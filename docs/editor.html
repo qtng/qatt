@@ -16,8 +16,11 @@ document.body.addEventListener("click", function(e){
 <b style="color:var(--clr)">
 Tiểu Tân Tự
 </b>
-<input type="button" value="&#x274c;" style="border-radius:100px;zoom:200%;position:fixed;bottom:2px;right:2px" onclick="display(); event.stopPropagation(); return; var d=document.getElementById('zoom');d.value=0;d.oninput();">
-<input type="button" value="&#x1F3A8;" style="border-radius:100px;zoom:200%;position:fixed;bottom:2px;left:2px" onclick="event.stopPropagation();body.className=!body.className?'light':body.className=='light'?'dark':''">
+<select style="border-radius:100px;zoom:200%;position:fixed;bottom:12px;right:2px" onchange="display(parseInt(this.value)); event.stopPropagation(); return; var d=document.getElementById('zoom');d.value=0;d.oninput();">
+<option value=1>QATT gốc</option>
+<option value=2>QATT giản thể</option>
+</select>
+<input type="button" value="&#x1F3A8;" style="border-radius:100px;zoom:200%;position:fixed;bottom:12px;left:2px" onclick="event.stopPropagation();body.className=!body.className?'light':body.className=='light'?'dark':''">
 <!--<input id="zoom" style="zoom:200%;position:fixed;bottom:2px;left:11.5vw;width:25vw"
 	type="range" step="1"
 	value="6" min="0" max="20"
@@ -812,10 +815,11 @@ g:nth-child(-n+26) g:nth-child(23){transform:translate(2440px)}
 </script>
 
 <script>
-var v = 0
-function display(){
+var v = 0;
+var svgContent = document.getElementById("svg").innerHTML;
+function display(version){
 document.getElementById("out").innerHTML = ""
-var version = (v++ % 2) + 1;
+version = version || ((v++ % 2) + 1);
 var onset_prefix = "v2-";
 var vowel_prefix = "v2-";
 var coda_prefix = "v2-";
@@ -844,6 +848,7 @@ if (version == 1) {
 var svgns = "http://www.w3.org/2000/svg";
 var xlinkns = "http://www.w3.org/1999/xlink";
 var svg = document.getElementById("svg");
+	svg.innerHTML = svgContent;
 var pre = "_ b c ch d dz ph g h kh l m n ng nh r s t th tr v x".split(" ");
 var nuc = "a a2 aw aw2 o o2 u u2 y y2 i i2 e e2".split(" ");
 var group = document.createElementNS(svgns, "g");
