@@ -39,8 +39,13 @@ document.getElementById('content').style.transform='scale('+v+')'">
 </div>
 
 <div style="position:absolute;top:150px;width:100%;left:0;bottom:70px;overflow:auto">
-<div id="content" style="transform-origin:top left;transform:scale(.2)">
+<div id="content" style="transform-origin:top left">
 <style type="text/css">
+#content {transform:scale(.4)}
+@media (max-width: 1250px) {
+  #content {transform:scale(.2)}
+}
+	
 *{box-sizing: border-box}
 #content {font-size:90px}
 body {
