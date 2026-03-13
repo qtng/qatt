@@ -836,25 +836,28 @@ var onset_prefix = "v2-";
 var vowel_prefix = "v2-";
 var coda_prefix = "v2-";
 var char_fontsize = "105px";
-var separate_tones = false;
+var separate_tones = true;
 if (version == 1) {
+    separate_tones = true;
 	onset_prefix = "v2-";
 	vowel_prefix = "v2-";
 	coda_prefix = "v2-";
 } else if (version == 4) {
+    separate_tones = true;
 	onset_prefix = "";
 	vowel_prefix = "v2-";
 	coda_prefix = "";
 } else if(version == 3){
+    separate_tones = true;
 	onset_prefix = "v2-";
 	vowel_prefix = "";
 	coda_prefix = "v2-";
 } else if(version == 2){
+    separate_tones = false;
 	onset_prefix = "";
 	vowel_prefix = "";
 	coda_prefix = "";
 }
-
 
 
 var svgns = "http://www.w3.org/2000/svg";
@@ -1227,7 +1230,9 @@ function paSvg(root, initial, vowel, final, tone, bold, isCoda) {
 	svg.style.verticalAlign = "bottom";
 	svg.style.border = "none";
 	if (g) (root || d.getElementById("out")).appendChild(svg);
-	if (g && vowel && "waeiouy".indexOf(vowel[0]) >= 0) useG(g, "qt" + (tone || 0))
+	if (g && vowel && "waeiouy".indexOf(vowel[0]) >= 0) {
+	    if (separate_tones) useG(g, "qt" + (tone || 0))
+	}
 	if (tone != null && tone < 0){
 		tone = Math.abs(tone);
 		if (!final){
@@ -1251,8 +1256,7 @@ function paSvg(root, initial, vowel, final, tone, bold, isCoda) {
 		if (final) {
 			var tonesize = "";
 			if (tone >= 3) tonesize = "small";
-			if (0 && tone) {
-			    
+			if (!separate_tones && tone) {
 				g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
 				useG(g, "_t" + tone)
 			} else {
