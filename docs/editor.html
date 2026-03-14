@@ -958,8 +958,6 @@ if (showTable) {
 
 let nbsp = String.fromCharCode(160);
 
-
-
 // ONSETS
 svg.appendChild(document.createElementNS(svgns, "g"));
 group = document.createElementNS(svgns, "g");
@@ -968,23 +966,23 @@ text.appendChild(document.createTextNode("ʔ B C Ch D Dz Ph G H Kh L"));
 text.setAttribute("style", "word-spacing:48px; font-size:56px; transform: translate(360px, 60px)");
 group.appendChild(text);
 svg.appendChild(group);
-group = document.createElementNS(svgns, "g");
 text = document.createElementNS(svgns, "text");
 text.appendChild(document.createTextNode("Bán âm"));
-text.setAttribute("style", "font-size:44px; transform: translate(0, 40px)");
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
 group.appendChild(text);
 svg.appendChild(group);
-"  _ b c ch d dz ph g h kh l".split(" ").forEach((t) => group.appendChild(useG(addG(group), onset_prefix+t+"-small")));
 group = document.createElementNS(svgns, "g");
+"   _ b c ch d dz ph g h kh l".split(" ").forEach((t) => group.appendChild(useG(addG(group), onset_prefix+t+"-small")));
 svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
 "   m n ng nh r s t th tr v x".split(" ").forEach((t) => group.appendChild(useG(addG(group), onset_prefix+t+"-small")));
+svg.appendChild(group);
 group = document.createElementNS(svgns, "g");
 text = document.createElementNS(svgns, "text");
 text.appendChild(document.createTextNode("M N Ng Nh R S T Th Tr V X"));
-text.setAttribute("style", "word-spacing:47px; font-size:56px; transform: translate(340px, 60px)");
+text.setAttribute("style", "word-spacing:46px; font-size:56px; transform: translate(345px, 60px)");
 group.appendChild(text);
 svg.appendChild(group);
-
 
 
 // ONSETS WITH MEDIAL
