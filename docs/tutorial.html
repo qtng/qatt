@@ -508,6 +508,10 @@ window.changetype = (type) => {
     })
 };
 
+if (location.hash.indexOf("simplifiedOption") > -1) {
+	document.getElementById("simplifiedOption").checked = true;
+}
+
 });
 
 function toFullQatt(){
@@ -589,7 +593,7 @@ svg {
 	style="z-index:1;font-size:1.1rem"
 	onchange="changetype(parseInt(this.value))">
 	<option value="1">QATT chính thể</option>
-	<option value="0">QATT giản thể</option>
+	<option id="simplifiedOption" value="0">QATT giản thể</option>
 </select>
 </div>
 
