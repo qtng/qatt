@@ -508,8 +508,9 @@ window.changetype = (type) => {
     })
 };
 
-if (location.hash.indexOf("simplified") > -1) {
-	document.getElementById("simplifiedOption").checked = true;
+if (location.hash === "#simplified") {
+    const opt = document.getElementById("simplifiedOption");
+    opt.checked = true;
 }
 
 });
