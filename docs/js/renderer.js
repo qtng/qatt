@@ -580,7 +580,6 @@ class SvgGlyphRenderer {
         if (tone || final) this.useG(g, "qt" + (tone || final || 0));
         final = ""; tone = "";
       }
-      if (isCoda) console.log(this.prefixes.coda+vStr)
       this.useG(g, (isCoda ? this.prefixes.coda : this.prefixes.vowel) + vStr);
     }
 
