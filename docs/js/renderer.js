@@ -540,7 +540,8 @@ class SvgGlyphRenderer {
 
   renderSvg(root, initial, vowel, final, tone, bold, isCoda) {
 	if (vowel && vowel.startsWith("+")) {
-		const qv = this.qattEncoding[vowel.substr(1) + final];
+		vowel = vowel.substr(1)
+		const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
 			vowel = qv;
 			final = null;
