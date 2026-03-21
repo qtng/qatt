@@ -436,6 +436,8 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 
 class SvgGlyphRenderer {
   constructor(options = {}) {
+	const initialType = options.type != null ? options.type : window.location.hash.replace("#simplified", "");
+	this.qattEncoding = options.qattEncoding || {};
     this.defs = options.defs || defaultSvgDefs;
     this.container = options.container || document.getElementById("out");
     this.charFontsize = options.charFontsize || "105px";
@@ -449,8 +451,6 @@ class SvgGlyphRenderer {
     this.defsElement = null;
 
     this._initializeDefs();
-    
-    const initialType = window.location.hash.replace("#simplified", "");
     this.updateConfig(initialType);
   }
 
@@ -539,6 +539,13 @@ class SvgGlyphRenderer {
   
 
   renderSvg(root, initial, vowel, final, tone, bold, isCoda) {
+	if (vowel && vowel.startsWith("+")) {
+		const qv = this.qattEncoding[vowel.substr(1) + final];
+		if (qv) {
+			vowel = qv;
+			final = null;
+		}
+	}
     const d = document;
     const svg = d.createElementNS(this.svgns, "svg");
     let g;
