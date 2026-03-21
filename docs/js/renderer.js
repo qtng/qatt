@@ -439,7 +439,7 @@ class SvgGlyphRenderer {
 	const initialType = options.type != null ? options.type : window.location.hash.replace("#simplified", "");
 	this.qattEncoding = options.qattEncoding || {};
     this.defs = options.defs || defaultSvgDefs;
-    this.container = options.container || document.getElementById("out");
+    this.container = options.container || document.createElement("div");
     this.charFontsize = options.charFontsize || "105px";
     this.svgns = "http://www.w3.org/2000/svg";
     this.xlinkns = "http://www.w3.org/1999/xlink";
@@ -601,7 +601,6 @@ class SvgGlyphRenderer {
 
     if (tone != null && tone < 0) {
       tone = Math.abs(tone);
-      console.log(0)
       if (!final) {
         this.renderSvg(root, "", "_tlarge" + tone);
       } else {
