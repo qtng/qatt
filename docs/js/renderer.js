@@ -414,22 +414,26 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qt3" d="M2 -5 m0 015 c-12 0 -12 -15 0 -15"/>
     	<path id="qt4" d="M2 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
     	<path id="qt5" d="M98 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
-    	
+    	<path id="qt6" d="M98 90 m0 15 c12 0 12 15 0 15"/>
+		<path id="qt7" d="M98 90 m0 15 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
+		
     	<path id="_t1" d="M16 12 h60 l-3 15"/>
     	<path id="_t2" d="M20 10 v10 h50"/>
     	<path id="_t3" d="M30 10 l-15 23 M28 18 h44"/>
     	<path id="_t4" d="M30 8 l-15 25 M28 14 h44 M20 30 h52"/>
     	<path id="_t5" d="M26 12 h42 v16 M18 29 h58"/>
-    	<path id="_t6" d="M30 10 v12 M30 10 h35 v12 M20 27 h52"/>
-    	
+    	<path id="_t6" d="M20 10 v10 h50"/>
+		<path id="_t7" d="M26 12 h42 v16 M18 29 h58"/>
+	
     	<!--fullsize tones-->
     	<path id="_tlarge1" d="M30 20 h45 v55"/>
     	<path id="_tlarge2" d="M20 55 h60"/>
     	<path id="_tlarge3" d="M75 28 h-50 m0-8 c0 0 0 40 -10 60"/>
     	<path id="_tlarge4" d="M75 28 h-50 m0-8 c0 0 0 40 -10 60 m20-25 l35 0"/>
     	<path id="_tlarge5" d="M25 20 h45 v55 M20 75 h60"/>
-    	<path id="_tlarge6" d="M30 30 h40 M20 85 h60"/>
-    	
+        <path id="_tlarge6" d="M20 55 h60"/>
+        <path id="_tlarge7" d="M25 20 h45 v55 M20 75 h60"/>
+		
     	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
     	</defs>
     	</svg>`;
