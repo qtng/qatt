@@ -28,7 +28,7 @@ class VietnameseParser {
             static ONSETS = ["ngh", "ng", "nh", "gh", "ph", "th", "ch", "tr", "kh", "gi", "qu", "b", "c", "d", "đ", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "v", "x"];
             static CODAS = ["ng", "nh", "ch", "m", "n", "p", "t", "c"];
             static VALID_VOWELS = [
-                "ai", "ao", "au", "ây", "âu", "eo", "êu", "ia", "iê", "iêu", "iu", 
+                "ai", "ao", "au", "ay", "ây", "âu", "eo", "êu", "ia", "iê", "iêu", "iu", 
                 "oi", "ôi", "ơi", "ua", "uô", "uôi", "ui", "ưa", "ưi", "ươ", "ươi", "ươu", "ưu", 
                 "ya", "yê", "yêu",
                 "a", "ă", "â", "e", "ê", "i", "o", "ô", "ơ", "u", "ư", "y"
@@ -78,6 +78,11 @@ class VietnameseParser {
                         temp = temp.substring(o.length);
                         break;
                     }
+                }
+
+                if (res.onset == "qu") {
+                    res.onset = "q";
+                    res.glide = "u";
                 }
 
                 // 3. Auslaut (Coda)
@@ -143,7 +148,7 @@ class VietnameseParser {
                     (res.glide ? "w" : "") + (VietnameseParser.QATT_VOWEL_MAP[res.vowel.normalize('NFC')] || res.vowel),
                     res.coda || "",
                     VietnameseParser.TONE_INT_MAP[res.tone] || "0"
-                ].join(",");
+                ].join(",").replace("c,wo,", "c,waw2,");
 
                 return {
                     code: code,
