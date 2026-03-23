@@ -526,7 +526,7 @@ const defaultQattEncoding = {
       
       wau: "t2",
       waw2ng: "t3",
-      wawy: "t4",
+      wawi: "t4",
       wawn: "t5",
       wym: "t6",
       
