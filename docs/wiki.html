@@ -309,7 +309,7 @@
                 if (currentType !== 0) {
                     code = code.replace(/\+/g, "");
                 } else {
-                    code = code.replace(',', ',+').replace('0', '');
+                    code = code.replace(',', ',+');
                 }
                 const div = document.createElement("div");
                 renderer.renderText(code, div, currentType);
