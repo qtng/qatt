@@ -132,8 +132,14 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-m6" data-onsetsize="xsmall" d="M60 18 m30 0 m2 -8 v16"/>
     	<path id="v2-m" d="M60 18 h30 M85 30 c0 0 -8 30 -20 50 M66 35 c0 0 12 18 23 42"/>
     	
-    	<path xx id="v2-n" d="M60 16 v64 M80 23 v44 M65 46 h29"/>
-    	
+    	<path id="v2-n1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
+		<path id="v2-n2" data-onsetsize="xsmall" d="M60 16 m0 64 m-8 0 h16"/>
+		<path id="v2-n3" data-onsetsize="xsmall" d="M61 46 m3 1 l7 14"/>
+		<path id="v2-n4" data-onsetsize="xsmall" d="M79 24 m0 44 m-8 0 h16"/>
+		<path id="v2-n5" data-onsetsize="xsmall" d="M60 46 m34 0 m0-8 v16"/>
+		<path id="v2-n6" data-onsetsize="xsmall" d="M79 24 m-8 0 h16"/>
+		<path id="v2-n" d="M60 16 v64 M60 46 h34 M79 24 v44"/>
+	
     	<path id="v2-ng1" data-onsetsize="xsmall" d="M60 22 m-2 -8 v16"/>
     	<path id="v2-ng2" data-onsetsize="xsmall" d="M70 22 m-1 6 l-10 10"/>
     	<path id="v2-ng3" data-onsetsize="xsmall" d="M70 22 m-6 50 m-6 1 h16"/>
@@ -150,10 +156,22 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-nh6" data-onsetsize="xsmall" d="M86 20 m-8 0 h16"/>
     	<path id="v2-nh" d="M59 42 l38 8 M68 20 c0 20 0 35 -3 55 M86 20 v56"/>
     	
-    	<path xx id="v2-ph" d="M95 16 v50 M83 15 c-4 22 -8 45 -28 70 M59 28 c6 8 14 24 28 50"/>
-    	
-    	<path xx id="v2-r" d="M61 75 v-57 m2 12 l20 14 M92 18 v56"/>
-    	
+    	<path id="v2-ph1" data-onsetsize="xsmall" d="M57 30 m1-7l-5 15"/>
+		<path id="v2-ph2" data-onsetsize="xsmall" d="M77 20 m-18 56 m-4-8l6 15"/>
+		<path id="v2-ph3" data-onsetsize="xsmall" d="M57 30 m26 50 m6-1l-12 4"/>
+		<path id="v2-ph4" data-onsetsize="xsmall" d="M89 16 m0 50 m-8 0 h16"/>
+		<path id="v2-ph5" data-onsetsize="xsmall" d="M89 16 m-6 0 h14"/>
+		<path id="v2-ph6" data-onsetsize="xsmall" d="M77 20 m-2-6l8 14"/>
+		<path id="v2-ph" data-onsetsize="xsmall" d="M89 16v50 M77 20 c0 0 -8 40 -18 56 M57 30 c0 0 14 24 26 50"/>
+	
+		<path id="v2-r1" data-onsetsize="xsmall" d="M61 75 m0-57 m-8 0 h16"/>
+		<path id="v2-r2" data-onsetsize="xsmall" d="M61 75 m-8 0 h16"/>
+		<path id="v2-r3" data-onsetsize="xsmall" d="M61 75 m0-57 m2 12 m20 14 m-1 1 l-4 8"/>
+		<path id="v2-r4" data-onsetsize="xsmall" d="M92 18 m0 56 m-8 0 h16"/>
+		<path id="v2-r5" data-onsetsize="xsmall" d="M92 18 m-8 0 h16"/>
+		<path id="v2-r6" data-onsetsize="xsmall" d="M61 75 m0-57 m2 12 m4 2 l8 -8"/>
+		<path id="v2-r" d="M61 75 v-57 m2 12 l20 14 M92 18 v56"/>
+	    	
     	<path id="v2-s1" data-onsetsize="xsmall" d="M61 18 m-8 0 h16"/>
     	<path id="v2-s2" data-onsetsize="xsmall" d="M61 18 m0 57 m-8 0 h16"/>
     	<path id="v2-s3" data-onsetsize="xsmall" d="M63 71 m4 -2 l8 8"/>
@@ -178,9 +196,21 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-th6" data-onsetsize="xsmall" d="M86 20 m-8 0 h16"/>
     	<path id="v2-th" d="M59 50 l38 -8 M68 20 c0 20 0 35 -3 55 M86 20 v56"/>
     	
-    	<path id="v2-tr" d="M76 20 v58 M64 20 h26 M60 45 h34"/>
-    	
-    	<path xx id="v2-v" d="M60 16 v56 M94 15 c-4 22 -8 45 -30 70 M73 28 c4 8 10 24 20 50"/>
+    	<path id="v2-tr1" data-onsetsize="xsmall" d="M64 20 m0-8 v16"/>
+		<path id="v2-tr2" data-onsetsize="xsmall" d="M76 20 m-1 3 l-12 12"/>
+		<path id="v2-tr3" data-onsetsize="xsmall" d="M60 45 m0-8 v16"/>
+		<path id="v2-tr4" data-onsetsize="xsmall" d="M76 20 m0 58 m-8 0 h16"/>
+		<path id="v2-tr5" data-onsetsize="xsmall" d="M60 45 m34 0 m0-8 v16"/>
+		<path id="v2-tr6" data-onsetsize="xsmall" d="M64 20 m26 0 m0-8 v16"/>
+		<path id="v2-tr" d="M76 20 v58 M64 20 h26 M60 45 h34"/>
+	
+    	<path id="v2-v1" data-onsetsize="xsmall" d="M60 20 m-8 0 h16"/>
+		<path id="v2-v2" data-onsetsize="xsmall" d="M60 20 m0 50 m-2 4l14-14"/>
+		<path id="v2-v3" data-onsetsize="xsmall" d="M95 15 m-24 70 m-8 1 h16"/>
+		<path id="v2-v4" data-onsetsize="xsmall" d="M71 28 m28 50 m5 -2 l-13 8"/>
+		<path id="v2-v5" data-onsetsize="xsmall" d="M95 15 m-8-1 h16"/>
+		<path id="v2-v6" data-onsetsize="xsmall" d="M71 28 m2-8 l-6 15"/>
+		<path id="v2-v" data-onsetsize="xsmall" d="M60 20v50 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
     	
     	<path id="v2-x1" data-onsetsize="xsmall" d="M61 18 m0 -8 v16"/>
     	<path id="v2-x2" data-onsetsize="xsmall" d="M89 19 m-10 51 m0 -4 l-8 -10"/>
@@ -455,7 +485,6 @@ class SvgGlyphRenderer {
     this.defsElement = null;
 
     this._initializeDefs();
-    this.updateConfig(initialType);
   }
 
   _initializeDefs() {
@@ -467,15 +496,16 @@ class SvgGlyphRenderer {
   }
 
   // Zentralisierte Konfiguration
-  updateConfig(type) {
+  getPrefixes(type) {
     const isSimplified = !!type && type !== "";
-    this.prefixes.onset = isSimplified ? "" : "v2-";
-    this.prefixes.vowel = this.prefixes.onset;
-    this.prefixes.coda = this.prefixes.onset;
-    this.prefixes.qattTones = (type != 2);
-    
-    // WICHTIG: Cache leeren, wenn sich die Konfiguration ändert
-    this.cache.clear();
+	const prefix = isSimplified ? "" : "v2-";
+	const prefixes = {
+		type: (type || "0").toString(),
+		onset: prefix,
+		vowel: prefix,
+		coda: prefix,
+		qattTones: (type != 2)
+	};
   }
 
   _getDefById(id) {
@@ -506,27 +536,28 @@ class SvgGlyphRenderer {
     return g;
   }
 
-  renderText(text, root) {
+  renderText(text, root, type) {
+    const prefixes = this.getPrefixes(type);
     const target = root || this.container;
     const fragment = document.createDocumentFragment();
     
     text.split(" ").forEach(t => {
       if (t.includes(",")) {
         // Cache-Key prüfen
-        if (this.cache.has(t)) {
+        if (this.cache.has(prefixes.type+t)) {
           // Alle gespeicherten Nodes des Eintrags klonen
-          this.cache.get(t).forEach(node => {
+          this.cache.get(prefixes.type+t).forEach(node => {
             fragment.appendChild(node.cloneNode(true));
           });
         } else {
           const tempContainer = document.createElement("div");
-          this.renderSvg(tempContainer, ...t.split(","));
+          this.renderSvg(tempContainer, prefixes, ...t.split(","));
           
           // Alle Kinder des tempContainers (alle SVGs) erfassen
           const nodes = Array.from(tempContainer.childNodes);
           
           if (nodes.length > 0) {
-            this.cache.set(t, nodes); // Das ganze Array speichern
+            this.cache.set(prefixes.type+t, nodes); // Das ganze Array speichern
             nodes.forEach(node => {
               fragment.appendChild(node.cloneNode(true));
             });
@@ -542,7 +573,7 @@ class SvgGlyphRenderer {
   }
   
 
-  renderSvg(root, initial, vowel, final, tone, bold, isCoda) {
+  renderSvg(root, prefixes, initial, vowel, final, tone, bold, isCoda) {
 	if (vowel && vowel.startsWith("+")) {
 		vowel = vowel.substr(1)
 		const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
@@ -565,7 +596,7 @@ class SvgGlyphRenderer {
     if (initial) {
       initial = initial.replace("#", "").replace("$", "");
       const post = this.getPost(vowel?.charAt(0) === "w", vowel);
-      id = this.prefixes.onset + initial + '-' + post;
+      id = prefixes.onset + initial + '-' + post;
 
       if (!this._getDefById(id)) id = id.replace("xsmall", "small").replace("large", "xxsmall");
       if (!this._getDefById(id)) id = id.replace("xxsmall", "xsmall").replace("xsmall", "small");
@@ -576,16 +607,16 @@ class SvgGlyphRenderer {
       let vStr = vowel;
       if (vStr.charAt(0) === "w") {
         vStr = vStr.substr(1);
-        this.useG(g, `${this.prefixes.onset}${initial}-medial`);
+        this.useG(g, `${prefixes.onset}${initial}-medial`);
       }
       
       if (!"aeiouy".includes(vStr[0]) && /\d$/.test(vStr)) {
         const toneVal = vStr.replace(/\d*(\d)/, "$1");
-        this.useG(g, this.prefixes.vowel + vStr.replace(/\d/, ""));
+        this.useG(g, prefixes.vowel + vStr.replace(/\d/, ""));
         if (tone || final) this.useG(g, "qt" + (tone || final || 0));
         final = ""; tone = "";
       }
-      this.useG(g, (isCoda ? this.prefixes.coda : this.prefixes.vowel) + vStr);
+      this.useG(g, (isCoda ? prefixes.coda : prefixes.vowel) + vStr);
     }
 
     svg.setAttribute("viewBox", "-10 -25 120 125");
@@ -593,14 +624,14 @@ class SvgGlyphRenderer {
     svg.style.verticalAlign = "bottom";
 
     if (g) root.appendChild(svg);
-    this._handleTones(root, initial, vowel, final, tone, g);
+    this._handleTones(root, prefixes, initial, vowel, final, tone, g);
     return g;
   }
 
-  _handleTones(root, initial, vowel, final, tone, g) {
+  _handleTones(root, prefixes, initial, vowel, final, tone, g) {
     // ... (Logik wie vorher, nutzt intern wieder renderSvg)
     if (g && vowel && "waeiouy".includes(vowel[0])) {
-      if (tone < 8 && this.prefixes.qattTones) this.useG(g, "qt" + (tone || 0));
+      if (tone < 8 && prefixes.qattTones) this.useG(g, "qt" + (tone || 0));
     }
 
     if (tone != null && tone < 0) {
@@ -613,14 +644,14 @@ class SvgGlyphRenderer {
         this.useG(newG, "_t" + tone);
       }
     } else if (final) {
-        if (tone && !this.prefixes.qattTones) {
+        if (tone && !prefixes.qattTones) {
           const tonesize = tone >= 3 ? "small" : "";
           const newG = this.renderSvg(root, "", final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
           this.useG(newG, "_t" + tone);
         } else {
           this.renderSvg(root, "", final.toUpperCase(), 0, null, null, true);
         }
-    } else if (tone && !this.prefixes.qattTones) {
+    } else if (tone && !prefixes.qattTones) {
         this.renderSvg(root, "", '_tlarge' + tone, 0, null, null, true);
     }
   }
