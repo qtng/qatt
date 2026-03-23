@@ -21,32 +21,35 @@
 
         /* --- SVG Größensteuerung --- */
         svg {
-            height: 1.9em; /* Standardhöhe für Typ 0 */
-            margin: -0.1em -.0em;
+            height: 1.9em; 
+            margin: -0.1em -0.0em;
             fill: transparent;
             stroke: currentColor;
             stroke-width: 4px;
             stroke-linecap: square;
             stroke-linejoin: square;
-            transition: height 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        /* Wenn Typ 1 oder 2 aktiv ist, werden alle SVGs kleiner */
+        /* Typ 1: Giản thể */
         body[data-type="1"] svg {
             height: 1.45em;
             stroke-width: 5.5px;
-            margin: .075em -.05em;
+            margin: 0.075em -0.05em;
         }
+
+        /* Typ 2: Giản thể + */
         body[data-type="2"] svg {
             height: 1.4em;
             stroke-width: 6.5px;
-            margin: 0 -.1em;
+            margin: 0 -0.1em;
         }
 
-        /* Spezielle Anpassung für das Logo im Header */
+        /* Logo Styling */
         .svg-bold svg { 
-            stroke-width: 9.5px;
+            stroke-width: 9.5px !important;
             height: 1.6em !important; 
+            margin: 0 !important;
         }
 
         .wiki-content img {
@@ -84,7 +87,7 @@
             font-weight: 500;
         }
 
-        /* Flow-Modus: Wenn das Original ausgeblendet ist */
+        /* Flow-Modus: Original ausblenden */
         .hide-original ruby {
             display: inline;
             white-space: normal;
@@ -107,7 +110,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .tab-content-container {
+        .content-container {
             border: 1px solid var(--border-gray);
             border-radius: 0.5rem;
             background-color: #fff;
@@ -128,18 +131,33 @@
             border-bottom: 1px solid var(--border-gray);
             margin-bottom: 1.5rem;
         }
+
+        .type-selector {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 0.4rem;
+            border: 1px solid var(--border-gray);
+            background-color: #f8f9fa;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
     </style>
 </head>
 <body class="bg-light" data-type="0">
 
     <header class="sticky-header sticky-top">
         <div class="container">
-            <!-- Top Row: Logo and Type Selector -->
+            <!-- Top Row: Logo & Type Selector -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="fw-bold text-primary fs-4">
                     <tt class="svg-bold">v,i</tt><tt class="text-danger">c,i</tt><tt class="text-success svg-bold">b,e</tt><tt class="text-warning">d,i</tt><tt class="text-info svg-bold">_,a</tt>
                 </span>
-                <select class="w-auto form-select" id="typeSelect" onchange="changetype(parseInt(this.value))">
+                <select class="type-selector" id="typeSelect" onchange="changetype(parseInt(this.value))">
                     <option value="0">Chính thể</option>
                     <option value="1">Giản thể</option>
                     <option value="2">Giản thể +</option>
@@ -153,22 +171,21 @@
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm Wikipedia...">
                         <button id="searchBtn" class="btn btn-primary px-4" type="button">
-                            Tìm <tt class="svg-bold">t,i,m,2</tt>
+                            Tìm
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Switches Row: Centered below Search -->
+            <!-- Options Row -->
             <div class="d-flex justify-content-center gap-4">
-                
-                <div class="form-check form-switch small">
-                    <input checked class="form-check-input" type="checkbox" role="switch" id="transToggle">
-                    <label class="form-check-label" for="transToggle">Quốc Âm</label>
-                </div>
                 <div id="showToggleContainer" class="form-check form-switch small">
                     <input class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
                     <label class="form-check-label" for="showOriginalToggle">Quốc ngữ</label>
+                </div>
+                <div class="form-check form-switch small">
+                    <input checked class="form-check-input" type="checkbox" role="switch" id="transToggle">
+                    <label class="form-check-label" for="transToggle">Quốc Âm Tân Tự</label>
                 </div>
             </div>
         </div>
@@ -177,7 +194,7 @@
     <main class="container mb-5 mt-4">
         <div class="row justify-content-center">
             <div class="col-lg-12">
-                <div class="p-4 tab-content-container border shadow-sm">
+                <div class="p-4 content-container border shadow-sm">
                     <div id="loading" class="text-center d-none py-5">
                         <div class="spinner-border text-primary" role="status"></div>
                         <p class="mt-2 text-muted">Đang tải...</p>
@@ -219,6 +236,7 @@
         let currentWikiHtml = ""; 
         let originalTitle = "";
 
+        // Initialisierung
         function initParser() {
             if (typeof VietnameseParser !== 'undefined' && typeof SvgGlyphRenderer !== 'undefined') {
                 parser = new VietnameseParser();
@@ -226,17 +244,34 @@
                     container: document.createElement("div")
                 });
                 renderTTVanilla();
-                fetchWiki(START_TERM);
+                
+                const titleFromUrl = decodeURIComponent(window.location.hash.substring(1));
+                const initialTitle = titleFromUrl || START_TERM;
+                
+                // Initialer State setzen, damit "Zurück" zum Startpunkt führt
+                history.replaceState({ title: initialTitle }, initialTitle, "#" + encodeURIComponent(initialTitle));
+                fetchWiki(initialTitle, false);
             } else {
                 setTimeout(initParser, 100);
             }
         }
 
+        // Browser-Navigation (Zurück/Vor) abfangen
+        window.onpopstate = function(event) {
+            let titleToLoad = START_TERM;
+            if (event.state && event.state.title) {
+                titleToLoad = event.state.title;
+            } else {
+                const hashTitle = decodeURIComponent(window.location.hash.substring(1));
+                if (hashTitle) titleToLoad = hashTitle;
+            }
+            
+            fetchWiki(titleToLoad, false); // false verhindert neuen pushState
+        };
+
         window.changetype = (type) => {
             currentType = type;
-            // Setzt das Attribut am Body für CSS-Selektoren
             document.body.setAttribute("data-type", type.toString());
-            
             renderTTVanilla();
             if (currentWikiHtml) {
                 renderWiki();
@@ -249,7 +284,6 @@
                 const tp = Number((el.dataset.type == null ? currentType : el.dataset.type) || 0);
                 el.innerHTML = "";
                 el.dataset.codes = t;
-                // Bei Typ 1 und 2 werden die "+" entfernt
                 const codeToRender = tp ? t.replace(/\+/g, "") : t;
                 renderer.renderText(codeToRender, el, tp);
             });
@@ -281,16 +315,29 @@
             });
         }
 
-        async function fetchWiki(title) {
+        async function fetchWiki(title, pushToHistory = true) {
+            if (!title) return;
             setLoading(true);
             const url = `https://${wikiLang}.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&format=json&origin=*&prop=text|displaytitle`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                if (data.error) throw new Error("Không tìm thấy trang này.");
-                originalTitle = data.parse.title;
+                if (data.error) throw new Error("Trang không tồn tại.");
+                
+                const newTitle = data.parse.title;
                 currentWikiHtml = data.parse.text["*"];
+                originalTitle = newTitle;
+                
+                if (pushToHistory) {
+                    const encodedTitle = encodeURIComponent(newTitle);
+                    // Verhindert unnötige Historien-Einträge bei gleichem Ziel
+                    if (decodeURIComponent(window.location.hash.substring(1)) !== newTitle) {
+                        history.pushState({ title: newTitle }, newTitle, "#" + encodedTitle);
+                    }
+                }
+                
                 renderWiki();
+                searchInput.value = newTitle;
             } catch (err) { showError(err.message); }
             finally { setLoading(false); }
         }
@@ -302,6 +349,7 @@
             let html = currentWikiHtml.replace(/src="\/\//g, 'src="https://').replace(/srcset="\/\//g, 'srcset="https://');
             html = html.replace(/src="\/([^/])/g, `src="https://${wikiLang}.wikipedia.org/$1`);
             contentArea.innerHTML = html;
+            
             if (transToggle.checked) {
                 applyRuby(contentArea);
                 wikiTitle.innerHTML = textToRubyHTML(originalTitle);
@@ -348,6 +396,7 @@
             errorMessage.classList.remove('d-none');
         }
 
+        // Event Listener
         searchBtn.addEventListener('click', () => {
             const val = searchInput.value.trim();
             if (val) fetchWiki(val);
@@ -372,7 +421,6 @@
                         e.preventDefault();
                         const titlePart = href.split('/wiki/')[1].split('#')[0];
                         const decodedTitle = decodeURIComponent(titlePart).replace(/_/g, ' ');
-                        searchInput.value = decodedTitle;
                         fetchWiki(decodedTitle);
                         window.scrollTo(0, 0);
                     }
