@@ -499,7 +499,7 @@ class SvgGlyphRenderer {
   getPrefixes(type) {
     const isSimplified = !!type && type !== "";
 	const prefix = isSimplified ? "" : "v2-";
-	const prefixes = {
+	return {
 		type: (type || "0").toString(),
 		onset: prefix,
 		vowel: prefix,
