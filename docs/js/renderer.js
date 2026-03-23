@@ -468,10 +468,145 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	</defs>
     	</svg>`;
 
+const defaultQattEncoding = {
+      ong: "_1",
+      we2: "_2",
+      ung: "_3",
+      wan: "_4",
+      wi: "_5",
+      aw2m: "_6",
+      
+      e2: "ng2",
+      o2ng: "ng3",
+      an: "ng4",
+      i: "ng5",
+      waw2m: "ng6",
+      
+      wa: "h2",
+      we2ng: "h3",
+      we2n: "h4",
+      y2: "h5",
+      e2m: "h6",
+      
+      a: "g2",
+      e2ng: "g3",
+      e2n: "g4",
+      y: "g5",
+      u2m: "g6",
+      
+      we: "c2",
+      wenh: "c3",
+      wa2n: "c4",
+      a2: "c5",
+      om: "c6",
+      
+      e: "l2",
+      enh: "l3",
+      a2n: "l4",
+      wa2: "l5",
+      um: "l6",
+      
+      aw2u: "tr2",
+      yng: "tr3",
+      ai: "tr4",
+      yn: "tr5",
+      o2m: "tr6",
+      
+      waw2u: "d2",
+      wyng: "d3",
+      wai: "d4",
+      y2n: "d5",
+      a2m: "d6",
+      
+      au: "n2",
+      aw2ng: "n3",
+      awi: "n4",
+      awn: "n5",
+      y2m: "n6",
+      
+      wau: "t2",
+      waw2ng: "t3",
+      wawy: "t4",
+      wawn: "t5",
+      wym: "t6",
+      
+      awu: "th2",
+      awng: "th3",
+      a2i: "th4",
+      aw2n: "th5",
+      em: "th6",
+      
+      wawu: "nh2",
+      wawng: "nh3",
+      wa2i: "nh4",
+      waw2n: "nh5",
+      im: "nh6",
+      
+      u2ng: "ch2",
+      i2ng: "ch3",
+      i2: "ch4",
+      en: "ch5",
+      i2m: "ch6",
+      
+      wyng: "dz2",
+      wi2ng: "dz3",
+      wi2: "dz4",
+      wen: "dz5",
+      am: "dz6",
+      
+      y2ng: "x2",
+      anh: "x3", awnh: "x3", a2nh: "x3", a2ng: "x3",
+      aw2i: "x4",
+      i2n: "x5",
+      wam: "x6",
+      
+      ang: "kh2",
+      wawnh: "kh3",
+      waw2i: "kh4",
+      wi2n: "kh5",
+      awm: "kh6",
+      
+      wang: "s2",
+      inh: "s3",
+      yi: "s4",
+      in: "s5",
+      wawm: "s6",
+      
+      oong: "r2",
+      winh: "r3",
+      y2i: "r4",
+      win: "r5",
+      ym: "r6",
+      
+      o: "m2",
+      on: "m3",
+      oi: "m4",
+      yu: "m5",
+      y2u: "m6",
+      
+      o2: "b2",
+      un: "b3",
+      ui: "b4",
+      iu: "b5",
+      i2u: "b6",
+      
+      u2: "v2",
+      o2n: "v3",
+      o2i: "v4",
+      eu: "v5",
+      e2u: "v6",
+      
+      u: "ph2",
+      u2n: "ph3",
+      u2i: "ph4",
+      weu: "ph5",
+      we2u: "ph6"
+};
+
 class SvgGlyphRenderer {
   constructor(options = {}) {
 	const initialType = options.type != null ? options.type : window.location.hash.replace("#simplified", "");
-	this.qattEncoding = options.qattEncoding || {};
+	this.qattEncoding = options.qattEncoding || defaultQattEncoding;
     this.defs = options.defs || defaultSvgDefs;
     this.container = options.container || document.createElement("div");
     this.charFontsize = options.charFontsize || "105px";
