@@ -146,7 +146,7 @@ class VietnameseParser {
                 const code = [
                     VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_",
                     (res.glide ? "w" : "") + (VietnameseParser.QATT_VOWEL_MAP[res.vowel.normalize('NFC')] || res.vowel),
-                    res.coda || "",
+                    (res.coda == "o" ? "u" : res.coda == "y" ? "i" : res.coda || ""),
                     VietnameseParser.TONE_INT_MAP[res.tone] || "0"
                 ].join(",").replace("c,wo,", "c,waw2,");
 
