@@ -7,519 +7,79 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
+    <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
+    
     <script type="text/javascript">
-    
-    window.addEventListener("load", function(){
-    	const defs = `<svg xmlns="http://www.w3.org/2000/svg"
-    	xmlns:xlink="http://www.w3.org/1999/xlink"
-    	style="height:4800px;width:2540px;"
-    	id="svg">
-    	<defs>
-    
-    	<path id="w-a"   d="M70 35 h27 M85 10 v40 c0 5 0 20 -5 40"/>
-    	<path id="w-a2"  d="M70 35 h27 M85 10 v70 c0 10 0 10 -15 9"/>
-    	<path id="w-aw"  d="M60 35 h40 M70 15 v45 M90 10 v40 c0 5 0 20 -5 40"/>
-    	<path id="w-aw2" d="M60 35 h40 M70 15 v45 M90 10 v70 c0 10 0 10 -15 9"/>
-    	<path id="w-i"   d="M60 36 h27 M70 13 v72 c0 0 0 5 5 5 c15 0 15 0 15 -5"/>
-    	<path id="w-i2"  d="M54 30 h26 M62 13 v36 h23 c0 0 0 20 -15 40"/>
-    	<path id="w-e"   d="M54 36 h29 M60 18 v40 M75 13 v72 c0 0 0 5 5 5 c12 0 12 0 12 -5"/>
-    	<path id="w-e2"  d="M54 30 h32 M60 15 v35 M75 13 v36 h15 c0 5 0 22 -22 40"/>
-    	
-    	<path id="v2-a" data-onsetsize="xsmall" d="M60 10 v80 M50 90 h20 M65 35 h30 m-30 25 h30"/>
-    	<path id="v2-a2" data-onsetsize="xsmall" d="M68 20 h25 m-8 0 v40 c0 5 0 15 -5 30 M80 44 h-18 m0 22 h18"/>
-    	<path id="v2-aw" data-onsetsize="xsmall" d="M73 17 v52 M90 10 v40 c0 5 0 20 -4 40 M62 46 l37-10 M57 36v20"/>
-    	<path id="v2-aw2" data-onsetsize="xsmall" d="M62 15 h36 M71 25 l-8 14 M80 20 v68 m-22-38 h44"/>
-    	<path id="v2-e" data-onsetsize="xsmall" d="M55 15h20 M65 15 v70 M82 25 v50 M99 15 v70"/>
-    	<path id="v2-e2" data-onsetsize="xsmall"  d="M58 10 h40 M58 26 l14-6 m-3 5 v50 M90 10 v75"/>
-    	<path id="v2-i" data-onsetsize="xsmall" d="M58 33 l32 5m-32 20l32 5 M74 13 v77"/>
-    	<path id="v2-i2" data-onsetsize="xsmall"  d="M58 38 l32-5m-32 30l32-5 M74 13 v77 h1 l20-5"/>
-    	<path id="v2-o" data-onsetsize="xsmall"  d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 M64 38m4-12l-10 20M64 38 c6 8 14 18 28 40"/>
-    	<path id="v2-o2" data-onsetsize="xsmall" d="M88 10 c0 0 -8 40 -19 56 m-10-6l12 16 M64 23 c0 0 13 15 28 40 M64 86 h30"/>
-    	<path id="v2-u" data-onsetsize="xsmall" d="M60 25v45 m-2 4l14-14 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
-    	<path id="v2-u2" data-onsetsize="xsmall" d="M94 16v50 M82 20 c0 0 -8 40 -18 56 m-7-8l9 18 M62 30 c0 0 14 24 26 50"/>
-    	<path id="v2-y" data-onsetsize="xsmall" d="M60 15 v70 M62 25 l20 19 M90 13 v65 m-10 0h18"/>
-    	<path id="v2-y2" data-onsetsize="xsmall" d="M64 20 v50 M80 13 v58 h1 l12-5 M60 85 h35"/>		
-    	
-    	<path id="a" d="M85 10 v70 c0 10 0 10 -18 7"/>
-    	<path id="a2" d="M67 30 h22 v30 c0 5 0 15 -5 30"/>
-    	<path id="aw" d="M70 17 v45 M90 10 v40 c0 5 0 20 -5 40"/>
-    	<path id="aw2" d="M65 15 h25 m-3 2 c0 0 -4 16 -22 32 M80 40 v46"/>
-    	<path id="e" d="M60 10 h30 M75 10 v75"/>
-    	<path id="e2" d="M60 15 h32 m-4 2 c0 0 -10 13 -30 25 M69 42 v41 M88 40 v42"/>
-    	<path id="i" d="M82 10 c-2 20 -5 50 -24 80 M76 52 l18 36"/>
-    	<path id="i2" d="M58 38 h27 M70 13 v72 m1 -4 l22 -5"/>
-    	<path id="o" d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 c6 8 14 18 28 40"/>
-    	<path id="o2" d="M56 30 h26 M72 10 l-5 45 l20 0 v1 c0 0 -6 24 -15 35"/>
-    	<path id="u" d="M88 15 c-4 22 -8 45 -28 70 M64 28 c6 8 14 24 28 50"/>
-    	<path id="u2" d="M72 10 c0 0 -5 40 -13 66 M54 80 l33 -7 M82 58 l8 20"/>
-    	<path id="y" d="M56 15 h30 v45 l-10 -1 M65 15 v72"/>
-    	<path id="y2" d="M68 13 v72 m1 -4 l24 -5"/>		
-    	
-    	
-    	<path id="v2-_-medial" d="M9 22 m0-8 v16"/>
-    	<path id="v2-_-small" d="M11 22 h30 M12 45 h26 M10 70 l34 -3"/>
-    	<path id="v2-b-medial" d="M14 25 m0-8 l-5 16"/>
-    	<path id="v2-b-small" d="M14 25 l30 35 M35 10 c0 0 -7 40 -20 65 M10 80 l38 -5"/>
-    	<path id="v2-c-medial" d="M14 40 m0-8 v16"/>
-    	<path id="v2-c-small" d="M44 18 v60 M14 40 h30 M12 62 l30 -4"/>
-    	<path id="v2-ch-medial" d="M28 20 m-8 0 h16"/>
-    	<path id="v2-ch-small" d="M10 42 l35-6 M10 64 l35-6 M28 20 c0 30 0 45 -5 62"/>
-    	<path id="v2-d-medial" d="M28 20 m-8 0 h16"/>
-    	<path id="v2-d-small" d="M12 40 h32 M28 20 v44 M10 70 l36 -3"/>
-    	<path id="v2-dz-medial" d="M28 20 m-8 0 h16"/>
-    	<path id="v2-dz-small" d="M10 36 l35 6 M10 58 l35 6 M28 20 c0 30 0 45 -5 62"/>
-    	<path id="v2-dz-medial" d="M28 20 m-8 0 h16"/>
-    	<path id="v2-gi-small" d="M10 36 l35 6 M10 58 l35 6 M28 20 v62"/>
-    	<path id="v2-g-medial" d="M16 18 m-8 0 h16"/>
-    	<path id="v2-g-small" d="M16 18 v65 M16 40 h28 M17 60 l28 3"/>
-    	<path id="v2-h-medial" d="M20 26 m-8 0 h16"/>
-    	<path id="v2-h-small" d="M36 20 v46 M20 26 v37 M10 70 l36 -3"/>
-    	<path id="v2-kh-medial" d="M11 18 m-4 -8 v16"/>
-    	<path id="v2-kh-small" d="M41 18 h-30 m6 0 v2 l10 54M10 76 h36"/>
-    	<path id="v2-l-medial" d="M30 16 m-6 0 h12"/>
-    	<path id="v2-l-small" d="M15 16 v30 c0 5 0 20 -5 34 M30 16 v58 M45 16 v58"/>
-    	<path id="v2-m-medial" d="M10 15 m0 -8 v16"/>
-    	<path id="v2-m-small" d="M10 15 h30 c-4 22 -8 45 -30 70 M16 38 c6 8 14 18 28 40"/>
-    	<path id="v2-n-medial" d="M15 16 m-8 0 h16"/>
-    	<path id="v2-n-small" d="M15 16 v64 M34 23 v44 M20 45 h26"/>
-    	<path id="v2-ng-medial" d="M10 22 m-2-8 v16"/>
-    	<path id="v2-ng-small" d="M10 22 h38 M20 22 c0 20 0 40 -10 50 M38 22 v51"/>
-    	<path id="v2-nh-medial" d="M20 15 m-10 0 h16"/>
-    	<path id="v2-nh-small" d="M8 40 l40 8 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
-    	<path id="v2-ph-medial" d="M9 28 m0-8 l-5 16"/>
-    	<path id="v2-ph-small" d="M45 16 v50 M33 15 c-4 22 -8 45 -28 70 M9 28 c6 8 14 24 28 50"/>
-    	<path id="v2-r-medial" d="M10 18 m-8 0 h16"/>
-    	<path id="v2-r-small" d="M11 70 v-52 m2 12 l20 14 M44 18 v56"/>
-    	<path id="v2-s-medial" d="M11 18 m-8 0 h16"/>
-    	<path id="v2-s-small" d="M11 18 v52 m0 -4 l22 -8 M44 18 v56"/>
-    	<path id="v2-t-medial" d="M24 24 m-8 0 h16"/>
-    	<path id="v2-t-small" d="M44 16 v64 M10 46 h34 M24 24 v44"/>
-    	<path id="v2-th-medial" d="M20 15 m-10 0 h16"/>
-    	<path id="v2-th-small" d="M8 48 l40 -10 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
-    	<path id="v2-tr-medial" d="M10 20 m0 -8 v16"/>
-    	<path id="v2-tr-small" d="M28 20 v56 M10 20 h36 M13 45 h30"/>
-    	<path id="v2-v-medial" d="M10 25 m-8 0 h16"/>
-    	<path id="v2-v-small" d="M10 16 v56 M44 15 c-4 22 -8 45 -30 70 M23 28 c4 8 10 24 20 50"/>
-    	<path id="v2-x-medial" d="M11 18 m0 -8 v16"/>
-    	<path id="v2-x-small" d="M11 18 h32 m-4 0 l-10 52 M10 74 h36"/>
-    	
-    	<!--consonants-->
-	<path id="_-medial" d="M12 22 m0-10 v20"/>
-	<path id="_-large" d="M12 22 h44 M10 70 l48 -4"/>
-	<path id="_-small" d="M11 22 h38 M10 70 l40 -3"/>
-	<path id="_-xsmall" d="M11 22 h30 M10 70 l34 -3"/>
-	
-	<path id="b-medial" d="M10 32 l-4 16"/>
-	<path id="b-large" d="M10 40 h40 M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5"/>
-	<path id="b-small" d="M10 40 h38 M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5"/>
-	<path id="b-xsmall" d="M10 40 h36 M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5"/>
-	
-	<path id="c-medial" d="M12 18 m0-10 v20"/>
-	<path id="c-large" d="M12 18 h43 c-2 35 -2 65 -15 60 M35 44 l-25 15"/>
-	<path id="c-small" d="M12 18 h40 c-2 35 -2 65 -15 60 M35 44 l-25 15"/>
-	<path id="c-xsmall" d="M12 18 h32 c-2 35 -2 65 -15 60 M28 44 l-18 12"/>
-	
-	<path id="ch-medial" d="M10 48 m0-10 v20"/>
-	<path id="ch-large" d="M10 48 h46 M33 20 v62"/>
-	<path id="ch-small" d="M10 48 h44 M32 20 v62"/>
-	<path id="ch-xsmall" d="M10 48 h40 M30 20 v62"/>
-	
-	<path id="d-large-medial" d="M34 20 m-10 0 h20"/>
-	<path id="d-small-medial" d="M32 20 m-10 0 h20"/>
-	<path id="d-xsmall-medial" d="M28 20 m-10 0 h20"/>
-	<path id="d-large" d="M34 20 v46 M10 70 l48 -4"/>
-	<path id="d-small" d="M32 20 v44 M10 70 l44 -3"/>
-	<path id="d-xsmall" d="M28 20 v44 M10 70 l36 -3"/>
-	
-	<path id="dz-medial" d="M36 10 m-10 0 h20"/>
-	<path id="dz-large-medial" d="M38 10 m-10 0 h20"/>
-	<path id="dz-large" d="M38 10 c-2 20 -6 50 -26 70 M34 45 l20 34"/>
-	<path id="dz-small" d="M36 10 c-2 20 -5 50 -24 70 M32 45 l18 34"/>
-	<path id="dz-xsmall" d="M36 10 c-2 20 -5 50 -24 70 M32 45 l18 34"/>
-	<path id="gi-medial" d="M36 10 m-10 0 h20"/>
-	<path id="gi-large-medial" d="M38 10 m-10 0 h20"/>
-	<path id="gi-large" d="M38 10 c-2 20 -6 50 -26 70 M34 45 l20 34"/>
-	<path id="gi-small" d="M36 10 c-2 20 -5 50 -24 70 M32 45 l18 34"/>
-	<path id="gi-xsmall" d="M36 10 c-2 20 -5 50 -24 70 M32 45 l18 34"/>
-	
-	<path id="ph-medial" d="M12 36 m0-10 l-3 20"/>
-	<path id="ph-large" d="M12 36 h40 c-2 15 -2 48 -15 42 M30 16 c0 10 0 33 -20 62"/>
-	<path id="ph-small" d="M12 36 h36 c-2 15 -2 48 -15 42 M30 16 c0 10 0 33 -20 62"/>
-	<path id="ph-xsmall" d="M12 36 h32 c-2 15 -2 48 -15 42 M24 16 c0 10 0 33 -14 62"/>
-	
-	<path id="g-medial" d="M15 15 m-10 0 h20"/>
-	<path id="g-large" d="M15 15 v60 c0 0 0 10 10 10 h25 c0 0 5 0 7 -10 M15 40 l30 -5"/>
-	<path id="g-small" d="M15 15 v60 c0 0 0 10 10 10 h22 c0 0 5 0 7 -10 M15 40 l30 -5"/>
-	<path id="g-xsmall" d="M15 15 v60 c0 0 0 10 10 10 h17 c0 0 5 0 7 -10 M15 40 l25 -4"/>
-	
-	<path id="h-medial" d="M37 20 m-10 0 h20"/>
-	<path id="h-xsmall-medial" d="M30 20 m-10 0 h20"/>
-	<path id="h-large" d="M37 20 v46 M12 28 v36 M10 70 l48 -3"/>
-	<path id="h-small" d="M36 20 v46 M11 28 v37 M10 70 l44 -3"/>
-	<path id="h-xsmall" d="M30 20 v46 M11 28 v37 M10 70 l36 -3"/>
-	
-	<path id="kh-medial" d="M12 18 m0 -10 l-8 20"/>
-	<path id="kh-large" d="M12 18 h44 M16 18 v46 l42 -7"/>
-	<path id="kh-small" d="M11 18 h42 M15 18 v47 l40 -6"/>
-	<path id="kh-xsmall" d="M11 18 h30 M15 18 v48 l30 -6"/>
-	
-	<path id="l-medial" d="M17 16 m-10 0 h20"/>
-	<path id="l-small-medial" d="M16 16 m-10 0 h20"/>
-	<path id="l-xsmall-medial" d="M15 16 m-10 0 h20"/>
-	<path id="l-large" d="M17 16 v30 c0 5 0 20 -5 34 M48 16 v58"/>
-	<path id="l-small" d="M16 16 v30 c0 5 0 20 -5 34 M44 16 v58"/>
-	<path id="l-xsmall" d="M15 16 v30 c0 5 0 20 -5 34 M40 16 v58"/>
-	
-	<path id="m-medial" d="M10 15 m0 -10 v20"/>
-	<path id="m-large" d="M10 15 h40 v1 c-8 22 -15 45 -40 69 M16 38 c10 8 20 18 34 36"/>
-	<path id="m-small" d="M10 15 h40 v1 c-8 22 -15 45 -40 69 M16 38 c10 8 20 18 34 36"/>
-	<path id="m-xsmall" d="M10 15 h30 v1 c-4 22 -8 45 -30 69 M16 38 c6 8 14 18 28 40"/>
-	
-	<path id="n-medial" d="M22 16 m-10 0 h20"/>
-	<path id="n-large" d="M22 16 v60 M23 46 l33 3"/>
-	<path id="n-small" d="M20 16 v60 M21 46 l33 3"/>
-	<path id="n-xsmall" d="M20 16 v60 M21 46 l25 3"/>
-	
-	<path id="ng-medial" d="M12 18 m0 -10 v20"/>
-	<path id="ng-large" d="M12 18 h43 c-2 35 -2 65 -15 60 M30 23 c0 10 0 28 -20 55"/>
-	<path id="ng-small" d="M12 18 h40 c-2 35 -2 65 -15 60 M30 23 c0 10 0 28 -20 55"/>
-	<path id="ng-xsmall" d="M12 18 h32 c-2 35 -2 65 -15 60 M24 22 c0 10 0 28 -14 55"/>
-	
-	<path id="nh-medial" d="M15 16 m0 -10 v20"/>
-	<path id="nh-large" d="M15 16 h33 c0 0 -6 30 -38 64 M36 47 c0 0 9 12 19 28"/>
-	<path id="nh-small" d="M15 16 h32 c0 0 -6 30 -38 64 M35 47 c0 0 9 12 19 28"/>
-	<path id="nh-xsmall" d="M15 16 h26 c0 0 -6 30 -30 64 M30 50 c0 0 9 12 18 28"/>
-	
-	<path id="r-medial" d="M12 18 m3-10 l-15 20"/>
-	<path id="r-large" d="M12 18 v52 M12 18 l44 0 v56"/>
-	<path id="r-small" d="M11 18 v52 M11 18 l36 0 v56"/>
-	<path id="r-xsmall" d="M11 18 v52 M11 18 l33 0 v56"/>
-	
-	<path id="s-medial" d="M12 15 m-10 0 h20"/>
-	<path id="s-large" d="M12 18 v47 M10 70 l45 -7 M56 18 v52"/>
-	<path id="s-small" d="M11 18 v47 M10 70 l37 -5 M48 18 v52"/>
-	<path id="s-xsmall" d="M11 18 v47 M10 70 l33 -5 M44 18 v52"/>
-	
-	<path id="t-medial" d="M10 46 m0-10 l-2 20"/>
-	<path id="t-large" d="M42 16 v60 M10 46 l30 -3"/>
-	<path id="t-small" d="M40 16 v60 M10 46 l28 -3"/>
-	<path id="t-xsmall" d="M38 16 v60 M10 46 l26 -3"/>
-	
-	<path id="th-medial" d="M15 16 m0 -10 v20"/>
-	<path id="th-xsmall-medial" d="M10 16 m0 -10 v20"/>
-	<path id="th-large" d="M15 16 h33 c0 0 0 30 -30 64 M15 46 h44"/>
-	<path id="th-small" d="M14 16 h30 c0 0 0 30 -30 64 M14 46 h40"/>
-	<path id="th-xsmall" d="M10 16 h28 c0 0 0 30 -28 64 M12 46 h32"/>
-	
-	<path id="tr-medial" d="M10 18 m0 -10 v20"/>
-	<path id="tr-large" d="M36 20 v46 c0 0 0 10 -14 7 M10 18 l48 0"/>
-	<path id="tr-small" d="M34 20 v46 c0 0 0 10 -14 7 M10 18 l44 0"/>
-	<path id="tr-xsmall" d="M30 20 v46 c0 0 0 10 -14 7 M10 18 l36 0"/>
-	
-	<path id="x-medial" d="M12 19 m0 -10 v20"/>
-	<path id="x-large" d="M12 18 h40 M52 18 l-3 51 M10 70 h48"/>
-	<path id="x-small" d="M11 20 h38 M49 20 l-2 45 M10 70 h44"/>
-	<path id="x-xsmall" d="M11 20 h30 M41 20 l-2 45 M10 70 h34"/>
-	
-	<path id="v-medial" d="M35 10 m-10 0 h20"/>
-	<path id="v-large" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
-	<path id="v-small" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
-	<path id="v-xsmall" d="M35 10 c0 0 -7 40 -20 63 M10 77 l36 -10 M43 53 l8 20"/>
-	
-    	<path id="v2-U" d="M70 22 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
-    	<path id="v2-I" d="M52 15 l-8 68 M25 35 l50 8 M22 58 l50 8"/>
-    	<path id="v2-M" d="M22 18 h55 m-8 20 c0 0 -12 20 -46 45 M30 37 c0 0 12 20 42 46"/>
-    	<path id="v2-N" d="M25 15 v70 M27 45 l52 4 M54 20 v60"/>
-    	<path id="v2-P" d="M55 15 c0 0 -10 30 -30 63 M20 80 l60 0 M28 24 l40 40"/>
-    	<path id="v2-C" d="M20 37 h55 M20 63 h55 M75 15 v70"/>
-    	<path id="v2-T" d="M54 20 v58 M25 80 h58 M28 44 h52"/>
-    	<path id="v2-NG" d="M15 20 h66 M34 20 c0 20 0 40 -10 60 M62 20 v60"/>
-    	<path id="v2-NH" d="M15 45 l66 10 M34 20 c0 20 0 40 -10 60 M62 20 v60"/>
-    	<path id="v2-CH" d="M48 15 l8 68 M25 40 l50 -8 M28 64 l50 -8"/>
-    	
-    	<path id="U" d="M70 20 c0 0 -15 60 -55 65 M25 20 c0 0 15 60 55 65"/>
-    	<path id="I" d="M50 15 v15 c0 0 -5 35 -30 55 M50 15 v15 c 0 0 5 35 30 55"/>
-    	<path id="M" d="M25 18 h55 c0 0 0 30 -55 65 M36 42 c0 0 22 16 40 40"/>
-    	<path id="N" d="M25 15 v70 M27 45 l52 4"/>
-    	<path id="P" d="M55 15 c0 0 -10 30 -30 63 M20 80 l60 -5 M24 44 h52 "/>
-    	<path id="C" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M24 64 l30 -18"/>
-    	<path id="T" d="M54 20 v58 M25 80 h58"/>
-    	<path id="NG" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M46 20 c0 0 0 40 -28 63"/>
-    	<path id="NH" d="M50 15 v5 c0 0 -5 40 -30 65 M50 15 v15 c 0 0 5 30 30 55"/>
-    	<path id="CH" d="M30 15 v65 c0 0 0 10 10 10 l37 -2 c0 0 5 0 5 -5 v-8 M15 48 l50 -5"/>
-    	
-    	<path id="NG_t"      d="M25 40 h48 c0 0 0 18 -8 40 c0 0 0 5 -15 2 M44 40 c0 0 0 20 -24 40"/>
-    	<path id="NG_tsmall" d="M25 45 h48 c0 0 0 15 -8 35 c0 0 0 5 -15 2 M44 45 c0 0 0 17 -24 35"/>
-    	<path id="NH_t"      d="M50 35 c0 0 -5 35 -30 50 M50 35 c 0 0 5 35 30 50"/>
-    	<path id="NH_tsmall" d="M50 45 c0 0 -5 30 -30 40 M50 45 c 0 0 5 30 30 40"/>
-    	<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
-    	<path id="N_tsmall"  d="M35 40 v40 M35 56 l40 2"/>
-    	<path id="M_t"      d="M26 40 h44 c0 0 0 25 -55 45 M36 55 c0 0 20 10 38 28"/>
-    	<path id="M_tsmall" d="M26 46 h44 c0 0 0 22 -55 40 M36 62 c0 0 20 6 38 22"/>
-    	<path id="T_t"      d="M48 40 v33 M23 78 h50"/>
-    	<path id="T_tsmall" d="M48 45 v30 M23 78h50"/>
-    	<path id="P_t"      d="M25 40 h45 v20 M48 40 v17 M25 64 h45 M25 40 v40 c0 5 5 5 40 5 c0 0 5 0 7 -3"/>
-    	<path id="P_tsmall" d="M25 45 h45 v15 M48 45 v12 M25 64 h45 M25 45 v35 c0 5 5 5 40 5 c0 0 5 0 7 -3"/>
-    	<path id="C_t"      d="M20 40 h55 c0 0 0 25 -6 40 c0 0 0 5 -15 0 M20 75 l24 -16"/>
-    	<path id="C_tsmall" d="M20 46 h55 c0 0 0 22 -6 37 c0 0 0 5 -15 0 M20 77 l24 -15"/>
-    	<path id="U_t"      d="M64 40 c0 0 -20 45 -48 45 M27 40 c0 0 20 45 48 45"/>
-    	<path id="U_tsmall" d="M64 45 c0 0 -20 40 -48 40 M27 45 c0 0 20 40 48 40"/>
-    	<path id="I_t"      d="M47 35 c0 0 0 35 -30 50 M47 35 c 0 0 5 35 30 50"/>
-    	<path id="I_tsmall" d="M47 40 c0 0 0 30 -30 45 M47 40 c 0 0 5 30 30 45"/>
-    	<path id="CH_t"      d="M35 40 v40 c0 0 0 10 10 10 l27 -2 c0 0 5 0 5 -5 v-5 M18 64 l50 -5"/>
-    	<path id="CH_tsmall" d="M35 45 v35 c0 0 0 10 10 10 l27 -2 c0 0 5 0 5 -5 v-5 M18 64 l50 -5"/>
-    	
-    	<circle id="smallbox" cx="47" cy="62" r="25" stroke="gray" stroke-width="4px" stroke-dasharray="3,10"/>
-    	<circle id="largebox" cx="52" cy="48" r="40" stroke="gray" stroke-width="4px" stroke-dasharray="3,10"/>
-    	
-    	<!--tones-->
-    	<path id="qt0" d="M2 90 m0 15 c-12 0 -12 -15 0 -15"/>
-    	<path id="qt1" d="M98 -5 c12 0 12 15 0 15"/>
-    	<path id="qt2" d="M2 90 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
-    	<path id="qt3" d="M2 -5 m0 015 c-12 0 -12 -15 0 -15"/>
-    	<path id="qt4" d="M2 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
-    	<path id="qt5" d="M98 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
-    	
-    	<path id="_t1" d="M16 12 h60 l-3 15"/>
-    	<path id="_t2" d="M20 10 v10 h50"/>
-    	<path id="_t3" d="M30 10 l-15 23 M28 18 h44"/>
-    	<path id="_t4" d="M30 8 l-15 25 M28 14 h44 M20 30 h52"/>
-    	<path id="_t5" d="M26 12 h42 v16 M18 29 h58"/>
-    	<path id="_t6" d="M30 10 v12 M30 10 h35 v12 M20 27 h52"/>
-    	
-    	<!--fullsize tones-->
-    	<path id="_tlarge1" d="M30 20 h45 v55"/>
-    	<path id="_tlarge2" d="M20 55 h60"/>
-    	<path id="_tlarge3" d="M75 28 h-50 m0-8 c0 0 0 40 -10 60"/>
-    	<path id="_tlarge4" d="M75 28 h-50 m0-8 c0 0 0 40 -10 60 m20-25 l35 0"/>
-    	<path id="_tlarge5" d="M25 20 h45 v55 M20 75 h60"/>
-    	<path id="_tlarge6" d="M30 30 h40 M20 85 h60"/>
-    	
-    	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
-    	</defs>
-    	</svg>`;
-    	
-    	const div = document.createElement("div")
-    	div.innerHTML = defs;
-    	div.style.display = "none"
-    	document.body.append(div)
-    	const svgContent = document.getElementById("svg").innerHTML;
-    	
-    	var onset_prefix = "v2-";
-    	var vowel_prefix = "v2-";
-    	var coda_prefix = "v2-";
-    	var char_fontsize = "105px";
-    	var qatt_tones = true;
-
-		if (window.location.hash.indexOf("simplified") > -1) {
-    		onset_prefix = "";
-    		vowel_prefix = "";
-    		coda_prefix = "";
-		}
-    	
-    	var svgns = "http://www.w3.org/2000/svg";
-    	var xlinkns = "http://www.w3.org/1999/xlink";
-    	var svg = document.getElementById("svg");
-    	svg.innerHTML = svgContent;
-    	var pre = "_ b c ch d dz ph g h kh l m n ng nh r s t th tr v x".split(" ");
-    	var nuc = "a a2 aw aw2 o o2 u u2 y y2 i i2 e e2".split(" ");
-    	
-    	//table.setAttribute('id', 'table');
-    	function getPost(glide, nucleus) {
-    	if (nucleus.charAt(0) == "w") nucleus = nucleus.substr(1)
-    	let el = document.getElementById(nucleus);
-    	if (el && el.dataset.onsetsize) return el.dataset.onsetsize
-    	var post = "small";
-    	if ("a a2".split(" ").indexOf(nucleus) > -1) post = "large";
-    	if ("o o2 e e2 i2 u2 y".split(" ").indexOf(nucleus) > -1) post = "xsmall";
-    	if (glide) post = post == "large" ? "small" : "xsmall";
-    	return post;
-    	}
-
-function addG(initial, vowel) {
-	var g = document.createElementNS(svgns, "g");
-	if (initial) useG(g, initial)
-	if (vowel) useG(g, vowel);
-	return g;
-}
-function useG(g, id, cls, _tone) {
-	var u = document.createElementNS(svgns,"use");
-	u.setAttributeNS(xlinkns, 'href', '#' + id);
-	if (cls) u.setAttribute('class', cls);
-	g.appendChild(u);
-	if (_tone == 3 || _tone == 4) {
-		//u.setAttribute('transform', "scale(1,.94)");
-		u.setAttribute('vector-effect', 'non-scaling-stroke');
-		u.style["vector-effect"] = "non-scaling-stroke"
-	}
-	return g;
-}
-function paSvg(root, initial, vowel, final, tone, bold, isCoda) {
-	var css = this;
-	var d = document, svg = d.createElementNS(svgns, "svg");
-	var g;
-	var glide = 0;
-	if (initial || vowel){
-		g = addG();
-		useG(g, 'square')
-		svg.appendChild(g);
-	}
-	var color = initial && initial.indexOf("$") >= 0 ? 1 : 0;
-	var underline = initial && initial.indexOf("#") >= 0 ? 1 : 0;
-	svg.setAttribute("class", "char" + (underline?" underline":"") + (color?" color":""));
-	if (initial) {
-		initial = initial.replace("#", "").replace("$", "");
-		var post = getPost(vowel.charAt(0)=="w", vowel)
-		var id = onset_prefix + initial+ '-' + post;
-		if (!document.getElementById(id)) {
-		id = id.replace("xxsmall", "xsmall").replace("large", "xxsmall")
-		}
-		if (!document.getElementById(id)) {
-		id = id.replace("xsmall", "small")
-		}
-		if (!document.getElementById(id)) id = id.replace("xsmall", "small")
-		useG(g, id);
-	}
-	if (vowel) {
-		if (vowel.charAt(0) == "w") {
-			vowel = vowel.substr(1);
-			const medialExists = document.getElementById(onset_prefix + initial + '-' + id.split("-")[1] + '-medial');
-			useG(g, onset_prefix + initial + (medialExists ? '-' + id.split("-")[1] : '') + '-medial');
-		}
-		useG(g, (isCoda ? coda_prefix : vowel_prefix) + vowel);
-		
-	}
-	svg.setAttribute("viewBox", "-10 -25 120 125");
-	svg.style.aspectRatio= "13 / 15";
-	svg.style.verticalAlign = "bottom";
-	svg.style.border = "none";
-	if (g) (root || d.getElementById("out")).appendChild(svg);
-	if (g && vowel && "waeiouy".indexOf(vowel[0]) >= 0) {
-	    if (tone < 8 && qatt_tones) useG(g, "qt" + (tone || 0))
-	}
-	if (tone != null && tone < 0){
-		tone = Math.abs(tone);
-		if (!final){
-			paSvg(root, "", "_tlarge"+tone);
-			//paSvg(null, "", vowel)
-		}else{
-			var tonesize = "";
-			if (tone >= 0) tonesize = "small";
-			var g = paSvg(
-				root,
-				(color?"$":"")+(underline?"#":""),
-				final.toUpperCase() + (tone?'_t':'') + tonesize,
-				"",
-				null,
-				bold,
-				true);
-			useG(g, "_t"+tone);
-		}
-	} else {
-		if (tone < 0) tone = -tone
-		if (final) {
-			var tonesize = "";
-			if (tone >= 3) tonesize = "small";
-			if (tone) {
-			    if (qatt_tones) {
-			    	g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase(), 0, null, null, true);
-			    } else {
-			    
-					g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
-					useG(g, "_t" + tone)
-				}
-			} else {
-				//if (tone) useG(g, "_t" + tone)
-				g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase(), 0, null, null, true);
-			}
-		}
-		else if (tone != null) {
-		  if (!qatt_tones) {
-		    g = paSvg(root, (color?"$":"")+(underline?"#":""), '_tlarge' + tone, 0, null, null, true);
-		    //useG(g, "_tlarge" + tone);
-		  } else {
-			//useG(g, "_tlarge" + tone);
-		  }
-		}
-	}
-	//if (final) useG(g, 'square')
-	return g;
-}
-function paChr(t, root){
-	var d = document, el = d.createElement("div");
-	el.style.display = "inline-block";
-	el.style.width = "110px";
-	el.style.height = "110px";
-	el.style.lineHeight = "110px";
-	el.style.textAlign = "center";
-	el.style.verticalAlign = "bottom";
-	el.style.marginBottom = "30px";
-	el.style.fontSize = char_fontsize;
-	el.style.fontWeight = "400";
-	if (t.indexOf("$") >= 0 && t.indexOf("#") >= 0) el.className = "color underline";
-	else if (t.indexOf("$") >= 0) el.className = "color";
-	else if (t.indexOf("#") >= 0) el.className = "underline";
-	t = t.replace("#", "").replace("$", "");
-	(root || d.getElementById("out")).appendChild(el);
-	el.appendChild(d.createTextNode(t));
-}
-function paBr(n, root){
-	var d = document;
-	(root || d.getElementById("out")).appendChild(d.createElement("br"));
-	if (n > 1) {
-		for(var i = 1; i < n; i++) {
-			pa(" ");
-			(root || d.getElementById("out")).appendChild(d.createElement("br"));
-		}
-	}
-}
-function pa(T, root){
-	txt = T.split(" ");
-	for (var i=0,ilen=txt.length; i<ilen; i++){
-		var t = txt[i];
-		if (t.indexOf(",") > -1) paSvg.apply(null, [root, ].concat(t.split(",")));
-		else paChr(t, root);
-	}
-}
-
-window.pa = pa
-window.paBr = paBr
-window.paChr = paChr
-
-const chars = [];
-Array.from(document.querySelectorAll("tt")).forEach(el => {
-	const t = el.innerText;
-	el.innerHTML = "";
-	el.dataset.codes = t;
-	pa(t, el)
-	chars.push(el)
+const parser = new VietnameseParser();
+let renderer;
+window.addEventListener("load", function(){
+  renderer = new SvgGlyphRenderer({});
+ const chars = [];
+  Array.from(document.querySelectorAll("tt")).forEach(el => {
+    const t = el.innerText;
+    const type = Number(el.dataset.type || 0);
+    el.innerHTML = "";
+    el.dataset.codes = t;
+    renderer.renderText(
+    	t,
+    	el,
+    	type
+    );
+    chars.push(el);
+  });
+  window.changetype = (type) => {
+  	document.querySelector("body").setAttribute("data-type", (type || "0").toString());
+  	const hash = type ? "#simplified" + type : "#";
+  	history.replaceState(null, "", hash);
+  	chars.forEach((el) => {
+  		const tp = Number((el.dataset.type == null ? type : el.dataset.type) || 0);
+  		renderer.renderText(
+  			tp?el.dataset.codes.replace(/\+/g,""):el.dataset.codes,
+  			el,
+  			tp
+  		);
+  	});
+  };
 });
 
-window.changetype = (type) => {
-	history.replaceState(null, "", type ? "#" : "#simplified");
-	
-	//qatt_tones = type
-	onset_prefix = type ? "v2-" : "";
-    vowel_prefix = onset_prefix;
-    coda_prefix = onset_prefix;
-    chars.forEach((el) => {
-    	el.innerHTML = "";
-   		pa(el.dataset.codes, el);
-    })
-};
-
-if (location.hash === "#simplified") {
-    const opt = document.getElementById("simplifiedOption");
-    opt.selected = true;
+if (location.hash === "#simplified1" || location.hash === "#simplified") {
+    const opt = document.getElementById("simplifiedOption1");
+    if (opt) opt.selected = true;
+} else if (location.hash === "#simplified2") {
+    const opt = document.getElementById("simplifiedOption2");
+    if (opt) opt.selected = true;
 }
 
-});
 
 function toFullQatt(){
 	alert("Hướng dẫn này chưa có... work in progress")
 }
+
+window.addEventListener("hashchange", (e) => {
+	let page = location.hash.substr(1) || "page-1";
+	document.querySelector("body").setAttribute("data-page", page);
+	window.scrollTo({top:0,left:0,behavior:'instant'})
+});
+
+window.addEventListener("load", () => {
+	window.dispatchEvent(new Event("hashchange"))
+});
+
     </script>
 <style>
+.page-1-only {display:none}
+#page-1, #page-2, #page-3 {display: none}
+.page-1, .page-2, .page-3 {background: transparent}
+
+body[data-page="page-1"] #page-1,
+body[data-page="page-1"] .page-1-only {display: block!important}
+body[data-page="page-1"] .page-1 {background:white}
+body[data-page="page-2"] #page-2 {display: block!important}
+body[data-page="page-2"] .page-2 {background:white}
+body[data-page="page-3"] #page-3 {display: block!important}
+body[data-page="page-3"] .page-3 {background:white}
+
         :root {
         	--primary: #3a445c;
         }
@@ -534,47 +94,97 @@ function toFullQatt(){
         	box-shadow: 0 2px 4px rgb(0 0 0 / .15);
         	border-bottodm: 1.5px solid black; rgba(255,255,255,.7);
         }
-        .btn-link {color: #eee!important}
+        a:not(.nav-link) {color: #eee!important}
+        tt { white-space: nowrap}
         code {
         	display: inline-block;
         	color: currentColor;
         	background: rgba(255,255,255,.2);
-        	padding: 0 .6em;
+        	padding: 0 .3em;
         	border-radius: .4em;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: .1em;
+            letter-spacing: .075em;
         }
         .alert code {
-        	background: rgba(0,0,0,0.1);
-        	color:darkblue;
+        	background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.1));
+        	color: white;
         }
-        .alert-warning code{color:#e60}
+        .alert-warning code{color: #e60}
         
         .alert-info code{color:white}
         .alert-info{color:white;background: rgba(255,255,255,.1); border:none}
-        h2 {margin-top:2em; font-size: 1.4rem; color: powderblue}
-        h3 {margin-top:1.25em; font-size: 1.1em; color: powderblue}
+        
+        .alert-primary code{color: #06a}
+        .alert-danger code{color: #c30}
+        
+
+h1 {font-size:3.6em; margin-top:1em}
+h2.subtitle{
+	color:white;
+	margin-top:1.5em!important;
+	font-size: 1.2em;
+}
+
+h2 {margin-top:2em; font-size: 1.4rem; color: powderblue}
+h3 {margin-top:1.25em; font-size: 1.1em; color: powderblue}
+
 svg {
 	--notclr: #c9c9c9;
 	--noteven:#000;
-	--strokew: 7;
+	--strokew: 5.75px;
 	stroke: currentColor;
 	stroke-width:var(--strokew);
 	stroke-linecap: square;
 	stroke-linejoin: square;
 	fill: transparent;
-	height: 2em!important;
 	vertical-align:middle;
+	transform: translate(0, -.1em);
+	display: inline-block;
 }
-.svg-normal svg {
-	stroke-width:7px;
+
+.svg-big svg { height: 2.8em }
+.svg-normal svg, svg{ height: 2.2em }
+.svg-small svg { height: 1.7em }
+.svg-tiny svg { height: 1.5em }
+
+body[data-type="0"] .svg-0-big,
+body[data-type="1"] .svg-1-big,
+body[data-type="2"] .svg-2-big {
+  svg { height:2.8em }
+}
+
+body[data-type="0"] .svg-0-normal,
+body[data-type="1"] .svg-1-normal,
+body[data-type="2"] .svg-2-normal {
+  svg { height: 2.2em; }
+}
+
+body[data-type="0"] .svg-0-small,
+body[data-type="1"] .svg-1-small,
+ ody[data-type="2"] .svg-2-small {
+  svg { height: 1.8em }
+}
+
+body[data-type="0"] .svg-0-tiny,
+body[data-type="1"] .svg-1-tiny,
+body[data-type="2"] .svg-2-tiny {
+  svg { height:1.5em }
+}
+
+
+
+.svg-medium {
+	stroke-width: var(--strokew);
 }
 .svg-bold svg {
-	stroke-width:8.5px;
+	stroke-width: 6.5px;
+}
+.svg-heavy svg {
+	stroke-width:8px;
 }
 .svg-light svg {
-	stroke-width:5.5px;
+	stroke-width:4.5px;
 }
 
 #qt0, #qt1, #qt2, #qt3, #qt4, #qt5, #qt6, #qt7 {
@@ -584,17 +194,22 @@ svg {
 	letter-spacing: .15em
 }
 
+.text-vertical{
+	writing-mode: vertical-rl; 
+	text-orientation: mixed;
+	line-height: 2.5;
+}
     </style>
 </head>
-<body>
+<body data-type="0" data-page="page-1" data-bs-theme="light">
 
-
-<div style="z-index:1" class="position-fixed bottom-0 w-100 pb-3">
+<div style="z-index:1" class="page-1-only position-fixed bottom-0 w-100 pb-3">
 <select	class="d-block rounded px-2 py-1 shadow border-0 bg-danger text-light w-auto m-auto"
 	style="z-index:1;font-size:1.1rem"
 	onchange="changetype(parseInt(this.value)); this.blur()">
-	<option value="1">QATT chính thể</option>
-	<option id="simplifiedOption" value="0">QATT giản thể</option>
+	<option value="0">QATT chính thể</option>
+	<option id="simplifiedOption1" value="1">QATT giản thể</option>
+	<option id="simplifiedOption2" value="2">QATT giản thể +</option>
 </select>
 </div>
 
@@ -603,34 +218,57 @@ svg {
 		
 		<ul class="nav">
     		<li class="nav-item">
-        		<a class="nav-link active bg-light text-black-50 rounded">
-            		Tân Tự 1
+        		<a class="page-1 nav-link rounded" href="#page-1">
+            		Tập 1
         		</a>
     		</li>
     		<li class="nav-item">
-        		<a class="nav-link text-white-50" href="#" onclick="toFullQatt(); return false;">
-            		Tân Tự 2
+        		<a class="page-2 nav-link rounded" href="#page-2">
+            		Tập 2
         		</a>
     		</li>
+			<!--<li class="nav-item">
+        		<a class="page-3 nav-link rounded" href="#page-3">
+            		Tân Tự 3
+        		</a>
+    		</li>-->
 		</ul>
 		<div class="navbar-brand me-3">
 			<div class="rounded d-inline-block text-xlight">
-				<tt onclick="alert('Chữ này là chữ Ạ 😉')"
-				style="position:relative; top:-.125em">_,a,,5</tt>
+				<tt data-type="0" onclick="alert('Chữ này là chữ A 😉')"
+					style="position:relative; top:-.125em">_,+a,,</tt>
 			</div>
 		</div>
 	</div>
 </div>
 
-<div class="container">
+<div class="container pb-5 mb-5">
 
-<div class="pb-5 mb-5">
+<div id="page-1">
+	<div class="d-flex align-items-center justify-content-between">
+		<h1 class="m-0">Tập 1</h1>
+		<div class="h5 m-0 d-flex">
+			<tt>t,aw2,p,5</tt>
+			<span class="h1 mt-2 fw-light">1</span>
+		</div>
+	</div>
 	
-	<h2 class="mt-5" style="font-size:1.6rem">Quốc Âm Tân Tự — Hướng dẫn</h2>
-	<tt class="svg-bold">c,waw2,c,1 _,aw2,m t,aw2,n t,y,,5</tt> — <tt>h,y2,ng,1 dz,aw2,n,4</tt>
-
-	<h2>Hướng dẫn học hệ thống chữ QATT</h2>
-	<p><tt>h,y2,ng,1 dz,aw2,n,4 h,o2,c,4 h,e,,5 th,o,ng,1 ch,y,,4</tt> QATT</p>
+	<h2 class="mt-5 subtitle">Quốc Âm Tân Tự — Hướng dẫn</h2>
+	<div class="svg-bold d-flex flex-wrap align-items-center">
+		<tt>c,waw2,c,1 _,aw2,m t,aw2,n t,y,,5</tt>
+		<span class="mx-2">—</span>
+		<tt>h,y2,ng,1</tt>
+		<tt>dz,aw2,n,4</tt>
+	</div>
+	
+	<h2>Hệ thống chữ QATT</h2>
+	<p class="d-flex flex-wrap">
+		<tt>h,e,,5 th,o,ng,1</tt>
+		<nobr>
+			<tt>ch,y,,4</tt>
+			<big class="text-spaced">QATT</big>
+		</nobr>
+	</p>
 	
 	<p>
 	Tài liệu này giới thiệu những bước đầu tiên để làm quen
@@ -644,12 +282,12 @@ svg {
 	bạn hoàn toàn có thể viết được mọi từ trong tiếng Việt.
 	Khác biệt là một số từ sẽ cần hai ký tự để viết.
 	Sau khi đã nắm vững nền tảng,
-	bạn có thể <span class="btn btn-link p-0 p-none" onclick="toFullQatt()">học thêm 96 vần</span> còn lại
+	bạn có thể <a href="#page-2">học thêm 96 vần</a> còn lại
 	để làm chủ hoàn toàn hệ thống QATT và
 	viết chữ một cách tối ưu hơn.
 	</p>
-
-<div class="alert alert-warning shadow d-flex flex-wrap">
+	
+	<div class="alert alert-warning shadow d-flex flex-wrap">
 		<b class="col-12">Phụ âm — 22 cán tự</b>
 		<div class="col-4"><tt>_,</tt> <code>&#x294;</code></div>
 		<div class="col-4"><tt>b,</tt> <code>b</code></div>
@@ -729,12 +367,12 @@ svg {
 	<div class="alert alert-warning shadow">
 		<div class="fw-bold mb-1">Dấu thanh</div>
 		<div class="d-flex flex-wrap">
-			<div class="col-6">sắc → <tt>t,a,,1</tt> <code>tá</code></div>
-			<div class="col-6">nặng → <tt>t,a,,5</tt> <code>tạ</code></div>
-			<div class="col-6">hỏi → <tt>t,a,,3</tt> <code>tả</code></div>
-			<div class="col-6">ngã → <tt>t,a,,4</tt> <code>tã</code></div>
-			<div class="col-6">ngang → <tt>t,a,,0</tt> <code>ta</code></div>
-			<div class="col-6">huyền → <tt>t,a,,2</tt> <code>tà</code></div>
+			<div class="col-6"><tt>t,a,,1</tt> <code>tá</code> → sắc</div>
+			<div class="col-6"><tt>t,a,,5</tt> <code>tạ</code> → nặng</div>
+			<div class="col-6"><tt>t,a,,3</tt> <code>tả</code> → hỏi</div>
+			<div class="col-6"><tt>t,a,,4</tt> <code>tã</code> → ngã</div>
+			<div class="col-6"><tt>t,a,,0</tt> <code>ta</code> → ngang</div>
+			<div class="col-6"><tt>t,a,,2</tt> <code>tà</code> → huyền</div>
 		</div>
 	</div>
 	
@@ -748,7 +386,7 @@ svg {
 	mới bảt đầu học, chỉ cần 14 vần cơ bản.
 	
 	</p>
-
+	
 	<div class="alert alert-warning shadow">
 		<div class="fw-bold mb-1">Âm cuối</div>
 		<div class="d-flex flex-wrap">
@@ -756,27 +394,25 @@ svg {
 			<div class="col-6"><tt>t,a,u</tt> <code>tao</code></div>
 			<div class="col-6"><tt>t,a,n</tt> <code>tan</code></div>
 			<div class="col-6"><tt>t,a,t,1</tt> <code>tát</code></div>
-			<div class="col-6"><tt>t,a,m</tt> <code>tam</code></div>
+			<div class="col-6"><tt>t,a,m</tt> <code>tap</code></div>
 			<div class="col-6"><tt>t,a,p,1</tt> <code>táp</code></div>
 			<div class="col-6"><tt>t,a,ng</tt> <code>tang</code></div>
 			<div class="col-6"><tt>t,a,c,1</tt> <code>tác</code></div>
 		</div>
 	</div>
-
-	<div class="alert alert-info">
+	
+	<div class="alert alert-info shadow">
 		<b class="mb-2">Ví dụ:</b>
 		<div class="d-flex flex-wrap">
 		<div class="col-5"><tt>t,e</tt> <code>tê</code></div>
 		<div class="col-7">→ <tt>t,e,n</tt> <code>tên</code></div>
 		<div class="col-5"><tt>c,i2</tt> <code>kia</code></div>
 		<div class="col-7">→ <tt>c,i2,u</tt> <code>kiêu</code></div>
-		<div class="col-5"><tt>m,u2,,1</tt> <code>múa</code></div>
-		<div class="col-7">→ <tt>m,u2,i,1</tt> <code>muối</code></div>
 		<div class="col-5"><tt>v,u2</tt> <code>vua</code></div>
 		<div class="col-7">→ <tt>v,u2,ng</tt> <code>vuông</code></div>
 		</div>
 	</div>
-
+	
 	<h2>Âm đệm (hoa, suy, khoe, ...)</h2>
 	<p><tt>_,aw2,m d,e,m,5</tt> (<tt>h,wa</tt>, <tt>s,wi</tt>, <tt>kh,we</tt>, ...)
 	
@@ -804,12 +440,12 @@ svg {
 		<div class="col-4"><tt>x,wi</tt> <code>xuy</code></div>
 		</div>
 	</div>
-
+	
 	<div class="alert alert-info">
 		<b class="mb-2">Ví dụ:</b>
 		<p>Chuyển từ dạng cơ bản sang dạng có âm đệm.</p>
 		<div class="d-flex flex-wrap">
-			<div class="col-5"><tt> c,a,,1</tt> <code>cá</code></div>
+			<div class="col-5"><tt>c,a,,1</tt> <code>cá</code></div>
 			<div class="col-7">→ <tt>c,wa,,1</tt> <code>quá</code></div>
 			<div class="col-5"><tt>kh,i2,n</tt> <code>khiên</code></div>
 			<div class="col-7">→ <tt>kh,wi2,n</tt> <code>khuyên</code></div>
@@ -822,27 +458,327 @@ svg {
 		</div>
 	</div>
 	
-	<div class="px-4 alert alert-info" style="color:rgba(255,255,255,.85)">
-		<div class="fw-bold mb-2 text-spaced">— Truyện Kiều</div>
-		<div>
-			<tt class="ps-4">tr,aw,m n,aw,m tr,o2,ng c,o,i,4 ng,y2,i,2 t,a</tt>，
-			<tt>ch,y,,4 t,a,i,2 ch,y,,4 m,e,nh,5 kh,e2,u,1 l,a,,2 g,e2,t,1 nh,aw,u</tt>。
-			<tt>tr,a,i,3 c,wa m,o,t,5 c,u2,c,5 b,e,,3 dz,aw2,u</tt>
-			<tt>nh,y,ng,4 d,i2,u,2 tr,o,ng th,aw2,i,1 m,a,,2 d,aw,u d,a2,n,1 l,o,ng,2</tt>。
-			<p class="mt-4">
-				<tt class="ps-4">l,a,,5 gi,i,,2 b,i,,3 s,aw,c,1 t,y ph,o2,ng</tt>，
-				<tt>tr,a2,i,2 x,aw,nh c,we2,n v,a2,i,1 m,a,,1 h,o,ng,1 d,aw,nh,1 g,e2,n</tt>。
-				<tt>c,a,u,3 th,a2,m l,aw2,n,2 gi,a2,,3 tr,y2,c,1 d,e2,n,2</tt>，
-				<tt>ph,o,ng t,i,nh,2 c,o2,,1 l,u,c,5 c,o2,n,2 tr,wi2,n,2 s,y,,3 x,aw,nh</tt>。
-			</p>
+	<div class="alert alert-info">
+	<h5>Bước tiếp theo là gì?</h5>
+	Sau khi bạn đã thuần thục cách ghép 14 vần cơ bản và âm cuối,
+	chúng ta sẽ tiến sang <a href="#page-2">Tập 2</a>: Hệ thống vần mở rộng.
+	Ở phần sau, bạn sẽ học cách viết các vần phức tạp (như oanh, uyên, iếc...)
+	chỉ bằng một ký tự duy nhất thay vì phải ghép rời.
+	</div>
+	
+	<div class="alert alert-info" style="color:rgba(255,255,255,.85)">
+		<div class="fw-bold mb-2 text-spaced">Truyện Kiều</div>
+		<div class="svg-0-tiny svg-1-tiny svg-2-tiny svg-light">
+			<tt>tr,+wi2,n,5 c,+i2,u,2</tt>
+			<br>
+			<br><tt>tr,aw,m n,aw,m tr,o2,ng c,o,i,4 ng,y2,i,2 t,a</tt>，
+			<br><tt>ch,y,,4 t,a,i,2 ch,y,,4 m,e,nh,5 kh,e2,u,1 l,a,,2 g,e2,t,1 nh,aw,u</tt>。
+			<br><tt>tr,a,i,3 c,wa m,o,t,5 c,u2,c,5 b,e,,3 dz,aw2,u</tt>，
+			<br><tt>nh,y,ng,4 d,i2,u,2 tr,o,ng th,aw2,i,1 m,a,,2 d,aw,u d,a2,n,1 l,o,ng,2</tt>。
+			<br>
+			<br><tt>l,a,,5 gi,i,,2 b,i,,3 s,aw,c,1 t,y ph,o2,ng</tt>，
+			<br><tt>tr,a2,i,2 x,aw,nh c,we2,n v,a2,i,1 m,a,,1 h,o,ng,1 d,aw,nh,1 g,e2,n</tt>。
+			<br><tt>c,a,u,3 th,a2,m l,aw2,n,2 gi,a2,,3 tr,y2,c,1 d,e2,n,2</tt>，
+			<br><tt>ph,o,ng t,i,nh,2 c,o2,,1 l,u,c,5 c,o2,n,2 tr,wi2,n,2 s,y,,3 x,aw,nh</tt>。
+			<br>
+			<br><tt>tr,wi2,n,5 c,i2,u,2</tt>
 		</div>
-		<div class="svg-normal text-end">
-			<div style="display:none;letter-spacing:4px">Truyện Kiều</div>
-			<tt>tr,wi2,n,5 k,i2,u,2</tt>
+	</div>
+</div>
+
+
+<div id="page-2">
+	<div class="d-flex align-items-center justify-content-between">
+		<h1 class="m-0">Tập 2</h1>
+		<div class="h5 m-0 d-flex">
+			<tt data-type="0">t,+aw2,p,5</tt>
+			<span class="h1 mt-2 fw-light">2</span>
+		</div>
+	</div>
+	
+	<h2 class="mt-5 subtitle">Quốc Âm Tân Tự — Hướng dẫn (Tập 2)</h2>
+	<div dclass="svg-bold d-flex flex-wrap align-items-center">
+		<tt data-type="0">c,+waw2,c,1 _,+aw2,m t,+aw2,n t,+y,,5</tt>
+		<span class="mx-2">—</span>
+    	<tt data-type="0">h,+y2,ng,1</tt>
+    	<tt data-type="0">dz,+aw2,n,4</tt>
+    	<nobr>
+    		<big>(</big><tt data-type="0">t,+aw2,p,5</tt><big>2)</big>
+    	</nobr>
+    </div>
+    
+	<h2>Hệ thống vần mở rộng</h2>
+	<p>
+		<tt data-type="0">h,+e,,5 th,+o,ng,1 v,+aw2,n,2 m,+aw,,3 r,+o,ng,5</tt>
+	</p>
+	
+	<p class="mt-3">Trong <a href="#page-1">Tập 1</a>, chúng ta đã làm quen với Tiểu Tân Tự — phương pháp ghép âm cuối rời giúp việc học và đọc trở nên cực kỳ đơn giản. Tuy nhiên, để làm chủ hoàn toàn QATT, bạn cần tìm hiểu về các Chi tự đầy đủ.
+    </p>
+    
+    <div class="alert alert-info">
+    <b>Lưu ý:</b> Hệ thống đầy đủ trong Tập 2 này giúp tối ưu hóa số lượng ký tự khi viết (mỗi vần chỉ dùng một hình dạng duy nhất). Tuy nhiên, điều này cũng làm tăng độ phức tạp: việc đọc sẽ trở nên chậm hơn vì bạn phải ghi nhớ hàng trăm mặt chữ khác nhau thay vì chỉ ghép các mảnh cơ bản. Đây là bước tiến dành cho những người muốn nghiên cứu sâu và sử dụng QATT như một hệ thống ký hiệu chuyên nghiệp.
+    </div>
+
+	<p>Trong QATT đầy đủ, thay vì viết vần cơ bản rồi thêm ký tự âm cuối bên cạnh, các vần dưới đây được biểu diễn bằng một ký tự duy nhất.</p>
+
+	<div class="alert alert-info">
+		<div class="mb-2">Ví dụ:</div>
+		<p><b>Khoảng:</b> Thay vì dùng "kh (biến thể) + a + ng", ta dùng phụ âm kh chuẩn kết hợp với chi tự oang.</p>
+		<div>
+			<tt data-type="0">kh,wa,ng,4</tt>
+			→
+			<span>QATT đầy đủ: <tt data-type="0">kh,+wa,ng,4</tt></span>
+			<code>khoảng</code>
+		</div>
+		
+		<p class="mt-3"><b>Chiều:</b> Sử dụng phụ âm ch chuẩn kết hợp với chi tự iêu.</p>
+		<div>
+			<tt data-type="0">ch,i2,u,2</tt>
+			→
+			<span>QATT đầy đủ: <tt data-type="0">ch,+i2u,2</tt></span>
+			<code>chiều</code>
+		</div>
+	</div>
+	
+	<h2 class="mt-5">62 vần có âm cuối</h2>
+	<p><big>62</big> <tt data-type="0" class="svg-bold">v,+aw2,n,2 c,+o2,,1 _,+aw2,m c,+u2,i,1</tt></p>
+
+	<h2>Các vần -n</h2>
+	<div class="alert alert-warning">
+		<div class="svg-small svg-0-normal d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,n</tt> <code>an</code></div>
+			<div class="col-3"><tt data-type="0">,+e,n</tt> <code>ên</code></div>
+			<div class="col-3"><tt data-type="0">,+i,n</tt> <code>in</code></div>
+			<div class="col-3"><tt data-type="0">,+o,n</tt> <code>ôn</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,n</tt> <code>ăn</code></div>
+			<div class="col-3"><tt data-type="0">,+u,n</tt> <code>un</code></div>
+			<div class="col-3"><tt data-type="0">,+y,n</tt> <code>ưn</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+a2,n</tt> <code>ơn</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,n</tt> <code>en</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,n</tt> <code>iên</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,n</tt> <code>on</code></div>
+			<div class="col-3"><tt data-type="0">,+aw2,n</tt> <code>ân</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,n</tt> <code>uôn</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,n</tt> <code>ươn</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+	
+	<h2>Các vần -m</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,m</tt> <code>am</code></div>
+			<div class="col-3"><tt data-type="0">,+e,m</tt> <code>êm</code></div>
+			<div class="col-3"><tt data-type="0">,+i,m</tt> <code>im</code></div>
+			<div class="col-3"><tt data-type="0">,+o,m</tt> <code>ôm</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,m</tt> <code>ăm</code></div>
+			<div class="col-3"><tt data-type="0">,+u,m</tt> <code>um</code></div>
+			<div class="col-3"><tt data-type="0">,+y,m</tt> <code>ưm</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+a2,m</tt> <code>ơm</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,m</tt> <code>em</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,m</tt> <code>iêm</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,m</tt> <code>om</code></div>
+			<div class="col-3"><tt data-type="0">,+aw2,m</tt> <code>âm</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,m</tt> <code>uôm</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,m</tt> <code>ươm</code></div>
+			<div class="col-3"></div>
 		</div>
 	</div>
 
+	<h2>Các vần -ng</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,ng</tt> <code>ang</code></div>
+			<div class="col-3"><tt data-type="0">,+e,nh</tt> <code>ênh</code></div>
+			<div class="col-3"><tt data-type="0">,+i,nh</tt> <code>inh</code></div>
+			<div class="col-3"><tt data-type="0">,+o,ng</tt> <code>ông</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,ng</tt> <code>ăng</code></div>
+			<div class="col-3"><tt data-type="0">,+u,ng</tt> <code>ung</code></div>
+			<div class="col-3"><tt data-type="0">,+y,ng</tt> <code>ưng</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+a,nh</tt> <code>anh</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,ng</tt> <code>eng</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,ng</tt> <code>iêng</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,ng</tt> <code>ong</code></div>
+			<div class="col-3"><tt data-type="0">,+aw2,ng</tt> <code>âng</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,ng</tt> <code>uông</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,ng</tt> <code>ương</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+
+	<h2>Các vần -o/u</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,u</tt> <code>ao</code></div>
+			<div class="col-3"><tt data-type="0">,+e,u</tt> <code>êu</code></div>
+			<div class="col-3"><tt data-type="0">,+i,u</tt> <code>iu</code></div>
+			<div class="col-3"><tt data-type="0">,+y,u</tt> <code>ưu</code></div>
+			
+			<div class="col-3"><tt data-type="0">,+aw,u</tt> <code>au</code></div>
+			<div class="col-9"></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="bg-danger text-light">ơu</code></div>
+			<div class="col-9"></div>
+			
+			<div class="col-3"><tt data-type="0">,+aw2,u</tt> <code>âu</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,u</tt> <code>eo</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,u</tt> <code>iêu</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,u</tt> <code>ươu</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+	
+	<h2>Các vần -i/y</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,i</tt> <code>ai</code></div>
+			<div class="col-3"><tt data-type="0">,+o,i</tt> <code>ôi</code></div>
+			<div class="col-3"><tt data-type="0">,+u,i</tt> <code>ui</code></div>
+			<div class="col-3"><tt data-type="0">,+y,i</tt> <code>ưi</code></div>
+		
+			<div class="col-3"><tt data-type="0">,+aw,i</tt> <code>ay</code></div>
+			<div class="col-9"></div>
+			<div class="col-3"><tt data-type="0">,+aw2,i</tt> <code>ây</code></div>
+			<div class="col-9"></div>
+			
+			<div class="col-3"><tt data-type="0">,+a2,i</tt> <code>ơi</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,i</tt> <code>oi</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,i</tt> <code>uôi</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,i</tt> <code>ươi</code></div>
+		</div>
+	</div>
+
+	
+	<h2>Hệ thống vần có âm đệm (Âm đệm toàn phần)</h2>
+	
+	<p>
+	Trong hệ thống đầy đủ, thay vì sử dụng biến thể của phụ âm đầu (như đã học ở <a href="#page-1">Tập 1</a>), mỗi vần có âm đệm sẽ có một chi tự riêng biệt. Điều này giúp chữ viết cực kỳ gọn gàng nhưng đòi hỏi sự tập trung cao độ khi đọc.
+	</p>
+		
+	<div class="mt-3 alert alert-danger">
+		<div class="fw-bold mb-2">Danh sách các vần có âm đệm tích hợp</div>
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+wa,n</tt> <code>oan</code></div>
+			<div class="col-3"><tt data-type="0">,+we,n</tt> <code>uên</code></div>
+			<div class="col-3"><tt data-type="0">,+wi,n</tt> <code>uyn</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,n</tt> <code>uăn</code></div>
+			<div class="col-3"><tt data-type="0">,+wa2,n</tt> <code>uơn</code></div>
+			<div class="col-3"><tt data-type="0">,+we2,n</tt> <code>oen</code></div>
+			<div class="col-3"><tt data-type="0">,+wi2,n</tt> <code>uyên</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,n</tt> <code>uân</code></div>
+		</div>
+		
+		<hr>
+	
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-6"><tt data-type="0">,+wa,m</tt> <code>oam</code></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="text-white bg-danger">uym</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,m</tt> <code>oăm</code></div>
+			<div class="col-3"></div>
+			<div class="col-6"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="text-white bg-danger">oem</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,m</tt> <code>uâm</code></div>
+		</div>
+		
+		<hr>
+	
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+wa,ng</tt> <code>oang</code></div>
+			<div class="col-3"><tt data-type="0">,+we,nh</tt> <code>uênh</code></div>
+			<div class="col-3"><tt data-type="0">,+wi,nh</tt> <code>uynh</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,ng</tt> <code>oăng</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,nh</tt> <code>oanh</code></div>
+			<div class="col-3"><tt data-type="0">,+we2,ng</tt> <code>oeng</code></div>
+			<div class="col-3"><tt data-type="0">,+wi2,ng</tt> <code class="px-1">uyêng</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,ng</tt> <code>uâng</code></div>
+			<div class="col-3"></div>
+		</div>
+		
+		<hr>
+		
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+wa,u</tt> <code>oao</code></div>
+			<div class="col-3"><tt data-type="0">,+we,u</tt> <code>uêu</code></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="bg-danger text-white">uyu</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,u</tt> <code>oau</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+we2,u</tt> <code>oeo</code></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="bg-danger text-white">uyêu</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,u</tt> <code>uâu</code></div>
+		</div>
+		
+		<hr>
+		
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-9"><tt data-type="0">,+wa,i</tt> <code>oai</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,i</tt> <code>oay</code></div>
+			<div class="col-9"></div>
+			<div class="col-3"><tt data-type="0">,+waw2,i</tt> <code>uây</code></div>
+		</div>
+	</div>
+	
+	<!--<div class="alert alert-info">
+	<h5>Lời khuyên cho người học</h5>
+	<p>Việc học 110 chi tự đầy đủ giống như việc học một ngôn ngữ ký hiệu mới. Nếu bạn cảm thấy việc đọc trở nên quá khó khăn, đừng ngần ngại quay lại sử dụng cách viết ở Tập 1.
+	Mục tiêu của QATT là sự linh hoạt: Bạn có thể viết theo cách đơn giản (Tập 1) hoặc cách chuyên sâu (Tập 2) tùy vào mục đích sử dụng của mình.
+	</p>
+	<h5>Bước tiếp theo:</h5>
+	<p>Trong các tập tới, chúng ta sẽ đi sâu vào quy tắc viết hoa, cách trình bày văn bản và các mẹo để tăng tốc độ nhận diện mặt chữ khi sử dụng hệ thống đầy đủ này.
+	Chúc bạn kiên trì trên con đường chinh phục QATT!</p>
+	</div>-->
+	
+	<div class="alert alert-info" style="color:rgba(255,255,255,.85)">
+		<div class="fw-bold mb-2 text-spaced">Truyện Kiều</div>
+		<div class="svg-small svg-light">
+			<tt data-type="0">tr,+wi2,n,5 c,+i2,u,2</tt>
+			<br>
+			<br><tt data-type="0">tr,+aw,m n,+aw,m tr,+o2,ng c,+o,i,4 ng,+y2,i,2 t,+a</tt>，
+			<br><tt data-type="0">ch,+y,,4 t,+a,i,2 ch,+y,,4 m,+e,nh,5 kh,+e2,u,1 l,+a,,2 g,+e2,t,1 nh,+aw,u</tt>。
+			<br><tt data-type="0">tr,+a,i,3 c,+wa m,+o,t,5 c,+u2,c,5 b,+e,,3 dz,+aw2,u</tt>，
+			<br><tt data-type="0">nh,+y,ng,4 d,+i2,u,2 tr,+o,ng th,+aw2,i,1 m,+a,,2 d,+aw,u d,+a2,n,1 l,+o,ng,2</tt>。
+			<br>
+			<br><tt data-type="0">l,+a,,5 gi,+i,,2 b,+i,,3 s,+aw,c,1 t,+y ph,+o2,ng</tt>，
+			<br><tt data-type="0">tr,+a2,i,2 x,+aw,nh c,+we2,n v,+a2,i,1 m,+a,,1 h,+o,ng,1 d,+aw,nh,1 g,+e2,n</tt>。
+			<br><tt data-type="0">c,+a,u,3 th,+a2,m l,+aw2,n,2 gi,+a2,,3 tr,+y2,c,1 d,+e2,n,2</tt>，
+			<br><tt data-type="0">ph,+o,ng t,+i,nh,2 c,+o2,,1 l,+u,c,5 c,+o2,n,2 tr,+wi2,n,2 s,+y,,3 x,+aw,nh</tt>。
+			<br>
+			<br><tt data-type="0">tr,wi2,n,5 c,i2,u,2</tt>
+		</div>
+	</div>
 </div>
+
+
+<div id="page-3">
+	<div class="d-flex align-items-center justify-content-between">
+		<h1 class="m-0">Tập 3</h1>
+		<div class="h5 m-0 d-flex">
+			<tt class="">t,aw2,p,1</tt>
+			<span class="h1 mt-2 fw-light">3</span>
+		</div>
+	</div>
+	
+	<h2 class="mt-5 subtitle">Quốc Âm Tân Tự — Hướng dẫn</h2>
+	<tt class="svg-bold">c,waw2,c,1 _,aw2,m t,aw2,n t,y,,5</tt>
+	— <tt class="svg-bold">h,y2,ng,1 dz,aw2,n,4</tt>
+
+	<h2>Phương pháp</h2>
+	<p>
+		<tt>ph,y2,ng ph,a,p,1</tt>
+	</p>
+	
+<div id="editor-wrapper">
+		<textarea class="form-control" id="editor" oninput="
+			const out = document.getElementById('editor-output');
+			out.innerHTML = '';
+			renderer.renderText(((parser.parse(this.value)||{code:this.value}).code), out)
+			console.log(parser.parse(this.value).code)
+		"></textarea>
+		<div class="alert" id="editor-output"></div>
+	</div>
+</div>
+
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
