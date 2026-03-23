@@ -787,7 +787,7 @@ class SvgGlyphRenderer {
         this.useG(newG, "_t" + tone);
       }
     } else if (final) {
-        if (tone && !prefixes.qattTones) {
+        if (tone && !prefixes.qattTones && Number(prefixes.type) != 2) {
           const tonesize = tone >= 3 ? "small" : "";
           const newG = this.renderSvg(root, prefixes, "", final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
           this.useG(newG, "_t" + tone);
