@@ -34,7 +34,7 @@ class VietnameseParser {
                 "a", "ă", "â", "e", "ê", "i", "o", "ô", "ơ", "u", "ư", "y"
             ];
             
-            static QATT_ONSET_MAP = {"đ": "d", "d": "dz", "ngh": "ng", "q": "c", "gh": "g"};
+            static QATT_ONSET_MAP = {"p": "b", "đ": "d", "d": "dz", "ngh": "ng", "q": "c", "k": "c", "gh": "g"};
             static QATT_VOWEL_MAP = {
                 "a": "a", "ă": "aw", "â": "aw2", "e": "e2", "ê": "e", "i": "i",
                 "ia": "i2", "iê": "i2", "o": "o2", "ơ": "a2", "ô": "o", "u": "u",
