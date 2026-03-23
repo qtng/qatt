@@ -637,22 +637,22 @@ class SvgGlyphRenderer {
     if (tone != null && tone < 0) {
       tone = Math.abs(tone);
       if (!final) {
-        this.renderSvg(root, "", "_tlarge" + tone);
+        this.renderSvg(root, prefixes, "", "_tlarge" + tone);
       } else {
         const tonesize = tone >= 0 ? "small" : "";
-        const newG = this.renderSvg(root, "", final.toUpperCase() + (tone ? '_t' : '') + tonesize, "", null, bold, true);
+        const newG = this.renderSvg(root, prefixes, "", final.toUpperCase() + (tone ? '_t' : '') + tonesize, "", null, bold, true);
         this.useG(newG, "_t" + tone);
       }
     } else if (final) {
         if (tone && !prefixes.qattTones) {
           const tonesize = tone >= 3 ? "small" : "";
-          const newG = this.renderSvg(root, "", final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
+          const newG = this.renderSvg(root, prefixes, "", final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
           this.useG(newG, "_t" + tone);
         } else {
-          this.renderSvg(root, "", final.toUpperCase(), 0, null, null, true);
+          this.renderSvg(root, prefixes, "", final.toUpperCase(), 0, null, null, true);
         }
     } else if (tone && !prefixes.qattTones) {
-        this.renderSvg(root, "", '_tlarge' + tone, 0, null, null, true);
+        this.renderSvg(root, prefixes, "", '_tlarge' + tone, 0, null, null, true);
     }
   }
 
