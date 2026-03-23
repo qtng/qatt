@@ -3,16 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wiki & News Transliteration</title>
+    <title>Wiki Transliteration</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Externe Parser & Renderer Skripte -->
     <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
     <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
 
     <style>
-        .wiki-content img, .news-item img {
+        :root {
+            --primary-blue: #0d6efd;
+            --border-gray: #dee2e6;
+        }
+
+        /* --- SVG Größensteuerung --- */
+        svg {
+            height: 1.9em; /* Standardhöhe für Typ 0 */
+            margin: -0.1em -.0em;
+            fill: transparent;
+            stroke: currentColor;
+            stroke-width: 4px;
+            stroke-linecap: square;
+            stroke-linejoin: square;
+            transition: height 0.2s ease;
+        }
+
+        /* Wenn Typ 1 oder 2 aktiv ist, werden alle SVGs kleiner */
+        body[data-type="1"] svg {
+            height: 1.45em;
+            stroke-width: 5.5px;
+            margin: .075em -.05em;
+        }
+        body[data-type="2"] svg {
+            height: 1.4em;
+            stroke-width: 6.5px;
+            margin: 0 -.1em;
+        }
+
+        /* Spezielle Anpassung für das Logo im Header */
+        .svg-bold svg { 
+            stroke-width: 9.5px;
+            height: 1.6em !important; 
+        }
+
+        .wiki-content img {
             max-width: 100%;
             height: auto;
             border-radius: 0.5rem;
@@ -21,17 +58,9 @@
             background-color: #f8f9fa;
         }
     
-    svg {
-        height: 1.6em;
-        fill: transparent;
-        stroke: currentColor;
-        stroke-width: 5.5px;
-        stroke-linecap: square;
-        stroke-linejoin: square;
-    }
-    a svg {
-        border-bottom: 1.5px solid currentColor
-    }
+        a svg {
+            border-bottom: 1.5px solid currentColor;
+        }
         
         /* Ruby & Transliteration Design */
         ruby {
@@ -41,7 +70,6 @@
             vertical-align: bottom;
             white-space: nowrap;
             margin: 0 1px;
-            xcolor: #212529;
             font-weight: inherit;
         }
 
@@ -49,14 +77,10 @@
             display: block;
             font-size: 1.1em;
             line-height: 1.2;
-            xfont-family: sans-serif;
-            xfont-weight: inherit;normal;
             text-align: center;
-            xcolor: #6c757d;
         }
 
         ruby.ruby-changed rt {
-            xcolor: #0d6efd; 
             font-weight: 500;
         }
 
@@ -74,145 +98,91 @@
             color: inherit;
             line-height: inherit;
         }
-        .hide-original ruby.ruby-changed rt {
-            color: inherit; 
-            font-weight: inherit;
-        }
-
-        /* News Layout */
-        .news-item { 
-            border-bottom: 1px solid #eee; 
-            padding: 2rem 0; 
-        }
-        .news-item:last-child { border-bottom: none; }
 
         .sticky-header {
             background: white;
             z-index: 1020;
             padding-top: 1rem;
+            padding-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* Klassisches Tab-Styling */
-        .nav-tabs {
-            border-bottom: 1px solid #dee2e6;
-        }
-        .nav-tabs .nav-link {
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-top-left-radius: 0.5rem;
-            border-top-right-radius: 0.5rem;
-            padding: 0.6rem 1.5rem;
-            margin-bottom: -1px; 
-            color: #6c757d;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .nav-tabs .nav-link:hover {
-            background-color: #f8f9fa;
-            border-color: #dee2e6 #dee2e6 transparent;
-        }
-        .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            background-color: #fff;
-            border-color: #dee2e6 #dee2e6 #fff; 
-            position: relative;
-        }
-
-        /* Inhalts-Container */
         .tab-content-container {
-            border: 1px solid #dee2e6;
-            border-top: none; 
-            border-bottom-left-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
+            border: 1px solid var(--border-gray);
+            border-radius: 0.5rem;
             background-color: #fff;
         }
 
-        /* Link zum Originalartikel mit Feinjustierung nach oben */
         .external-wiki-link {
             color: #6c757d;
             text-decoration: none;
-            transition: color 0.2s;
             line-height: 1;
             position: relative;
             top: -0.1em;
         }
-        .external-wiki-link:hover {
-            color: #0d6efd;
-        }
 
-        /* Ausrichtung der Überschriften-Zeile */
         .wiki-header-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid var(--border-gray);
             margin-bottom: 1.5rem;
-        }
-        .svg-bold svg {
-        	   stroke-width: 9.5px;
         }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-light" data-type="0">
 
     <header class="sticky-header sticky-top">
         <div class="container">
+            <!-- Top Row: Logo and Type Selector -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-primary fs-4"><tt class="svg-bold">v,i</tt><tt class="text-danger">c,i</tt><tt class="text-success svg-bold">b,e</tt><tt class="text-warning">d,i</tt><tt class="text-info svg-bold">_,a</tt></span>
-                <div class="d-flex align-items-center gap-3">
-                    <div id="showToggleContainer" class="form-check form-switch small m-0">
-                        <input class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
-                        <label class="form-check-label" for="showOriginalToggle">
-                            Quốc ngữ
-                        </label>
-                    </div>
-                    <div class="form-check form-switch small m-0">
-                        <input checked class="form-check-input" type="checkbox" role="switch" id="transToggle">
-                        <label class="form-check-label" for="transToggle">
-                            Quốc Âm
-                        </label>
-                    </div>
-                </div>
+                <span class="fw-bold text-primary fs-4">
+                    <tt class="svg-bold">v,i</tt><tt class="text-danger">c,i</tt><tt class="text-success svg-bold">b,e</tt><tt class="text-warning">d,i</tt><tt class="text-info svg-bold">_,a</tt>
+                </span>
+                <select class="w-auto form-select" id="typeSelect" onchange="changetype(parseInt(this.value))">
+                    <option value="0">Chính thể</option>
+                    <option value="1">Giản thể</option>
+                    <option value="2">Giản thanh</option>
+                </select>
             </div>
 
-            <div class="row justify-content-center mb-4 pt-3 bg-light">
+            <!-- Search Row -->
+            <div class="row justify-content-center mb-3">
                 <div class="col-md-8 col-lg-6">
                     <div class="input-group shadow-sm">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm...">
+                        <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm Wikipedia...">
                         <button id="searchBtn" class="btn btn-primary px-4" type="button">
-                            <tt class="svg-bold">t,i,m,2</tt>
+                            Tìm <tt class="svg-bold">t,i,m,2</tt>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="d-none row justify-content-center">
-                <div class="col-lg-10">
-                    <ul class="nav nav-tabs justify-content-start" id="modeTabs">
-                        <li class="nav-item">
-                            <button class="nav-link active" data-mode="wiki" type="button">
-                                <i class="bi bi-book me-2"></i>Wikipedia
-                            </button>
-                        </li>
-                        <li class="nav-item">
-                            <button class="nav-link" data-mode="news" type="button">
-                                <i class="bi bi-newspaper me-2"></i>News
-                            </button>
-                        </li>
-                    </ul>
+            <!-- Switches Row: Centered below Search -->
+            <div class="d-flex justify-content-center gap-4">
+                
+                <div class="form-check form-switch small">
+                    <input checked class="form-check-input" type="checkbox" role="switch" id="transToggle">
+                    <label class="form-check-label" for="transToggle">Quốc Âm</label>
+                </div>
+                <div id="showToggleContainer" class="form-check form-switch small">
+                    <input class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
+                    <label class="form-check-label" for="showOriginalToggle">Quốc ngữ</label>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="container mb-5">
+    <main class="container mb-5 mt-4">
         <div class="row justify-content-center">
             <div class="col-lg-12">
-                <div class="p-3 tab-content-container border shadow-sm">
+                <div class="p-4 tab-content-container border shadow-sm">
                     <div id="loading" class="text-center d-none py-5">
                         <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Đang tải...</p>
                     </div>
+                    
                     <div id="errorMessage" class="alert alert-danger d-none border-0" role="alert"></div>
 
                     <div id="wikiArea">
@@ -224,53 +194,79 @@
                         </div>
                         <div id="contentArea" class="wiki-content"></div>
                     </div>
-
-                    <div id="newsArea" class="d-none">
-                        <h2 class="h4 fw-bold mb-4"><i class="bi bi-lightning-fill text-warning me-1"></i> Tin tức Việt Nam</h2>
-                        <div id="newsList"></div>
-                    </div>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        const parser = new VietnameseParser();
-        const renderer = new SvgGlyphRenderer({
-            container: document.createElement("div")
-        });
-        // renderer.updateConfig(0)
-    
-        // --- Konfiguration ---
-        const GNEWS_API_KEY = '';
-        const START_TERM = "Quốc Âm Tân Tự"; // Aktualisierter Start-Begriff
+        let parser, renderer;
+        let currentType = 0;
+        
+        const START_TERM = "Quốc Âm Tân Tự";
         const wikiLang = "vi";
         
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const contentArea = document.getElementById('contentArea');
-        const newsList = document.getElementById('newsList');
         const wikiTitle = document.getElementById('wikiTitle');
         const wikiExternalLink = document.getElementById('wikiExternalLink');
         const transToggle = document.getElementById('transToggle');
         const showOriginalToggle = document.getElementById('showOriginalToggle');
         const errorMessage = document.getElementById('errorMessage');
         const loading = document.getElementById('loading');
-        const tabButtons = document.querySelectorAll('#modeTabs .nav-link');
 
         let currentWikiHtml = ""; 
-        let currentNewsData = [];
         let originalTitle = "";
-        let currentMode = "wiki";
+
+        function initParser() {
+            if (typeof VietnameseParser !== 'undefined' && typeof SvgGlyphRenderer !== 'undefined') {
+                parser = new VietnameseParser();
+                renderer = new SvgGlyphRenderer({
+                    container: document.createElement("div")
+                });
+                renderTTVanilla();
+                fetchWiki(START_TERM);
+            } else {
+                setTimeout(initParser, 100);
+            }
+        }
+
+        window.changetype = (type) => {
+            currentType = type;
+            // Setzt das Attribut am Body für CSS-Selektoren
+            document.body.setAttribute("data-type", type.toString());
+            
+            renderTTVanilla();
+            if (currentWikiHtml) {
+                renderWiki();
+            }
+        };
+
+        function renderTTVanilla() {
+            Array.from(document.querySelectorAll("tt")).forEach(el => {
+                const t = el.dataset.codes || el.innerText;
+                const tp = Number((el.dataset.type == null ? currentType : el.dataset.type) || 0);
+                el.innerHTML = "";
+                el.dataset.codes = t;
+                // Bei Typ 1 und 2 werden die "+" entfernt
+                const codeToRender = tp ? t.replace(/\+/g, "") : t;
+                renderer.renderText(codeToRender, el, tp);
+            });
+        }
 
         function transliterateWord(word) {
+            if (!parser) return word;
             const parsed = parser.parse(word.trim());
             if (parsed) {
-                const type = 0;
                 let code = parsed.code;
-                if (!type) code = code.replace(',', ',+').replace('0', '');
-                const div = document.createElement("div")
-                renderer.renderText(code, div, type);
+                if (currentType !== 0) {
+                    code = code.replace(/\+/g, "");
+                } else {
+                    code = code.replace(',', ',+').replace('0', '');
+                }
+                const div = document.createElement("div");
+                renderer.renderText(code, div, currentType);
                 return div.innerHTML;
             }
             return word;
@@ -285,49 +281,16 @@
             });
         }
 
-        async function fetchNews(query = "") {
-            setLoading(true);
-            const topic = query || "tin tức Việt Nam";
-            const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(topic)}&lang=vi&country=vn&max=10&apikey=${GNEWS_API_KEY}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.errors) throw new Error(data.errors[0]);
-                currentNewsData = data.articles || [];
-                renderNews();
-                switchContent('news');
-            } catch (err) { showError(err.message); }
-            finally { setLoading(false); }
-        }
-
-        function renderNews() {
-            newsList.innerHTML = currentNewsData.map(art => `
-                <div class="news-item">
-                    <h3 class="h5 fw-bold mb-2">${art.title}</h3>
-                    <div class="mb-3 text-muted small d-flex gap-3">
-                        <span><i class="bi bi-calendar3 me-1"></i>${new Date(art.publishedAt).toLocaleDateString('vi-VN')}</span>
-                        <span><i class="bi bi-journal-text me-1"></i>${art.source.name}</span>
-                    </div>
-                    ${art.image ? `<img src="${art.image}" class="img-fluid" onerror="this.style.display='none'">` : ''}
-                    <p class="news-desc lh-base">${art.description}</p>
-                    <a href="${art.url}" target="_blank" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold">Xem bài gốc <i class="bi bi-arrow-right"></i></a>
-                </div>
-            `).join('');
-            if (transToggle.checked) applyRuby(newsList);
-            updateHiding();
-        }
-
         async function fetchWiki(title) {
             setLoading(true);
             const url = `https://${wikiLang}.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&format=json&origin=*&prop=text|displaytitle`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                if (data.error) throw new Error("Nicht gefunden.");
+                if (data.error) throw new Error("Không tìm thấy trang này.");
                 originalTitle = data.parse.title;
                 currentWikiHtml = data.parse.text["*"];
                 renderWiki();
-                switchContent('wiki');
             } catch (err) { showError(err.message); }
             finally { setLoading(false); }
         }
@@ -367,22 +330,16 @@
 
         function updateHiding() {
             const hide = !showOriginalToggle.checked && transToggle.checked;
-            [contentArea, wikiTitle, newsList].forEach(c => c?.classList.toggle('hide-original', hide));
-        }
-
-        function switchContent(mode) {
-            currentMode = mode;
-            document.getElementById('wikiArea').classList.toggle('d-none', mode !== 'wiki');
-            document.getElementById('newsArea').classList.toggle('d-none', mode !== 'news');
-            tabButtons.forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-mode') === mode));
+            [contentArea, wikiTitle].forEach(c => c?.classList.toggle('hide-original', hide));
         }
 
         function setLoading(isLoading) {
             loading.classList.toggle('d-none', !isLoading);
             if(isLoading) {
                 document.getElementById('wikiArea').classList.add('d-none');
-                document.getElementById('newsArea').classList.add('d-none');
                 errorMessage.classList.add('d-none');
+            } else {
+                document.getElementById('wikiArea').classList.remove('d-none');
             }
         }
 
@@ -391,36 +348,20 @@
             errorMessage.classList.remove('d-none');
         }
 
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mode = btn.getAttribute('data-mode');
-                const query = searchInput.value.trim();
-                if (mode === 'news') {
-                    if (currentNewsData.length === 0 || (query && query !== START_TERM)) fetchNews(query && query !== START_TERM ? query : "");
-                    else switchContent('news');
-                } else {
-                    if (!originalTitle || (query && query !== originalTitle)) fetchWiki(query || START_TERM);
-                    else switchContent('wiki');
-                }
-            });
-        });
-
         searchBtn.addEventListener('click', () => {
             const val = searchInput.value.trim();
-            if (!val) return;
-            currentMode === 'wiki' ? fetchWiki(val) : fetchNews(val);
+            if (val) fetchWiki(val);
         });
 
         searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
 
         transToggle.addEventListener('change', () => {
-            showToggleContainer.classList.toggle('d-none', !transToggle.checked);
-            currentMode === 'wiki' ? renderWiki() : renderNews();
+            document.getElementById('showToggleContainer').classList.toggle('d-none', !transToggle.checked);
+            renderWiki();
         });
 
         showOriginalToggle.addEventListener('change', updateHiding);
 
-        // --- Link-Interceptor für Wikipedia-Navigation ---
         contentArea.addEventListener('click', (e) => {
             const link = e.target.closest('a');
             if (link) {
@@ -439,18 +380,7 @@
             }
         });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            Array.from(document.querySelectorAll("tt")).forEach(el => {
-              const t = el.innerText;
-              const type = Number(el.dataset.type || 0);
-              el.innerHTML = "";
-              el.dataset.codes = t;
-              renderer.renderText(t,el,type);
-              //chars.push(el);
-            });
-            searchInput.value = START_TERM;
-            fetchWiki(START_TERM);
-        });
+        window.onload = initParser;
     </script>
 </body>
 </html>
