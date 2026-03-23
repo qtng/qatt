@@ -576,13 +576,13 @@ class SvgGlyphRenderer {
   renderSvg(root, prefixes, initial, vowel, final, tone, bold, isCoda) {
 	if (vowel && vowel.startsWith("+")) {
 		vowel = vowel.substr(1);
-		if (prefixes.type != "0" && ["t", "p", "c", "ch"].includes(final)) {
+		if (prefixes.type == "0" && ["t", "p", "c", "ch"].includes(final)) {
             if (final == "t") final = "n";
 			else if (final == "p") final = "m";
 			else if (final == "c") final = "ng";
 			else if (final == "ch") final = "nh";
-			if (tone+"" == "6") tone = 1;
-			else if (tone+"" == "7") tone = 5;
+			if (tone+"" == "1") tone = 6;
+			else if (tone+"" == "5") tone = 7;
 		}
 		const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
