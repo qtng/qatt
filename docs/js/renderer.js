@@ -767,7 +767,7 @@ class SvgGlyphRenderer {
     svg.style.verticalAlign = "bottom";
 
     if (g) {
-		const nobr = root.tagName == "NOBR" ? root : document.createElementById("nobr");
+		const nobr = root.tagName == "NOBR" ? root : document.createElement("nobr");
 		nobr.append(svg);
 		if (nobr !== root) root.appendChild(nobr);
 	    this._handleTones(nobr, prefixes, initial, vowel, final, tone, g);
