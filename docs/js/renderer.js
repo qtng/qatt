@@ -766,9 +766,15 @@ class SvgGlyphRenderer {
     svg.style.aspectRatio = "13 / 15";
     svg.style.verticalAlign = "bottom";
 
-    if (g) root.appendChild(svg);
-    this._handleTones(root, prefixes, initial, vowel, final, tone, g);
-    return g;
+    if (g) {
+		const nobr = root.tagName == "NOBR" ? root : document.createElementById("nobr");
+		nobr.append(svg);
+		if (nobr !== root) root.appendChild(nobr);
+	    this._handleTones(nobr, prefixes, initial, vowel, final, tone, g);
+	} else {
+		this._handleTones(root, prefixes, initial, vowel, final, tone, g);
+	}
+	return g;
   }
 
   _handleTones(root, prefixes, initial, vowel, final, tone, g) {
