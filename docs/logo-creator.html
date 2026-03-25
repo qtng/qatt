@@ -3,374 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quốc Âm Tân Tự - Logo Creator</title>
+    <title>QATT Logo Creator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- External Logic Modules -->
     <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
     <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
-
     <style>
-        :root { 
-            --primary-indigo: #6366f1; 
-            --accent-cyan: #22d3ee;
-            --dark-bg: #0f172a;
-            
-            /* Dynamic Parameters */
-            --logo-hue: 0deg;
-            --logo-contrast: 1;
-            --logo-size: 4.8rem;
-            --logo-thickness: 10px;
-            
-            /* Theme Variables (Default: Deep Space) */
-            --logo-color: #ffffff;
-            --logo-glow: rgba(99, 102, 241, 0.6);
-            --logo-glow-alt: rgba(34, 211, 238, 0.3);
-            --card-bg: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                       radial-gradient(at 100% 0%, rgba(34, 211, 238, 0.15) 0px, transparent 50%),
-                       radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%),
-                       #030712;
-            --text-orig-color: rgba(255, 255, 255, 0.5);
-            --label-color: #cbd5e1;
-            --logo-filter: none;
-            --logo-opacity: 1;
-        }
-
-        /* --- THEME DEFINITIONS --- */
-        [data-theme="hue-imperial"] { 
-            --logo-color: #450a0a; 
-            --logo-glow: rgba(69, 10, 10, 0.2); 
-            --card-bg: linear-gradient(135deg, #fef08a 0%, #facc15 100%); 
-            --text-orig-color: rgba(69, 10, 10, 0.5);
-        }
-        [data-theme="hoi-an"] { 
-            --logo-color: #ffffff; 
-            --logo-glow: #f472b6; 
-            --card-bg: radial-gradient(circle at center, #9d174d 0%, #1e020a 100%); 
-            --text-orig-color: rgba(244, 114, 182, 0.5);
-        }
-        [data-theme="ha-long"] { 
-            --logo-color: #a7f3d0; 
-            --logo-glow: rgba(5, 150, 105, 0.6); 
-            --card-bg: linear-gradient(180deg, #064e3b 0%, #022c22 100%); 
-        }
-        [data-theme="gold"] { --logo-color: #fde047; --logo-glow: rgba(234, 179, 8, 0.5); --logo-glow-alt: rgba(251, 191, 36, 0.2); --card-bg: linear-gradient(135deg, #1c1917 0%, #0c0a09 100%); }
-        [data-theme="neon"] { --logo-color: #00ffcc; --logo-glow: rgba(0, 255, 204, 0.8); --logo-glow-alt: rgba(255, 0, 255, 0.5); --card-bg: #000; }
-        [data-theme="glitch"] { --logo-color: #fff; --logo-glow: #ff00c1; --logo-glow-alt: #00fff0; --card-bg: #050505; --logo-filter: url(#glitchFilter); }
-        [data-theme="mercury"] { --logo-color: #e2e8f0; --logo-glow: rgba(255, 255, 255, 0.8); --logo-glow-alt: rgba(148, 163, 184, 0.5); --card-bg: #0f172a; --logo-filter: blur(1px) contrast(20) brightness(1.2); }
-        [data-theme="mist"] { --logo-color: #fff; --logo-glow: rgba(168, 85, 247, 0.5); --logo-glow-alt: rgba(99, 102, 241, 0.5); --card-bg: linear-gradient(45deg, #1e1b4b, #312e81); --logo-filter: blur(0.6px); }
-        [data-theme="fisheye"] { --logo-color: #fff; --logo-glow: rgba(255,255,255,0.2); --card-bg: radial-gradient(circle, #1e293b 0%, #020617 100%); --logo-filter: url(#fisheyeFilter); }
-        [data-theme="chromatic"] { --logo-color: #fff; --logo-glow: rgba(255, 0, 0, 0.3); --logo-glow-alt: rgba(0, 0, 255, 0.3); --card-bg: #050505; --logo-filter: url(#chromaticAberration); }
-        [data-theme="glass"] { --logo-color: #f0f9ff; --logo-glow: rgba(255, 255, 255, 0.7); --card-bg: linear-gradient(135deg, #2563eb 0%, #0f172a 100%); --logo-filter: url(#glassFilter); }
-        [data-theme="blueprint"] { --logo-color: #fff; --logo-glow: rgba(255,255,255,0.4); --card-bg: #004b93; --text-orig-color: rgba(255,255,255,0.3); }
-        [data-theme="blueprint"] .output-container { background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
-        [data-theme="antique"] { --logo-color: #2b1d0e; --card-bg: #f2e8cf; --text-orig-color: rgba(43, 29, 14, 0.4); --logo-filter: url(#paperFilter); }
-        [data-theme="terminal"] { --logo-color: #00ff41; --logo-glow: rgba(0, 255, 65, 0.6); --card-bg: #000; --text-orig-color: rgba(0, 255, 65, 0.3); }
-        [data-theme="hologram"] { --logo-color: #a5f3fc; --logo-glow: #06b6d4; --card-bg: #020617; --logo-filter: url(#hologramFilter); }
-        [data-theme="lava"] { --logo-color: #ff4d00; --logo-glow: #ffae00; --card-bg: #1a0500; --logo-filter: url(#lavaFilter); }
-        [data-theme="vhs"] { --logo-color: #fff; --logo-glow: #ff00c1; --logo-glow-alt: #00fff0; --card-bg: #0a0a0a; --logo-filter: url(#vhsFilter); }
-        [data-theme="fire"] { --logo-color: #ffcc00; --logo-glow: #ff4d00; --card-bg: #000; --logo-filter: url(#fireFilter); }
-        [data-theme="sea"] { --logo-color: #22d3ee; --logo-glow: #0891b2; --card-bg: #020617; --logo-filter: url(#waterFilter); }
-        [data-theme="retro"] { --logo-color: #ff00ff; --logo-glow: #7000ff; --logo-glow-alt: #00ffff; --card-bg: linear-gradient(180deg, #2d004d 0%, #000000 100%); }
-        [data-theme="echo"] { --logo-color: #ffffff; --card-bg: #000; --logo-filter: url(#echoFilter); }
-        [data-theme="popart"] { --logo-color: #000; --card-bg: #00f2ff; --logo-filter: url(#popFilter); --text-orig-color: #ff00ff; }
+        :root { --logo-hue: 0deg; --logo-contrast: 1; --logo-size: 6rem; --logo-thickness: 10px; }
         
-        /* Updated Pop Art variant with stronger contrast */
-        [data-theme="popart-pink"] { 
-            --logo-color: #00f2ff; /* Vibrant Cyan text (Popart Blue) */
-            --card-bg: #db2777;    /* Strong Magenta background */
-            --logo-filter: url(#popFilter); 
-            --text-orig-color: #fde047; 
-            --logo-glow: rgba(0, 242, 255, 0.3);
-        }
-
-        [data-theme="light"] { --logo-color: #1e293b; --logo-glow: rgba(0, 0, 0, 0.1); --card-bg: #f8fafc; --text-orig-color: rgba(0, 0, 0, 0.2); }
-
-        /* --- STYLING --- */
-        body { 
-            background-color: #0f172a; 
-            color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
+        /* THEMES */
+        .t-default, body[data-theme="default"] .output-container { --logo-color: #fff; --logo-glow: rgba(99,102,241,0.6); --card-bg: radial-gradient(at 0% 0%, rgba(99,102,241,0.15) 0, transparent 50%), #030712; }
+        .t-hue-imperial, body[data-theme="hue-imperial"] .output-container { --logo-color: #450a0a; --logo-glow: rgba(69,10,10,0.1); --card-bg: linear-gradient(135deg, #fef08a 0%, #facc15 100%); }
+        .t-hoi-an, body[data-theme="hoi-an"] .output-container { --logo-color: #fff; --logo-glow: #f472b6; --card-bg: radial-gradient(circle at center, #9d174d 0, #1e020a 100%); }
+        .t-ha-long, body[data-theme="ha-long"] .output-container { --logo-color: #a7f3d0; --logo-glow: rgba(5, 150, 105, 0.6); --card-bg: linear-gradient(180deg, #064e3b 0, #022c22 100%); }
+        .t-popart, body[data-theme="popart"] .output-container { --logo-color: #000; --card-bg: #00f2ff; --logo-filter: url(#popFilter); }
+        .t-popart-pink, body[data-theme="popart-pink"] .output-container { --logo-color: #00f2ff; --card-bg: #db2777; --logo-filter: url(#popFilter); }
+        .t-sea, body[data-theme="sea"] .output-container { --logo-color: #22d3ee; --logo-glow: #0891b2; --card-bg: #020617; --logo-filter: url(#waterFilter); }
+        .t-neon, body[data-theme="neon"] .output-container { --logo-color: #00ffcc; --logo-glow: rgba(0, 255, 204, 0.8); --card-bg: #000; }
+        .t-chromatic, body[data-theme="chromatic"] .output-container { --logo-color: #fff; --logo-glow: rgba(255, 0, 0, 0.3); --card-bg: #050505; --logo-filter: url(#chromaticAberration); }
+        .t-hyper-chroma, body[data-theme="hyper-chroma"] .output-container { --logo-color: #fff; --logo-glow: rgba(255, 255, 255, 0.2); --card-bg: radial-gradient(circle at center, #0f172a 0%, #020617 100%); --logo-filter: url(#hyperChromaFilter); }
+        .t-antique, body[data-theme="antique"] .output-container { --logo-color: #2b1d0e; --card-bg: #f2e8cf; --logo-filter: url(#paperFilter); }
+        .t-gold, body[data-theme="gold"] .output-container { --logo-color: #fff; --logo-glow: rgba(255,215,0,0.4); --card-bg: radial-gradient(circle at center, #3f2b00 0, #0c0a09 100%); --logo-filter: url(#goldFilterFixed); }
+        .t-mercury, body[data-theme="mercury"] .output-container { --logo-color: #fff; --logo-glow: rgba(255,255,255,0.2); --card-bg: linear-gradient(135deg, #2c3e50 0, #000 100%); --logo-filter: url(#mercuryFilter); }
+        .t-glass, body[data-theme="glass"] .output-container { --logo-color: #f0f9ff; --logo-glow: rgba(255,255,255,0.8); --card-bg: linear-gradient(135deg, #2563eb 0, #0f172a 100%); --logo-filter: url(#glassFilterFixed); }
+        .t-blueprint, body[data-theme="blueprint"] .output-container { --logo-color: #fff; --card-bg: #004b93; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
+        .t-hologram, body[data-theme="hologram"] .output-container { --logo-color: #a5f3fc; --logo-glow: #06b6d4; --card-bg: #020617; --logo-filter: url(#hologramFilter); }
+        .t-lava, body[data-theme="lava"] .output-container { --logo-color: #ff4d00; --logo-glow: #ffae00; --card-bg: #1a0500; --logo-filter: url(#lavaFilter); }
+        .t-vhs, body[data-theme="vhs"] .output-container { --logo-color: #fff; --logo-glow: #ff00c1; --card-bg: #0a0a0a; --logo-filter: url(#vhsFilter); }
+        .t-fire, body[data-theme="fire"] .output-container { --logo-color: #ffcc00; --logo-glow: #ff4d00; --card-bg: #000; --logo-filter: url(#fireFilter); }
+        .t-retro, body[data-theme="retro"] .output-container { --logo-color: #ff00ff; --logo-glow: #7000ff; --card-bg: linear-gradient(180deg, #2d004d 0, #000 100%); }
+        body[data-theme="retro"] .output-container::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(112,0,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(112,0,255,0.3) 1px, transparent 1px); background-size: 40px 40px; transform-origin: center top; transform: perspective(100px) rotateX(60deg); animation: gridScroll 2s linear infinite; z-index: 0; }
+        .t-light, body[data-theme="light"] .output-container { --logo-color: #1e293b; --card-bg: #f8fafc; }
         
-        body.is-loading .main-content { opacity: 0; filter: blur(10px); }
+        @keyframes gridScroll { from { background-position: center 0; } to { background-position: center 40px; } }
 
-        .main-card { 
-            max-width: 900px; 
-            margin: 40px auto; 
-            background: rgba(30, 41, 59, 0.85); 
-            backdrop-filter: blur(20px);
-            border-radius: 2rem; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .card-header-qatt { 
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-            padding: 1.2rem; 
-            text-align: center; 
-            position: relative;
-        }
-
-        .card-header-qatt h1 {
-            font-size: clamp(0.9rem, 4.5vw, 1.25rem);
-            letter-spacing: 0.02em; 
-            color: #1e293b; 
-            font-weight: 800;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin: 0;
-            text-transform: uppercase;
-        }
-
-        .output-wrapper { padding: 1.5rem 0; display: flex; justify-content: center; flex-direction: column; align-items: center; }
-
-        .output-container { 
-            width: 100%;
-            min-height: 400px; 
-            background: var(--card-bg);
-            border-radius: 1.5rem; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center;
-            padding: 2rem; 
-            position: relative;
-            overflow: hidden;
-            transition: background 0.5s ease;
-            filter: hue-rotate(var(--logo-hue)) contrast(var(--logo-contrast));
-        }
+        /* UI BASICS */
+        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; align-items: center; }
+        .main-card { max-width: 900px; margin: 40px auto; background: rgba(30,41,59,0.85); backdrop-filter: blur(20px); border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .card-header-qatt { background: linear-gradient(135deg, #fbbf24 0, #f59e0b 100%); padding: 1.2rem; text-align: center; color: #1e293b; font-weight: 800; text-transform: uppercase; }
+        .card-header-qatt h1 { font-size: 1.15rem; margin: 0; white-space: nowrap; }
+        .output-container { width: 100%; min-height: 400px; background: var(--card-bg); border-radius: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 1.5rem; position: relative; overflow: hidden; filter: hue-rotate(var(--logo-hue)) contrast(var(--logo-contrast)); transition: background .5s; }
+        .qatt-output { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; color: var(--logo-color); filter: var(--logo-filter); z-index: 1 }
+        .qatt-output svg { height: var(--logo-size); fill: transparent; stroke: currentColor; stroke-width: var(--logo-thickness); filter: drop-shadow(0 0 15px var(--logo-glow)); }
         
-        .qatt-output { 
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            color: var(--logo-color);
-            filter: var(--logo-filter);
-            opacity: var(--logo-opacity);
-            transition: color 0.2s ease;
-        }
-
-        .qatt-output svg {
-            height: var(--logo-size);
-            margin: 0 0.15rem;
-            fill: transparent;
-            stroke: currentColor;
-            stroke-width: var(--logo-thickness);
-            stroke-linecap: square; 
-            stroke-linejoin: miter;
-            filter: drop-shadow(0 0 15px var(--logo-glow)) drop-shadow(0 0 30px var(--logo-glow-alt));
-        }
-
-        .theme-grid {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 10px 2px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.1) transparent;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .theme-grid::-webkit-scrollbar { height: 4px; }
-        .theme-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-        .theme-tile {
-            flex: 0 0 90px;
-            aspect-ratio: 1.2;
-            border-radius: 0.6rem;
-            cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            background: var(--card-bg);
-            transition: all 0.2s ease;
-        }
-
-        .theme-tile::before {
-            content: "Q";
-            font-weight: 900;
-            font-size: 0.9rem;
-            color: var(--logo-color);
-            filter: drop-shadow(0 0 3px var(--logo-glow));
-            z-index: 2;
-        }
-
-        .theme-tile-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.75);
-            color: white;
-            font-size: 0.55rem;
-            padding: 2px 0;
-            text-align: center;
-            text-transform: uppercase;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .theme-tile.active {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
-        }
-
-        #originalText { 
-            width: 100%;
-            margin-top: 2rem; 
-            color: var(--text-orig-color);
-            font-style: italic; 
-            font-size: 1.2rem;
-            letter-spacing: 0.08em; 
-            font-weight: 400; 
-            text-transform: uppercase;
-        }
-
-        .form-select, .form-control, .form-range {
-            background: rgba(15, 23, 42, 0.7) !important;
-            color: white !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
-
-        .slider-label, label.form-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.7rem;
-            font-weight: bold;
-            color: var(--label-color) !important;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
+        nobr { white-space: normal !important; display: inline-block; }
+        .theme-grid { display: flex; gap: 12px; overflow-x: auto; padding: 10px 2px; }
+        .theme-tile { flex: 0 0 90px; aspect-ratio: 1.4; border-radius: .6rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); background: var(--card-bg); position: relative; display: flex; align-items: center; justify-content: center; transition: all .2s; overflow: hidden; }
+        .theme-tile::before { content: "Q"; font-weight: 900; font-size: 1.1rem; color: var(--logo-color); filter: drop-shadow(0 0 5px var(--logo-glow)); z-index: 2; transform: translateY(-8px); }
+        .theme-tile.active { border-color: #22d3ee; transform: translateY(-2px); box-shadow: 0 0 10px rgba(34,211,238,0.3); }
+        .theme-tile-label { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); color: #fff; font-size: .5rem; text-align: center; padding: 3px 0; text-transform: uppercase; font-weight: 700; z-index: 3; }
+        .form-control, .form-select { background: rgba(15,23,42,0.7) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+        .form-range { background: 0 0 !important; border: none !important; padding: 0 !important; }
+        .slider-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; display: flex; justify-content: space-between; margin-bottom: .2rem; }
+        #originalText { margin-top: 1.5rem; font-style: italic; color: rgba(255,255,255,0.4); z-index: 1; text-transform: uppercase; letter-spacing: 1px; }
         .svg-filters { position: absolute; width: 0; height: 0; visibility: hidden; }
     </style>
 </head>
-<body class="is-loading">
-
-    <!-- SVG-Filter Definitions -->
-    <svg class="svg-filters" viewBox="0 0 400 200">
+<body data-theme="default">
+    <svg class="svg-filters">
         <defs>
-            <filter id="glitchFilter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02 0.15" numOctaves="3" result="noise">
-                    <animate attributeName="baseFrequency" values="0.02 0.15; 0.05 0.3; 0.02 0.15" dur="0.2s" repeatCount="indefinite" />
-                </feTurbulence>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" />
-            </filter>
-            <filter id="fisheyeFilter" x="-50%" y="-50%" width="200%" height="200%">
-                <feImage href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3CradialGradient id='g'%3E%3Cstop offset='0%25' stop-color='white'/%3E%3Cstop offset='100%25' stop-color='black'/%3E%3C/radialGradient%3E%3Ccircle cx='50' cy='50' r='50' fill='url(%23g)'/%3E%3C/svg%3E" result="map" x="0" y="0" width="100%" height="100%"/>
-                <feDisplacementMap in="SourceGraphic" in2="map" scale="80" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-            <filter id="chromaticAberration">
-                <feOffset in="SourceGraphic" dx="4" dy="0" result="red" />
-                <feOffset in="SourceGraphic" dx="-4" dy="0" result="blue" />
-                <feColorMatrix in="red" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="redOnly" />
-                <feColorMatrix in="blue" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="blueOnly" />
-                <feBlend in="redOnly" in2="blueOnly" mode="screen" result="aberration" />
-                <feBlend in="aberration" in2="SourceGraphic" mode="screen" />
-            </filter>
-            <filter id="glassFilter">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur" />
-                <feSpecularLighting in="blur" surfaceScale="6" specularConstant="1.2" specularExponent="30" lighting-color="#ffffff">
-                    <fePointLight x="-5000" y="-10000" z="20000" />
-                </feSpecularLighting>
-                <feComposite in2="SourceGraphic" operator="in" />
-            </filter>
-            <filter id="popFilter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="1" result="noise" />
-                <feComposite operator="in" in="noise" in2="SourceGraphic" result="halftone" />
-                <feBlend mode="multiply" in="halftone" in2="SourceGraphic" />
+            <filter id="goldFilterFixed" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur"/><feSpecularLighting in="blur" surfaceScale="5" specularConstant="2.2" specularExponent="35" lighting-color="#fff" result="spec"><fePointLight x="-1000" y="-1000" z="1000"/></feSpecularLighting><feComposite in="spec" in2="SourceGraphic" operator="in" result="specIn"/><feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1 0 0 0 0 0.8 0 0 0 0 0.1 0 0 0 1 0" result="goldBase"/><feBlend in="specIn" in2="goldBase" mode="screen" result="lit"/><feColorMatrix in="lit" type="matrix" values="1.1 0 0 0 0 0 1.05 0 0 0 0 0 1.2 0 0 0 0 0 1 0"/></filter>
+            <filter id="mercuryFilter" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise"><animate attributeName="baseFrequency" values="0.015; 0.025; 0.015" dur="10s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="5" result="displace"/><feGaussianBlur in="displace" stdDeviation="1.5" result="blur"/><feSpecularLighting in="blur" surfaceScale="6" specularConstant="2.8" specularExponent="40" lighting-color="#fff" result="spec"><fePointLight x="-1000" y="-1000" z="1000"/></feSpecularLighting><feComposite in="spec" in2="displace" operator="in" result="specIn"/><feBlend in="specIn" in2="displace" mode="screen"/></filter>
+            <filter id="glassFilterFixed" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur"/><feSpecularLighting in="blur" surfaceScale="6" specularConstant="2.5" specularExponent="45" lighting-color="#fff" result="spec"><fePointLight x="-1000" y="-1000" z="1000"/></feSpecularLighting><feComposite in="spec" in2="SourceGraphic" operator="in" result="specIn"/><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.6 0" result="base"/><feBlend in="specIn" in2="base" mode="screen"/></filter>
+            <filter id="waterFilter"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2"><animate attributeName="baseFrequency" values="0.02; 0.05; 0.02" dur="5s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="8"/></filter>
+            <filter id="lavaFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01 0.05; 0.02 0.1; 0.01 0.05" dur="8s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="12"/><feGaussianBlur stdDeviation="1" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
+            <filter id="fireFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="3" result="noise"><animate attributeName="baseFrequency" values="0.01 0.1; 0.02 0.2; 0.01 0.1" dur="4s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="15"/></filter>
+            <filter id="vhsFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.5" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01 0.5; 0.01 0.8; 0.01 0.5" dur=".15s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="10"/></filter>
+            <filter id="popFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="1" result="noise"/><feComposite operator="in" in="noise" in2="SourceGraphic" result="halftone"/><feBlend mode="multiply" in="halftone" in2="SourceGraphic"/></filter>
+            <filter id="paperFilter"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" result="inkBleed"/><feGaussianBlur in="inkBleed" stdDeviation="0.1"/></filter>
+            <filter id="hologramFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.2" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01 0.2; 0.01 0.3; 0.01 0.2" dur="3s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="5"/><feColorMatrix type="matrix" values="0 0 0 0 0.5 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/></filter>
+            <filter id="chromaticAberration"><feOffset in="SourceGraphic" dx="4" dy="0" result="red"/><feOffset in="SourceGraphic" dx="-4" dy="0" result="blue"/><feColorMatrix in="red" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="redOnly"/><feColorMatrix in="blue" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="blueOnly"/><feBlend in="redOnly" in2="blueOnly" mode="screen" result="aberration"/><feBlend in="aberration" in2="SourceGraphic" mode="screen"/></filter>
+            
+            <!-- HYPER CHROMA FILTER (Vertical Red & Cyan separation, 70% opacity) -->
+            <filter id="hyperChromaFilter">
+                <feOffset id="hcTop" in="SourceGraphic" dx="0" dy="4" result="topLayer"/>
+                <feOffset id="hcBottom" in="SourceGraphic" dx="0" dy="-4" result="bottomLayer"/>
+                <feColorMatrix in="topLayer" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0" result="redOnly"/>
+                <feColorMatrix in="bottomLayer" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.7 0" result="cyanOnly"/>
+                <feBlend in="redOnly" in2="cyanOnly" mode="screen" result="aberration"/>
+                <feBlend in="aberration" in2="SourceGraphic" mode="screen"/>
             </filter>
         </defs>
     </svg>
 
-    <div class="container main-content">
+    <div class="container py-4">
         <div class="main-card">
-            <div class="card-header-qatt">
-                <h1>Quốc Âm Tân Tự - Logo Creator</h1>
-            </div>
-
+            <div class="card-header-qatt"><h1>Quốc Âm Tân Tự - Logo Creator</h1></div>
             <div class="p-4 p-md-5">
-                <!-- 1. Text Input -->
                 <div class="mb-4">
-                    <label class="form-label mb-2">Your Text</label>
-                    <input type="text" id="nameInput" class="form-control form-control-lg shadow-none" 
-                           placeholder="Enter text..." value="Tiếng Việt">
+                    <label class="form-label">Enter your text</label>
+                    <input type="text" id="nameInput" class="form-control form-control-lg shadow-none" value="Tiếng Việt">
                 </div>
-
-                <!-- 2. Style Catalog -->
-                <div class="mb-5">
-                    <label class="form-label mb-1">Style Catalog</label>
-                    <div id="themeGrid" class="theme-grid">
-                        <!-- Tiles are generated via JS -->
-                    </div>
-                </div>
-
-                <!-- 3. Output Display -->
-                <div class="output-wrapper mb-5">
-                    <div id="logoCard" class="output-container">
-                        <div id="qattDisplay" class="qatt-output" data-type="0"></div>
-                        <div id="originalText"></div>
-                    </div>
-                </div>
-
-                <!-- 4. Sliders (Paired Layout) -->
+                <div class="mb-5"><label class="form-label">Style Catalog</label><div id="themeGrid" class="theme-grid"></div></div>
+                <div class="mb-5 text-center"><div id="logoCard" class="output-container"><div id="qattDisplay" class="qatt-output"></div><div id="originalText"></div></div></div>
                 <div class="row g-4 mb-4">
-                    <div class="col-6">
-                        <label class="slider-label mb-1">
-                            <span>Size</span>
-                            <span id="sizeValue">4.8em</span>
-                        </label>
-                        <input type="range" class="form-range" id="sizeSlider" min="1" max="10" step="0.1" value="4.8">
-                    </div>
-                    <div class="col-6">
-                        <label class="slider-label mb-1">
-                            <span>Thickness</span>
-                            <span id="weightValue">10px</span>
-                        </label>
-                        <input type="range" class="form-range" id="weightSlider" min="1" max="15" step="1" value="10">
-                    </div>
-                    <div class="col-6">
-                        <label class="slider-label mb-1">
-                            <span>Color (Hue)</span>
-                            <span id="hueValue">0°</span>
-                        </label>
-                        <input type="range" class="form-range" id="hueSlider" min="0" max="360" step="1" value="0">
-                    </div>
-                    <div class="col-6">
-                        <label class="slider-label mb-1">
-                            <span>Contrast</span>
-                            <span id="contrastValue">100%</span>
-                        </label>
-                        <input type="range" class="form-range" id="contrastSlider" min="0.5" max="2" step="0.1" value="1">
-                    </div>
+                    <div class="col-6"><label class="slider-label"><span>Size</span><span id="sizeVal">6em</span></label><input type="range" class="form-range" id="sizeSlider" min="1" max="20" step="0.1" value="6"></div>
+                    <div class="col-6"><label class="slider-label"><span>Thickness</span><span id="weightVal">10px</span></label><input type="range" class="form-range" id="weightSlider" min="1" max="18" step="1" value="10"></div>
                 </div>
-
-                <!-- 5. Typography Mode -->
-                <div class="mb-4">
-                    <label class="form-label mb-2">Typography Mode</label>
-                    <select id="typeSelect" class="form-select shadow-sm">
-                        <option value="0">Authentic</option>
-                        <option value="1">Simplified</option>
-                        <option value="2">Simplified +</option>
-                    </select>
+                <div class="row g-4 mb-4">
+                    <div class="col-6"><label class="slider-label"><span>Hue</span><span id="hueVal">0°</span></label><input type="range" class="form-range" id="hueSlider" min="0" max="360" step="1" value="0"></div>
+                    <div class="col-6"><label class="slider-label"><span>Contrast</span><span id="contrastVal">100%</span></label><input type="range" class="form-range" id="contrastSlider" min="0.5" max="2" step="0.1" value="1"></div>
                 </div>
-
-                <!-- 6. Original Text Toggle -->
+                <div class="mb-4"><label class="form-label">Writing Style</label><select id="typeSelect" class="form-select"><option value="0">Chính thể</option><option value="1">Giản thể</option><option value="2">Giản thể +</option></select></div>
                 <div class="d-flex justify-content-center">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="showOriginal" checked>
@@ -380,124 +113,60 @@
             </div>
         </div>
     </div>
-<script>
+    <script>
         let parser, renderer;
-
+        const $ = id => document.getElementById(id), setProp = (k, v) => document.documentElement.style.setProperty(k, v);
+        
         const themes = [
-            { id: 'default', label: 'Deep Space' },
-            { id: 'hue-imperial', label: 'Huế Imperial' },
-            { id: 'hoi-an', label: 'Hội An Lantern' },
-            { id: 'ha-long', label: 'Hạ Long Emerald' },
-            { id: 'gold', label: 'Pure Gold' },
-            { id: 'neon', label: 'Neon' },
-            { id: 'glitch', label: 'Glitch' },
-            { id: 'mercury', label: 'Mercury' },
-            { id: 'mist', label: 'Spirit Mist' },
-            { id: 'fisheye', label: 'Fisheye' },
-            { id: 'chromatic', label: 'Chroma' },
-            { id: 'glass', label: 'Glass' },
-            { id: 'blueprint', label: 'Blueprint' },
-            { id: 'antique', label: 'Antique' },
-            { id: 'terminal', label: 'Terminal' },
-            { id: 'hologram', label: 'Holo' },
-            { id: 'lava', label: 'Lava' },
-            { id: 'vhs', label: 'VHS' },
-            { id: 'fire', label: 'Fire' },
-            { id: 'sea', label: 'Sea Ripple' },
-            { id: 'retro', label: 'Retro Wave' },
-            { id: 'echo', label: 'Spirit Echo' },
-            { id: 'popart', label: 'Pop Art' },
-            { id: 'popart-pink', label: 'Pop Pink' },
-            { id: 'light', label: 'Paper' }
+            { id: 'default', label: 'Deep Space', class: 't-default' }, { id: 'hue-imperial', label: 'Huế Imperial', class: 't-hue-imperial' },
+            { id: 'hoi-an', label: 'Hội An Lantern', class: 't-hoi-an' }, { id: 'ha-long', label: 'Hạ Long Emerald', class: 't-ha-long' },
+            { id: 'popart', label: 'Pop Art', class: 't-popart' }, { id: 'popart-pink', label: 'Pop Pink', class: 't-popart-pink' },
+            { id: 'sea', label: 'Sea Ripple', class: 't-sea' }, { id: 'neon', label: 'Neon', class: 't-neon' },
+            { id: 'chromatic', label: 'Chroma', class: 't-chromatic' }, { id: 'hyper-chroma', label: 'Hyper Chroma', class: 't-hyper-chroma' },
+            { id: 'antique', label: 'Antique', class: 't-antique' }, { id: 'gold', label: 'Pure Gold', class: 't-gold' },
+            { id: 'mercury', label: 'Mercury', class: 't-mercury' }, { id: 'glass', label: 'Glass', class: 't-glass' },
+            { id: 'blueprint', label: 'Blueprint', class: 't-blueprint' }, { id: 'hologram', label: 'Holo', class: 't-hologram' },
+            { id: 'lava', label: 'Lava', class: 't-lava' }, { id: 'vhs', label: 'VHS', class: 't-vhs' },
+            { id: 'fire', label: 'Fire', class: 't-fire' }, { id: 'retro', label: 'Retro Wave', class: 't-retro' },
+            { id: 'light', label: 'Paper', class: 't-light' }
         ];
 
-        function createThemeGrid() {
-            const grid = document.getElementById('themeGrid');
-            themes.forEach(theme => {
-                const tile = document.createElement('div');
-                tile.className = 'theme-tile';
-                tile.setAttribute('data-theme', theme.id);
-                tile.onclick = () => updateTheme(theme.id);
-                if (theme.id === 'default') tile.classList.add('active');
-                const label = document.createElement('div');
-                label.className = 'theme-tile-label';
-                label.innerText = theme.label;
-                tile.appendChild(label);
-                grid.appendChild(tile);
-            });
-        }
-
-        function updateTheme(themeId) {
-            document.body.setAttribute('data-theme', themeId);
-            document.querySelectorAll('.theme-tile').forEach(t => {
-                t.classList.toggle('active', t.getAttribute('data-theme') === themeId);
-            });
-            render();
-        }
-
         function init() {
-            if (typeof VietnameseParser !== 'undefined' && typeof SvgGlyphRenderer !== 'undefined') {
-                parser = new VietnameseParser();
-                renderer = new SvgGlyphRenderer({ container: document.createElement("div") });
-                createThemeGrid();
-                document.body.classList.remove('is-loading');
-                setupListeners();
-                render();
-            } else {
-                setTimeout(init, 100);
-            }
+            if (typeof VietnameseParser === 'undefined') return setTimeout(init, 100);
+            parser = new VietnameseParser(); renderer = new SvgGlyphRenderer({ container: document.createElement("div") });
+            const grid = $('themeGrid');
+            themes.forEach(t => {
+                const el = document.createElement('div'); el.className = `theme-tile ${t.class}`; el.dataset.theme = t.id;
+                el.onclick = () => { document.body.dataset.theme = t.id; document.querySelectorAll('.theme-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.theme === t.id)); renderUI(); };
+                el.innerHTML = `<div class="theme-tile-label">${t.label}</div>`; grid.appendChild(el);
+            });
+            ['nameInput', 'typeSelect', 'showOriginal', 'sizeSlider', 'weightSlider', 'hueSlider', 'contrastSlider'].forEach(id => $(id).oninput = renderUI);
+            renderUI();
         }
 
-        function render() {
-            if (!parser || !renderer) return;
-
-            const input = document.getElementById('nameInput').value;
-            const type = parseInt(document.getElementById('typeSelect').value);
-            const showOrig = document.getElementById('showOriginal').checked;
-            const display = document.getElementById('qattDisplay');
-            const origDisp = document.getElementById('originalText');
+        function renderUI() {
+            if (!parser) return;
+            const text = $('nameInput').value, type = +$('typeSelect').value, show = $('showOriginal').checked, sz = $('sizeSlider').value, th = $('weightSlider').value, hue = $('hueSlider').value, ct = $('contrastSlider').value;
+            setProp('--logo-size', sz + 'em'); setProp('--logo-thickness', th + 'px'); setProp('--logo-hue', hue + 'deg'); setProp('--logo-contrast', ct);
             
-            const size = document.getElementById('sizeSlider').value;
-            const weight = document.getElementById('weightSlider').value;
-            const hue = document.getElementById('hueSlider').value;
-            const contrast = document.getElementById('contrastSlider').value;
-
-            const root = document.documentElement;
-            root.style.setProperty('--logo-size', size + 'em');
-            root.style.setProperty('--logo-thickness', weight + 'px');
-            root.style.setProperty('--logo-hue', hue + 'deg');
-            root.style.setProperty('--logo-contrast', contrast);
-
-            document.getElementById('sizeValue').innerText = size + 'em';
-            document.getElementById('weightValue').innerText = weight + 'px';
-            document.getElementById('hueValue').innerText = hue + '°';
-            document.getElementById('contrastValue').innerText = Math.round(contrast * 100) + '%';
-
-            display.innerHTML = '';
-            display.setAttribute('data-type', type);
-            origDisp.innerText = showOrig ? input : '';
-
-            if (!input.trim()) return;
-
-            const words = input.split(/\s+/);
-            words.forEach(word => {
-                const native = parser.parse(word);
-                if (native) {
-                    const span = document.createElement('span');
-                    renderer.renderText(native.code.replace(/\+/g, type !== 0 ? "" : "+"), span, type);
-                    display.appendChild(span);
-                }
-                display.appendChild(document.createTextNode(' '));
+            // Dynamic Vertical Offset (0.075em)
+            const hcOffset = (sz * 16) * 0.075; 
+            if($('hcTop')) $('hcTop').setAttribute('dy', hcOffset); 
+            if($('hcBottom')) $('hcBottom').setAttribute('dy', -hcOffset);
+            
+            $('sizeVal').innerText = sz + 'em'; $('weightVal').innerText = th + 'px'; $('hueVal').innerText = hue + '°'; $('contrastVal').innerText = Math.round(ct * 100) + '%';
+            const out = $('qattDisplay'); out.innerHTML = ''; $('originalText').innerText = show ? text : '';
+            if (!text.trim()) return;
+            text.split(/\s+/).forEach(w => {
+                const n = parser.parse(w);
+                if (n) { const s = document.createElement('span'); renderer.renderText(n.code.replace(/\+/g, type === 0 ? "+" : ""), s, type); out.appendChild(s); }
+                out.appendChild(document.createTextNode(' '));
             });
         }
-
-        function setupListeners() {
-            ['nameInput', 'typeSelect', 'showOriginal', 'sizeSlider', 'weightSlider', 'hueSlider', 'contrastSlider'].forEach(id => {
-                document.getElementById(id).addEventListener('input', render);
-            });
-        }
-
         window.onload = init;
     </script>
 </body>
 </html>
+
+        
+                
