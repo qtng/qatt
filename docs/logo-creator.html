@@ -103,7 +103,7 @@
                     <div class="col-6"><label class="slider-label"><span>Hue</span><span id="hueVal">0°</span></label><input type="range" class="form-range" id="hueSlider" min="0" max="360" step="1" value="0"></div>
                     <div class="col-6"><label class="slider-label"><span>Contrast</span><span id="contrastVal">100%</span></label><input type="range" class="form-range" id="contrastSlider" min="0.5" max="2" step="0.1" value="1"></div>
                 </div>
-                <div class="mb-4"><label class="form-label">Writing Style</label><select id="typeSelect" class="form-select"><option value="0">Quốc âm tân tự</option><option value="0.0">Tiểu tân tự</option><option value="1">Giản thể</option><option value="2">Giản thể +</option></select></div>
+                <div class="mb-4"><label class="form-label">Writing Style</label><select id="typeSelect" class="form-select"><option value="0">Chính thể - Quốc âm tân tự</option><option value="0.0">Chính thể - Tiểu tân tự</option><option value="1">Giản thể</option><option value="2">Giản thể +</option></select></div>
                 <div class="d-flex justify-content-center">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="showOriginal" checked>
@@ -161,7 +161,6 @@
                 const n = parser.parse(w);
                 if (n) {
                     const s = document.createElement('span');
-                    alert(type)
                     let code = n.code.replace(",", ",+").replace('+', (!type || type == "0") ? "+" : "");
                     renderer.renderText(code, s, +type);
                     out.appendChild(s);
