@@ -191,115 +191,125 @@
     </script>
 
     <script>
+        // --- EXPORT LOGIC ---
         function getFilename(ext) {
-    const text = $('nameInput').value.trim().replace(/\s+/g, '_') || 'qatt-logo';
-    const theme = document.body.dataset.theme || 'default';
-    return `${text}_${theme}.${ext}`;
-}
+            const text = $('nameInput').value.trim().replace(/\s+/g, '_') || 'qatt-logo';
+            const theme = document.body.dataset.theme || 'default';
+            return `${text}_${theme}.${ext}`;
+        }
 
-async function exportPNG() {
-    const btn = $('btnPNG');
-    btn.disabled = true; btn.textContent = 'Exporting…';
-    try {
-        // 1) SVG mit aufgelösten <use> Elementen bauen
-        const resolvedSVG = buildResolvedSVG();
+        function buildResolvedSVG() {
+            const card = $('logoCard');
+            const display = $('qattDisplay');
+            const scale = 3;
+            const W = card.offsetWidth * scale;
+            const H = card.offsetHeight * scale;
 
-        // 2) Als Blob → Image → Canvas
-        const card = $('logoCard');
-        const scale = 3;
-        const W = card.offsetWidth * scale;
-        const H = card.offsetHeight * scale;
+            const rootStyle = getComputedStyle(document.documentElement);
+            const cardStyle = getComputedStyle(card);
+            const displayStyle = getComputedStyle(display);
 
-        const canvas = document.createElement('canvas');
-        canvas.width = W; canvas.height = H;
-        const ctx = canvas.getContext('2d');
+            // Alle relevanten CSS-Variablen erfassen
+            const vars = {
+                '--logo-size': rootStyle.getPropertyValue('--logo-size'),
+                '--logo-thickness': rootStyle.getPropertyValue('--logo-thickness'),
+                '--logo-color': cardStyle.getPropertyValue('--logo-color'),
+                '--logo-glow': cardStyle.getPropertyValue('--logo-glow'),
+                '--logo-filter': cardStyle.getPropertyValue('--logo-filter'),
+                '--logo-hue': rootStyle.getPropertyValue('--logo-hue'),
+                '--logo-contrast': rootStyle.getPropertyValue('--logo-contrast'),
+                '--card-bg': cardStyle.getPropertyValue('--card-bg')
+            };
 
-        // Hintergrund
-        ctx.fillStyle = getComputedStyle(card).backgroundColor || '#030712';
-        ctx.fillRect(0, 0, W, H);
+            // SVG-Filter einbetten
+            const filterDefs = document.querySelector('.svg-filters defs').innerHTML;
+            const injectedDefs = document.querySelector('#svg defs') ? document.querySelector('#svg defs').innerHTML : '';
 
-        const blob = new Blob([resolvedSVG], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => { ctx.drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url); resolve(); };
-            img.onerror = (e) => { 
-    console.error('SVG render error:', e);
-    alert('SVG content:'+resolvedSVG); // zeigt das erzeugte SVG
-    reject(new Error('SVG konnte nicht als Bild geladen werden')); 
-};
-            img.src = url;
-        });
+            // Glyphen extrahieren
+            const cardRect = card.getBoundingClientRect();
+            let glyphs = '';
+            display.querySelectorAll('nobr').forEach(nobr => {
+                const svgEl = nobr.querySelector('svg');
+                if (!svgEl) return;
+                const rect = nobr.getBoundingClientRect();
+                const x = (rect.left - cardRect.left) * scale;
+                const y = (rect.top - cardRect.top) * scale;
+                const w = rect.width * scale;
+                const h = rect.height * scale;
+                const vb = svgEl.getAttribute('viewBox') || `0 0 ${svgEl.clientWidth} ${svgEl.clientHeight}`;
 
-        const link = document.createElement('a');
-        link.download = getFilename('png');
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    } catch(e) { 
-    alert('Export failed: ' + (e.message || JSON.stringify(e))); 
-    console.error('Full error:', e); 
-    }
-    finally { btn.disabled = false; btn.innerHTML = '⬇ Export PNG'; }
-}
+                // Jeder Glyphe ihre Styles direkt mitgeben
+                glyphs += `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}" overflow="visible">
+                    <g fill="transparent" stroke="${vars['--logo-color']}" stroke-width="${vars['--logo-thickness']}" 
+                       style="filter: ${vars['--logo-glow'] !== 'transparent' ? 'drop-shadow(0 0 15px ' + vars['--logo-glow'] + ')' : 'none'};">
+                        ${svgEl.innerHTML}
+                    </g>
+                </svg>`;
+            });
 
-function buildResolvedSVG() {
-    const card = $('logoCard');
-    const scale = 3;
-    const W = card.offsetWidth * scale;
-    const H = card.offsetHeight * scale;
-
-    // CSS-Variablen des aktiven Themes auslesen
-    const cardStyle = getComputedStyle(card);
-    const logoColor   = cardStyle.getPropertyValue('--logo-color').trim() || '#fff';
-    const logoGlow    = cardStyle.getPropertyValue('--logo-glow').trim();
-    const cardBg      = cardStyle.getPropertyValue('--card-bg').trim() || '#030712';
-    const logoFilter  = cardStyle.getPropertyValue('--logo-filter').trim() || 'none';
-    const thickness   = getComputedStyle(document.documentElement).getPropertyValue('--logo-thickness').trim() || '10px';
-    const hue         = getComputedStyle(document.documentElement).getPropertyValue('--logo-hue').trim() || '0deg';
-    const contrast    = getComputedStyle(document.documentElement).getPropertyValue('--logo-contrast').trim() || '1';
-
-    // Filter-Definitionen aus .svg-filters
-    const filterDefs = document.querySelector('.svg-filters defs');
-    const filterDefsHTML = filterDefs ? filterDefs.innerHTML : '';
-
-    // Path-Definitionen aus renderer.js injiziertem SVG
-    const injectedDefs = document.querySelector('#svg defs');
-    const injectedDefsHTML = injectedDefs ? injectedDefs.innerHTML : '';
-
-    // Glyphen mit Position aus DOM auslesen
-    const cardRect = card.getBoundingClientRect();
-    let glyphs = '';
-
-    document.querySelectorAll('#qattDisplay nobr').forEach(nobr => {
-        const svgEl = nobr.querySelector('svg');
-        if (!svgEl) return;
-
-        const rect = nobr.getBoundingClientRect();
-        const x = (rect.left - cardRect.left) * scale;
-        const y = (rect.top  - cardRect.top)  * scale;
-        const w = rect.width  * scale;
-        const h = rect.height * scale;
-        const vb = svgEl.getAttribute('viewBox') || `0 0 ${svgEl.clientWidth} ${svgEl.clientHeight}`;
-
-        glyphs += `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}"
-                       overflow="visible"
-                       fill="transparent" stroke="${logoColor}" stroke-width="${thickness}"
-                       style="filter: ${logoFilter}; drop-shadow(0 0 15px ${logoGlow})">
-                       ${svgEl.innerHTML}
-                   </svg>`;
-    });
-
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"
-                 style="filter: hue-rotate(${hue}) contrast(${contrast})">
+            // Das Finale SVG-String
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
                 <defs>
-                    <style>svg, g { overflow: visible; }</style>
-                    ${filterDefsHTML}
-                    ${injectedDefsHTML}
+                    ${filterDefs}
+                    ${injectedDefs}
                 </defs>
-                <rect width="${W}" height="${H}" fill="${cardBg}"/>
-                ${glyphs}
+                <rect width="100%" height="100%" fill="${vars['--card-bg'].includes('gradient') ? '#030712' : vars['--card-bg']}"/>
+                <g style="filter: hue-rotate(${vars['--logo-hue']}) contrast(${vars['--logo-contrast']});">
+                    <g style="filter: ${vars['--logo-filter']};">
+                        ${glyphs}
+                    </g>
+                </g>
+                <text x="${W/2}" y="${H - 25}" font-family="sans-serif" font-size="${12*scale}" fill="${vars['--logo-color']}" opacity="0.4" text-anchor="middle">
+                    ${$('originalText').innerText}
+                </text>
             </svg>`;
-}
+        }
+
+        async function exportPNG() {
+            const btn = $('btnPNG');
+            btn.disabled = true; btn.innerText = 'Exporting...';
+            try {
+                const svgData = buildResolvedSVG();
+                const card = $('logoCard');
+                const scale = 3;
+                const W = card.offsetWidth * scale;
+                const H = card.offsetHeight * scale;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = W; canvas.height = H;
+                const ctx = canvas.getContext('2d');
+
+                const img = new Image();
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+
+                await new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0);
+                        const link = document.createElement('a');
+                        link.download = getFilename('png');
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        resolve();
+                    };
+                    img.onerror = reject;
+                    img.src = url;
+                });
+            } catch(e) { console.error(e); }
+            finally { btn.disabled = false; btn.innerText = '⬇ Export PNG'; }
+        }
+
+        function exportSVG() {
+            const svgContent = buildResolvedSVG();
+            const blob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = getFilename('svg');
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
