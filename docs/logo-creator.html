@@ -225,7 +225,7 @@ async function exportPNG() {
             img.onload = () => { ctx.drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url); resolve(); };
             img.onerror = (e) => { 
     console.error('SVG render error:', e);
-    aler('SVG content:'+resolvedSVG); // zeigt das erzeugte SVG
+    alert('SVG content:'+resolvedSVG); // zeigt das erzeugte SVG
     reject(new Error('SVG konnte nicht als Bild geladen werden')); 
 };
             img.src = url;
