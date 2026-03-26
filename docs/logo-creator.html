@@ -223,7 +223,11 @@ async function exportPNG() {
         await new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => { ctx.drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url); resolve(); };
-            img.onerror = reject;
+            img.onerror = (e) => { 
+    console.error('SVG render error:', e);
+    aler('SVG content:'+resolvedSVG); // zeigt das erzeugte SVG
+    reject(new Error('SVG konnte nicht als Bild geladen werden')); 
+};
             img.src = url;
         });
 
@@ -231,7 +235,10 @@ async function exportPNG() {
         link.download = getFilename('png');
         link.href = canvas.toDataURL('image/png');
         link.click();
-    } catch(e) { alert('Export failed: ' + e.message); console.error(e); }
+    } catch(e) { 
+    alert('Export failed: ' + (e.message || JSON.stringify(e))); 
+    console.error('Full error:', e); 
+    }
     finally { btn.disabled = false; btn.innerHTML = '⬇ Export PNG'; }
 }
 
