@@ -248,20 +248,25 @@ function buildResolvedSVG() {
     const W = card.offsetWidth * scale;
     const H = card.offsetHeight * scale;
 
-    // CSS-Variablen
-    const logoColor   = getComputedStyle(card).getPropertyValue('--logo-color').trim() || '#fff';
+    // CSS-Variablen des aktiven Themes auslesen
+    const cardStyle = getComputedStyle(card);
+    const logoColor   = cardStyle.getPropertyValue('--logo-color').trim() || '#fff';
+    const logoGlow    = cardStyle.getPropertyValue('--logo-glow').trim();
+    const cardBg      = cardStyle.getPropertyValue('--card-bg').trim() || '#030712';
+    const logoFilter  = cardStyle.getPropertyValue('--logo-filter').trim() || 'none';
     const thickness   = getComputedStyle(document.documentElement).getPropertyValue('--logo-thickness').trim() || '10px';
     const hue         = getComputedStyle(document.documentElement).getPropertyValue('--logo-hue').trim() || '0deg';
     const contrast    = getComputedStyle(document.documentElement).getPropertyValue('--logo-contrast').trim() || '1';
 
+    // Filter-Definitionen aus .svg-filters
+    const filterDefs = document.querySelector('.svg-filters defs');
+    const filterDefsHTML = filterDefs ? filterDefs.innerHTML : '';
 
+    // Path-Definitionen aus renderer.js injiziertem SVG
+    const injectedDefs = document.querySelector('#svg defs');
+    const injectedDefsHTML = injectedDefs ? injectedDefs.innerHTML : '';
 
-const injectedDefs = document.querySelector('#svg defs');
-const defsHTML = injectedDefs ? injectedDefs.innerHTML : '';
-
-
-    
-    // Jeden <nobr> bzw. <span> mit SVG positionieren
+    // Glyphen mit Position aus DOM auslesen
     const cardRect = card.getBoundingClientRect();
     let glyphs = '';
 
@@ -276,19 +281,25 @@ const defsHTML = injectedDefs ? injectedDefs.innerHTML : '';
         const h = rect.height * scale;
         const vb = svgEl.getAttribute('viewBox') || `0 0 ${svgEl.clientWidth} ${svgEl.clientHeight}`;
 
-        // <use> Elemente direkt übernehmen – Symbole sind jetzt inline in defs
         glyphs += `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}"
-                       fill="transparent" stroke="${logoColor}" stroke-width="${thickness}">
+                       overflow="visible"
+                       fill="transparent" stroke="${logoColor}" stroke-width="${thickness}"
+                       style="filter: ${logoFilter}; drop-shadow(0 0 15px ${logoGlow})">
                        ${svgEl.innerHTML}
                    </svg>`;
     });
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"
                  style="filter: hue-rotate(${hue}) contrast(${contrast})">
-                <defs>${defsHTML}</defs>
+                <defs>
+                    <style>svg, g { overflow: visible; }</style>
+                    ${filterDefsHTML}
+                    ${injectedDefsHTML}
+                </defs>
+                <rect width="${W}" height="${H}" fill="${cardBg}"/>
                 ${glyphs}
             </svg>`;
-        }
+}
     </script>
 </body>
 </html>
