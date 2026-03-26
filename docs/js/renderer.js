@@ -268,7 +268,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-x-small" d="M11 18 h32 m-4 0 l-10 52 M10 74 h36"/>
     	
     	<!--consonants-->
-	<path id="_-medial" d="M12 22 m0-10 v20"/>
+	<path id="_-medial" d="M10 22 m0-10 v20"/>
 	<path id="_-large" d="M12 22 h44 M10 70 l48 -4"/>
 	<path id="_-small" d="M11 22 h38 M10 70 l40 -3"/>
 	<path id="_-xsmall" d="M11 22 h30 M10 70 l34 -3"/>
@@ -360,16 +360,16 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 	<path id="r-xsmall" d="M11 18 v52 M11 18 l33 0 v56"/>
 	
 	<path id="s-medial" d="M12 15 m-10 0 h20"/>
-	<path id="s-large" d="M12 18 v47 M10 70 l45 -7 M56 18 v52"/>
-	<path id="s-small" d="M11 18 v47 M10 70 l37 -5 M48 18 v52"/>
-	<path id="s-xsmall" d="M11 18 v47 M10 70 l33 -5 M44 18 v52"/>
+	<path id="s-large" d="M12 18 v47 M10 70 l45 -9 M56 18 v52"/>
+	<path id="s-small" d="M11 18 v47 M10 70 l37 -7 M48 18 v52"/>
+	<path id="s-xsmall" d="M11 18 v47 M10 70 l33 -7 M44 18 v52"/>
 	
 	<path id="t-medial" d="M10 46 m0-10 l-2 20"/>
 	<path id="t-large" d="M42 16 v60 M10 46 l30 -3"/>
 	<path id="t-small" d="M40 16 v60 M10 46 l28 -3"/>
 	<path id="t-xsmall" d="M38 16 v60 M10 46 l26 -3"/>
 	
-	<path id="th-medial" d="M15 16 m0 -10 v20"/>
+	<path id="th-medial" d="M13 16 m0 -10 v20"/>
 	<path id="th-xsmall-medial" d="M10 16 m0 -10 v20"/>
 	<path id="th-large" d="M15 16 h33 c0 0 0 30 -30 64 M15 46 h44"/>
 	<path id="th-small" d="M14 16 h30 c0 0 0 30 -30 64 M14 46 h40"/>
@@ -380,15 +380,17 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 	<path id="tr-small" d="M34 20 v46 c0 0 0 10 -14 7 M10 18 l44 0"/>
 	<path id="tr-xsmall" d="M30 20 v46 c0 0 0 10 -14 7 M10 18 l36 0"/>
 	
-	<path id="x-medial" d="M12 19 m0 -10 v20"/>
+	<path id="x-medial" d="M11 19 m0 -10 v20"/>
 	<path id="x-large" d="M12 18 h40 M52 18 l-3 51 M10 70 h48"/>
 	<path id="x-small" d="M11 20 h38 M49 20 l-2 45 M10 70 h44"/>
 	<path id="x-xsmall" d="M11 20 h30 M41 20 l-2 45 M10 70 h34"/>
 	
-	<path id="v-medial" d="M35 10 m-10 0 h20"/>
+	<path id="v-medial" d="M35 9 m-10 0 h20"/>
 	<path id="v-large" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
 	<path id="v-small" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
 	<path id="v-xsmall" d="M35 10 c0 0 -7 40 -20 63 M10 77 l36 -10 M43 53 l8 20"/>
+
+
 	
     	<path id="v2-U" d="M70 22 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
     	<path id="v2-I" d="M52 15 l-8 68 M25 35 l50 8 M22 58 l50 8"/>
