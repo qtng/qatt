@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
     <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --logo-hue: 0deg; --logo-contrast: 1; --logo-size: 6rem; --logo-thickness: 10px; }
         
@@ -56,6 +57,14 @@
         .slider-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; display: flex; justify-content: space-between; margin-bottom: .2rem; }
         #originalText { margin-top: 1.5rem; font-style: italic; color: rgba(255,255,255,0.4); z-index: 1; text-transform: uppercase; letter-spacing: 1px; }
         .svg-filters { position: absolute; width: 0; height: 0; visibility: hidden; }
+    
+    .export-btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; }
+.btn-export { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; cursor: pointer; border: none; transition: all .2s; }
+.btn-export-png { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+.btn-export-png:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.6); }
+.btn-export-svg { background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15) !important; }
+.btn-export-svg:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.btn-export:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     </style>
 </head>
 <body data-theme="default">
@@ -108,6 +117,16 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="showOriginal" checked>
                         <label class="form-check-label small" for="showOriginal">Show original text</label>
+                    </div>
+                    <div class="export-btn-group">
+    <button class="btn-export btn-export-png" onclick="exportPNG()" id="btnPNG">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+        Export PNG
+    </button>
+    <button class="btn-export btn-export-svg" onclick="exportSVG()" id="btnSVG">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+        Export SVG
+    </button>
                     </div>
                 </div>
             </div>
@@ -169,6 +188,44 @@
             });
         }
         window.onload = init;
+    </script>
+
+    <script>
+        function getFilename(ext) {
+    const text = $('nameInput').value.trim().replace(/\s+/g, '_') || 'qatt-logo';
+    const theme = document.body.dataset.theme || 'default';
+    return `${text}_${theme}.${ext}`;
+}
+
+async function exportPNG() {
+    const btn = $('btnPNG');
+    btn.disabled = true; btn.textContent = 'Exporting…';
+    try {
+        const card = $('logoCard');
+        const canvas = await html2canvas(card, { scale: 3, useCORS: true, backgroundColor: null, logging: false });
+        const link = document.createElement('a');
+        link.download = getFilename('png');
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch(e) { alert('Export failed: ' + e.message); }
+    finally { btn.disabled = false; btn.innerHTML = '⬇ Export PNG'; }
+}
+
+function exportSVG() {
+    const svgs = $('qattDisplay').querySelectorAll('svg');
+    if (!svgs.length) { alert('Please enter some text first.'); return; }
+    const color = getComputedStyle($('logoCard')).getPropertyValue('--logo-color').trim() || '#fff';
+    const thickness = getComputedStyle(document.documentElement).getPropertyValue('--logo-thickness').trim();
+    let combined = `<svg xmlns="http://www.w3.org/2000/svg" style="color:${color};stroke:currentColor;stroke-width:${thickness};fill:transparent;">`;
+    svgs.forEach(s => { combined += s.innerHTML; });
+    combined += '</svg>';
+    const blob = new Blob([combined], { type: 'image/svg+xml' });
+    const link = document.createElement('a');
+    link.download = getFilename('svg');
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+        }
     </script>
 </body>
 </html>
