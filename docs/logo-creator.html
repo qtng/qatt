@@ -254,11 +254,13 @@ function buildResolvedSVG() {
     const hue         = getComputedStyle(document.documentElement).getPropertyValue('--logo-hue').trim() || '0deg';
     const contrast    = getComputedStyle(document.documentElement).getPropertyValue('--logo-contrast').trim() || '1';
 
-    // Alle <symbol> Definitionen aus dem injizierten renderer-SVG holen
-    const allSymbols = document.querySelectorAll('symbol');
-    let defsHTML = '';
-    allSymbols.forEach(sym => { defsHTML += sym.outerHTML; });
 
+
+const injectedDefs = document.querySelector('#svg defs');
+const defsHTML = injectedDefs ? injectedDefs.innerHTML : '';
+
+
+    
     // Jeden <nobr> bzw. <span> mit SVG positionieren
     const cardRect = card.getBoundingClientRect();
     let glyphs = '';
