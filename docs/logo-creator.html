@@ -255,7 +255,7 @@ function buildResolvedSVG() {
     const contrast    = getComputedStyle(document.documentElement).getPropertyValue('--logo-contrast').trim() || '1';
 
     // Alle <symbol> Definitionen aus dem injizierten renderer-SVG holen
-    const allSymbols = document.querySelectorAll('svg defs symbol');
+    const allSymbols = document.querySelectorAll('symbol');
     let defsHTML = '';
     allSymbols.forEach(sym => { defsHTML += sym.outerHTML; });
 
