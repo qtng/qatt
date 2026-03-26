@@ -191,7 +191,7 @@
     </script>
 
     <script>
-        // --- EXPORT LOGIC ---
+                // --- EXPORT LOGIC ---
         function getFilename(ext) {
             const text = $('nameInput').value.trim().replace(/\s+/g, '_') || 'qatt-logo';
             const theme = document.body.dataset.theme || 'default';
@@ -218,27 +218,30 @@
                 '--logo-filter': cardStyle.getPropertyValue('--logo-filter'),
                 '--logo-hue': rootStyle.getPropertyValue('--logo-hue'),
                 '--logo-contrast': rootStyle.getPropertyValue('--logo-contrast'),
-                '--card-bg': cardStyle.getPropertyValue('--card-bg')
+                // Hintergrund-Eigenschaften vollständig erfassen
+                'background': cardStyle.background,
+                'background-image': cardStyle.backgroundImage,
+                'background-size': cardStyle.backgroundSize,
+                'background-position': cardStyle.backgroundPosition,
+                'background-repeat': cardStyle.backgroundRepeat,
+                'background-color': cardStyle.backgroundColor
             };
 
-            // SVG-Filter einbetten
             const filterDefs = document.querySelector('.svg-filters defs').innerHTML;
             const injectedDefs = document.querySelector('#svg defs') ? document.querySelector('#svg defs').innerHTML : '';
 
-            // Glyphen extrahieren
             const cardRect = card.getBoundingClientRect();
             let glyphs = '';
-            display.querySelectorAll('nobr').forEach(nobr => {
-                const svgEl = nobr.querySelector('svg');
+            display.querySelectorAll('span').forEach(span => {
+                const svgEl = span.querySelector('svg');
                 if (!svgEl) return;
-                const rect = nobr.getBoundingClientRect();
+                const rect = span.getBoundingClientRect();
                 const x = (rect.left - cardRect.left) * scale;
                 const y = (rect.top - cardRect.top) * scale;
                 const w = rect.width * scale;
                 const h = rect.height * scale;
                 const vb = svgEl.getAttribute('viewBox') || `0 0 ${svgEl.clientWidth} ${svgEl.clientHeight}`;
 
-                // Jeder Glyphe ihre Styles direkt mitgeben
                 glyphs += `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}" overflow="visible">
                     <g fill="transparent" stroke="${vars['--logo-color']}" stroke-width="${vars['--logo-thickness']}" 
                        style="filter: ${vars['--logo-glow'] !== 'transparent' ? 'drop-shadow(0 0 15px ' + vars['--logo-glow'] + ')' : 'none'};">
@@ -247,13 +250,24 @@
                 </svg>`;
             });
 
-            // Das Finale SVG-String
             return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
                 <defs>
                     ${filterDefs}
                     ${injectedDefs}
                 </defs>
-                <rect width="100%" height="100%" fill="${vars['--card-bg'].includes('gradient') ? '#030712' : vars['--card-bg']}"/>
+                <!-- Hintergrund via foreignObject für komplexe Gradients/Patterns -->
+                <foreignObject width="100%" height="100%">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="
+                        width: 100%; height: 100%; 
+                        background: ${vars['background']};
+                        background-image: ${vars['background-image']};
+                        background-size: ${vars['background-size']};
+                        background-position: ${vars['background-position']};
+                        background-repeat: ${vars['background-repeat']};
+                        background-color: ${vars['background-color']};
+                    "></div>
+                </foreignObject>
+                <!-- Content Layer -->
                 <g style="filter: hue-rotate(${vars['--logo-hue']}) contrast(${vars['--logo-contrast']});">
                     <g style="filter: ${vars['--logo-filter']};">
                         ${glyphs}
@@ -310,6 +324,7 @@
             link.click();
             URL.revokeObjectURL(url);
         }
+        
     </script>
 </body>
 </html>
