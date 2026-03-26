@@ -113,12 +113,12 @@
                     <div class="col-6"><label class="slider-label"><span>Contrast</span><span id="contrastVal">100%</span></label><input type="range" class="form-range" id="contrastSlider" min="0.5" max="2" step="0.1" value="1"></div>
                 </div>
                 <div class="mb-4"><label class="form-label">Writing Style</label><select id="typeSelect" class="form-select"><option value="0">Chính thể - Quốc âm tân tự</option><option value="0.0">Chính thể - Tiểu tân tự</option><option value="1">Giản thể</option><option value="2">Giản thể +</option></select></div>
-                <div class="d-flex justify-content-center">
+                <div class="d-flex flex-column align-items-center justify-content-center">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="showOriginal" checked>
                         <label class="form-check-label small" for="showOriginal">Show original text</label>
                     </div>
-                    <div class="export-btn-group">
+                    <div class="mt-3 export-btn-group">
     <button class="btn-export btn-export-png" onclick="exportPNG()" id="btnPNG">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
         Export PNG
@@ -201,30 +201,84 @@ async function exportPNG() {
     const btn = $('btnPNG');
     btn.disabled = true; btn.textContent = 'Exporting…';
     try {
+        // 1) SVG mit aufgelösten <use> Elementen bauen
+        const resolvedSVG = buildResolvedSVG();
+
+        // 2) Als Blob → Image → Canvas
         const card = $('logoCard');
-        const canvas = await html2canvas(card, { scale: 3, useCORS: true, backgroundColor: null, logging: false });
+        const scale = 3;
+        const W = card.offsetWidth * scale;
+        const H = card.offsetHeight * scale;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        // Hintergrund
+        ctx.fillStyle = getComputedStyle(card).backgroundColor || '#030712';
+        ctx.fillRect(0, 0, W, H);
+
+        const blob = new Blob([resolvedSVG], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => { ctx.drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url); resolve(); };
+            img.onerror = reject;
+            img.src = url;
+        });
+
         const link = document.createElement('a');
         link.download = getFilename('png');
         link.href = canvas.toDataURL('image/png');
         link.click();
-    } catch(e) { alert('Export failed: ' + e.message); }
+    } catch(e) { alert('Export failed: ' + e.message); console.error(e); }
     finally { btn.disabled = false; btn.innerHTML = '⬇ Export PNG'; }
 }
 
-function exportSVG() {
-    const svgs = $('qattDisplay').querySelectorAll('svg');
-    if (!svgs.length) { alert('Please enter some text first.'); return; }
-    const color = getComputedStyle($('logoCard')).getPropertyValue('--logo-color').trim() || '#fff';
-    const thickness = getComputedStyle(document.documentElement).getPropertyValue('--logo-thickness').trim();
-    let combined = `<svg xmlns="http://www.w3.org/2000/svg" style="color:${color};stroke:currentColor;stroke-width:${thickness};fill:transparent;">`;
-    svgs.forEach(s => { combined += s.innerHTML; });
-    combined += '</svg>';
-    const blob = new Blob([combined], { type: 'image/svg+xml' });
-    const link = document.createElement('a');
-    link.download = getFilename('svg');
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    URL.revokeObjectURL(link.href);
+function buildResolvedSVG() {
+    const card = $('logoCard');
+    const scale = 3;
+    const W = card.offsetWidth * scale;
+    const H = card.offsetHeight * scale;
+
+    // CSS-Variablen
+    const logoColor   = getComputedStyle(card).getPropertyValue('--logo-color').trim() || '#fff';
+    const thickness   = getComputedStyle(document.documentElement).getPropertyValue('--logo-thickness').trim() || '10px';
+    const hue         = getComputedStyle(document.documentElement).getPropertyValue('--logo-hue').trim() || '0deg';
+    const contrast    = getComputedStyle(document.documentElement).getPropertyValue('--logo-contrast').trim() || '1';
+
+    // Alle <symbol> Definitionen aus dem injizierten renderer-SVG holen
+    const allSymbols = document.querySelectorAll('svg defs symbol');
+    let defsHTML = '';
+    allSymbols.forEach(sym => { defsHTML += sym.outerHTML; });
+
+    // Jeden <nobr> bzw. <span> mit SVG positionieren
+    const cardRect = card.getBoundingClientRect();
+    let glyphs = '';
+
+    document.querySelectorAll('#qattDisplay nobr').forEach(nobr => {
+        const svgEl = nobr.querySelector('svg');
+        if (!svgEl) return;
+
+        const rect = nobr.getBoundingClientRect();
+        const x = (rect.left - cardRect.left) * scale;
+        const y = (rect.top  - cardRect.top)  * scale;
+        const w = rect.width  * scale;
+        const h = rect.height * scale;
+        const vb = svgEl.getAttribute('viewBox') || `0 0 ${svgEl.clientWidth} ${svgEl.clientHeight}`;
+
+        // <use> Elemente direkt übernehmen – Symbole sind jetzt inline in defs
+        glyphs += `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}"
+                       fill="transparent" stroke="${logoColor}" stroke-width="${thickness}">
+                       ${svgEl.innerHTML}
+                   </svg>`;
+    });
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"
+                 style="filter: hue-rotate(${hue}) contrast(${contrast})">
+                <defs>${defsHTML}</defs>
+                ${glyphs}
+            </svg>`;
         }
     </script>
 </body>
