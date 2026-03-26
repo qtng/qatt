@@ -1,5 +1,4 @@
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
-    	xmlns:xlink="http://www.w3.org/1999/xlink"
     	style="height:4800px;width:2540px;"
     	id="svg">
     	<defs>
@@ -611,7 +610,6 @@ class SvgGlyphRenderer {
     this.container = options.container || document.createElement("div");
     this.charFontsize = options.charFontsize || "105px";
     this.svgns = "http://www.w3.org/2000/svg";
-    this.xlinkns = "http://www.w3.org/1999/xlink";
     
     this.prefixes = { onset: "v2-", vowel: "v2-", coda: "v2-", qattTones: true };
     
@@ -661,7 +659,7 @@ class SvgGlyphRenderer {
 
   useG(g, id, cls, _tone) {
     const u = document.createElementNS(this.svgns, "use");
-    u.setAttributeNS(this.xlinkns, 'href', '#' + id);
+    u.setAttribute('href', '#' + id);
     if (cls) u.setAttribute('class', cls);
     g.appendChild(u);
     if (_tone === 3 || _tone === 4) {
