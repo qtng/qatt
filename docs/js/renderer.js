@@ -12,21 +12,21 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="w-e"   d="M54 36 h29 M60 18 v40 M75 13 v72 c0 0 0 5 5 5 c12 0 12 0 12 -5"/>
     	<path id="w-e2"  d="M54 30 h32 M60 15 v35 M75 13 v36 h15 c0 5 0 22 -22 40"/>
     	
-    	<path id="a" d="M85 10 v70 c0 10 0 10 -18 7"/>
-    	<path id="a2" d="M67 30 h22 v30 c0 5 0 15 -5 30"/>
-    	<path id="aw" d="M70 17 v45 M90 10 v40 c0 5 0 20 -5 40"/>
-    	<path id="aw2" d="M65 15 h25 m-3 2 c0 0 -4 16 -22 32 M80 40 v46"/>
-    	<path id="e" d="M60 10 h30 M75 10 v75"/>
-    	<path id="e2" d="M60 15 h32 m-4 2 c0 0 -10 13 -30 25 M69 42 v41 M88 40 v42"/>
-    	<path id="i" d="M82 10 c-2 20 -5 50 -24 80 M76 52 l18 36"/>
-    	<path id="i2" d="M58 38 h27 M70 13 v72 m1 -4 l22 -5"/>
-    	<path id="o" d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 c6 8 14 18 28 40"/>
-    	<path id="o2" d="M56 30 h26 M72 10 l-5 45 l20 0 v1 c0 0 -6 24 -15 35"/>
-    	<path id="u" d="M88 15 c-4 22 -8 45 -28 70 M64 28 c6 8 14 24 28 50"/>
-    	<path id="u2" d="M72 10 c0 0 -5 40 -13 66 M54 80 l33 -7 M82 58 l8 20"/>
-    	<path id="y" d="M56 15 h30 v45 l-10 -1 M65 15 v72"/>
-    	<path id="y2" d="M68 13 v72 m1 -4 l24 -5"/>		
-    	
+    	<path id="a" d="M68 13 v72 m1 -4 l24 -5"/>
+	<path id="a2" d="M67 30 h22 v30 c0 5 0 15 -5 30"/>
+	<path id="aw" d="M70 17 v45 M90 10 v40 c0 5 0 20 -5 40"/>
+	<path id="aw2" d="M65 15 h25 m-3 2 c0 0 -4 16 -22 32 M80 40 v46"/>
+	<path id="e" d="M60 10 h30 M75 10 v75"/>
+	<path id="e2" d="M60 15 h32 m-4 2 c0 0 -10 13 -30 25 M69 42 v41 M88 40 v42"/>
+	<path id="i" d="M82 10 c-2 20 -5 50 -24 80 M76 52 l18 36"/>
+	<path id="i2" d="M58 38 h27 M70 13 v72 m1 -4 l22 -5"/>
+	<path id="o" d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 c6 8 14 18 28 40"/>
+	<path id="o2" d="M56 30 h26 M72 10 l-5 45 l20 0 v1 c0 0 -6 24 -15 35"/>
+	<path id="u2" d="M56 40 l30-14 v45 l-8 -1 M68 15 v72"/>
+	<path id="u" d="M72 10 c0 0 -5 40 -13 66 M54 80 l33 -7 M82 58 l8 20"/>
+	<path 乂 id="uxx" d="M88 15 c-4 22 -8 45 -28 70 M64 28 c6 8 14 24 28 50"/>
+	<path id="y" d="M56 15 h30 v45 l-10 -1 M65 15 v72"/>
+	<path id="y2" d="M66 20 v40 M82 13 v72 h1 l10 -4"/>		
     	
     	<path id="v2-a" data-onsetsize="xsmall" d="M60 10 v80 M50 90 h20 M65 35 h30 m-30 25 h30"/>
     	<path id="v2-a2" data-onsetsize="xsmall" d="M68 20 h25 m-8 0 v40 c0 5 0 15 -5 30 M80 44 h-18 m0 22 h18"/>
