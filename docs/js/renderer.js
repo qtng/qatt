@@ -664,10 +664,10 @@ class SvgGlyphRenderer {
     u.setAttribute('href', '#' + id);
     if (cls) u.setAttribute('class', cls);
     g.appendChild(u);
-    if (_tone === 3 || _tone === 4) {
+    //if (_tone === 3 || _tone === 4) {
       u.setAttribute('vector-effect', 'non-scaling-stroke');
       u.style["vector-effect"] = "non-scaling-stroke";
-    }
+    //}
     return g;
   }
 
