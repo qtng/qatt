@@ -1,4 +1,4 @@
-window.addEventHandler("load",
+window.addEventListener("load",
         function() {
             const navConfig = {
                 title: "QATT",
