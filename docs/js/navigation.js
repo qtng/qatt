@@ -57,10 +57,5 @@ window.addEventHandler("load",
                 document.body.style.paddingTop = "70px"; 
                 document.body.prepend(nav);
             }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', injectNav);
-            } else {
-                injectNav();
-            }
+            injectNav();
         });
