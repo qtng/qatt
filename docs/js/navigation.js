@@ -9,9 +9,6 @@
             };
 
             function injectNav() {
-                const currentPath = window.location.pathname;
-                document.getElementById('path-display').textContent = currentPath;
-
                 const nav = document.createElement('nav');
                 nav.className = "navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm";
                 
