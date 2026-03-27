@@ -766,6 +766,7 @@ class SvgGlyphRenderer {
     svg.style.aspectRatio = "13 / 15";
     svg.style.verticalAlign = "bottom";
     svg.style.overflow = "visible";
+	svg.setAttribute("preserveAspectRatio", "none");
 
     if (g) {
 		const nobr = root.tagName == "NOBR" ? root : document.createElement("nobr");
