@@ -1,4 +1,5 @@
-(function() {
+window.addEventHandler("load",
+        function() {
             const navConfig = {
                 title: "QATT",
                 links: [
@@ -62,4 +63,4 @@
             } else {
                 injectNav();
             }
-        })();
+        });
