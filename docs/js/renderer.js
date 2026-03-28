@@ -449,7 +449,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 		<path id="qt7" d="M98 90 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
 		
     	<path id="_t1" d="M16 12 h60 l-3 15"/>
-    	<path id="_t2" d="M20 10 v10 h50"/>
+    	<path id="_t2" d="M20 15 h50"/>
     	<path id="_t3" d="M30 10 l-15 23 M28 18 h44"/>
     	<path id="_t4" d="M30 8 l-15 25 M28 14 h44 M20 30 h52"/>
     	<path id="_t5" d="M26 12 h42 v16 M18 29 h58"/>
