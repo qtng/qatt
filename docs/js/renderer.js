@@ -22,8 +22,8 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 	<path id="i2" d="M58 38 h27 M70 13 v72 l1 -4 l22 -5"/>
 	<path id="o" d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 c6 8 14 18 28 40"/>
 	<path id="o2" d="M56 30 h26 M72 10 l-5 45 l20 0 v1 c0 0 -6 24 -15 35"/>
-	<path id="u2" d="M56 40 l30-14 v45 l-8 -1 M68 15 v72"/>
-	<path id="u" d="M72 10 c0 0 -5 40 -13 66 M54 80 l33 -7 M82 58 l8 20"/>
+	<path id="u" d="M56 40 l30-14 v45 l-8 -1 M68 15 v72"/>
+	<path id="u2" d="M72 10 c0 0 -5 40 -13 66 M54 80 l33 -7 M82 58 l8 20"/>
 	<path 乂 id="uxx" d="M88 15 c-4 22 -8 45 -28 70 M64 28 c6 8 14 24 28 50"/>
 	<path id="y" d="M56 15 h30 v45 l-10 -1 M65 15 v72"/>
 	<path id="y2" d="M66 20 v40 M82 13 v72 h1 l10 -4"/>		
