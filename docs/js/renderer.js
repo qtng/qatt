@@ -606,7 +606,7 @@ const defaultQattEncoding = {
 
 class SvgGlyphRenderer {
   constructor(options = {}) {
-	const initialType = options.type != null ? options.type : window.location.hash.replace("#simplified", "");
+	const initialType = options.type != null ? options.type : localStorage.qattType || "0";
 	this.qattEncoding = options.qattEncoding || defaultQattEncoding;
     this.defs = options.defs || defaultSvgDefs;
     this.container = options.container || document.createElement("div");
