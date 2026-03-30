@@ -1,23 +1,123 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>QATT App - Spaced Repetition</title>
+  <title>QATT App</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
+  <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
   <style>
-    .qatt-container { max-width: 500px; margin: 2rem auto; }
-    .card { position: relative; border-radius: 15px; overflow: hidden; }
-    .fade-in { animation: fadeIn 0.4s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .symbol-card { background: #f8f9fa; min-height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-    .symbol-card img { max-height: 120px; width: auto; }
-    
-    .feedback-area {
-      position: absolute; top: 30%; left: 50%; width: 100%;
-      text-align: center; z-index: 100; pointer-events: none;
-      transform: translate(-50%, -50%); opacity: 0;
+    :root {
+      --stroke-width: 7px;
+      --highlight-onsets: #f87171;
+      --highlight-vowels: #60a5fa;
+      --highlight-tones: #4ade80;
+      --highlight-rhymes: #60a5fa;
+      --highlight-codas: #c084fc;
+      --color-success: #4ade80;
     }
+
+    body {
+      background: #3a445c;
+      min-height: 100vh;
+      color: white;
+    }
+    
+    html { scroll-behavior: auto !important; }
+    
+    svg {
+        stroke: currentColor;
+        stroke-width: var(--stroke-width);
+        stroke-linecap: square;
+        stroke-linejoin: square;
+        fill: transparent;
+        overflow: visible !important;
+        display: inline-block;
+        max-width: 100%;
+        height: 2.75em;
+    }
+    
+    svg use[href^="#qt"] {
+    	stroke-width: calc(var(--stroke-width) * 3 / 4)
+    }
+
+    .card {
+      color: inherit;
+      background-color: #46516d;
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .lesson-card {
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .lesson-card:hover { transform: translateY(-3px); filter: brightness(1.05); }
+
+    .logo-home {
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+    .logo-home:hover {
+      opacity: 0.8;
+    }
+
+    .reference-svg-container {
+        display: inline-block;
+        margin-left: 10px;
+        opacity: 0.3;
+        vertical-align: middle;
+    }
+    
+    .reference-svg-container svg {
+    	height: 1.8em!important;
+    	--stroke-width: 6px;
+    }
+
+    .symbol-card, .word-grid-item, .lesson-thumbnail {
+        position: relative;
+        opacity: 1;
+        background: #3a445c;
+        border-radius: 6px;
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 85px;
+        height: 85px;
+        color: #fff;
+        box-shadow: 2px 2px 40px rgb(255 255 255 / .025);
+    }
+
+    .symbol-card { 
+      min-height: 220px; 
+      border-radius: 18px; 
+      padding: 30px; 
+      svg { height: 6em; margin-top: -1.75em; };
+      .reference-svg-container svg { height: 2.7em!important; margin-top: 2em; }
+    }
+
+    .lesson-thumbnail svg { color:white; height: 2.4em; --stroke-width: 10px; }
+    .lesson-thumbnail-text { margin-top:.5em; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+
+    .qatt-container { max-width: 550px; margin: 1.5rem auto; padding: 0 15px; }
+    .word-svg-container { width: 100%; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; }
+    .category-title { font-weight: 800; text-transform: uppercase; margin-top: 2.5rem; margin-bottom: 1rem; font-size: 0.9rem; opacity: 0.7; }
+    .progress { background-color: rgba(255,255,255,0.1); border-radius: 10px; height: 8px !important; }
+    
+    .style-selector-wrap { background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 12px; }
+    #global-style-select { box-shadow: none!important; outline:1px solid transparent!important; background-color: transparent!important; font-weight: bold; border: none; color: white; }
+    #global-style-select option { background-color: #3a445c; }
+
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .options .btn { position: relative; overflow: hidden; min-height: 80px; }
+
+    .feedback-area { position: absolute; top: 35%; left: 50%; width: 100%; text-align: center; z-index: 100; transform: translate(-50%, -50%); opacity: 0; pointer-events: none; }
     .float-up-fade { animation: floatUpFade 1.6s ease-in-out forwards; }
     @keyframes floatUpFade {
       0% { opacity: 0; transform: translate(-50%, -50%); }
@@ -25,499 +125,588 @@
       85% { opacity: 1; transform: translate(-50%, -80%); }
       100% { opacity: 0; transform: translate(-50%, -120%); }
     }
-    .alert-custom-success { color: #28a745; font-size: 2rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .alert-custom-danger { color: #dc3545; font-size: 1.5rem; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  /* Der Container des Balkens */
-.progress {
-  background-color: #eee;
-  border-radius: 10px;
-  height: 10px !important;
-  overflow: hidden;
-}
 
-/* Der animierte Balken */
-.progress-bar {
-  background: linear-gradient(90deg, #28a745, #5cd677);
-  border-radius: 10px;
-  /* Dies ist der entscheidende Teil für die Animation */
-  transition: width .8s cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
+    #qatt-toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: silver; color: #1a1a1a; padding: 12px 24px; border-radius: 50px;
+      font-size: 0.8rem; font-weight: 800; z-index: 2000; opacity: 0; transition: all 0.3s;
+      overflow:auto; max-height: 70vh
+    }
+    #qatt-toast.show { opacity: 1; bottom: 40px; }
 
-  .list-group-item {
-  background: rgba(255, 255, 255, 0.8);
-  transition: background 0.2s;
-}
-.list-group-item:hover {
-  background: rgba(255, 255, 255, 1);
-}
-/* Scrollbar für die Liste verschönern */
-.list-group::-webkit-scrollbar { width: 6px; }
-.list-group::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+    .energy-heart { color: #f87171; font-size: 1.2rem; margin-left: 2px; transition: all 0.3s; display: inline-block; }
+    .energy-heart.lost { opacity: 0.2; filter: grayscale(1); }
+    .energy-heart.refill-anim { animation: heartRefill 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes heartRefill {
+      0% { transform: scale(1); filter: drop-shadow(0 0 0px #f87171); }
+      40% { transform: scale(1.6); filter: drop-shadow(0 0 15px #f87171); }
+      100% { transform: scale(1); filter: drop-shadow(0 0 0px #f87171); }
+    }
+
+    .word-progress-emoji {
+      position: absolute;
+      font-size: 1.4rem;
+      pointer-events: none;
+      filter: drop-shadow(0 0 3px rgba(0,0,0,0.4));
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+    
+    .quiz-pos { top: 10px; right: 10px; }
+    .grid-pos { bottom: 4px; right: 4px; font-size: 0.9rem; filter: none; }
+    .emoji-empty { opacity: 0.15; font-size: 0.7rem; }
+
+    .emoji-pop-subtle { animation: emojiPopSubtle 0.4s ease-out; }
+    @keyframes emojiPopSubtle {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .emoji-pop-milestone {
+      animation: emojiPopMilestone 1.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 50;
+    }
+    @keyframes emojiPopMilestone {
+      0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+      20% { transform: scale(4.5) rotate(15deg); filter: brightness(1.8) drop-shadow(0 0 20px #fbbf24); }
+      40% { transform: scale(3.5) rotate(-15deg); filter: brightness(1.6) drop-shadow(0 0 30px #fbbf24); }
+      60% { transform: scale(4.0) rotate(10deg); filter: brightness(1.7) drop-shadow(0 0 25px #fbbf24); }
+      80% { transform: scale(1.2) rotate(-5deg); filter: brightness(1.2); }
+      100% { transform: scale(1) rotate(0deg); filter: brightness(1) drop-shadow(0 0 5px rgba(0,0,0,0.3)); }
+    }
+
+    .energy-bonus { color: #4ade80; font-weight: 800; animation: bounce 0.5s ease 2 alternate; }
+    @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.4); } }
+
+    .broken-heart-anim {
+      display: inline-block;
+      position: relative;
+      font-size: 4rem;
+      animation: breakShake 0.5s ease-in-out;
+    }
+    @keyframes breakShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px) rotate(-5deg); }
+      75% { transform: translateX(5px) rotate(5deg); }
+    }
+
+    .lesson-onsets :not(.reference-svg-container) > nobr > svg { use[href$="small"], use[href$="large"] { stroke: var(--highlight-onsets) } }
+    .lesson-vowels :not(.reference-svg-container) > nobr > svg { use[href$="a"], use[href$="e"], use[href$="i"], use[href$="o"], use[href$="u"], use[href$="y"], use[href$="w"], use[href$="2"] { stroke: var(--highlight-vowels) } }
+	.lesson-tones :not(.reference-svg-container) > nobr > svg { use[href^="#qt"], use[href*="tlarge"] { stroke: var(--highlight-tones) } }
+    .lesson-codas :not(.reference-svg-container) > nobr > svg { use[href$="U"], use[href$="I"], use[href$="N"], use[href$="M"], use[href$="NG"], use[href$="NH"], use[href$="T"], use[href$="P"], use[href$="C"], use[href$="CH"] { stroke: var(--highlight-codas) } }
   </style>
 </head>
-<body class="bg-light">
+<body data-bs-theme="dark">
   <div class="container qatt-container">
-    <h1 class="text-center mb-4">QATT App</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex align-items-center">
+        <!-- Logo mit Home-Funktion -->
+        <h2 class="mb-0 fw-bold logo-home" onclick="app.renderLibrary()">QATT</h2>
+      </div>
+      <div class="style-selector-wrap d-flex">
+        <select id="global-style-select" class="form-select form-select-sm">
+          <option value="0">Chính thể</option>
+          <option value="1">Giản thể</option>
+        </select>
+      </div>
+    </div>
     <div id="app"></div>
   </div>
+  <div id="qatt-toast"></div>
 
   <script>
-  
-  
-
 class App {
-  constructor(container, options) {
-    this.opts = {
-      symbolFormatter: (s, t) => [s, t],
-      reverseFormatter: (s, t) => [t, s],
-      background: "white",
-      requiredCorrect: 2,
-      maxErrors: 3,
-      activeLimit: 3,
-      ...(options || {})
-    };
+  lang = {
+    'back': 'Quay lại', 
+    'symbols': 'Từ', 
+    'startLesson': 'Bắt đầu học',
+    'lessonDone': '🎉 Hoàn thành!', 
+    'correct': 'CHÍNH XAC! ✨', 
+    'wrong': 'SAI RỒI',
+    'allOnOnePage': 'Tất cả từ',
+    'preview': 'Preview',
+    'restart': 'Học lại',
+    'outOfEnergy': 'Hết năng lượng!',
+    'outOfEnergyMsg': 'Bạn đã sử dụng hết trái tim của mình. Hãy thử lại để học tốt hơn!',
+    'tryAgain': 'Thử lại'
+  };
 
+  constructor(container) {
+    this.opts = { background: "white", requiredCorrect: 3, maxErrors: 3, activeLimit: 3 };
     this.mainContainer = container;
     this.lessons = {};
     this.currentLesson = null;
-
-    // Daten aus LocalStorage laden
-    this.stats = JSON.parse(localStorage.getItem('qatt_stats')) || {};
-    this.highscores = JSON.parse(localStorage.getItem('qatt_highscores')) || {};
-
-    // Grundgerüst initialisieren
-    this.initLayout();
+    this.globalStyle = localStorage.getItem('qattType') || "auto";
     
-    this.audioCtx = null;
-  
-  // Einmaliger Listener, um den AudioContext bei der ersten Interaktion zu starten
-    const unlockAudio = () => {
-      if (!this.audioCtx) {
-        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (this.audioCtx.state === 'suspended') {
-        this.audioCtx.resume();
-      }
-      // Listener entfernen, sobald Audio entsperrt ist
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
+    this.sessionStats = null; 
+    this.sessionWords = [];
+    this.wasInProgress = false; 
+    this.maxEnergy = 5;
+    this.currentEnergy = 5;
+    this.lastRefilledIndex = -1;
+
+    this.parser = new VietnameseParser();
+    this.renderer = new SvgGlyphRenderer({});
+    this.toastEl = document.getElementById("qatt-toast");
+
+    this.stats = JSON.parse(localStorage.getItem('qatt_stats')) || {};
+
+    this.initLayout();
+    this.setupStyleSelector();
+    this.setupAudio();
+    this.setupNavigation();
+    this.categories = [];
+  }
+
+  setupStyleSelector() {
+    const sel = document.getElementById('global-style-select');
+    sel.value = this.globalStyle;
+    if (sel.value == "") sel.value = "0";
+    sel.onchange = (e) => {
+      this.globalStyle = e.target.value;
+      localStorage.setItem('qattType', this.globalStyle);
+      this.refreshCurrentView();
     };
-    window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
-  };
+  }
+
+  refreshCurrentView(state = null) {
+    const currentState = state || history.state || { view: 'library' };
+    const view = currentState.view || 'library';
+    
+    if (view === 'library') this.renderLibrary(true);
+    else if (view === 'preview') this.renderLessonPreview(currentState.lessonId, true);
+    else if (view === 'quiz') this.renderQuiz(true);
+    else if (view === 'full') this.renderFullView(true);
+  }
+
+  showToast(el, msg) {
+    this.toastEl.textContent = msg + el.innerHTML;
+    this.toastEl.classList.add("show");
+    setTimeout(() => this.toastEl.classList.remove("show"), 7500);
+  }
+
+  setupAudio() {
+    const unlock = () => {
+      if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      window.removeEventListener('click', unlock);
+    };
+    window.addEventListener('click', unlock);
+  }
+
+  setupNavigation() {
+    if (!history.state) history.replaceState({ view: 'library' }, '');
+    window.onpopstate = (e) => this.refreshCurrentView(e.state);
+  }
 
   initLayout() {
     this.mainContainer.innerHTML = `
       <div id="qatt-stats-wrapper" class="mb-4 d-none">
-        <div class="card shadow-sm p-3 border-0" style="border-radius: 15px">
+        <div id="stats-card" class="card p-3 border-0">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <button id="qatt-back-btn" class="btn btn-sm btn-outline-secondary me-3" style="border-radius: 8px;">Back</button>
-              <span id="qatt-lesson-title" class="fw-bold small text-uppercase text-secondary" style="letter-spacing: 1px;"></span>
-            </div>
-            <span id="qatt-progress-percent" class="badge rounded-pill bg-success px-3">0%</span>
+              <span id="qatt-lesson-title" class="fw-bold small text-uppercase"></span>
+              <div id="qatt-energy-display" class="d-flex align-items-center"></div>
+              <button id="qatt-back-btn" class="btn btn-sm btn-outline-light border-0 opacity-75">${this.lang.back}</button>
           </div>
-          <div class="progress" style="height: 10px; background-color: #f0f0f0; border-radius: 10px; overflow: hidden;">
-            <div id="qatt-progress-bar" 
-                 class="progress-bar" 
-                 style="width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1) !important; background: linear-gradient(90deg, #28a745, #5cd677);">
-            </div>
-          </div>
+          <div class="progress w-100"><div id="qatt-progress-bar" class="progress-bar" style="width: 0%;"></div></div>
         </div>
       </div>
-      
       <div id="qatt-content"></div>
     `;
-
     this.statsWrapper = document.getElementById("qatt-stats-wrapper");
     this.contentArea = document.getElementById("qatt-content");
     this.progressBar = document.getElementById("qatt-progress-bar");
-    this.progressPercent = document.getElementById("qatt-progress-percent");
     this.lessonTitle = document.getElementById("qatt-lesson-title");
-
+    this.energyDisplay = document.getElementById("qatt-energy-display");
     document.getElementById("qatt-back-btn").onclick = () => this.renderLibrary();
+  }
+
+  getActiveStyle(lesson) {
+    const userStyle = this.globalStyle === "auto" ? "0.0" : this.globalStyle;
+    if (lesson.style.length > 0) {
+      if (lesson.style.includes(userStyle)) return userStyle;
+      return String(lesson.style[0]);
+    }
+    return userStyle;
+  }
+
+  getParsedCode(word, style) {
+    const parts = this.parser.parse(word);
+    if (!parts) return null;
+    let code = parts.code;
+    if (String(style) === "0") {
+      if (!code.includes(",+")) code = code.replace(",", ",+");
+    }
+    return code;
+  }
+
+  renderToElement(word, style, element, skipReference = false) {
+    element.innerHTML = "";
+    const mainCode = this.getParsedCode(word, style);
+    if (mainCode) {
+        const mainSvgSpan = document.createElement("span");
+        this.renderer.renderText(mainCode, mainSvgSpan, parseInt(style));
+        element.appendChild(mainSvgSpan);
+        if (!skipReference) {
+            const refCode = this.getParsedCode(word, "0");
+            const refSpan = document.createElement("span");
+            refSpan.className = "reference-svg-container";
+            this.renderer.renderText(parseInt(style) ? refCode : refCode.replace("+", ""), refSpan, parseInt(style) ? 0 : "1");
+            element.appendChild(refSpan);
+            element.onclick = (e) => { e.stopPropagation(); this.showToast(e.target, mainCode); };
+        }
+    } else {
+        element.textContent = word;
+    }
+  }
+
+  getProgressEmoji(word, animate = false, layoutType = 'grid') {
+    const count = this.stats[word]?.c || 0;
+    let emoji = "🌑"; 
+    let isDefault = true;
+    let animClass = "";
+
+    if (count === 1) { 
+        emoji = "💧"; isDefault = false; 
+        animClass = animate ? "emoji-pop-subtle" : "";
+    } else if (count === 2) { 
+        emoji = "🌱"; isDefault = false; 
+        animClass = animate ? "emoji-pop-subtle" : "";
+    } else if (count >= 3) { 
+        emoji = "🌻"; isDefault = false; 
+        animClass = animate ? "emoji-pop-milestone" : "";
+    }
+
+    const posClass = (layoutType === 'quiz') ? 'quiz-pos' : 'grid-pos';
+    return `<span class="word-progress-emoji ${posClass} ${isDefault ? 'emoji-empty' : ''} ${animClass}">${emoji}</span>`;
   }
 
   addLesson(opts) {
     const id = opts.id;
-    const name = opts.title;
-    const items = opts.items;
-    const background = opts.background || "white";
-    const symbols = Object.keys(items);
-    this.lessons[id] = { id, name, background, items, symbols };
-    symbols.forEach(s => { 
-      if (!this.stats[s]) this.stats[s] = { c: 0, w: 0 }; 
-    });
+    const lesson = { name: "", symbols: [], category: "", background: "powderblue", style: [], hiddenStyle: [], ...opts };
+    if (!this.categories.includes(lesson.category)) this.categories.push(lesson.category);
+    this.lessons[id] = lesson;
+    lesson.symbols.forEach(s => { if (!this.stats[s]) this.stats[s] = { c: 0, w: 0 }; });
     return this.lessons[id];
   }
 
-  isDone(symbol) {
-    const s = this.stats[symbol];
-    const done = s.c >= this.opts.requiredCorrect || s.w >= this.opts.maxErrors;
-    if (!done) console.log("Not Done", symbol, s.c, s.w, JSON.stringify(this.stats))
-    return done
+  isSuccessful(symbol) {
+    const s = this.stats[symbol] || { c: 0, w: 0 };
+    return s.c >= this.opts.requiredCorrect;
+  }
+
+  isFailed(symbol) {
+    const s = this.stats[symbol] || { c: 0, w: 0 };
+    return s.w >= this.opts.maxErrors;
+  }
+
+  isDone(symbol) { return this.isSuccessful(symbol) || this.isFailed(symbol); }
+
+  getLessonProgress(lessonId) {
+    const lesson = this.lessons[lessonId];
+    if (!lesson || lesson.symbols.length === 0) return 0;
+    const processedCount = lesson.symbols.reduce((sum, s) => sum + (this.isSuccessful(s) ? 1 : 0), 0);
+    return Math.round((processedCount / lesson.symbols.length) * 100);
   }
 
   calculateProgress() {
     if (!this.currentLesson) return 0;
-    const totalSymbols = this.currentLesson.symbols.length;
-    const maxPoints = totalSymbols * this.opts.requiredCorrect;
-    const currentPoints = this.currentLesson.symbols.reduce((sum, s) => 
-      sum + Math.min(this.stats[s].c, this.opts.requiredCorrect), 0);
-    return Math.round((currentPoints / maxPoints) * 100);
-  }
-
-  renderStatus() {
-    const totalProgress = this.calculateProgress();
-    this.lessonTitle.textContent = this.currentLesson.name;
-    this.progressPercent.textContent = `${totalProgress}%`;
-    this.progressBar.style.width = `${totalProgress}%`;
-  }
-
-  renderLibrary() {
-    this.currentLesson = null;
-    this.statsWrapper.classList.add("d-none");
-    
-    let html = `<div class="row g-3 fade-in">`;
-    for (const id in this.lessons) {
-      const lesson = this.lessons[id];
-      const score = this.highscores[id] || 0;
-      
-      html += `
-        <div class="col-12">
-          <div class="card shadow-sm border-0 p-3 d-flex flex-row justify-content-between align-items-center" 
-               style="background: ${lesson.background}; border-radius: 12px; cursor: pointer; transition: transform 0.2s;" 
-               onclick="app.renderLessonPreview('${id}')"
-               onmouseover="this.style.transform='scale(1.01)'" 
-               onmouseout="this.style.transform='scale(1)'">
-            <div>
-              <h5 class="mb-0">${lesson.name}</h5>
-              <small class="text-muted">${lesson.symbols.length} Zeichen</small>
-            </div>
-            <div class="text-end">
-              <div class="small text-uppercase text-muted" style="font-size: 0.6rem;">Bestwert</div>
-              <span class="badge ${score === 100 ? 'bg-success' : 'bg-secondary'} rounded-pill px-3">${score}%</span>
-            </div>
-          </div>
-        </div>
-      `;
+    if (this.sessionStats) {
+        const totalPossible = this.sessionWords.length;
+        const currentSessionProcessed = this.sessionWords.reduce((sum, s) => {
+            const isWordSuccessful = (this.sessionStats[s].c >= this.opts.requiredCorrect);
+            return sum + (isWordSuccessful ? 1 : 0);
+        }, 0);
+        return Math.round((currentSessionProcessed / totalPossible) * 100);
     }
-    html += `</div>`;
-    this.contentArea.innerHTML = html;
+    return this.getLessonProgress(this.currentLesson.id);
   }
 
-  playTone(type) {
-  // Falls noch kein Kontext existiert (sollte durch unlockAudio abgefangen sein)
-  if (!this.audioCtx) return;
-  
-  // Browser-Sicherheit: Kontext explizit fortsetzen
-  if (this.audioCtx.state === 'suspended') {
-    this.audioCtx.resume();
+  renderStatus(showHearts = true) {
+    const p = this.calculateProgress();
+    this.lessonTitle.textContent = this.currentLesson.name;
+    this.progressBar.style.width = `${p}%`;
+    if (showHearts) {
+        this.energyDisplay.classList.remove('d-none');
+        let heartsHtml = "";
+        for(let i=0; i < this.maxEnergy; i++) {
+            const isRefilling = i === this.lastRefilledIndex;
+            heartsHtml += `<span class="energy-heart ${i >= this.currentEnergy ? 'lost' : ''} ${isRefilling ? 'refill-anim' : ''}">❤️</span>`;
+        }
+        this.energyDisplay.innerHTML = heartsHtml;
+        this.lastRefilledIndex = -1; 
+    } else {
+        this.energyDisplay.classList.add('d-none');
+    }
   }
 
-  const now = this.audioCtx.currentTime;
-  const osc = this.audioCtx.createOscillator();
-  const gain = this.audioCtx.createGain();
-
-  osc.connect(gain);
-  gain.connect(this.audioCtx.destination);
-  osc.type = 'sine';
-
-  if (type === 'success') {
-    // Aufsteigend (Pling)
-    osc.frequency.setValueAtTime(220, now);
-    osc.frequency.exponentialRampToValueAtTime(440, now + 0.4);
-  } else {
-    // Absteigend (Failure)
-    osc.frequency.setValueAtTime(440, now);
-    osc.frequency.exponentialRampToValueAtTime(220, now + 0.4);
+  resetLessonProgress() {
+    if (!this.currentLesson) return;
+    this.currentLesson.symbols.forEach(s => { this.stats[s] = { c: 0, w: 0 }; });
+    localStorage.setItem('qatt_stats', JSON.stringify(this.stats));
+    this.sessionStats = null;
+    this.refreshCurrentView();
   }
 
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.1, now + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-  osc.start(now);
-  osc.stop(now + 0.4);
-}
-
-  startLesson(id) {
-    this.currentLesson = this.lessons[id];
-    this.statsWrapper.classList.remove("d-none");
-    this.renderQuiz();
+  renderLibrary(isPopState = false) {
+    this.currentLesson = null;
+    this.sessionStats = null;
+    this.statsWrapper.classList.add("d-none");
+    if (!isPopState && (!history.state || history.state.view !== 'library')) history.pushState({ view: 'library' }, '');
+    let html = `<div class="fade-in"><div class="text-center mb-3"><button class="btn btn-link text-white-50 small text-decoration-none" onclick="app.renderFullView()">${this.lang.allOnOnePage}</button></div>`;
+    this.categories.forEach(cat => {
+      const filtered = Object.values(this.lessons).filter(l => l.category === cat);
+      if (filtered.length === 0) return;
+      let lessonsHTML = "";
+      filtered.forEach(lesson => {
+        const progress = this.getLessonProgress(lesson.id);
+        lessonsHTML += `
+          <div class="col-12 lesson-${lesson.id}">
+            <div class="card lesson-card p-3" onclick="app.renderLessonPreview('${lesson.id}')">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="w-75">
+                  <h5 class='mb-1 fw-bold'>${lesson.name}</h5>
+                  <small class="opacity-75 font-weight-bold">${lesson.symbols.length} ${this.lang.symbols}</small>
+                  <div class="progress mt-2" style="height: 5px; width: 100px;"><div class="progress-bar bg-info" style="width: ${progress}%"></div></div>
+                </div>
+                <div id="thumb-${lesson.id}" class="lesson-thumbnail"></div>
+              </div>
+            </div>
+          </div>`;
+      });
+      if (lessonsHTML) html += `<div class="category-title">${cat}</div><div class="row g-3">` + lessonsHTML + `</div>`;
+    });
+    this.contentArea.innerHTML = html + `</div>`;
+    Object.values(this.lessons).forEach(lesson => {
+        const thumbCont = document.getElementById(`thumb-${lesson.id}`);
+        if (thumbCont) {
+            const style = this.getActiveStyle(lesson);
+            this.renderToElement(lesson.symbols[0], style, thumbCont, true);
+            const textSpan = document.createElement("div");
+            textSpan.className = "lesson-thumbnail-text";
+            textSpan.textContent = lesson.symbols[0];
+            thumbCont.appendChild(textSpan);
+            thumbCont.innerHTML += this.getProgressEmoji(lesson.symbols[0], false, 'grid');
+        }
+    });
   }
 
-  renderQuiz() {
-    console.log(JSON.stringify(this.currentLesson.symbols), "in current lesson")
-    const unfinished = this.currentLesson.symbols.filter(s => !this.isDone(s));
-    console.log(unfinished.length, " are unfinished", JSON.stringify(unfinished))
-    const pool = unfinished.slice(0, this.opts.activeLimit);
-    this.formatter = Math.random() < .5 ? this.opts.symbolFormatter : this.opts.reverseFormatter;
-    this.renderStatus();
-
-    // Abschlussprüfung
-    if (pool.length === 0) {
-      this.highscores[this.currentLesson.id] = 100;
-      localStorage.setItem('qatt_highscores', JSON.stringify(this.highscores));
-
+  renderQuiz(isPopState = false) {
+    if (this.currentEnergy <= 0) {
       this.contentArea.innerHTML = `
-        <div class="card p-5 text-center shadow border-0 fade-in" style="border-radius: 15px;">
-          <h2 class="mb-3">🎉 Lektion beendet!</h2>
-          <p class="text-muted">Du hast alle Zeichen bearbeitet. Dein Bestwert wurde gespeichert.</p>
-          <div class="d-grid gap-2">
-            <button class="btn btn-primary btn-lg" onclick="app.renderLibrary()">Zurück zur Übersicht</button>
-            <button class="btn btn-link text-danger btn-sm" onclick="app.resetCurrentStats()">Fortschritt dieser Lektion löschen</button>
+        <div class="card p-5 text-center fade-in">
+          <div class="broken-heart-anim mb-3">💔</div>
+          <h2 class="text-danger fw-bold mb-3">${this.lang.outOfEnergy}</h2>
+          <p class="opacity-75 mb-4">${this.lang.outOfEnergyMsg}</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-lg btn-primary px-4" onclick="app.startLessonDirectly()">${this.lang.tryAgain}</button>
+            <button class="btn btn-lg btn-outline-light px-4" onclick="app.renderLibrary()">${this.lang.back}</button>
           </div>
         </div>`;
       return;
     }
 
-    const correctSymbol = pool[Math.floor(Math.random() * pool.length)];
-    const correctValue = this.currentLesson.items[correctSymbol];
-    const stat = this.stats[correctSymbol];
-    const formatted = this.formatter(correctSymbol, correctValue)
+    const globalUnfinished = this.currentLesson.symbols.filter(s => !this.isDone(s));
+    
+    if (this.wasInProgress && globalUnfinished.length === 0) {
+      this.wasInProgress = false; this.sessionStats = null;
+      this.contentArea.innerHTML = `<div class="card p-5 text-center fade-in"><h2>${this.lang.lessonDone}</h2><div class="d-flex gap-2 justify-content-center mt-4"><button class="btn btn-primary" onclick="app.renderLibrary()">${this.lang.back}</button><button class="btn btn-outline-light" onclick="app.resetLessonProgress()">${this.lang.restart}</button></div></div>`;
+      return;
+    }
+
+    const activePoolSource = globalUnfinished.length > 0 ? globalUnfinished : this.currentLesson.symbols;
+
+    const sessionUnfinished = activePoolSource
+        .sort((a, b) => {
+            const scoreA = ((this.stats[a]?.w || 0) + 1) * Math.random();
+            const scoreB = ((this.stats[b]?.w || 0) + 1) * Math.random();
+            return scoreB - scoreA;
+        })
+        .filter(s => this.sessionStats[s].c < this.opts.requiredCorrect && !this.isFailed(s));
+
+    if (sessionUnfinished.length === 0) {
+        this.contentArea.innerHTML = `<div class="card p-5 text-center fade-in"><h2>${this.lang.lessonDone}</h2><div class="d-flex gap-2 justify-content-center mt-4"><button class="btn btn-primary" onclick="app.renderLibrary()">${this.lang.back}</button><button class="btn btn-outline-light" onclick="app.startLessonDirectly()">${this.lang.restart}</button></div></div>`;
+        return;
+    }
+
+    const currentActiveWords = sessionUnfinished.slice(0, this.opts.activeLimit);
+    this.renderStatus(true); 
+    if (!isPopState) history.pushState({ view: 'quiz' }, '');
+    const correctWord = currentActiveWords[Math.floor(Math.random() * currentActiveWords.length)];
+    const showSvg = Math.random() < 0.5; 
+    const activeStyle = this.getActiveStyle(this.currentLesson);
+    
     this.contentArea.innerHTML = `
-      <div class="fade-in card shadow-sm border-0" style="background: ${this.currentLesson.background}; border-radius: 15px;">
-        <div class="p-4" style="background: rgba(255,255,255,.3)">
-          <div class="text-end mb-2">
-             <small class="text-muted" style="font-size: 0.7rem;">
-               Level: ✅${stat.c}/${this.opts.requiredCorrect} | ❌${stat.w}/${this.opts.maxErrors}
-             </small>
+      <div class="fade-in card border-0 lesson-${this.currentLesson.id}">
+        <div class="p-4">
+          <div class="symbol-card mb-4" id="quiz-symbol-container">
+            <div id="emoji-container-${correctWord}">${this.getProgressEmoji(correctWord, false, 'quiz')}</div>
           </div>
-          <div class="symbol-card mb-4 border" style="background: rgba(255,255,255,.99)">
-            ${formatted[0]}
-          </div>
-          <div class="options d-grid gap-2" style="grid-template-columns: 1fr 1fr;"></div>
+          <div class="options" id="quiz-options-container"></div>
           <div id="feedback" class="feedback-area"></div>
         </div>
-      </div>
-    `;
-
-    this.renderOptions(correctSymbol, correctValue);
-  }
-
-  renderOptions(correctSymbol, correctValue) {
-  const distractors = this.currentLesson.symbols
-    .filter(s => s !== correctSymbol)
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 3)
-    .map(s => ({
-      symbol: s,
-      value: this.currentLesson.items[s]
-    }));
-
-  const options = [
-    ...distractors,
-    { symbol: correctSymbol, value: correctValue }
-  ].sort(() => 0.5 - Math.random());
-
-  const container = this.contentArea.querySelector('.options');
-
-  options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = "btn shadow btn-lg py-3";
-    btn.style.borderRadius = "12px";
-    btn.style.backgroundColor = "rgba(255,255,255,.75)";
-
-    btn.innerHTML = this.formatter(opt.symbol, opt.value)[1];
-
-    // WICHTIG:
-    btn.dataset.correct = (opt.symbol === correctSymbol);
-    btn.dataset.value = opt.value;
-
-    btn.onclick = () => this.checkAnswer(btn);
-
-    container.appendChild(btn);
-  });
-}
-  
-  checkAnswer(clickedBtn) {
-  const isCorrect = clickedBtn.dataset.correct === "true";
-  this.playTone(isCorrect ? 'success' : 'error');
-
-  const symbol = this.currentLesson.symbols.find(s =>
-    this.currentLesson.items[s] === clickedBtn.dataset.value
-  );
-console.log("Log answer", symbol, isCorrect)
-  if (isCorrect) this.stats[symbol].c++;
-  else this.stats[symbol].w++;
-
-  localStorage.setItem('qatt_stats', JSON.stringify(this.stats));
-
-  const buttons = this.contentArea.querySelectorAll(".btn");
-
-  buttons.forEach(b => {
-    b.disabled = true;
-    //b.style.backgroundColor = "auto";
-    b.style.backgroundColor = "";
-    b.classList.remove("btn-outline-primary")
-    if (b.dataset.correct === "true") {
-      b.classList.add("btn-success");
-    } else if (b === clickedBtn && !isCorrect) {
-      b.classList.add("btn-danger");
-    }
-  });
-
-  const feedback = this.contentArea.querySelector("#feedback");
-  feedback.innerHTML = `<div class="${isCorrect ? 'alert-custom-success' : 'alert-custom-danger'}">
-      ${isCorrect ? 'Richtig! ✨' : 'Falsch'}
-    </div>`;
-
-  feedback.classList.remove("float-up-fade");
-  void feedback.offsetWidth;
-  feedback.classList.add("float-up-fade");
-
-  setTimeout(() => this.renderQuiz(), isCorrect ? 1000 : 2200);
-}
-  
-  resetCurrentStats() {
-    if(confirm("Fortschritt dieser Lektion wirklich löschen?")) {
-      this.currentLesson.symbols.forEach(s => this.stats[s] = {c:0, w:0});
-      localStorage.setItem('qatt_stats', JSON.stringify(this.stats));
-      this.renderQuiz();
-    }
-  }
-  
-  renderLessonPreview(id) {
-  this.currentLesson = this.lessons[id];
-  this.statsWrapper.classList.add("d-none"); 
-  
-  let html = `
-    <div class="fade-in card shadow-sm p-4 border-0" style="background: ${this.currentLesson.background}; border-radius: 15px;">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0 text-dark">${this.currentLesson.name}</h3>
-        <button class="btn btn-sm btn-light border" onclick="app.renderLibrary()">Zurück</button>
-      </div>
+      </div>`;
       
-      <div class="list-group mb-4 shadow-sm" style="max-height: 450px; overflow-y: auto; border-radius: 12px;">
-  `;
+    const symbolContainer = document.getElementById("quiz-symbol-container");
+    const displayWrap = document.createElement("div");
+    if (showSvg) this.renderToElement(correctWord, activeStyle, displayWrap);
+    else displayWrap.innerHTML = `<h1 class="display-1 fw-bold">${correctWord}</h1>`;
+    symbolContainer.prepend(displayWrap);
+    this.renderOptions(correctWord, showSvg, activeStyle, document.getElementById("quiz-options-container"));
+  }
 
-  this.currentLesson.symbols.forEach(symbol => {
-    const value = this.currentLesson.items[symbol];
-    const stat = this.stats[symbol] || { c: 0, w: 0 };
-    const formatted = this.opts.symbolFormatter(symbol, value);
-    
-    // Fortschrittsberechnung für die visuelle Leiste
-    const itemProgress = Math.min(100, Math.round((stat.c / this.opts.requiredCorrect) * 100));
-    const isDone = itemProgress === 100;
+  renderOptions(correctWord, questionWasSvg, activeStyle, container) {
+    const distractors = this.currentLesson.symbols.filter(s => s !== correctWord).sort(() => 0.5 - Math.random()).slice(0, 3);
+    const options = [...distractors, correctWord].sort(() => 0.5 - Math.random());
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = "btn shadow btn-lg py-3 bg-white border-0 text-dark fw-bold d-flex align-items-center justify-content-center";
+      btn.dataset.word = opt;
+      const content = document.createElement("div");
+      if (questionWasSvg) content.textContent = opt;
+      else this.renderToElement(opt, activeStyle, content, true);
+      btn.appendChild(content);
+      btn.onclick = () => {
+        const isCorrect = opt === correctWord;
+        this.playTone(isCorrect ? 'success' : 'error');
+        let bonusHearts = 0;
+        let isMilestoneReached = false;
+        
+        if (isCorrect) {
+            const wasSuccessfulBefore = this.isSuccessful(correctWord);
+            this.stats[correctWord].c++;
+            if (this.sessionStats[correctWord]) this.sessionStats[correctWord].c++;
+            
+            const emojiCont = document.getElementById(`emoji-container-${correctWord}`);
+            if(emojiCont) emojiCont.innerHTML = this.getProgressEmoji(correctWord, true, 'quiz');
 
-    html += `
-      <div class="list-group-item d-flex align-items-center p-3 border-0 border-bottom bg-white">
-        <div style="width: 35%">${formatted[0]}</div>
-        <div class="flex-grow-1 px-3">
-          <div class="fw-bold mb-1">${value}</div>
-        </div>
-        <div class="progress flex-shrink-0" style="width:25%; height: 4px; background-color: #eee;">
-          <div class="progress-bar ${isDone ? 'bg-success' : 'bg-info'}" 
-                 style="width: ${itemProgress}%"></div>
-        </div>
-      </div>
-    `;
-  });
+            if (!wasSuccessfulBefore && this.isSuccessful(correctWord)) {
+                isMilestoneReached = true;
+                if (this.currentEnergy < this.maxEnergy) {
+                    bonusHearts = 1; this.lastRefilledIndex = this.currentEnergy; this.currentEnergy++;
+                }
+            }
+        } else {
+            this.stats[correctWord].w++;
+            this.currentEnergy--; 
+        }
+        localStorage.setItem('qatt_stats', JSON.stringify(this.stats));
+        document.querySelectorAll(".options .btn").forEach(b => {
+          b.disabled = true;
+          if (b.dataset.word === correctWord) b.style.backgroundColor = "#82e99e";
+          else if (b.dataset.word === opt && !isCorrect) b.style.backgroundColor = "#ff8e8e";
+        });
+        const fb = document.getElementById("feedback");
+        let feedbackHtml = `<div class="fw-black p-3" style="font-size:2rem; color:${isCorrect?'#82e99e':'#ff8e8e'}">${isCorrect?this.lang.correct:this.lang.wrong}</div>`;
+        if (bonusHearts > 0) feedbackHtml += `<div class="energy-bonus">+${bonusHearts} ❤️</div>`;
+        fb.innerHTML = feedbackHtml; fb.classList.add("float-up-fade");
+        
+        const delay = isMilestoneReached ? 2400 : 1200;
+        setTimeout(() => this.renderQuiz(true), delay); 
+      };
+      container.appendChild(btn);
+    });
+  }
 
-  html += `
-      </div>
-      <div class="d-grid">
-        <button class="btn btn-primary btn-lg shadow-sm" onclick="app.startLessonDirectly()">
-          Lektion jetzt starten
-        </button>
-      </div>
-    </div>
-  `;
+  playTone(type) {
+    if (!this.audioCtx) return;
+    const osc = this.audioCtx.createOscillator();
+    const g = this.audioCtx.createGain();
+    osc.connect(g); g.connect(this.audioCtx.destination);
+    osc.frequency.setValueAtTime(type === 'success' ? 440 : 220, this.audioCtx.currentTime);
+    g.gain.setValueAtTime(0.05, this.audioCtx.currentTime);
+    osc.start(); osc.stop(this.audioCtx.currentTime + 0.2);
+  }
+
+  renderLessonPreview(id, isPopState = false) {
+    this.currentLesson = this.lessons[id];
+    this.sessionStats = null;
+    this.statsWrapper.classList.remove("d-none"); 
+    this.currentEnergy = this.maxEnergy; 
+    this.renderStatus(false); 
+    if (!isPopState) history.pushState({ view: 'preview', lessonId: id }, '');
+    this.contentArea.innerHTML = `<div class="fade-in card border-0 lesson-${id}"><div class="p-4"><div class="d-flex justify-content-between align-items-center mb-4"><h3 class="mb-0 fw-bold">${this.currentLesson.name}</h3><button class="btn btn-sm btn-outline-light border-0 opacity-50" onclick="app.resetLessonProgress()">${this.lang.restart}</button></div><div class="row g-3 mb-4" id="words-grid"></div><div class="d-grid"><button class="btn btn-primary" onclick="app.startLessonDirectly()">${this.lang.startLesson}</button></div></div></div>`;
+    const style = this.getActiveStyle(this.currentLesson);
+    this.currentLesson.symbols.forEach(word => {
+        const success = this.isSuccessful(word);
+        const failed = this.isFailed(word);
+        const col = document.createElement("div"); col.className = "col-6 col-sm-4";
+        const card = document.createElement("div"); card.className = "word-grid-item";
+        if (success) card.style.border = "2px solid rgba(74, 222, 128, 0.5)";
+        if (failed) card.style.border = "2px solid rgba(248, 113, 113, 0.5)";
+        const svgBox = document.createElement("div"); svgBox.className = "word-svg-container";
+        this.renderToElement(word, style, svgBox);
+        card.appendChild(svgBox);
+        const label = document.createElement("div"); label.className = "fw-bold opacity-75 small text-center"; label.textContent = word;
+        card.appendChild(label);
+        card.innerHTML += this.getProgressEmoji(word, false, 'grid');
+        col.appendChild(card); document.getElementById("words-grid").appendChild(col);
+    });
+  }
+
+  startLessonDirectly() { 
+    this.currentEnergy = this.maxEnergy; 
+    const globalUnfinished = this.currentLesson.symbols.filter(s => !this.isDone(s));
+    this.sessionWords = globalUnfinished.length > 0 ? globalUnfinished : this.currentLesson.symbols;
+    this.sessionStats = {};
+    this.sessionWords.forEach(s => { this.sessionStats[s] = { c: 0 }; });
+    this.wasInProgress = globalUnfinished.length > 0;
+    this.statsWrapper.classList.remove("d-none"); 
+    this.renderQuiz(); 
+  }
   
-  this.contentArea.innerHTML = html;
-}
-  
-  // Diese Methode wird jetzt vom "Start"-Button der Vorschau aufgerufen
-  startLessonDirectly() {
-    if (!this.currentLesson) return;
-    this.statsWrapper.classList.remove("d-none");
-    this.renderQuiz();
+  renderFullView(isPopState = false) {
+    if (!isPopState) history.pushState({ view: 'full' }, '');
+    this.contentArea.innerHTML = `<div class="fade-in"><h4>${this.lang.preview}</h4><button class="btn btn-sm btn-light" onclick="app.renderLibrary()">${this.lang.back}</button><div id="full-grid"></div></div>`;
+    Object.values(this.lessons).forEach(lesson => {
+      const activeStyle = this.getActiveStyle(lesson);
+      const div = document.createElement("div");
+      div.className = `lesson-${lesson.id} mb-4 p-3 card`;
+      div.innerHTML = `<h6 class="fw-bold opacity-50 mb-3">${lesson.name}</h6><div class="row g-2" id="grid-${lesson.id}"></div>`;
+      document.getElementById("full-grid").appendChild(div);
+      lesson.symbols.forEach(word => {
+        const col = document.createElement("div"); col.className = "col-4 col-sm-2";
+        const card = document.createElement("div"); card.className = "word-grid-item text-center p-2";
+        const svgBox = document.createElement("div"); svgBox.className = "word-svg-container";
+        const label = document.createElement("div"); label.className = "small fw-bold opacity-75"; label.textContent = word;
+        this.renderToElement(word, activeStyle, svgBox);
+        card.appendChild(svgBox); card.appendChild(label);
+        card.innerHTML += this.getProgressEmoji(word, false, 'grid');
+        div.querySelector(`#grid-${lesson.id}`).appendChild(col).appendChild(card);
+      });
+    });
   }
 }
-  </script>
-  
-  <script>
- 
-  // Initialisierung nach dem Laden
-  const app = new App(document.getElementById("app"), {
-    symbolFormatter: (s, value) => {
-      return [
-        s.split(" ").map((i) => {
-          return `<img style="width:25%" src="https://chunom.org/media/generated/${i}-220.png">`
-        }).join(" "),
-        value
-      ]
-    },
-    reverseFormatter: (s, value) => {
-      return [
-        `<h1>${value}</h1>`, s.split(" ").map((i) => {
-          return `<img width="25%" src="https://chunom.org/media/generated/${i}-220.png">`
-        }).join(" ")
-      ]
-    },
-    soundProfile: "pling", // pling/blop
-    requiredCorrect: 2,
-    maxErrors: 3,
-    activeLimit: 3
-  });
 
-// Lektionen hinzufügen
-  
-  app.addLesson({
-    id: "lesson_1",
-    title: "Tập I — Cán Tự",
-    background: "#5ce",
-    items: {
-      "EE00": "?",
-      "EE01": "NG",
-      "EE02": "H",
-      "EE06": "TR",
-      "EE07": "Đ",
-      "EE08": "N",
-      "EE09": "T",
-      "EE0A": "TH",
-      "EE0B": "NH",
-      "EE0C": "CH",
-      "EE0D": "D",
-      "EE0E": "X",
-    }
-  });
-  
-  app.addLesson({
-    id: "lesson_2",
-    title: "Tập II — Chi tự",
-    background: "#fca",
-    items: {
-      "EE00 EE40 EE48": "ai",
-      "EE09 EE40": "ta",
-      "EE02 EE41": "hoa",
-      "EE12 EE42": "mơ",
-      "EE0C EE42 EE48": "chơi",
-      "EE43": "uơ",
-      "EE44": "ê",
-      "EE45": "uê",
-      "EE01 EE46": "nghe",
-      "EE46 EE3A": "em",
-      "EE47": "oe",
-      "EE07 EE48": "đi",
-      "EE49": "uy",
-      "EE4A": "ia",
-      "EE4B": "uya",
-      "EE4C": "ô",
-      "EE4D": "o",
-      "EE4E": "u",
-      "EE4F": "ua",
-      "EE50": "ư",
-      "EE51": "ưa",
-    }
-  });
-  
-  // Mit der Bibliothek starten
-  app.renderLibrary();
-
+const app = new App(document.getElementById("app"));
+const basicStyles = ["0.0", "1", "2"];
+const onsets = "b c ch d đ g gi h k kh l m n ng nh ph r s t th tr v x".split(" ");
+const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
+const tones = "a à á ả ã ạ".split(" ");
+const codas = "u i n m ng t p c nh ch".split(" ");
+const levelName = "Essentials";
+app.addLesson({ id: "onsets", category: levelName, name: "Phụ âm đầu", style: basicStyles, symbols: ["a", ...onsets.map(o => o.trim() + "a").filter(o => o !== "a")] });
+app.addLesson({ id: "vowels", category: levelName, name: "Nguyên âm", style: basicStyles, symbols: vowels });
+app.addLesson({ id: "tones", category: levelName, name: "Thanh điệu", style: basicStyles, symbols: tones });
+app.addLesson({ id: "codas", category: levelName, name: "Âm cuối", style: basicStyles, symbols: codas.map(c => "a" + c.trim()) });
+const rhymesList = [
+    { words: "ai ay ơi ây ôi oi ui uôi ưi ươi" }, { words: "ao au âu êu eo iu iêu ưu ươu" },
+    { words: "an ăn ơn ân ên en in iên ôn on un uôn ưn ươn" }, { words: "am ăm ơm âm êm em im iêm ôm om um uôm ưm ươm" },
+    { words: "ang ăng anh âng ênh eng inh iêng ông ong ung uông ưng ương" },
+];
+const rhymesList2 = [
+    { words: "oa uơ uê oe uy uya" }, { words: "oai oay uơi uây oao oau uâu uêu oeo uyu uyêu" },
+    { words: "oan oăn uơn uân uên oen uyn uyên" }, { words: "oam oăm uơm uâm uêm oem uym uyêm" },
+    { words: "oang oăng oanh uâng uênh oeng uynh uyêng" },
+];
+let idx = 0;
+rhymesList.forEach((r) => { idx++; app.addLesson({ id: "rhymes-" + idx, category: "Advanced", name: "Vần " + idx, style: ["0"], symbols: r.words.split(" ") }); });
+rhymesList2.forEach((r) => { idx++; app.addLesson({ id: "rhymes-" + idx, category: "Master", name: "Vần " + idx, style: ["0"], symbols: r.words.split(" ") }); });
+app.renderLibrary();
   </script>
 </body>
 </html>
