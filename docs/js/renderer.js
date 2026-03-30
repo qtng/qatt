@@ -562,7 +562,7 @@ const defaultQattEncoding = {
       wam: "x6",
       
       ang: "kh2",
-      wawnh: "kh3",
+      wanh: "kh3", wawnh: "kh3", wa2nh: "kh3", wa2ng: "kh3",
       waw2i: "kh4",
       wi2n: "kh5",
       awm: "kh6",
