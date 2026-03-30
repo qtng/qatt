@@ -721,12 +721,12 @@ const basicStyles = ["0.0", "1", "2"];
 const onsets = "b c ch d đ g gi h k kh l m n ng nh ph r s t th tr v x".split(" ");
 const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
 const tones = "a à á ả ã ạ".split(" ");
-const codas = "u i n m ng t p c nh ch".split(" ");
+const codas = "au ai an át am áp ang ác anh ách".split(" ");
 const levelName = "Essentials";
 app.addLesson({ id: "onsets", category: levelName, name: "Phụ âm đầu", style: basicStyles, symbols: ["a", ...onsets.map(o => o.trim() + "a").filter(o => o !== "a")] });
 app.addLesson({ id: "vowels", category: levelName, name: "Nguyên âm", style: basicStyles, symbols: vowels });
 app.addLesson({ id: "tones", category: levelName, name: "Thanh điệu", style: basicStyles, symbols: tones });
-app.addLesson({ id: "codas", category: levelName, name: "Âm cuối", style: basicStyles, symbols: codas.map(c => "a" + c.trim()) });
+app.addLesson({ id: "codas", category: levelName, name: "Âm cuối", style: basicStyles, symbols: codas });
 const rhymesList = [
     { words: "ai ay ơi ây ôi oi ui uôi ưi ươi" }, { words: "ao au âu êu eo iu iêu ưu ươu" },
     { words: "an ăn ơn ân ên en in iên ôn on un uôn ưn ươn" }, { words: "am ăm ơm âm êm em im iêm ôm om um uôm ưm ươm" },
