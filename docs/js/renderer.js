@@ -40,8 +40,8 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-o2" data-onsetsize="xsmall" d="M88 10 c0 0 -8 40 -19 56 m-10-6l12 16 M64 23 c0 0 13 15 28 40 M64 86 h30"/>
     	<path id="v2-u" data-onsetsize="xsmall" d="M60 25v45 m-2 4l14-14 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
     	<path id="v2-u2" data-onsetsize="xsmall" d="M94 16v50 M82 20 c0 0 -8 40 -18 56 m-7-8l9 18 M62 30 c0 0 14 24 26 50"/>
-    	<path id="v2-y" data-onsetsize="xsmall" d="M60 15 v70 M62 25 l20 19 M90 13 v65 m-10 0h18"/>
-    	<path id="v2-y2" data-onsetsize="xsmall" d="M64 20 v50 M80 13 v58 h1 l12-5 M60 85 h35"/>		
+    	<path id="v2-y" data-onsetsize="xsmall" d="M66 16 v65 M66 40 h28 m0-8v16 M67 60 l28 3"/>
+		<path id="v2-y2" data-onsetsize="xsmall" d="M64 20 v50 M80 13 v58 h1 l12-5 M60 85 h35"/>		
     	
     	<path id="v2-_1" data-onsetsize="xsmall" d="M61 22 m-1-8 v16"/>
     	<path id="v2-_2" data-onsetsize="xsmall" d="M62 45 m-1-8 v16"/>
