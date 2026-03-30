@@ -4,7 +4,7 @@ window.addEventListener("load",
                 title: "QATT",
                 links: [
                     { name: "Học / Learn", url: "app.html" },
-                    { name: "Hướng dẫn / Tutorial", url: "tutorial.html" },
+                    //{ name: "Hướng dẫn / Tutorial", url: "tutorial.html" },
                     { name: "Wikipedia Browser", url: "wiki.html" },
                     { name: "Logo Creator", url: "logo-creator.html" },
                 ]
