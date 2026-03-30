@@ -38,8 +38,8 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-i2" data-onsetsize="xsmall"  d="M58 38 l32-5m-32 30l32-5 M74 13 v77 h1 l20-5"/>
     	<path id="v2-o" data-onsetsize="xsmall"  d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 M64 38m4-12l-10 20M64 38 c6 8 14 18 28 40"/>
     	<path id="v2-o2" data-onsetsize="xsmall" d="M88 10 c0 0 -8 40 -19 56 m-10-6l12 16 M64 23 c0 0 13 15 28 40 M64 86 h30"/>
-    	<path id="v2-u" data-onsetsize="xsmall" d="M60 25v45 m-2 4l14-14 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
-    	<path id="v2-u2" data-onsetsize="xsmall" d="M94 16v50 M82 20 c0 0 -8 40 -18 56 m-7-8l9 18 M62 30 c0 0 14 24 26 50"/>
+    	<path id="v2-u2" data-onsetsize="xsmall" d="M60 25v45 m-2 4l14-14 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
+    	<path id="v2-u" data-onsetsize="xsmall" d="M94 16v50 M82 20 c0 0 -8 40 -18 56 m-7-8l9 18 M62 30 c0 0 14 24 26 50"/>
     	<path id="v2-y" data-onsetsize="xsmall" d="M66 16 v65 M66 40 h28 m0-8v16 M67 60 l28 3"/>
 		<path id="v2-y2" data-onsetsize="xsmall" d="M64 20 v50 M80 13 v58 h1 l12-5 M60 85 h35"/>		
     	
