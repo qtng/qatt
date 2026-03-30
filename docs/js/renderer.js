@@ -788,7 +788,7 @@ class SvgGlyphRenderer {
     if (tone != null && tone < 0) {
       tone = Math.abs(tone);
       if (!final) {
-        this.renderSvg(root, prefixes, "", "_tlarge" + tone);
+        if (String(tone) != "") this.renderSvg(root, prefixes, "", "_tlarge" + tone);
       } else {
         const tonesize = tone >= 0 ? "small" : "";
         const newG = this.renderSvg(root, prefixes, "", final.toUpperCase() + (tone ? '_t' : '') + tonesize, "", null, bold, true);
