@@ -56,4 +56,22 @@ class SupabaseService {
 
     return error ? [] : data;
   }
+
+async signInWithGoogle() {
+  const { data, error } = await this.client.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      // Where to redirect after successful login
+      redirectTo: window.location.origin 
+    }
+  });
+
+  if (error) console.error("Login error:", error.message);
+}
+
+
+
+
+  
+  
 }
