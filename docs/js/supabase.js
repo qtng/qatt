@@ -1,62 +1,59 @@
 class SupabaseService {
   constructor() {
-    // Replace with your actual Supabase project details
     this.url = 'https://fteusrnytslaylfgemye.supabase.co';
-    this.key = 'sb_publishable_2meEMOnLkAPYby7xd7Uy_w_kmHQw7dq'; //your-anon-public-key
+    this.key = 'sb_publishable_2meEMOnLkAPYby7xd7Uy_w_kmHQw7dq';
     this.client = null;
     this.user = null;
   }
 
-  // Initialize client and trigger anonymous auth
   async init() {
-    if (typeof supabase === 'undefined') {
-      console.error("Supabase SDK missing");
-      return;
-    }
+    if (typeof supabase === 'undefined') return;
+    
     this.client = supabase.createClient(this.url, this.key);
-    await this._authenticate();
+
+    // Check for existing session in localStorage
+    const { data: { session } } = await this.client.auth.getSession();
+
+    if (session) {
+      this.user = session.user;
+    } else {
+      await this._authenticate();
+    }
+    
+    return this.user;
   }
 
-  // Signs in anonymously to obtain a unique UUID
   async _authenticate() {
     const { data, error } = await this.client.auth.signInAnonymously();
-    if (error) {
-      console.error("Auth error:", error.message);
-      return;
-    }
+    if (error) return null;
     this.user = data.user;
     return this.user;
   }
 
-  // Upsert score using user_id as unique constraint
   async saveScore(nickname, score, sunflowers) {
-    if (!this.user) await this._authenticate();
+    if (!this.user) await this.init();
+    if (!this.user) return;
 
-    const { error } = await this.client
+    await this.client
       .from('leaderboard')
       .upsert({
         user_id: this.user.id,
         username: nickname || "Anonymous",
         score: score,
-        sunflowers: sunflowers,
+        sunflowers: sunflowers || 0,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
-
-    if (error) console.error("Save error:", error.message);
   }
 
-  // Retrieve top ranked scores
   async getLeaderboard(limit = 25) {
+    if (!this.client) return [];
+
     const { data, error } = await this.client
       .from('leaderboard')
-      .select('username, score, sunflowers, user_id, updated_at')
+      .select('username, score, sunflowers, user_id')
       .order('score', { ascending: false })
       .limit(limit);
 
-    if (error) {
-      console.error("Fetch error:", error.message);
-      return [];
-    }
-    return data;
+    return error ? [] : data;
   }
 }
