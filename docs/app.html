@@ -342,8 +342,7 @@ class App {
     //db.signInWithGoogle()
     const int = setInterval(() => {
     	if (db.user) {
-    		clearInterval(int)
-    		console.log(db.user.id)
+    		clearInterval(int);
     	}
     }, 500);
   	return new App(container, db);
@@ -1007,16 +1006,16 @@ renderLeaderboard(isPop = false) {
 }
   
   setNickname() {
-    let newname = prompt('Chọn tên mới', app.nickname);
+    let newname = prompt('Chọn tên mới', localStorage.username);
 	if (!newname) return;
 	  newname = newname.trim().replace(/[^\p{L}\p{N}]/g, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
 	  if (newname.length < 2) return;
 	  if (newname.length > 30) newname = newname.substr(0, 30);
 	this.username = newname;
 	localStorage.username = newname;
-    this.db.setNickname(newname);
-    
+	console.log("username changed to", localStorage.username);
     setTimeout(() => this.refreshCurrentView(),1000);
+	this.db.setNickname(newname);
   }
 	
 	
