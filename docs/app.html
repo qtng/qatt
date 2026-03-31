@@ -1007,7 +1007,12 @@ renderLeaderboard(isPop = false) {
   
   setNickname() {
     let newname = prompt('Chọn tên mới', app.nickname);
-	app.nickname = localStorage.nickname = this.db.setNickname(newname);
+	if (!newname) return;
+	  newname = newname.trim().replace(/[^\p{L}\p{N}]/g, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
+	  if (newname.length < 2) return;
+	  if (newname.length > 30) newname = newname.substr(0, 30);
+	app.nickname = localStorage.nickname = newname;
+    this.db.setNickname(newname);
     
     setTimeout(() => this.refreshCurrentView(),1000);
   }
