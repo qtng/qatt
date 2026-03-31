@@ -980,7 +980,7 @@ renderLeaderboard(isPop = false) {
     		</td>
     		<td class="fw-bold" style="font-size:1.1em">
       			${row.score}
-      			${row.rank == 1 ? '🏆' : ''}
+      			${row.rank == 1 ? '' : ''}
     		</td>
     		<th class="${row.user_id == this.db.user.id ? 'text-warning' : ''}">
     	  		<div class="text-truncate">${username}</div>
