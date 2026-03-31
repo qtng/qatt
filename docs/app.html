@@ -314,7 +314,7 @@ class App {
     };
     this.db = db;
     this.useDB = true;
-    this.nickname = localStorage.nickname || "Anonymous";
+    this.username = localStorage.username || "Anonymous";
     this.mainContainer = container;
     this.lessons = {};
     this.currentLesson = null;
@@ -677,7 +677,7 @@ class App {
       // --- HELPERS ---
   async syncScore() {
   	if (!this.db.user) return; // Wait, until Auth is ready 
-  	await this.db.saveScore(this.nickname || "Anonymous", this.stats._score || 0, 0);
+  	await this.db.saveScore(this.username || "Anonymous", this.stats._score || 0, 0);
   }
   
   updateGlobalCounters(animations = {}) {
@@ -1013,7 +1013,7 @@ renderLeaderboard(isPop = false) {
 	  newname = newname.trim().replace(/[^\p{L}\p{N}]/g, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
 	  if (newname.length < 2) return;
 	  if (newname.length > 30) newname = newname.substr(0, 30);
-	this.nickname = newname;
+	this.username = newname;
 	localStorage.username = newname;
     this.db.setNickname(newname);
     
