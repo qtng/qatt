@@ -1007,10 +1007,14 @@ renderLeaderboard(isPop = false) {
   
   setNickname() {
     let newname = prompt('Chọn tên mới', localStorage.username);
+	console.log("about to change username to", newname);
 	if (!newname) return;
+	  console.log("changing");
 	  newname = newname.trim().replace(/[^\p{L}\p{N}]/g, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
+	  console.log("cleaned name", newname);
 	  if (newname.length < 2) return;
 	  if (newname.length > 30) newname = newname.substr(0, 30);
+	  console.log("truncating to", newname);
 	this.username = newname;
 	localStorage.username = newname;
 	console.log("username changed to", localStorage.username);
