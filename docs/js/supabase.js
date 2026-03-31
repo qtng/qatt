@@ -45,6 +45,13 @@ class SupabaseService {
       }, { onConflict: 'user_id' });
   }
 
+  async setNickname(name) {
+    name = name.trim().replace(/[^\p{L}\p{N}]/g, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
+    if (name.length < 2) return;
+    if (name.length > 30) name = name.substr(0, 30);
+    return;
+  }
+
   async getLeaderboard(limit = 25) {
     if (!this.client) return [];
 
