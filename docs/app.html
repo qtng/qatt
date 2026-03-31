@@ -952,36 +952,49 @@ renderLeaderboard(isPop = false) {
   this.bottomBar.style.display = "none";
   this.mainContainer.innerHTML = `
     <div class="fade-in">
-      <h4 class="fw-bold mb-4 text-center">Rangliste</h4>
+      <h4 class="fw-bold mb-4 text-center">Bảng xếp hạng</h4>
       <div id="leaderboard-content" class="card p-4 text-center">⏳</div>
     </div>`;
   
   let html = "";
-  this.db.getLeaderboard(20).then(data => {
+  this.db.getHybridLeaderboard(10, 3).then(data => {
     console.log(JSON.stringify(data))
     html = "";
+    let rankBefore = 0;
     data.forEach((row, i) => {
-       const username = row.username != "Anonymous" ? row.username : "Anonymous-" + row.user_id.split("-")[0].toUpperCase();
-    	html += `
-    	<tr>
+      const hasGap = row.rank - rankBefore > 1 ? true : false;
+      rankBefore = row.rank;
+      const username = row.username != "Anonymous" ? row.username : "Anonymous-" + row.user_id.split("-")[0].toUpperCase();
+      if (hasGap) {
+        html += `
+          <tr><td colspan="3">...</td></tr>
+        `;
+      }
+      	html += `
+    	<tr style="${row.user_id == this.db.user.id ? '' : 'opacity:.85'}">
     		<td>
-    		  (${i+1})
+    		  (${row.rank})
     		</td>
     		<td class="fw-bold" style="font-size:1.1em">
-    			${row.score}
-    			${i == 0 ? '🏆' : ''}
+      			${row.score}
+      			${row.rank == 1 ? '🏆' : ''}
     		</td>
-    		<th class="fw-bold ms-4 text-truncate">
-    			${username}
-    			<div class="small text-muted">
-    			${new Date(row.updated_at||null).toISOString().replace('T', ' ').split('.')[0]}
-    			</div>
+    		<th class="${row.user_id == this.db.user.id ? 'text-warning' : ''}">
+    	  		${username}
+      			<div class="small text-muted">
+        			${new Date(row.updated_at||null).toISOString().replace('T', ' ').split('.')[0].slice(0, -3)}
+      			</div>
     		</th>
     	</tr>
-    	`;
+      	`;
     });
     this.mainContainer.innerHTML = `
-    	<table class="table rounded">
+    	
+    <div class="m-2">
+      Tên của bạn: <b>${this.nickname}</b> (<span onclick="app.setNickname()" class="text-light cursor-pointer">đổi tên</span>)
+    </div>
+    
+    <table class="table rounded">
     		<tr>
     			<th>Rank</th>
     			<th>Score</th>
@@ -991,7 +1004,15 @@ renderLeaderboard(isPop = false) {
     	</table>`;
   });
 }
-
+  
+  setNickname() {
+    let newname = prompt('Chọn tên mới', app.nickname);
+	app.nickname = localStorage.nickname = this.db.setNickname(newname);
+    
+    setTimeout(() => this.refreshCurrentView(),1000);
+  }
+	
+	
 }
 
 async function main() {
