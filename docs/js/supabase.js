@@ -50,7 +50,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('leaderboard')
-      .select('username, score, sunflowers, user_id')
+      .select('username, score, sunflowers, user_id, updated_at')
       .order('score', { ascending: false })
       .limit(limit);
 
