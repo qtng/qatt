@@ -814,6 +814,9 @@ class App {
             this.renderer.renderText(formattedRefCode, refSpan, Number(style) > 0 ? 0 : 1);
             element.appendChild(refSpan);
         }
+		const text = document.createElement("div");
+        text.className = "w-100 small text-center";
+        text.append(word);
     } else {
         element.textContent = word;
     }
