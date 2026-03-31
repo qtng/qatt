@@ -1,7 +1,7 @@
 window.addEventListener("load",
         function() {
             const navConfig = {
-                title: "QATT",
+                title: "QATT App",
                 links: [
                     { name: "Học / Learn", url: "app.html" },
                     //{ name: "Hướng dẫn / Tutorial", url: "tutorial.html" },
