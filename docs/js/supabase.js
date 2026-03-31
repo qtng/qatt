@@ -49,7 +49,7 @@ class SupabaseService {
   async getLeaderboard(limit = 25) {
     const { data, error } = await this.client
       .from('leaderboard')
-      .select('name, score, sunflowers, user_id')
+      .select('username, score, sunflowers, user_id')
       .order('score', { ascending: false })
       .limit(limit);
 
