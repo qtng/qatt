@@ -46,10 +46,19 @@ class SupabaseService {
   }
 
   async setNickname(name) {
-    name = name.trim().replace(/[^\p{L}\p{N}]/g, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
+    name = name.trim().replace(/[^\p{L}\p{N}\s]/ug, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
     if (name.length < 2) return;
     if (name.length > 30) name = name.substr(0, 30);
-    return;
+    if (!this.user) await this.init();
+    if (!this.user) return;
+
+    const { error } = await this.client
+      .from('leaderboard')
+      .update({
+        username: name
+      }).eq('user_id', this.user.id);
+
+    if (error) console.error("Error updating nickname:", error.message);
   }
 
   async getLeaderboard(limit = 25) {
