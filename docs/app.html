@@ -416,7 +416,7 @@ class App {
     Object.values(this.lessons).forEach(lesson => { 
       const thumbElement = document.getElementById(`thumb-${lesson.id}`);
       if (thumbElement) {
-        this.renderToElement(lesson.symbols[0], this.getActiveStyle(lesson), thumbElement, true); 
+        this.renderToElement(lesson.symbols[1], this.getActiveStyle(lesson), thumbElement, true); 
       }
     });
 
