@@ -36,7 +36,7 @@ class SupabaseService {
       .from('leaderboard')
       .upsert({
         user_id: this.user.id,
-        name: nickname || "Anonymous",
+        username: nickname || "Anonymous",
         score: score,
         sunflowers: sunflowers,
         updated_at: new Date().toISOString()
