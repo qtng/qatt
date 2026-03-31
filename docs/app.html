@@ -958,7 +958,6 @@ renderLeaderboard(isPop = false) {
   
   let html = "";
   this.db.getHybridLeaderboard(10, 3).then(data => {
-    console.log(JSON.stringify(data))
     html = "";
     let rankBefore = 0;
     data.forEach((row, i) => {
@@ -993,7 +992,7 @@ renderLeaderboard(isPop = false) {
     this.mainContainer.innerHTML = `
     	
     <div class="m-2">
-      Tên của bạn: <b>${this.nickname}</b> (<span onclick="app.setNickname()" class="text-light cursor-pointer">đổi tên</span>)
+      Tên của bạn: <b>${this.username}</b> (<span onclick="app.setNickname()" class="text-light cursor-pointer">đổi tên</span>)
     </div>
     
     <table class="table rounded">
