@@ -171,6 +171,7 @@
                 </span>
                 <select class="w-auto form-select-sm form-select" id="typeSelect" onchange="changetype(parseInt(this.value))">
                     <option value="0">Chính thể</option>
+                    <option value="0.0">Chính thể rời</option>
                     <option value="1">Giản thể</option>
                     <option value="2">Giản thể +</option>
                 </select>
@@ -192,7 +193,7 @@
             <!-- Options Row -->
             <div class="d-flex justify-content-center gap-4 mb-2">
                 <div id="showToggleContainer" class="form-check form-switch small">
-                    <input checked class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
+                    <input class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
                     <label class="form-check-label" for="showOriginalToggle">Quốc ngữ</label>
                 </div>
                 <div class="form-check form-switch small">
