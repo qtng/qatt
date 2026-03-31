@@ -468,6 +468,7 @@ class App {
     });
   }
 
+
   renderQuiz(isPop = false, keepWord = false) {
     if (this.currentEnergy <= 0) {
       this.mainContainer.innerHTML = `
@@ -501,16 +502,13 @@ class App {
           selectedWord = unfinishedSymbols[Math.floor(Math.random() * poolLimit)];
         } while (tries < 20 && selectedWord === this.lastQuizWord);
       } else {
-        selectedWord = unfinishedSymbols[Math.floor(Math.random() * poolLimit)];
-        } while (tries < 20 && selectedWord === this.lastQuizWord);
-      } else {
         selectedWord = unfinishedSymbols[0];
       }
       
       this.activeQuizWord = selectedWord;
       this.lastQuizWord = selectedWord;
-    }
-
+	}
+	  
     const correctWord = this.activeQuizWord;
     const showSvgAsQuestion = Math.random() < 0.5;
     const activeStyle = this.getActiveStyle(this.currentLesson);
