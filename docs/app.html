@@ -965,6 +965,8 @@ renderLeaderboard(isPop = false) {
       const hasGap = row.rank - rankBefore > 1 ? true : false;
       rankBefore = row.rank;
       const username = row.username != "Anonymous" ? row.username : "Anonymous-" + row.user_id.split("-")[0].toUpperCase();
+		if (username.length > 30) username = username.substr(0, 30);
+		username = username.replace(/[^\p{L}\p{N}\s]/ug, "").replace(/[<>"'&]/g, "");
       if (hasGap) {
         html += `
           <tr><td colspan="3">...</td></tr>
