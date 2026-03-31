@@ -963,7 +963,7 @@ renderLeaderboard(isPop = false) {
       const hasGap = row.rank - rankBefore > 1 ? true : false;
       rankBefore = row.rank;
       let username = row.username != "Anonymous" ? row.username : "Anonymous-" + row.user_id.split("-")[0].toUpperCase();
-		if (username.length > 30) username = username.substr(0, 30);
+		if (username.length > 40) username = username.substr(0, 40);
 		username = username.replace(/[^\p{L}\p{N}\s]/ug, "").replace(/[<>"'&]/g, "");
       if (hasGap) {
         html += `
@@ -980,7 +980,7 @@ renderLeaderboard(isPop = false) {
       			${row.rank == 1 ? '🏆' : ''}
     		</td>
     		<th class="${row.user_id == this.db.user.id ? 'text-warning' : ''}">
-    	  		${username}
+    	  		<div class="text-truncate">${username}</div>
       			<div class="small text-muted">
         			${new Date(row.updated_at||null).toISOString().replace('T', ' ').split('.')[0].slice(0, -3)}
       			</div>
@@ -1013,7 +1013,7 @@ renderLeaderboard(isPop = false) {
 	  newname = newname.trim().replace(/[^\p{L}\p{N}]/ug, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
 	  console.log("cleaned name", newname);
 	  if (newname.length < 2) return;
-	  if (newname.length > 30) newname = newname.substr(0, 30);
+	  if (newname.length > 40) newname = newname.substr(0, 30);
 	  console.log("truncating to", newname);
 	this.username = newname;
 	localStorage.username = newname;
