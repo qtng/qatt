@@ -32,7 +32,12 @@
     }
     
     html { scroll-behavior: auto !important; }
-    
+
+	@media (min-width: 1400px) { max-width: 960px }
+	@media (min-width: 1200px) { max-width: 960px }
+	@media (min-width: 992px) { max-width: 960px }
+	  
+	  
     .fixed-header-container {
       position: fixed;
       top: var(--external-nav-height);
@@ -123,7 +128,7 @@
     .symbol-card { min-height: 200px; border-radius: 18px; padding: 30px; svg { height: 6em; margin-top: -1.75em; }; }
     .reload-quiz-btn { position: absolute; top: 15px; left: 15px; background: none; border: none; color: white; opacity: 0.3; font-size: 1.4rem; padding: 10px; z-index: 10; }
 
-    .qatt-container { max-width: 550px; margin: auto; margin-top: var(--external-nav-height); padding: 0 15px; }
+    .qatt-container { margin: auto; margin-top: var(--external-nav-height) }
     .category-title { font-weight: 800; text-transform: uppercase; margin-top: 2rem; margin-bottom: 1rem; font-size: 0.8rem; opacity: 0.5; }
     .progress { background-color: rgba(255,255,255,0.1); border-radius: 10px; height: 6px !important; }
     
@@ -271,7 +276,7 @@
 <body data-bs-theme="dark">
   
   <header class="fixed-header-container">
-    <div class="d-flex align-items-center w-100">
+    <div class="container d-flex align-items-center w-100">
       <div class="nav-icon-btn" onclick="app.renderLibrary()" title="Trang chủ">🏠</div>
 
       <div class="status-group">
