@@ -1029,12 +1029,12 @@ getUsername(username, uuid) {
     const adjectives = [
         "Fast", "Cool", "Wild", "Smart", "Glad", 
         "Brave", "Soft", "Bold", "Bright", "Strong",
-        "Small", "Fluffy", "Quick", "Calm", "Noble", 
+        "Small", "Fluffy", "Quick", "Light", "Noble", 
         "Sharp", "Keen", "True", "Lucky", "Pure"
     ];
 
     const nouns = [
-        "Panda", "Eagle", "Fox", "Bear", "Lion", 
+        "Cat", "Eagle", "Fox", "Bear", "Lion", 
         "Tiger", "Otter", "Wolf", "Hare", "Owl",
         "Lynx", "Koala", "Deer", "Dino", "Shark", 
         "Moose", "Raven", "Pug", "Seal", "Gecko"
@@ -1045,9 +1045,8 @@ getUsername(username, uuid) {
 
     const adjIndex = val % adjectives.length;
     const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
-    const suffix = parseInt(hexPart.slice(0,2), 16) || 1;
-
-    return `${adjectives[adjIndex]}-${nouns[nounIndex]}-${suffix}`;
+    const suffix = parseInt(hexPart.slice(0,2), 16) || 1!
+    return `${adjectives[adjIndex].toLowerCase()}${nouns[nounIndex]}_${suffix}`;
 }
 
 
