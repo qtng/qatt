@@ -1026,18 +1026,19 @@ getUsername(username, uuid) {
 		if (!uuid) return username || "Anonymous";
 	}
 	if (username && username != "Anonymous") return  username;
+	if (!uuid) return "Anonymous";
     const adjectives = [
         "Fast", "Cool", "Wild", "Smart", "Glad", 
-        "Brave", "Soft", "Bold", "Bright", "Strong",
-        "Small", "Fluffy", "Quick", "Light", "Noble", 
-        "Sharp", "Keen", "True", "Lucky", "Pure"
+        "Brave", "Soft", "Bold", "Bright", "Swift",
+        "Tiny", "Fluffy", "Quick", "Light", "Noble", 
+        "Sharp", "Keen", "True", "Lucky", "Free"
     ];
 
     const nouns = [
         "Cat", "Eagle", "Fox", "Bear", "Lion", 
-        "Tiger", "Otter", "Wolf", "Hare", "Owl",
-        "Lynx", "Koala", "Deer", "Dino", "Shark", 
-        "Moose", "Raven", "Pug", "Seal", "Gecko"
+        "Goose", "Camel", "Wolf", "Hare", "Owl",
+        "Lynx", "Koala", "Deer", "Dino", "Squirrel", 
+        "Hippo", "Raven", "Pug", "Seal", "Gecko"
     ];
 
     const hexPart = uuid.substring(0, 3);
@@ -1045,7 +1046,7 @@ getUsername(username, uuid) {
 
     const adjIndex = val % adjectives.length;
     const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
-    const suffix = parseInt(hexPart.slice(0,2), 16) || 1!
+    const suffix = parseInt(hexPart.slice(0,2), 16) || 1;
     return `${adjectives[adjIndex].toLowerCase()}${nouns[nounIndex]}_${suffix}`;
 }
 
