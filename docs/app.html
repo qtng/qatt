@@ -976,7 +976,7 @@ renderLeaderboard(isPop = false) {
       rankBefore = row.rank;
       let username = this.getUsername(row.username, row.user_id);
 		if (username.length > 40) username = username.substr(0, 40);
-		username = username.replace(/[^\p{L}\p{N}\s\-_]/ug, "").replace(/[<>"'&]/g, "");
+		username = username.replace(/[^\p{L}\p{N}\-_\s]/ug, "").replace(/[<>"'&]/g, "");
       if (hasGap) {
         html += `
           <tr><td colspan="3">...</td></tr>
@@ -1057,7 +1057,7 @@ getUsername(username, uuid) {
 	console.log("about to change username to", newname);
 	if (!newname) return;
 	  console.log("changing...");
-	  newname = newname.trim().replace(/[^\p{L}\p{N}\-_]/ug, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
+	  newname = newname.trim().replace(/[^\p{L}\p{N}\-_\s]/ug, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
 	  console.log("cleaned name", newname);
 	  if (newname.length < 2) return;
 	  if (newname.length > 40) newname = newname.substr(0, 30);
