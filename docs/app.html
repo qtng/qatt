@@ -1041,8 +1041,8 @@ getUsername(username, uuid) {
         "Hippo", "Raven", "Pug", "Seal", "Gecko"
     ];
 
-    const hexPart = uuid.substring(0, 3);
-    const val = parseInt(hexPart, 16);
+    const hexPart = uuid.substring(0, 5);
+    const val = parseInt(hexPart.substring(2, 5), 16);
 
     const adjIndex = val % adjectives.length;
     const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
