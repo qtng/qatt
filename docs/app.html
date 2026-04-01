@@ -1020,7 +1020,7 @@ renderLeaderboard(isPop = false) {
 }
 
 getUsername(username, uuid) {
-	if (username == null && uuid && null) {
+	if (username == null && uuid == null) {
 		username = this.username;
 		uuid = this.db.user ? this.db.user.id : null;
 		if (!uuid) return username || "Anonymous";
