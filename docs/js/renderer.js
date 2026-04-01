@@ -695,7 +695,7 @@ class SvgGlyphRenderer {
 	} else if(String(type) == 0) {
       text = text.replace("+", "").replace(",", ",+")
     }
-	return this.renderT3xt(text, root, String(type));
+	return this.renderText(text, root, String(type));
   }
 	
   renderText(text, root, type) {
