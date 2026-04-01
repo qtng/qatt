@@ -681,7 +681,8 @@ class App {
       // --- HELPERS ---
   async syncScore() {
   	if (!this.db.user) return; // Wait, until Auth is ready 
-  	await this.db.saveScore(this.username || "Anonymous", this.stats._score || 0, 0);
+	const username = this.getUsername();
+  	await this.db.saveScore(username, this.stats._score || 0, 0);
   }
   
   updateGlobalCounters(animations = {}) {
@@ -973,7 +974,7 @@ renderLeaderboard(isPop = false) {
     data.forEach((row, i) => {
       const hasGap = row.rank - rankBefore > 1 ? true : false;
       rankBefore = row.rank;
-      let username = row.username != "Anonymous" ? row.username : "Anonymous-" + row.user_id.split("-")[0].toUpperCase();
+      let username = getUsername(row.username, row.user_id);
 		if (username.length > 40) username = username.substr(0, 40);
 		username = username.replace(/[^\p{L}\p{N}\s]/ug, "").replace(/[<>"'&]/g, "");
       if (hasGap) {
@@ -999,10 +1000,12 @@ renderLeaderboard(isPop = false) {
     	</tr>
       	`;
     });
+
+	
     this.mainContainer.innerHTML = `
     	
     <div class="mx-2 my-3">
-      Tên của bạn: <b>${this.username}</b> (<span class="text-decoration-underline" onclick="app.setNickname()" class="text-light cursor-pointer">chỉnh sửa tên</span>)
+      Tên của bạn: <b>${this.getUsername()}</b> (<span class="text-decoration-underline" onclick="app.setNickname()" class="text-light cursor-pointer">chỉnh sửa tên</span>)
     </div>
     
     <table class="table rounded">
@@ -1015,7 +1018,40 @@ renderLeaderboard(isPop = false) {
     	</table>`;
   });
 }
-  
+
+getUsername(username, uuid) {
+	if (username == null && uuid && null) {
+		username = this.username;
+		uuid = this.db.user ? this.db.user.id : null;
+		if (!uuid) return username || "Anonymous";
+	}
+	if (!username || username != "Anonymous") return username;
+    const adjectives = [
+        "Fast", "Cool", "Wild", "Smart", "Glad", 
+        "Brave", "Soft", "Bold", "Bright", "Strong",
+        "Small", "Fluffy", "Quick", "Calm", "Noble", 
+        "Sharp", "Keen", "True", "Lucky", "Pure"
+    ];
+
+    const nouns = [
+        "Panda", "Eagle", "Fox", "Bear", "Lion", 
+        "Tiger", "Otter", "Wolf", "Hare", "Owl",
+        "Lynx", "Koala", "Deer", "Dino", "Shark", 
+        "Moose", "Raven", "Pug", "Seal", "Gecko"
+    ];
+
+    const hexPart = uuid.substring(0, 3);
+    const val = parseInt(hexPart, 16);
+
+    const adjIndex = val % adjectives.length;
+    const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
+    const suffix = hexPart.charAt(2).toUpperCase();
+
+    return `${adjectives[adjIndex]} ${nouns[nounIndex]} ${suffix}`;
+  }
+
+
+	
   setNickname() {
     let newname = prompt('Chọn tên mới', localStorage.username || this.username);
 	console.log("about to change username to", newname);
