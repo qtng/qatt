@@ -30,7 +30,7 @@ window.addEventListener("load",
                 }).join('');
 
                 nav.innerHTML = `
-                    <div class="container-fluid">
+                    <div class="container">
                         <a class="navbar-brand d-flex align-items-center" href="index.html">
                             <span class="fw-bold tracking-tight">${navConfig.title}</span>
                         </a>
