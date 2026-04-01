@@ -542,7 +542,7 @@ class App {
     const questionWrapper = document.createElement("div");
 
     if (showSvgAsQuestion) {
-      this.renderToElement(correctWord, activeStyle, questionWrapper); 
+      this.renderToElement(correctWord, activeStyle, questionWrapper, false, false); 
     } else {
       questionWrapper.innerHTML = `<h1 class="display-1 fw-bold">${correctWord}</h1>`; 
     }
@@ -591,7 +591,7 @@ class App {
       if (questionWasSvg) {
         wrapper.textContent = option; 
       } else {
-        this.renderToElement(option, activeStyle, wrapper, true);
+        this.renderToElement(option, activeStyle, wrapper, true, false);
       }
       
       button.appendChild(wrapper);
@@ -797,7 +797,7 @@ class App {
     return code; 
   }
   
-  renderToElement(word, style, element, skipReference = false) {
+  renderToElement(word, style, element, skipReference = false, withHint = true) {
     element.innerHTML = "";
     const mainCode = this.getParsedCode(word, style);
     if (mainCode) {
@@ -814,10 +814,12 @@ class App {
             this.renderer.renderText(formattedRefCode, refSpan, Number(style) > 0 ? 0 : 1);
             element.appendChild(refSpan);
         }
-		const text = document.createElement("div");
-        text.className = "w-100 small text-center";
-        text.append(word);
-		element.appendChild(text);
+		if (withHint) {
+			const text = document.createElement("div");
+            text.className = "w-100 small text-center";
+            text.append(word);
+		    element.appendChild(text);
+		}
     } else {
         element.textContent = word;
     }
