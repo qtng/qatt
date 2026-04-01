@@ -1025,7 +1025,7 @@ getUsername(username, uuid) {
 		uuid = this.db.user ? this.db.user.id : null;
 		if (!uuid) return username || "Anonymous";
 	}
-	if (!username || username != "Anonymous") return username;
+	if (username && username != "Anonymous") return  username;
     const adjectives = [
         "Fast", "Cool", "Wild", "Smart", "Glad", 
         "Brave", "Soft", "Bold", "Bright", "Strong",
@@ -1045,10 +1045,10 @@ getUsername(username, uuid) {
 
     const adjIndex = val % adjectives.length;
     const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
-    const suffix = hexPart.charAt(2).toUpperCase();
+    const suffix = parseInt(hexPart.slice(0,2), 16) || 1;
 
-    return `${adjectives[adjIndex]} ${nouns[nounIndex]} ${suffix}`;
-  }
+    return `${adjectives[adjIndex]}-${nouns[nounIndex]}-${suffix}`;
+}
 
 
 	
