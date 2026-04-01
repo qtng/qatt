@@ -974,7 +974,7 @@ renderLeaderboard(isPop = false) {
     data.forEach((row, i) => {
       const hasGap = row.rank - rankBefore > 1 ? true : false;
       rankBefore = row.rank;
-      let username = getUsername(row.username, row.user_id);
+      let username = this.getUsername(row.username, row.user_id);
 		if (username.length > 40) username = username.substr(0, 40);
 		username = username.replace(/[^\p{L}\p{N}\s]/ug, "").replace(/[<>"'&]/g, "");
       if (hasGap) {
