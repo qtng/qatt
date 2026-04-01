@@ -1,3 +1,19 @@
+/*
+QATT renderer
+
+const options = {};
+const renderer = new SvgGlyphRenderer(options);
+
+let type = 0; // traditional QATT
+// type = -1 // trditional QATT with extra final
+// type = 1 // simplified QATT
+// type = 2 // simplified QATT with fused tones
+
+const element = document.createElemebt("div");
+renderer.render("t,i2,ng,1", element, type);
+
+*/
+
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	style="height:4800px;width:2540px;"
     	id="svg">
@@ -670,7 +686,18 @@ class SvgGlyphRenderer {
     //}
     return g;
   }
-
+	
+  render(text, root, type) {
+	  // render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
+	if (String(type) == -1) {
+      type = "0";
+	  text = text.replace("+", "");
+	} else if(String(type) == 0) {
+      text = text.replace("+", "").replace(",", ",+")
+    }
+	return this.renderT3xt(text, root, String(type));
+  }
+	
   renderText(text, root, type) {
     const prefixes = this.getPrefixes(type);
     const target = root || this.container;
