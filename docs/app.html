@@ -1047,7 +1047,7 @@ getUsername(username, uuid) {
     const adjIndex = val % adjectives.length;
     const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
     const suffix = parseInt(hexPart.slice(0,2), 16) || 1;
-    return `${adjectives[adjIndex].toLowerCase()}${nouns[nounIndex]}_${suffix}`;
+    return `${adjectives[adjIndex]}${nouns[nounIndex]}_${suffix}`;
 }
 
 
