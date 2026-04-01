@@ -46,7 +46,7 @@ class SupabaseService {
   }
 
   async setNickname(name) {
-    name = name.trim().replace(/[^\p{L}\p{N}\s]/ug, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
+    name = name.trim().replace(/[^\p{L}\p{N}\-_\s]/ug, "").replace(/[\x00-\x1F\x7F&<>"']/g, "").replace(/\s+/g, " ");
     if (name.length < 2) return;
     if (name.length > 40) name = name.substr(0, 40);
     if (!this.user) await this.init();
