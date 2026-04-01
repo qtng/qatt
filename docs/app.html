@@ -1042,11 +1042,11 @@ getUsername(username, uuid) {
     ];
 
     const hexPart = uuid.substring(0, 5);
-    const val = parseInt(hexPart.substring(2, 5), 16);
+    const val = parseInt(hexPart.substring(0, 3), 16);
 
     const adjIndex = val % adjectives.length;
     const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
-    const suffix = parseInt(hexPart.slice(0,2), 16) || 1;
+    const suffix = parseInt(hexPart.slice(3, 5), 16) || 1;
     return `${adjectives[adjIndex]}${nouns[nounIndex]}_${suffix}`;
 }
 
