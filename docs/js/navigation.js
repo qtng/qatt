@@ -1,12 +1,13 @@
 window.addEventListener("load",
         function() {
             const navConfig = {
-                title: "QATT App",
+                title: "Chunom.org",
                 links: [
-                    { name: "Học / Learn", url: "/qatt-dc/app.html" },
+                    { name: "Học QATT", url: "/qatt-dc/app.html" },
                     //{ name: "Hướng dẫn / Tutorial", url: "tutorial.html" },
-                    { name: "Wikipedia Browser", url: "/qatt-dc/wiki.html" },
+                    { name: "QATT Wiki", url: "/qatt-dc/wiki.html" },
                     { name: "Logo Creator", url: "/qatt-dc/logo-creator.html" },
+                        { name: "Chữ Nôm", url: "/chunom" },
                 ]
             };
 
