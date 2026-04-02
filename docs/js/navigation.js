@@ -13,7 +13,7 @@ window.addEventListener("load",
             function injectNav() {
                 const currentPath = window.location.pathname;
                 const nav = document.createElement('nav');
-                nav.style.backgroundColor = "rgb(20 35 55 / 0.5)";
+                nav.style.backgroundColor = "rgba(20, 35, 55, 0.3)";
                 nav.style.backdropFilter = "blur(32px)";
                 nav.className = "navbar navbar-expand-lg navbar-dark fixed-top shadow-sm";
                 
