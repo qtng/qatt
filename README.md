@@ -12,14 +12,14 @@ More complex characters can be expressed by **combining multiple QATT codes** us
 
 **Examples:**
 
-- `Dd3+1` → `⁰壬`  
-  Base symbol **Dd**, with a dot placed at the start of the second stroke and a full tine symbol in the top left corner.
+- `Dd5+1` → `°壬`  
+  Base symbol **Dd** (土), with a dot placed at the start of the vertical **main stroke** (壬) and a full tone symbol in the top left corner: °壬.
 
-- `Tr1+4` → `꜆牛`  
-  Base symbol **Tr**, with a dot at the start of the first stroke and a half tone marker in the bottom-left corner.
+- `Ch1-3` → `꜀牛`  
+  Base symbol **Ch** (キ), with a dot on the top left of the **support rectangle** (牛) and a half tone marker in the bottom-left corner: ꜀牛.
 
-- `⿱ThDd-2` → `芏꜂`  
-  A compound character formed by placing **Th** above **Dd**, with a half tone marker at the top-right.
+- `⿱ThDd-2` → `芏꜄`  
+  A compound character formed by placing **Th** (卄) above **Dd** (土), with a half tone marker at the top-right: 芏꜄.
 
 The complete syntax, component definitions, and formal rules are described in the [Full Specification](SPEC.md).
 
@@ -39,16 +39,16 @@ Các ký tự phức hợp được biểu diễn bằng cách **kết hợp nhi
 
 **Ví dụ:**
 
-- `Dd3+1` → `⁰壬`  
-  Cán tự **Dd**, với dấu phẩy đặt tại đầu nét thứ hai với thanh điêu dương ở góc trên bên trái.
+- `Dd5+1` → `⁰壬`  
+  Cán tự **Dd**, với dấu phẩy đặt tại đầu **nét chính** với thanh điêu dương ở góc trên bên trái.
 
-- `Tr1+4` → `꜀牛`  
-  Cán tự **Tr**, với dấu phẩy ở đầu nét thứ nhất với thanh điệu dương ở góc dưới bên trái.
+- `Ch1-3` → `꜀牛`  
+  Cán tự **Ch** (キ), với dấu phẩy ở trên bên trái của hình chữ **nhật của phụ** (牛) với thanh điệu âm ở góc dưới bên trái: ꜀牛.
 
 - `⿱ThDd-2` → `芏꜄`  
-  Ký tự phức hợp gồm **Th** đặt phía trên **Dd**, với thanh điệu âm ở góc trên bên phải.
+  Chữ phức hợp gồm **Th** (卄) đặt phía trên **Dd** (土), với thanh điệu âm ở góc trên bên phải: 芏꜄.
 
 Cú pháp đầy đủ, định nghĩa các thành phần và các quy tắc hình thức được trình bày trong [Tài liệu đặc tả đầy đủ QATT-DC](SPEC.md).
 
 # Lookup table - Bảng tra
-![QATT Lookup Table](qatt.png)
+tbd
