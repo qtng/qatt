@@ -3,18 +3,18 @@ window.addEventListener("load",
             const navConfig = {
                 title: "QATT App",
                 links: [
-                    { name: "Học / Learn", url: "app.html" },
+                    { name: "Học / Learn", url: "/qatt-dc/app.html" },
                     //{ name: "Hướng dẫn / Tutorial", url: "tutorial.html" },
-                    { name: "Wikipedia Browser", url: "wiki.html" },
-                    { name: "Logo Creator", url: "logo-creator.html" },
+                    { name: "Wikipedia Browser", url: "/qatt-dc/wiki.html" },
+                    { name: "Logo Creator", url: "/qatt-dc/logo-creator.html" },
                 ]
             };
 
             function injectNav() {
                 const currentPath = window.location.pathname;
                 const nav = document.createElement('nav');
-                nav.style.backgroundColor = "rgba(20, 35, 55, 0.75)";
-                nav.style.backdropFilter = "blur(16px)";
+                nav.style.backgroundColor = "rgba(20, 35, 55, 0.8)";
+                nav.style.backdropFilter = "blur(8px)";
                 nav.className = "navbar navbar-expand-lg navbar-dark fixed-top shadow-sm";
                 
                 const navLinks = navConfig.links.map(link => {
