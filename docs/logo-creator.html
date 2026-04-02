@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QATT Logo Creator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://qtng.github.io/qatt-dc/js/navigation.js"></script>
+    
+    <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
+    <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --logo-hue: 0deg; --logo-contrast: 1; --logo-size: 6rem; --logo-thickness: 10px; }
+        
+        /* THEMES */
+        .t-default, body[data-theme="default"] .output-container { --logo-color: #fff; --logo-glow: rgba(99,102,241,0.6); --card-bg: radial-gradient(at 0% 0%, rgba(99,102,241,0.15) 0, transparent 50%), #030712; }
+        .t-hue-imperial, body[data-theme="hue-imperial"] .output-container { --logo-color: #450a0a; --logo-glow: rgba(69,10,10,0.1); --card-bg: linear-gradient(135deg, #fef08a 0%, #facc15 100%); }
+        .t-hoi-an, body[data-theme="hoi-an"] .output-container { --logo-color: #fff; --logo-glow: #f472b6; --card-bg: radial-gradient(circle at center, #9d174d 0, #1e020a 100%); }
+        .t-ha-long, body[data-theme="ha-long"] .output-container { --logo-color: #a7f3d0; --logo-glow: rgba(5, 150, 105, 0.6); --card-bg: linear-gradient(180deg, #064e3b 0, #022c22 100%); }
+        .t-popart, body[data-theme="popart"] .output-container { --logo-color: #000; --card-bg: #00f2ff; --logo-filter: url(#popFilter); }
+        .t-popart-pink, body[data-theme="popart-pink"] .output-container { --logo-color: #00f2ff; --card-bg: #db2777; --logo-filter: url(#popFilter); }
+        .t-sea, body[data-theme="sea"] .output-container { --logo-color: #22d3ee; --logo-glow: #0891b2; --card-bg: #020617; --logo-filter: url(#waterFilter); }
+        .t-neon, body[data-theme="neon"] .output-container { --logo-color: #00ffcc; --logo-glow: rgba(0, 255, 204, 0.8); --card-bg: #000; }
+        .t-chromatic, body[data-theme="chromatic"] .output-container { --logo-color: #fff; --logo-glow: rgba(255, 0, 0, 0.3); --card-bg: #050505; --logo-filter: url(#chromaticAberration); }
+        .t-hyper-chroma, body[data-theme="hyper-chroma"] .output-container { --logo-color: #fff; --logo-glow: rgba(255, 255, 255, 0.2); --card-bg: radial-gradient(circle at center, #0f172a 0%, #020617 100%); --logo-filter: url(#hyperChromaFilter); }
+        .t-antique, body[data-theme="antique"] .output-container { --logo-color: #2b1d0e; --card-bg: #f2e8cf; --logo-filter: url(#paperFilter); }
+        .t-gold, body[data-theme="gold"] .output-container { --logo-color: #fff; --logo-glow: rgba(255,215,0,0.4); --card-bg: radial-gradient(circle at center, #3f2b00 0, #0c0a09 100%); --logo-filter: url(#goldFilterFixed); }
+        .t-mercury, body[data-theme="mercury"] .output-container { --logo-color: #fff; --logo-glow: rgba(255,255,255,0.2); --card-bg: linear-gradient(135deg, #2c3e50 0, #000 100%); --logo-filter: url(#mercuryFilter); }
+        .t-glass, body[data-theme="glass"] .output-container { --logo-color: #f0f9ff; --logo-glow: rgba(255,255,255,0.8); --card-bg: linear-gradient(135deg, #2563eb 0, #0f172a 100%); --logo-filter: url(#glassFilterFixed); }
+        .t-blueprint, body[data-theme="blueprint"] .output-container { --logo-color: #fff; --card-bg: #004b93; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
+        .t-hologram, body[data-theme="hologram"] .output-container { --logo-color: #a5f3fc; --logo-glow: #06b6d4; --card-bg: #020617; --logo-filter: url(#hologramFilter); }
+        .t-lava, body[data-theme="lava"] .output-container { --logo-color: #ff4d00; --logo-glow: #ffae00; --card-bg: #1a0500; --logo-filter: url(#lavaFilter); }
+        .t-vhs, body[data-theme="vhs"] .output-container { --logo-color: #fff; --logo-glow: #ff00c1; --card-bg: #0a0a0a; --logo-filter: url(#vhsFilter); }
+        .t-fire, body[data-theme="fire"] .output-container { --logo-color: #ffcc00; --logo-glow: #ff4d00; --card-bg: #000; --logo-filter: url(#fireFilter); }
+        .t-retro, body[data-theme="retro"] .output-container { --logo-color: #ff00ff; --logo-glow: #7000ff; --card-bg: linear-gradient(180deg, #2d004d 0, #000 100%); }
+        body[data-theme="retro"] .output-container::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(112,0,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(112,0,255,0.3) 1px, transparent 1px); background-size: 40px 40px; transform-origin: center top; transform: perspective(100px) rotateX(60deg); animation: gridScroll 2s linear infinite; z-index: 0; }
+        .t-light, body[data-theme="light"] .output-container { --logo-color: #1e293b; --card-bg: #f8fafc; }
+        
+        @keyframes gridScroll { from { background-position: center 0; } to { background-position: center 40px; } }
+
+        /* UI BASICS */
+        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; align-items: center; }
+        .main-card { max-width: 900px; margin: auto; background: rgba(30,41,59,0.85); backdrop-filter: blur(20px); border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .card-header-qatt { background: linear-gradient(135deg, #fbbf24 0, #f59e0b 100%); padding: 1.2rem; text-align: center; color: #1e293b; font-weight: 800; text-transform: uppercase; }
+        .card-header-qatt h1 { font-size: 1.15rem; margin: 0; white-space: nowrap; }
+        .output-container { width: 100%; min-height: 400px; background: var(--card-bg); border-radius: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 1.5rem; position: relative; overflow: hidden; filter: hue-rotate(var(--logo-hue)) contrast(var(--logo-contrast)); transition: background .5s; }
+        .qatt-output { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; color: var(--logo-color); filter: var(--logo-filter); z-index: 1 }
+        .qatt-output svg { height: var(--logo-size); fill: transparent; stroke: currentColor; stroke-width: var(--logo-thickness); filter: drop-shadow(0 0 15px var(--logo-glow)); }
+        
+        nobr { white-space: normal !important; display: inline-block; }
+        .theme-grid { display: flex; gap: 12px; overflow-x: auto; padding: 10px 2px; }
+        .theme-tile { flex: 0 0 90px; aspect-ratio: 1.4; border-radius: .6rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); background: var(--card-bg); position: relative; display: flex; align-items: center; justify-content: center; transition: all .2s; overflow: hidden; }
+        .theme-tile::before { content: "Q"; font-weight: 900; font-size: 1.1rem; color: var(--logo-color); filter: drop-shadow(0 0 5px var(--logo-glow)); z-index: 2; transform: translateY(-8px); }
+        .theme-tile.active { border-color: #22d3ee; transform: translateY(-2px); box-shadow: 0 0 10px rgba(34,211,238,0.3); }
+        .theme-tile-label { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.85); color: #fff; font-size: .5rem; text-align: center; padding: 3px 0; text-transform: uppercase; font-weight: 700; z-index: 3; }
+        .form-control, .form-select { background: rgba(15,23,42,0.7) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+        .form-range { background: 0 0 !important; border: none !important; padding: 0 !important; }
+        .slider-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: #cbd5e1; display: flex; justify-content: space-between; margin-bottom: .2rem; }
+        #originalText { margin-top: 1.5rem; font-style: italic; color: rgba(255,255,255,0.4); z-index: 1; text-transform: uppercase; letter-spacing: 1px; }
+        .svg-filters { position: absolute; width: 0; height: 0; visibility: hidden; }
+    
+    .export-btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem; }
+.btn-export { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; cursor: pointer; border: none; transition: all .2s; }
+.btn-export-png { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+.btn-export-png:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.6); }
+.btn-export-svg { background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15) !important; }
+.btn-export-svg:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+.btn-export:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    </style>
+</head>
+<body data-theme="default">
+    <svg class="svg-filters">
+        <defs>
+            <filter id="goldFilterFixed" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="blur"/><feSpecularLighting in="blur" surfaceScale="5" specularConstant="2.2" specularExponent="35" lighting-color="#fff" result="spec"><fePointLight x="-1000" y="-1000" z="1000"/></feSpecularLighting><feComposite in="spec" in2="SourceGraphic" operator="in" result="specIn"/><feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1 0 0 0 0 0.8 0 0 0 0 0.1 0 0 0 1 0" result="goldBase"/><feBlend in="specIn" in2="goldBase" mode="screen" result="lit"/><feColorMatrix in="lit" type="matrix" values="1.1 0 0 0 0 0 1.05 0 0 0 0 0 1.2 0 0 0 0 0 1 0"/></filter>
+            <filter id="mercuryFilter" x="-50%" y="-50%" width="200%" height="200%"><feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise"><animate attributeName="baseFrequency" values="0.015; 0.025; 0.015" dur="10s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="5" result="displace"/><feGaussianBlur in="displace" stdDeviation="1.5" result="blur"/><feSpecularLighting in="blur" surfaceScale="6" specularConstant="2.8" specularExponent="40" lighting-color="#fff" result="spec"><fePointLight x="-1000" y="-1000" z="1000"/></feSpecularLighting><feComposite in="spec" in2="displace" operator="in" result="specIn"/><feBlend in="specIn" in2="displace" mode="screen"/></filter>
+            <filter id="glassFilterFixed" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur"/><feSpecularLighting in="blur" surfaceScale="6" specularConstant="2.5" specularExponent="45" lighting-color="#fff" result="spec"><fePointLight x="-1000" y="-1000" z="1000"/></feSpecularLighting><feComposite in="spec" in2="SourceGraphic" operator="in" result="specIn"/><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.6 0" result="base"/><feBlend in="specIn" in2="base" mode="screen"/></filter>
+            <filter id="waterFilter"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2"><animate attributeName="baseFrequency" values="0.02; 0.05; 0.02" dur="5s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="8"/></filter>
+            <filter id="lavaFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.05" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01 0.05; 0.02 0.1; 0.01 0.05" dur="8s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="12"/><feGaussianBlur stdDeviation="1" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
+            <filter id="fireFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="3" result="noise"><animate attributeName="baseFrequency" values="0.01 0.1; 0.02 0.2; 0.01 0.1" dur="4s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="15"/></filter>
+            <filter id="vhsFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.5" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01 0.5; 0.01 0.8; 0.01 0.5" dur=".15s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="10"/></filter>
+            <filter id="popFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="1" result="noise"/><feComposite operator="in" in="noise" in2="SourceGraphic" result="halftone"/><feBlend mode="multiply" in="halftone" in2="SourceGraphic"/></filter>
+            <filter id="paperFilter"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" result="inkBleed"/><feGaussianBlur in="inkBleed" stdDeviation="0.1"/></filter>
+            <filter id="hologramFilter"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.2" numOctaves="2" result="noise"><animate attributeName="baseFrequency" values="0.01 0.2; 0.01 0.3; 0.01 0.2" dur="3s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="5"/><feColorMatrix type="matrix" values="0 0 0 0 0.5 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/></filter>
+            <filter id="chromaticAberration"><feOffset in="SourceGraphic" dx="4" dy="0" result="red"/><feOffset in="SourceGraphic" dx="-4" dy="0" result="blue"/><feColorMatrix in="red" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="redOnly"/><feColorMatrix in="blue" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="blueOnly"/><feBlend in="redOnly" in2="blueOnly" mode="screen" result="aberration"/><feBlend in="aberration" in2="SourceGraphic" mode="screen"/></filter>
+            
+            <!-- HYPER CHROMA FILTER (Vertical Red & Cyan separation, 70% opacity) -->
+            <filter id="hyperChromaFilter">
+                <feOffset id="hcTop" in="SourceGraphic" dx="0" dy="4" result="topLayer"/>
+                <feOffset id="hcBottom" in="SourceGraphic" dx="0" dy="-4" result="bottomLayer"/>
+                <feColorMatrix in="topLayer" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0" result="redOnly"/>
+                <feColorMatrix in="bottomLayer" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.7 0" result="cyanOnly"/>
+                <feBlend in="redOnly" in2="cyanOnly" mode="screen" result="aberration"/>
+                <feBlend in="aberration" in2="SourceGraphic" mode="screen"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="container mt-3">
+        <div class="main-card">
+            <div class="card-header-qatt"><h1>Quốc Âm Tân Tự - Logo Creator</h1></div>
+            <div class="p-4 p-md-5">
+                <div class="mb-4">
+                    <label class="form-label">Enter your text</label>
+                    <input type="text" id="nameInput" class="form-control form-control-lg shadow-none" value="Tiếng Việt">
+                </div>
+                <div class="mb-5"><label class="form-label">Style Catalog</label><div id="themeGrid" class="theme-grid"></div></div>
+                <div class="mb-5 text-center"><div id="logoCard" class="output-container"><div id="qattDisplay" class="qatt-output"></div><div id="originalText"></div></div></div>
+                <div class="row g-4 mb-4">
+                    <div class="col-6"><label class="slider-label"><span>Size</span><span id="sizeVal">6em</span></label><input type="range" class="form-range" id="sizeSlider" min="1" max="20" step="0.1" value="6"></div>
+                    <div class="col-6"><label class="slider-label"><span>Thickness</span><span id="weightVal">10px</span></label><input type="range" class="form-range" id="weightSlider" min="1" max="18" step="1" value="10"></div>
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-6"><label class="slider-label"><span>Hue</span><span id="hueVal">0°</span></label><input type="range" class="form-range" id="hueSlider" min="0" max="360" step="1" value="0"></div>
+                    <div class="col-6"><label class="slider-label"><span>Contrast</span><span id="contrastVal">100%</span></label><input type="range" class="form-range" id="contrastSlider" min="0.5" max="2" step="0.1" value="1"></div>
+                </div>
+                <div class="mb-4"><label class="form-label">Writing Style</label><select id="typeSelect" class="form-select"><option value="0">Chính thể - Quốc âm tân tự</option><option value="0.0">Chính thể - Tiểu tân tự</option><option value="1">Giản thể</option><option value="2">Giản thể +</option></select></div>
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="showOriginal" checked>
+                        <label class="form-check-label small" for="showOriginal">Show original text</label>
+                    </div>
+                    <div class="mt-3 export-btn-group">
+    <button class="btn-export btn-export-png" onclick="exportPNG()" id="btnPNG">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+        Export PNG
+    </button>
+    <button class="btn-export btn-export-svg" onclick="exportSVG()" id="btnSVG">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+        Export SVG
+    </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let parser, renderer;
+        const $ = id => document.getElementById(id), setProp = (k, v) => document.documentElement.style.setProperty(k, v);
+        
+        const themes = [
+            { id: 'default', label: 'Deep Space', class: 't-default' }, { id: 'hue-imperial', label: 'Huế Imperial', class: 't-hue-imperial' },
+            { id: 'hoi-an', label: 'Hội An Lantern', class: 't-hoi-an' }, { id: 'ha-long', label: 'Hạ Long Emerald', class: 't-ha-long' },
+            { id: 'popart', label: 'Pop Art', class: 't-popart' }, { id: 'popart-pink', label: 'Pop Pink', class: 't-popart-pink' },
+            { id: 'sea', label: 'Sea Ripple', class: 't-sea' }, { id: 'neon', label: 'Neon', class: 't-neon' },
+            { id: 'chromatic', label: 'Chroma', class: 't-chromatic' }, { id: 'hyper-chroma', label: 'Hyper Chroma', class: 't-hyper-chroma' },
+            { id: 'antique', label: 'Antique', class: 't-antique' }, { id: 'gold', label: 'Pure Gold', class: 't-gold' },
+            { id: 'mercury', label: 'Mercury', class: 't-mercury' }, { id: 'glass', label: 'Glass', class: 't-glass' },
+            { id: 'blueprint', label: 'Blueprint', class: 't-blueprint' }, { id: 'hologram', label: 'Holo', class: 't-hologram' },
+            { id: 'lava', label: 'Lava', class: 't-lava' }, { id: 'vhs', label: 'VHS', class: 't-vhs' },
+            { id: 'fire', label: 'Fire', class: 't-fire' }, { id: 'retro', label: 'Retro Wave', class: 't-retro' },
+            { id: 'light', label: 'Paper', class: 't-light' }
+        ];
+
+        function init() {
+            if (typeof VietnameseParser === 'undefined') return setTimeout(init, 100);
+            parser = new VietnameseParser(); renderer = new SvgGlyphRenderer({ container: document.createElement("div") });
+            const grid = $('themeGrid');
+            themes.forEach(t => {
+                const el = document.createElement('div'); el.className = `theme-tile ${t.class}`; el.dataset.theme = t.id;
+                el.onclick = () => { document.body.dataset.theme = t.id; document.querySelectorAll('.theme-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.theme === t.id)); renderUI(); };
+                el.innerHTML = `<div class="theme-tile-label">${t.label}</div>`; grid.appendChild(el);
+            });
+            ['nameInput', 'typeSelect', 'showOriginal', 'sizeSlider', 'weightSlider', 'hueSlider', 'contrastSlider'].forEach(id => $(id).oninput = renderUI);
+            renderUI();
+        }
+
+        function renderUI() {
+            if (!parser) return;
+            const text = $('nameInput').value, type = $('typeSelect').value, show = $('showOriginal').checked, sz = $('sizeSlider').value, th = $('weightSlider').value, hue = $('hueSlider').value, ct = $('contrastSlider').value;
+            setProp('--logo-size', sz + 'em'); setProp('--logo-thickness', th + 'px'); setProp('--logo-hue', hue + 'deg'); setProp('--logo-contrast', ct);
+            
+            // Dynamic Vertical Offset (0.075em)
+            const hcOffset = (sz * 16) * 0.075; 
+            if($('hcTop')) $('hcTop').setAttribute('dy', hcOffset); 
+            if($('hcBottom')) $('hcBottom').setAttribute('dy', -hcOffset);
+            
+            $('sizeVal').innerText = sz + 'em'; $('weightVal').innerText = th + 'px'; $('hueVal').innerText = hue + '°'; $('contrastVal').innerText = Math.round(ct * 100) + '%';
+            const out = $('qattDisplay'); out.innerHTML = ''; $('originalText').innerText = show ? text : '';
+            if (!text.trim()) return;
+            text.split(/\s+/).forEach(w => {
+                const n = parser.parse(w);
+                if (n) {
+                    const s = document.createElement('span');
+                    let code = n.code.replace(",", ",+").replace('+', (!type || type == "0") ? "+" : "");
+                    renderer.renderText(code, s, +type);
+                    out.appendChild(s);
+                }
+                out.appendChild(document.createTextNode(' '));
+            });
+        }
+        window.onload = init;
+    </script>
+
+    <script>
+                // --- EXPORT LOGIC ---
+        function getFilename(ext) {
+            const text = $('nameInput').value.trim().replace(/\s+/g, '_') || 'qatt-logo';
+            const theme = document.body.dataset.theme || 'default';
+            return `${text}_${theme}.${ext}`;
+        }
+
+        function buildResolvedSVG() {
+            const card = $('logoCard');
+            const display = $('qattDisplay');
+            const scale = 3;
+            const W = card.offsetWidth * scale;
+            const H = card.offsetHeight * scale;
+
+            const rootStyle = getComputedStyle(document.documentElement);
+            const cardStyle = getComputedStyle(card);
+            const displayStyle = getComputedStyle(display);
+
+            // Alle relevanten CSS-Variablen erfassen
+            const vars = {
+                '--logo-size': rootStyle.getPropertyValue('--logo-size'),
+                '--logo-thickness': rootStyle.getPropertyValue('--logo-thickness'),
+                '--logo-color': cardStyle.getPropertyValue('--logo-color'),
+                '--logo-glow': cardStyle.getPropertyValue('--logo-glow'),
+                '--logo-filter': cardStyle.getPropertyValue('--logo-filter'),
+                '--logo-hue': rootStyle.getPropertyValue('--logo-hue'),
+                '--logo-contrast': rootStyle.getPropertyValue('--logo-contrast'),
+                // Hintergrund-Eigenschaften vollständig erfassen
+                'background': cardStyle.background,
+                'background-image': cardStyle.backgroundImage,
+                'background-size': cardStyle.backgroundSize,
+                'background-position': cardStyle.backgroundPosition,
+                'background-repeat': cardStyle.backgroundRepeat,
+                'background-color': cardStyle.backgroundColor
+            };
+
+            const filterDefs = document.querySelector('.svg-filters defs').innerHTML;
+            const injectedDefs = document.querySelector('#svg defs') ? document.querySelector('#svg defs').innerHTML : '';
+
+            const cardRect = card.getBoundingClientRect();
+            let glyphs = '';
+            display.querySelectorAll('span').forEach(span => {
+                const svgEl = span.querySelector('svg');
+                if (!svgEl) return;
+                const rect = span.getBoundingClientRect();
+                const x = (rect.left - cardRect.left) * scale;
+                const y = (rect.top - cardRect.top) * scale;
+                const w = rect.width * scale;
+                const h = rect.height * scale;
+                const vb = svgEl.getAttribute('viewBox') || `0 0 ${svgEl.clientWidth} ${svgEl.clientHeight}`;
+
+                glyphs += `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}" overflow="visible">
+                    <g fill="transparent" stroke="${vars['--logo-color']}" stroke-width="${vars['--logo-thickness']}" 
+                       style="filter: ${vars['--logo-glow'] !== 'transparent' ? 'drop-shadow(0 0 15px ' + vars['--logo-glow'] + ')' : 'none'};">
+                        ${svgEl.innerHTML}
+                    </g>
+                </svg>`;
+            });
+
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+                <defs>
+                    ${filterDefs}
+                    ${injectedDefs}
+                </defs>
+                <!-- Hintergrund via foreignObject für komplexe Gradients/Patterns -->
+                <foreignObject width="100%" height="100%">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="
+                        width: 100%; height: 100%; 
+                        background: ${vars['background']};
+                        background-image: ${vars['background-image']};
+                        background-size: ${vars['background-size']};
+                        background-position: ${vars['background-position']};
+                        background-repeat: ${vars['background-repeat']};
+                        background-color: ${vars['background-color']};
+                    "></div>
+                </foreignObject>
+                <!-- Content Layer -->
+                <g style="filter: hue-rotate(${vars['--logo-hue']}) contrast(${vars['--logo-contrast']});">
+                    <g style="filter: ${vars['--logo-filter']};">
+                        ${glyphs}
+                    </g>
+                </g>
+                <text x="${W/2}" y="${H - 25}" font-family="sans-serif" font-size="${12*scale}" fill="${vars['--logo-color']}" opacity="0.4" text-anchor="middle">
+                    ${$('originalText').innerText}
+                </text>
+            </svg>`;
+        }
+
+        async function exportPNG() {
+            const btn = $('btnPNG');
+            btn.disabled = true; btn.innerText = 'Exporting...';
+            try {
+                const svgData = buildResolvedSVG();
+                const card = $('logoCard');
+                const scale = 3;
+                const W = card.offsetWidth * scale;
+                const H = card.offsetHeight * scale;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = W; canvas.height = H;
+                const ctx = canvas.getContext('2d');
+
+                const img = new Image();
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+
+                await new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0);
+                        const link = document.createElement('a');
+                        link.download = getFilename('png');
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        resolve();
+                    };
+                    img.onerror = reject;
+                    img.src = url;
+                });
+            } catch(e) { console.error(e); }
+            finally { btn.disabled = false; btn.innerText = '⬇ Export PNG'; }
+        }
+
+        function exportSVG() {
+            const svgContent = buildResolvedSVG();
+            const blob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = getFilename('svg');
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+        
+    </script>
+</body>
+</html>
+
+        
+                

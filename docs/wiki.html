@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QATT Wikipedia Browser</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
+    <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
+
+    
+    <script src="https://qtng.github.io/qatt-dc/js/navigation.js"></script>
+    
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --border-gray: #dee2e6;
+            --tutorial-bg: #0d6efd;
+        }
+
+        /* --- SVG Sizes --- */
+        svg {
+            height: 1.9em; 
+            margin: -0.1em -0.0em;
+            fill: transparent;
+            stroke: currentColor;
+            stroke-width: 4px;
+            stroke-linecap: square;
+            stroke-linejoin: square;
+            transition: all 0.2s ease;
+        }
+
+        /* Type 1: Giản thể */
+        body[data-type="1"] svg {
+            height: 1.45em;
+            stroke-width: 5.5px;
+            margin: 0.075em -0.05em;
+        }
+
+        /* Type 2: Giản thể + */
+        body[data-type="2"] svg {
+            height: 1.4em;
+            stroke-width: 6.5px;
+            margin: 0 -0.1em;
+        }
+
+        /* Logo Styling */
+        .svg-bold svg { 
+            stroke-width: 9.5px !important;
+            height: 1.6em !important; 
+            margin: 0 !important;
+        }
+
+        .wiki-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-bottom: 1.25rem;
+            display: block;
+            background-color: #f8f9fa;
+        }
+    
+        a svg {
+            border-bottom: 1.5px solid currentColor;
+        }
+        
+        /* Ruby & Transliteration Design */
+        ruby {
+            display: inline-flex;
+            flex-direction: column-reverse; 
+            align-items: center;
+            vertical-align: bottom;
+            white-space: nowrap;
+            margin: 0 1px;
+            font-weight: inherit;
+        }
+
+        .r-base {
+            color: inherit;
+            opacity: 1;
+        }
+
+        ruby rt {
+            display: block;
+            font-size: 1.1em;
+            line-height: 1.2;
+            text-align: center;
+            color: inherit;
+            opacity: 1;
+        }
+
+        ruby.ruby-changed rt {
+            font-weight: 500;
+        }
+
+        /* Flow-Modus: If original is hidden */
+        .hide-original ruby {
+            display: inline;
+            white-space: normal;
+            margin: 0;
+            color: inherit;
+        }
+        
+        .hide-original .r-base { 
+            display: none; 
+        }
+        
+        .hide-original ruby rt {
+            display: inline;
+            font-size: 1.1em;
+            color: inherit;
+            opacity: 1;
+            line-height: inherit;
+        }
+
+        .sticky-header {
+            background: white;
+            z-index: 1020;
+            padding-top: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .content-container {
+            border: 1px solid var(--border-gray);
+            border-radius: 0.5rem;
+            background-color: #fff;
+        }
+
+        .external-wiki-link {
+            color: #6c757d;
+            text-decoration: none;
+            line-height: 1;
+            position: relative;
+            top: -0.1em;
+        }
+
+        .wiki-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .type-selector {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 0.4rem;
+            border: 1px solid var(--border-gray);
+            background-color: #f8f9fa;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+    </style>
+</head>
+<body class="bg-light" data-type="0">
+
+    <header xclass="sticky-header sticky-top">
+        <div class="container">
+            <!-- Top Row: Logo & Type Selector -->
+            <div class="d-flex justify-content-between align-items-end mb-3">
+                <span class="fw-bold text-primary fs-4">
+                    <tt class="svg-bold">v,i</tt><tt class="text-danger">c,i</tt><tt class="text-success svg-bold">b,e</tt><tt class="text-warning">d,i</tt><tt class="text-info svg-bold">_,a</tt>
+                </span>
+                <select class="w-auto form-select-sm form-select" id="typeSelect" onchange="changetype(parseInt(this.value))">
+                    <option value="0">Chính thể</option>
+                    <option value="0.0">Chính thể rời</option>
+                    <option value="1">Giản thể</option>
+                    <option value="2">Giản thể +</option>
+                </select>
+            </div>
+
+            <!-- Search Row -->
+            <div class="row justify-content-center mb-3">
+                <div class="col-md-8 col-lg-6">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm Wikipedia...">
+                        <button id="searchBtn" class="btn btn-primary px-4" type="button">
+                            Tìm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Row -->
+            <div class="d-flex justify-content-center gap-4 mb-2">
+                <div id="showToggleContainer" class="form-check form-switch small">
+                    <input class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
+                    <label class="form-check-label" for="showOriginalToggle">Quốc ngữ</label>
+                </div>
+                <div class="form-check form-switch small">
+                    <input checked class="form-check-input" type="checkbox" role="switch" id="transToggle">
+                    <label class="form-check-label" for="transToggle">Quốc Âm Tân Tự</label>
+                </div>
+            </div>
+        </div>
+        <a href="https://qtng.github.io/qatt-dc/tutorial.html" class="d-block bg-primary-subtle text-primary p-2 text-center text-decoration-none shadow-sm">
+            <i class="bi bi-arrow-right"></i> Hướng dẫn học Quốc Âm Tân Tự (Tutorial)
+        </a>
+    </header>
+    
+
+    <main class="container mb-5 mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="p-4 content-container border shadow-sm">
+                    <div id="loading" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Đang tải...</p>
+                    </div>
+                    
+                    <div id="errorMessage" class="alert alert-danger d-none border-0" role="alert"></div>
+
+                    <div id="wikiArea">
+                        <div class="wiki-header-row">
+                            <h1 id="wikiTitle" class="display-6 fw-bold mb-3"></h1>
+                            <a id="wikiExternalLink" href="#" target="_blank" class="external-wiki-link mt-2" title="Mở trong Wikipedia">
+                                <i class="bi bi-box-arrow-up-right fs-4"></i>
+                            </a>
+                        </div>
+                        <div id="contentArea" class="wiki-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let parser, renderer;
+        let currentType = 0;
+        
+        const START_TERM = "Quốc Âm Tân Tự";
+        const wikiLang = "vi";
+        
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const contentArea = document.getElementById('contentArea');
+        const wikiTitle = document.getElementById('wikiTitle');
+        const wikiExternalLink = document.getElementById('wikiExternalLink');
+        const transToggle = document.getElementById('transToggle');
+        const showOriginalToggle = document.getElementById('showOriginalToggle');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+
+        let currentWikiHtml = ""; 
+        let originalTitle = "";
+
+        // Init
+        function initParser() {
+            if (typeof VietnameseParser !== 'undefined' && typeof SvgGlyphRenderer !== 'undefined') {
+                parser = new VietnameseParser();
+                renderer = new SvgGlyphRenderer({
+                    container: document.createElement("div")
+                });
+                renderTTVanilla();
+                
+                const titleFromUrl = decodeURIComponent(window.location.hash.substring(1));
+                const initialTitle = titleFromUrl || START_TERM;
+                
+                history.replaceState({ title: initialTitle }, initialTitle, "#" + encodeURIComponent(initialTitle));
+                fetchWiki(initialTitle, false);
+            } else {
+                setTimeout(initParser, 100);
+            }
+        }
+
+        // Browser navigation
+        window.onpopstate = function(event) {
+            const titleToLoad = (event.state && event.state.title) 
+                || decodeURIComponent(window.location.hash.substring(1)) 
+                || START_TERM;
+            
+            searchInput.value = titleToLoad;
+            fetchWiki(titleToLoad, false);
+        };
+
+        window.changetype = (type) => {
+            currentType = type;
+            document.body.setAttribute("data-type", type.toString());
+            renderTTVanilla();
+            if (currentWikiHtml) {
+                renderWiki();
+            }
+        };
+
+        function renderTTVanilla() {
+            Array.from(document.querySelectorAll("tt")).forEach(el => {
+                const t = el.dataset.codes || el.innerText;
+                const tp = Number((el.dataset.type == null ? currentType : el.dataset.type) || 0);
+                el.innerHTML = "";
+                el.dataset.codes = t;
+                const codeToRender = tp ? t.replace(/\+/g, "") : t;
+                renderer.renderText(codeToRender, el, tp);
+            });
+        }
+
+        function transliterateWord(word) {
+            if (!parser) return word;
+            const parsed = parser.parse(word.trim());
+            if (parsed) {
+                let code = parsed.code;
+                if (currentType !== 0) {
+                    code = code.replace(/\+/g, "");
+                } else {
+                    code = code.replace(',', ',+');
+                }
+                const div = document.createElement("div");
+                renderer.renderText(code, div, currentType);
+                return div.innerHTML;
+            }
+            return word;
+        }
+
+        function textToRubyHTML(text) {
+            if (!text) return "";
+            return text.replace(/\s*[abcdeghiklmnopqrstuvxyàáạảãÂâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ]+\s*/ig, (word) => {
+                const trans = transliterateWord(word);
+                const isChanged = trans !== word;
+                return `<ruby class="${isChanged ? 'ruby-changed' : 'ruby-same'}"><span class="r-base">${word}</span><rt>${trans}</rt></ruby>`;
+            });
+        }
+
+        async function fetchWiki(title, pushToHistory = true) {
+            if (!title) return;
+            setLoading(true);
+            const url = `https://${wikiLang}.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&format=json&origin=*&prop=text|displaytitle`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) throw new Error("Trang không tồn tại.");
+                
+                const newTitle = data.parse.title;
+                currentWikiHtml = data.parse.text["*"];
+                originalTitle = newTitle;
+                
+                if (pushToHistory) {
+                    const encodedTitle = encodeURIComponent(newTitle);
+                    if (decodeURIComponent(window.location.hash.substring(1)) !== newTitle) {
+                        history.pushState({ title: newTitle }, newTitle, "#" + encodedTitle);
+                    }
+                }
+                
+                renderWiki();
+                searchInput.value = newTitle;
+            } catch (err) { showError(err.message); }
+            finally { setLoading(false); }
+        }
+
+        function renderWiki() {
+            wikiTitle.innerHTML = originalTitle;
+            wikiExternalLink.href = `https://${wikiLang}.wikipedia.org/wiki/${encodeURIComponent(originalTitle.replace(/ /g, '_'))}`;
+            
+            let html = currentWikiHtml.replace(/src="\/\//g, 'src="https://').replace(/srcset="\/\//g, 'srcset="https://');
+            html = html.replace(/src="\/([^/])/g, `src="https://${wikiLang}.wikipedia.org/$1`);
+            contentArea.innerHTML = html;
+            
+            if (transToggle.checked) {
+                applyRuby(contentArea);
+                wikiTitle.innerHTML = textToRubyHTML(originalTitle);
+            }
+            updateHiding();
+        }
+
+        function applyRuby(container) {
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+                acceptNode: n => {
+                    const parentTag = n.parentElement.tagName.toLowerCase();
+                    return ['script', 'style', 'ruby', 'rt', 'code', 'pre'].includes(parentTag) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+                }
+            });
+            const nodes = [];
+            let n; while (n = walker.nextNode()) if (n.nodeValue.trim()) nodes.push(n);
+            nodes.forEach(textNode => {
+                const rubyHTML = textToRubyHTML(textNode.nodeValue);
+                if (rubyHTML !== textNode.nodeValue) {
+                    const span = document.createElement('span');
+                    span.innerHTML = rubyHTML;
+                    textNode.parentNode.replaceChild(span, textNode);
+                }
+            });
+        }
+
+        function updateHiding() {
+            const hide = !showOriginalToggle.checked && transToggle.checked;
+            [contentArea, wikiTitle].forEach(c => c?.classList.toggle('hide-original', hide));
+        }
+
+        function setLoading(isLoading) {
+            loading.classList.toggle('d-none', !isLoading);
+            if(isLoading) {
+                document.getElementById('wikiArea').classList.add('d-none');
+                errorMessage.classList.add('d-none');
+            } else {
+                document.getElementById('wikiArea').classList.remove('d-none');
+            }
+        }
+
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.classList.remove('d-none');
+        }
+
+        // Event Listener
+        searchBtn.addEventListener('click', () => {
+            const val = searchInput.value.trim();
+            if (val) fetchWiki(val, true);
+        });
+
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
+
+        transToggle.addEventListener('change', () => {
+            document.getElementById('showToggleContainer').classList.toggle('d-none', !transToggle.checked);
+            renderWiki();
+        });
+
+        showOriginalToggle.addEventListener('change', updateHiding);
+
+        contentArea.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link) {
+                const href = link.getAttribute('href');
+                if (href) {
+                    const isWikiInternal = href.startsWith('/wiki/') || href.includes('.wikipedia.org/wiki/');
+                    if (isWikiInternal && !href.includes(':')) {
+                        e.preventDefault();
+                        const titlePart = href.split('/wiki/')[1].split('#')[0];
+                        const decodedTitle = decodeURIComponent(titlePart).replace(/_/g, ' ');
+                        fetchWiki(decodedTitle);
+                        window.scrollTo(0, 0);
+                    }
+                }
+            }
+        });
+
+        window.onload = initParser;
+    </script>
+</body>
+</html>
+

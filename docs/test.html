@@ -1,0 +1,562 @@
+<html>
+  <head>
+    <script src="https://qtng.github.io/qatt-dc/js/qatt.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/css/bootstrap.min.css"
+          integrity="sha512-2bBQCjcnw658Lho4nlXJcc6WkV/UxpE/sAokbXPxQNGqmNdQrWqtw26Ns9kFF/yG792pKR1Sx8/Y1Lf1XN4GKA=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <style>
+    svg {height: 40px!important; width: 40px!important; transform: scale(1, 0.8)}
+    path {stroke: black; stroke-width: 70px}
+    path.colorized {stroke: black!important; stroke-width: 250px; stroke-linecap: round!important}
+    .z path.colorized {stroke-width: 175px}
+    .q2 path.colorized {stroke: black!important}
+    .q3 path.colorized {stroke: white!important}
+    .q4 path.colorized {stroke: red!important}
+    .q5 path.colorized {stroke: lime!important}
+    .q6 path.colorized {stroke: yellow!important}
+    .table th, .table td {padding: 2px}
+    .table th {padding-left: 16px}
+    .table th {font-size: 1.5rem; font-weight: normal}
+    .table td {background: #eb7; border-width: 5px; border-color: white}
+    .table td:empty {background: #fff}
+    td.q1, td.pi {background: #bdb}
+    td.new {background: #f00}
+    td.q2, td.plus {background: #dbb}
+    td.q3, td.x {background: #bbd}
+    td.q4, td.z {background: #dd9}
+    td.q5, td.h {background: #9be}
+    .xxx {opacity:.5}
+    </style>
+  </head>
+  <body class="container" style="max-width:1600px!important">
+    <table class="table my-5 border shadow" style="table-layout:fixed">
+      <colgroup>
+        <col width=17% />
+        <col width=5% />
+        <col width=1% />
+        <col width=21% />
+        <col width=5% />
+        <col width=1% />
+        <col width=20% />
+        <col width=5% />
+        <col width=1% />
+        <col width=23% />
+        <col width=5% />
+        <col width=0% />
+      </colgroup>
+      <tr>
+        <td colspan=5 class="pi fs-3 text-center bg-dark text-light">Chi tự QÂTT gốc</td>
+        <td></td>
+        <td colspan=6 class="pi fs-3 text-center bg-dark text-light">Chi tự QÂTT mở rộng</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/aː/ - a</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g2</td>
+        <th></th>
+        <th class="text-start">/waː/ - oa</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>h2</td>
+        <td></td>
+        <th class="text-start">/aː/ - a</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g2</td>
+        <th></th>
+        <th class="text-start">/waː/ - oa</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>h2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">
+          /əː/ - ơ a<sup>(nh)</sup>
+        </th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>c5</td>
+        <th></th>
+        <th class="text-start">
+          /wəː/ - uơ oa<sup>(nh)</sup>
+        </th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>l4</td>
+        <td></td>
+        <th class="text-start">
+          /əː/ - ơ a<sup>(nh)</sup>
+        </th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>c5</td>
+        <th></th>
+        <th class="text-start">
+          /wəː/ - uơ oa<sup>(nh)</sup>
+        </th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>l4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">
+          /ă/ - ă a<sup>(u)</sup> a<sup>(y)</sup>
+        </th>
+        <td class="qatt pi xxx" data-opts='{"selector":"qatt"}'>g</td>
+        <th></th>
+        <th class="text-start">
+          /wă/ - uă oă oa<sup>(u)</sup> oa<sup>(y)</sup>
+        </th>
+        <td class="qatt pi xxx" data-opts='{"selector":"qatt"}'>h</td>
+        <td></td>
+        <th class="text-start">
+          /ă/ - ă a<sup>(u)</sup> a<sup>(y)</sup>
+        </th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>g</td>
+        <th></th>
+        <th class="text-start">
+          /wă/ - uă oă oa<sup>(u)</sup> oa<sup>(y)</sup>
+        </th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>h</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ə̆/ - â</th>
+        <td class="qatt pi xxx" data-opts='{"selector":"qatt"}'>c</td>
+        <th></th>
+        <th class="text-start">
+          /wə̆/ - uâ <sup>(q)</sup>uô
+        </th>
+        <td class="qatt pi xxx" data-opts='{"selector":"qatt"}'>l</td>
+        <td></td>
+        <th class="text-start">/ə̆/ - â</th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>c</td>
+        <th></th>
+        <th class="text-start">
+          /wə̆/ - uâ <sup>(q)</sup>uô
+        </th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>l</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/eː/ - ê</th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l1</td>
+        <th></th>
+        <th class="text-start">/weː/ - uê</th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>c3</td>
+        <td></td>
+        <th class="text-start">/eː/ - ê</th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l1</td>
+        <th></th>
+        <th class="text-start">/weː/ - uê</th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>c3</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɛː/ - e</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng3</td>
+        <th></th>
+        <th class="text-start">/wɛː/ - oe</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>?3</td>
+        <td></td>
+        <th class="text-start">/ɛː/ - e</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng3</td>
+        <th></th>
+        <th class="text-start">/wɛː/ - oe</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>?3</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/i/ - i y</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng5</td>
+        <th></th>
+        <th class="text-start">/wi/ - uy</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>?4</td>
+        <td></td>
+        <th class="text-start">/i/ - i y</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng5</td>
+        <th></th>
+        <th class="text-start">/wi/ - uy</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>?4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/iə/ - ia iê ya yê</th>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch6</td>
+        <th></th>
+        <th class="text-start">/wiə/ - uya uyê</th>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>d2</td>
+        <td></td>
+        <th class="text-start">/iə/ - ia iê ya yê</th>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch6</td>
+        <th></th>
+        <th class="text-start">/wiə/ - uya uyê</th>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>d2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/oː/ - ô</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>m5</td>
+        <th></th>
+        <th></th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'></td>
+        <td></td>
+        <th class="text-start">/oː/ - ô</th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>m</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɔː/ - o</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>b2</td>
+        <th></th>
+        <th></th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'></td>
+        <td></td>
+        <th class="text-start">/ɔː/ - o</th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>b</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/uː/ - u</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>ph2</td>
+        <th></th>
+        <th></th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'></td>
+        <td></td>
+        <th class="text-start">/uː/ - u</th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>ph</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/uə/ - ua uô</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>v2</td>
+        <th></th>
+        <th></th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'></td>
+        <td></td>
+        <th class="text-start">/uə/ - ua uô</th>
+        <td class="qatt new" data-opts='{"selector":"qatt"}'>v</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɨː/ - ư</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g4</td>
+        <th></th>
+        <th></th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'></td>
+        <td></td>
+        <th class="text-start">/ɨː/ - ư</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɨə/ - ưa ươ</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>h4</td>
+        <th></th>
+        <th></th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'></td>
+        <td></td>
+        <th class="text-start">/ɨə/ - ưa ươ</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>h4</td>
+      </tr>
+    </table>
+    <table class="table" style="table-layout:fixed">
+      <tr class="text-center align-middle">
+        <th>72</th>
+        <th>-</th>
+        <th>- /j/ - i y</th>
+        <th>- /w/ - o u</th>
+        <th>- /m/ - m</th>
+        <th>- /n/ - n</th>
+        <th>- /ŋ/ - ng</th>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/aː/ - a</th>
+        <td class="qatt pi">g6</td>
+        <td class="qatt plus">tr6</td>
+        <td class="qatt plus">n2</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>d4</td>
+        <td class="qatt pi">ng2</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>kh3</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">
+          /əː/ - ơ a<sup>(nh)</sup>
+        </th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>c5</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>dd2</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l4</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>x5</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ə̆/ - â</th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>x6</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>tr3</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>?2</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>th6</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>n3</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">
+          /ă/ - ă a<sup>(u)</sup> a<sup>(y)</sup>
+        </th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>n6</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>th5</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>kh2</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>n4</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>th2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/eː/ - ê</th>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l1</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>v3</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>th3</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch4</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɛː/ - e</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng3</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>v5</td>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>h3</td>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g6</td>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g5</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/i/ - i y</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng5</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>b4</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>nh3</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>s5</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>s4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/iə/ - ia iê ya yê</th>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch6</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>b1</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch2</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>x3</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch3</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/oː/ - ô</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>m5</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>m6</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>c2</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>m4</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>?1</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɔː/ - o</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>b2</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>v6</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>tr2</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l4</td>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>ng4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/uː/ - u</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>ph2</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>b6</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>l5</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>b2</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'>?5</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/uə/ - ua uô</th>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>v2</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>ph6</td>
+        <td class="qatt" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g3</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>ph4</td>
+        <td class="qatt h" data-opts='{"selector":"qatt"}'>ch1</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɨː/ - ư</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>g4</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>s6</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>m3</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>r6</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>tr4</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>tr3</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɨə/ - ưa ươ</th>
+        <td class="qatt pi" data-opts='{"selector":"qatt"}'>h4</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>r6</td>
+        <td class="qatt x" data-opts='{"selector":"qatt"}'>m2</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>n5</td>
+        <td class="qatt plus" data-opts='{"selector":"qatt"}'>dd6</td>
+        <td class="qatt z" data-opts='{"selector":"qatt"}'>x4</td>
+      </tr>
+    </table>
+    <table class="table" style="table-layout:fixed">
+      <tr class="text-center align-middle">
+        <th>72</th>
+        <th>-</th>
+        <th>- /j/ - i y</th>
+        <th>- /w/ - o u</th>
+        <th>- /m/ - m</th>
+        <th>- /n/ - n</th>
+        <th>- /ŋ/ - ng</th>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/aː/ - a</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>g</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>g3</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>g5</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>g4</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>g6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>g2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">
+          /əː/ - ơ a<sup>(nh)</sup>
+        </th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>c</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>c2</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>c4</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>c6</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ə̆/ - â</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>x</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>x1</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>x5</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>x2</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>x6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>x4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">
+          /ă/ - ă a<sup>(u)</sup> a<sup>(y)</sup>
+        </th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>n</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>n1</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>n2</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>n5</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>n6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>n4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/eː/ - ê</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>l</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>l2</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>l5</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>l6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>l4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɛː/ - e</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>ng</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>ng4</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>ng5</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>ng6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>ng2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/i/ - i y</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>b</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>b2</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>b1</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>b4</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>b6</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/iə/ - ia iê ya yê</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>ch</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>ch3</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>ch2</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>ch4</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>ch6</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/oː/ - ô</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>m</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>m5</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>m3</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>m6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>m2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɔː/ - o</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>tr</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>tr1</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>tr2</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>tr4</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>tr6</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/uː/ - u</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>ph</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>ph3</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>ph1</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>ph4</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>ph6</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/uə/ - ua uô</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>v</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>v5</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'></td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>v3</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>v6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>v2</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɨː/ - ư</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>s</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>s1</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>s2</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>s5</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>s6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>s4</td>
+      </tr>
+      <tr class="text-center align-middle">
+        <th class="text-start">/ɨə/ - ưa ươ</th>
+        <td class="qatt q1" data-opts='{"selector":"qatt"}'>r</td>
+        <td class="qatt q2" data-opts='{"selector":"qatt"}'>r1</td>
+        <td class="qatt q3" data-opts='{"selector":"qatt"}'>r2</td>
+        <td class="qatt q4" data-opts='{"selector":"qatt"}'>r5</td>
+        <td class="qatt q5" data-opts='{"selector":"qatt"}'>r6</td>
+        <td class="qatt q6" data-opts='{"selector":"qatt"}'>r4</td>
+      </tr>
+    </table>
+    <div class="container mt-4">
+      <div class="d-flex flex-wrap justify-content-center" style="gap: 16px">
+        <div class="w-25 card">
+          <div class="card-header">Ngông</div>
+          <div class="card-body">
+            <span class="qatt" data-opts='{"selector": "qatt"}'>Ng1</span> Ngông
+            <div class="qatt" data-opts='{"selector": "qatt"}'>Ng1</div>
+            Ngôn
+          </div>
+        </div>
+        <div class="w-25 card">
+          <div class="card-header">Ngông</div>
+          <div class="card-body">
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+          </div>
+        </div>
+        <div class="w-25 card">
+          <div class="card-header">Ngông</div>
+          <div class="card-body">
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+          </div>
+        </div>
+        <div class="w-25 card">
+          <div class="card-header">Ngông</div>
+          <div class="card-body">
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+          </div>
+        </div>
+        <div class="w-25 card">
+          <div class="card-header">Ngông</div>
+          <div class="card-body">
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+            <div class="qatt" data-opts='{"selector": "qatt"}'>B d</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
