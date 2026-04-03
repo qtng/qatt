@@ -7,7 +7,7 @@ window.addEventListener("load",
                     url: "/chunom"
                 }, {
                     name: "Chữ Nôm Writer",
-                    arl: "/chunom/ime.html"
+                    url: "/chunom/ime.html"
                 }, {
                     name: "Học QATT",
                     url: "/qatt-dc/app.html"
