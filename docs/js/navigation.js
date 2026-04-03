@@ -3,11 +3,11 @@ window.addEventListener("load",
             const navConfig = {
                 title: "Chunom.org",
                 links: [
+                    { name: "Chữ Nôm", url: "/chunom" },
                     { name: "Học QATT", url: "/qatt-dc/app.html" },
                     //{ name: "Hướng dẫn / Tutorial", url: "tutorial.html" },
                     { name: "QATT Wiki", url: "/qatt-dc/wiki.html" },
                     { name: "Logo Creator", url: "/qatt-dc/logo-creator.html" },
-                        { name: "Chữ Nôm", url: "/chunom" },
                 ]
             };
 
@@ -34,8 +34,8 @@ window.addEventListener("load",
 
                 nav.innerHTML = `
                     <div class="container">
-                        <a class="navbar-brand d-flex align-items-center" href="index.html">
-                            <span class="fw-bold tracking-tight">${navConfig.title}</span>
+                        <a class="navbar-brand d-flex align-items-center" href="/chunom">
+                            <span class="fw-bold tracking-tight">${navConfig.title}<sup style="font-size:10px">v2 -alpha</sup></span>
                         </a>
                         <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
