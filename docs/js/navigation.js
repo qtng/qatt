@@ -35,7 +35,7 @@ window.addEventListener("load",
                 nav.innerHTML = `
                     <div class="container">
                         <a class="navbar-brand d-flex align-items-center" href="/chunom">
-                            <span class="fw-bold tracking-tight">${navConfig.title}<sup style="font-size:10px">v2 -alpha</sup></span>
+                            <span class="fw-bold tracking-tight">${navConfig.title}<sup class="ms-2 text-warning" style="font-size:12px">v2 -alpha</sup></span>
                         </a>
                         <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
                             <span class="navbar-toggler-icon"></span>
