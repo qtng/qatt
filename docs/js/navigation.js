@@ -85,7 +85,7 @@
         header.innerHTML = `
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" href="/chunom">
-                    ${navConfig.title}<span class="version-badge ms-1 text-warning">v2</span>
+                    ${navConfig.title}<span class="version-badge ms-1 text-warning">v2-alpha</span>
                 </a>
                 <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                     <span class="navbar-toggler-icon"></span>
@@ -100,7 +100,7 @@
 
         const sectionsHtml = navConfig.sections.map(section => {
             const linksHtml = section.links.map(link => {
-                const isActive = currentPath.includes(link.url);
+                const isActive = currentPath === link.url;
                 return `<a href="${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
                             <i class="bi ${link.icon}"></i> ${link.name}
                         </a>`;
