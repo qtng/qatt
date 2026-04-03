@@ -17,8 +17,9 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "Learn QATT", url: "/qatt-dc/app.html", icon: "bi-mortarboard" },
-                    { name: "Logo Creator", url: "/qatt-dc/logo-creator.html", icon: "bi-palette" },
+                    { name: "Practise QATT", url: "/qatt-dc/app.html", icon: "bi-mortarboard" },
+                    { name: "QATT Tutorial", url: "/qatt-dc/tutorial.html", icon: "bi-journal-text" },
+                    { name: "QATT Logo Creator", url: "/qatt-dc/logo-creator.html", icon: "bi-palette" },
                     { name: "QATT Wiki", url: "/qatt-dc/wiki.html", icon: "bi-info-circle" }
                 ]
             }
