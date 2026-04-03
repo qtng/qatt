@@ -90,9 +90,10 @@ body[data-page="page-3"] .page-3 {background:white}
         }
         .navbar {
         	z-index:1000;
-        	background: color-mix(in srgb, var(--primary) 50%, black);
-        	box-shadow: 0 2px 4px rgb(0 0 0 / .15);
-        	border-bottodm: 1.5px solid black; rgba(255,255,255,.7);
+			background: rgba(58, 68, 92, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         a:not(.nav-link) {color: #eee!important}
         tt { white-space: nowrap}
@@ -213,7 +214,7 @@ body[data-type="2"] .svg-2-tiny {
 </select>
 </div>
 
-<div style="top:60px" class="position-fixed w-100 navbar navbar-dark p-2">
+<div style="top:55px" class="position-fixed w-100 navbar navbar-dark p-2">
 	<div class="container d-flex align-items-center justify-content-between">
 		
 		<ul class="nav">
