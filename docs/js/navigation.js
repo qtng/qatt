@@ -47,7 +47,7 @@
               backdrop-filter: blur(15px);
             }
             .navmenu-backdrop{
-              background: rgba(33, 37, 41, 0.4);
+              background: rgba(33, 37, 41, 0.2);
               backdrop-filter: blur(15px);
             }
             .nav-section-header {
