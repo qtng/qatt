@@ -7,7 +7,7 @@
                 themeClass: "text-warning",
                 linkClass: "link-nom",
                 links: [
-                    { name: "Online Dictionary", url: "/chunom", icon: "bi-book" },
+                    { name: "Online Dictionary", url: "/chunom/", icon: "bi-book" },
                     { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
                     //{ name: "Historical Scans", url: "/chunom/scans.html", icon: "bi-archive" }
                 ]
