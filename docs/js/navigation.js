@@ -9,7 +9,7 @@
                 links: [
                     { name: "Online Dictionary", url: "/chunom/", icon: "bi-book" },
                     { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
-                    { name: "Flashcards", url: "/chunom/deck.html", icon: "bi-layers-half" },
+                    { name: "Flashcards", url: "/chunom/decks.html", icon: "bi-layers-half" },
                 ]
             },
             {
