@@ -141,5 +141,67 @@ class SupabaseService {
     if (error) console.error("Login error:", error.message);
   }
 
+// --- Deck Methods ---
+
+  /**
+   * Saves or updates a deck.
+   * @param {Object} deck - {id, title, words: []}
+   */
+  async saveDeck(deck) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+
+    const { data, error } = await this.client
+      .from('decks')
+      .upsert({
+        id: deck.id,
+        user_id: this.user.id,
+        title: deck.title,
+        words: deck.words,
+        count: deck.words.length,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+
+    if (error) console.error("Save error:", error.message);
+    return { data, error };
+  }
+
+  /**
+   * Fetches all decks for the current user.
+   */
+  async getDecks() {
+    if (!this.user) await this.init();
+    if (!this.user) return [];
+
+    const { data, error } = await this.client
+      .from('decks')
+      .select('*')
+      .eq('user_id', this.user.id)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return [];
+    }
+    return data;
+  }
+
+  /**
+   * Deletes a deck by id.
+   */
+  async deleteDeck(id) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+
+    const { error } = await this.client
+      .from('decks')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', this.user.id);
+
+    if (error) console.error("Delete error:", error.message);
+    return { error };
+  }
+  
 // end of class
 }
