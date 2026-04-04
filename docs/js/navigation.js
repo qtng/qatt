@@ -95,7 +95,8 @@
         `;
 
         const offcanvas = document.createElement('div');
-        offcanvas.className = "offcanvas offcanvas-start bg-dark text-light";
+        offcanvas.className = "offcanvas offcanvas-end bg-dark text-light";
+        offcanvas.style.backdropFilter = "blur(15px)";
         offcanvas.id = navId;
         offcanvas.tabIndex = "-1";
 
