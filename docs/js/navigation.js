@@ -42,6 +42,10 @@
 
         const style = document.createElement('style');
         style.textContent = `
+            .nav-backdrop{
+              background: rgba(33, 37, 41, 0.7);
+              backdrop-filter: blur(15px);
+            }
             .nav-section-header {
                 font-size: 0.75rem;
                 font-weight: 800;
@@ -80,9 +84,7 @@
         const navId = "siteOffcanvas";
         
         const header = document.createElement('nav');
-        header.className = "navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
-        header.style.backdropFilter = "blur(10px)";
-        header.style.backgroundColor = "rgba(33, 37, 41, 0.7)";
+        header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
         header.innerHTML = `
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" href="/chunom">
@@ -95,8 +97,7 @@
         `;
 
         const offcanvas = document.createElement('div');
-        offcanvas.className = "offcanvas offcanvas-end bg-dark text-light";
-        offcanvas.style.backdropFilter = "blur(15px)";
+        offcanvas.className = "nav-backdrop offcanvas offcanvas-end bg-dark text-light";
         offcanvas.id = navId;
         offcanvas.tabIndex = "-1";
 
