@@ -1,151 +1,567 @@
-(function() {
-    const navConfig = {
-        title: "Chunom.org",
-        sections: [
-            {
-                header: "Chữ Nôm",
-                themeClass: "text-warning",
-                linkClass: "link-nom",
-                links: [
-                    { name: "Online Dictionary", url: "/chunom", icon: "bi-book" },
-                    { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
-                    //{ name: "Historical Scans", url: "/chunom/scans.html", icon: "bi-archive" }
-                ]
-            },
-            {
-                header: "Quốc Âm Tân Tự (QATT)",
-                themeClass: "text-info",
-                linkClass: "link-qatt",
-                links: [
-                    { name: "Practise QATT", url: "/qatt-dc/app.html", icon: "bi-mortarboard" },
-                    { name: "QATT Tutorial", url: "/qatt-dc/tutorial.html", icon: "bi-journal-text" },
-                    { name: "QATT Logo Creator", url: "/qatt-dc/logo-creator.html", icon: "bi-palette" },
-                    { name: "QATT Wiki", url: "/qatt-dc/wiki.html", icon: "bi-info-circle" }
-                ]
-            }
-        ]
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chunom.org</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://chunom.org/media/css/fonts/all.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://qtng.github.io/qatt-dc/js/navigation.js"></script>
+  <script src="https://qtng.github.io/qatt-dc/js/renderer.js?2"></script>
+  <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://qtng.github.io/qatt-dc/js/supabase.js"></script>
+  <style>
+    /* Styling for QATT SVG rendering */
+    svg {
+      stroke: currentColor;
+      stroke-width: 5.75px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: transparent;
+      vertical-align: baseline;
+      display: inline-block;
+      height: 2em;
+      position: relative;
+      top: -.25em;
+    }
+    code {
+      display: inline-block;
+      vertical-align: baseline;
+      font-family: inherit;
+      font-size: 1.5em;
+      color: inherit;
+    }
+    .glyph-box {
+      width: 120px;
+      height: 120px;
+      flex-shrink: 0;
+    }
+    .font-serif {
+      font-family: 'Nom Na Tong Supplement', 'NomKhai-Supplement', 'Han-Nom Gothic Supplement', serif;
+    }
+    .font-monospace {
+      font-family: 'Nom Na Tong Supplement', 'NomKhai-Supplement', 'Han-Nom Gothic Supplement', monospace;
+    }
+    .active-scale:active {
+      transform: scale(0.95);
+      transition: transform 0.1s;
+    }
+    .lh-sm {
+      line-height: 1.1;
+    }
+    .badge-rank {
+      font-weight: 400;
+      border: 1px solid rgba(108, 117, 125, 0.5);
+      color: #6c757d;
+      font-size: 0.65rem;
+      background: transparent;
+    }
+    #copy-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      z-index: 9999;
+      display: none;
+      border: 1px solid #444;
+    }
+    .clickable-meta {
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .clickable-meta:hover {
+      opacity: 1 !important;
+      text-decoration: underline;
+    }
+    #detailModal tt {
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    #detailModal tt:hover {
+      filter: brightness(1.3);
+    }
+    tt {
+      cursor: default;
+    }
+    /* Real-time search preview styling */
+    #search-preview {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-left: none;
+      min-width: 0;
+      white-space: nowrap;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    #search-preview:not(:empty) {
+      display: flex;
+      min-width: 40px;
+      max-width: 30vw;
+      overflow-x: auto;
+    }
+    /* Vertical alignment for SVGs in search preview */
+    #search-preview svg {
+      height: 1.4em;
+      top: -.25em; 
+    }
+    /* Remove Bootstrap focus outline/glow */
+    #search:focus {
+      box-shadow: none;
+      outline: none;
+      border-color: #6c757d;
+    }
+  </style>
+</head>
+<body data-bs-theme="dark" class="bg-dark text-light">
+  <div id="copy-toast">Copied</div>
+
+  <div class="container mt-4">
+    <div class="mb-4 d-flex align-items-center justify-content-between">
+      <div class="text-secondary">
+        Chữ Nôm
+        <code class="text-white">字喃</code>
+        <tt class="text-info" title="chữ nôm">ch,y,,4 n,o,m</tt>
+      </div>
+    </div>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text bg-secondary text-white border-secondary">Search</span>
+      <input type="search" id="search" class="form-control bg-dark text-white border-secondary" placeholder="Type Quốc Ngữ or Chữ Nôm..." disabled>
+      <div id="search-preview" class="input-group-text bg-dark border-secondary"></div>
+      <div id="dict-status" class="input-group-text bg-dark border-secondary">
+        <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+      </div>
+    </div>
+
+    <div id="discovery" class="mt-4">
+      <div class="mb-5">
+        <h6 class="text-secondary border-bottom border-secondary pb-2 mb-3 text-uppercase small fw-bold">Top 85 Frequent Words</h6>
+        <div id="list-top-85" class="row row-cols-4 row-cols-sm-5 row-cols-md-8 row-cols-lg-10 g-2"></div>
+      </div>
+      <div class="mb-5">
+        <h6 class="text-secondary border-bottom border-secondary pb-2 mb-3 text-uppercase small fw-bold">Next Frequent Words (up to Rank 500)</h6>
+        <div id="list-next-350" class="row row-cols-4 row-cols-sm-5 row-cols-md-8 row-cols-lg-10 g-2"></div>
+      </div>
+    </div>
+
+    <div id="results" class="list-group w-100"></div>
+  </div>
+
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark text-light border-secondary shadow-lg">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="modalTitle">Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+class ChunomDict {
+  constructor(apiUrl, searchInputId, resultsContainerId, statusId) {
+    this.apiUrl = apiUrl;
+    this.searchInput = document.getElementById(searchInputId);
+    this.searchPreview = document.getElementById('search-preview');
+    this.resultsContainer = document.getElementById(resultsContainerId);
+    this.discoveryContainer = document.getElementById('discovery');
+    this.statusContainer = document.getElementById(statusId);
+    this.toast = document.getElementById('copy-toast');
+    
+    const modalEl = document.getElementById('detailModal');
+    if (typeof bootstrap !== 'undefined') {
+      this.modal = new bootstrap.Modal(modalEl);
+    }
+    this.modalBody = document.getElementById('modalBody');
+    this.modalTitle = document.getElementById('modalTitle');
+    
+    this.cacheKey = 'chunom_dict_data';
+    this.cacheTimeKey = 'chunom_dict_timestamp';
+    this.expirationMs = 24 * 60 * 60 * 1000; 
+    this.data = [];
+    
+    this.initHistoryHandler(modalEl);
+    this.init();
+    this.initGlobalClickHandlers();
+  }
+
+  initHistoryHandler(modalEl) {
+    window.addEventListener('popstate', () => {
+      if (this.modal) this.modal.hide();
+    });
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      if (history.state && history.state.modalOpen) {
+        history.back();
+      }
+    });
+  }
+
+  initGlobalClickHandlers() {
+    document.addEventListener('click', (e) => {
+      const tt = e.target.closest('tt');
+      if (tt && tt.title && e.target.closest('#detailModal')) {
+        e.stopPropagation();
+        const query = tt.title.toLowerCase();
+        this.searchInput.value = query;
+        this.search(query);
+        if (this.modal) this.modal.hide();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  }
+
+  async init() {
+    let cachedData = localStorage.getItem(this.cacheKey);
+    const cachedTime = localStorage.getItem(this.cacheTimeKey);
+    const now = Date.now();
+
+    if (cachedData && cachedTime && (now - cachedTime < this.expirationMs)) {
+      try {
+        this.data = JSON.parse(cachedData);
+        this.finishLoading();
+        return;
+      } catch (e) {
+        console.error("Cache parse error", e);
+      }
+    }
+
+    try {
+      const response = await fetch(this.apiUrl);
+      if (!response.ok) throw new Error("Network error");
+      const text = await response.text();
+      this.data = this.parseCSV(text);
+      localStorage.setItem(this.cacheKey, JSON.stringify(this.data));
+      localStorage.setItem(this.cacheTimeKey, now.toString());
+      this.finishLoading();
+    } catch (err) {
+      console.error("Fetch error", err);
+      this.showError("Error loading data.");
+    }
+  }
+
+  parseCSV(text) {
+    const rows = [];
+    const lines = text.split(/\r?\n/);
+    for (let line of lines) {
+      if (!line.trim()) continue;
+      const row = [];
+      let cell = '', inQuotes = false;
+      for (let char of line) {
+        if (char === '"') inQuotes = !inQuotes;
+        else if (char === ',' && !inQuotes) {
+          row.push(cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+          cell = '';
+        } else cell += char;
+      }
+      row.push(cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+      if (row.length >= 2) rows.push(row);
+    }
+    return rows;
+  }
+
+  finishLoading() {
+    this.statusContainer.classList.add('d-none');
+    this.searchInput.removeAttribute('disabled');
+    this.searchInput.placeholder = "Type Quốc Ngữ or Chữ Nôm...";
+    this.searchInput.addEventListener('input', (e) => this.search(e.target.value));
+    this.renderDiscoveryLists();
+  }
+
+  getQattHtml(quocNgu, fontSize = 'inherit') {
+    if (!quocNgu || !parser) return '';
+    return quocNgu.split(/\s+/).map(word => {
+      const parsed = parser.parse(word);
+      const cleanWord = word.replace(/"/g, '&quot;');
+      return parsed ? `<tt class="text-info" style="font-size: ${fontSize};" title="${cleanWord}">${parsed.code}</tt>` : '';
+    }).join(' ');
+  }
+
+  renderDiscoveryLists() {
+    const list85 = document.getElementById('list-top-85');
+    const listNext = document.getElementById('list-next-350');
+    if (!list85 || !listNext) return;
+
+    const uniqueRanksMap = new Map();
+    this.data.forEach(r => {
+      const rank = parseInt(r[5]);
+      if (!isNaN(rank)) {
+        if (!uniqueRanksMap.has(rank) || r[3] === '1') {
+          uniqueRanksMap.set(rank, r);
+        }
+      }
+    });
+
+    const allUnique = Array.from(uniqueRanksMap.values())
+      .sort((a, b) => parseInt(a[5]) - parseInt(b[5]));
+
+    const renderGrid = (items, container) => {
+      const frag = document.createDocumentFragment();
+      items.forEach(r => {
+        const col = document.createElement('div');
+        col.className = 'col';
+        col.innerHTML = `
+          <div class="bg-dark pt-4 p-2 rounded text-center h-100 d-flex flex-column justify-content-center border border-secondary border-opacity-25 position-relative shadow-sm opacity-hover-75" style="cursor: pointer;">
+            <span class="position-absolute top-0 start-0 m-1 badge badge-rank" style="opacity: 0.8;">#${r[5]}</span>
+            <div class="h3 font-serif text-white mb-0">${this.wrapNomChars(r[1])}</div>
+            <div class="d-flex align-items-center justify-content-center gap-1 mt-1 overflow-hidden flex-wrap">
+              ${this.getQattHtml(r[0], '0.7rem')}
+            </div>
+            <div class="text-secondary small opacity-75 text-truncate w-100">${r[0]}</div>
+          </div>
+        `;
+        col.onclick = () => this.showDetails(r[5], r[1]);
+        frag.appendChild(col);
+      });
+      container.innerHTML = "";
+      container.appendChild(frag);
     };
 
-    function injectDependencies() {
-        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
-            const icons = document.createElement('link');
-            icons.rel = 'stylesheet';
-            icons.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css';
-            document.head.appendChild(icons);
+    const top85Items = allUnique.filter(r => parseInt(r[5]) <= 85);
+    const nextItems = allUnique.filter(r => parseInt(r[5]) > 85 && parseInt(r[5]) <= 500);
+
+    renderGrid(top85Items, list85);
+    renderGrid(nextItems, listNext);
+  }
+
+  showError(msg) {
+    this.statusContainer.innerHTML = `<span class="text-danger small">${msg}</span>`;
+  }
+
+  search(term) {
+    const query = term.trim().toLowerCase();
+    
+    if (this.searchPreview) {
+      if (query && !/[\u4e00-\u9fff]/.test(query)) {
+        const html = this.getQattHtml(query, '1.4em');
+        this.searchPreview.innerHTML = html;
+        if (html) {
+          this.searchInput.style.borderRight = 'none';
+        } else {
+          this.searchInput.style.borderRight = '';
         }
-
-        if (typeof bootstrap === 'undefined' && !document.querySelector('script[src*="bootstrap"]')) {
-            const bsScript = document.createElement('script');
-            bsScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
-            document.head.appendChild(bsScript);
-        }
-
-        const style = document.createElement('style');
-        style.textContent = `
-            .nav-section-header {
-                font-size: 0.75rem;
-                font-weight: 800;
-                text-transform: uppercase;
-                letter-spacing: 0.08rem;
-                padding: 1.5rem 1.25rem 0.5rem;
-            }
-            .offcanvas-nav-link {
-                color: #adb5bd;
-                padding: 0.7rem 1.25rem;
-                display: flex;
-                align-items: center;
-                text-decoration: none;
-                transition: all 0.2s ease;
-                border-left: 3px solid transparent;
-            }
-            .link-nom.active, .link-nom:hover {
-                border-left-color: var(--bs-warning);
-                background: linear-gradient(90deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0) 100%);
-                color: #fff !important;
-            }
-            .link-qatt.active, .link-qatt:hover {
-                border-left-color: var(--bs-info);
-                background: linear-gradient(90deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0) 100%);
-                color: #fff !important;
-            }
-            .offcanvas-nav-link i { margin-right: 12px; width: 20px; text-align: center; }
-            .navbar-brand .version-badge { font-size: 0.7rem; vertical-align: super; }
-            #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
-        `;
-        document.head.appendChild(style);
+      } else {
+        this.searchPreview.innerHTML = '';
+        this.searchInput.style.borderRight = '';
+      }
     }
 
-    function injectNav() {
-        const currentPath = window.location.pathname;
-        const navId = "siteOffcanvas";
-        
-        const header = document.createElement('nav');
-        header.className = "navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
-        header.style.backdropFilter = "blur(10px)";
-        header.style.backgroundColor = "rgba(33, 37, 41, 0.75)";
-        header.innerHTML = `
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="/chunom">
-                    ${navConfig.title}<span class="version-badge ms-1 text-warning">v2-alpha</span>
-                </a>
-                <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+    this.resultsContainer.innerHTML = '';
+    
+    if (!query) {
+      this.discoveryContainer.classList.remove('d-none');
+      return;
+    }
+
+    this.discoveryContainer.classList.add('d-none');
+
+    let count = 0;
+    const fragment = document.createDocumentFragment();
+    for (const row of this.data) {
+      if (row[0].includes(' ') && !row[1].includes(query) && !row[0].toLowerCase().includes(query)) continue;
+      if (row[0].toLowerCase().includes(query) || row[1].includes(query)) {
+        fragment.appendChild(this.createResultItem(row));
+        if (++count > 40) break;
+      }
+    }
+    this.resultsContainer.appendChild(fragment);
+  }
+
+  createResultItem(row) {
+    const [quocNgu, nom, meaning, flag, strokes, id, hex] = row;
+    const div = document.createElement('div');
+    div.className = 'list-group-item list-group-item-action bg-dark text-light border-secondary py-3';
+    div.innerHTML = `
+      <div class="d-flex w-100 align-items-center mb-1">
+        <div class="me-auto d-flex align-items-center">
+          <span class="fs-2 text-white me-2">${this.wrapNomChars(nom)}</span>
+          <span class="text-secondary fw-bold">${quocNgu}</span>
+        </div>
+        <div class="text-end d-flex align-items-center gap-2 flex-wrap justify-content-end">
+          ${this.getQattHtml(quocNgu)}
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center w-100">
+        <p class="mb-0 text-secondary small text-truncate flex-grow-1">${meaning}</p>
+        ${id ? `<span class="badge badge-rank ms-2">#${id}</span>` : ''}
+      </div>
+    `;
+    div.addEventListener('click', () => this.showDetails(id, nom));
+    return div;
+  }
+
+  async copyText(text, el) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      if (el && el.classList.contains('glyph-box')) {
+        el.classList.add('border-info');
+        setTimeout(() => el.classList.remove('border-info'), 1000);
+      }
+      this.toast.innerText = `Copied: ${text}`;
+      this.toast.style.display = 'block';
+      setTimeout(() => { this.toast.style.display = 'none'; }, 2000);
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+    document.body.removeChild(textArea);
+  }
+
+  wrapNomChars(text) {
+    if (!text) return '';
+    return text.replace(/[\u4e00-\u9fff\u3400-\u4dbf\u{20000}-\u{2a6df}]/gu, (match) => {
+      return `<span class="font-serif link-light link-underline-opacity-0 link-underline-opacity-100-hover" style="cursor: pointer;" onclick="event.stopPropagation(); dict.showDetails(null, '${match}')">${match}</span>`;
+    });
+  }
+
+  showDetails(clickedId, mainNom) {
+    let related = this.data.filter(row => row[1] && row[1].includes(mainNom));
+    const seenEntries = new Set();
+    related = related.filter(r => {
+      const key = `${r[0].trim().toLowerCase()}|${r[1].trim()}|${r[2].trim()}`;
+      if (seenEntries.has(key)) return false;
+      seenEntries.add(key);
+      return true;
+    });
+
+    const sortedRelated = related.sort((a, b) => {
+        const aIsExact = (a[1] === mainNom);
+        const bIsExact = (b[1] === mainNom);
+        if (aIsExact !== bIsExact) return aIsExact ? -1 : 1;
+        const aIsCompound = a[0].trim().includes(' ');
+        const bIsCompound = b[0].trim().includes(' ');
+        if (aIsCompound !== bIsCompound) return aIsCompound ? 1 : -1;
+        const aRank = parseInt(a[5]) || Infinity;
+        const bRank = parseInt(b[5]) || Infinity;
+        return aRank - bRank;
+    });
+
+    if (!history.state || !history.state.modalOpen) {
+      history.pushState({ modalOpen: true }, "");
+    }
+
+    this.modalTitle.innerText = 'Details';
+    const mainEntry = sortedRelated.find(r => r[1] === mainNom && !r[0].trim().includes(' '));
+    const hex = mainEntry ? mainEntry[6] : (related.find(r => r[6])?.[6] || '');
+    const strokes = mainEntry ? mainEntry[4] : (related.find(r => r[4])?.[4] || '');
+    const rank = clickedId || (mainEntry ? mainEntry[5] : null);
+
+    const exactMatches = sortedRelated.filter(r => r[1] === mainNom && !r[0].trim().includes(' '));
+    const uniqueReadings = [...new Set(exactMatches.map(r => r[0]))];
+
+    const readingsHtml = uniqueReadings.map(read => {
+      return `
+        <div class="d-flex justify-content-between align-items-center w-100 lh-sm">
+          <span class="text-secondary fs-2 fw-bold">${read}</span>
+          <div class="d-flex align-items-center gap-1">
+            ${this.getQattHtml(read)}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const rawDataStr = sortedRelated.map(r => r.join(',')).join('\n');
+
+    this.modalBody.innerHTML = `
+      <div class="d-flex align-items-start gap-4 mb-4 p-2">
+        <div class="d-flex flex-column align-items-center">
+          <div class="border border-secondary d-flex align-items-center justify-content-center p-3 rounded bg-black glyph-box active-scale" 
+               onclick="dict.copyText('${mainNom}', this)" title="Click to copy glyph">
+            <span class="display-1 font-serif m-0 text-white">${mainNom}</span>
+          </div>
+        </div>
+        <div class="flex-grow-1">
+          <div class="d-flex flex-column w-100">${readingsHtml || '<span class="text-secondary fst-italic">Part of compound words</span>'}</div>
+          <div class="d-flex flex-column gap-1 mt-3 opacity-75 small text-secondary">
+             ${hex ? `<div class="clickable-meta" onclick="dict.copyText('${hex}', this)" title="Click to copy Hex code">Unicode: U+${hex}</div>` : ''}
+             ${strokes ? `<div>Strokes: ${strokes}</div>` : ''}
+             ${rank ? `<div>Rank: <span class="badge badge-rank">#${rank}</span></div>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="list-group list-group-flush border-top border-secondary">
+        ${sortedRelated.map(r => {
+          return `
+          <div class="list-group-item bg-transparent text-light border-secondary py-3 px-0">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <div class="d-flex align-items-center flex-wrap">
+                <span class="fs-3 text-white me-2">${this.wrapNomChars(r[1])}</span>
+                <span class="text-secondary fw-bold fs-5">${r[0]}</span> 
+              </div>
+              <div class="text-end d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                ${this.getQattHtml(r[0])}
+              </div>
             </div>
-        `;
-
-        const offcanvas = document.createElement('div');
-        offcanvas.className = "offcanvas offcanvas-start bg-dark text-light";
-        offcanvas.id = navId;
-        offcanvas.tabIndex = "-1";
-
-        const sectionsHtml = navConfig.sections.map(section => {
-            const linksHtml = section.links.map(link => {
-                const isActive = currentPath === link.url;
-                return `<a href="${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
-                            <i class="bi ${link.icon}"></i> ${link.name}
-                        </a>`;
-            }).join('');
-            return `<div class="nav-section-header ${section.themeClass}">${section.header}</div>
-                    <div class="nav flex-column">${linksHtml}</div>`;
-        }).join('');
-
-        offcanvas.innerHTML = `
-            <div class="offcanvas-header border-bottom border-secondary">
-                <h5 class="offcanvas-title fw-bold text-white">${navConfig.title}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <div class="text-secondary small text-truncate flex-grow-1">${r[2] || 'No description'}</div>
+              ${r[5] ? `<span class="badge badge-rank ms-2">#${r[5]}</span>` : ''}
             </div>
-            <div class="offcanvas-body p-0">${sectionsHtml}</div>
-        `;
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="mt-4 pt-3 border-top border-secondary opacity-50">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small class="text-uppercase fw-bold" style="font-size: 0.65rem;">Raw Data:</small>
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.6rem;" onclick="dict.copyText(decodeURIComponent('${encodeURIComponent(rawDataStr)}'), this)">Copy All</button>
+        </div>
+        <pre class="bg-black p-2 rounded text-info border border-secondary font-monospace" 
+             style="font-size: 0.65rem; white-space: pre-wrap; cursor: pointer;" 
+             onclick="dict.copyText(this.innerText, this)" title="Click to copy raw content">${rawDataStr}</pre>
+      </div>`;
+    this.modal.show();
+  }
+}
 
-        document.body.style.paddingTop = "62px";
-        document.body.prepend(header);
-        document.body.appendChild(offcanvas);
+let renderer, parser, dict;
 
-        const initOffcanvas = () => {
-            const toggler = document.getElementById('navTogglerCustom');
-            const offcanvasEl = document.getElementById(navId);
-            
-            if (toggler && offcanvasEl && typeof bootstrap !== 'undefined') {
-                const bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
-                toggler.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    bsOffcanvas.toggle();
-                });
-            } else if (typeof bootstrap === 'undefined') {
-                setTimeout(initOffcanvas, 200);
-            }
-        };
-        initOffcanvas();
+function renderQatt(el) {
+  if (el.dataset.rendered) return;
+  const qattType = localStorage.getItem('qattType') || "0";
+  let code = el.innerText.trim();
+  if (qattType === "0" && code.includes(",")) code = code.replace(",", ",+");
+  el.innerHTML = "";
+  el.dataset.rendered = "true";
+  renderer.renderText(code, el, parseInt(qattType));
+}
+
+function initObserver() {
+  const observer = new MutationObserver(mutations => {
+    for (let m of mutations) {
+      for (let n of m.addedNodes) {
+        if (n.nodeName === "TT") renderQatt(n);
+        else if (n.nodeType === 1) n.querySelectorAll("tt").forEach(renderQatt);
+      }
     }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  document.querySelectorAll("tt").forEach(renderQatt);
+}
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-            injectDependencies();
-            injectNav();
-        });
-    } else {
-        injectDependencies();
-        injectNav();
-    }
-})();
+window.addEventListener("load", () => {
+  try {
+    renderer = new SvgGlyphRenderer({});
+    parser = new VietnameseParser();
+    initObserver();
+    dict = new ChunomDict('https://qtng.github.io/chunom/dict.csv', 'search', 'results', 'dict-status');
+  } catch (e) {
+    console.error("Initialization error", e);
+  }
+});
+  </script>
+</body>
+</html>
