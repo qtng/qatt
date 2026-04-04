@@ -92,6 +92,7 @@
         } catch{
             highscore = 0;
         }
+        const isQuiz = currentPath.endsWith("/app.html");
         
         const header = document.createElement('nav');
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
@@ -101,7 +102,7 @@
                     ${navConfig.title}<span class="version-badge ms-1 text-warning">v2-alpha</span>
                 </a>
                 <div class="ms-auto d-flex align-items-center">
-                    <a href="/qatt-dc/app.html" class="badge rounded-pill border border-success text-success bg-transparent highscore-badge small me-2 py-1 px-2">
+                    <a href="/qatt-dc/app.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-success bg-transparent text-decoeation-none small me-2 py-1 px-2">
                         🏆 ${highscore}
                     </a>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
