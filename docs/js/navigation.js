@@ -86,7 +86,12 @@
     function injectNav() {
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
-        const highscore = Number(JSON.parse(localStorage.getItem('qatt_stats')||"{}").score||0);
+        let highscore;
+        try {
+            highscore = Number(JSON.parse(localStorage.getItem('qatt_stats')||"{}")._score||0);
+        } catch{
+            highscore = 0;
+        }
         
         const header = document.createElement('nav');
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
