@@ -47,7 +47,7 @@
               backdrop-filter: blur(15px);
             }
             .navmenu-backdrop{
-              background: rgba(33, 37, 41, 0.3);
+              background: rgba(33, 37, 41, 0.4);
               backdrop-filter: blur(15px);
             }
             .nav-section-header {
@@ -101,7 +101,7 @@
         `;
 
         const offcanvas = document.createElement('div');
-        offcanvas.className = "navmenu-backdrop offcanvas offcanvas-end bg-dark text-light";
+        offcanvas.className = "navmenu-backdrop offcanvas offcanvas-end text-light";
         offcanvas.id = navId;
         offcanvas.tabIndex = "-1";
 
