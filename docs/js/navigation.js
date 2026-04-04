@@ -80,7 +80,7 @@
         const navId = "siteOffcanvas";
         
         const header = document.createElement('nav');
-        header.className = "navbar navbar-dark bg-dark fixed-top border-bottom border-secondary shadow-sm";
+        header.className = "navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
         header.style.backdropFilter = "blur(10px)";
         header.style.backgroundColor = "rgba(33, 37, 41, 0.85)";
         header.innerHTML = `
