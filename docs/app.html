@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>QATT</title>
+  <title>QATT App</title>
   <base href="https://qtng.github.io">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -197,6 +197,12 @@
       animation: symbolPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
+	.pop-milestone {
+      display: inline-block;
+      animation: megaPop 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      filter: drop-shadow(0 0 15px #fde047);
+      z-index: 10;
+	}
     .sunflower-milestone {
       display: inline-block;
       animation: sunflowerMegaPop 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -216,6 +222,13 @@
       60% { transform: scale(1.3) rotate(-10deg); }
       100% { transform: scale(1.5) rotate(0deg); opacity: 1; }
     }
+
+	@keyframes megaPop {
+      0% { transform: scale(0); opacity: 0; }
+      30% { transform: scale(3); opacity: 1; }
+      60% { transform: scale(1.3); }
+      100% { transform: scale(1.5); opacity: 1; }
+	}
 
     .plus-one-heart {
       display: block;
@@ -282,7 +295,7 @@
       <div class="status-group">
         <div id="badge-total" class="score-badge badge-total" title="Tổng điểm">🏆 <span id="val-total">0</span></div>
         <div id="badge-sunflower" class="score-badge badge-sunflower" title="Hoa">🌻 <span id="val-sunflower">0</span></div>
-        <div id="badge-plant" class="score-badge badge-plant" title="Cây">🌱 <span id="val-plant">0</span></div>
+        <div id="badge-coin" class="score-badge badge-coin" title="Vàng">🪙 <span id="val-coin">0</span></div>
       </div>
       
       <div class="style-selector-wrap">
@@ -312,10 +325,10 @@
 class App {
   constructor(container, db) {
     this.opts = { 
-      requiredCorrect: 3, 
-      maxErrors: 3, 
-      learningWindow: 4, 
-      hintDelay: 10000 
+      requiredCorrect: 4,
+      maxErrors: 3,
+      learningWindow: 4,
+      hintDelay: 10000,
     };
     this.db = db;
     this.useDB = true;
@@ -604,8 +617,6 @@ class App {
         this.clearHintTimer(); 
         const isCorrect = option === correctWord; 
         this.playTone(isCorrect ? 'success' : 'error');
-        
-        let animations = { total: true };
         let isMilestone = false;
         
         if ((this.currentLesson.practiceModeItems||[]).includes(correctWord)){
@@ -615,31 +626,38 @@ class App {
           }
         }
 
+		const animations = {};
         if (isCorrect) {
-            const prevCorrectCount = this.stats[correctWord].c; 
+            const prevCorrectCount = this.stats[correctWord].c || 0; 
             this.stats[correctWord].c++;
-            
-            let triggerAnimation = false;
-            if (prevCorrectCount === 1) { 
-              this.stats._score += 20; 
-              animations.plant = true; 
-              triggerAnimation = true;
+			animations.total = true;
+            if (prevCorrectCount === 0) { 
+			  animations.drop = true;
+              this.stats._score += 10; 
             }
-            else if (prevCorrectCount === 2) { 
-              this.stats._score += 100; 
-              animations.sunflower = true; 
-              triggerAnimation = true;
+			else if (prevCorrectCount === 1) {
+			  animations.seedling = true;
+              this.stats._score += 15;
+			}
+			else if (prevCorrectCount === 2) { 
+			  animations.plant = true;
+              this.stats._score += 25;
+			}
+            else if (prevCorrectCount === 3) { 
+			  animations.sunflower = true;
+              this.stats._score += 200; 
               isMilestone = true;
               if (this.currentEnergy < 5) this.currentEnergy++; 
-            } else {
-              this.stats._score += 10;
-              animations.drop = true;
-              triggerAnimation = true;
+            } else if (prevCorrectCount < 10) {
+			  animations.coin = true;
+              this.stats._score += 20;
             }
-            
+			else {
+			  animations.gem = true;
+			  this.stats._score += 20;
+			}
             this.syncScore();
-            
-            document.getElementById("emoji-c").innerHTML = this.getProgressEmoji(correctWord, triggerAnimation, 'quiz');
+            document.getElementById("emoji-c").innerHTML = this.getProgressEmoji(correctWord, true, 'quiz');
         } else { 
             this.stats[correctWord].w++; 
             this.stats._score = Math.max(0, this.stats._score - 1); 
@@ -648,7 +666,7 @@ class App {
         }
 
         localStorage.setItem('qatt_stats', JSON.stringify(this.stats)); 
-        this.renderStatus(document.querySelector(".quiz-container"));
+        this.renderStatus(document.querySelector(".quiz-container"), animations);
         
         document.querySelectorAll("#opts .btn").forEach(btn => { 
           btn.disabled = true; 
@@ -686,18 +704,22 @@ class App {
   }
   
   updateGlobalCounters(animations = {}) {
-    let counts = { drop: 0, plant: 0, sunflower: 0 };
-    Object.keys(this.stats).forEach(key => { 
-      if (key === '_score') return; 
-      const symbolStats = this.stats[key]; 
-      if (symbolStats.c >= 3) counts.sunflower++; 
-      else if (symbolStats.c === 2) counts.plant++; 
-      else if (symbolStats.c === 1) counts.drop++; 
+    let counts = {drop: 0, seedling, plant: 0, sunflower: 0, coin: 0};
+    Object.keys(this.stats).forEach(key => {
+      if (key === '_score') return;
+      const symbolStats = this.stats[key];
+      if (symbolStats.c > 4) counts.coin++;
+	  else if (symbolStats.c === 4) counts.sunflower++
+	  else if (symbolStats.c === 3) counts.plant++
+      else if (symbolStats.c === 2) counts.seedling++;
+      else if (symbolStats.c === 1) counts.drop++;
     });
 
     this.updateBadge('total', Math.floor(this.stats._score || 0), animations.total);
+	this.updateBadge('coin', counts.coin, animations.coin);
     this.updateBadge('sunflower', counts.sunflower, animations.sunflower);
     this.updateBadge('plant', counts.plant, animations.plant);
+	this.updateBadge('seedling', counts.seedling, animations.seedling);
     this.updateBadge('drop', counts.drop, animations.drop);
   }
 
@@ -711,7 +733,7 @@ class App {
     } 
   }
 
-  renderStatus(container) {
+  renderStatus(container, animations = {}) {
     if (!container) return; 
     const progressBar = container.querySelector(".progress-bar"); 
     const energyDisplay = container.querySelector(".energy-display");
@@ -725,9 +747,14 @@ class App {
         doneCount = this.currentLesson.quizLength - afterFinishRemaining;
         quizLength = this.currentLesson.quizLength;
       } else {
+		// THESE ARE NOT POINTS!!!!
+		// THIS IS ONLY FOR DECIDING
+		// THE AMOUNT OF VISUAL FEEDBACK
+		// ON THE PROGRESS BAR
         // Learning mode, in learning mode quiz length is calculated dynamically
-        doneCount = 65 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 3).length;
-        doneCount += 25 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 2).length;
+        doneCount = 65 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 4).length;
+		doneCount = 15 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 3).length;
+        doneCount += 10 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 2).length;
         doneCount += 10 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 1).length;
         quizLength = 100 * this.currentLesson.symbols.length;
       }
@@ -749,7 +776,7 @@ class App {
         </div>
         `; 
     }
-    this.updateGlobalCounters();
+    this.updateGlobalCounters(animations);
   }
 
   triggerHeartLossAnimation() {
@@ -832,14 +859,14 @@ class App {
   }
 
   getProgressEmoji(word, shouldAnimate, locationType) { 
-    const correctCount = this.stats[word].c; 
-    const emoji = correctCount === 1 ? "💧" : correctCount === 2 ? "🌱" : correctCount >= 3 ? "🌻" : ""; 
+    const correctCount = parseInt(this.stats[word].c) || 0; 
+    const emoji = correctCount === 0 ? "" : correctCount === 1 ? "💧" : correctCount === 2 ? "🌱" : correctCount == 3 ? "🌿" : correctCount == 4 ? "🌻" : correctCount < 10 ? "🪙" : "💎"; 
     const positionClass = locationType === 'quiz' ? 'quiz-pos' : 'grid-pos';
     const emptyClass = correctCount === 0 ? 'emoji-empty' : '';
     
     let animationClass = '';
     if (shouldAnimate && correctCount > 0) {
-      animationClass = (correctCount >= 3) ? 'sunflower-milestone' : 'symbol-animate';
+      animationClass = (correctCount == 4) ? "sunflower-milestone" : (correctCount > 4) ? 'milestone' : 'symbol-animate';
     }
     
     return `<span class="word-progress-emoji ${positionClass} ${animationClass} ${emptyClass}">${emoji}</span>`; 
