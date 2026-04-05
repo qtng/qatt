@@ -149,8 +149,7 @@ class SupabaseService {
    */
   async saveDeck(deck) {
     if (!this.user) await this.init();
-    if (!this.user) return { error: "Auth required" };
-
+    if (!this.user) return;
     const { data, error } = await this.client
       .from('decks')
       .upsert({
@@ -182,6 +181,23 @@ class SupabaseService {
     if (error) {
       console.error("Fetch error:", error.message);
       return [];
+    }
+    return data;
+  }
+
+  async getDeck(id) {
+    if (!this.user) await this.init();
+    if (!this.user) return {};
+
+    const { data, error } = await this.client
+      .from('decks')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return {};
     }
     return data;
   }
