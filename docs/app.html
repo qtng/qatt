@@ -704,7 +704,7 @@ class App {
   }
   
   updateGlobalCounters(animations = {}) {
-    let counts = {drop: 0, seedling, plant: 0, sunflower: 0, coin: 0};
+    let counts = {drop: 0, seedling: 0, plant: 0, sunflower: 0, coin: 0};
     Object.keys(this.stats).forEach(key => {
       if (key === '_score') return;
       const symbolStats = this.stats[key];
