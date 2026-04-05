@@ -495,8 +495,8 @@ class App {
         </div>`;
       return;
     }
-    	if (!this.currentLesson) return;
-    let unfinishedSymbols = this.currentLesson.symbols.filter(symbol => this.stats[symbol].c < 3);
+    if (!this.currentLesson) return;
+    let unfinishedSymbols = this.currentLesson.symbols.filter(symbol => this.stats[symbol].c < this.opts.requiredCorrect);
     if (unfinishedSymbols.length === 0) {
       if ((this.currentLesson.practiceModeItems||[]).length == 0) {
         this.renderLessonPreview(this.currentLesson.id, true);
