@@ -213,7 +213,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select(`*, profiles:user_id(username)`)
+      .select(`*, profiles!user_id(username)`)
       .eq('id', id)
       .maybeSingle();
 
