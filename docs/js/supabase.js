@@ -49,7 +49,7 @@ class SupabaseService {
     if (!this.user) await this.init();
     if (!this.user) return;
     await this.client
-      .from('leaderboard')
+      .from('profiles')
       .upsert({
         user_id: this.user.id,
         username: nickname || "Anonymous",
@@ -74,7 +74,7 @@ class SupabaseService {
     const {
       error
     } = await this.client
-      .from('leaderboard')
+      .from('profiles')
       .update({
         username: name
       })
