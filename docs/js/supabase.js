@@ -215,12 +215,13 @@ class SupabaseService {
       .from('decks')
       .select(`*, profiles:user_id(username)`)
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Fetch error:", error.message);
       return {};
     }
+    if (!data) return {};
     data.username = (data.profile ? data.profile.username : null) || this.defaultUsername();
     return data;
   }
