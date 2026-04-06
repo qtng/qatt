@@ -61,6 +61,28 @@ class SupabaseService {
         onConflict: 'user_id'
       });
   }
+
+  defaultUsername(){
+    if (!this.user || !this.user.id) return "Anonymous";
+    const adjectives = [
+        "Fast", "Cool", "Wild", "Smart", "Glad", 
+        "Brave", "Soft", "Bold", "Bright", "Swift",
+        "Tiny", "Fluffy", "Quick", "Light", "Noble", 
+        "Sharp", "Keen", "True", "Lucky", "Free"
+    ];
+    const nouns = [
+        "Cat", "Eagle", "Fox", "Bear", "Lion", 
+        "Goose", "Camel", "Wolf", "Hare", "Owl",
+        "Lynx", "Koala", "Deer", "Dino", "Squirrel", 
+        "Hippo", "Raven", "Pug", "Seal", "Gecko"
+    ];
+    const hexPart = this.user.id.substring(0, 5);
+    const val = parseInt(hexPart.substring(0, 3), 16);
+    const adjIndex = val % adjectives.length;
+    const nounIndex = Math.floor(val / adjectives.length) % nouns.length;
+    const suffix = parseInt(hexPart.slice(3, 5), 16) || 1;
+    return `${adjectives[adjIndex]}${nouns[nounIndex]}_${suffix}`;
+  }
   
   async setNickname(name) {
     name = name.trim()
@@ -191,7 +213,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select('*')
+      .select(`*, profiles:user_id(username)`)
       .eq('id', id)
       .single();
 
@@ -199,6 +221,7 @@ class SupabaseService {
       console.error("Fetch error:", error.message);
       return {};
     }
+    data.username = (data.profile ? data.profile.username : null) || this.defaultUsername();
     return data;
   }
 
