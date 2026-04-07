@@ -20,6 +20,7 @@
                 links: [
                     { name: "Practise QATT", url: "/qatt-dc/app.html", icon: "bi-mortarboard" },
                     { name: "QATT Tutorial", url: "/qatt-dc/tutorial.html", icon: "bi-journal-text" },
+                    { name: "QATT Reference", url: "/qatt-dc/reference.html", icon: "bi-book-half" },
                     { name: "QATT Logo Creator", url: "/qatt-dc/logo-creator.html", icon: "bi-palette" },
                     { name: "QATT Wiki", url: "/qatt-dc/wiki.html", icon: "bi-info-circle" }
                 ]
