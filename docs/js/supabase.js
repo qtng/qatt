@@ -16,15 +16,18 @@ class SupabaseService {
     this.key = 'sb_publishable_2meEMOnLkAPYby7xd7Uy_w_kmHQw7dq';
     this.client = null;
     this.user = null;
-    this.header = {
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache',
-    };
   }
   
   async init() {
     if (typeof supabase === 'undefined') return;
-    this.client = supabase.createClient(this.url, this.key);
+    this.client = supabase.createClient(this.url, this.key, {
+      global: {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        }
+      }
+    });
     // Check for existing session in localStorage
     const {
       data: {
@@ -199,7 +202,6 @@ class SupabaseService {
     if (!this.user) return [];
 
     const { data, error } = await this.client
-      .setHeader(this.headers)
       .from('decks')
       .select('*')
       .eq('user_id', this.user.id)
@@ -217,7 +219,6 @@ class SupabaseService {
     if (!this.user) return {};
 
     const { data, error } = await this.client
-      .setHeader(this.headers)
       .from('decks')
       .select("*")  //(`*, profiles!user_id(username)`)
       .eq('id', id)
