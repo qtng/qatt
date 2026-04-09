@@ -690,15 +690,16 @@ class SvgGlyphRenderer {
   render(text, root, type) {
 	  // render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
 	if (String(type) == -1) {
-      type = "0";
+      type = 0;
 	  text = text.replace("+", "");
-	} else if(String(type) == 0) {
+	} else if(type == 0) {
       text = text.replace("+", "").replace(",", ",+")
     }
-	return this.renderText(text, root, String(type));
+	return this.renderText(text, root, type);
   }
 	
   renderText(text, root, type) {
+	type = Number(type) >= 0 ? Number(type) : 0;
     const prefixes = this.getPrefixes(type);
     const target = root || this.container;
     const fragment = document.createDocumentFragment();
