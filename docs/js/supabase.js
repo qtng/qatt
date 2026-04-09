@@ -214,9 +214,24 @@ class SupabaseService {
     return data;
   }
 
+  async getPublicDecks() {
+    if (!this.client) await this.init();
+
+    const { data, error } = await this.client
+      .from('decks')
+      .select('*')
+      .eq('is_public', true)
+      .order('title', { ascending: true });
+
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return [];
+    }
+    return data;
+  }
+
   async getDeck(id) {
-    if (!this.user) await this.init();
-    if (!this.user) return {};
+    if (!this.client) await this.init();
 
     const { data, error } = await this.client
       .from('decks')
