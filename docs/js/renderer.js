@@ -432,8 +432,6 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	
     	<path id="NG_t"      d="M25 40 h48 c0 0 0 18 -8 40 c0 0 0 5 -15 2 M44 40 c0 0 0 20 -24 40"/>
     	<path id="NG_tsmall" d="M25 45 h48 c0 0 0 15 -8 35 c0 0 0 5 -15 2 M44 45 c0 0 0 17 -24 35"/>
-    	<path id="NH_t"      d="M50 35 c0 0 -5 35 -30 50 M50 35 c 0 0 5 35 30 50"/>
-    	<path id="NH_tsmall" d="M50 45 c0 0 -5 30 -30 40 M50 45 c 0 0 5 30 30 40"/>
 		<path id="NH_t"      d="M20 35 h45 c0 0 -25 33 -45 50 M49 57 c 0 0 15 15 27 29"/>
 		<path id="NH_tsmall" d="M20 45 h45 c0 0 -25 28 -45 40 M50 65 c 0 0 15 10 27 20"/>
 		<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
