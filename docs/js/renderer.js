@@ -427,14 +427,16 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="C" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M24 64 l30 -18"/>
 		<path id="T" d="M70 15 v70 M15 50 l55 -5"/>
     	<path id="NG" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M46 20 c0 0 0 40 -28 63"/>
-    	<path id="NH" d="M50 15 v5 c0 0 -5 40 -30 65 M50 15 v15 c 0 0 5 30 30 55"/>
-    	<path id="CH" d="M30 15 v65 c0 0 0 10 10 10 l37 -2 c0 0 5 0 5 -5 v-8 M15 48 l50 -5"/>
+    	<path id="NH" d="M23 15 h40 c0 0 -10 40 -45 70 M48 50 c 0 0 6 6 28 35"/>
+		<path id="CH" d="M30 15 v65 c0 0 0 10 10 10 l37 -2 c0 0 5 0 5 -5 v-8 M15 48 l50 -5"/>
     	
     	<path id="NG_t"      d="M25 40 h48 c0 0 0 18 -8 40 c0 0 0 5 -15 2 M44 40 c0 0 0 20 -24 40"/>
     	<path id="NG_tsmall" d="M25 45 h48 c0 0 0 15 -8 35 c0 0 0 5 -15 2 M44 45 c0 0 0 17 -24 35"/>
     	<path id="NH_t"      d="M50 35 c0 0 -5 35 -30 50 M50 35 c 0 0 5 35 30 50"/>
     	<path id="NH_tsmall" d="M50 45 c0 0 -5 30 -30 40 M50 45 c 0 0 5 30 30 40"/>
-    	<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
+		<path id="NH_t"      d="M20 35 h45 c0 0 -25 33 -45 50 M49 57 c 0 0 15 15 27 29"/>
+		<path id="NH_tsmall" d="M20 45 h45 c0 0 -25 28 -45 40 M50 65 c 0 0 15 10 27 20"/>
+		<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
     	<path id="N_tsmall"  d="M35 40 v40 M35 56 l40 2"/>
     	<path id="M_t"      d="M26 40 h44 c0 0 0 25 -55 45 M36 55 c0 0 20 10 38 28"/>
     	<path id="M_tsmall" d="M26 46 h44 c0 0 0 22 -55 40 M36 62 c0 0 20 6 38 22"/>
