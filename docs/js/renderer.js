@@ -851,4 +851,17 @@ class SvgGlyphRenderer {
     el.textContent = t;
     root.appendChild(el);
   }
+
+  observe(tagName) {
+    const observer = new MutationObserver(mutations => {
+      for (let m of mutations) {
+        for (let n of m.addedNodes) {
+          if (n.nodeName === tagName.toUooerCase()) this.render(n);
+          else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach(this.render);
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.querySelectorAll(tagName).forEach(this.render);
+  }
 }
