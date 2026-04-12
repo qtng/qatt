@@ -853,11 +853,12 @@ class SvgGlyphRenderer {
   }
 
   observe(tagName) {
+	tagName = (tagName ?? "TT").toUpperCase();
     const observer = new MutationObserver(mutations => {
 	  const type = localStorage.getItem('qattType') || "0";
       for (let m of mutations) {
         for (let n of m.addedNodes) {
-          if (n.nodeName === tagName.toUpperCase()) this.render(n, n.dataset.type ?? type);
+          if (n.nodeName === tagName) this.render(n, n.dataset.type ?? type);
           else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach((tag) => {
 			this.render(tag, tag.dataset.type ?? type)
 		  });
