@@ -854,14 +854,19 @@ class SvgGlyphRenderer {
 
   observe(tagName) {
     const observer = new MutationObserver(mutations => {
+	  const type = localStorage.getItem('qattType') || "0";
       for (let m of mutations) {
         for (let n of m.addedNodes) {
-          if (n.nodeName === tagName.toUooerCase()) this.render(n);
-          else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach(this.render);
+          if (n.nodeName === tagName.toUpperCase()) this.render(n, n.dataset.type ?? type);
+          else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach((tag) => {
+			this.render(tag, tag.dataset.type ?? type)
+		  });
         }
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    document.querySelectorAll(tagName).forEach(this.render);
+    document.querySelectorAll(tagName).forEach((tag) => {
+	  this.render(tag, tag.dataset.type ?? type);
+	});
   }
 }
