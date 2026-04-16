@@ -203,7 +203,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select('*')
+      .select('id, user_id, title, count, is_public')
       .eq('user_id', this.user.id)
       .order('updated_at', { ascending: false });
 
