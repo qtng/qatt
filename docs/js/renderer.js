@@ -856,24 +856,40 @@ class SvgGlyphRenderer {
     el.textContent = t;
     root.appendChild(el);
   }
-
-  observe(tagName) {
-	tagName = (tagName ?? "TT").toUpperCase();
-    const observer = new MutationObserver(mutations => {
-	  const type = localStorage.getItem('qattType') || "0";
-      for (let m of mutations) {
-        for (let n of m.addedNodes) {
-          if (n.nodeName === tagName) this.render(n.innerText.trim(), n, n.dataset.type ?? type);
-          else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach((tag) => {
-			this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type)
-		  });
+	observe(tagName) {
+  tagName = (tagName ?? "TT").toUpperCase();
+  const observer = new MutationObserver(mutations => {
+    const type = localStorage.getItem('qattType') || "0";
+    for (let m of mutations) {
+      // 1. Reagieren auf neue Elemente im DOM
+      for (let n of m.addedNodes) {
+        if (n.nodeName === tagName) {
+          this.render(n.innerText.trim(), n, n.dataset.type ?? type);
+        } else if (n.nodeType === 1) {
+          n.querySelectorAll(tagName).forEach((tag) => {
+            this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
+          });
         }
       }
-    });
-	const type = localStorage.getItem('qattType') || "0";
-    observer.observe(document.body, { childList: true, subtree: true });
-    document.querySelectorAll(tagName).forEach((tag) => {
-	  this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
-	});
-  }
+      // 2. Reagieren auf Inhaltsänderungen (innerText / characterData)
+      if (m.type === 'characterData' || m.type === 'childList') {
+        const target = m.target.nodeType === 3 ? m.target.parentElement : m.target;
+        if (target) {
+          const tag = target.closest(tagName);
+          if (tag) {
+            this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
+          }
+        }
+      }
+    }
+  });
+
+  const type = localStorage.getItem('qattType') || "0";
+  // characterData: true ist entscheidend für innerText-Änderungen
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  
+  document.querySelectorAll(tagName).forEach((tag) => {
+    this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
+  });
+	}
 }
