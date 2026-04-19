@@ -865,6 +865,7 @@ class SvgGlyphRenderer {
         }
       }
     });
+	const type = localStorage.getItem('qattType') || "0";
     observer.observe(document.body, { childList: true, subtree: true });
     document.querySelectorAll(tagName).forEach((tag) => {
 	  this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
