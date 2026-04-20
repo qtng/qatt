@@ -200,13 +200,13 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-s6" data-onsetsize="xsmall" d="M63 71 m20 -11 m-1 -1 l-4 -8"/>
     	<path id="v2-s" d="M61 18 v57 M63 71 l20 -11 M92 18 v56"/>
     	
-    	<path id="v2-t1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
-    	<path id="v2-t2" data-onsetsize="xsmall" d="M60 16 m0 64 m-8 0 h16"/>
-    	<path id="v2-t3" data-onsetsize="xsmall" d="M61 46 m3 1 l7 14"/>
-    	<path id="v2-t4" data-onsetsize="xsmall" d="M79 24 m0 44 m-8 0 h16"/>
-    	<path id="v2-t5" data-onsetsize="xsmall" d="M60 46 m34 0 m0-8 v16"/>
-    	<path id="v2-t6" data-onsetsize="xsmall" d="M79 24 m-8 0 h16"/>
-    	<path id="v2-t" d="M60 16 v64 M60 46 h34 M79 24 v44"/>
+    	<path id="v2-t1" data-onsetsize="xsmall" d="M77 24 m-8 0 h16"/>
+    	<path id="v2-t2" data-onsetsize="xsmall" d="M60 46 m0-8 v16"/>
+    	<path id="v2-t3" data-onsetsize="xsmall" d="M77 24 m0 44 m-8 0 h16"/>
+    	<path id="v2-t4" data-onsetsize="xsmall" d="M60 46 m34 0 m-3 1 l-7 14"/>
+    	<path id="v2-t5" data-onsetsize="xsmall" d="M94 16 m0 64 m-8 0 h16"/>
+    	<path id="v2-t6" data-onsetsize="xsmall" d="M94 16 m-8 0 h16"/>
+    	<path id="v2-t" d="M94 16 v64 M60 46 h34 M77 24 v44"/>
     	
     	<path id="v2-th1" data-onsetsize="xsmall" d="M68 20 m-8 0 h16"/>
     	<path id="v2-th2" data-onsetsize="xsmall" d="M59 50 m-3 -8 v16"/>
