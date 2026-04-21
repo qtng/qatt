@@ -772,11 +772,12 @@ class SvgGlyphRenderer {
     if (initial) {
       initial = initial.replace("#", "").replace("$", "");
       const post = this.getPost(vowel?.charAt(0) === "w", vowel);
-      id = prefixes.onset + initial + '-' + post;
-
+      id = prefixes.onset + initial.replace("w","") + '-' + post;
+	  const hasMark = initial.indexOf("w") == 0 ? true : false;
       if (!this._getDefById(id)) id = id.replace("xsmall", "small").replace("large", "xxsmall");
       if (!this._getDefById(id)) id = id.replace("xxsmall", "xsmall").replace("xsmall", "small");
       this.useG(g, id);
+	  if (hasMark) this.useG(g, prefixes.onset + initial.replace("w","") + "1");
     }
 
     if (vowel) {
