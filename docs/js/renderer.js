@@ -777,7 +777,7 @@ class SvgGlyphRenderer {
       if (!this._getDefById(id)) id = id.replace("xsmall", "small").replace("large", "xxsmall");
       if (!this._getDefById(id)) id = id.replace("xxsmall", "xsmall").replace("xsmall", "small");
       this.useG(g, id);
-	  if (hasMark) this.useG(g, prefixes.onset + initial.replace("w","") + "1");
+	  if (hasMark) this.useG(g, prefixes.onset + initial.replace("w","") + "-medial");
     }
 
     if (vowel) {
