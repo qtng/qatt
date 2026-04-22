@@ -108,8 +108,8 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-dz2" data-onsetsize="xsmall" d="M60 36 m-1 -8 v16"/>
     	<path id="v2-dz3" data-onsetsize="xsmall" d="M60 58 m-1 -8 v16"/>
     	<path id="v2-dz4" data-onsetsize="xsmall" d="M78 20 m-5 62 m-6 1 h16"/>
-    	<path id="v2-dz5" data-onsetsize="xsmall" d="M60 36 m35 6 m1 -8 v16"/>
-    	<path id="v2-dz6" data-onsetsize="xsmall" d="M60 58 m35 6 m1 -8 v16"/>
+    	<path id="v2-dz5" data-onsetsize="xsmall" d="M60 58 m35 6 m1 -8 v16"/>
+    	<path id="v2-dz6" data-onsetsize="xsmall" d="M60 36 m35 6 m1 -8 v16"/>
     	<path id="v2-dz" d="M60 36 l35 6 M60 58 l35 6 M78 20 c0 30 0 45 -5 62"/>
     	
     	<path id="v2-g1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
@@ -283,7 +283,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-th-small" d="M8 48 l40 -10 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
     	<path id="v2-tr-medial" d="M10 20 m0 -8 v16"/>
     	<path id="v2-tr-small" d="M28 20 v56 M10 20 h36 M13 45 h30"/>
-    	<path id="v2-v-medial" d="M10 25 m-8 0 h16"/>
+    	<path id="v2-v-medial" d="M10 16 m-8 0 h16"/>
     	<path id="v2-v-small" d="M10 16 v56 M44 15 c-4 22 -8 45 -30 70 M23 28 c4 8 10 24 20 50"/>
     	<path id="v2-x-medial" d="M11 18 m0 -8 v16"/>
     	<path id="v2-x-small" d="M11 18 h32 m-4 0 l-10 52 M10 74 h36"/>
@@ -778,6 +778,7 @@ class SvgGlyphRenderer {
       if (!this._getDefById(id)) id = id.replace("xxsmall", "xsmall").replace("xsmall", "small");
       this.useG(g, id);
 	  if (hasMark) this.useG(g, prefixes.onset + initial.replace("w","") + "-medial");
+	  initial = initial.replace("w", "");
     }
 
     if (vowel) {
