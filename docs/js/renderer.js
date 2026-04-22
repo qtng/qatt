@@ -409,8 +409,6 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 	<path id="v-large" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
 	<path id="v-small" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
 	<path id="v-xsmall" d="M35 10 c0 0 -7 40 -20 63 M10 77 l36 -10 M43 53 l8 20"/>
-
-
 	
     	<path id="v2-U" d="M70 22 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
     	<path id="v2-I" d="M52 15 l-8 68 M25 35 l50 8 M22 58 l50 8"/>
@@ -632,13 +630,9 @@ class SvgGlyphRenderer {
     this.container = options.container || document.createElement("div");
     this.charFontsize = options.charFontsize || "105px";
     this.svgns = "http://www.w3.org/2000/svg";
-    
     this.prefixes = { onset: "v2-", vowel: "v2-", coda: "v2-", qattTones: true };
-    
-    // Performance: Cache für bereits gerenderte SVG-Elemente
     this.cache = new Map();
     this.defsElement = null;
-
     this._initializeDefs();
   }
 
@@ -649,8 +643,7 @@ class SvgGlyphRenderer {
     this.defsElement.style.display = "none";
     document.body.append(this.defsElement);
   }
-
-  // Zentralisierte Konfiguration
+	
   getPrefixes(type) {
     const isSimplified = !!type && type !== "";
 	const prefix = isSimplified ? "" : "v2-";
@@ -738,7 +731,6 @@ class SvgGlyphRenderer {
     target.innerHTML = ""; 
     target.appendChild(fragment);
   }
-  
 
   renderSvg(root, prefixes, initial, vowel, final, tone, bold, isCoda) {
 	if (vowel && vowel.startsWith("+")) {
@@ -814,8 +806,7 @@ class SvgGlyphRenderer {
   }
 
   _handleTones(root, prefixes, initial, vowel, final, tone, g) {
-    // ... (Logik wie vorher, nutzt intern wieder renderSvg)
-    if (g && vowel && "waeiouy".includes(vowel[0])) {
+    if (g && vowel && "aeiouy".includes(vowel[0])) {
       if (tone < 8 && prefixes.qattTones) this.useG(g, "qt" + (tone || 0));
     }
 
