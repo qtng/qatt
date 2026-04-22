@@ -9,9 +9,14 @@ let type = 0; // traditional QATT
 // type = 1 // simplified QATT
 // type = 2 // simplified QATT with fused tones
 
-const element = document.createElemebt("div");
-renderer.render("t,i2,ng,1", element, type);
+const element = document.createElement("div");
+renderer.render("t,i2,ng,1", element, optionalQattType);
 
+// use mutationObserver to automatically render
+// the innerText of the registered tag.
+// The used Qatt type is read from the data-type attribute or
+// falls back to localStorage.qattType if not specified.
+renderer.observe("TT");
 */
 
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
@@ -194,13 +199,13 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-s6" data-onsetsize="xsmall" d="M63 71 m20 -11 m-1 -1 l-4 -8"/>
     	<path id="v2-s" d="M61 18 v57 M63 71 l20 -11 M92 18 v56"/>
     	
-    	<path id="v2-t1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
-    	<path id="v2-t2" data-onsetsize="xsmall" d="M60 16 m0 64 m-8 0 h16"/>
-    	<path id="v2-t3" data-onsetsize="xsmall" d="M61 46 m3 1 l7 14"/>
-    	<path id="v2-t4" data-onsetsize="xsmall" d="M79 24 m0 44 m-8 0 h16"/>
-    	<path id="v2-t5" data-onsetsize="xsmall" d="M60 46 m34 0 m0-8 v16"/>
-    	<path id="v2-t6" data-onsetsize="xsmall" d="M79 24 m-8 0 h16"/>
-    	<path id="v2-t" d="M60 16 v64 M60 46 h34 M79 24 v44"/>
+    	<path id="v2-t1" data-onsetsize="xsmall" d="M77 24 m-8 0 h16"/>
+    	<path id="v2-t2" data-onsetsize="xsmall" d="M60 46 m0-8 v16"/>
+    	<path id="v2-t3" data-onsetsize="xsmall" d="M77 24 m0 44 m-8 0 h16"/>
+    	<path id="v2-t4" data-onsetsize="xsmall" d="M60 46 m34 0 m-3 1 l-7 14"/>
+    	<path id="v2-t5" data-onsetsize="xsmall" d="M94 16 m0 64 m-8 0 h16"/>
+    	<path id="v2-t6" data-onsetsize="xsmall" d="M94 16 m-8 0 h16"/>
+    	<path id="v2-t" d="M94 16 v64 M60 46 h34 M77 24 v44"/>
     	
     	<path id="v2-th1" data-onsetsize="xsmall" d="M68 20 m-8 0 h16"/>
     	<path id="v2-th2" data-onsetsize="xsmall" d="M59 50 m-3 -8 v16"/>
@@ -426,14 +431,14 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="C" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M24 64 l30 -18"/>
 		<path id="T" d="M70 15 v70 M15 50 l55 -5"/>
     	<path id="NG" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M46 20 c0 0 0 40 -28 63"/>
-    	<path id="NH" d="M50 15 v5 c0 0 -5 40 -30 65 M50 15 v15 c 0 0 5 30 30 55"/>
-    	<path id="CH" d="M30 15 v65 c0 0 0 10 10 10 l37 -2 c0 0 5 0 5 -5 v-8 M15 48 l50 -5"/>
+    	<path id="NH" d="M23 15 h40 c0 0 -10 40 -45 70 M48 50 c 0 0 6 6 28 35"/>
+		<path id="CH" d="M30 15 v65 c0 0 0 10 10 10 l37 -2 c0 0 5 0 5 -5 v-8 M15 48 l50 -5"/>
     	
     	<path id="NG_t"      d="M25 40 h48 c0 0 0 18 -8 40 c0 0 0 5 -15 2 M44 40 c0 0 0 20 -24 40"/>
     	<path id="NG_tsmall" d="M25 45 h48 c0 0 0 15 -8 35 c0 0 0 5 -15 2 M44 45 c0 0 0 17 -24 35"/>
-    	<path id="NH_t"      d="M50 35 c0 0 -5 35 -30 50 M50 35 c 0 0 5 35 30 50"/>
-    	<path id="NH_tsmall" d="M50 45 c0 0 -5 30 -30 40 M50 45 c 0 0 5 30 30 40"/>
-    	<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
+		<path id="NH_t"      d="M20 35 h45 c0 0 -25 33 -45 50 M49 57 c 0 0 15 15 27 29"/>
+		<path id="NH_tsmall" d="M20 45 h45 c0 0 -25 28 -45 40 M50 65 c 0 0 15 10 27 20"/>
+		<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
     	<path id="N_tsmall"  d="M35 40 v40 M35 56 l40 2"/>
     	<path id="M_t"      d="M26 40 h44 c0 0 0 25 -55 45 M36 55 c0 0 20 10 38 28"/>
     	<path id="M_tsmall" d="M26 46 h44 c0 0 0 22 -55 40 M36 62 c0 0 20 6 38 22"/>
@@ -689,15 +694,16 @@ class SvgGlyphRenderer {
   render(text, root, type) {
 	  // render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
 	if (String(type) == -1) {
-      type = "0";
+      type = 0;
 	  text = text.replace("+", "");
-	} else if(String(type) == 0) {
+	} else if(type == 0) {
       text = text.replace("+", "").replace(",", ",+")
     }
-	return this.renderText(text, root, String(type));
+	return this.renderText(text, root, type);
   }
 	
   renderText(text, root, type) {
+	type = Number(type) >= 0 ? Number(type) : 0;
     const prefixes = this.getPrefixes(type);
     const target = root || this.container;
     const fragment = document.createDocumentFragment();
@@ -765,11 +771,13 @@ class SvgGlyphRenderer {
     if (initial) {
       initial = initial.replace("#", "").replace("$", "");
       const post = this.getPost(vowel?.charAt(0) === "w", vowel);
-      id = prefixes.onset + initial + '-' + post;
-
+      id = prefixes.onset + initial.replace("w","") + '-' + post;
+	  const hasMark = initial.indexOf("w") == 0 ? true : false;
       if (!this._getDefById(id)) id = id.replace("xsmall", "small").replace("large", "xxsmall");
       if (!this._getDefById(id)) id = id.replace("xxsmall", "xsmall").replace("xsmall", "small");
       this.useG(g, id);
+	  if (hasMark) this.useG(g, prefixes.onset + initial.replace("w","") + "-medial");
+	  initial = initial.replace("w", "");
     }
 
     if (vowel) {
@@ -848,5 +856,24 @@ class SvgGlyphRenderer {
     });
     el.textContent = t;
     root.appendChild(el);
+  }
+  observe(tagName) {
+	tagName = (tagName ?? "TT").toUpperCase();
+    const observer = new MutationObserver(mutations => {
+	  const type = localStorage.getItem('qattType') || "0";
+      for (let m of mutations) {
+        for (let n of m.addedNodes) {
+          if (n.nodeName === tagName) this.render(n.innerText.trim(), n, n.dataset.type ?? type);
+          else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach((tag) => {
+			this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type)
+		  });
+        }
+      }
+    });
+	const type = localStorage.getItem('qattType') || "0";
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.querySelectorAll(tagName).forEach((tag) => {
+	  this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
+	});
   }
 }
