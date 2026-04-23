@@ -748,7 +748,7 @@ class SvgGlyphRenderer {
 		const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
 			vowel = qv;
-			//final = null;
+			final = null;
 		}
 	}
     const d = document;
@@ -785,7 +785,8 @@ class SvgGlyphRenderer {
         const toneVal = vStr.replace(/\d*(\d)/, "$1");
         this.useG(g, prefixes.vowel + vStr.replace(/\d/, ""));
         if (tone || final) this.useG(g, "qt" + (tone || final || 0));
-        final = ""; tone = "";
+        //final = "";
+		tone = "";
       }
       this.useG(g, (isCoda ? prefixes.coda : prefixes.vowel) + vStr);
     }
