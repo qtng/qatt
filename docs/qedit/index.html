@@ -311,7 +311,7 @@
                     const hasMark = parts[0].startsWith("w");
                     parts[0] = (hasMark ? "" : "w") + parts[0].replace("w", "");
                 } else if (code == "#+") {
-                    parts[2] = !parts[2] ? "i" : parts[2] == "i" ? "u" : null;
+                    parts[2] = !parts[2] ? "ii" : parts[2] == "ii" ? "uu" : null;
                 } else if (parts[1]) {
                     if (parts[1] != code && parts[1].replace(/\d/, "") == code) {
                         let num = Number(parts[1].slice(-1)) + 1;
