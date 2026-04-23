@@ -40,7 +40,6 @@
             align-items: start;
             cursor: text;
             color: var(--bs-body-color);
-            /* Für den Export wichtig: Relatives Positioning */
             position: relative;
         }
 
@@ -165,7 +164,7 @@
     </div>
 
     <!-- External Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="qatt-dc/js/renderer.js?1"></script>
     
     <script>
@@ -216,36 +215,36 @@
 
             async exportAsImage() {
                 const activeChar = this.output.querySelector('.qatt-active');
-                let wasEmpty = false;
+                let wasEmptyPlaceholder = false;
                 
-                // Vorübergehend den aktiven Cursor-Style entfernen für ein sauberes Bild
+                // UI vorbereiten: Cursor entfernen
                 if (activeChar) {
                     activeChar.classList.remove('qatt-active');
                     if (!activeChar.dataset.qattCode || activeChar.dataset.qattCode === "") {
-                        activeChar.style.display = 'none';
-                        wasEmpty = true;
+                        // Verhindert das "?" im Export bei einem leeren aktiven Feld
+                        activeChar.style.visibility = 'hidden';
+                        wasEmptyPlaceholder = true;
                     }
                 }
 
                 try {
-                    const canvas = await html2canvas(this.output, {
-                        backgroundColor: null, // Transparent oder Theme-Farbe nutzen
-                        scale: 2, // Höhere Auflösung
-                        logging: false,
-                        useCORS: true
+                    // html-to-image fängt SVGs besser ein
+                    const dataUrl = await htmlToImage.toPng(this.output, {
+                        backgroundColor: getComputedStyle(this.output).backgroundColor,
+                        pixelRatio: 2 // Für scharfe Kanten
                     });
                     
                     const link = document.createElement('a');
                     link.download = `qatt-export-${Date.now()}.png`;
-                    link.href = canvas.toDataURL('image/png');
+                    link.href = dataUrl;
                     link.click();
                 } catch (err) {
                     console.error("Export failed", err);
                 } finally {
-                    // UI-Zustand wiederherstellen
+                    // UI wiederherstellen
                     if (activeChar) {
                         activeChar.classList.add('qatt-active');
-                        if (wasEmpty) activeChar.style.display = '';
+                        if (wasEmptyPlaceholder) activeChar.style.visibility = 'visible';
                     }
                 }
             }
@@ -521,3 +520,4 @@
     </script>
 </body>
 </html>
+        
