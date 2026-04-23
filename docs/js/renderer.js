@@ -748,7 +748,7 @@ class SvgGlyphRenderer {
 		const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
 			vowel = qv;
-			final = null;
+			//final = null;
 		}
 	}
     const d = document;
