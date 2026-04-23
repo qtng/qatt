@@ -39,6 +39,7 @@
             gap: 2px 0px;
             align-items: start;
             cursor: text;
+            color: var(--bs-body-color);
         }
 
         #output svg {
@@ -77,7 +78,7 @@
             min-height: 3em;
         }
 
-        .qatt-active svg use { stroke: #aef; }
+        .qatt-active svg use { stroke: var(--bs-primary); }
         .qatt-active div { display: none !important; }
 
         /* Cursor-Style für interaktive Zeichen im Output */
@@ -86,7 +87,7 @@
             transition: background-color 0.2s;
         }
         #output tt:hover:not(.qatt-active) {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(128, 128, 128, 0.1);
             border-radius: 4px;
         }
 
@@ -139,14 +140,20 @@
         </header>
 
         <!-- Ausgabe-Bereich -->
-        <div id="output" class="shadow-sm"></div>
+        <div id="output" class="shadow-sm" data-bs-theme="dark"></div>
 
         <!-- Tastatur Grid -->
         <div class="d-flex flex-wrap gap-1 justify-content-center mb-4" id="keyboard"></div>
         
-		<div class="d-flex align-items-center mt-5 pt-3 w-50">
-                <label for="fontSizeSlider" class="form-label mb-0 small text-secondary">Size</label>
-                <input type="range" class="ms-2 form-range flex-grow-1" id="fontSizeSlider" min="10" max="60" step="1">
+		<div class="d-flex align-items-center mt-5 pt-3 gap-4 flex-wrap">
+                <div class="d-flex align-items-center flex-grow-1" style="min-width: 200px; max-width: 400px;">
+                    <label for="fontSizeSlider" class="form-label mb-0 small text-secondary">Size</label>
+                    <input type="range" class="ms-2 form-range" id="fontSizeSlider" min="10" max="60" step="1">
+                </div>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" role="switch" id="themeToggle">
+                    <label class="form-check-label small text-secondary" for="themeToggle">Light Mode</label>
+                </div>
 		</div>
     </div>
 
@@ -163,28 +170,27 @@
                 this.keyboard = document.getElementById('keyboard');
                 this.clearBtn = document.getElementById('clearBtn');
                 this.fontSizeSlider = document.getElementById('fontSizeSlider');
+                this.themeToggle = document.getElementById('themeToggle');
                 
-                // qattType is fixed to "0"
                 this.currentType = "0";
-                this.currentFontSize = "24"; //localStorage.qattFontSize || "24";
+                this.currentFontSize = "24"; 
                 
                 this.init();
             }
 
             init() {
-                // Initialize Renderer
                 this.renderer = new SvgGlyphRenderer();
                 this.renderer.observe('TT');
 
-                // Bind UI Events
                 this.clearBtn.onclick = () => this.resetEditor();
                 this.output.onclick = (e) => this.handleOutputAreaClick(e);
                 this.fontSizeSlider.oninput = (e) => this.updateFontSize(e.target.value);
+                this.themeToggle.onchange = (e) => this.updateOutputTheme(e.target.checked);
                 document.addEventListener('keydown', (e) => this.handlePhysicalKeyboard(e));
 
-                // Set initial values
                 this.fontSizeSlider.value = this.currentFontSize;
                 this.updateFontSize(this.currentFontSize);
+                this.updateOutputTheme(this.themeToggle.checked);
 
                 this.createKeyboard();
                 this.createPlaceholder();
@@ -192,13 +198,15 @@
 
             updateFontSize(size) {
                 this.output.style.fontSize = size + "px";
-                //localStorage.qattFontSize = size;
+            }
+
+            updateOutputTheme(isLight) {
+                this.output.setAttribute('data-bs-theme', isLight ? 'light' : 'dark');
             }
 
             createKeyboard() {
                 this.keyboard.innerHTML = "";
                 
-                // Letter buttons
                 this.initials.forEach(rawInitial => {
                     const btn = document.createElement('button');
                     btn.className = 'btn btn-secondary qatt-btn d-flex align-items-center justify-content-center shadow-sm p-0';
@@ -220,12 +228,10 @@
                     this.keyboard.appendChild(btn);
                 });
 
-                // Row break before function buttons
                 const spacer = document.createElement('div');
                 spacer.className = 'w-100 mt-1';
                 this.keyboard.appendChild(spacer);
 
-                // Backspace
                 const backspaceBtn = document.createElement('button');
                 backspaceBtn.className = 'btn btn-secondary qatt-btn qatt-btn-backspace shadow-sm';
                 backspaceBtn.innerHTML = '⌫';
@@ -235,7 +241,6 @@
                 };
                 this.keyboard.appendChild(backspaceBtn);
 
-                // Space
                 const spaceBtn = document.createElement('button');
                 spaceBtn.className = 'btn btn-primary qatt-btn qatt-btn-space shadow-sm';
                 spaceBtn.textContent = 'Space';
@@ -245,7 +250,6 @@
                 };
                 this.keyboard.appendChild(spaceBtn);
 
-                // Return
                 const returnBtn = document.createElement('button');
                 returnBtn.className = 'btn btn-secondary qatt-btn qatt-btn-return shadow-sm';
                 returnBtn.innerHTML = '↵';
@@ -278,10 +282,16 @@
             setActive(el) {
                 const currentActive = this.output.querySelector('.qatt-active');
                 if (currentActive && currentActive !== el) {
-                    if (currentActive.dataset.qattCode && currentActive.dataset.qattCode !== "") {
+                    // Prüfen ob das verlassene Element behalten werden soll:
+                    // Entweder es hat Code ODER es wurde bereits als 'complete' markiert (z.B. durch Space)
+                    const hasCode = currentActive.dataset.qattCode && currentActive.dataset.qattCode !== "";
+                    const isCompleted = currentActive.dataset.complete === "true";
+
+                    if (hasCode || isCompleted) {
                         currentActive.dataset.complete = "true";
                         currentActive.classList.remove('qatt-active');
                     } else {
+                        // Nur unvollständige, leere Platzhalter löschen
                         currentActive.remove();
                     }
                 }
@@ -365,9 +375,14 @@
 
             handleSpace() {
                 const activeChar = this.output.querySelector('.qatt-active');
-                if (activeChar && activeChar.dataset.qattCode && activeChar.dataset.qattCode !== "") {
+                if (activeChar) {
                     activeChar.classList.remove('qatt-active');
                     activeChar.dataset.complete = "true";
+                    
+                    if (!activeChar.dataset.qattCode || activeChar.dataset.qattCode === "") {
+                        activeChar.innerText = ""; 
+                    }
+                    
                     this.createPlaceholder(activeChar);
                 }
             }
@@ -376,22 +391,19 @@
                 const activeChar = this.output.querySelector('.qatt-active');
                 if (activeChar) {
                     const hasContent = activeChar.dataset.qattCode && activeChar.dataset.qattCode !== "";
+                    const isCompleted = activeChar.dataset.complete === "true";
                     
-                    if (hasContent) {
-                        // Accept current character
+                    if (hasContent || isCompleted) {
                         activeChar.classList.remove('qatt-active');
                         activeChar.dataset.complete = "true";
                     } else {
-                        // If empty, remove placeholder
                         activeChar.remove();
                     }
                     
-                    // Insert line break
                     const br = document.createElement('div');
                     br.className = 'line-break';
                     this.output.appendChild(br);
                     
-                    // Create new placeholder on the next line
                     this.createPlaceholder();
                 }
             }
@@ -409,7 +421,7 @@
                     parent.insertBefore(activeChar, next);
                 } else {
                     const prev = activeChar.previousElementSibling;
-                    if (prev) {
+                    if (prev && !prev.classList.contains('line-break')) {
                         prev.remove();
                     }
                 }
