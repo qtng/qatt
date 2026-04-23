@@ -40,6 +40,8 @@
             align-items: start;
             cursor: text;
             color: var(--bs-body-color);
+            /* Für den Export wichtig: Relatives Positioning */
+            position: relative;
         }
 
         #output svg {
@@ -134,9 +136,14 @@
     <div class="container pt-2 pb-5">
         <header class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h4 class="mb-0">QATT Editor</h4>
-            <button id="clearBtn" class="btn btn-sm btn-outline-danger">
-            	Clear
-            </button>
+            <div class="d-flex gap-2">
+                <button id="exportBtn" class="btn btn-sm btn-outline-primary">
+                    Export PNG
+                </button>
+                <button id="clearBtn" class="btn btn-sm btn-outline-danger">
+                    Clear
+                </button>
+            </div>
         </header>
 
         <!-- Ausgabe-Bereich -->
@@ -157,7 +164,8 @@
 		</div>
     </div>
 
-    <!-- Renderer Script -->
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="qatt-dc/js/renderer.js?1"></script>
     
     <script>
@@ -169,6 +177,7 @@
                 this.output = document.getElementById('output');
                 this.keyboard = document.getElementById('keyboard');
                 this.clearBtn = document.getElementById('clearBtn');
+                this.exportBtn = document.getElementById('exportBtn');
                 this.fontSizeSlider = document.getElementById('fontSizeSlider');
                 this.themeToggle = document.getElementById('themeToggle');
                 
@@ -183,6 +192,7 @@
                 this.renderer.observe('TT');
 
                 this.clearBtn.onclick = () => this.resetEditor();
+                this.exportBtn.onclick = () => this.exportAsImage();
                 this.output.onclick = (e) => this.handleOutputAreaClick(e);
                 this.fontSizeSlider.oninput = (e) => this.updateFontSize(e.target.value);
                 this.themeToggle.onchange = (e) => this.updateOutputTheme(e.target.checked);
@@ -202,6 +212,42 @@
 
             updateOutputTheme(isLight) {
                 this.output.setAttribute('data-bs-theme', isLight ? 'light' : 'dark');
+            }
+
+            async exportAsImage() {
+                const activeChar = this.output.querySelector('.qatt-active');
+                let wasEmpty = false;
+                
+                // Vorübergehend den aktiven Cursor-Style entfernen für ein sauberes Bild
+                if (activeChar) {
+                    activeChar.classList.remove('qatt-active');
+                    if (!activeChar.dataset.qattCode || activeChar.dataset.qattCode === "") {
+                        activeChar.style.display = 'none';
+                        wasEmpty = true;
+                    }
+                }
+
+                try {
+                    const canvas = await html2canvas(this.output, {
+                        backgroundColor: null, // Transparent oder Theme-Farbe nutzen
+                        scale: 2, // Höhere Auflösung
+                        logging: false,
+                        useCORS: true
+                    });
+                    
+                    const link = document.createElement('a');
+                    link.download = `qatt-export-${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (err) {
+                    console.error("Export failed", err);
+                } finally {
+                    // UI-Zustand wiederherstellen
+                    if (activeChar) {
+                        activeChar.classList.add('qatt-active');
+                        if (wasEmpty) activeChar.style.display = '';
+                    }
+                }
             }
 
             createKeyboard() {
@@ -282,8 +328,6 @@
             setActive(el) {
                 const currentActive = this.output.querySelector('.qatt-active');
                 if (currentActive && currentActive !== el) {
-                    // Prüfen ob das verlassene Element behalten werden soll:
-                    // Entweder es hat Code ODER es wurde bereits als 'complete' markiert (z.B. durch Space)
                     const hasCode = currentActive.dataset.qattCode && currentActive.dataset.qattCode !== "";
                     const isCompleted = currentActive.dataset.complete === "true";
 
@@ -291,7 +335,6 @@
                         currentActive.dataset.complete = "true";
                         currentActive.classList.remove('qatt-active');
                     } else {
-                        // Nur unvollständige, leere Platzhalter löschen
                         currentActive.remove();
                     }
                 }
