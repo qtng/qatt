@@ -806,7 +806,7 @@ class SvgGlyphRenderer {
   }
 
   _handleTones(root, prefixes, initial, vowel, final, tone, g) {
-    if (g && Number(tone) >= 0) { ( //vowel && vowel.match(/[aeiouy]/)) {
+    if (g && Number(tone) >= 0) { //vowel && vowel.match(/[aeiouy]/)) {
       if (tone < 8 && prefixes.qattTones) this.useG(g, "qt" + (tone || 0));
     }
 
