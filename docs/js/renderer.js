@@ -410,7 +410,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
 	<path id="v-small" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
 	<path id="v-xsmall" d="M35 10 c0 0 -7 40 -20 63 M10 77 l36 -10 M43 53 l8 20"/>
 	
-    	<path alternative-U id="v2-UU" d="M25 22 h45 v1 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
+    	<path alternative-U id="v2-UU" d="M25 22 h45 v1 c0 0 -15 35 -55 55 M30 27 c0 0 14 33 50 50"/>
     	<path akternative-I id="v2-II" d="M25 22 v55 l45-4 M70 22 v55"/>
 		<path id="v2-U" d="M70 22 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
     	<path id="v2-I" d="M52 15 l-8 68 M25 35 l50 8 M22 58 l50 8"/>
