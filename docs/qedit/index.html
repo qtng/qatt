@@ -32,12 +32,12 @@
             background-color: var(--bs-tertiary-bg);
             border: 1px solid var(--bs-border-color);
             border-radius: 0.5rem;
-            padding: 1.5rem;
+            padding: 16px;
             margin-bottom: 2rem;
             display: flex;
             flex-wrap: wrap;
             gap: 2px 0px;
-            align-items: center;
+            align-items: start;
             cursor: text;
         }
 
@@ -103,9 +103,12 @@
             font-size: 0.8rem;
         }
 
-        .qatt-btn-backspace, .qatt-btn-return {
-            width: 50px;
-            font-weight: bold;
+        .qatt-btn-backspace {
+            width: 75px;
+        }
+        .qatt-btn-return {
+        	width: 75px;
+        	font-size: 1.5em;
         }
 
         .qatt-btn tt + tt {
@@ -127,18 +130,12 @@
 </head>
 <body class="bg-dark text-light">
 
-    <div class="container py-5">
+    <div class="container pt-2 pb-5">
         <header class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <h1 class="display-5 mb-0">QATT IME Editor</h1>
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <label for="fontSizeSlider" class="form-label mb-0 small text-secondary">Size</label>
-                    <input type="range" class="form-range" id="fontSizeSlider" min="10" max="60" step="1" style="width: 100px;">
-                </div>
-                <button id="clearBtn" class="btn btn-sm btn-outline-danger">
-                    Clear
-                </button>
-            </div>
+            <h4 class="mb-0">QATT Editor</h4>
+            <button id="clearBtn" class="btn btn-sm btn-outline-danger">
+            	Clear
+            </button>
         </header>
 
         <!-- Ausgabe-Bereich -->
@@ -146,6 +143,11 @@
 
         <!-- Tastatur Grid -->
         <div class="d-flex flex-wrap gap-1 justify-content-center mb-4" id="keyboard"></div>
+        
+		<div class="d-flex align-items-center mt-5 pt-3 w-50">
+                <label for="fontSizeSlider" class="form-label mb-0 small text-secondary">Size</label>
+                <input type="range" class="ms-2 form-range flex-grow-1" id="fontSizeSlider" min="10" max="60" step="1">
+		</div>
     </div>
 
     <!-- Renderer Script -->
@@ -164,7 +166,7 @@
                 
                 // qattType is fixed to "0"
                 this.currentType = "0";
-                this.currentFontSize = localStorage.qattFontSize || "24";
+                this.currentFontSize = "24"; //localStorage.qattFontSize || "24";
                 
                 this.init();
             }
@@ -190,7 +192,7 @@
 
             updateFontSize(size) {
                 this.output.style.fontSize = size + "px";
-                localStorage.qattFontSize = size;
+                //localStorage.qattFontSize = size;
             }
 
             createKeyboard() {
@@ -225,7 +227,7 @@
 
                 // Backspace
                 const backspaceBtn = document.createElement('button');
-                backspaceBtn.className = 'btn btn-outline-warning qatt-btn qatt-btn-backspace shadow-sm';
+                backspaceBtn.className = 'btn btn-secondary qatt-btn qatt-btn-backspace shadow-sm';
                 backspaceBtn.innerHTML = '⌫';
                 backspaceBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -245,7 +247,7 @@
 
                 // Return
                 const returnBtn = document.createElement('button');
-                returnBtn.className = 'btn btn-outline-info qatt-btn qatt-btn-return shadow-sm';
+                returnBtn.className = 'btn btn-secondary qatt-btn qatt-btn-return shadow-sm';
                 returnBtn.innerHTML = '↵';
                 returnBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -464,4 +466,3 @@
     </script>
 </body>
 </html>
-
