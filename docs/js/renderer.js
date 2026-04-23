@@ -815,7 +815,7 @@ class SvgGlyphRenderer {
 
   _handleTones(root, prefixes, initial, vowel, final, tone, g) {
     // ... (Logik wie vorher, nutzt intern wieder renderSvg)
-    if (g && vowel && "waeiouy".includes(vowel[0])) {
+    if (g && vowel) { // && "waeiouy".includes(vowel[0])) {
       if (tone < 8 && prefixes.qattTones) this.useG(g, "qt" + (tone || 0));
     }
 
