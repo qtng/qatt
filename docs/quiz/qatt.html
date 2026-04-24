@@ -1,4 +1,22 @@
-<html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>QATT App</title>
+  <base href="https://qtng.github.io">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/qatt-dc/js/navigation.js"></script>
+  <script src="/qatt-dc/js/renderer.js"></script>
+  <script src="/qatt-dc/js/parser.js"></script>
+  <script src="/qatt-dc/js/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="quiz.css">
+  <script src="/quiz.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
 async function main() {
 const app = await App.init(document.getElementById("app"));
 const basicStyles = ["-1", "1", "2"];
