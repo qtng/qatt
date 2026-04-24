@@ -630,7 +630,7 @@ class SvgGlyphRenderer {
 	this.qattEncoding = options.qattEncoding || defaultQattEncoding;
 
 	  // Mini-QATT
-	this.qattEncoding3 = options.qattEncoding3 || this.qattEncoding;
+	this.qattEncoding3 = options.qattEncoding3 || this.getMiniQattEncoding() || this.qattEncoding;
 	  
     this.defs = options.defs || defaultSvgDefs;
     this.container = options.container || document.createElement("div");
@@ -648,6 +648,30 @@ class SvgGlyphRenderer {
     this.defsElement.innerHTML = this.defs;
     this.defsElement.style.display = "none";
     document.body.append(this.defsElement);
+  }
+
+  getMiniQattEncoding(){
+    const miniQattEncoding = {
+        an: "ng4", oan: "_4",
+        e2n: "g4", we2n: "h4",
+        a2n: "l4", wa2n: "c4",
+        yn: "tr5", y2n: "d5",
+        awn: "n5", wawn: "t5",
+        aw2n: "nh4", waw2n: "nh4",
+        en: "ch5", wen: "dz5",
+        i2n: "x5", wi2n: "kh5",
+        in: "s5", win: "r5",
+        on: "m3", un: "b3",
+        o2n: "v3", u2n: "ph3"
+    };
+    Object.keys(miniQattEncoding).forEach(k => {
+        const name = k.replace("n", "");
+        let value = miniQattEncoding[k];
+        miniQattEncoding[name] = value.replace(/\d+/, "");
+        miniQattEncoding[name + "ng"] = value.replace(/\d+/, "") + "7";
+        miniQattEncoding[name + "m"] = value + "7";
+    });
+	return miniQattEncoding;
   }
 	
   getPrefixes(type) {
