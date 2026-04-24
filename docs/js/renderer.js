@@ -628,6 +628,10 @@ class SvgGlyphRenderer {
   constructor(options = {}) {
 	const initialType = options.type != null ? options.type : localStorage.qattType || "0";
 	this.qattEncoding = options.qattEncoding || defaultQattEncoding;
+
+	  // Mini-QATT
+	this.qattEncoding3 = options.qattEncoding3 || this.qattEncoding;
+	  
     this.defs = options.defs || defaultSvgDefs;
     this.container = options.container || document.createElement("div");
     this.charFontsize = options.charFontsize || "1em";
