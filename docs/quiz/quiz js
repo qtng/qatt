@@ -9,7 +9,6 @@ class App {
     this.db = db;
     this.useDB = true;
     this.username = localStorage.username || "Anonymous";
-    this.mainContainer = container;
     this.lessons = {};
     this.currentLesson = null;
     this.globalStyle = localStorage.getItem('qattType') || "-1";
@@ -28,6 +27,43 @@ class App {
     this.setupAudio();
     this.setupNavigation();
     this.updateGlobalCounters();
+
+    container.innerHTML = `
+<header class="fixed-header-container">
+    <div class="container d-flex align-items-center w-100">
+      <div id="library-btn" class="nav-icon-btn" title="Trang chủ">🏠</div>
+
+      <div class="status-group">
+        <div id="badge-total" class="score-badge badge-total" title="Tổng điểm">🏆 <span id="val-total">0</span></div>
+        <div id="badge-sunflower" class="score-badge badge-sunflower" title="Hoa">🌻 <span id="val-sunflower">0</span></div>
+        <div id="badge-coin" class="score-badge badge-coin" title="Vàng">🪙 <span id="val-coin">0</span></div>
+      </div>
+      
+      <div class="style-selector-wrap">
+        <select id="global-style-select">
+          <option selected value="-1">Chính thể</option>
+          <option value="1">Giản thể</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <div class="container qatt-container">
+    <div id="app-container"></div>
+  </div>
+
+  <div id="fixed-bottom-controls" class="fixed-bottom-bar">
+    <div class="d-grid">
+      <button id="main-action-btn"
+        class="btn btn-info btn-lg shadow-lg fw-bold py-3"
+        >
+        Bắt đầu học
+      </button>
+    </div>
+  </div>`;
+    this.mainContainer = container.getElementById("app-container");
+    container.getElementById("main-action-btn").addEventListener("click", this.startLessonDirectly);
+    container.getElementById("library-btn").addEventListener("click", this.renderLibrary);
   }
   
   static async init(container) {
