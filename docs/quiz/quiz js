@@ -1,3 +1,483 @@
+class App {
+  constructor(container, db) {
+    this.opts = { 
+      requiredCorrect: 4,
+      maxErrors: 3,
+      learningWindow: 4,
+      hintDelay: 10000,
+    };
+    this.db = db;
+    this.useDB = true;
+    this.username = localStorage.username || "Anonymous";
+    this.mainContainer = container;
+    this.lessons = {};
+    this.currentLesson = null;
+    this.globalStyle = localStorage.getItem('qattType') || "-1";
+    this.maxEnergy = 5; 
+    this.currentEnergy = 5;
+    this.parser = new VietnameseParser();
+    this.renderer = new SvgGlyphRenderer({});
+    this.stats = JSON.parse(localStorage.getItem('qatt_stats')) || { _score: 0 };
+    this.hintInterval = null;
+    this.activeQuizWord = null;
+    this.lastQuizWord = null; 
+    this.categories = [];
+    this.bottomBar = document.getElementById("fixed-bottom-controls");
+    
+    this.setupStyleSelector();
+    this.setupAudio();
+    this.setupNavigation();
+    this.updateGlobalCounters();
+  }
+  
+  static async init(container) {
+    const db = new SupabaseService();
+    await db.init();
+    //db.signInWithGoogle()
+    const int = setInterval(() => {
+    	if (db.user) {
+    		clearInterval(int);
+    	}
+    }, 500);
+  	return new App(container, db);
+  }
+  
+  refreshCurrentView(state = null) {
+    const currentState = state || history.state || { view: 'library' };
+    const view = currentState.view || 'library';
+    
+    if (view === 'library') this.renderLibrary(true);
+    else if (view === 'preview') this.renderLessonPreview(currentState.lessonId, true);
+    else if (view === 'quiz') this.renderQuiz(true);
+    else if (view === 'full') this.renderFullView(true);
+    else if (view === 'leaderboard') this.renderLeaderboard(true);
+  }
+
+  // --- VIEWS ---
+  renderLibrary(isPop = false) {
+    if (!isPop) history.pushState({ view: 'library' }, '');
+    this.currentLesson = null;
+    this.bottomBar.style.display = "none";
+    this.clearHintTimer();
+
+    let html = "";
+    
+    if (this.useDB) html += `
+      <div class="fade-in alert py-0 shadow">
+       		<div class="text-center mb-3">
+		         <div class="me-2 btn btn-sm btn-outline-warning" onclick="app.renderLeaderboard()">Bảng xếp hạng</div>
+         		<button class="btn btn-sm btn-outline-light" onclick="app.renderFullView()">
+           			Mục lục
+         		</button>
+        </div>
+      	</div>
+        `;
+
+    this.categories.forEach(category => {
+      html += `
+        <div class="category-title">${category}</div>
+        <div class="row g-3">`;
+
+      Object.values(this.lessons)
+        .filter(lesson => lesson.category === category)
+        .forEach(lesson => {
+          const progress = this.getLessonProgress(lesson.id);
+          html += `
+            <div class="col-12 lesson-${lesson.id}">
+              <div class="card p-3 lesson-card" onclick="app.renderLessonPreview('${lesson.id}')">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="flex-grow-1 me-3">
+                    <h5 class="fw-bold mb-1">${lesson.name}</h5>
+                    
+                    <small class="opacity-50 mt-1 d-block">${lesson.symbols.length} chữ</small>
+                  </div>
+                  <div class="d-flex flex-column align-items-stretch">
+                  <div id="thumb-${lesson.id}" class="lesson-thumbnail"></div>
+                  <div class="progress mt-1">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: ${progress}%;" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        });
+      html += `
+      	</div>`;
+    });
+
+    this.mainContainer.innerHTML = html + `</div>`;
+
+    Object.values(this.lessons).forEach(lesson => { 
+      const thumbElement = document.getElementById(`thumb-${lesson.id}`);
+      if (thumbElement) {
+        this.renderToElement(lesson.symbols[1], this.getActiveStyle(lesson), thumbElement, true); 
+      }
+    });
+
+    this.updateGlobalCounters();
+  }
+
+  renderLessonPreview(lessonId, isPop = false) {
+    history[isPop?'replaceState':'pushState']({ view: 'preview', lessonId: lessonId }, '');
+    this.currentLesson = this.lessons[lessonId];
+    this.bottomBar.style.display = "block";
+
+    const lessonClass = `lesson-${lessonId}`;
+    this.mainContainer.innerHTML = `
+      <div class="fade-in ${lessonClass}">
+        <button onclick="app.renderLibrary()" class="btn btn-link text-white-50 text-decoration-none mb-2 p-0">
+          ← Quay lại
+        </button>
+        <div class="card p-4 preview-container">
+          <div class="mb-4">
+            <h3 class="fw-bold">${this.currentLesson.name}</h3>
+            <div class="progress">
+              <div class="progress-bar bg-info"></div>
+            </div>
+          </div>
+          <div class="row g-3" id="words-grid"></div>
+        </div>
+      </div>`;
+
+    this.renderStatus(document.querySelector(".preview-container"));
+    
+    const activeStyle = this.getActiveStyle(this.currentLesson);
+    const gridElement = document.getElementById("words-grid");
+
+    this.currentLesson.symbols.forEach(word => {
+        const column = document.createElement("div"); 
+        column.className = "col-6 col-sm-4";
+        
+        const card = document.createElement("div"); 
+        card.className = "word-grid-item";
+        
+        if (this.stats[word].c >= 3) {
+          card.style.borderColor = "rgba(74, 222, 128, 0.4)";
+        }
+
+        this.renderToElement(word, activeStyle, card);
+        card.innerHTML += this.getProgressEmoji(word, false, 'grid');
+        gridElement.appendChild(column).appendChild(card);
+    });
+  }
+
+
+  renderQuiz(isPop = false, keepWord = false) {
+    if (this.currentEnergy <= 0) {
+      this.mainContainer.innerHTML = `
+        <div class="card p-5 text-center">
+          <h2>Hết năng lượng!</h2>
+          <button class="btn btn-primary mt-3" onclick="app.startLessonDirectly()"> Thử lại </button>
+        </div>`;
+      return;
+    }
+    if (!this.currentLesson) return;
+    let unfinishedSymbols = this.currentLesson.symbols.filter(symbol => this.stats[symbol].c < this.opts.requiredCorrect);
+    if (unfinishedSymbols.length === 0) {
+      if ((this.currentLesson.practiceModeItems||[]).length == 0) {
+        this.renderLessonPreview(this.currentLesson.id, true);
+        return;
+      }
+      else unfinishedSymbols = this.currentLesson.practiceModeItems;
+    }
+
+    if (!isPop) history.pushState({ view: 'quiz' }, '');
+    this.bottomBar.style.display = "none";
+    
+    if (!keepWord) {
+      const poolLimit = Math.min(unfinishedSymbols.length, this.opts.learningWindow);
+      let selectedWord;
+      
+      if (unfinishedSymbols.length > 1) {
+        let tries = 0;
+        do {
+          tries++;
+          selectedWord = unfinishedSymbols[Math.floor(Math.random() * poolLimit)];
+        } while (tries < 20 && selectedWord === this.lastQuizWord);
+      } else {
+        selectedWord = unfinishedSymbols[0];
+      }
+      
+      this.activeQuizWord = selectedWord;
+      this.lastQuizWord = selectedWord;
+	}
+	  
+    const correctWord = this.activeQuizWord;
+    const showSvgAsQuestion = Math.random() < 0.5;
+    const activeStyle = this.getActiveStyle(this.currentLesson);
+    const lessonClass = `lesson-${this.currentLesson.id}`;
+
+    this.mainContainer.innerHTML = `
+      <div class="fade-in ${lessonClass}">
+        <button onclick="app.renderLibrary()" class="btn btn-link text-white-50 text-decoration-none mb-2 p-0">
+          ← Quay lại
+        </button>
+        <div class="card p-4 quiz-container overflow-hidden">
+          <div class="d-flex justify-content-between mb-1">
+            <h5 class="fw-bold opacity-50">${this.currentLesson.name}</h5>
+            
+            <div class="energy-display d-flex align-items-center"></div>
+          </div>
+          <div class="progress mb-4">
+            <div class="progress-bar bg-info"></div>
+          </div>
+          <div class="symbol-card mb-4" id="q-box">
+            <button class="reload-quiz-btn" onclick="app.renderQuiz(true)">↻</button>
+            <div id="emoji-c">${this.getProgressEmoji(correctWord, false, 'quiz')}</div>
+            <div id="feedback" class="feedback-area"></div>
+          </div>
+          <div class="options" id="opts"></div>
+        </div>
+      </div>`;
+
+    this.renderStatus(document.querySelector(".quiz-container"));
+    
+    const questionBox = document.getElementById("q-box");
+    const questionWrapper = document.createElement("div");
+
+    if (showSvgAsQuestion) {
+      this.renderToElement(correctWord, activeStyle, questionWrapper, false, false); 
+    } else {
+      questionWrapper.innerHTML = `<h1 class="display-1 fw-bold">${correctWord}</h1>`; 
+    }
+
+    questionBox.prepend(questionWrapper);
+    this.renderOptions(correctWord, showSvgAsQuestion, activeStyle);
+    this.startHintTimer(correctWord);
+  }
+
+  renderOptions(correctWord, questionWasSvg, activeStyle) {
+    const optionsContainer = document.getElementById("opts");
+    
+    let unfinishedSymbols = this.currentLesson.symbols.filter(s => this.stats[s].c < 3);
+    (this.currentLesson.practiceModeItems||[]).forEach(itm => {
+        if (unfinishedSymbols.length < this.opts.learningWindow && itm != correctWord) unfinishedSymbols.push(itm);
+    });
+    const windowPool = unfinishedSymbols.slice(0, this.opts.learningWindow);
+    
+    const windowDistractors = windowPool
+      .filter(s => s !== correctWord)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 2);
+    
+    const fullPool = this.currentLesson.symbols
+      .filter(s => s !== correctWord && !windowDistractors.includes(s))
+      .sort(() => 0.5 - Math.random());
+    
+    const globalDistractor = fullPool.length > 0 ? [fullPool[0]] : [];
+    
+    let selectedOptions = [correctWord, ...windowDistractors, ...globalDistractor];
+    if (selectedOptions.length < 4) {
+      const remaining = this.currentLesson.symbols
+        .filter(s => !selectedOptions.includes(s))
+        .sort(() => 0.5 - Math.random());
+      selectedOptions = [...selectedOptions, ...remaining.slice(0, 4 - selectedOptions.length)];
+    }
+
+    selectedOptions.sort(() => 0.5 - Math.random());
+
+    selectedOptions.forEach(option => {
+      const button = document.createElement("button"); 
+      button.className = "btn"; 
+      button.dataset.word = option;
+      
+      const wrapper = document.createElement("div");
+      if (questionWasSvg) {
+        wrapper.textContent = option; 
+      } else {
+        this.renderToElement(option, activeStyle, wrapper, true, false);
+      }
+      
+      button.appendChild(wrapper);
+      button.onclick = () => {
+        this.clearHintTimer(); 
+        const isCorrect = option === correctWord; 
+        this.playTone(isCorrect ? 'success' : 'error');
+        let isMilestone = false;
+        
+        if ((this.currentLesson.practiceModeItems||[]).includes(correctWord)){
+          // Remove from list of words to test
+          if (isCorrect || Math.random() < .5) {
+            this.currentLesson.practiceModeItems = this.currentLesson.practiceModeItems.filter(itm => itm != correctWord);
+          }
+        }
+
+		const animations = {};
+        if (isCorrect) {
+            const prevCorrectCount = this.stats[correctWord].c || 0; 
+            this.stats[correctWord].c++;
+			animations.total = true;
+            if (prevCorrectCount === 0) { 
+			  animations.drop = true;
+              this.stats._score += 10; 
+            }
+			else if (prevCorrectCount === 1) {
+			  animations.seedling = true;
+              this.stats._score += 15;
+			}
+			else if (prevCorrectCount === 2) { 
+			  animations.plant = true;
+              this.stats._score += 25;
+			}
+            else if (prevCorrectCount === 3) { 
+			  animations.sunflower = true;
+              this.stats._score += 200; 
+              isMilestone = true;
+              if (this.currentEnergy < 5) this.currentEnergy++; 
+            } else if (prevCorrectCount < 10) {
+			  animations.coin = true;
+              this.stats._score += 20;
+            }
+			else {
+			  animations.gem = true;
+			  this.stats._score += 20;
+			}
+            this.syncScore();
+            document.getElementById("emoji-c").innerHTML = this.getProgressEmoji(correctWord, true, 'quiz');
+        } else { 
+            this.stats[correctWord].w++; 
+            this.stats._score = Math.max(0, this.stats._score - 1); 
+            this.currentEnergy--; 
+            this.triggerHeartLossAnimation(); 
+        }
+
+        localStorage.setItem('qatt_stats', JSON.stringify(this.stats)); 
+        this.renderStatus(document.querySelector(".quiz-container"), animations);
+        
+        document.querySelectorAll("#opts .btn").forEach(btn => { 
+          btn.disabled = true; 
+          if (btn.dataset.word === correctWord) {
+            btn.style.backgroundColor = "#82e99e";
+            btn.style.borderColor = "#4ade80";
+          } else if (btn.dataset.word === option) {
+            btn.style.backgroundColor = "#ff8e8e";
+            btn.style.borderColor = "#f87171";
+          }
+        });
+
+        const feedbackArea = document.getElementById("feedback"); 
+        let feedbackHtml = `<h2 class="fw-bold" style="color:${isCorrect ? '#82e99e' : '#ff8e8e'}">
+            ${isCorrect ? 'Đúng! ✨' : 'Sai 😅'}
+          </h2>`;
+        
+        if (isMilestone) {
+          feedbackHtml += `<div class="plus-one-heart">+1 ❤️</div>`;
+        }
+
+        feedbackArea.innerHTML = feedbackHtml;
+        feedbackArea.classList.add("float-up-fade");
+        
+        setTimeout(() => this.renderQuiz(true), isMilestone ? 1800 : 1200);
+      };
+      optionsContainer.appendChild(button);
+    });
+  }
+      // --- HELPERS ---
+  async syncScore() {
+  	if (!this.db.user) return; // Wait, until Auth is ready 
+	const username = this.getUsername();
+  	await this.db.saveScore(username, this.stats._score || 0, 0);
+  }
+  
+  updateGlobalCounters(animations = {}) {
+    let counts = {drop: 0, seedling: 0, plant: 0, sunflower: 0, coin: 0};
+    Object.keys(this.stats).forEach(key => {
+      if (key === '_score') return;
+      const symbolStats = this.stats[key];
+      if (symbolStats.c > 4) counts.coin++;
+	  else if (symbolStats.c === 4) counts.sunflower++
+	  else if (symbolStats.c === 3) counts.plant++
+      else if (symbolStats.c === 2) counts.seedling++;
+      else if (symbolStats.c === 1) counts.drop++;
+    });
+
+    this.updateBadge('total', Math.floor(this.stats._score || 0), animations.total);
+	this.updateBadge('coin', counts.coin, animations.coin);
+    this.updateBadge('sunflower', counts.sunflower, animations.sunflower);
+    this.updateBadge('plant', counts.plant, animations.plant);
+	this.updateBadge('seedling', counts.seedling, animations.seedling);
+    this.updateBadge('drop', counts.drop, animations.drop);
+  }
+
+  updateBadge(id, value, shouldAnimate) { 
+    const valueEl = document.getElementById(`val-${id}`); 
+    const badgeEl = document.getElementById(`badge-${id}`); 
+    if (valueEl) valueEl.textContent = value; 
+    if (shouldAnimate && badgeEl) { 
+      badgeEl.classList.add('pop'); 
+      setTimeout(() => badgeEl.classList.remove('pop'), 600); 
+    } 
+  }
+
+  renderStatus(container, animations = {}) {
+    if (!container) return; 
+    const progressBar = container.querySelector(".progress-bar"); 
+    const energyDisplay = container.querySelector(".energy-display");
+
+    if (progressBar && this.currentLesson) {
+      let doneCount = 0;
+      let quizLength = 0;
+      let afterFinishRemaining = (this.currentLesson.practiceModeItems||[]).length;
+      if (afterFinishRemaining) {
+        // Practice mode
+        doneCount = this.currentLesson.quizLength - afterFinishRemaining;
+        quizLength = this.currentLesson.quizLength;
+      } else {
+		// THESE ARE NOT POINTS!!!!
+		// THIS IS ONLY FOR DECIDING
+		// THE AMOUNT OF VISUAL FEEDBACK
+		// ON THE PROGRESS BAR
+        // Learning mode, in learning mode quiz length is calculated dynamically
+        doneCount = 65 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 4).length;
+		doneCount = 15 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 3).length;
+        doneCount += 10 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 2).length;
+        doneCount += 10 * this.currentLesson.symbols.filter(symbol => this.stats[symbol].c >= 1).length;
+        quizLength = 100 * this.currentLesson.symbols.length;
+      }
+      const percentage = Math.round((doneCount / quizLength) * 100);
+      progressBar.style.width = `${percentage}%`;
+    }
+
+    if (energyDisplay) {
+      
+      let heartsHtml = `
+        
+      `; 
+      for (let i = 0; i < 5; i++) {
+        heartsHtml += `<span class="energy-heart ${i >= this.currentEnergy ? 'lost' : ''}">❤️</span>`; 
+      }
+      energyDisplay.innerHTML = heartsHtml + `
+        <div class="ms-2 timer-wrapper">
+          <div id="timer-pie" class="timer-pie timer-active"></div>
+        </div>
+        `; 
+    }
+    this.updateGlobalCounters(animations);
+  }
+
+  triggerHeartLossAnimation() {
+    const energyDisplay = document.querySelector(".energy-display");
+    if (!energyDisplay) return;
+
+    const hearts = energyDisplay.querySelectorAll(".energy-heart:not(.lost)");
+    const targetHeart = hearts.length > 0 ? hearts[hearts.length - 1] : energyDisplay;
+    
+    const rect = targetHeart.getBoundingClientRect();
+    const flyHeart = document.createElement("div");
+    flyHeart.className = "heart-fly-loss";
+    flyHeart.textContent = "❤️";
+    
+    flyHeart.style.left = (rect.left + rect.width / 2) + "px";
+    flyHeart.style.top = rect.top + "px";
+    flyHeart.style.position = "fixed"; 
+    
+    document.body.appendChild(flyHeart);
+    setTimeout(() => flyHeart.remove(), 1100);
+    this.playTone('error');
+  }
+
+
+
 
   getLessonProgress(lessonId) {
     const lesson = this.lessons[lessonId]; 
