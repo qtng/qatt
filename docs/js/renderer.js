@@ -776,14 +776,18 @@ class SvgGlyphRenderer {
 		const qv = (this["qattEncoding"+prefixes.type] || this.qattEncoding)[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
 			vowel = qv;
-			// final = null;
+			final = null;
 			
 			// Mini-QATT rule
-			// qattEncoding that ends with 7 means
-			// the initial is marked at position 1.
+			// qattEncoding that ends with
+			// 7 means onset is marked at position 1
+			// 8 means final ii (mini-qatt version)
+			// 9 means final uu (mini-qatt version)
 			if (vowel.endsWith("7")) {
 				// 7 means mini-QATT coda
-				vowel = vowel.replace("7", "");
+				if (vowel.endsWith("8")) final = "ii";
+				if (voeel.endsWith("9")) final = "uu";
+				vowel = vowel.replace(/[789]$/, "");
 				initial = "w" + initial;
 			}
 		}
