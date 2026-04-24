@@ -630,7 +630,7 @@ class SvgGlyphRenderer {
 	this.qattEncoding = options.qattEncoding || defaultQattEncoding;
     this.defs = options.defs || defaultSvgDefs;
     this.container = options.container || document.createElement("div");
-    this.charFontsize = options.charFontsize || "105px";
+    this.charFontsize = options.charFontsize || "1em";
     this.svgns = "http://www.w3.org/2000/svg";
     this.prefixes = { onset: "v2-", vowel: "v2-", coda: "v2-", qattTones: true };
     this.cache = new Map();
@@ -689,7 +689,7 @@ class SvgGlyphRenderer {
   render(text, root, type) {
 	// render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
 	type = !Number.isNaN(type) ? Number(type) : 0;
-	if (type == -1 || type == 3) {
+	if (type == -1) {
       type = 0;
 	  text = text.replace("+", "");
 	} else if(type != 1 && type != 2) {
@@ -716,11 +716,10 @@ class SvgGlyphRenderer {
           const tempContainer = document.createElement("div");
           this.renderSvg(tempContainer, prefixes, ...t.split(","));
           
-          // Alle Kinder des tempContainers (alle SVGs) erfassen
           const nodes = Array.from(tempContainer.childNodes);
           
           if (nodes.length > 0) {
-            this.cache.set(prefixes.type+t, nodes); // Das ganze Array speichern
+            this.cache.set(prefixes.type+t, nodes);
             nodes.forEach(node => {
               fragment.appendChild(node.cloneNode(true));
             });
