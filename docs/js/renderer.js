@@ -647,7 +647,7 @@ class SvgGlyphRenderer {
   }
 	
   getPrefixes(type) {
-    const isSimplified = !!type && type !== "";
+    const isSimplified = type == 1 || type == 2;
 	const prefix = isSimplified ? "" : "v2-";
 	return {
 		type: (type || "0").toString(),
@@ -687,18 +687,19 @@ class SvgGlyphRenderer {
   }
 	
   render(text, root, type) {
-	  // render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
-	if (String(type) == -1) {
+	// render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
+	type = !Number.inNaN(type) ? Number(type) : 0;
+	if (type == -1 || type == 3) {
       type = 0;
 	  text = text.replace("+", "");
-	} else if(type == 0) {
+	} else if(type != 1 && type != 2) {
       text = text.replace("+", "").replace(",", ",+")
     }
 	return this.renderText(text, root, type);
   }
 	
   renderText(text, root, type) {
-	type = Number(type) >= 0 ? Number(type) : 0;
+	type = !Number.isNaN(type) ? Number(type) : 0;
     const prefixes = this.getPrefixes(type);
     const target = root || this.container;
     const fragment = document.createDocumentFragment();
