@@ -749,6 +749,14 @@ class SvgGlyphRenderer {
 		if (qv) {
 			vowel = qv;
 			final = null;
+			// Mini-QATT rule
+			// qattEncoding that ends with 7 means
+			// the initial is marked at position 1.
+			if (vowel.endsWith("7")) {
+				// 7 means mini-QATT coda
+				vowel = vowel.replace("7", "");
+				initial = "w" + initial;
+			}
 		}
 	}
     const d = document;
