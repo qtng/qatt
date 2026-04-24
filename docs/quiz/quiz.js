@@ -21,7 +21,6 @@ class App {
     this.activeQuizWord = null;
     this.lastQuizWord = null; 
     this.categories = [];
-    this.bottomBar = document.getElementById("fixed-bottom-controls");
     
     container.innerHTML = `
 <header class="fixed-header-container">
@@ -57,9 +56,11 @@ class App {
     </div>
   </div>`;
     this.mainContainer = document.getElementById("app-container");
+    this.bottomBar = document.getElementById("fixed-bottom-controls");
+	  
     document.getElementById("main-action-btn").addEventListener("click", this.startLessonDirectly);
     document.getElementById("library-btn").addEventListener("click", this.renderLibrary);
-
+	  
     this.setupStyleSelector();
     this.setupAudio();
     this.setupNavigation();
