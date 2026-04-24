@@ -776,7 +776,8 @@ class SvgGlyphRenderer {
 		const qv = (this["qattEncoding"+prefixes.type] || this.qattEncoding)[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
 			vowel = qv;
-			final = null;
+			// final = null;
+			
 			// Mini-QATT rule
 			// qattEncoding that ends with 7 means
 			// the initial is marked at position 1.
