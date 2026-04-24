@@ -56,7 +56,7 @@ class App {
       </button>
     </div>
   </div>`;
-    this.mainContainer = container.getElementById("app-container");
+    this.mainContainer = document.getElementById("app-container");
     document.getElementById("main-action-btn").addEventListener("click", this.startLessonDirectly);
     document.getElementById("library-btn").addEventListener("click", this.renderLibrary);
 
