@@ -688,7 +688,7 @@ class SvgGlyphRenderer {
 	
   render(text, root, type) {
 	// render a glyph code, e.g. t,i2,ng,1 or t,+ch3,,1
-	type = !Number.inNaN(type) ? Number(type) : 0;
+	type = !Number.isNaN(type) ? Number(type) : 0;
 	if (type == -1 || type == 3) {
       type = 0;
 	  text = text.replace("+", "");
@@ -738,7 +738,7 @@ class SvgGlyphRenderer {
   renderSvg(root, prefixes, initial, vowel, final, tone, bold, isCoda) {
 	if (vowel && vowel.startsWith("+")) {
 		vowel = vowel.substr(1);
-		if (prefixes.type == "0" && ["t", "p", "c", "ch"].includes(final)) {
+		if ((prefixes.type == "0" || prefixes.type == "3") && ["t", "p", "c", "ch"].includes(final)) {
             if (final == "t") final = "n";
 			else if (final == "p") final = "m";
 			else if (final == "c") final = "ng";
@@ -746,7 +746,7 @@ class SvgGlyphRenderer {
 			if (tone+"" == "1") tone = 6;
 			else if (tone+"" == "5") tone = 7;
 		}
-		const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
+		const qv = (this["qattEncoding"+prefixes.type] || this.qattEncoding)[vowel + ((!final || !isNaN(Number(final))) ? '' : final)];
 		if (qv) {
 			vowel = qv;
 			final = null;
