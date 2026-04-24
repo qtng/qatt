@@ -23,11 +23,6 @@ class App {
     this.categories = [];
     this.bottomBar = document.getElementById("fixed-bottom-controls");
     
-    this.setupStyleSelector();
-    this.setupAudio();
-    this.setupNavigation();
-    this.updateGlobalCounters();
-
     container.innerHTML = `
 <header class="fixed-header-container">
     <div class="container d-flex align-items-center w-100">
@@ -64,6 +59,11 @@ class App {
     this.mainContainer = container.getElementById("app-container");
     container.getElementById("main-action-btn").addEventListener("click", this.startLessonDirectly);
     container.getElementById("library-btn").addEventListener("click", this.renderLibrary);
+
+    this.setupStyleSelector();
+    this.setupAudio();
+    this.setupNavigation();
+    this.updateGlobalCounters();
   }
   
   static async init(container) {
