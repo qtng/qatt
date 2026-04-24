@@ -1,0 +1,44 @@
+<html>
+async function main() {
+const app = await App.init(document.getElementById("app"));
+const basicStyles = ["-1", "1", "2"];
+const onsets = "b c ch d đ g h kh l m n ng nh ph r s t th tr v x".split(" ");
+const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
+const tones = "a à á ả ã ạ".split(" ");
+const codas = "ao ai an át am áp ang ác anh ách".split(" ");
+const levelName = "Essentials";
+
+app.addLesson({ id: "onsets", category: levelName, name: "Phụ âm đầu", style: basicStyles, symbols: ["a", ...onsets.map(o => o.trim() + "a").filter(o => o !== "a")] });
+app.addLesson({ id: "vowels", category: levelName, name: "Nguyên âm", style: basicStyles, symbols: vowels });
+app.addLesson({ id: "tones", category: levelName, name: "Thanh điệu", style: basicStyles, symbols: tones });
+app.addLesson({ id: "codas", category: levelName, name: "Âm cuối", style: basicStyles, symbols: codas });
+
+const rhymesList = [
+    { words: "ai ay ơi ây ôi oi ui uôi ưi ươi" }, 
+    { words: "ao au âu êu eo iu iêu ưu ươu" },
+    { words: "an ăn ơn ân ên en in iên ôn on un uôn ưn ươn" }, 
+    { words: "am ăm ơm âm êm em im iêm ôm om um uôm ưm ươm" },
+    { words: "ang ăng anh âng ênh eng inh iêng ông ong ung uông ưng ương" },
+];
+
+const rhymesList2 = [
+    { words: "oa uơ uê oe uy uya" }, 
+    { words: "oai oay uơi uây oao oau uâu uêu oeo uyu uyêu" },
+    { words: "oan oăn uơn uân uên oen uyn uyên" }, 
+    { words: "oam oăm uơm uâm uêm oem uym uyêm" },
+    { words: "oang oăng oanh uâng uênh oeng uynh uyêng" },
+];
+
+let rhymeIdx = 0;
+rhymesList.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "Advanced", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+rhymesList2.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "Master", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+
+window.app = app;
+app.renderLibrary();
+
+}
+
+main()
+  </script>
+</body>
+</html>
