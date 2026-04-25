@@ -660,6 +660,7 @@ class App {
 
   startLessonDirectly() { 
     this.currentEnergy = 5;
+	  console.log(this.curentLesson);
     const lesson = JSON.parse(JSON.stringify(this.currentLesson));
     let unfinishedSymbols = lesson.symbols.filter(symbol => this.stats[symbol].c < 3);
     if (unfinishedSymbols.length == 0) {
