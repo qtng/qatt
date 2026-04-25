@@ -785,8 +785,8 @@ class SvgGlyphRenderer {
 			// 9 means final uu (mini-qatt version)
 			if (vowel.endsWith("7")) {
 				// 7 means mini-QATT coda
-				if (vowel.endsWith("8")) final = "i";
-				if (vowel.endsWith("9")) final = "u";
+				if (vowel.endsWith("8")) final = "II";
+				if (vowel.endsWith("9")) final = "UU";
 				vowel = vowel.replace(/[789]$/, "");
 				initial = "w" + initial;
 			}
