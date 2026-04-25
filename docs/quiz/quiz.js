@@ -102,7 +102,7 @@ class App {
     let html = "";
     
     if (this.useDB) html += `
-      <div class="fade-in alert py-0 shadow">
+      <div id="quiz-navbar" class="fade-in alert py-0 shadow">
        		<div class="text-center mb-3">
 		         <div class="me-2 btn btn-sm btn-outline-warning" onclick="app.renderLeaderboard()">Bảng xếp hạng</div>
          		<button class="btn btn-sm btn-outline-light" onclick="app.renderFullView()">
