@@ -60,8 +60,8 @@ class App {
     this.mainContainer = document.getElementById("app-container");
     this.bottomBar = document.getElementById("fixed-bottom-controls");
 	  
-    document.getElementById("main-action-btn").addEventListener("click", this.startLessonDirectly);
-    document.getElementById("library-btn").addEventListener("click", this.renderLibrary);
+    document.getElementById("main-action-btn").addEventListener("click", () => this.startLessonDirectly());
+    document.getElementById("library-btn").addEventListener("click", () => this.renderLibrary());
 	  
     this.setupStyleSelector();
     this.setupAudio();
