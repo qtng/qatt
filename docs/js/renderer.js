@@ -652,7 +652,7 @@ class SvgGlyphRenderer {
 
   getMiniQattEncoding(){
     const miniQattEncoding = {
-        an: "ng4", oan: "_4",
+        an: "ng4", wan: "_4",
         e2n: "g4", we2n: "h4",
         a2n: "l4", wa2n: "c4",
         yn: "tr5", y2n: "d5",
@@ -665,11 +665,14 @@ class SvgGlyphRenderer {
         o2n: "v3", u2n: "ph3"
     };
     Object.keys(miniQattEncoding).forEach(k => {
-        const name = k.replace("n", "");
-        let value = miniQattEncoding[k];
-        miniQattEncoding[name] = value.replace(/\d+/, "");
-        miniQattEncoding[name + "ng"] = value.replace(/\d+/, "") + "7";
-        miniQattEncoding[name + "m"] = value + "7";
+		const name = k.replace("n", "");
+        const value1 = miniQattEncoding[k];
+        const value0 = value1.replace(/\d+/, "");
+        miniQattEncoding[name] = value0;
+        miniQattEncoding[name + "ng"] = value0 + "7";
+        miniQattEncoding[name + "m"] = value1 + "7";
+        miniQattEncoding[name + "i"] = value0 + "8";
+        miniQattEncoding[name + "u"] = value0 + "9";
     });
 	return miniQattEncoding;
   }
