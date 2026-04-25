@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Mini-QATT App</title>
+  <title>Mini QATT App</title>
   <base href="https://qtng.github.io">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,18 +19,23 @@
  		--stroke-width: 6px;
  		--svg-height: 2.5em;
   	}
+  		.style-selector-wrap,
   		.reference-svg-container {display:none}
   		#quiz-navbar {
   			padding-top: 16px!important;
-  			xxbackground: rgba(0,0,0,0.4)
+  			background: rgba(0,0,0,0.4)
   		}
-  		body, .card {
-  			xxbackground: bisque;
-  			xxcolor:black
+  		body {
+  			background: bisque;  #104050;
+  			color: black
+  		}
+  		.card {
+  			background: rgba(155,255,255,.05);
+  			color: black
   		}
   		.symbol-card, .word-grid-item, .lesson-thumbnail  {
-  			xxbackground: beige;
-  			xxcolor: black;
+  			background: rgba(0,0,0,.2);
+  			color: black;
   		}
   
 		nobr:has(svg:nth-child(2)) {
