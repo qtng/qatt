@@ -787,6 +787,10 @@ class SvgGlyphRenderer {
 			else if (vowel.endsWith("8")) final = "II";
 			else if (vowel.endsWith("9")) final = "UU";
 			vowel = vowel.replace(/[789]$/, "");
+			if (prefixes.type == "3") {
+				if (final == "i") final = "II";
+				if (final == "u") final = "UU";
+			}
 		}
 	}
     const d = document;
