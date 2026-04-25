@@ -553,7 +553,7 @@ class App {
     if (mainCode) {
         const mainSvgSpan = document.createElement("span");
         const formattedCode = style == "0" ? mainCode.replace(",", ",+") : mainCode.replace("+", "");
-        this.renderer.renderText(formattedCode, mainSvgSpan, Math.max(0, parseInt(style)));
+        this.renderer.render(formattedCode, mainSvgSpan, Math.max(0, parseInt(style)));
         element.appendChild(mainSvgSpan);
 
         if (!skipReference) {
