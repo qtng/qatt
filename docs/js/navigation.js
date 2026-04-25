@@ -17,7 +17,7 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "Practise QATT", url: "/qatt-dc/quiz", icon: "bi-mortarboard" },
+                    { name: "Practise QATT", url: "/qatt-dc/quiz/qatt.html", icon: "bi-mortarboard" },
                     { name: "QATT Tutorial", url: "/qatt-dc/tutorial.html", icon: "bi-journal-text" },
                     { name: "QATT Reference", url: "/qatt-dc/reference.html", icon: "bi-book-half" },
                     { name: "QATT Logo Creator", url: "/qatt-dc/logo-creator.html", icon: "bi-palette" },
@@ -107,7 +107,7 @@
                     ${navConfig.title}<span class="version-badge ms-1 text-warning">v2-alpha</span>
                 </a>
                 <div class="ms-auto d-flex align-items-center">
-                    <a href="/qatt-dc/quiz" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-success bg-transparent text-decoration-none small me-2 py-1 px-2">
+                    <a href="/qatt-dc/quiz/qatt.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-success bg-transparent text-decoration-none small me-2 py-1 px-2">
                         🏆 ${highscore}
                     </a>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
