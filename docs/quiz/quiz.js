@@ -159,6 +159,7 @@ class App {
   renderLessonPreview(lessonId, isPop = false) {
     history[isPop?'replaceState':'pushState']({ view: 'preview', lessonId: lessonId }, '');
     this.currentLesson = this.lessons[lessonId];
+	console.log(lessonId, this.lessons);
     this.bottomBar.style.display = "block";
 
     const lessonClass = `lesson-${lessonId}`;
