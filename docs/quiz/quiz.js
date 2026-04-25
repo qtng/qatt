@@ -35,8 +35,9 @@ class App {
       
       <div class="style-selector-wrap">
         <select id="global-style-select">
-          <option selected value="-1">Chính thể</option>
-          <option value="1">Giản thể</option>
+          <option selected value="3">QATT-mini</option>
+		  <option selected value="0">QATT</option>
+          <option value="1">QATT giản thể</option>
         </select>
       </div>
     </div>
