@@ -783,13 +783,10 @@ class SvgGlyphRenderer {
 			// 7 means onset is marked at position 1
 			// 8 means final ii (mini-qatt version)
 			// 9 means final uu (mini-qatt version)
-			if (vowel.endsWith("7")) {
-				// 7 means mini-QATT coda
-				if (vowel.endsWith("8")) final = "II";
-				if (vowel.endsWith("9")) final = "UU";
-				vowel = vowel.replace(/[789]$/, "");
-				initial = "w" + initial;
-			}
+			if (vowel.endsWith("7")) initial = "w" + initial;
+			else if (vowel.endsWith("8")) final = "II";
+			else if (vowel.endsWith("9")) final = "UU";
+			vowel = vowel.replace(/[789]$/, "");
 		}
 	}
     const d = document;
