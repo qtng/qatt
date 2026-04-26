@@ -165,7 +165,7 @@ class App {
     const lessonClass = `lesson-${lessonId}`;
     this.mainContainer.innerHTML = `
       <div class="fade-in ${lessonClass}">
-        <button onclick="app.renderLibrary()" class="btn btn-link text-white-50 text-decoration-none mb-2 p-0">
+        <button onclick="app.renderLibrary()" class="back-link btn btn-link text-white-50 text-decoration-none mb-2 p-0">
           ← Quay lại
         </button>
         <div class="card p-4 preview-container">
