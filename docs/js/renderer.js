@@ -657,7 +657,7 @@ class SvgGlyphRenderer {
         a2n: "l4", wa2n: "c4",
         yn: "tr5", y2n: "d5",
         awn: "n5", wawn: "t5",
-        aw2n: "th4", waw2n: "nh4",
+        aw2n: "th5", waw2n: "nh5",
         en: "ch5", wen: "dz5",
         i2n: "x5", wi2n: "kh5",
         in: "s5", win: "r5",
