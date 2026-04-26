@@ -293,38 +293,12 @@
         let currentWikiHtml = ""; 
         let originalTitle = "";
         
-        const miniQattEncoding = {
-        an: "ng4", wan: "_4",
-        e2n: "g4", we2n: "h4",
-        a2n: "l4", wa2n: "c4",
-        yn: "tr5", y2n: "d5",
-        awn: "n5", wawn: "t5",
-        aw2n: "nh4", waw2n: "nh4",
-        en: "ch5", wen: "dz5",
-        i2n: "x5", wi2n: "kh5",
-        in: "s5", win: "r5",
-        on: "m3", un: "b3",
-        o2n: "v3", u2n: "ph3"
-        }
-        ;
-        Object.keys(miniQattEncoding).forEach(k => {
-        	const name = k.replace("n", "");
-        	const value1 = miniQattEncoding[k];
-        	const value0 = value1.replace(/\d+/, "");
-        	miniQattEncoding[name] = value0;
-        	miniQattEncoding[name + "ng"] = value0 + "7";
-        	miniQattEncoding[name + "m"] = value1 + "7";
-        	miniQattEncoding[name + "i"] = value0 + "8";
-        	miniQattEncoding[name + "u"] = value0 + "9";
-        });
-
         // Init
         function initParser() {
             if (typeof VietnameseParser !== 'undefined' && typeof SvgGlyphRenderer !== 'undefined') {
                 parser = new VietnameseParser();
                 renderer = new SvgGlyphRenderer({
                     container: document.createElement("div"),
-                    qattEncoding3: miniQattEncoding
                 });
                 renderTTVanilla();
                 
