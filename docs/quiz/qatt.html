@@ -19,26 +19,30 @@
  		--stroke-width: 6px;
  		--svg-height: 2.5em;
  		--bgcolor: bisque;
+ 		--fgcolor-raw: 0, 0, 0;
  		--fgcolor: black;
+ 		--fgcolor-inverse: black;
   	}
   		.style-selector-wrap,
   		.reference-svg-container {display:none}
   		#quiz-navbar {
   			padding-top: 16px!important;
-  			background: rgba(0,0,0,0.4)
+  			background: rgba(var(--fgcolor-raw),0.4)
   		}
   		body {
   			background: var(--bgcolor);
   			color: var(--fgcolor);
   		}
   		.card {
-  			background: rgba(155,255,255,.05);
+  			background: rgba(255,255,255,.05);
   			color: var(--fgcolor)
   		}
   		.symbol-card, .word-grid-item, .lesson-thumbnail  {
-  			background: rgba(0,0,0,.2);
-  			color: var(--fgcolor)
+  			background: rgba(0,0,0,.1);
+  			color: var(--fgcolor-inverse)
   		}
+  		
+  		.progress {background: rgba(255,255,255,.7)}
   
 		nobr:has(svg:nth-child(2)) {
         	display: inline-flex;
@@ -92,7 +96,8 @@ app.addLesson({
 	name: "22 Chữ cơ bản",
 	style: ["3"],
 	symbols: [
-		"ngan", "oan",
+		"ngan",
+		"oan",
 		"ghen", "hoen",
 		"lơn", "quơn",
 		"trưn", "đươn",
