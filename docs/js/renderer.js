@@ -727,7 +727,7 @@ class SvgGlyphRenderer {
       type = 0;
 	  text = text.replace("+", "");
 	} else if(type != 1 && type != 2) {
-      text = text.replace("+", "").replace(",", ",+")
+      text = text.replace(/\+/g, "").replace(/^[^,\s]*,/g, "$&+").replace(/ [^,]*,/g, "$&+")
     }
 	return this.renderText(text, root, type);
   }
