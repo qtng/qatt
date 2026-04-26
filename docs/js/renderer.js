@@ -674,6 +674,9 @@ class SvgGlyphRenderer {
         miniQattEncoding[name + "i"] = value0 + "8";
         miniQattEncoding[name + "u"] = value0 + "9";
     });
+	miniQattEncoding["anh"] = "l7";
+    miniQattEncoding["enh"] = "ch7";
+    miniQattEncoding["inh"] = "x7";
 	return miniQattEncoding;
   }
 	
