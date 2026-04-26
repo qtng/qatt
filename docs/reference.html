@@ -325,7 +325,7 @@
             <h1>QATT Reference</h1>
             
             <div style="display:none" class="d-none controls">
-                <label for="type-select" style="font-size: 0.85rem; color: var(--text-muted);">Darstellungs-Typ:</label>
+                <label for="type-select" style="font-size: 0.85rem; color: var(--text-muted);">Type:</label>
                 <select id="type-select" onchange="handleTypeChange(this.value)">
                     <option value="0">0</option>
                     <option value="0.0">0.0</option>
@@ -335,7 +335,7 @@
             </div>
 
             <div class="legend">
-                <div class="legend-item"><span class="dot" style="background:var(--onset-color)"></span> Âm đầu</div>
+                <div class="legend-item"><span class="dot" style="background:var(--onset-color)"></span> Phụ âm đầu</div>
                 <div class="legend-item"><span class="dot" style="background:var(--vowel-color)"></span> Nguyên âm</div>
                 <div class="legend-item"><span class="dot" style="background:var(--tone-color)"></span> Thanh</div>
                 <div class="legend-item"><span class="dot" style="background:var(--coda-color)"></span> Âm cuối</div>
@@ -589,8 +589,8 @@
             rhymeRules = [];
             initialized = false;
 
-            renderSection("Onsets", onsets, "onset");
-            renderSection("Vowels", vowels, "vowel");
+            renderSection("Phụ âm đầu", onsets, "onset");
+            renderSection("Nguyên âm", vowels, "vowel");
             
             const expandedTones = [];
             tones.forEach(t => {
@@ -598,9 +598,9 @@
                 if (TYPE == "2") expandedTones.push(base);           
                 expandedTones.push(t);     
             });
-            renderSection("Codas", codas, "coda");
-            renderSection("Tones", expandedTones, "tone");
-            renderSection("Rhymes", rhymes, "rhyme");
+            renderSection("Âm cuối", codas, "coda");
+            renderSection("Thanh", expandedTones, "tone");
+            renderSection("Vần", rhymes, "rhyme");
         }
 
         function renderSection(title, items, type) {
