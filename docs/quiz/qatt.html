@@ -14,18 +14,23 @@
   <link rel="stylesheet" href="/qatt-dc/quiz/quiz.css">
   <script src="/qatt-dc/quiz/quiz.js"></script>
   <style type="text/css">
-  
-  	:root {
+	:root {
  		--stroke-width: 6px;
  		--svg-height: 2.5em;
  		--bgcolor: bisque;
  		--fgcolor-raw: 0, 0, 0;
  		--fgcolor: black;
  		--fgcolor-inverse: black;
+ 		
+ 		--highlight-onsets: #f87171;
+ 		--highlight-vowels: #60a5fa;
+ 		--highlight-tones: #0b0;
+ 		--highlight-rhymes: #08b;
+ 		--highlight-codas: #e00;
   	}
   		.style-selector-wrap,
   		.reference-svg-container {display:none}
-	    .back-link {color: var(--fgcolor)!important}
+  		.back-link {color: var(--fgcolor)!important}
   		#quiz-navbar {
   			padding-top: 16px!important;
   			background: rgba(var(--fgcolor-raw),0.4)
@@ -76,6 +81,40 @@
         		}
         	}
         }
+
+    /* !!! START OF PROTECTED CSS BLOCK !!! */
+    .lesson-onsets :not(.reference-svg-container) > nobr > svg {
+    	use[href$="small"], use[href$="large"] { stroke: var(--highlight-onsets) }
+    	use[href^="#qt"] { display: none}
+    	
+    }
+    .lesson-vowels :not(.reference-svg-container) > nobr > svg {
+    	use[href$="a"], use[href$="#e"], use[href$="-e"], use[href$="i"], use[href$="o"], use[href$="u"], use[href$="y"], use[href$="w"], use[href$="2"] { stroke: var(--highlight-vowels) }
+    }
+	.lesson-tones :not(.reference-svg-container) > nobr > svg {
+    	use[href^="#qt"], use[href*="tlarge"] { stroke: var(--highlight-tones) }
+    }
+    .lesson-codas :not(.reference-svg-container) > nobr > svg {
+    	use[href$="medial"], use[href$="U"], use[href$="I"], use[href$="N"], use[href$="M"], use[href$="NG"], use[href$="NH"], use[href$="T"], use[href$="P"], use[href$="C"], use[href$="CH"] {
+    		stroke: var(--highlight-codas)
+    	}
+    	use[href*="-_"], use[href*="-b"], use[href*="-c"], use[href*="-ch"], use[href*="-d"], use[href*="-dz"], use[href*="-g"], use[href*="-h"], use[href*="-kh"], use[href*="-l"], use[href*="-m"],
+    	use[href*="-n"], use[href$="-ng"], use[href*="-nh"], use[href*="-ph"], use[href*="-r"], use[href*="-s"], use[href*="-t"], use[href*="-th"], use[href*="-tr"], use[href*="-v"], use[href*="-x"] {
+    		&[href$="1"], &[href$="2"], &[href$="3"], &[href$="4"], &[href$="5"], &[href$="6"]{
+    			stroke: var(--highlight-codas)
+    		};
+    	};
+    }
+    .lesson-rhymes-1, .lesson-rhymes-2, .lesson-rhymes-3, .lesson-rhymes-4, .lesson-rhymes-5, .lesson-rhymes-6, .lesson-rhymes-7, .lesson-rhymes-8, .lesson-rhymes-9, .lesson-rhymes-10, .lesson-rhymes-11, .lesson-rhymes-12 {
+    	:not(.reference-svg-container) > nobr > svg {
+    		use[href$="-_"], use[href$="-b"], use[href$="-c"], use[href$="-ch"], use[href$="-d"], use[href$="-dz"], use[href$="-g"], use[href$="-h"], use[href$="-kh"], use[href$="-l"], use[href$="-m"], use[href$="-n"], use[href$="-ng"], use[href$="-nh"], use[href$="-ph"], use[href$="-r"], use[href$="-s"], use[href$="-t"], use[href$="-th"], use[href$="-tr"], use[href$="-v"], use[href$="-x"] { stroke: var(--highlight-rhymes); };
+    		use[href*="-_"], use[href*="-b"], use[href*="-c"], use[href*="-ch"], use[href*="-d"], use[href*="-dz"], use[href*="-g"], use[href*="-h"], use[href*="-kh"], use[href*="-l"], use[href*="-m"], use[href*="-n"], use[href$="-ng"], use[href*="-nh"], use[href*="-ph"], use[href*="-r"], use[href*="-s"], use[href*="-t"], use[href*="-th"], use[href*="-tr"], use[href*="-v"], use[href*="-x"] {
+    			&[href$="1"], &[href$="2"], &[href$="3"], &[href$="4"], &[href$="5"], &[href$="6"]{ stroke: var(--highlight-rhymes); };
+    		};
+    	}
+	}
+    /* !!! END OF PROTECTED CSS BLOCK !!! */
+	  
   </style>
 </head>
 <body>
