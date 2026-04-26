@@ -190,8 +190,8 @@
                 const n = parser.parse(w);
                 if (n) {
                     const s = document.createElement('span');
-                    let code = n.code.replace(",", ",+").replace('+', (!type || type == "0") ? "+" : "");
-                    renderer.renderText(code, s, +type);
+                    //let code = n.code.replace(",", ",+").replace('+', (!type || type == "0") ? "+" : "");
+                    renderer.render(n.code, s, +type);
                     out.appendChild(s);
                 }
                 out.appendChild(document.createTextNode(' '));
