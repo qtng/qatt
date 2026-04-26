@@ -281,6 +281,40 @@
             .section-title { background: #eee !important; color: black !important; }
             svg { stroke: black !important; }
         }
+        
+		nobr:has(svg:nth-child(2)) {
+		--svg-height: 3em;
+		--stroke-width: 5px;
+        	display: inline-flex;
+        	flex-direction: column-reverse;
+        	align-items: center;
+        	
+        	svg:last-child {
+        		height: calc(0.4 * var(--svg-height))!important;
+        		width: calc(0.7 * var(--svg-height))!important;
+        		border: none!important;
+        		position: relative!important;
+        		bottom: calc(-0.1 * var(--svg-height))!important;
+        		top: .65em!important;
+        		margin-bottom: 0!important;
+        		use {
+        		    stroke-width: calc(1.4 * var(--stroke-width));
+        		}
+        	}
+        	svg:first-child {
+        		position: relative!important;
+        		height: calc(0.7 * var(--svg-height))!important;
+        		width: calc(0.8 * var(--svg-height))!important;
+        		margin-top: 0!important;
+        		use {
+        			stroke-width: calc(1.2 * var(--stroke-width));
+        		}
+        		use[href^="#qt"] {
+        			transform-origin: center;
+        			transform: scale(1, 1.2);
+        		}
+        	}
+        }
     </style>
     <style id="dynamic-style-tag"></style>
 </head>
@@ -301,16 +335,16 @@
             </div>
 
             <div class="legend">
-                <div class="legend-item"><span class="dot" style="background:var(--onset-color)"></span> Onset</div>
-                <div class="legend-item"><span class="dot" style="background:var(--vowel-color)"></span> Vowel</div>
-                <div class="legend-item"><span class="dot" style="background:var(--tone-color)"></span> Tone</div>
-                <div class="legend-item"><span class="dot" style="background:var(--coda-color)"></span> Coda</div>
-                <div class="legend-item"><span class="dot" style="background:var(--rhyme-color)"></span> Rhyme</div>
+                <div class="legend-item"><span class="dot" style="background:var(--onset-color)"></span> Âm đầu</div>
+                <div class="legend-item"><span class="dot" style="background:var(--vowel-color)"></span> Nguyên âm</div>
+                <div class="legend-item"><span class="dot" style="background:var(--tone-color)"></span> Thanh</div>
+                <div class="legend-item"><span class="dot" style="background:var(--coda-color)"></span> Âm cuối</div>
+                <div class="legend-item"><span class="dot" style="background:var(--rhyme-color)"></span> Vần</div>
             </div>
             
             <div class="legend" style="margin-top:20px; display:inline-block; width:auto; border:1px solid gray; padding:8px">
             <div class="legend-item" style="text-align: center">
-                Left: traditional <span style="margin:0 10px">•</span> Right: simplified
+                ← QATT <span style="margin:0 10px">•</span> QATT-mini →
             </div>
             </div>
         </header>
@@ -333,9 +367,9 @@
     	let TYPE = "0";
         
         const onsets = " b c ch d đ g gi h k kh l m n ng nh ph r s t th tr v x".split(" ");
-        const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
+        const vowels = "a ă â ơ ê e i ia ô o u ua ư ưa".split(" ");
         const tones = "an àn ản ãn án ạn át ạt".split(" ");
-        const codas = "u i n m ng t p c nh ch".split(" ");
+        const codas = "o i n m ng nh t p c ch".split(" ");
         const rhymes = `-n an
  ên
  in
@@ -489,7 +523,7 @@
                 labelHtml = `${onsetChar}<span style="font-size: 0.9rem; font-weight: 300;">a</span>`;
                 wordToParse = (text === "" || text === " ") ? "a" : text + "a";
             } else if (type === 'coda') {
-                const prefix = "a";
+                const prefix = ("pct".indexOf(text[text.length-1]) > -1 || text.endsWith("ch")) ? "á" : "a";
                 labelHtml = `<span style="font-size: 0.9rem; font-weight: 300;">${prefix}</span>${text}`;
                 wordToParse = prefix + text;
             } else {
@@ -517,8 +551,8 @@
             const result = parser.parse(wordToParse);
             
             if (result && result.code) {
-                renderer.renderText(result.code.replace(",", TYPE == "0" ? ",+" : ","), ttMain, parseFloat(TYPE));
-                renderer.renderText(result.code.replace(",", ","), ttAlt, 1);
+                renderer.render(result.code, ttMain, parseFloat(TYPE));
+                renderer.render(result.code, ttAlt, 3);
                 //renderer.renderText(result.code.replace(",", ","), ttAlt2, 2);
 
                 const parts = result.code.split(",");
