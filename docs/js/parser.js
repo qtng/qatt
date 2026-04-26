@@ -122,6 +122,9 @@ class VietnameseParser {
                     if (["i","y","o","u"].includes(lastChar)) {
                         res.coda = lastChar;
                         res.vowel = res.vowel.slice(0, -1);
+                        if (lastChar == "y" || lastChar == "u") {
+                            if (red.vowel == "a") res.vowel = "ă";
+                        }
                     }
                 }
 
