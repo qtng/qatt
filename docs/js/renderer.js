@@ -675,9 +675,11 @@ class SvgGlyphRenderer {
         miniQattEncoding[name + "u"] = value0 + "9";
     });
 	miniQattEncoding["anh"] = "l7";
+	miniQattEncoding["awnh"] = "l7";
     miniQattEncoding["enh"] = "ch7";
     miniQattEncoding["inh"] = "s7";
 	miniQattEncoding["wanh"] = "c7";
+	miniQattEncoding["wawnh"] = "c7";
     miniQattEncoding["wenh"] = "nh7";
     miniQattEncoding["winh"] = "r7";
 	return miniQattEncoding;
