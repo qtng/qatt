@@ -264,6 +264,66 @@ class SupabaseService {
     if (error) console.error("Delete error:", error.message);
     return { error };
   }
+
+// --- Forum Methods ---
+
+  /**
+   * Creates a new forum topic.
+   */
+  async saveTopic(topic) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+    const { data, error } = await this.client
+      .from('forum_topics')
+      .insert([{
+        title: topic.title,
+        content: topic.content
+      }]);
+    if (error) console.error("Save topic error:", error.message);
+    return { data, error };
+  }
+
+  /**
+   * Saves a comment or a reply.
+   */
+  async saveComment(comment) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+    const { data, error } = await this.client
+      .from('forum_comments')
+      .insert([{
+        topic_id: comment.topicId,
+        parent_id: comment.parentId || null,
+        text: comment.text
+      }]);
+    if (error) console.error("Save comment error:", error.message);
+    return { data, error };
+  }
+
+  /**
+   * Fetches topics joined with user profiles and their comments.
+   */
+  async getTopics() {
+    if (!this.client) await this.init();
+    // author:profiles!author_id(username) joins the profiles table using our author_id column
+    const { data, error } = await this.client
+      .from('forum_topics')
+      .select(`
+        *,
+        author:profiles!author_id(username),
+        comments:forum_comments(
+          *,
+          author:profiles!author_id(username)
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Fetch topics error:", error.message);
+      return [];
+    }
+    return data;
+  }
   
 // end of class
 }
