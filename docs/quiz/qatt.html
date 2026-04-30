@@ -127,7 +127,7 @@ const onsets = "b c ch d đ g h kh l m n ng nh ph r s t th tr v x".split(" ");
 const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
 const tones = "a à á ả ã ạ".split(" ");
 const codas = "ao ai an át am áp ang ác anh ách".split(" ");
-const levelName = "QATT I - Quốc Âm Tân Tự cơ bản";
+const levelName = "QATT I — Quốc Âm Tân Tự cơ bản";
 
 //app.addLesson({ id: "onsets", category: levelName, name: "Phụ âm đầu", style: basicStyles, symbols: ["a", ...onsets.map(o => o.trim() + "a").filter(o => o !== "a")] });
 app.addLesson({
@@ -165,7 +165,7 @@ app.addLesson({
 app.addLesson({
 	id: "codas",
 	category: levelName,
-	name: "Âm cuối (QATT-mini)",
+	name: "Âm cuối",
 	style: ["3"],
 	symbols: [
 		"cán",
@@ -202,8 +202,8 @@ const rhymesList2 = [
 ];
 
 let rhymeIdx = 0;
-rhymesList.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT II", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
-rhymesList2.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT II", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+rhymesList.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT II — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+rhymesList2.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT II — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
 	
 window.app = app;
 app.renderLibrary();
