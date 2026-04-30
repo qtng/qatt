@@ -70,10 +70,6 @@ window.addEventListener("load", () => {
     </script>
 <style>
 
-.navbar.navbar-dark *, .navbar-dark, .navbar-dark .navbar-brand, .offcanvas .offcanvas-nav-link {
-	color: white!important;
-}
-
 .page-1-only {display:none}
 #page-1, #page-2, #page-3 {display: none}
 .page-1, .page-2, .page-3 {background: transparent}
@@ -87,7 +83,7 @@ body[data-page="page-3"] #page-3 {display: block!important}
 body[data-page="page-3"] .page-3 {background:white; color: black!important}
 
         :root {
-        	--primary: cornsilk; #3a445c;
+        	--primary: #3a445c;
         }
         body {
             background-color: var(--primary);
@@ -100,7 +96,7 @@ body[data-page="page-3"] .page-3 {background:white; color: black!important}
         	backdrop-filter: blur(8px);
         	box-shadow: 0 2px 4px rgb(0 0 0 / .15);
         }
-        a:not(.nav-link) {color: #555!important}
+        a:not(.nav-link) {color: #eee!important}
         code {
         	display: inline-block;
         	color: currentColor;
@@ -115,13 +111,13 @@ body[data-page="page-3"] .page-3 {background:white; color: black!important}
         	position: relative;
         	top: -.2em;
         	background: rgba(0,0,0,0.075);
-        	xxcolor: white;
+        	color: white;
         }
         .alert-warning code{color: #e60}
         .alert-light code{color:#559!important}
         
         .alert-info code{color:navy}
-        .xxxalert-info{color:white;background: rgba(255,255,255,.1); border:none}
+        .alert-info{color:white;background: rgba(255,255,255,.1); border:none}
         
         .alert-primary code{color: #06a}
         .alert-danger code{color: #c30}
