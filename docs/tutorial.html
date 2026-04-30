@@ -1,1 +1,942 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn - Quốc Âm Tân Tự</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://qtng.github.io/qatt-dc/js/navigation.js"></script>
+    <script src="https://qtng.github.io/qatt-dc/js/renderer.js"></script>
+    <script src="https://qtng.github.io/qatt-dc/js/parser.js"></script>
+    
+    <script type="text/javascript">
+const parser = new VietnameseParser();
+let renderer;
+window.addEventListener("load", function(){
+  renderer = new SvgGlyphRenderer({});
+ const chars = [];
+  Array.from(document.querySelectorAll("tt")).forEach(el => {
+    let t = el.innerText;
+    const type = Number(el.dataset.type || 3);
+    el.innerHTML = "";
+    el.dataset.codes = t;
+    renderer.render(
+    	t,
+    	el,
+    	type
+    );
+    chars.push(el);
+  });
+  window.changetype = (type) => {
+  type = 3;
+  	document.querySelector("body").setAttribute("data-type", (type || "0").toString());
+  	const hash = type ? "#simplified" + type : "#";
+  	history.replaceState(null, "", hash);
+  	chars.forEach((el) => {
+  		const tp = Number((el.dataset.type == null ? type : el.dataset.type) || 0);
+  		renderer.render(
+  			tp?el.dataset.codes.replace(/\+/g,""):el.dataset.codes,
+  			el,
+  			tp
+  		);
+  	});
+  };
+});
 
+if (location.hash === "#simplified1" || location.hash === "#simplified") {
+    const opt = document.getElementById("simplifiedOption1");
+    if (opt) opt.selected = true;
+} else if (location.hash === "#simplified2") {
+    const opt = document.getElementById("simplifiedOption2");
+    if (opt) opt.selected = true;
+}
+
+
+function toFullQatt(){
+	alert("Hướng dẫn này chưa có... work in progress")
+}
+
+window.addEventListener("hashchange", (e) => {
+	let page = location.hash.substr(1) || "page-1";
+	document.querySelector("body").setAttribute("data-page", page);
+	window.scrollTo({top:0,left:0,behavior:'instant'})
+});
+
+window.addEventListener("load", () => {
+	window.dispatchEvent(new Event("hashchange"))
+});
+
+    </script>
+<style>
+
+.navbar.navbar-dark *, .navbar-dark, .navbar-dark .navbar-brand, .offcanvas .offcanvas-nav-link {
+	color: white!important;
+}
+
+.page-1-only {display:none}
+#page-1, #page-2, #page-3 {display: none}
+.page-1, .page-2, .page-3 {background: transparent}
+
+body[data-page="page-1"] #page-1,
+body[data-page="page-1"] .page-1-only {display: block!important}
+body[data-page="page-1"] .page-1 {background:white; color: black!important}
+body[data-page="page-2"] #page-2 {display: block!important}
+body[data-page="page-2"] .page-2 {background:white; color: black!important}
+body[data-page="page-3"] #page-3 {display: block!important}
+body[data-page="page-3"] .page-3 {background:white; color: black!important}
+
+        :root {
+        	--primary: cornsilk; #3a445c;
+        }
+        body {
+            background-color: var(--primary);
+            margin-top: 110px
+        }
+        #tutorial-navbar {
+        	z-index:1000;
+        	margin-top: 55px;
+        	background: rgb(0 0 0 / .5);
+        	backdrop-filter: blur(8px);
+        	box-shadow: 0 2px 4px rgb(0 0 0 / .15);
+        }
+        a:not(.nav-link) {color: #555!important}
+        code {
+        	display: inline-block;
+        	color: currentColor;
+        	background: rgba(255,255,255,.2);
+        	padding: 0 .3em;
+        	border-radius: .4em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .075em;
+        }
+        .alert code {
+        	position: relative;
+        	top: -.2em;
+        	background: rgba(0,0,0,0.075);
+        	xxcolor: white;
+        }
+        .alert-warning code{color: #e60}
+        .alert-light code{color:#559!important}
+        
+        .alert-info code{color:navy}
+        .xxxalert-info{color:white;background: rgba(255,255,255,.1); border:none}
+        
+        .alert-primary code{color: #06a}
+        .alert-danger code{color: #c30}
+
+h1 {font-size:2em; margin-top:1em}
+h2.subtitle{
+	margin-top:1.5em!important;
+	font-size: 1.2em;
+}
+
+h2 {margin-top:2em; font-size: 1.4rem; color: steelblue}
+h3 {margin-top:1.25em; font-size: 1.1em; color: steelblue}
+
+svg {
+	--notclr: #c9c9c9;
+	--noteven:#000;
+	--strokew: 5.75px;
+	stroke: currentColor;
+	stroke-width:var(--strokew);
+	stroke-linecap: square;
+	stroke-linejoin: square;
+	fill: transparent;
+	vertical-align:middle;
+	transform: translate(0, -.1em);
+	display: inline-block;
+}
+
+.svg-big svg { height: 2.8em }
+.svg-normal svg, svg{ height: 2.2em }
+.svg-small svg { height: 1.7em }
+.svg-tiny svg { height: 1.5em }
+
+body[data-type="0"] .svg-0-big,
+body[data-type="1"] .svg-1-big,
+body[data-type="2"] .svg-2-big {
+  svg { height:2.8em }
+}
+
+body[data-type="0"] .svg-0-normal,
+body[data-type="1"] .svg-1-normal,
+body[data-type="2"] .svg-2-normal {
+  svg { height: 2.2em; }
+}
+
+body[data-type="0"] .svg-0-small,
+body[data-type="1"] .svg-1-small,
+body[data-type="2"] .svg-2-small {
+  svg { height: 1.8em }
+}
+
+body[data-type="0"] .svg-0-tiny,
+body[data-type="1"] .svg-1-tiny,
+body[data-type="2"] .svg-2-tiny {
+  svg { height:1.5em }
+}
+
+.svg-medium {
+	stroke-width: var(--strokew);
+}
+.svg-bold svg {
+	stroke-width: 6.5px;
+}
+.svg-heavy svg {
+	stroke-width:7px;
+}
+.svg-light svg {
+	stroke-width:4.5px;
+}
+
+#qt0, #qt1, #qt2, #qt3, #qt4, #qt5, #qt6, #qt7 {
+	stroke-width: calc(var(--strokew) - 2);
+}
+.text-spaced {
+	letter-spacing: .15em
+}
+
+.text-vertical{
+	writing-mode: vertical-rl; 
+	text-orientation: mixed;
+	line-height: 2.5;
+}
+tt > div {
+	font-size:1em!important;
+	height:1em!important;
+	width:auto!important;
+	margin:0!important;
+	padding:0!important;
+	vertical-align:top!important;
+}
+code {
+  b {
+	display: inline-block;
+	color: blue;
+  }
+}
+
+nobr:has(svg:nth-child(2)) {
+        	display: inline-flex;
+        	flex-direction: column-reverse;
+        	align-items: center;
+        	--svg-height: 3em;
+        	--stroke-width: 4px;
+        	
+        	svg:last-child {
+        		height: calc(0.4 * var(--svg-height))!important;
+        		width: calc(0.7 * var(--svg-height))!important;
+        		border: none!important;
+        		position: relative!important;
+        		bottom: calc(-0.1 * var(--svg-height))!important;
+        		top: .6em!important;
+        		margin-bottom: 0!important;
+        		use {
+        		    stroke-width: calc(1.8 * var(--stroke-width));
+        		}
+        	}
+        	svg:first-child {
+        		position: relative!important;
+        		height: calc(0.5 * var(--svg-height))!important;
+        		width: calc(0.8 * var(--svg-height))!important;
+        		margin-top: 0!important;
+        		use {
+        			stroke-width: calc(1.3 * var(--stroke-width));
+        		}
+        		use[href^="#qt"] {
+        			transform-origin: center;
+        			transform: scale(1, 1.2);
+        		}
+        	}
+}
+
+.text-narrow{letter-spacing:0}
+.hide-first-svg svg use[href^="#v2-"][href$="small"] {display: none!important}
+    </style>
+</head>
+<body data-type="0" data-page="page-1" data-bs-theme="light">
+
+
+<!--<div style="z-index:1" class="page-1-only position-fixed bottom-0 w-100 pb-3">
+<select	class="d-block rounded px-2 py-1 shadow border-0 bg-danger text-light w-auto m-auto"
+	style="z-index:1;font-size:1.1rem"
+	onchange="changetype(parseInt(this.value)); this.blur()">
+	<option value="0">QATT mở rộng</option>
+	<option value="3">QATT cơ bản</option>
+	<option id="simplifiedOption1" value="1">QATT giản thể</option>
+	<option id="simplifiedOption2" value="2">QATT giản thể +</option>
+</select>
+</div>-->
+
+<div id="tutorial-navbar" class="position-fixed top-0 w-100 navbar navbar-dark p-2">
+	<div class="container d-flex align-items-center justify-content-between">
+		
+		<ul class="nav">
+    		<li class="nav-item">
+        		<a class="page-1 nav-link rounded text-light" href="#page-1">
+            		QATT Cơ Bản
+        		</a>
+    		</li>
+    		<li class="nav-item">
+        		<a class="page-2 nav-link rounded text-light" href="#page-2">
+            		Mở Rộng
+        		</a>
+    		</li>
+			<!--<li class="nav-item">
+        		<a class="page-3 nav-link rounded" href="#page-3">
+            		Tân Tự 3
+        		</a>
+    		</li>-->
+		</ul>
+		
+	</div>
+</div>
+
+<div class="container pb-5 mb-5">
+
+<div id="page-1">
+	<div class="d-flex align-items-center justify-content-between">
+		<h1 class="m-0">Hướng dẫn</h1>
+		<div class="h5 m-0 d-flex">
+			<tt data-type="3">h,y2,ng,1 dz,aw2,n,4</tt>
+		</div>
+	</div>
+	
+	<h2 class="mt-5 subtitle">Quốc Âm Tân Tự Cơ Bản</h2>
+	<div class="svg-bold d-flex flex-wrap align-items-center">
+		<tt data-type="3">c,waw2,c,1 _,aw2,m t,aw2,n t,y,,5 c,a2 b,a,n,3</tt>
+	</div>
+	
+	<h2>Hệ thống chữ QATT cơ bản</h2>
+	<p class="d-flex flex-wrap">
+		<tt data-type="3">h,e,,5 th,o,ng,1</tt>
+		<nobr>
+			<tt data-type="3">ch,y,,4</tt>
+			<big class="text-spaced">QATT</big>
+			<tt data-type="3">c,a2 b,a,n,3</tt>
+		</nobr>
+	</p>
+	
+	<p>
+	Tài liệu này giới thiệu những bước đầu tiên để làm quen
+	với hệ thống chữ Quốc Âm Tân Tự (QATT).
+	Hệ thống QATT mở rộng
+	bao gồm tổng cộng 22 cán tự (phụ âm) và 110 chi tự (vần).
+	Tuy nhiên, trong khuôn khổ phần 1 của bài hướng dẫn này,
+	bạn sẽ được làm quen với 22 cán tự và 22 vần cơ bản.
+	Dùng dấu phẩy và một cách viết gọi là Tham Thư trong QATT,
+	bạn hoàn toàn có thể viết được mọi từ trong tiếng Việt.
+	Sau khi đã nắm vững nền tảng,
+	bạn có thể <a href="#page-2">học thêm 88 vần</a> còn lại
+	để làm chủ hoàn hệ thống QATT mở rộng.
+	</p>
+	
+	<div class="alert alert-warning shadow d-flex flex-wrap">
+		<code class="col-12 bg-transparent mb-2">
+			<b>22 cán tự</b>
+			<span class="text-dark">+</span>
+			22 chi tự
+			<span class="text-dark">cơ bản</span>
+		</code>
+		<div class="col-6"><tt>ng,ng4</tt> <code><b>ng</b>an</code></div>
+		<div class="col-6"><tt>_,_4</tt> <code><b>ʔ</b>oan</code></div>
+		<div class="col-6"><tt>g,g4</tt> <code><b>gh</b>en</code></div>
+		<div class="col-6"><tt>h,h4</tt> <code><b>h</b>oen</code></div>
+		<div class="col-6"><tt>l,l4</tt> <code><b>l</b>ơn</code></div>
+		<div class="col-6"><tt>c,c4</tt> <code><b>q</b>uơn</code></div>
+		<div class="col-6"><tt>tr,tr5</tt> <code><b>tr</b>ưn</code></div>
+		<div class="col-6"><tt>d,d5</tt> <code><b>đ</b>ươn</code></div>
+		<div class="col-6"><tt>n,n5</tt> <code><b>n</b>ăn</code></div>
+		<div class="col-6"><tt>t,t5</tt> <code><b>t</b>oăn</code></div>
+		<div class="col-6"><tt>th,th5</tt> <code><b>th</b>ân</code></div>
+		<div class="col-6"><tt>nh,nh5</tt> <code><b>nh</b>uân</code></div>
+		<div class="col-6"><tt>ch,ch5</tt> <code><b>ch</b>ên</code></div>
+		<div class="col-6"><tt>dz,dz5</tt> <code><b>d</b>uên</code>*</div>
+		<div class="col-6"><tt>x,x5</tt> <code><b>x</b>iên</code></div>
+		<div class="col-6"><tt>kh,kh5</tt> <code><b>kh</b>uyên</code></div>
+		<div class="col-6"><tt>s,s5</tt> <code><b>s</b>in</code></div>
+		<div class="col-6"><tt>r,r5</tt> <code><b>r</b>uyn</code></div>
+		<div class="col-6"><tt>m,m3</tt> <code><b>m</b>ôn</code></div>
+		<div class="col-6"><tt>b,b3</tt> <code><b>b</b>un</code></div>
+		<div class="col-6"><tt>v,v3</tt> <code><b>v</b>on</code></div>
+		<div class="col-6"><tt>ph,ph3</tt> <code><b>ph</b>uôn</code></div>
+		<small class="mt-3">
+			* Quốc Âm Tân Tự không phân biệt gi và d.
+		</small>
+	</div>
+	
+	<!--
+	<div class="alert alert-light warning shadow d-flex flex-wrap px-2">
+		<b class="col-12 display-6 fw-bold">Bảng chữ QATT cơ bản</b>
+		
+		<div class="my-2">
+		QATT cơ bản sử dụng một tập con các ký tự của QATT:
+		</div>
+		
+		<section style="font-size:14px" class="d-flex flex-wrap">
+		<div class="col-6"><tt>ng,ng4 wng,</tt> <code>a|ngan|ngông</code></div>
+		<div class="col-6"><tt>_,_4 w_,</tt> <code>oa|oan|ông</code></div>
+		<div class="col-6"><tt>g,g4 wg,</tt> <code>e|ghen|gông</code></div>
+		<div class="col-6"><tt>h,h4 wh,</tt> <code>oe|hoen|hông</code></div>
+		<div class="col-6"><tt>l,l4 wl,</tt> <code>ơ|lơn|lông</code></div>
+		<div class="col-6"><tt>c,c4 wc,</tt> <code>uơ|quơn|công</code></div>
+		<div class="col-6"><tt>tr,tr5 wtr,</tt> <code>ư|trưn|trông</code></div>
+		<div class="col-6"><tt>d,d5 wd,</tt> <code>ưa|đươn|đông</code></div>
+		<div class="col-6"><tt>n,n5 wn,</tt> <code>ă|năn|nông</code></div>
+		<div class="col-6"><tt>t,t5 wt,</tt> <code>oă|toăn|tông</code></div>
+		<div class="col-6"><tt>th,th5 wth,</tt> <code>â|thân|thông</code></div>
+		<div class="col-6"><tt>nh,nh5 wnh,</tt> <code>uâ|nhuân|nhông</code></div>
+		<div class="col-6"><tt>ch,ch5 wch,</tt> <code>ê|chên|chông</code></div>
+		<div class="col-6"><tt>dz,dz5 wdz,</tt> <code>uê|duên|dông</code></div>
+		<div class="col-6"><tt>x,x5 wx,</tt> <code>ia|xiên|xông</code></div>
+		<div class="col-6"><tt>kh,kh5 wkh,</tt> <code class="text-narrow">uya|khuyên|không</code></div>
+		<div class="col-6"><tt>s,s5 ws,</tt> <code>i|sin|sông</code></div>
+		<div class="col-6"><tt>r,r5 wr,</tt> <code>uy|ruyn|rông</code></div>
+		<div class="col-6"><tt>m,m3 wm,</tt> <code>ô|môn|mông</code></div>
+		<div class="col-6"><tt>b,b3 wb,</tt> <code>u|bun|bông</code></div>
+		<div class="col-6"><tt>v,v3 wv,</tt> <code>o|von|vông</code></div>
+		<div class="col-6"><tt>ph,ph3 wph,</tt> <code>ua|phuôn|phông</code></div>
+
+		<div class="alert alert-warning success w-100 my-2 pt-0 d-flex flex-wrap align-items-center">
+			
+			<div class="d-flex align-items-end">
+			<div class="d-inline-block text-center">
+			<tt class="ms-1">c,ng</tt>
+			<div class="ms-3">ca</div>
+			</div>
+			<div class="ms-3 d-inline-block text-center">
+			<div class="d-inline-flex flex-column">
+			<tt style="transform:scale(1.3,0.35); margin:0 0 -1.5em -1em">,,i</tt>
+			<tt style="transform:scale(1,0.7)">c,ng</tt>
+			</div>
+			<div class="d-inline-flex flex-column">
+			<tt style="transform:scale(1.3,0.35); margin:0 0 -1.5em -1em">,,o</tt>
+			<tt style="transform:scale(1,0.7)">c,ng</tt>
+			</div>
+			<div style="margin-top:-.3em">cai &nbsp; cao</div>
+			</div>
+			<div class="d-inline-block text-center">
+			<tt class="ms-3">c,ng4 wc,ng wc,ng4</tt><tt class="ms-3">c,ng4,,6 wc,ng,,6 wc,ng4,,6</tt>
+			<div class="ms-3">can cang cam &nbsp; &nbsp; cát các cáp</div>
+			</div>
+			</div>
+			
+<div class="w-100"><hr class="my-2"></div>
+			<div>
+			<b>ngang/hỏi/sắc</b>
+			&nbsp;&nbsp; <b>huyền/ngã/nặng</b>
+			&nbsp;&nbsp; <b>ênh/inh/anh</b>
+			<br>
+			<tt class="ms-1">c,ch,,0 c,ch,,3 c,ch,,1</tt>
+			<tt class="ms-4">c,ch,,2 c,ch,,4 c,ch,,5</tt>
+			<tt class="ms-4">wc,ch wc,s wc,l</tt>
+			</div>
+			
+			<div class="mt-2">
+				Các chữ có âm cuối -t/-c/-p viết giống như -n/-ng/-m
+				nhưng bỏ thanh điệu ở phía dưới:
+				<b>cán/cạn → cát/cạt</b>.
+			</div>
+			<div class="mt-2 d-flex align-items-center">
+				<tt>c,ng4,,1 c,ng4,,5</tt>
+				→
+				<tt>c,ng4,,6 c,ng4,,7</tt>
+			</div>
+			
+		</div>
+		
+		<div class="d-flex align-items-end">
+			<div class="d-inline-block text-center">
+				<tt>b,ch5,,0 b,ch,,0 wb,ch,,0 wb,ch5,,0 b,ch5,,6 wb,ch,,6 wb,ch5,,6</tt>
+				<br>bên bê bênh bêm bết bếch bếp
+			</div>
+			<div class="ms-2 d-inline-block text-center">
+				<div class="d-inline-flex flex-column" style="opacity:.3">
+					<tt style="transform:scale(1.3,0.35); margin:0 0 -1.5em -1em">,,i</tt>
+					<tt style="transform:scale(1,0.7)">b,ch,,0</tt>
+				</div>
+				<div class="d-inline-flex flex-column">
+					<tt style="transform:scale(1.3,0.35); margin:0 0 -1.5em -1em">,,o</tt>
+					<tt style="transform:scale(1,0.7)">b,ch,,0</tt>
+				</div>
+				<div style="margin-top:-.3em"><span style="opacity:.3">bêi</span> &nbsp; bêu</div>
+			</div>
+		</div>		
+		<div class="d-flex align-items-end">
+			<div class="d-inline-block text-center">
+				<tt>d,l4,,0 d,l,,0 wd,l,,0 wd,l4,,0 d,l4,,7 wd,l,,7 wd,l4,,7</tt>
+				<br>đơn đơ đanh đơm đợt đợc đợp
+			</div>
+			<div class="ms-2 d-inline-block text-center">
+				<div class="d-inline-flex flex-column">
+					<tt style="transform:scale(1.3,0.35); margin:0 0 -1.5em -1em">,,i</tt>
+					<tt style="transform:scale(1,0.7)">d,l,,0</tt>
+				</div>
+				<div class="d-inline-flex flex-column">
+					<tt style="transform:scale(1.3,0.35); margin:0 0 -1.5em -1em">,,o</tt>
+					<tt style="transform:scale(1,0.7)">d,l,,0</tt>
+				</div>
+				<div style="margin-top:-.3em">đơi &nbsp; đơu</div>
+			</div>
+		</div>
+		</section>
+	</div>-->
+	
+	
+	<h2>Cách đặt dấu thanh</h2>
+	<p><tt>c,a,ch,1 d,aw,t,5 dz,aw2,u,1 th,aw,nh</tt></p>
+	
+	<p>
+	Dấu thanh được đặt ở một trong các góc của chữ.
+	QATT sử dụng cả bốn góc. Trong bài hướng dẫn này chỉ dùng ba góc.
+	</p>
+	
+	<div class="alert alert-warning shadow">
+		<div class="fw-bold mb-1">Dấu thanh</div>
+		<div class="d-flex flex-wrap">
+			<div class="col-6"><tt>c,a,n,0</tt> <code>can</code></div>
+			<div class="col-6"><tt>c,a,n,2</tt> <code>càn</code></div>
+			<div class="col-6"><tt>c,a,n,1</tt> <code>cán</code></div>
+			<div class="col-6"><tt>c,a,n,5</tt> <code>cạn</code></div>
+			<div class="col-6"><tt>c,a,n,3</tt> <code>cản</code></div>
+			<div class="col-6"><tt>c,a,n,4</tt> <code>cãn</code></div>
+		</div>
+	</div>
+	
+	<h2>Cấu tạo chữ viết theo QATT cơ bản</h2>
+	<p><tt>c,aw2,u,1 t,a,u,5 c,u2,,3 m,o,t,5 ch,y,,4 v,i2,t,1</tt>
+	
+	<p>Mỗi chữ trong QATT được cấu tạo bởi ít nhất hai thành phần:
+	phụ âm đầu và vần. Trong đó, phụ âm đầu luôn đứng bên trái,
+	còn phần vần đứng bên phải. Sự kết hợp giữa hai thành phần
+	này tạo nên chữ cơ bản.</p>
+	
+	<div class="alert alert-info">
+		<b class="d-block mb-2">Ví dụ:</b>
+		<tt>c,</tt> <code>c</code>
+		+ <tt class="hide-first-svg">c,ng4</tt> <code>an</code>
+		→ <tt>c,ng4</tt> <code>can</code>
+	</div>
+	
+	Muốn viết vần có âm cuối "-m", "-ng" hoặc không có âm cuối, phải thêm dấu phẩy ở cán tự hoặc bỏ dấu ở chi tự.
+	<div class="alert alert-info">
+		<b class="d-block mb-2">Ví dụ:</b>
+		<tt>c,ng4</tt> <code>can</code>
+		<br>→ <tt>wc,ng4</tt> <code>cam</code>
+		<br>→ <tt>wc,ng</tt> <code>cang</code>
+		<br>→ <tt>c,ng</tt> <code>ca</code>
+	</div>
+	
+	Viết vần có âm cuối "-i/y" hoặc "-o/u", phải bỏ dấu phẩy và thêm chi tự ở phía trên.
+	<div class="alert alert-info">
+		<b class="d-block mb-2">Ví dụ:</b>
+		<tt>c,ng,ii</tt> <code>cai</code>
+		→ <tt>c,ng,uu</tt> <code>cao</code>
+	</div>
+	
+	<!--
+	<h2>Âm cuối</h2>
+	<p><tt>_,aw2,m c,u2,i,1</tt>
+	
+	<p>
+	Trong bài hướng dẫn này, âm cuối được viết thành một
+	ký tự riêng biệt đứng bên phải khối chữ chính.
+	Điều này giúp hệ thống rút gọn cho người
+	mới bảt đầu học, chỉ cần 14 vần cơ bản.
+	
+	</p>
+	
+	<div class="alert alert-warning shadow">
+		<div class="fw-bold mb-1">Âm cuối</div>
+		<div class="d-flex flex-wrap">
+			<div class="col-6"><tt>t,a,i</tt> <code>tai</code></div>
+			<div class="col-6"><tt>t,a,u</tt> <code>tao</code></div>
+			<div class="col-6"><tt>t,a,n</tt> <code>tan</code></div>
+			<div class="col-6"><tt>t,a,t,1</tt> <code>tát</code></div>
+			<div class="col-6"><tt>t,a,m</tt> <code>tap</code></div>
+			<div class="col-6"><tt>t,a,p,1</tt> <code>táp</code></div>
+			<div class="col-6"><tt>t,a,ng</tt> <code>tang</code></div>
+			<div class="col-6"><tt>t,a,c,1</tt> <code>tác</code></div>
+		</div>
+	</div>
+	
+	<div class="alert alert-info shadow">
+		<b class="mb-2">Ví dụ:</b>
+		<div class="d-flex flex-wrap">
+		<div class="col-5"><tt>t,e</tt> <code>tê</code></div>
+		<div class="col-7">→ <tt>t,e,n</tt> <code>tên</code></div>
+		<div class="col-5"><tt>c,i2</tt> <code>kia</code></div>
+		<div class="col-7">→ <tt>c,i2,u</tt> <code>kiêu</code></div>
+		<div class="col-5"><tt>v,u2</tt> <code>vua</code></div>
+		<div class="col-7">→ <tt>v,u2,ng</tt> <code>vuông</code></div>
+		</div>
+	</div>
+	
+	<h2>Âm đệm (hoa, suy, khoe, ...)</h2>
+	<p><tt>_,aw2,m d,e,m,5</tt> (<tt>h,wa</tt>, <tt>s,wi</tt>, <tt>kh,we</tt>, ...)
+	
+	<p>
+	Trong hệ thống mở rộng, mỗi vần có âm đệm đều có một chi tự riêng. Tuy nhiên, để đơn giản hoá cho người mới học, trong bài hướng dẫn này các vần có âm đệm được viết bằng dạng biến thể của phụ âm đầu.
+	</p>
+	
+	<div class="alert alert-warning shadow">
+		<div class="fw-bold mb-1">Âm đệm</div>
+		<div class="d-flex flex-wrap">
+		<div class="col-4"><tt>_,wi</tt> <code>uy</code></div>
+		<div class="col-4"><tt>c,wi</tt> <code>quy</code></div>
+		<div class="col-4"><tt>ch,wi</tt> <code>chuy</code></div>
+		<div class="col-4"><tt>d,wi</tt> <code>đuy</code></div>
+		<div class="col-4"><tt>dz,wi</tt> <code>duy</code></div>
+		<div class="col-4"><tt>h,wi</tt> <code>huy</code></div>
+		<div class="col-4"><tt>kh,wi</tt> <code>khuy</code></div>
+		<div class="col-4"><tt>l,wi</tt> <code>luy</code></div>
+		<div class="col-4"><tt>ng,wi</tt> <code>nguy</code></div>
+		<div class="col-4"><tt>nh,wi</tt> <code>nhuy</code></div>
+		<div class="col-4"><tt>s,wi</tt> <code>suy</code></div>
+		<div class="col-4"><tt>t,wi</tt> <code>tuy</code></div>
+		<div class="col-4"><tt>th,wi</tt> <code>thuy</code></div>
+		<div class="col-4"><tt>tr,wi</tt> <code>truy</code></div>
+		<div class="col-4"><tt>x,wi</tt> <code>xuy</code></div>
+		</div>
+	</div>
+	
+	<div class="alert alert-info">
+		<b class="mb-2">Ví dụ:</b>
+		<p>Chuyển từ dạng cơ bản sang dạng có âm đệm.</p>
+		<div class="d-flex flex-wrap">
+			<div class="col-5"><tt>c,a,,1</tt> <code>cá</code></div>
+			<div class="col-7">→ <tt>c,wa,,1</tt> <code>quá</code></div>
+			<div class="col-5"><tt>kh,i2,n</tt> <code>khiên</code></div>
+			<div class="col-7">→ <tt>kh,wi2,n</tt> <code>khuyên</code></div>
+			<div class="col-5"><tt>c,aw2,n,2</tt> <code>cần</code></div>
+			<div class="col-7">→ <tt>c,waw2,n,2</tt> <code>quần</code></div>
+			<div class="col-5"><tt>h,a,ng,2</tt> <code>hàng</code></div>
+			<div class="col-7">→ <tt>h,wa,ng,2</tt> <code>hoàng</code></div>
+			<div class="col-5"><tt>t,i2,t,1</tt> <code>tiết</code></div>
+			<div class="col-7">→ <tt>t,wi2,t,1</tt> <code>tuyết</code></div>
+		</div>
+	</div>-->
+	
+	<div class="alert alert-info">
+	<h5>Bước tiếp theo là gì?</h5>
+	Sau khi bạn đã thuần thục cách ghép 14 vần cơ bản và âm cuối,
+	chúng ta sẽ tiến sang <a href="#page-2">Phần 2</a>: Hệ thống vần mở rộng.
+	Ở phần sau, bạn sẽ học cách viết các vần phức tạp (như oanh, uyên, iếc...)
+	chỉ bằng một ký tự duy nhất thay vì phải ghép rời.
+	</div>
+	
+	<div class="alert alert-info">
+		<div class="fw-bold mb-2 text-spaced">Truyện Kiều</div>
+		<div>
+			<tt>tr,+wi2,n,5 c,+i2,u,2</tt>
+			<br>
+			<br><tt>tr,aw,m n,aw,m tr,o2,ng c,o,i,4 ng,y2,i,2 t,a</tt>，
+			<br><tt>ch,y,,4 t,a,i,2 ch,y,,4 m,e,nh,5 kh,e2,u,1 l,a,,2 g,e2,t,1 nh,aw,u</tt>。
+			<br><tt>tr,a,i,3 c,wa m,o,t,5 c,u2,c,5 b,e,,3 dz,aw2,u</tt>，
+			<br><tt>nh,y,ng,4 d,i2,u,2 tr,o,ng th,aw2,i,1 m,a,,2 d,aw,u d,a2,n,1 l,o,ng,2</tt>。
+			<br>
+			<br><tt>l,a,,5 gi,i,,2 b,i,,3 s,aw,c,1 t,y ph,o2,ng</tt>，
+			<br><tt>tr,a2,i,2 x,aw,nh c,we2,n v,a2,i,1 m,a,,1 h,o,ng,1 d,aw,nh,1 g,e2,n</tt>。
+			<br><tt>c,a,u,3 th,a2,m l,aw2,n,2 gi,a2,,3 tr,y2,c,1 d,e2,n,2</tt>，
+			<br><tt>ph,o,ng t,i,nh,2 c,o2,,1 l,u,c,5 c,o2,n,2 tr,wi2,n,2 s,y,,3 x,aw,nh</tt>。
+			<br>
+			<br><tt>tr,wi2,n,5 c,i2,u,2</tt>
+		</div>
+	</div>
+</div>
+
+
+<div id="page-2">
+	<div class="d-flex align-items-center justify-content-between">
+		<h1 class="m-0">Mở Rộng</h1>
+		<div class="h5 m-0 d-flex">
+			<tt data-type="3">m,a2,,3 r,o,ng,5</tt>
+		</div>
+	</div>
+	
+	<h2 class="mt-5 subtitle">Quốc Âm Tân Tự — Hướng dẫn (Phần 2)</h2>
+	<div dclass="svg-bold d-flex flex-wrap align-items-center">
+		<tt data-type="0">c,+waw2,c,1 _,+aw2,m t,+aw2,n t,+y,,5</tt>
+		<span class="mx-2">—</span>
+    	<tt data-type="0">h,+y2,ng,1</tt>
+    	<tt data-type="0">dz,+aw2,n,4</tt>
+    	<nobr>
+    		<big>(</big><tt data-type="0">t,+aw2,p,5</tt><big>2)</big>
+    	</nobr>
+    </div>
+    
+	<h2>Hệ thống vần mở rộng</h2>
+	<p>
+		<tt data-type="3">h,e,,5 th,o,ng,1 v,aw2,n,2 m,a2,,3 r,o,ng,5</tt>
+	</p>
+	
+	<p class="mt-3">Trong <a href="#page-1">Phần 1</a>, bạn đã làm quen với Quốc Âm Tân Tự cơ bản — phương pháp ghi âm cuối bằng dấu phẩy, giúp việc học và đọc trở nên cực kỳ đơn giản. Tuy nhiên, để làm chủ hoàn toàn QATT mở rộng, bạn cần tìm hiểu về các chi tự mở rộng.
+    </p>
+    
+    <div class="alert alert-info">
+    <b>Lưu ý:</b> Hệ thống mở rộng trong phần 2 này giúp tối ưu hóa số lượng ký tự khi viết. Tuy nhiên, điều này cũng làm tăng độ phức tạp: việc đọc sẽ trở nên chậm hơn vì bạn phải ghi nhớ hàng trăm mặt chữ khác nhau thay vì chỉ ghép các mảnh cơ bản. Đây là bước tiến dành cho những người muốn nghiên cứu sâu và sử dụng QATT như một hệ thống ký hiệu chuyên nghiệp.
+    </div>
+
+	<p>Trong QATT mở rộng, thay vì viết vần cơ bản bằng dấu phẩy hoặc tham thư (= thêm âm cuối phia trên), các vần dưới đây được biểu diễn bằng một ký tự duy nhất.</p>
+
+	<div class="alert alert-info">
+		<div class="mb-2">Ví dụ:</div>
+		<p><b>Khoảng:</b> Thay vì dùng "kh (có dấu) + oa", ta dùng phụ âm kh chuẩn kết hợp với chi tự oang.</p>
+		<div>
+			<tt data-type="0">wkh,_,,4</tt>
+			→
+			<span>QATT mở rộng: <tt data-type="0">kh,+wa,ng,4</tt></span>
+			<code>khoảng</code>
+		</div>
+		
+		<p class="mt-3"><b>Chiều:</b> Thay vì dùng "ch + iê + u", ta dùng phụ âm ch chuẩn kết hợp với chi tự iêu.</p>
+		<div>
+			<tt data-type="0">ch,x,u,2</tt>
+			→
+			<span>QATT mở rộng: <tt data-type="0">ch,+i2u,2</tt></span>
+			<code>chiều</code>
+		</div>
+	</div>
+	
+	<h2 class="mt-5">62 vần có âm cuối</h2>
+	<p class="d-flex align-items-end"><big>62&nbsp;</big><tt data-type="3" class="svg-bold">v,+aw2,n,2 c,+o2,,1 _,+aw2,m c,+u2,i,1</tt></p>
+
+	<h2>Các vần -n</h2>
+	<div class="alert alert-warning">
+		<div class="svg-small svg-0-normal d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,n</tt> <code>an</code></div>
+			<div class="col-3"><tt data-type="0">,+e,n</tt> <code>ên</code></div>
+			<div class="col-3"><tt data-type="0">,+i,n</tt> <code>in</code></div>
+			<div class="col-3"><tt data-type="0">,+o,n</tt> <code>ôn</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,n</tt> <code>ăn</code></div>
+			<div class="col-3"><tt data-type="0">,+u,n</tt> <code>un</code></div>
+			<div class="col-3"><tt data-type="0">,+y,n</tt> <code>ưn</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+a2,n</tt> <code>ơn</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,n</tt> <code>en</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,n</tt> <code>iên</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,n</tt> <code>on</code></div>
+			<div class="col-3"><tt data-type="0">,+aw2,n</tt> <code>ân</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,n</tt> <code>uôn</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,n</tt> <code>ươn</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+	
+	<h2>Các vần -m</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,m</tt> <code>am</code></div>
+			<div class="col-3"><tt data-type="0">,+e,m</tt> <code>êm</code></div>
+			<div class="col-3"><tt data-type="0">,+i,m</tt> <code>im</code></div>
+			<div class="col-3"><tt data-type="0">,+o,m</tt> <code>ôm</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,m</tt> <code>ăm</code></div>
+			<div class="col-3"><tt data-type="0">,+u,m</tt> <code>um</code></div>
+			<div class="col-3"><tt data-type="0">,+y,m</tt> <code>ưm</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+a2,m</tt> <code>ơm</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,m</tt> <code>em</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,m</tt> <code>iêm</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,m</tt> <code>om</code></div>
+			<div class="col-3"><tt data-type="0">,+aw2,m</tt> <code>âm</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,m</tt> <code>uôm</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,m</tt> <code>ươm</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+
+	<h2>Các vần -ng</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,ng</tt> <code>ang</code></div>
+			<div class="col-3"><tt data-type="0">,+e,nh</tt> <code>ênh</code></div>
+			<div class="col-3"><tt data-type="0">,+i,nh</tt> <code>inh</code></div>
+			<div class="col-3"><tt data-type="0">,+o,ng</tt> <code>ông</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,ng</tt> <code>ăng</code></div>
+			<div class="col-3"><tt data-type="0">,+u,ng</tt> <code>ung</code></div>
+			<div class="col-3"><tt data-type="0">,+y,ng</tt> <code>ưng</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+a,nh</tt> <code>anh</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,ng</tt> <code>eng</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,ng</tt> <code>iêng</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,ng</tt> <code>ong</code></div>
+			<div class="col-3"><tt data-type="0">,+aw2,ng</tt> <code>âng</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,ng</tt> <code>uông</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,ng</tt> <code>ương</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+
+	<h2>Các vần -o/u</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,u</tt> <code>ao</code></div>
+			<div class="col-3"><tt data-type="0">,+e,u</tt> <code>êu</code></div>
+			<div class="col-3"><tt data-type="0">,+i,u</tt> <code>iu</code></div>
+			<div class="col-3"><tt data-type="0">,+y,u</tt> <code>ưu</code></div>
+			
+			<div class="col-3"><tt data-type="0">,+aw,u</tt> <code>au</code></div>
+			<div class="col-9"></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="bg-danger text-light">ơu</code></div>
+			<div class="col-9"></div>
+			
+			<div class="col-3"><tt data-type="0">,+aw2,u</tt> <code>âu</code></div>
+			<div class="col-3"><tt data-type="0">,+e2,u</tt> <code>eo</code></div>
+			<div class="col-3"><tt data-type="0">,+i2,u</tt> <code>iêu</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,u</tt> <code>ươu</code></div>
+			<div class="col-3"></div>
+		</div>
+	</div>
+	
+	<h2>Các vần -i/y</h2>
+	<div class="alert alert-warning">
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+a,i</tt> <code>ai</code></div>
+			<div class="col-3"><tt data-type="0">,+o,i</tt> <code>ôi</code></div>
+			<div class="col-3"><tt data-type="0">,+u,i</tt> <code>ui</code></div>
+			<div class="col-3"><tt data-type="0">,+y,i</tt> <code>ưi</code></div>
+		
+			<div class="col-3"><tt data-type="0">,+aw,i</tt> <code>ay</code></div>
+			<div class="col-9"></div>
+			<div class="col-3"><tt data-type="0">,+aw2,i</tt> <code>ây</code></div>
+			<div class="col-9"></div>
+			
+			<div class="col-3"><tt data-type="0">,+a2,i</tt> <code>ơi</code></div>
+			<div class="col-3"><tt data-type="0">,+o2,i</tt> <code>oi</code></div>
+			<div class="col-3"><tt data-type="0">,+u2,i</tt> <code>uôi</code></div>
+			<div class="col-3"><tt data-type="0">,+y2,i</tt> <code>ươi</code></div>
+		</div>
+	</div>
+
+	
+	<h2>Các vần có âm đệm</h2>
+	
+	<div class="mt-3 alert alert-warning">
+		<div class="fw-bold mb-2">Danh sách các vần có âm đệm tích hợp</div>
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+wa,n</tt> <code>oan</code></div>
+			<div class="col-3"><tt data-type="0">,+we,n</tt> <code>uên</code></div>
+			<div class="col-3"><tt data-type="0">,+wi,n</tt> <code>uyn</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,n</tt> <code>uăn</code></div>
+			<div class="col-3"><tt data-type="0">,+wa2,n</tt> <code>uơn</code></div>
+			<div class="col-3"><tt data-type="0">,+we2,n</tt> <code>oen</code></div>
+			<div class="col-3"><tt data-type="0">,+wi2,n</tt> <code>uyên</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,n</tt> <code>uân</code></div>
+		</div>
+		
+		<hr>
+	
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-6"><tt data-type="0">,+wa,m</tt> <code>oam</code></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="text-white bg-danger">uym</code></div>
+			<div class="col-3"><tt data-type="0">,+aw,m</tt> <code>oăm</code></div>
+			<div class="col-3"></div>
+			<div class="col-6"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="text-white bg-danger">oem</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,m</tt> <code>uâm</code></div>
+		</div>
+		
+		<hr>
+	
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+wa,ng</tt> <code>oang</code></div>
+			<div class="col-3"><tt data-type="0">,+we,nh</tt> <code>uênh</code></div>
+			<div class="col-3"><tt data-type="0">,+wi,nh</tt> <code>uynh</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,ng</tt> <code>oăng</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,nh</tt> <code>oanh</code></div>
+			<div class="col-3"><tt data-type="0">,+we2,ng</tt> <code>oeng</code></div>
+			<div class="col-3"><tt data-type="0">,+wi2,ng</tt> <code class="px-1">uyêng</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,ng</tt> <code>uâng</code></div>
+			<div class="col-3"></div>
+		</div>
+		
+		<hr>
+		
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-3"><tt data-type="0">,+wa,u</tt> <code>oao</code></div>
+			<div class="col-3"><tt data-type="0">,+we,u</tt> <code>uêu</code></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="bg-danger text-white">uyu</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,u</tt> <code>oau</code></div>
+			<div class="col-3"></div>
+			<div class="col-3"><tt data-type="0">,+we2,u</tt> <code>oeo</code></div>
+			<div class="col-3"><tt data-type="0" style="opacity:.3">_,_</tt> <code class="bg-danger text-white">uyêu</code></div>
+			<div class="col-3"><tt data-type="0">,+waw2,u</tt> <code>uâu</code></div>
+		</div>
+		
+		<hr>
+		
+		<div class="d-flex flex-wrap justify-content-between">
+			<div class="col-9"><tt data-type="0">,+wa,i</tt> <code>oai</code></div>
+			<div class="col-3"><tt data-type="0">,+waw,i</tt> <code>oay</code></div>
+			<div class="col-9"></div>
+			<div class="col-3"><tt data-type="0">,+waw2,i</tt> <code>uây</code></div>
+		</div>
+	</div>
+	
+	<!--<div class="alert alert-info">
+	<h5>Lời khuyên cho người học</h5>
+	<p>Việc học 110 chi tự mở rộng giống như việc học một ngôn ngữ ký hiệu mới. Nếu bạn cảm thấy việc đọc trở nên quá khó khăn, đừng ngần ngại quay lại sử dụng cách viết ở phần 1.
+	Mục tiêu của QATT là sự linh hoạt: Bạn có thể viết theo cách đơn giản (phần 1) hoặc cách chuyên sâu (phần 2) tùy vào mục đích sử dụng của mình.
+	</p>
+	<h5>Bước tiếp theo:</h5>
+	<p>Trong các phần tới, chúng ta sẽ đi sâu vào quy tắc viết hoa, cách trình bày văn bản và các mẹo để tăng tốc độ nhận diện mặt chữ khi sử dụng hệ thống mở rộng này.
+	Chúc bạn kiên trì trên con đường chinh phục QATT!</p>
+	</div>-->
+	
+	<div class="alert alert-info">
+		<div class="fw-bold mb-2 text-spaced">Truyện Kiều</div>
+		<div class="svg-big svg-normal">
+			<tt data-type="0">tr,+wi2,n,5 c,+i2,u,2</tt>
+			<br>
+			<br><tt data-type="0">tr,+aw,m n,+aw,m tr,+o2,ng c,+o,i,4 ng,+y2,i,2 t,+a</tt>，
+			<br><tt data-type="0">ch,+y,,4 t,+a,i,2 ch,+y,,4 m,+e,nh,5 kh,+e2,u,1 l,+a,,2 g,+e2,t,1 nh,+aw,u</tt>。
+			<br><tt data-type="0">tr,+a,i,3 c,+wa m,+o,t,5 c,+u2,c,5 b,+e,,3 dz,+aw2,u</tt>，
+			<br><tt data-type="0">nh,+y,ng,4 d,+i2,u,2 tr,+o,ng th,+aw2,i,1 m,+a,,2 d,+aw,u d,+a2,n,1 l,+o,ng,2</tt>。
+			<br>
+			<br><tt data-type="0">l,+a,,5 gi,+i,,2 b,+i,,3 s,+aw,c,1 t,+y ph,+o2,ng</tt>，
+			<br><tt data-type="0">tr,+a2,i,2 x,+aw,nh c,+we2,n v,+a2,i,1 m,+a,,1 h,+o,ng,1 d,+aw,nh,1 g,+e2,n</tt>。
+			<br><tt data-type="0">c,+a,u,3 th,+a2,m l,+aw2,n,2 gi,+a2,,3 tr,+y2,c,1 d,+e2,n,2</tt>，
+			<br><tt data-type="0">ph,+o,ng t,+i,nh,2 c,+o2,,1 l,+u,c,5 c,+o2,n,2 tr,+wi2,n,2 s,+y,,3 x,+aw,nh</tt>。
+			<br>
+			<br><tt data-type="0">tr,wi2,n,5 c,i2,u,2</tt>
+		</div>
+	</div>
+</div>
+
+
+<div id="page-3">
+	<div class="d-flex align-items-center justify-content-between">
+		<h1 class="m-0">Phần 3</h1>
+		<div class="h5 m-0 d-flex">
+			<tt class="">t,aw2,p,1</tt>
+			<span class="h1 mt-2 fw-light">3</span>
+		</div>
+	</div>
+	
+	<h2 class="mt-5 subtitle">Quốc Âm Tân Tự — Hướng dẫn</h2>
+	<tt class="svg-bold">c,waw2,c,1 _,aw2,m t,aw2,n t,y,,5</tt>
+	— <tt class="svg-bold">h,y2,ng,1 dz,aw2,n,4</tt>
+
+	<h2>Phương pháp</h2>
+	<p>
+		<tt>ph,y2,ng ph,a,p,1</tt>
+	</p>
+	
+<div id="editor-wrapper">
+		<textarea class="form-control" id="editor" oninput="
+			const out = document.getElementById('editor-output');
+			out.innerHTML = '';
+			renderer.renderText(((parser.parse(this.value)||{code:this.value}).code), out)
+			console.log(parser.parse(this.value).code)
+		"></textarea>
+		<div class="alert" id="editor-output"></div>
+	</div>
+</div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
