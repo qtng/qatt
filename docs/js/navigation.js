@@ -1,6 +1,6 @@
 (function() {
     const navConfig = {
-        title: "Chunom.org",
+        title:  (location.pathname.indexOf("/qatt/") > -1) ? " QATT.org" : "Chunom.org",
         sections: [
             {
                 header: "Chữ Nôm",
