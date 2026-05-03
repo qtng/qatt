@@ -460,11 +460,11 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	
     	<!--tones-->
     	<path id="qt0" d="M2 90 m0 15 c-12 0 -12 -15 0 -15"/>
-    	<path id="qt1" d="M98 -5 c12 0 12 15 0 15"/>
+    	<path id="qt1" d="M98 -8 v3 c12 0 12 15 0 15"/>
     	<path id="qt2" d="M2 90 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
     	<path id="qt3" d="M2 -5 m0 015 c-12 0 -12 -15 0 -15"/>
     	<path id="qt4" d="M2 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
-    	<path id="qt5" d="M98 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
+    	<path id="qt5" d="M98 -8 v3 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
     	<path id="qt6" d="M98 90 c12 0 12 15 0 15"/>
 		<path id="qt7" d="M98 90 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
 		
