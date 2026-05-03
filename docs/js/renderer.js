@@ -5,7 +5,7 @@ const options = {};
 const renderer = new SvgGlyphRenderer(options);
 
 let type = 0; // traditional QATT
-// type = -1 // trditional QATT with extra final
+// type = -1 // traditional QATT with extra final
 // type = 1 // simplified QATT
 // type = 2 // simplified QATT with fused tones
 
@@ -863,7 +863,11 @@ class SvgGlyphRenderer {
 
   _handleTones(root, prefixes, initial, vowel, final, tone, g) {
     if (g && tone != null && tone != "" && tone >= 0) { //vowel && vowel.match(/[aeiouy]/)) {
-      if (tone < 8 && prefixes.qattTones) this.useG(g, "qt" + (tone || 0));
+      if (tone < 8 && prefixes.qattTones) {
+		  if (tone || prefixes.type != "3") {
+		      this.useG(g, "qt" + (tone || 0));
+		  }
+	  }
     }
 
     if (tone != null && tone < 0) {
