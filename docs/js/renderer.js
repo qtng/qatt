@@ -837,7 +837,12 @@ class SvgGlyphRenderer {
       if (!"aeiouy".includes(vStr[0]) && /\d$/.test(vStr)) {
         const toneVal = vStr.replace(/\d*(\d)/, "$1");
         this.useG(g, prefixes.vowel + vStr.replace(/\d/, ""));
-        if (tone || final) this.useG(g, "qt" + (tone || final || 0));
+        if (tone || final) {
+			const t = Number(tone || final || 0);
+			if (t > 0 || prefixes.type != "3") {
+			    this.useG(g, "qt" + (tone || final || 0));
+			}
+		}
         //final = "";
 		tone = "";
       }
@@ -864,7 +869,7 @@ class SvgGlyphRenderer {
   _handleTones(root, prefixes, initial, vowel, final, tone, g) {
     if (g && tone != null && tone != "" && tone >= 0) { //vowel && vowel.match(/[aeiouy]/)) {
       if (tone < 8 && prefixes.qattTones) {
-		  if (tone || prefixes.type != "3") {
+		  if (tone > 0 || prefixes.type != "3") {
 		      this.useG(g, "qt" + (tone || 0));
 		  }
 	  }
