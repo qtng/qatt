@@ -461,7 +461,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<!--tones-->
     	<path id="qt0" d="M2 90 m0 14 c-12 0 -12 -14 0 -14"/>
     	<path id="qt1" d="M98 -5 c12 0 12 14 0 14"/>
-    	<path id="qt2" d="M2 90 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 h10-1"/>
+    	<path id="qt2" d="M2 90 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l10-1"/>
     	<path id="qt3" d="M2 -5 m0 14 c-12 0 -12 -14 0 -14"/>
     	<path id="qt4" d="M2 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l10-1"/>
     	<path id="qt5" d="M98 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l-10-1"/>
