@@ -462,10 +462,10 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qt0" d="M2 90 m0 14 c-12 0 -12 -14 -6 -14"/>
     	<path id="qt1" d="M98 -5 c12 0 12 14 6 14"/>
     	<path id="qt2" d="M2 90 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l10-1"/>
-    	<path id="qt3" d="M2 -5 m0 14 c-12 0 -12 -14 -6 -14"/>
+    	<path id="qt3" d="M2 -5 c-12 0 -12 14 -6 14"/>
     	<path id="qt4" d="M2 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l10-1"/>
     	<path id="qt5" d="M98 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l-10-1"/>
-    	<path id="qt6" d="M98 90 m0-5v5 c12 0 12 14 6 14"/>
+    	<path id="qt6" d="M98 90 m0-5v5 c12 0 12 14 0 14"/>
 		<path id="qt7" d="M98 90 m0-5v5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14"/>
 		
     	<path id="_t1" d="M16 12 h60 l-3 15"/>
