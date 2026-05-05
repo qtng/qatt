@@ -163,8 +163,8 @@ app.addLesson({
 });
 app.addLesson({
 	id: "codas",
-	category: levelName,
-	name: "Âm cuối",
+	category: "QATT II — qatt-mini",
+	name: "Âm cuối (theo qatt-minj)",
 	style: ["3"],
 	symbols: [
 		"cán",
@@ -201,8 +201,8 @@ const rhymesList2 = [
 ];
 
 let rhymeIdx = 0;
-rhymesList.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT II — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
-rhymesList2.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT II — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+rhymesList.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT III — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+rhymesList2.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT III — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
 	
 window.app = app;
 app.renderLibrary();
