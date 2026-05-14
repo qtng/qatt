@@ -7,7 +7,7 @@
                 themeClass: "text-warning",
                 linkClass: "link-nom",
                 links: [
-                    { name: "Online Dictionary", url: "/chunom/", icon: "bi-book" },
+                    { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
                     { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
                     { name: "Flashcards", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
                 ]
@@ -43,11 +43,16 @@
 
         const style = document.createElement('style');
         style.textContent = `
-        svg { /* global defaults for rendered QATT SVGs */
-          stroke-linecap: square;
-          stroke-linejoin: square;
-        }
-            .nav-backdrop{
+            @media (min-width: 1400px) {
+                .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+                    max-width: 1040px;
+                }
+            }
+            svg { /* global defaults for rendered QATT SVGs */
+            stroke-linecap: square;
+            stroke-linejoin: square;
+            }
+                .nav-backdrop{
               background: rgba(33, 37, 41, 0.7);
               backdrop-filter: blur(15px);
             }
@@ -89,6 +94,17 @@
     }
 
     function injectNav() {
+        // Turn links into relative links, for local development.
+        let relativeLinkPrefix = ".";
+        const urlParts = location.href.split("/");
+        for (let i = urlParts.length - 1; i >= 0; i--) {
+            const part = urlParts[i].replace(/[\/#?].*$/, ""); // remove any trailing slashes or query/hash
+            if (!part.endsWith(".html")) relativeLinkPrefix += "/..";
+            if (part == "chunom" || part == "qatt") {
+                break;
+            }
+        }
+
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
         let highscore;
@@ -104,10 +120,11 @@
         header.innerHTML = `
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" href="/chunom">
-                    ${navConfig.title}<span class="version-badge ms-1 text-warning">v2-alpha</span>
+                    ${navConfig.title}
+                    <span class="version-badge ms-1 text-warning">v2-alpha</span>
                 </a>
                 <div class="ms-auto d-flex align-items-center">
-                    <a href="/qatt/quiz/qatt.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-success bg-transparent text-decoration-none small me-2 py-1 px-2">
+                    <a style="background:rgba(0,255,0,0.2)" href="${relativeLinkPrefix}/qatt/quiz/qatt.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-light text-decoration-none small me-2 py-1 px-2">
                         🏆 ${highscore}
                     </a>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
@@ -125,7 +142,7 @@
         const sectionsHtml = navConfig.sections.map(section => {
             const linksHtml = section.links.map(link => {
                 const isActive = currentPath === link.url;
-                return `<a href="${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
+                return `<a href="${relativeLinkPrefix}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
                             <i class="bi ${link.icon}"></i> ${link.name}
                         </a>`;
             }).join('');
