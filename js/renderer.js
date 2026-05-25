@@ -493,7 +493,7 @@ const defaultQattEncoding = {
       ong: "_1",
       we2: "_2",
       ung: "_3",
-      wan: "_4",
+      wa2n: "_4",
       wi: "_5",
       aw2m: "_6",
       
@@ -505,7 +505,7 @@ const defaultQattEncoding = {
       
       wa: "h2",
       we2ng: "h3",
-      we2n: "h4",
+      wan: "h4",
       y2: "h5",
       e2m: "h6",
       
@@ -517,7 +517,7 @@ const defaultQattEncoding = {
       
       we: "c2",
       wenh: "c3",
-      wa2n: "c4",
+      we2n: "c4",
       a2: "c5",
       om: "c6",
       
