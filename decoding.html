@@ -99,7 +99,7 @@
             if (e.key === 'Enter') saveLabel();
         });
 
-        names.forEach(name, index) => {
+        names.forEach((name, index) => {
             const col = document.createElement('div');
             col.className = (index % 2 === 1 ? 'border-end boder-2 pe-1 ' : '') 'col-auto d-flex flex-column align-items-center me-1';
             
