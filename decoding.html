@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quốc Âm Tân Tự</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .fixed-title-height {
+            height: 2em;
+        }
+        .sprite-wrapper {
+            position: relative;
+        }
+        .sprite-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.5); /* Opacity set to 0.5 */
+            font-size: 0.8rem;
+            padding: 1px 3px;
+            pointer-events: none;
+            color: red; 
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <div class="container-fluid py-4">
+        <h1 class="mb-4 text-center">Quốc Âm Tân Tự</h1>
+        <div class="row flex-nowrap overflow-x-auto g-0" id="main-row"></div>
+    </div>
+
+    <!-- Bootstrap Modal for editing -->
+    <div class="modal fade" id="editLabelModal" tabindex="-1" aria-labelledby="editLabelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editLabelModalLabel">Edit Label</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="labelInput" class="form-control" placeholder="New label (empty = remove)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveLabelBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const names = "z l ng h g c tr d t n th nh ch dz x kh s r m b v ph".split(" ");
+        const row = document.getElementById('main-row');
+
+        let editModal = null;
+        let currentLabelElement = null;
+        let currentStorageKey = null;
+
+        const labelInput = document.getElementById('labelInput');
+        const saveLabelBtn = document.getElementById('saveLabelBtn');
+
+        function updateLabelColor(labelElement, text) {
+            const lowerText = text.toLowerCase();
+            if (lowerText.endsWith('ng') || lowerText.endsWith('nh')) {
+                labelElement.style.color = 'green';
+            } else if (lowerText.endsWith('n')) {
+                labelElement.style.color = 'blue';
+            } else if (lowerText.endsWith('m')) {
+                labelElement.style.color = 'purple';
+            } else {
+                labelElement.style.color = 'red';
+            }
+            
+            // Hide background if there is no text
+            if (text === "") {
+                labelElement.style.background = "transparent";
+            } else {
+                labelElement.style.background = "rgba(255, 255, 255, 0.5)"; 
+            }
+        }
+
+        function saveLabel() {
+            if (currentLabelElement && currentStorageKey) {
+                const newText = labelInput.value.trim();
+                currentLabelElement.textContent = newText;
+                updateLabelColor(currentLabelElement, newText);
+                localStorage.setItem(currentStorageKey, newText);
+                editModal.hide();
+            }
+        }
+
+        saveLabelBtn.addEventListener('click', saveLabel);
+        labelInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') saveLabel();
+        });
+
+        names.forEach(name => {
+            const col = document.createElement('div');
+            col.className = 'col-auto d-flex flex-column align-items-center me-1';
+            
+            const title = document.createElement('h3');
+            title.textContent = name == "z" ? "ʔ" : name;
+            title.className = 'text-center my-3 w-100 fixed-title-height';
+            col.appendChild(title);
+
+            const spriteBox = document.createElement('div');
+            spriteBox.className = 'd-flex flex-column justify-content-between align-items-center flex-grow-1 bg-warning-subtle p-2 rounded';
+            col.appendChild(spriteBox);
+            row.appendChild(col);
+
+            const imageUrl = `https://qatt.org/qatt/img/qatt/${name}.jpg`;
+            const img = new Image();
+            img.src = imageUrl;
+
+            img.onload = () => {
+                const displayWidth = 50;
+                const ratio = displayWidth / img.naturalWidth;
+                const displayHeight = (img.naturalHeight / 5) * ratio;
+                const fullDisplayHeight = img.naturalHeight * ratio;
+
+                for (let i = 0; i < 5; i++) {
+                    const sprite = document.createElement('div');
+                    sprite.className = 'sprite-wrapper';
+                    sprite.style.width = `${displayWidth}px`;
+                    sprite.style.height = `${displayHeight}px`;
+                    sprite.style.backgroundImage = `url(${imageUrl})`;
+                    sprite.style.backgroundSize = `${displayWidth}px ${fullDisplayHeight}px`;
+                    sprite.style.backgroundPosition = `0px -${i * displayHeight}px`;
+                    sprite.style.marginBottom = "5px";
+                    sprite.style.backgroundRepeat = "no-repeat";
+                    sprite.style.cursor = "pointer";
+
+                    const label = document.createElement('span');
+                    label.className = 'sprite-label';
+                    
+                    const storageKey = `qatt_sprite_${name}_${i}`;
+                    // Load saved value or set empty string
+                    const savedLabel = localStorage.getItem(storageKey) || "";
+                    
+                    label.textContent = savedLabel;
+                    updateLabelColor(label, savedLabel);
+                    
+                    sprite.appendChild(label);
+
+                    sprite.addEventListener('click', () => {
+                        if (!editModal) {
+                            editModal = new bootstrap.Modal(document.getElementById('editLabelModal'));
+                        }
+                        currentLabelElement = label;
+                        currentStorageKey = storageKey;
+                        labelInput.value = label.textContent;
+                        
+                        editModal.show();
+                        
+                        document.getElementById('editLabelModal').addEventListener('shown.bs.modal', () => {
+                            labelInput.focus();
+                            labelInput.select();
+                        }, { once: true });
+                    });
+
+                    spriteBox.appendChild(sprite);
+                }
+            };
+        });
+    </script>
+</body>
+</html>
+
