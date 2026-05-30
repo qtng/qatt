@@ -101,7 +101,7 @@
 
         names.forEach((name, index) => {
             const col = document.createElement('div');
-            col.className = (index % 2 === 1 ? 'border-end boder-2 pe-1 ' : '') 'col-auto d-flex flex-column align-items-center me-1';
+            col.className = (index % 2 === 1 ? 'border-end boder-2 pe-1 ' : '') + 'col-auto d-flex flex-column align-items-center me-1';
             
             const title = document.createElement('h3');
             title.textContent = name == "z" ? "ʔ" : name;
