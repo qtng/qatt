@@ -17,6 +17,7 @@ renderer.render("t,i2,ng,1", element, optionalQattType);
 // The used Qatt type is read from the data-type attribute or
 // falls back to localStorage.qattType if not specified.
 renderer.observe("TT");
+renderer.observe("TT", {brushFilter: 3})  // 3 is the filter strength, can be any low integer.
 */
 
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
