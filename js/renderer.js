@@ -647,23 +647,41 @@ class SvgGlyphRenderer {
   }
 
   _injectBrushFilter() {
-    const strength = typeof this.brushFilter === "number" 
+    if (typeof this.brushFilter === "string") return;
+
+    const strength = typeof this.brushFilter === "number"
         ? this.brushFilter : 3;
-    const scale = [0, 1.5, 3, 5][Math.min(strength, 3)];
-    const freq = [0, 0.04, 0.05, "0.06 0.02"][Math.min(strength, 3)];
-    const seed = [0, 2, 8, 14][Math.min(strength, 3)];
-    
+    const scale  = [0, 1.5, 3,    5   ][Math.min(strength, 3)];
+    const freq   = [0, 0.04, 0.05, 0.06][Math.min(strength, 3)];
+    const seed   = [0, 2,    8,    14  ][Math.min(strength, 3)];
+    const blur   = [0, 0.3,  0.5,  0.8 ][Math.min(strength, 3)];
+    // tableValues: mehr Stufen = schärfer, weniger = fransiger
+    const fringe = [
+        "",
+        "0 0 0 1",      // subtil: kaum Fransen
+        "0 0 1",        // mittel
+        "0 1"           // stark: grobe Fransen
+    ][Math.min(strength, 3)];
+
     const svg = document.createElementNS(this.svgns, "svg");
     svg.style.display = "none";
     svg.innerHTML = `<defs>
-        <filter id="qatt-brush" x="-10%" y="-10%" 
-                width="120%" height="120%">
-            <feTurbulence type="fractalNoise" 
-                baseFrequency="${freq}" numOctaves="6" 
+        <filter id="qatt-brush" x="-15%" y="-15%"
+                width="130%" height="130%">
+            <feTurbulence type="fractalNoise"
+                baseFrequency="${freq}" numOctaves="6"
                 seed="${seed}" result="noise"/>
-            <feDisplacementMap in="SourceGraphic" in2="noise" 
+            <feDisplacementMap in="SourceGraphic" in2="noise"
                 scale="${scale}"
-                xChannelSelector="R" yChannelSelector="G"/>
+                xChannelSelector="R" yChannelSelector="G"
+                result="warped"/>
+            <feGaussianBlur in="warped"
+                stdDeviation="${blur}"
+                result="blurred"/>
+            <feComponentTransfer in="blurred">
+                <feFuncA type="discrete"
+                    tableValues="${fringe}"/>
+            </feComponentTransfer>
         </filter>
     </defs>`;
     document.body.appendChild(svg);
@@ -883,6 +901,12 @@ class SvgGlyphRenderer {
 	svg.setAttribute("preserveAspectRatio", "none");
 	if (this.brushFilter) {
         svg.setAttribute("filter", "url(#qatt-brush)");
+	}
+    if (this.brushFilter) {
+        const filterId = typeof this.brushFilter === "string"
+            ? this.brushFilter
+            : "qatt-brush";
+        svg.setAttribute("filter", `url(#${filterId})`);
 	}
     if (g) {
 		const nobr = root.tagName == "NOBR" ? root : document.createElement("nobr");
