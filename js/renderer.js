@@ -640,8 +640,34 @@ class SvgGlyphRenderer {
     this.cache = new Map();
     this.defsElement = null;
     this._initializeDefs();
+	this.brushFilter = options.brushFilter || false;
+    this._initializeDefs();
+    if (this.brushFilter) this._injectBrushFilter();
   }
 
+  _injectBrushFilter() {
+    const strength = typeof this.brushFilter === "number" 
+        ? this.brushFilter : 3;
+    const scale = [0, 1.5, 3, 5][Math.min(strength, 3)];
+    const freq = [0, 0.04, 0.05, "0.06 0.02"][Math.min(strength, 3)];
+    const seed = [0, 2, 8, 14][Math.min(strength, 3)];
+    
+    const svg = document.createElementNS(this.svgns, "svg");
+    svg.style.display = "none";
+    svg.innerHTML = `<defs>
+        <filter id="qatt-brush" x="-10%" y="-10%" 
+                width="120%" height="120%">
+            <feTurbulence type="fractalNoise" 
+                baseFrequency="${freq}" numOctaves="6" 
+                seed="${seed}" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" 
+                scale="${scale}"
+                xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </defs>`;
+    document.body.appendChild(svg);
+  }
+	
   _initializeDefs() {
     if (!this.defs) return;
     this.defsElement = document.createElement("div");
@@ -854,7 +880,9 @@ class SvgGlyphRenderer {
     svg.style.verticalAlign = "bottom";
     svg.style.overflow = "visible";
 	svg.setAttribute("preserveAspectRatio", "none");
-
+	if (this.brushFilter) {
+        svg.setAttribute("filter", "url(#qatt-brush)");
+	}
     if (g) {
 		const nobr = root.tagName == "NOBR" ? root : document.createElement("nobr");
 		nobr.append(svg);
@@ -913,7 +941,11 @@ class SvgGlyphRenderer {
     el.textContent = t;
     root.appendChild(el);
   }
-  observe(tagName) {
+  observe(tagName, options = {}) {
+	if (options.brushFilter != null) {
+        this.brushFilter = options.brushFilter;
+        this._injectBrushFilter();
+	}
 	tagName = (tagName ?? "TT").toUpperCase();
     const observer = new MutationObserver(mutations => {
 	  const type = localStorage.getItem('qattType') || "0";
