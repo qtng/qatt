@@ -91,11 +91,16 @@
         function saveLabel() {
             if (currentLabelElement && currentStorageKey) {
                 const newText = labelInput.value.trim();
-                currentLabelElement.innerHTML = newText.replace(/;/g, "<br>");
+                currentLabelElement.innerHTML = getLabel(newText);
                 updateLabelColor(currentLabelElement, newText);
                 localStorage.setItem(currentStorageKey, newText);
                 editModal.hide();
             }
+        }
+
+        function getLabel(t) {
+            t = t.index(";") > -1 ? t.replace(/;/g, "<br>") : "<br>" + t;
+            return t;
         }
 
         saveLabelBtn.addEventListener('click', saveLabel);
@@ -146,7 +151,7 @@
                     // Load saved value or set empty string
                     const savedLabel = localStorage.getItem(storageKey) || "";
                     
-                    label.innerHTML = savedLabel.replace(/;/g, "<br>");
+                    label.innerHTML = getLabel(savedLabel);
                     updateLabelColor(label, savedLabel);
                     
                     sprite.appendChild(label);
