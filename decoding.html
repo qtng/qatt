@@ -99,8 +99,7 @@
         }
 
         function getLabel(t) {
-            t = t.index(";") > -1 ? t.replace(/;/g, "<br>") : "<br>" + t;
-            return t;
+            return t.index(";") > -1 ? t.replace(/;/g, "<br>;") : "<br>" + t;
         }
 
         saveLabelBtn.addEventListener('click', saveLabel);
