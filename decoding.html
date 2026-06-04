@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quốc Âm Tân Tự</title>
+    <title>QATT Sprites Overview</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .fixed-title-height {
@@ -11,29 +11,45 @@
         }
         .sprite-wrapper {
             position: relative;
+            width: 50px;
+            aspect-ratio: 2 / 3;
+            cursor: pointer;
+            background-repeat: no-repeat;
+            transition: opacity 0.2s ease-in-out;
         }
         .sprite-label {
             position: absolute;
-            top: -1.25rem;
-            overflow: hidden;
+            top: -1.25em;
             left: 0;
-            background: rgba(255, 255, 255, 0.5); /* Opacity set to 0.5 */
+            background: rgba(255, 255, 255, 0.5);
             font-size: 0.8rem;
-            padding: 1px 3px;
+            padding: 0 3px; /* Vertical padding removed to ensure exactly 1.25em height fits the text */
+            line-height: 1.25em; /* Ensure line height matches the cutoff */
             pointer-events: none;
             color: red; 
         }
-        .only-first-label .sprite-label {height: 1.25rem}
+        
+        /* Toggle-Klasse für die Begrenzung auf eine Zeile */
+        body.labels-collapsed .sprite-label {
+            height: 1.25em;
+            overflow: hidden;
+        }
     </style>
 </head>
-<body>
+<body class="bg-white">
 
     <div class="container-fluid py-4">
-        <h1 class="mb-4 text-center">Quốc Âm Tân Tự</h1>
+        <h1 class="mb-4 text-center">QATT Sprites Overview</h1>
         <div class="row flex-nowrap overflow-x-auto g-0" id="main-row"></div>
+        
+        <!-- Toggle Button -->
+        <div class="text-center mt-5 mb-3">
+            <button id="toggleHeightBtn" class="btn btn-outline-secondary">
+                Toggle Single Line Labels
+            </button>
+        </div>
     </div>
 
-    <!-- Bootstrap Modal for editing -->
     <div class="modal fade" id="editLabelModal" tabindex="-1" aria-labelledby="editLabelModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -52,13 +68,10 @@
         </div>
     </div>
 
-    <button type="button" onclick="let b = document.body; b.className = 'only-first-label';">toggle labels</button>
-
-    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const names = "z l ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
+        const names = "z l ng h g c tr d t n th nh ch dz x kh s r m b v ph".split(" ");
         const row = document.getElementById('main-row');
 
         let editModal = null;
@@ -67,6 +80,21 @@
 
         const labelInput = document.getElementById('labelInput');
         const saveLabelBtn = document.getElementById('saveLabelBtn');
+        const toggleHeightBtn = document.getElementById('toggleHeightBtn');
+
+        // Event-Listener für den Toggle-Button
+        toggleHeightBtn.addEventListener('click', () => {
+            document.body.classList.toggle('labels-collapsed');
+        });
+
+        function formatLabelText(text) {
+            if (text === "") return "";
+            if (text.includes(";")) {
+                return text.replace(/;/g, "<br>");
+            }
+            // Reduziert auf 1 <br>
+            return "<br>" + text;
+        }
 
         function updateLabelColor(labelElement, text) {
             const lowerText = text.toLowerCase();
@@ -80,7 +108,6 @@
                 labelElement.style.color = 'red';
             }
             
-            // Hide background if there is no text
             if (text === "") {
                 labelElement.style.background = "transparent";
             } else {
@@ -91,15 +118,22 @@
         function saveLabel() {
             if (currentLabelElement && currentStorageKey) {
                 const newText = labelInput.value.trim();
-                currentLabelElement.innerHTML = getLabel(newText);
+                
+                currentLabelElement.dataset.rawText = newText;
+                currentLabelElement.innerHTML = formatLabelText(newText);
+                
                 updateLabelColor(currentLabelElement, newText);
                 localStorage.setItem(currentStorageKey, newText);
+                
+                const spriteElement = currentLabelElement.parentElement;
+                if (newText === "") {
+                    spriteElement.classList.add('opacity-50');
+                } else {
+                    spriteElement.classList.remove('opacity-50');
+                }
+                
                 editModal.hide();
             }
-        }
-
-        function getLabel(t) {
-            return t.indexOf(";") > -1 ? t.replace(/;/g, "<br>;") : "<br>" + t;
         }
 
         saveLabelBtn.addEventListener('click', saveLabel);
@@ -109,15 +143,19 @@
 
         names.forEach((name, index) => {
             const col = document.createElement('div');
-            col.className = (index % 2 === 1 ? 'border-end boder-2 pe-1 ' : '') + 'col-auto d-flex flex-column align-items-center me-1';
+            col.className = 'col-auto d-flex flex-column align-items-center me-1';
+            
+            if (index % 2 === 1) {
+                col.classList.add('border-end', 'border-2', 'pe-2');
+            }
             
             const title = document.createElement('h3');
-            title.textContent = name == "z" ? "ʔ" : name;
+            title.textContent = name;
             title.className = 'text-center my-3 w-100 fixed-title-height';
             col.appendChild(title);
 
             const spriteBox = document.createElement('div');
-            spriteBox.className = 'd-flex flex-column justify-content-between align-items-center flex-grow-1 bg-warning-subtle p-2 rounded';
+            spriteBox.className = 'd-flex flex-column justify-content-between align-items-center flex-grow-1 p-2';
             col.appendChild(spriteBox);
             row.appendChild(col);
 
@@ -126,34 +164,28 @@
             img.src = imageUrl;
 
             img.onload = () => {
-                const displayWidth = 50;
-                const ratio = displayWidth / img.naturalWidth;
-                const displayHeight = (img.naturalHeight / 5) * ratio;
-                const fullDisplayHeight = img.naturalHeight * ratio;
-
                 for (let i = 0; i < 5; i++) {
                     const sprite = document.createElement('div');
-                    sprite.className = 'sprite-wrapper';
-                    sprite.style.width = `${displayWidth}px`;
-                    sprite.style.height = `${displayHeight}px`;
+                    sprite.className = 'sprite-wrapper border rounded shadow-sm mb-4';
                     sprite.style.backgroundImage = `url(${imageUrl})`;
-                    sprite.style.backgroundSize = `${displayWidth}px ${fullDisplayHeight}px`;
-                    sprite.style.backgroundPosition = `0px -${i * displayHeight}px`;
-                    sprite.style.marginBottom = "5px";
-                    sprite.style.backgroundRepeat = "no-repeat";
-                    sprite.style.cursor = "pointer";
+                    sprite.style.backgroundSize = '100% 500%';
+                    sprite.style.backgroundPosition = `0% ${i * 25}%`;
 
                     const label = document.createElement('span');
                     label.className = 'sprite-label';
                     
                     const storageKey = `qatt_sprite_${name}_${i}`;
-                    // Load saved value or set empty string
                     const savedLabel = localStorage.getItem(storageKey) || "";
                     
-                    label.innerHTML = getLabel(savedLabel);
+                    label.dataset.rawText = savedLabel;
+                    label.innerHTML = formatLabelText(savedLabel);
                     updateLabelColor(label, savedLabel);
                     
                     sprite.appendChild(label);
+
+                    if (savedLabel === "") {
+                        sprite.classList.add('opacity-50');
+                    }
 
                     sprite.addEventListener('click', () => {
                         if (!editModal) {
@@ -161,7 +193,7 @@
                         }
                         currentLabelElement = label;
                         currentStorageKey = storageKey;
-                        labelInput.value = label.textContent;
+                        labelInput.value = label.dataset.rawText;
                         
                         editModal.show();
                         
@@ -178,4 +210,3 @@
     </script>
 </body>
 </html>
-
