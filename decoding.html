@@ -91,7 +91,7 @@
         function saveLabel() {
             if (currentLabelElement && currentStorageKey) {
                 const newText = labelInput.value.trim();
-                currentLabelElement.textContent = newText;
+                currentLabelElement.innerHTML = newText.replace(/;/g, "<br>");
                 updateLabelColor(currentLabelElement, newText);
                 localStorage.setItem(currentStorageKey, newText);
                 editModal.hide();
@@ -146,7 +146,7 @@
                     // Load saved value or set empty string
                     const savedLabel = localStorage.getItem(storageKey) || "";
                     
-                    label.textContent = savedLabel;
+                    label.innerHTML = savedLabel.replace(/;/g, "<br>");
                     updateLabelColor(label, savedLabel);
                     
                     sprite.appendChild(label);
