@@ -6,31 +6,58 @@
     <title>QATT Sprites Overview</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .fixed-title-height {
-            height: 2em;
+        /* Modernes Grid-Layout für perfekte Ausrichtung ohne Leerraum */
+        .main-grid {
+            display: grid;
+            grid-template-rows: auto repeat(5, max-content);
+            grid-auto-columns: max-content;
+            grid-auto-flow: column;
+            column-gap: 0.5rem;
         }
-        .sprite-wrapper {
-            position: relative;
+        
+        .col-wrapper {
+            display: grid;
+            grid-template-rows: subgrid;
+            grid-row: span 6;
+            row-gap: 1rem;
+            justify-items: center;
+        }
+
+        .sprite-card {
             width: 50px;
-            aspect-ratio: 2 / 3;
             cursor: pointer;
-            background-repeat: no-repeat;
             transition: opacity 0.2s ease-in-out;
+            /* Ausrichtung unten: Sprites bilden immer eine Linie, Labels wachsen nach oben */
+            align-self: end; 
+            margin: 0;
         }
+
+        .sprite-wrapper {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background-repeat: no-repeat;
+        }
+
         .sprite-label {
-            position: absolute;
-            top: -1.25em;
-            left: 0;
-            background: rgba(255, 255, 255, 0.5);
-            font-size: 0.8rem;
-            padding: 0 3px;
-            line-height: 1.25em;
-            pointer-events: none;
-            color: red; 
+            font-size: 0.75rem;
+            line-height: 1.2em;
+            word-wrap: break-word;
+            max-height: 5em; /* Erhöht auf 5em für ca. 3 Zeilen */
+            overflow-y: auto;
+            scrollbar-width: thin; 
+        }
+        
+        .sprite-label::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sprite-label::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
         }
         
         body.labels-collapsed .sprite-label {
-            height: 1.25em;
+            max-height: 1.7em; 
             overflow: hidden;
         }
 
@@ -44,7 +71,9 @@
 
     <div class="container-fluid py-4">
         <h1 class="mb-4 text-center">QATT Sprites Overview</h1>
-        <div class="row flex-nowrap overflow-x-auto g-0" id="main-row"></div>
+        
+        <!-- Grid-Container ersetzt Flexbox -->
+        <div class="main-grid overflow-x-auto pb-3" id="main-row"></div>
         
         <!-- Toggle Button -->
         <div class="text-center mt-5 mb-3">
@@ -60,7 +89,6 @@
                 <button id="exportBtn" class="btn btn-success">Export</button>
             </div>
             <div class="mt-3 d-flex justify-content-center">
-                <!-- Title helps users understand they can click it -->
                 <pre id="exportOutput" class="bg-light p-3 border rounded text-start d-none" style="max-width: 600px; width: 100%; overflow-x: auto;" title="Click to copy"></pre>
             </div>
         </div>
@@ -75,7 +103,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="labelInput" class="form-control" placeholder="New label (empty = remove)">
+                    <textarea id="labelInput" class="form-control" rows="4" placeholder="lan 0.8&#10;len 0.7"></textarea>
+                    <small class="text-muted d-block mt-1">Press Ctrl+Enter to save</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -127,12 +156,12 @@
         const importInput = document.getElementById('importInput');
         const importErrorMsg = document.getElementById('importErrorMsg');
 
-        // Toggle Button Funktionalität
+        // Toggle Button
         toggleHeightBtn.addEventListener('click', () => {
             document.body.classList.toggle('labels-collapsed');
         });
 
-        // Export Logik (Flaches Key-Value Objekt)
+        // Export (mit Arrays und Sortierung)
         exportBtn.addEventListener('click', () => {
             const exportData = {};
             
@@ -140,8 +169,22 @@
                 for (let i = 0; i < 5; i++) {
                     const storageKey = `qatt_sprite_${name}_${i}`;
                     const savedLabel = localStorage.getItem(storageKey);
-                    // Leeres Label oder nicht existent = null
-                    exportData[storageKey] = (savedLabel === null || savedLabel.trim() === "") ? null : savedLabel;
+                    
+                    if (savedLabel === null || savedLabel.trim() === "") {
+                        exportData[storageKey] = null;
+                    } else {
+                        // Aufteilen in Array und leere Zeilen filtern
+                        let lines = savedLabel.split('\n').map(l => l.trim()).filter(l => l !== "");
+                        
+                        // Absteigend sortieren anhand des Scores am Ende
+                        lines.sort((a, b) => {
+                            const scoreA = parseFloat(a.match(/[\d.]+$/)?.[0] || 0);
+                            const scoreB = parseFloat(b.match(/[\d.]+$/)?.[0] || 0);
+                            return scoreB - scoreA;
+                        });
+                        
+                        exportData[storageKey] = lines;
+                    }
                 }
             });
 
@@ -149,12 +192,11 @@
             exportOutput.classList.remove('d-none');
         });
 
-        // Kopieren bei Klick auf den Output
+        // Click to copy
         exportOutput.addEventListener('click', () => {
             const textToCopy = exportOutput.textContent;
             if (!textToCopy) return;
 
-            // Unsichtbares Textarea für document.execCommand('copy') Workaround
             const textarea = document.createElement('textarea');
             textarea.value = textToCopy;
             textarea.style.position = 'fixed';
@@ -164,7 +206,6 @@
             
             try {
                 document.execCommand('copy');
-                // Kurzes visuelles Feedback (Grüner Hintergrund)
                 exportOutput.classList.replace('bg-light', 'bg-success');
                 exportOutput.classList.add('text-white');
                 setTimeout(() => {
@@ -178,7 +219,7 @@
             document.body.removeChild(textarea);
         });
 
-        // Import Modal öffnen
+        // Import
         importBtn.addEventListener('click', () => {
             if (!importModal) {
                 importModal = new bootstrap.Modal(document.getElementById('importModal'));
@@ -188,24 +229,26 @@
             importModal.show();
         });
 
-        // Import durchführen
         doImportBtn.addEventListener('click', () => {
             try {
                 importErrorMsg.classList.add('d-none');
                 const data = JSON.parse(importInput.value);
                 
-                // Durchlaufe das JSON und setze die Werte in localStorage
                 for (const key in data) {
                     if (key.startsWith('qatt_sprite_')) {
-                        if (data[key] === null || data[key] === "") {
+                        if (data[key] === null || data[key] === "" || (Array.isArray(data[key]) && data[key].length === 0)) {
                             localStorage.removeItem(key);
                         } else {
-                            localStorage.setItem(key, data[key]);
+                            // Wenn Array (wie beim neuen Export), zusammensetzen mit \n
+                            let valueToSave = data[key];
+                            if (Array.isArray(valueToSave)) {
+                                valueToSave = valueToSave.join('\n');
+                            }
+                            localStorage.setItem(key, valueToSave);
                         }
                     }
                 }
                 
-                // Labels im DOM aktualisieren
                 document.querySelectorAll('.sprite-label').forEach(label => {
                     const storageKey = label.dataset.storageKey;
                     if (storageKey) {
@@ -214,17 +257,16 @@
                         label.innerHTML = formatLabelText(val);
                         updateLabelColor(label, val);
                         
-                        const spriteElement = label.parentElement;
+                        const spriteCard = label.closest('.sprite-card');
                         if (val === "") {
-                            spriteElement.classList.add('opacity-50');
+                            spriteCard.classList.add('opacity-50');
                         } else {
-                            spriteElement.classList.remove('opacity-50');
+                            spriteCard.classList.remove('opacity-50');
                         }
                     }
                 });
 
                 importModal.hide();
-                // Verstecke eventuell vorher geöffneten Export
                 exportOutput.classList.add('d-none'); 
 
             } catch (error) {
@@ -234,34 +276,43 @@
 
         function formatLabelText(text) {
             if (text === "") return "";
-            if (text.includes(";")) {
-                return text.replace(/;/g, "<br>");
+            if (text.includes("\n")) {
+                return text.replace(/\n/g, "<br>");
             }
-            return "<br>" + text;
+            return text;
         }
 
         function updateLabelColor(labelElement, text) {
-            const lowerText = text.toLowerCase();
-            if (lowerText.endsWith('ng') || lowerText.endsWith('nh')) {
+            if (text === "") {
+                labelElement.classList.add('d-none'); 
+                labelElement.style.color = 'red';
+                return;
+            }
+            
+            labelElement.classList.remove('d-none');
+            
+            const firstWord = text.split(/[\s\n]+/)[0].toLowerCase();
+            
+            if (firstWord.endsWith('ng') || firstWord.endsWith('nh')) {
                 labelElement.style.color = 'green';
-            } else if (lowerText.endsWith('n')) {
+            } else if (firstWord.endsWith('n')) {
                 labelElement.style.color = 'blue';
-            } else if (lowerText.endsWith('m')) {
+            } else if (firstWord.endsWith('m')) {
                 labelElement.style.color = 'purple';
             } else {
                 labelElement.style.color = 'red';
-            }
-            
-            if (text === "") {
-                labelElement.style.background = "transparent";
-            } else {
-                labelElement.style.background = "rgba(255, 255, 255, 0.5)"; 
             }
         }
 
         function saveLabel() {
             if (currentLabelElement && currentStorageKey) {
-                const newText = labelInput.value.trim();
+                const rawLines = labelInput.value.split('\n');
+                
+                const cleanedLines = rawLines
+                    .map(line => line.trim().replace(/\s+/g, ' '))
+                    .filter(line => line !== '');
+                
+                const newText = cleanedLines.join('\n');
                 
                 currentLabelElement.dataset.rawText = newText;
                 currentLabelElement.innerHTML = formatLabelText(newText);
@@ -274,11 +325,11 @@
                      localStorage.setItem(currentStorageKey, newText);
                 }
                 
-                const spriteElement = currentLabelElement.parentElement;
+                const spriteCard = currentLabelElement.closest('.sprite-card');
                 if (newText === "") {
-                    spriteElement.classList.add('opacity-50');
+                    spriteCard.classList.add('opacity-50');
                 } else {
-                    spriteElement.classList.remove('opacity-50');
+                    spriteCard.classList.remove('opacity-50');
                 }
                 
                 editModal.hide();
@@ -286,13 +337,17 @@
         }
 
         saveLabelBtn.addEventListener('click', saveLabel);
-        labelInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') saveLabel();
+        
+        labelInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                saveLabel();
+            }
         });
 
         names.forEach((name, index) => {
             const col = document.createElement('div');
-            col.className = 'col-auto d-flex flex-column align-items-center me-1';
+            col.className = 'col-wrapper';
             
             if (index % 2 === 1) {
                 col.classList.add('border-end', 'border-2', 'pe-2');
@@ -300,66 +355,73 @@
             
             const title = document.createElement('h3');
             title.textContent = name;
-            title.className = 'text-center my-3 w-100 fixed-title-height';
+            title.className = 'text-center mb-3 w-100 fs-5';
+            title.style.alignSelf = 'end'; // Titel am unteren Rand seiner Grid-Zeile ausrichten
             col.appendChild(title);
 
-            const spriteBox = document.createElement('div');
-            spriteBox.className = 'd-flex flex-column justify-content-between align-items-center flex-grow-1 p-2';
-            col.appendChild(spriteBox);
+            const imageUrl = `https://qatt.org/qatt/img/qatt/${name}.jpg`;
+            const sprites = [];
+
+            for (let i = 0; i < 5; i++) {
+                const card = document.createElement('div');
+                card.className = 'sprite-card border rounded shadow-sm bg-white overflow-hidden';
+
+                const label = document.createElement('div');
+                label.className = 'sprite-label text-center p-1 bg-light border-bottom border-light';
+                
+                const storageKey = `qatt_sprite_${name}_${i}`;
+                const savedLabel = localStorage.getItem(storageKey) || "";
+                
+                label.dataset.storageKey = storageKey;
+                label.dataset.rawText = savedLabel;
+                label.innerHTML = formatLabelText(savedLabel);
+                updateLabelColor(label, savedLabel);
+                
+                const sprite = document.createElement('div');
+                sprite.className = 'sprite-wrapper';
+                // background set in onload
+                
+                card.appendChild(label);
+                card.appendChild(sprite);
+
+                if (savedLabel === "") {
+                    card.classList.add('opacity-50');
+                }
+
+                card.addEventListener('click', () => {
+                    if (!editModal) {
+                        editModal = new bootstrap.Modal(document.getElementById('editLabelModal'));
+                    }
+                    currentLabelElement = label;
+                    currentStorageKey = storageKey;
+                    labelInput.value = label.dataset.rawText;
+                    
+                    editModal.show();
+                    
+                    document.getElementById('editLabelModal').addEventListener('shown.bs.modal', () => {
+                        labelInput.focus();
+                        labelInput.selectionStart = labelInput.value.length;
+                        labelInput.selectionEnd = labelInput.value.length;
+                    }, { once: true });
+                });
+
+                col.appendChild(card);
+                sprites.push(sprite);
+            }
+
             row.appendChild(col);
 
-            const imageUrl = `https://qatt.org/qatt/img/qatt/${name}.jpg`;
+            // Bild asynchron laden und Hintergrund erst dann auf die Container anwenden
             const img = new Image();
             img.src = imageUrl;
-
             img.onload = () => {
-                for (let i = 0; i < 5; i++) {
-                    const sprite = document.createElement('div');
-                    sprite.className = 'sprite-wrapper border rounded shadow-sm mb-4';
+                sprites.forEach((sprite, i) => {
                     sprite.style.backgroundImage = `url(${imageUrl})`;
                     sprite.style.backgroundSize = '100% 500%';
                     sprite.style.backgroundPosition = `0% ${i * 25}%`;
-
-                    const label = document.createElement('span');
-                    label.className = 'sprite-label';
-                    
-                    const storageKey = `qatt_sprite_${name}_${i}`;
-                    const savedLabel = localStorage.getItem(storageKey) || "";
-                    
-                    // Speichere den Key am DOM Element für das dynamische DOM Update beim Import
-                    label.dataset.storageKey = storageKey;
-                    label.dataset.rawText = savedLabel;
-                    label.innerHTML = formatLabelText(savedLabel);
-                    updateLabelColor(label, savedLabel);
-                    
-                    sprite.appendChild(label);
-
-                    if (savedLabel === "") {
-                        sprite.classList.add('opacity-50');
-                    }
-
-                    sprite.addEventListener('click', () => {
-                        if (!editModal) {
-                            editModal = new bootstrap.Modal(document.getElementById('editLabelModal'));
-                        }
-                        currentLabelElement = label;
-                        currentStorageKey = storageKey;
-                        labelInput.value = label.dataset.rawText;
-                        
-                        editModal.show();
-                        
-                        document.getElementById('editLabelModal').addEventListener('shown.bs.modal', () => {
-                            labelInput.focus();
-                            labelInput.select();
-                        }, { once: true });
-                    });
-
-                    spriteBox.appendChild(sprite);
-                }
+                });
             };
         });
     </script>
 </body>
 </html>
-
-    
