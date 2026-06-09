@@ -6,7 +6,6 @@
     <title>QATT Sprites Overview</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Modernes Grid-Layout für perfekte Ausrichtung ohne Leerraum */
         .main-grid {
             display: grid;
             grid-template-rows: auto repeat(5, max-content);
@@ -24,41 +23,49 @@
         }
 
         .sprite-card {
-            width: 50px;
-            cursor: pointer;
             transition: opacity 0.2s ease-in-out;
-            /* Ausrichtung unten: Sprites bilden immer eine Linie, Labels wachsen nach oben */
             align-self: end; 
             margin: 0;
+            cursor: pointer;
         }
 
         .sprite-wrapper {
-            width: 100%;
-            aspect-ratio: 2 / 3;
+            width: 50px;
+            min-height: 75px; 
+            flex-shrink: 0; 
             background-repeat: no-repeat;
         }
 
-        .sprite-label {
+        .inputs-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1px; 
+            padding: 2px 0; 
+            width: 75px; 
+        }
+
+        .sprite-input {
             font-size: 0.75rem;
-            line-height: 1.2em;
-            word-wrap: break-word;
-            max-height: 5em; /* Erhöht auf 5em für ca. 3 Zeilen */
-            overflow-y: auto;
-            scrollbar-width: thin; 
+            line-height: 1;
+            text-align: left;
+            border: none;
+            background: transparent;
+            padding: 0 4px; 
+            margin: 0;
+            height: 16px; 
+            width: 100%;
+            outline: none;
+            box-shadow: none !important;
         }
         
-        .sprite-label::-webkit-scrollbar {
-            width: 4px;
+        .sprite-input:focus {
+            background: rgba(0,0,0,0.05);
+            border-radius: 2px;
         }
         
-        .sprite-label::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-        
-        body.labels-collapsed .sprite-label {
-            max-height: 1.7em; 
-            overflow: hidden;
+        body.labels-collapsed .inputs-container .sprite-input:not(:first-child) {
+            display: none;
         }
 
         #exportOutput {
@@ -72,17 +79,14 @@
     <div class="container-fluid py-4">
         <h1 class="mb-4 text-center">QATT Sprites Overview</h1>
         
-        <!-- Grid-Container ersetzt Flexbox -->
         <div class="main-grid overflow-x-auto pb-3" id="main-row"></div>
         
-        <!-- Toggle Button -->
         <div class="text-center mt-5 mb-3">
             <button id="toggleHeightBtn" class="btn btn-outline-secondary">
                 Toggle Single Line Labels
             </button>
         </div>
 
-        <!-- Import / Export Section -->
         <div class="text-center mb-5">
             <div class="d-flex justify-content-center gap-2">
                 <button id="importBtn" class="btn btn-primary">Import JSON</button>
@@ -90,26 +94,6 @@
             </div>
             <div class="mt-3 d-flex justify-content-center">
                 <pre id="exportOutput" class="bg-light p-3 border rounded text-start d-none" style="max-width: 600px; width: 100%; overflow-x: auto;" title="Click to copy"></pre>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Label Modal -->
-    <div class="modal fade" id="editLabelModal" tabindex="-1" aria-labelledby="editLabelModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editLabelModalLabel">Edit Label</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <textarea id="labelInput" class="form-control" rows="4" placeholder="lan 0.8&#10;len 0.7"></textarea>
-                    <small class="text-muted d-block mt-1">Press Ctrl+Enter to save</small>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveLabelBtn">Save</button>
-                </div>
             </div>
         </div>
     </div>
@@ -140,13 +124,8 @@
         const names = "z l ng h g c tr d t n th nh ch dz x kh s r m b v ph".split(" ");
         const row = document.getElementById('main-row');
 
-        let editModal = null;
         let importModal = null;
-        let currentLabelElement = null;
-        let currentStorageKey = null;
 
-        const labelInput = document.getElementById('labelInput');
-        const saveLabelBtn = document.getElementById('saveLabelBtn');
         const toggleHeightBtn = document.getElementById('toggleHeightBtn');
         const exportBtn = document.getElementById('exportBtn');
         const exportOutput = document.getElementById('exportOutput');
@@ -173,16 +152,12 @@
                     if (savedLabel === null || savedLabel.trim() === "") {
                         exportData[storageKey] = null;
                     } else {
-                        // Aufteilen in Array und leere Zeilen filtern
                         let lines = savedLabel.split('\n').map(l => l.trim()).filter(l => l !== "");
-                        
-                        // Absteigend sortieren anhand des Scores am Ende
                         lines.sort((a, b) => {
                             const scoreA = parseFloat(a.match(/[\d.]+$/)?.[0] || 0);
                             const scoreB = parseFloat(b.match(/[\d.]+$/)?.[0] || 0);
                             return scoreB - scoreA;
                         });
-                        
                         exportData[storageKey] = lines;
                     }
                 }
@@ -215,7 +190,6 @@
             } catch (err) {
                 console.error('Copy failed', err);
             }
-            
             document.body.removeChild(textarea);
         });
 
@@ -239,7 +213,6 @@
                         if (data[key] === null || data[key] === "" || (Array.isArray(data[key]) && data[key].length === 0)) {
                             localStorage.removeItem(key);
                         } else {
-                            // Wenn Array (wie beim neuen Export), zusammensetzen mit \n
                             let valueToSave = data[key];
                             if (Array.isArray(valueToSave)) {
                                 valueToSave = valueToSave.join('\n');
@@ -249,101 +222,58 @@
                     }
                 }
                 
-                document.querySelectorAll('.sprite-label').forEach(label => {
-                    const storageKey = label.dataset.storageKey;
+                // DOM aktualisieren
+                document.querySelectorAll('.sprite-card').forEach(card => {
+                    const storageKey = card.dataset.storageKey;
                     if (storageKey) {
                         const val = localStorage.getItem(storageKey) || "";
-                        label.dataset.rawText = val;
-                        label.innerHTML = formatLabelText(val);
-                        updateLabelColor(label, val);
+                        const lines = val.split('\n');
+                        const inputs = card.querySelectorAll('.sprite-input');
                         
-                        const spriteCard = label.closest('.sprite-card');
-                        if (val === "") {
-                            spriteCard.classList.add('opacity-50');
-                        } else {
-                            spriteCard.classList.remove('opacity-50');
-                        }
+                        inputs.forEach((input, index) => {
+                            input.value = lines[index] || "";
+                        });
+                        
+                        updateCardState(card, inputs);
                     }
                 });
 
                 importModal.hide();
                 exportOutput.classList.add('d-none'); 
-
             } catch (error) {
                 importErrorMsg.classList.remove('d-none');
             }
         });
 
-        function formatLabelText(text) {
-            if (text === "") return "";
-            if (text.includes("\n")) {
-                return text.replace(/\n/g, "<br>");
-            }
-            return text;
-        }
-
-        function updateLabelColor(labelElement, text) {
-            if (text === "") {
-                labelElement.classList.add('d-none'); 
-                labelElement.style.color = 'red';
-                return;
-            }
+        function updateCardState(card, inputs) {
+            const vals = Array.from(inputs)
+                .map(i => i.value.trim().replace(/\s+/g, ' '))
+                .filter(v => v !== "");
             
-            labelElement.classList.remove('d-none');
+            const newText = vals.join('\n');
             
-            const firstWord = text.split(/[\s\n]+/)[0].toLowerCase();
-            
-            if (firstWord.endsWith('ng') || firstWord.endsWith('nh')) {
-                labelElement.style.color = 'green';
-            } else if (firstWord.endsWith('n')) {
-                labelElement.style.color = 'blue';
-            } else if (firstWord.endsWith('m')) {
-                labelElement.style.color = 'purple';
+            if (newText === "") {
+                card.classList.add('opacity-50');
+                inputs.forEach(i => i.style.color = 'red');
             } else {
-                labelElement.style.color = 'red';
-            }
-        }
-
-        function saveLabel() {
-            if (currentLabelElement && currentStorageKey) {
-                const rawLines = labelInput.value.split('\n');
+                card.classList.remove('opacity-50');
                 
-                const cleanedLines = rawLines
-                    .map(line => line.trim().replace(/\s+/g, ' '))
-                    .filter(line => line !== '');
+                const firstWord = vals[0].split(/[\s\n]+/)[0].toLowerCase();
+                let color = 'red';
                 
-                const newText = cleanedLines.join('\n');
-                
-                currentLabelElement.dataset.rawText = newText;
-                currentLabelElement.innerHTML = formatLabelText(newText);
-                
-                updateLabelColor(currentLabelElement, newText);
-                
-                if (newText === "") {
-                     localStorage.removeItem(currentStorageKey);
-                } else {
-                     localStorage.setItem(currentStorageKey, newText);
+                if (firstWord.endsWith('ng') || firstWord.endsWith('nh')) {
+                    color = 'green';
+                } else if (firstWord.endsWith('n')) {
+                    color = 'blue';
+                } else if (firstWord.endsWith('m')) {
+                    color = 'purple';
                 }
                 
-                const spriteCard = currentLabelElement.closest('.sprite-card');
-                if (newText === "") {
-                    spriteCard.classList.add('opacity-50');
-                } else {
-                    spriteCard.classList.remove('opacity-50');
-                }
-                
-                editModal.hide();
+                inputs.forEach(i => i.style.color = color);
             }
+            
+            return newText;
         }
-
-        saveLabelBtn.addEventListener('click', saveLabel);
-        
-        labelInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
-                saveLabel();
-            }
-        });
 
         names.forEach((name, index) => {
             const col = document.createElement('div');
@@ -356,53 +286,68 @@
             const title = document.createElement('h3');
             title.textContent = name;
             title.className = 'text-center mb-3 w-100 fs-5';
-            title.style.alignSelf = 'end'; // Titel am unteren Rand seiner Grid-Zeile ausrichten
+            title.style.alignSelf = 'end';
             col.appendChild(title);
 
             const imageUrl = `https://qatt.org/qatt/img/qatt/${name}.jpg`;
             const sprites = [];
 
             for (let i = 0; i < 5; i++) {
-                const card = document.createElement('div');
-                card.className = 'sprite-card border rounded shadow-sm bg-white overflow-hidden';
-
-                const label = document.createElement('div');
-                label.className = 'sprite-label text-center p-1 bg-light border-bottom border-light';
-                
                 const storageKey = `qatt_sprite_${name}_${i}`;
                 const savedLabel = localStorage.getItem(storageKey) || "";
-                
-                label.dataset.storageKey = storageKey;
-                label.dataset.rawText = savedLabel;
-                label.innerHTML = formatLabelText(savedLabel);
-                updateLabelColor(label, savedLabel);
-                
-                const sprite = document.createElement('div');
-                sprite.className = 'sprite-wrapper';
-                // background set in onload
-                
-                card.appendChild(label);
-                card.appendChild(sprite);
+                const savedLines = savedLabel.split('\n');
 
-                if (savedLabel === "") {
-                    card.classList.add('opacity-50');
+                const card = document.createElement('div');
+                card.className = 'sprite-card border rounded shadow-sm bg-white overflow-hidden d-flex align-items-stretch';
+                card.dataset.storageKey = storageKey;
+
+                const inputsContainer = document.createElement('div');
+                inputsContainer.className = 'inputs-container bg-light border-start border-light';
+
+                const inputs = [];
+                for (let j = 0; j < 5; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'sprite-input';
+                    input.value = savedLines[j] || "";
+                    
+                    input.addEventListener('change', () => {
+                        const newText = updateCardState(card, inputs);
+                        if (newText === "") {
+                            localStorage.removeItem(storageKey);
+                        } else {
+                            localStorage.setItem(storageKey, newText);
+                        }
+                    });
+                    
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (j < 4) {
+                                inputs[j+1].focus();
+                            } else {
+                                input.blur();
+                            }
+                        }
+                    });
+
+                    inputs.push(input);
+                    inputsContainer.appendChild(input);
                 }
 
-                card.addEventListener('click', () => {
-                    if (!editModal) {
-                        editModal = new bootstrap.Modal(document.getElementById('editLabelModal'));
+                const sprite = document.createElement('div');
+                sprite.className = 'sprite-wrapper';
+                
+                card.appendChild(sprite);
+                card.appendChild(inputsContainer);
+
+                updateCardState(card, inputs);
+                
+                // Falls komplett leer, Klick auf die Karte fokussiert das erste Input-Feld
+                card.addEventListener('click', (e) => {
+                    if (card.classList.contains('opacity-50') && !e.target.classList.contains('sprite-input')) {
+                        inputs[0].focus();
                     }
-                    currentLabelElement = label;
-                    currentStorageKey = storageKey;
-                    labelInput.value = label.dataset.rawText;
-                    
-                    editModal.show();
-                    
-                    document.getElementById('editLabelModal').addEventListener('shown.bs.modal', () => {
-                        labelInput.focus();
-                        labelInput.selectionStart = labelInput.value.length;
-                        labelInput.selectionEnd = labelInput.value.length;
-                    }, { once: true });
                 });
 
                 col.appendChild(card);
@@ -411,7 +356,6 @@
 
             row.appendChild(col);
 
-            // Bild asynchron laden und Hintergrund erst dann auf die Container anwenden
             const img = new Image();
             img.src = imageUrl;
             img.onload = () => {
