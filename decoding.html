@@ -91,6 +91,7 @@
             <div class="d-flex justify-content-center gap-2">
                 <button id="importBtn" class="btn btn-primary">Import JSON</button>
                 <button id="exportBtn" class="btn btn-success">Export</button>
+                <button id="objectsBtn" class="btn btn-info text-white">Objects</button>
             </div>
             <div class="mt-3 d-flex justify-content-center">
                 <pre id="exportOutput" class="bg-light p-3 border rounded text-start d-none" style="max-width: 600px; width: 100%; overflow-x: auto;" title="Click to copy"></pre>
@@ -128,6 +129,7 @@
 
         const toggleHeightBtn = document.getElementById('toggleHeightBtn');
         const exportBtn = document.getElementById('exportBtn');
+        const objectsBtn = document.getElementById('objectsBtn');
         const exportOutput = document.getElementById('exportOutput');
         
         const importBtn = document.getElementById('importBtn');
@@ -135,12 +137,15 @@
         const importInput = document.getElementById('importInput');
         const importErrorMsg = document.getElementById('importErrorMsg');
 
+        // Regex für alle vietnamesischen Buchstaben
+        const vietnameseRegex = /[^a-záàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ]/g;
+
         // Toggle Button
         toggleHeightBtn.addEventListener('click', () => {
             document.body.classList.toggle('labels-collapsed');
         });
 
-        // Export (mit Arrays und Sortierung)
+        // JSON Export
         exportBtn.addEventListener('click', () => {
             const exportData = {};
             
@@ -164,6 +169,47 @@
             });
 
             exportOutput.textContent = JSON.stringify(exportData, null, 2);
+            exportOutput.classList.remove('d-none');
+        });
+
+        // Python Objects Export
+        objectsBtn.addEventListener('click', () => {
+            const fields = [];
+
+            names.forEach((name, colIndex) => {
+                for (let rowIndex = 0; rowIndex < 5; rowIndex++) {
+                    const storageKey = `qatt_sprite_${name}_${rowIndex}`;
+                    const savedLabel = localStorage.getItem(storageKey);
+                    
+                    let labelsStr = "[]";
+
+                    if (savedLabel && savedLabel.trim() !== "") {
+                        let lines = savedLabel.split('\n').map(l => l.trim()).filter(l => l !== "");
+                        
+                        const parsedLabels = lines.map(line => {
+                            const scoreMatch = line.match(/[\d.]+$/);
+                            const score = scoreMatch ? parseFloat(scoreMatch[0]) : 1;
+                            
+                            let text = scoreMatch ? line.slice(0, scoreMatch.index) : line;
+                            // Nur vietnamesische Zeichen behalten und lowercase
+                            text = text.toLowerCase().replace(vietnameseRegex, '');
+                            
+                            return { text, score };
+                        });
+
+                        // Absteigend sortieren
+                        parsedLabels.sort((a, b) => b.score - a.score);
+                        
+                        // In Python-Tuple-Format konvertieren
+                        labelsStr = "[" + parsedLabels.map(l => `("${l.text}", ${l.score})`).join(", ") + "]";
+                    }
+
+                    fields.push(`  Field(${colIndex}, ${rowIndex}, "${name}", ${labelsStr})`);
+                }
+            });
+
+            const pythonCode = "[\n" + fields.join(",\n") + "\n]";
+            exportOutput.textContent = pythonCode;
             exportOutput.classList.remove('d-none');
         });
 
@@ -305,7 +351,7 @@
                 inputsContainer.className = 'inputs-container bg-light border-start border-light';
 
                 const inputs = [];
-                for (let j = 0; j < Math.max(6, savedLines.length); j++) {
+                for (let j = 0; j < 5; j++) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'sprite-input';
@@ -343,7 +389,6 @@
 
                 updateCardState(card, inputs);
                 
-                // Falls komplett leer, Klick auf die Karte fokussiert das erste Input-Feld
                 card.addEventListener('click', (e) => {
                     if (card.classList.contains('opacity-50') && !e.target.classList.contains('sprite-input')) {
                         inputs[0].focus();
