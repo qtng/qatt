@@ -305,7 +305,7 @@
                 inputsContainer.className = 'inputs-container bg-light border-start border-light';
 
                 const inputs = [];
-                for (let j = 0; j < 5; j++) {
+                for (let j = 0; j < Math.max(5, savedLines.length); j++) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'sprite-input';
