@@ -8,7 +8,7 @@
     <script>
         function isVietnamese(){
             const langs = navigator.languages || [navigator.language];
-            return 1 || langs.some(lang => lang.toLowerCase().startsWith('vi'));
+            return langs.some(lang => lang.toLowerCase().startsWith('vi'));
         }
     </script>
     <style>
@@ -62,8 +62,17 @@
 
     <!-- App Header -->
     <div class="text-center text-white" id="header-container" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);">
-        <h2 class="fw-light mb-1">Thiên Calligraphy</h2>
-        <p class="small mb-0 opacity-75">Quốc Âm Tân Tự</p>
+        <h2 class="fw-light mb-1">
+            <script>
+                document.write(isVietnamese()?'Thư pháp Thiên':'Thiền Calligraphy')
+            </script>
+        </h2>
+        <p class="small mb-0 opacity-75">
+            <script>
+                document.write(isVietnamese()?'với':'with')
+            </script>
+            Quốc Âm Tân Tự
+        </p>
     </div>
 
     <!-- Main Content Area -->
@@ -83,7 +92,11 @@
             </div>
 
             <p class="small mb-4 opacity-75">Click start to begin audio playback and practice.</p>
-            <button id="start-btn" class="btn btn-light px-4 py-2">Begin Practice</button>
+            <button id="start-btn" class="btn btn-light px-4 py-2">
+                <script>
+                    document.write(isVietnamese()?'Bắt đầu':'Begin Practice')
+                </script>
+            </button>
         </div>
 
         <div class="d-none w-100 px-3 text-center" id="app-container">
