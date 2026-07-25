@@ -8,7 +8,7 @@
     <script>
         function isVietnamese(){
             const langs = navigator.languages || [navigator.language];
-            return langs.some(lang => lang.toLowerCase().startsWith('vi'));
+            return (langs[0]||'').toLowerCase().startsWith('vi');
         }
     </script>
     <style>
