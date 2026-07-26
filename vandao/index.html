@@ -450,6 +450,7 @@
                 
                 this.state.phaseText = currentPhaseLength < 1000 ? "" : phaseTexts[localPhase];
                 this.state.writeNowActive = (!isSecondCycle && localPhase === 2);
+                this.state.showLabel = (isSecondCycle && localPhase === 2);
 
                 if (this.state.writeNowActive && phaseTime < 50 && this.lastBellTriggerCycle !== cycleIndex) {
                     this.lastBellTriggerCycle = cycleIndex;
@@ -651,7 +652,8 @@
                     this.ctx.fillStyle = '#ffffff';
                     this.ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
                     this.ctx.shadowBlur = 6;
-                    this.ctx.fillText(this.state.phaseText, this.center, this.center - this.baseRadius - 45);
+                    const text = this.state.showLabel ? img.alt : this.state.phaseText;
+                    this.ctx.fillText(text, this.center, this.center - this.baseRadius - 45);
                     this.ctx.restore();
                 }
 
