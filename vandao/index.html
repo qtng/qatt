@@ -315,12 +315,15 @@
                 });
             }
 
-            setRandomImage() {
+            setRandomImage(isRandom) {
                 let nextFile;
-                do {
-                    nextFile = this.imageFiles[Math.floor(Math.random() * this.imageFiles.length)];
-                } while (nextFile === this.currentImgFile && this.imageFiles.length > 1);
-                
+                if (isRandom) {
+                    do {
+                        nextFile = this.imageFiles[Math.floor(Math.random() * this.imageFiles.length)];
+                    } while (nextFile === this.currentImgFile && this.imageFiles.length > 1);
+                } else {
+                    nextFile = this.imageFiles[this.imageFiles.indexOf(this.currentImgFile) + 1] || this.imageFiles[0];
+                }
                 this.currentImgFile = nextFile;
             }
 
@@ -480,7 +483,7 @@
                     this.lastCycleIndex = Math.floor(elapsed / totalCycleTime);
                     if (this.lastCycleIndex > 0) {
                         this.setRandomBackground();
-                        this.setRandomImage();
+                        this.setRandomImage(false);
                     }
                 }
 
@@ -732,7 +735,8 @@
                     ['ng-n', 'ngan'],
                     ['cursive-hảo', 'hảo'],
                     ['l', 'lơ'],
-                    ['ng-n', 'ngan']
+                    ['ng-n', 'ngan'],
+                    ['example-an', 'an'],
                 ]
             });
         });
