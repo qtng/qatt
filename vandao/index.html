@@ -198,18 +198,20 @@
         // Main Zen Meditation Canvas Application
         class ZenMeditationCanvas {
             constructor(config) {
-                this.imageFiles = config.imageFiles;
+                this.imageFiles = [];
                 this.baseUrl = 'https://qatt.org/qatt/img/can/';
                 
                 this.currentPatternKey = 'flow12';
                 this.setPattern(this.currentPatternKey);
 
                 this.images = {};
-                this.imageFiles.forEach(filename => {
+                config.imageFiles.forEach(i => {
                     const img = new Image();
                     img.crossOrigin = "anonymous";
-                    img.src = `${this.baseUrl}${filename}.jpg`;
-                    this.images[filename] = img;
+                    img.src = `${this.baseUrl}${i[0]}.jpg`;
+                    img.alt = i[1];
+                    this.images[i[0]] = img;
+                    this.imageFiles.push(i[0])
                 });
 
                 this.currentImgFile = this.imageFiles[0];
@@ -595,7 +597,7 @@
                 this.ctx.restore();
 
                 // Calligraphy image with multiply blend mode
-                const img = this.images[this.currentImgFile];
+                const img = this.images[this.currentImgFile][0];
                 if (img && img.complete && img.naturalWidth !== 0) {
                     this.ctx.save();
                     this.ctx.globalAlpha = this.state.opacity;
@@ -715,7 +717,21 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             new ZenMeditationCanvas({
-                imageFiles: ['example-hai', 'example-em', 'example-ai', 'th-n', 'cursive-hai', 'example-làm']
+                imageFiles: [
+                    ['example-hai', 'hai'],
+                    ['example-em', 'em'],
+                    ['h', 'hoa'],
+                    ['th-n', 'thân'],
+                    ['cursive-hai', 'hai'],
+                    ['kh', 'khuya'],
+                    ['example-ai', 'ai'],
+                    ['m-n', 'môn'],
+                    ['example-làm', 'làm'],
+                    ['ng-n', 'ngan'],
+                    ['cursive-hảo', 'hảo'],
+                    ['l-n', 'lơn'],
+                    ['ng-n', 'ngan']
+                ]
             });
         });
     </script>
