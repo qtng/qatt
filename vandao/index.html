@@ -597,7 +597,7 @@
                 this.ctx.restore();
 
                 // Calligraphy image with multiply blend mode
-                const img = this.images[this.currentImgFile][0];
+                const img = this.images[this.currentImgFile];
                 if (img && img.complete && img.naturalWidth !== 0) {
                     this.ctx.save();
                     this.ctx.globalAlpha = this.state.opacity;
