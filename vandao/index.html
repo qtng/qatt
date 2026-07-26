@@ -616,7 +616,7 @@
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'middle';
                     
-                    const text = (isVietnamese() ? "viết" : "write") + " " + img.alt.toUpperCase();
+                    const text = isVietnamese() ? "viết" : "write";
                     const metrics = this.ctx.measureText(text);
                     const paddingX = 22;
                     const boxWidth = metrics.width + paddingX * 2;
