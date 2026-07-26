@@ -450,7 +450,7 @@
                 
                 this.state.phaseText = currentPhaseLength < 1000 ? "" : phaseTexts[localPhase];
                 this.state.writeNowActive = (!isSecondCycle && localPhase === 2);
-                this.state.showLabel = (isSecondCycle && localPhase === 2);
+                this.state.showLabel = (isSecondCycle && localPhase === 0);
 
                 if (this.state.writeNowActive && phaseTime < 50 && this.lastBellTriggerCycle !== cycleIndex) {
                     this.lastBellTriggerCycle = cycleIndex;
@@ -458,7 +458,7 @@
                 }
 
                 const textFade = Math.min(1200, currentPhaseLength * 0.4);
-                this.state.textOpacity = phaseTime < textFade ? (phaseTime / textFade) * 0.45 : (phaseTime > currentPhaseLength - textFade ? ((currentPhaseLength - phaseTime) / textFade) * 0.45 : 0.45);
+                this.state.textOpacity = phaseTime < textFade ? (phaseTime / textFade) * 0.6 : (phaseTime > currentPhaseLength - textFade ? ((currentPhaseLength - phaseTime) / textFade) * 0.6 : 0.6);
 
                 if (this.state.writeNowActive) {
                     const displayDuration = 4000; 
@@ -616,7 +616,7 @@
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'middle';
                     
-                    const text = isVietnamese() ? "viết" : "write";
+                    const text = (isVietnamese() ? "viết" : "write") + " " + img.alt.toUpperCase();
                     const metrics = this.ctx.measureText(text);
                     const paddingX = 22;
                     const boxWidth = metrics.width + paddingX * 2;
