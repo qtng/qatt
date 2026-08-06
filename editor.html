@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=yes" />
+</head>
+<body>
+<script>
+document.body.addEventListener("click", function(e){
+	var step = (e.clientX/document.body.clientWidth) < .5 ? -1 : +1;
+	var z = document.getElementById("zoom");
+	if (!z.checkVisibility()) return
+	z.value = parseInt(z.value)+step;
+	z.oninput();
+})
+
+function position() {
+	var z = document.getElementById("actionbar");
+    z.style.left = (window.pageXOffset - 32) + 'px';
+    z.style.top = (window.innerHeight - 70) + 'px';
+}
+
+setTimeout(position, 200000)
+</script>
+<b style="color:var(--clr)">
+Tiểu Tân Tự
+</b>
+
+<div id="actionbar" style="height:3.5rem;position:absolute;bottom:.5rem;left:.5rem;right:.5rem;display:flex;align-items:stretch;justify-content:space-between">
+	<input style="font-size:2rem;border-radius:1rem" type="button" value="&#x1F3A8;" onclick="event.stopPropagation();body.className=!body.className?'light':body.className=='light'?'dark':''">
+	<input id="zoom"
+		type="range" step="1"
+		value="6" min="0" max="20"
+		oninput="var v = this.value;
+			v=[0.11, .14, .15, .18, .2, .23, .26, .29, .33, .37, .42, .5, .6, .7, .8, 1, 1.2, 1.4, 1.6, 1.8, 2][parseInt(v)];
+			document.getElementById('content').style.transform='scale('+v+')'">
+	<select style="border-radius:1rem"
+		onclick="event.stopPropagation()"
+		onchange="display(parseInt(this.value));"
+	>
+		<option value=1>QATT gốc</option>
+		<option value=2>QATT giản thể</option>
+	</select>
+</div>
+
+
+<div onclick="event.stopPropagation();" style="padding:2em; zoom:36%; left:0;width:100%;position:absolute;z-index:1000">
+	<textarea style="width:100%;zoom:3" id="writer" onfocus="this.select()">Quốc âm tân tự</textarea>
+	<div id="output" style="background:var(--background);border-radius:0 0 2em 2em; box-shadow: 0 0 2em rgba(0,0,0,0.5)"></div>
+</div>
+
+<div style="position:absolute;border-bottom:1px solid gray;bottom:5em; top:150px;left:0;max-width:100vw; width:100%; overflow:auto">
+<div id="content" style="transform-origin:top left">
+<style type="text/css">
+
+#zoom{dispxlay:none}
+
+#content {transform:scale(.4)}
+@media (max-width: 1250px) {
+  #content {transform:scale(.2)}
+}
+
+* {box-sizing: border-box}
+#content {font-size:90px}
+body {
+	--background: #3a445c;
+	background: var(--background);
+	font-family: sans-serif;
+	--textclr: #aaa;
+	--clr: linen; /* char table */
+	--evenclr: #ffc;
+	--charbasecolor: white; /* samples */
+	--charhicolor: dodgerblue
+}
+body.light{
+	--background: linen;
+	--textclr: gray;
+	--clr: #000; /* char table */
+	--evenclr: #349;
+	--charbasecolor: black; /* samples */
+	--charhicolor: dodgerblue
+}
+body.dark{
+	--background: black;
+	--textclr: gray;
+	--clr: linen; /* char table */
+	--evenclr: #ccc;
+	--charbasecolor: linen; /* samples */
+	--charhicolor: dodgerblue
+}
+svg {
+	--notclr: #c9c9c9;
+	--noteven:#000;
+	--strokew: 6;
+	stroke: var(--charbasecolor);
+	stroke-width:var(--strokew);
+	stroke-linecap: square;
+	stroke-linejoin: square;
+	fill: transparent;
+	width: 100px;
+	height: 100px;
+	xborder: 1px dashed rgba(255,255,255,.3);
+}
+#qt0, #qt1, #qt2, #qt3, #qt4, #qt5, #qt6, #qt7 {
+	stroke-width: calc(var(--strokew) - 2);
+}
+
+#svg{margin-left:50px}
+#svg text {fill:var(--textclr);stroke:transparent;font-size:60px;transform:translate(10px,90px);}
+#svg text.smaller {font-size:55px!important}
+#header text {transform: translate(25px, 90px)}
+#header .c2 text {transform: translate(5px, 90px)}
+#header .even text {fill:var(--evenclr); stroke:transparent!important}
+#svg g g{stroke:var(--clr)}
+#svg .even {stroke:var(--evenclr)}
+#svg .sample {stroke:var(--clr)}
+#svg > g{stroke:rgba(0,0,0,0)}
+
+svg.char.color * {stroke: var(--charhicolor)}
+svg.char.underline {border-bottom: 1px solid var(--charbasecolor)!important}
+svg.char.color.underline {border-color:var(--charhicolor)!important}
+
+div {color: var(--charbasecolor)}
+div.color {color: var(--charhicolor)!important}
+div.underline {border-bottom: 1px solid var(--charbasecolor)}
+div.color.underline {border-color:var(--charhicolor)}
+
+svg > g:nth-child(4){transform:translate(0,100px)}
+svg > g:nth-child(5){transform:translate(0,200px)}
+svg > g:nth-child(6){transform:translate(0,300px)}
+svg > g:nth-child(7){transform:translate(0,400px)}
+svg > g:nth-child(8){transform:translate(0,500px)}
+svg > g:nth-child(9){transform:translate(0,600px)}
+svg > g:nth-child(10){transform:translate(0,700px)}
+svg > g:nth-child(11){transform:translate(0,800px)}
+svg > g:nth-child(12){transform:translate(0,900px)}
+svg > g:nth-child(13){transform:translate(0,1000px)}
+svg > g:nth-child(14){transform:translate(0,1100px)}
+svg > g:nth-child(15){transform:translate(0,1200px)}
+svg > g:nth-child(16){transform:translate(0,1300px)}
+svg > g:nth-child(17){transform:translate(0,1400px)}
+svg > g:nth-child(18){transform:translate(0,1500px)}
+svg > g:nth-child(19){transform:translate(0,1600px)}
+svg > g:nth-child(20){transform:translate(0,1700px)}
+svg > g:nth-child(21){transform:translate(0,1800px)}
+svg > g:nth-child(22){transform:translate(0,1900px)}
+svg > g:nth-child(23){transform:translate(0,2000px)}
+svg > g:nth-child(24){transform:translate(0,2100px)}
+svg > g:nth-child(25){transform:translate(0,2200px)}
+svg > g:nth-child(26){transform:translate(0,2350px)}
+/* finals */
+svg > g:nth-child(27){transform:translate(0,2450px)}
+/* samples */
+	svg > g:nth-child(28){transform:translate(0,2500px)}
+svg > g:nth-child(29){transform:translate(0,2600px)}
+svg > g:nth-child(30){transform:translate(0,2700px)}
+svg > g:nth-child(31){transform:translate(0,2800px)}
+svg > g:nth-child(32){transform:translate(0,2900px)}
+svg > g:nth-child(33){transform:translate(0,3000px)}
+svg > g:nth-child(34){transform:translate(0,3100px)}
+svg > g:nth-child(35){transform:translate(0,3200px)}
+svg > g:nth-child(36){transform:translate(0,3300px)}
+svg > g:nth-child(37){transform:translate(0,3400px)}
+svg > g:nth-child(38){transform:translate(0,3500px)}
+svg > g:nth-child(39){transform:translate(0,3600px)}
+svg > g:nth-child(40){transform:translate(0,3700px)}
+svg > g:nth-child(41){transform:translate(0,3800px)}
+svg > g:nth-child(42){transform:translate(0,3900px)}
+svg > g:nth-child(43){transform:translate(0,4000px)}
+svg > g:nth-child(44){transform:translate(0,4100px)}
+svg > g:nth-child(45){transform:translate(0,4200px)}
+svg > g:nth-child(46){transform:translate(0,4300px)}
+svg > g:nth-child(47){transform:translate(0,4400px)}
+svg > g:nth-child(48){transform:translate(0,4500px)}
+svg > g:nth-child(49){transform:translate(0,4600px)}
+svg > g:nth-child(50){transform:translate(0,4700px)}
+
+g g:nth-child(2){transform:translate(110px)}
+g g:nth-child(3){transform:translate(220px)}
+g g:nth-child(4){transform:translate(330px)}
+g g:nth-child(5){transform:translate(440px)}
+g g:nth-child(6){transform:translate(550px)}
+g g:nth-child(7){transform:translate(660px)}
+g g:nth-child(8){transform:translate(770px)}
+g g:nth-child(9){transform:translate(880px)}
+g g:nth-child(10){transform:translate(990px)}
+g g:nth-child(11){transform:translate(1100px)}
+g g:nth-child(12){transform:translate(1210px)}
+g g:nth-child(13){transform:translate(1320px)}
+g g:nth-child(14){transform:translate(1430px)}
+g g:nth-child(15){transform:translate(1540px)}
+g g:nth-child(16){transform:translate(1650px)}
+g g:nth-child(17){transform:translate(1760px)}
+g g:nth-child(18){transform:translate(1870px)}
+g g:nth-child(19){transform:translate(2080px)}
+g g:nth-child(20){transform:translate(2090px)}
+g g:nth-child(21){transform:translate(2200px)}
+g g:nth-child(22){transform:translate(2310px)}
+g g:nth-child(23){transform:translate(2420px)}
+/* medials */
+g:nth-child(-n+26) g:nth-child(16){transform:translate(1670px)}
+g:nth-child(-n+26) g:nth-child(17){transform:translate(1780px)}
+g:nth-child(-n+26) g:nth-child(18){transform:translate(1890px)}
+g:nth-child(-n+26) g:nth-child(19){transform:translate(2000px)}
+g:nth-child(-n+26) g:nth-child(20){transform:translate(2110px)}
+g:nth-child(-n+26) g:nth-child(21){transform:translate(2220px)}
+g:nth-child(-n+26) g:nth-child(22){transform:translate(2330px)}
+g:nth-child(-n+26) g:nth-child(23){transform:translate(2440px)}
+/*end medials*/
+
+</style>
+
+
+<svg xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	style="height:4800px;width:2540px;"
+	id="svg">
+<defs>
+	<path id="hr" stroke-width="3" transform="translate(0,1.5)" d="M0 0 h1600"></path>
+	<path id="glide" d="M2 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
+	<path id="glide-a" d="M70 28 h27"/>
+	<path id="glide-a2" d="M70 28 h27"/>
+	<path id="glide-aw" d="M60 28 h40"/>
+	<path id="glide-aw2" d="M60 28 h40"/>
+	<path id="glide-i" d="M58 28 h27"/>
+	<path id="glide-i2" stroke-width="4"  d="M5 2 m5 0 c8 0 8 10 0 10 c-8 0 -8 -10 0 -10 z"/>
+	<path id="glide-e" d="M54 28 h31"/>
+	<path id="glide-e2" d="M54 28 h31"/>
+	
+	<path id="w-a"   d="M70 35 h27 M85 10 v40 c0 5 0 20 -5 40"/>
+	<path id="w-a2"  d="M70 35 h27 M85 10 v70 c0 10 0 10 -15 9"/>
+	<path id="w-aw"  d="M60 35 h40 M70 15 v45 M90 10 v40 c0 5 0 20 -5 40"/>
+	<path id="w-aw2" d="M60 35 h40 M70 15 v45 M90 10 v70 c0 10 0 10 -15 9"/>
+	<path id="w-i"   d="M60 36 h27 M70 13 v72 c0 0 0 5 5 5 c15 0 15 0 15 -5"/>
+	<path id="w-i2"  d="M54 30 h26 M62 13 v36 h23 c0 0 0 20 -15 40"/>
+	<path id="w-e"   d="M54 36 h29 M60 18 v40 M75 13 v72 c0 0 0 5 5 5 c12 0 12 0 12 -5"/>
+	<path id="w-e2"  d="M54 30 h32 M60 15 v35 M75 13 v36 h15 c0 5 0 22 -22 40"/>
+	
+	
+	<path id="v2-a" data-onsetsize="xsmall" d="M60 10 v80 M50 90 h20 M65 35 h30 m-30 25 h30"/>
+	<path id="v2-a2" data-onsetsize="xsmall" d="M68 20 h25 m-8 0 v40 c0 5 0 15 -5 30 M80 44 h-18 m0 22 h18"/>
+	<path id="v2-aw" data-onsetsize="xsmall" d="M73 17 v52 M90 10 v40 c0 5 0 20 -4 40 M62 46 l37-10 M57 36v20"/>
+	<path id="v2-aw2" data-onsetsize="xsmall" d="M62 15 h36 M71 25 l-8 14 M80 20 v68 m-22-38 h44"/>
+	<path id="v2-e" data-onsetsize="xsmall" d="M55 15h20 M65 15 v70 M82 25 v50 M99 15 v70"/>
+	<path id="v2-e2" data-onsetsize="xsmall"  d="M58 10 h40 M58 26 l14-6 m-3 5 v50 M90 10 v75"/>
+	<path id="v2-i" data-onsetsize="xsmall" d="M58 33 l32 5m-32 20l32 5 M74 13 v77"/>
+	<path id="v2-i2" data-onsetsize="xsmall"  d="M58 38 l32-5m-32 30l32-5 M74 13 v77 h1 l20-5"/>
+	<path id="v2-o" data-onsetsize="xsmall"  d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 M64 38m4-12l-10 20M64 38 c6 8 14 18 28 40"/>
+	<path id="v2-o2" data-onsetsize="xsmall" d="M88 10 c0 0 -8 40 -19 56 m-10-6l12 16 M64 23 c0 0 13 15 28 40 M64 86 h30"/>
+	<path id="v2-u" data-onsetsize="xsmall" d="M60 25v45 m-2 4l14-14 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
+	<path id="v2-u2" data-onsetsize="xsmall" d="M94 16v50 M82 20 c0 0 -8 40 -18 56 m-7-8l9 18 M62 30 c0 0 14 24 26 50"/>
+	<path id="v2-y" data-onsetsize="xsmall" d="M60 15 v70 M62 25 l20 19 M90 13 v65 m-10 0h18"/>
+	<path id="v2-y2" data-onsetsize="xsmall" d="M64 20 v50 M80 13 v58 h1 l12-5 M60 85 h35"/>		
+	
+	<path id="a" d="M85 10 v70 c0 10 0 10 -18 7"/>
+	<path id="a2" d="M67 30 h22 v30 c0 5 0 15 -5 30"/>
+	<path id="aw" d="M70 17 v45 M90 10 v40 c0 5 0 20 -5 40"/>
+	<path id="aw2" d="M65 15 h25 m-3 2 c0 0 -4 16 -22 32 M80 40 v46"/>
+	<path id="e" d="M60 10 h30 M75 10 v75"/>
+	<path id="e2" d="M60 15 h32 m-4 2 c0 0 -10 13 -30 25 M69 42 v41 M88 40 v42"/>
+	<path id="i" d="M82 10 c-2 20 -5 50 -24 80 M76 52 l18 36"/>
+	<path id="i2" d="M58 38 h27 M70 13 v72 m1 -4 l22 -5"/>
+	<path id="o" d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 c6 8 14 18 28 40"/>
+	<path id="o2" d="M56 30 h26 M72 10 l-5 45 l20 0 v1 c0 0 -6 24 -15 35"/>
+	<path id="u" d="M88 15 c-4 22 -8 45 -28 70 M64 28 c6 8 14 24 28 50"/>
+	<path id="u2" d="M72 10 c0 0 -5 40 -13 66 M54 80 l33 -7 M82 58 l8 20"/>
+	<path id="y" d="M56 15 h30 v45 l-10 -1 M65 15 v72"/>
+	<path id="y2" d="M68 13 v72 m1 -4 l24 -5"/>		
+	
+	
+	<path id="v2-_-medial" d="M9 22 m0-8 v16"/>
+	<path id="v2-_-small" d="M11 22 h30 M12 45 h26 M10 70 l34 -3"/>
+	<path id="v2-b-medial" d="M14 25 m0-8 l-5 16"/>
+	<path id="v2-b-small" d="M14 25 l30 35 M35 10 c0 0 -7 40 -20 65 M10 80 l38 -5"/>
+	<path id="v2-c-medial" d="M14 40 m0-8 v16"/>
+	<path id="v2-c-small" d="M44 18 v60 M14 40 h30 M12 62 l30 -4"/>
+	<path id="v2-ch-medial" d="M28 20 m-8 0 h16"/>
+	<path id="v2-ch-small" d="M10 42 l35-6 M10 64 l35-6 M28 20 c0 30 0 45 -5 62"/>
+	<path id="v2-d-medial" d="M28 20 m-8 0 h16"/>
+	<path id="v2-d-small" d="M12 40 h32 M28 20 v44 M10 70 l36 -3"/>
+	<path id="v2-dz-medial" d="M28 20 m-8 0 h16"/>
+	<path id="v2-dz-small" d="M10 36 l35 6 M10 58 l35 6 M28 20 c0 30 0 45 -5 62"/>
+	<path id="v2-dz-medial" d="M28 20 m-8 0 h16"/>
+	<path id="v2-gi-small" d="M10 36 l35 6 M10 58 l35 6 M28 20 v62"/>
+	<path id="v2-g-medial" d="M16 18 m-8 0 h16"/>
+	<path id="v2-g-small" d="M16 18 v65 M16 40 h28 M17 60 l28 3"/>
+	<path id="v2-h-medial" d="M20 26 m-8 0 h16"/>
+	<path id="v2-h-small" d="M36 20 v46 M20 26 v37 M10 70 l36 -3"/>
+	<path id="v2-kh-medial" d="M11 18 m-4 -8 v16"/>
+	<path id="v2-kh-small" d="M41 18 h-30 m6 0 v2 l10 54M10 76 h36"/>
+	<path id="v2-l-medial" d="M30 16 m-6 0 h12"/>
+	<path id="v2-l-small" d="M15 16 v30 c0 5 0 20 -5 34 M30 16 v58 M45 16 v58"/>
+	<path id="v2-m-medial" d="M10 15 m0 -8 v16"/>
+	<path id="v2-m-small" d="M10 15 h30 c-4 22 -8 45 -30 70 M16 38 c6 8 14 18 28 40"/>
+	<path id="v2-n-medial" d="M15 16 m-8 0 h16"/>
+	<path id="v2-n-small" d="M15 16 v64 M34 23 v44 M20 45 h26"/>
+	<path id="v2-ng-medial" d="M10 22 m-2-8 v16"/>
+	<path id="v2-ng-small" d="M10 22 h38 M20 22 c0 20 0 40 -10 50 M38 22 v51"/>
+	<path id="v2-nh-medial" d="M20 15 m-10 0 h16"/>
+	<path id="v2-nh-small" d="M8 40 l40 8 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
+	<path id="v2-ph-medial" d="M9 28 m0-8 l-5 16"/>
+	<path id="v2-ph-small" d="M45 16 v50 M33 15 c-4 22 -8 45 -28 70 M9 28 c6 8 14 24 28 50"/>
+	<path id="v2-r-medial" d="M10 18 m-8 0 h16"/>
+	<path id="v2-r-small" d="M11 70 v-52 m2 12 l20 14 M44 18 v56"/>
+	<path id="v2-s-medial" d="M11 18 m-8 0 h16"/>
+	<path id="v2-s-small" d="M11 18 v52 m0 -4 l22 -8 M44 18 v56"/>
+	<path id="v2-t-medial" d="M24 24 m-8 0 h16"/>
+	<path id="v2-t-small" d="M44 16 v64 M10 46 h34 M24 24 v44"/>
+	<path id="v2-th-medial" d="M20 15 m-10 0 h16"/>
+	<path id="v2-th-small" d="M8 48 l40 -10 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
+	<path id="v2-tr-medial" d="M10 20 m0 -8 v16"/>
+	<path id="v2-tr-small" d="M28 20 v56 M10 20 h36 M13 45 h30"/>
+	<path id="v2-v-medial" d="M10 25 m-8 0 h16"/>
+	<path id="v2-v-small" d="M10 16 v56 M44 15 c-4 22 -8 45 -30 70 M23 28 c4 8 10 24 20 50"/>
+	<path id="v2-x-medial" d="M11 18 m0 -8 v16"/>
+	<path id="v2-x-small" d="M11 18 h32 m-4 0 l-10 52 M10 74 h36"/>
+	
+	
+	<!--consonants-->
+	<path id="_-large" d="M12 22 h44 M10 70 l48 -4"/>
+	<path id="_-small" d="M11 22 h38 M10 70 l40 -3"/>
+	<path id="_-xsmall" d="M11 22 h30 M10 70 l34 -3"/>
+	<path id="b-large" d="M10 40 h40 M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5"/>
+	<path id="b-small" d="M10 40 h38 M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5"/>
+	<path id="b-xsmall" d="M10 40 h36 M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5"/>
+	<path id="c-large" d="M12 18 h43 c-2 35 -2 65 -15 60 M35 44 l-25 15"/>
+	<path id="c-small" d="M12 18 h40 c-2 35 -2 65 -15 60 M35 44 l-25 15"/>
+	<path id="c-xsmall" d="M12 18 h32 c-2 35 -2 65 -15 60 M28 44 l-18 12"/>
+	<path id="ch-large" d="M10 48 h46 M33 20 v62"/>
+	<path id="ch-small" d="M10 48 h44 M32 20 v62"/>
+	<path id="ch-xsmall" d="M10 48 h40 M30 20 v62"/>
+	<path id="d-large" d="M34 20 v46 M10 70 l48 -4"/>
+	<path id="d-small" d="M32 20 v44 M10 70 l44 -3"/>
+	<path id="d-xsmall" d="M28 20 v44 M10 70 l36 -3"/>
+	<path id="dz-large" d="M38 10 c-2 20 -6 50 -26 70 M34 45 l20 34"/>
+	<path id="dz-small" d="M36 10 c-2 20 -5 50 -24 70 M32 45 l18 34"/>
+	<path id="dz-xsmall" d="M36 10 c-2 20 -5 50 -24 70 M32 45 l18 34"/>
+	<path id="ph-large" d="M12 36 h40 c-2 15 -2 48 -15 42 M30 16 c0 10 0 33 -20 62"/>
+	<path id="ph-small" d="M12 36 h36 c-2 15 -2 48 -15 42 M30 16 c0 10 0 33 -20 62"/>
+	<path id="ph-xsmall" d="M12 36 h32 c-2 15 -2 48 -15 42 M24 16 c0 10 0 33 -14 62"/>
+	<path id="g-large" d="M15 15 v60 c0 0 0 10 10 10 h25 c0 0 5 0 7 -10 M15 40 l30 -5"/>
+	<path id="g-small" d="M15 15 v60 c0 0 0 10 10 10 h22 c0 0 5 0 7 -10 M15 40 l30 -5"/>
+	<path id="g-xsmall" d="M15 15 v60 c0 0 0 10 10 10 h17 c0 0 5 0 7 -10 M15 40 l25 -4"/>
+	<path id="h-large" d="M37 20 v46 M12 28 v36 M10 70 l48 -3"/>
+	<path id="h-small" d="M36 20 v46 M11 28 v37 M10 70 l44 -3"/>
+	<path id="h-xsmall" d="M30 20 v46 M11 28 v37 M10 70 l36 -3"/>
+	<path id="kh-large" d="M12 18 h44 M12 18 v46 M10 70 l48 -7"/>
+	<path id="kh-small" d="M11 18 h42 M11 18 v47 M10 70 l44 -6"/>
+	<path id="kh-xsmall" d="M11 18 h30 M11 18 v48 M10 70 l34 -6"/>
+	<path id="l-large" d="M17 16 v30 c0 5 0 20 -5 34 M48 16 v58"/>
+	<path id="l-small" d="M16 16 v30 c0 5 0 20 -5 34 M44 16 v58"/>
+	<path id="l-xsmall" d="M15 16 v30 c0 5 0 20 -5 34 M40 16 v58"/>
+	<path id="m-large" d="M10 15 h40 v1 c-8 22 -15 45 -40 69 M16 38 c10 8 20 18 34 36"/>
+	<path id="m-small" d="M10 15 h40 v1 c-8 22 -15 45 -40 69 M16 38 c10 8 20 18 34 36"/>
+	<path id="m-xsmall" d="M10 15 h30 v1 c-4 22 -8 45 -30 69 M16 38 c6 8 14 18 28 40"/>
+	<path id="n-large" d="M22 16 v60 M23 46 l33 3"/>
+	<path id="n-small" d="M20 16 v60 M21 46 l33 3"/>
+	<path id="n-xsmall" d="M20 16 v60 M21 46 l25 3"/>
+	<path id="ng-large" d="M12 18 h43 c-2 35 -2 65 -15 60 M30 23 c0 10 0 28 -20 55"/>
+	<path id="ng-small" d="M12 18 h40 c-2 35 -2 65 -15 60 M30 23 c0 10 0 28 -20 55"/>
+	<path id="ng-xsmall" d="M12 18 h32 c-2 35 -2 65 -15 60 M24 22 c0 10 0 28 -14 55"/>
+	<path id="nh-large" d="M15 16 h33 c0 0 -6 30 -38 64 M36 47 c0 0 9 12 19 28"/>
+	<path id="nh-small" d="M15 16 h32 c0 0 -6 30 -38 64 M35 47 c0 0 9 12 19 28"/>
+	<path id="nh-xsmall" d="M15 16 h26 c0 0 -6 30 -30 64 M30 50 c0 0 9 12 18 28"/>
+	<path id="r-large" d="M12 18 v52 M12 18 l44 0 v56"/>
+	<path id="r-small" d="M11 18 v52 M11 18 l36 0 v56"/>
+	<path id="r-xsmall" d="M11 18 v52 M11 18 l33 0 v56"/>
+	<path id="s-large" d="M12 18 v47 M10 70 l45 -7 M56 18 v52"/>
+	<path id="s-small" d="M11 18 v47 M10 70 l37 -5 M48 18 v52"/>
+	<path id="s-xsmall" d="M11 18 v47 M10 70 l33 -5 M44 18 v52"/>
+	<path id="t-large" d="M42 16 v60 M10 46 l30 -3"/>
+	<path id="t-small" d="M40 16 v60 M10 46 l28 -3"/>
+	<path id="t-xsmall" d="M38 16 v60 M10 46 l26 -3"/>
+	<path id="th-large" d="M15 16 h33 c0 0 0 30 -30 64 M15 46 h44"/>
+	<path id="th-small" d="M14 16 h30 c0 0 0 30 -30 64 M14 46 h40"/>
+	<path id="th-xsmall" d="M10 16 h28 c0 0 0 30 -28 64 M12 46 h32"/>
+	<path id="tr-large" d="M36 20 v46 c0 0 0 10 -14 7 M10 17 l48 0"/>
+	<path id="tr-small" d="M34 20 v46 c0 0 0 10 -14 7 M10 18 l44 0"/>
+	<path id="tr-xsmall" d="M30 20 v46 c0 0 0 10 -14 7 M10 18 l36 0"/>
+	<path id="x-large" d="M12 18 h40 M52 18 l-3 51 M10 70 h48"/>
+	<path id="x-small" d="M11 20 h38 M49 20 l-2 45 M10 70 h44"/>
+	<path id="x-xsmall" d="M11 20 h30 M41 20 l-2 45 M10 70 h34"/>
+	<path id="v-large" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
+	<path id="v-small" d="M35 10 c0 0 -7 40 -20 66 M10 80 l40 -5 M47 62 l8 20"/>
+	<path id="v-xsmall" d="M35 10 c0 0 -7 40 -20 63 M10 77 l36 -10 M43 53 l8 20"/>
+	
+	<path id="xxx_-large" d="M55 13 c 0 0 -23 4 -45 5 m9 5 v55 h36"/>
+	<path id="xxx_-small" d="M52 13 c 0 0 -21 4 -42 5 m9 5 v55 h33"/>
+	<path id="xxx_-xsmall" d="M42 13 c 0 0 -16 4 -32 5 m9 5 v55 h23"/>
+	<path id="gi-large" d="M30 10 v15 M10 25 h40 c0 0 -6 25 -26 40 m-14 10 l10 -10 c15 15 20 15 36 15"/>
+	<path id="gi-small" d="M30 10 v15 M10 25 h40 c0 0 -6 25 -26 40 m-14 10 l10 -10 c15 15 20 15 36 15"/>
+	<path id="gi-xsmall" d="M25 10 v15 M10 25 h30 c0 0 0 20 -16 40 m-14 10 l10 -10 c15 15 20 15 36 15"/>
+		
+	
+    <path id="_-large-2" d="M15 15 h45 l-40 40 c-5 10 -5 10 0 20 h35 c0 0 10 0 10 -15"/>
+    <path id="_-small-2" d="M15 15 h40 l-35 40 c-5 10 -5 10 0 20 h30 c0 0 10 0 10 -13"/>
+    <path id="_-xsmall-2" d="M15 15 h33 l-28 40 c-5 10 -5 10 0 20 h23 c0 0 10 0 10 -12"/>
+    <path id="b-large-2" d="M65 15 l-50 5 M15 50 h50 M40 20 v65 M20 30 l5 10 M60 30 l-5 10 M40 50 c0 0 -10 20 -25 30 M40 50 c0 0 10 20 25 30"/>
+    <path id="b-small-2" d="M55 15 l-40 5 M15 50 h40 M35 20 v65 M17 30 l5 10 M53 30 l-5 10 M35 50 c0 0 -10 20 -22 30 M35 50 c0 0 10 20 22 30"/>
+    <path id="b-xsmall-2" d="M46 15 l-33 5 M15 50 h32 M30 20 v65 M15 30 l4 8 M45 30 l-4 8 M30 50 c0 0 -10 20 -20 30 M31 50 c0 0 10 20 20 30"/>
+    <path id="c-large-2" d="M15 25 h50 v40 M20 47 h45 M15 70 h50"/>
+	<path id="c-small-2" d="M15 25 h40 v40 M20 47 h35 M15 70 h40"/>
+	<path id="c-xsmall-2" d="M15 25 h30 v40 M20 47 h25 M15 70 h30"/>
+	<path id="ch-large-2" d="M10 25 h55 M37 10 v30 M13 40 h45 c0 0 0 23 -47 40 M14 40 c0 0 0 23 47 40"/>
+	<path id="ch-small-2" d="M10 25 h45 M32 10 v30 M13 40 h38 c0 0 0 23 -42 40 M14 40 c0 0 0 23 42 40"/>
+	<path id="ch-xsmall-2" d="M10 25 h35 M28 10 v30 M11 40 h33 c0 0 0 23 -37 40 M12 40 c0 0 0 23 37 40"/>
+	<path id="d-large-2" d="M18 20 l12 8 M13 35 l15 9 M10 60 l58 -6 M45 15 v70"/>
+	<path id="d-small-2" d="M15 20 l12 8 M10 35 l15 9 M10 60 l50 -5 M40 15 v70"/>
+	<path id="d-xsmall-2" d="M15 20 l10 7 M10 35 l12 8 M10 60 l45 -5 M40 15 v70"/>
+	<path id="dz-large-2" d="M18 26 h45 M18 15 l-3 29 h45 c0 10 0 32 -5 38 h-15 M10 63 h35"/>
+	<path id="dz-small-2" d="M18 26 h32 M18 15 l-3 29 h35 c0 10 0 32 -5 38 h-13 M10 64 l25 -2"/>
+	<path id="dz-xsmall-2" d="M18 26 h25 M18 15 l-3 29 h30 c0 10 0 32 -5 38 h-12 M10 64 l20 -2"/>
+	<path id="ph-large-2" d="M37 10 v15 M10 25 h55 M27 25 c0 0 0 40 -15 55 M25 45 h35 c0 10 0 32 -5 35 h-15"/>
+	<path id="ph-small-2" d="M30 10 v15 M10 25 h40 M20 25 c0 0 0 40 -15 55 M20 45 h28 c0 10 0 32 -5 35 h-13"/>
+	<path id="ph-xsmall-2" d="M25 10 v15 M10 25 h32 M20 25 c0 0 0 40 -15 55 M20 45 h22 c0 10 0 32 -5 35 h-12"/>
+	<path id="g-large-2" d="M15 15 h45 v27 M15 40 h45 M15 40 v25 c0 0 0 10 10 10 h30 c0 0 10 0 10 -15"/>
+	<path id="g-small-2" d="M15 15 h35 v27 M15 40 h35 M15 40 v28 c0 0 0 7 7 7 h26 c0 0 7 0 7 -13"/>
+	<path id="g-xsmall-2" d="M15 15 h27 v27 M15 40 h27 M15 40 v28 c0 0 0 7 7 7 h21 c0 0 7 0 7 -12"/>
+	<path id="gi-large-2" d="M38 15 c0 0 -12 20 -28 32 M38 15 c0 0 12 20 28 32 M26 52 c0 15 0 25 -10 35 M52 52 v34"/>
+	<path id="gi-small-2" d="M34 15 c0 0 -12 20 -24 32 M34 15 c0 0 12 20 24 32 M26 52 c0 15 0 25 -10 35 M45 52 v34"/>
+	<path id="gi-xsmall-2" d="M30 15 c0 0 -10 20 -20 32 M30 15 c0 0 10 20 20 32 M23 52 c0 15 0 25 -10 35 M41 52 v34"/>
+	<path id="h-large-2" d="M17 15 h45 v15 h-45 v-15 M10 45 h60 M25 50 l-3 10 h40 c0 10 0 15 -5 20 h-15"/>
+	<path id="h-small-2" d="M17 15 h35 v15 h-35 v-15 M10 45 h50 M25 50 l-3 10 h35 c0 10 0 15 -5 20 h-15"/>
+	<path id="h-xsmall-2" d="M17 15 h30 v15 h-35 v-15 M10 45 h40 M20 50 l-3 10 h30 c0 10 0 15 -5 20 h-15"/>
+	<path id="kh-large-2" d="M17 15 h45 M10 34 h60 M25 40 l-3 13 h40 c0 10 0 20 -5 26 h-15"/>
+	<path id="kh-small-2" d="M17 15 h35 M10 34 h50 M25 40 l-3 13 h35 c0 10 0 20 -5 26 h-15"/>
+	<path id="kh-xsmall-2" d="M12 15 h28 M10 34 h35 M20 40 l-3 13 h30 c0 10 0 20 -5 26 h-15"/>
+	<path id="l-large-2" d="M40 15 v20 M40 25 h25 M20 40 h45 v18 h-45 M20 40 c0 0 0 36 -10 42"/>
+	<path id="l-small-2" d="M35 15 v20 M35 25 h20 M20 40 h35 v18 h-35 M20 40 c0 0 0 36 -10 42"/>
+	<path id="l-xsmall-2" d="M28 15 v20 M28 25 h15 M18 40 h28 v18 h-28 M18 40 c0 0 0 36 -8 42"/>
+	<path id="m-large-2" d="M10 15 h40 l-3 25 M18 25 l-3 20 h45 c0 10 0 30 -5 35 h-15"/>
+	<path id="m-small-2" d="M10 15 h35 l-3 25 M18 25 l-3 20 h40 c0 10 0 30 -5 35 h-15"/>
+	<path id="m-xsmall-2" d="M10 15 h30 l-3 25 M18 25 l-3 20 h35 c0 10 0 30 -5 35 h-15"/>
+	<path id="n-large-2" d="M40 15 l-20 38 c0 0 8 2 40 27 M10 33 h48 c0 0 0 35 -52 46"/>
+	<path id="n-small-2" d="M30 15 l-12 38 c0 0 8 2 33 27 M10 33 h38 c0 0 0 35 -42 46"/>
+	<path id="n-xsmall-2" d="M30 15 l-13 38 c0 0 8 2 33 27 M10 33 h35 c0 0 0 35 -40 46"/>
+	<path id="ng-large-2" d="M30 10 l10 12 M20 36 h20 v48 l15 -15"/>
+	<path id="ng-small-2" d="M30 10 l10 12 M20 36 h20 v48 l15 -15"/>
+	<path id="ng-xsmall-2" d="M30 10 l10 12 M20 36 h20 v48 l15 -15"/>
+	<path id="nh-large-2" d="M15 15 h50 M26 23 l-7 18 h45 M49 15 c0 0 0 45 -30 65 M23 60 l30 15"/>
+	<path id="nh-small-2" d="M15 15 h40 M26 23 l-7 18 h35 M44 15 c0 0 0 40 -30 65 M18 60 l30 15"/>
+	<path id="nh-xsmall-2" d="M15 15 h30 M23 23 l-7 18 h30 M39 15 c0 0 0 35 -25 65 M15 60 l28 14"/>
+	<path id="tr-large-2" d="M18 20 l12 8 M13 35 l15 9 M10 60 l58 -6 M45 15 v70"/>
+	<path id="tr-small-2" d="M15 20 l12 8 M10 35 l15 9 M10 60 l50 -5 M40 15 v70"/>
+	<path id="tr-xsmall-2" d="M15 20 l10 7 M10 35 l12 8 M10 60 l45 -5 M40 15 v70"/>
+	<path id="r-large-2" d="M20 15 h40 v23 h-40 v-24 M40 38 l-5 12 M15 55 h50 v25 h-50 v-25"/>
+	<path id="r-small-2" d="M20 15 h40 v23 h-40 v-24 M40 38 l-5 12 M15 55 h50 v25 h-50 v-25"/>
+	<path id="r-xsmall-2" d="M20 15 h40 v23 h-40 v-24 M40 38 l-5 12 M15 55 h50 v25 h-50 v-25"/>
+	<path id="s-large-2" d="M25 10 l-12 25 M25 17 h32 l-10 18 M15 35 h50 v40 M20 55 h45 M15 77 h50"/>
+	<path id="s-small-2" d="M25 10 l-12 25 M25 17 h32 l-10 18 M15 35 h50 v40 M20 55 h45 M15 77 h50"/>
+	<path id="s-xsmall-2" d="M25 10 l-12 25 M25 17 h32 l-10 18 M15 35 h50 v40 M20 55 h45 M15 77 h50"/>
+	<path id="t-large-2" d="M25 30 l-5 30 M25 45 l40 -5 M46 15 v68"/>
+	<path id="t-small-2" d="M25 30 l-5 30 M25 45 l40 -5 M46 15 v68"/>
+	<path id="t-xsmall-2" d="M25 30 l-5 30 M25 45 l40 -5 M46 15 v68"/>
+	<path id="th-large-2" d="M15 28 h50 M50 10 v63 c0 0 0 10 -5 10 h-15 M20 45 l10 15"/>
+	<path id="th-small-2" d="M15 28 h50 M50 10 v63 c0 0 0 10 -5 10 h-15 M20 45 l10 15"/>
+	<path id="th-xsmall-2" d="M15 28 h50 M50 10 v63 c0 0 0 10 -5 10 h-15 M20 45 l10 15"/>
+	<path id="tr-large-2" d="M15 30 h50 M50 10 c0 40 -3 55 -35 75 M25 45 c0 0 10 30 40 38"/>
+	<path id="tr-small-2" d="M15 30 h50 M50 10 c0 40 -3 55 -35 75 M25 45 c0 0 10 30 40 38"/>
+	<path id="tr-xsmall-2" d="M15 30 h50 M50 10 c0 40 -3 55 -35 75 M25 45 c0 0 10 30 40 38"/>
+	<path id="v-large-2" d="M15 23 h50 M20 38 h40 M15 53 h50 c0 0 0 10 -3 20 h-10 M40 15 v68"/>
+	<path id="v-small-2" d="M15 23 h50 M20 38 h40 M15 53 h50 c0 0 0 10 -3 20 h-10 M40 15 v68"/>
+	<path id="v-xsmall-2" d="M15 23 h50 M20 38 h40 M15 53 h50 c0 0 0 10 -3 20 h-10 M40 15 v68"/>
+	<path id="x-large-2" d="M15 25 h50 M32 12 l-14 35 h44 M15 65 h50 M40 35 v48"/>
+	<path id="x-small-2" d="M15 25 h50 M32 12 l-14 35 h44 M15 65 h50 M40 35 v48"/>
+	<path id="x-xsmall-2" d="M15 25 h50 M32 12 l-14 35 h44 M15 65 h50 M40 35 v48"/>
+	
+	<path id="v2-U" d="M70 22 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
+	<path id="v2-I" d="M52 15 l-8 68 M25 35 l50 8 M22 58 l50 8"/>
+	<path id="v2-M" d="M22 18 h55 m-8 20 c0 0 -12 20 -46 45 M30 37 c0 0 12 20 42 46"/>
+	<path id="v2-N" d="M25 15 v70 M27 45 l52 4 M54 20 v60"/>
+	<path id="v2-P" d="M55 15 c0 0 -10 30 -30 63 M20 80 l60 0 M28 24 l40 40"/>
+	<path id="v2-C" d="M20 37 h55 M20 63 h55 M75 15 v70"/>
+	<path id="v2-T" d="M54 20 v58 M25 80 h58 M28 44 h52"/>
+	<path id="v2-NG" d="M15 20 h66 M34 20 c0 20 0 40 -10 60 M62 20 v60"/>
+	<path id="v2-NH" d="M15 45 l66 10 M34 20 c0 20 0 40 -10 60 M62 20 v60"/>
+	<path id="v2-CH" d="M48 15 l8 68 M25 40 l50 -8 M28 64 l50 -8"/>
+	
+	<path id="U" d="M70 20 c0 0 -15 60 -55 65 M25 20 c0 0 15 60 55 65"/>
+	<path id="I" d="M50 15 v15 c0 0 -5 35 -30 55 M50 15 v15 c 0 0 5 35 30 55"/>
+	<path id="M" d="M25 18 h55 c0 0 0 30 -55 65 M36 42 c0 0 22 16 40 40"/>
+	<path id="N" d="M25 15 v70 M27 45 l52 4"/>
+	<path id="Px"  不 d="M20 18 h66 m-25 2 c0 0 -15 25 -40 38 M55 35 v48 M65 40 c0 0 10 7 20 15"//>
+	<path id="P" d="M55 15 c0 0 -10 30 -30 63 M20 80 l60 -5 M24 44 h52 "/>
+	<path id="C" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M24 64 l30 -18"/>
+	<path id="T" d="M54 20 v58 M25 80 h58"/>
+	<path id="NG" d="M20 20 h65 c0 10 0 35 -10 60 c0 0 0 8 -20 0 M46 20 c0 0 0 40 -28 63"/>
+	<path id="NH" d="M50 15 v5 c0 0 -5 40 -30 65 M50 15 v15 c 0 0 5 30 30 55"/>
+	<path id="CH" d="M30 15 v65 c0 0 0 10 10 10 l37 -2 c0 0 5 0 5 -5 v-8 M15 48 l50 -5"/>
+	
+	<path id="NG_t"      d="M25 40 h48 c0 0 0 18 -8 40 c0 0 0 5 -15 2 M44 40 c0 0 0 20 -24 40"/>
+	<path id="NG_tsmall" d="M25 45 h48 c0 0 0 15 -8 35 c0 0 0 5 -15 2 M44 45 c0 0 0 17 -24 35"/>
+	<path id="NH_t"      d="M50 35 c0 0 -5 35 -30 50 M50 35 c 0 0 5 35 30 50"/>
+	<path id="NH_tsmall" d="M50 45 c0 0 -5 30 -30 40 M50 45 c 0 0 5 30 30 40"/>
+	<path id="N_t"       d="M35 35 v45 M35 55 l40 2"/>
+	<path id="N_tsmall"  d="M35 40 v40 M35 56 l40 2"/>
+	<path id="M_t"      d="M26 40 h44 c0 0 0 25 -55 45 M36 55 c0 0 20 10 38 28"/>
+	<path id="M_tsmall" d="M26 46 h44 c0 0 0 22 -55 40 M36 62 c0 0 20 6 38 22"/>
+	<path id="T_t"      d="M48 40 v33 M23 78 h50"/>
+	<path id="T_tsmall" d="M48 45 v30 M23 78h50"/>
+	<path id="P_t"      d="M25 40 h45 v20 M48 40 v17 M25 64 h45 M25 40 v40 c0 5 5 5 40 5 c0 0 5 0 7 -3"/>
+	<path id="P_tsmall" d="M25 45 h45 v15 M48 45 v12 M25 64 h45 M25 45 v35 c0 5 5 5 40 5 c0 0 5 0 7 -3"/>
+	<path id="C_t"      d="M20 40 h55 c0 0 0 25 -6 40 c0 0 0 5 -15 0 M20 75 l24 -16"/>
+	<path id="C_tsmall" d="M20 46 h55 c0 0 0 22 -6 37 c0 0 0 5 -15 0 M20 77 l24 -15"/>
+	<path id="U_t"      d="M64 40 c0 0 -20 45 -48 45 M27 40 c0 0 20 45 48 45"/>
+	<path id="U_tsmall" d="M64 45 c0 0 -20 40 -48 40 M27 45 c0 0 20 40 48 40"/>
+	<path id="I_t"      d="M47 35 c0 0 0 35 -30 50 M47 35 c 0 0 5 35 30 50"/>
+	<path id="I_tsmall" d="M47 40 c0 0 0 30 -30 45 M47 40 c 0 0 5 30 30 45"/>
+	<path id="CH_t"      d="M35 40 v40 c0 0 0 10 10 10 l27 -2 c0 0 5 0 5 -5 v-5 M18 64 l50 -5"/>
+	<path id="CH_tsmall" d="M35 45 v35 c0 0 0 10 10 10 l27 -2 c0 0 5 0 5 -5 v-5 M18 64 l50 -5"/>
+	
+	<circle id="smallbox" cx="47" cy="62" r="25" stroke="gray" stroke-width="4px" stroke-dasharray="3,10"/>
+	<circle id="largebox" cx="52" cy="48" r="40" stroke="gray" stroke-width="4px" stroke-dasharray="3,10"/>
+
+<!--tones-->
+<path id="qt0" d="M2 90 m0 15 c-12 0 -12 -15 0 -15"/>
+<path id="qt1" d="M98 -5 c12 0 12 15 0 15"/>
+<path id="qt2" d="M2 90 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
+<path id="qt3" d="M2 -5 m0 015 c-12 0 -12 -15 0 -15"/>
+<path id="qt4" d="M2 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
+<path id="qt5" d="M98 -5 c12 0 12 15 0 15 c-12 0 -12 -15 0 -15"/>
+
+  
+    <path id="_t1" d="M16 12 h60 l-3 15"/>
+	<path id="_t2" d="M20 10 v10 h50"/>
+	<path id="_t3" d="M30 10 l-15 23 M28 18 h44"/>
+	<path id="_t4" d="M30 8 l-15 25 M28 14 h44 M20 30 h52"/>
+	<path id="_t5" d="M26 12 h42 v16 M18 29 h58"/>
+	<path id="_t6" d="M30 10 v12 M30 10 h35 v12 M20 27 h52"/>
+	
+	<!--abbreviated tones-->
+	<!--<path id="_tsmall1" style="stroke-width:5px" d="M105 10 l-7 10 l7 7"/>
+	<path id="_tsmall2" style="stroke-width:5px" d="M98 10 l7 10"/>
+	<path id="_tsmall3" style="stroke-width:5px" d="M98 10 l7 1 l-7 20 l7 3"/>
+	<path id="_tsmall4" style="stroke-width:5px" d="M105 10 l-7 12 l7 2 l-7 12 l7 2"/>
+	<path id="_tsmall5" style="stroke-width:5px" d="M98 10 l7 1 m-7 15 l7 1"/>
+	<path id="_tsmall6" style="stroke-width:5px" d="M98 10 h10"/>
+	-->
+	
+<!--fullsize tones-->
+	<path id="_tlarge1" d="M30 20 h45 v55"/>
+	<path id="_tlarge2" d="M20 55 h60"/>
+	<path id="_tlarge3" d="M75 28 h-50 m0-8 c0 0 0 40 -10 60"/>
+	<path id="_tlarge4" d="M75 28 h-50 m0-8 c0 0 0 40 -10 60 m20-25 l35 0"/>
+	<path id="_tlarge5" d="M25 20 h45 v55 M20 75 h60"/>
+	<path id="_tlarge6" d="M30 30 h40 M20 85 h60"/>
+	
+	<path id="square" style="opacity:.025" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
+</defs>
+	
+	<g>
+		<path stroke="#666" stroke-width="0" d="M1655 130 v2950"/>
+	</g>
+</svg>
+
+<div id="out" style="position:relative;overflow:hidden;width:1750px;padding:100px">
+
+
+<script>
+  (()=>{
+    function Writer(root, output) {
+      this.chars = {
+        "?": "_",
+        "b": "b",
+        "c": "c",
+        "ch": "ch",
+        "d": "dz",
+        "đ": "d",
+        "dd": "d",
+        "g": "g",
+        "gi": "dz",
+        "h": "h",
+        "j": "dz",
+        "kh": "kh",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "ng": "ng",
+        "nh": "nh",
+        "ph": "ph",
+        "qu": "c",
+        "r": "r",
+        "s": "s",
+        "t": "t",
+        "th": "th",
+        "tr": "tr",
+        "v": "v",
+        "x": "x",
+        
+        "a": "a",
+        "ă": "aw",
+        "ơ": "a2",
+        "â": "aw2",
+        "ê": "e",
+        "e": "e2",
+        "i": "i",
+        "ia": "i2",
+        "ô": "o",
+        "o": "o2",
+        "u": "u",
+        "ua": "u2",
+        "ư": "y",
+        "ưa": "y2",
+        "ngang": "",
+        "sắc": "1",
+        "huyền": "2",
+        "hỏi": "3",
+        "ngã": "4",
+        "nặng": "5",
+      }
+      
+      this.root = root
+      this.output = output
+      root.addEventListener("input", this.handleInput.bind(this))
+    }
+    
+    Writer.prototype.parseWord = function(word) {
+      word = word.toLowerCase().trim();
+    
+      // Extract tones
+      const toneMap = {
+        "\u0301": "sắc",
+        "\u0300": "huyền",
+        "\u0309": "hỏi",
+        "\u0303": "ngã",
+        "\u0323": "nặng"
+      };
+    
+      let tone = "ngang";
+      let nfd = word.normalize("NFD").replace(
+        /[\u0300\u0301\u0303\u0309\u0323]/g,
+        m => (tone = toneMap[m], "")
+      );
+      let base = nfd.normalize("NFC");
+    
+      // Onsets
+      const onsets = [
+        "ngh","ng","gh","ph","th","tr","ch","nh","kh",
+        "gi","qu","b","c","d","đ","g","h","k","l","m",
+        "n","p","r","s","t","v","x","q"
+      ];
+    
+      let onset = "?";
+      for (const o of onsets) {
+        if (base.startsWith(o)) {
+          onset = o;
+          base = base.slice(o.length);
+          break;
+        }
+      }
+      
+      // remove h in ngh and gh
+      if (onset == "gh") onset = "g"
+      if (onset == "ngh") onset = "ng"
+      if (onset == "q") onset = "qu"
+    
+      // Codas
+      const codas = ["ng","nh","ch","m","n","p","t","c"];
+      let coda = "";
+      for (const c of codas) {
+        if (base.endsWith(c)) {
+          coda = c;
+          base = base.slice(0, -c.length);
+          break;
+        }
+      }
+    
+      // Nucleus
+      let medial = "";
+      let offglide = "";
+      let vowel = base;
+    
+      if(onset == "qu") {
+          medial = "o"
+      }
+      
+      if ((coda == "nh" || coda == "ch") && vowel == "a") vowel = "ă";
+            
+      // --- find medial ---
+      if (vowel.length >= 2) {
+        const first = vowel[0];
+        const second = vowel[1];
+        
+        // u-rules
+        if (first === "u") {
+          if ("âêyơ".indexOf(second) > -1) {
+            medial = "u";
+            vowel = vowel.slice(1);
+          }
+        }
+    
+        // o-rules
+        else if (first === "o" && (second === "a" || second === "e")) {
+          medial = "o";
+          vowel = vowel.slice(1);
+        }
+        
+        else if (medial && first == "ô") vowel = "â" + second
+
+      }
+          
+      // --- Offglide (i/y/o/u at end) ---
+      if (vowel.length > 1 && /[iyou]$/.test(vowel)) {
+        offglide = vowel.slice(-1);
+        vowel = vowel.slice(0, -1);
+        
+        // ai/ay/ao/au distinction
+        if (vowel == "a" && (offglide == "y" || offglide == "u")) {
+          vowel = "ă"
+        }
+        
+        // i/y and u/o to same representation
+        if (offglide == "y") {
+          offglide = "i"
+        } else if (offglide == "o") {
+          offglide = "u"
+        }
+      }
+      
+      // gi has a default vowel
+      if (onset == "gi" && vowel == "") vowel = "i"
+    
+      
+      if (vowel == "iê") vowel = "ia"
+      else if (vowel == "yê") vowel = "ia"
+      else if (vowel == "ya") vowel = "ia"
+      else if (vowel == "y") vowel = "i"
+      else if (vowel == "uô") vowel = "ua"
+      else if (vowel == "ươ") vowel = "ưa"
+
+      return {
+        onset,
+        medial,
+        vowel,
+        offglide,
+        coda,
+        tone
+      };
+    }
+    
+    Writer.prototype.parseSentence = function(sentence) {
+      const result = [];
+      const regex = /\p{L}+|\P{L}+/gu; // Words OR non-words
+      const tokens = sentence.normalize("NFC").match(regex) || [];
+    
+      for (const token of tokens) {
+        if (/^\p{L}+$/u.test(token)) {
+          // Word → syllabic analysis
+          const parsed = this.parseWord(token);
+          result.push({
+            word: token,
+            onset: parsed.onset || "",
+            medial: parsed.medial || "",
+            vowel: parsed.vowel,
+            offglide: parsed.offglide || "",
+            coda: parsed.coda || "",
+            tone: parsed.tone
+          });
+        } else {
+          // Characters in between → unchanged
+          result.push({ word: token });
+        }
+      }
+    
+      return result;
+    }
+    
+    Writer.prototype.translate = function(text){
+      const tokens = this.parseSentence(text)
+      let output = ""
+      tokens.forEach((t) => {
+        if (t.vowel) {
+          const head = this.chars[t.onset] || t.onset
+          const medial = t.medial ? this.chars["u"] : ""
+          const vowelTmp = this.chars[t.vowel] || t.vowel
+          let vowel = this.chars[vowelTmp.toLowerCase()] || vowelTmp
+          if (medial) {
+            vowel = "w" + vowel;
+          }
+          const offglide = this.chars[t.offglide] || t.offglide || ""
+          const coda = this.chars[t.coda] || t.coda
+          const tone = this.chars[t.tone] || ""
+          console.log(JSON.stringify(t))
+          let parts = [head || "", vowel || "", offglide || coda || "", tone]
+          output += parts.join(",");
+          
+        } else {
+          output += t.word
+        }
+      })
+      return output
+    }
+    Writer.prototype.handleInput = function(){
+      const text = this.root.value
+      const codes = this.translate(text)
+      this.output.innerHTML = "";
+      pa(codes, this.output)
+    }
+    window.Writer = Writer
+  })()
+  const writer = new Writer(
+    document.getElementById("writer"),
+    document.getElementById("output"),
+  )
+</script>
+
+<script>
+var showTable = false;
+var v = 0;
+var svgContent = document.getElementById("svg").innerHTML;
+function display(version){
+document.getElementById("out").innerHTML = ""
+version = version || ((v++ % 2) + 1);
+var onset_prefix = "v2-";
+var vowel_prefix = "v2-";
+var coda_prefix = "v2-";
+var char_fontsize = "105px";
+var qatt_tones = true;
+if (version == 1) {
+    qatt_tones = true;
+	onset_prefix = "v2-";
+	vowel_prefix = "v2-";
+	coda_prefix = "v2-";
+} else if (version == 4) {
+    qatt_tones = true;
+	onset_prefix = "";
+	vowel_prefix = "v2-";
+	coda_prefix = "";
+} else if(version == 3){
+    qatt_tones = true;
+	onset_prefix = "v2-";
+	vowel_prefix = "";
+	coda_prefix = "v2-";
+} else if(version == 2){
+    qatt_tones = false;
+	onset_prefix = "";
+	vowel_prefix = "";
+	coda_prefix = "";
+}
+
+
+
+var svgns = "http://www.w3.org/2000/svg";
+var xlinkns = "http://www.w3.org/1999/xlink";
+var svg = document.getElementById("svg");
+svg.innerHTML = svgContent;
+var pre = "_ b c ch d dz ph g h kh l m n ng nh r s t th tr v x".split(" ");
+var nuc = "a a2 aw aw2 o o2 u u2 y y2 i i2 e e2".split(" ");
+
+//table.setAttribute('id', 'table');
+function getPost(glide, nucleus) {
+    if (nucleus.charAt(0) == "w") nucleus = nucleus.substr(1)
+    let el = document.getElementById(nucleus);
+    if (el && el.dataset.onsetsize) return el.dataset.onsetsize
+	var post = "small";
+	if ("a a2".split(" ").indexOf(nucleus) > -1) post = "large";
+	if ("o o2 e e2 i2 u2 y".split(" ").indexOf(nucleus) > -1) post = "xsmall";
+	if (glide) post = post == "large" ? "small" : "xsmall";
+	return post;
+}
+
+var group = document.createElementNS(svgns, "g");
+if (showTable) {
+  group.append(document.createElementNS(svgns, "g"))
+  svg.appendChild(group);
+  for (var b=0; b<nuc.length;b++){
+	var t = nuc[b], glide = "";
+	if (t.charAt(0) == "w") {
+		t = t.substr(1);
+		glide = t == "a" || t == "aw" || t == "e2" ? "o" : "u";
+	}
+	if (t == "a2") t = "ơ";
+	else if (t == "aw") t = "ă";
+	else if (t == "aw2") t = "â";
+	else if (t == "e") t = "ê";
+	else if (t == "e2") t = "e";
+	else if (t == "i") t = glide ? "y" : "i";
+	else if (t == "i2") t = glide ? "yê" : "iê";
+	else if (t == "o") t = "ô";
+	else if (t == "o2") t = "o";
+	else if (t == "u") t = "u";
+	else if (t == "u2") t = "uô";
+	else if (t == "y") t = "ư";
+	else if (t == "y2") t = "ươ";
+	var g = document.createElementNS(svgns, "g");
+	var hr = document.createElementNS(svgns, 'text');
+	hr.appendChild(document.createTextNode(glide + t));
+	g.appendChild(hr);
+	var cls = (parseInt(b/2) % 2 == 1) ? 'even' : ' ';
+	if (t.length > 1) cls += ' c2';
+	if (glide) cls += ' glide';
+	hr.setAttribute('class', 'smaller');
+	g.setAttribute('class', cls);
+	group.appendChild(g);
+  }
+  for (var a=0; a<pre.length;a++){
+	var group = document.createElementNS(svgns, "g");
+	var text = document.createElementNS(svgns, "text");
+	var t = pre[a].replace('_', '');
+	if (t == 'd') t = 'đ';
+	else if (t == 'c') t = 'c, k';
+	text.appendChild(document.createTextNode(t));
+	group.appendChild(text);
+	for (var b=0; b<nuc.length;b++){
+		var nucleus = nuc[b], glide = "";
+		if (nucleus.charAt(0) == "w") {
+			nucleus = nucleus.substr(1);
+			glide = true;
+		}
+		// invalid medial combinations like troa
+		var not = false;
+		if (glide && (pre[a] != "h" && "b d ph g gh gi m r v".split(" ").indexOf(pre[a]) != -1)) not = true;
+		else if (glide && nucleus == "a2" && "c th h".split(" ").indexOf(pre[a]) == -1) not = true;
+		else if (glide && pre[a] == "tr" && "aw2 i i2".split(" ").indexOf(nucleus) == -1) not = true;
+		else if (glide && pre[a] == "s" && "a aw2 i i2".split(" ").indexOf(nucleus) == -1) not = true;
+		else if (glide && pre[a] == "t" && "aw".split(" ").indexOf(nucleus) != -1) not = true;
+		else if (glide && pre[a] == "l" && "e".split(" ").indexOf(nucleus) != -1) not = true;
+		else if (glide && pre[a] == "dz" && "e".split(" ").indexOf(nucleus) != -1) not = true;
+		else if (glide && pre[a] == "n" && "a".split(" ").indexOf(nucleus) == -1) not = true;
+		//else if (nucleus == "aw" || nucleus == "aw2") not = true;
+		
+		var g = document.createElementNS(svgns, "g");
+		var u = document.createElementNS(svgns,"use");
+		var post = getPost(glide, nucleus);
+		if (!document.getElementById(onset_prefix + pre[a] + '-' + post)){
+		    if(post == "large") post = "small"
+		    else if (post == "small") post = "xsmall"
+		    else post = "small"
+		}
+		if (!document.getElementById(onset_prefix + pre[a] + '-' + post)){
+			if(post == "small") post = "xsmall"
+		}
+		u.setAttributeNS(xlinkns, 'href', '#' + onset_prefix + pre[a] + '-' + post);
+		g.appendChild(u);
+		if ("a aw y".split(" ").indexOf(nucleus) >= 0){
+	//	    u.setAttributeNS(xlinkns, 'href', '#' + pre[a] + '-' + post + '-2');
+		}
+		if (glide) nucleus = "w-" + nucleus;
+		g.appendChild(u);
+		var u = document.createElementNS(svgns,"use");
+		u.setAttributeNS(xlinkns, 'href', '#' + vowel_prefix + nucleus);
+		g.appendChild(u);
+		var cls = "";
+		if (parseInt(b/2) % 2 == 1) cls = " even";
+		if (glide) cls += ' glide';
+		if (not) cls += ' not';
+		if (post.indexOf("xsmall")>=0) cls+=" xsmall";
+		else if(post.indexOf("large")>=0) cls+=" large";
+		cls += ` char-${pre[a]}${nuc[b]} char-${pre[a]} char-${nuc[b]}`;
+		if (cls) g.setAttribute('class', cls);
+		g.id = "char-"+pre[a]+nuc[b];
+		useG(g, "square");
+		group.appendChild(g);
+	}
+	svg.appendChild(group);
+  }
+}
+
+let nbsp = String.fromCharCode(160);
+
+// ONSETS
+svg.appendChild(document.createElementNS(svgns, "g"));
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("ʔ B C Ch D Dz Ph G H Kh L"));
+text.setAttribute("style", "word-spacing:48px; font-size:56px; transform: translate(360px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Bán âm"));
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+"   _ b c ch d dz ph g h kh l".split(" ").forEach((t) => group.appendChild(useG(addG(group), onset_prefix+t+"-small")));
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+"   m n ng nh r s t th tr v x".split(" ").forEach((t) => group.appendChild(useG(addG(group), onset_prefix+t+"-small")));
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("M N Ng Nh R S T Th Tr V X"));
+text.setAttribute("style", "word-spacing:46px; font-size:56px; transform: translate(345px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+
+
+	// ONSETS WITH MEDIAL
+svg.appendChild(document.createElementNS(svgns, "g"));
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("ʔʷ Cʷ Chʷ Dʷ Dʷ Hʷ Khʷ Lʷ Ngʷ Nhʷ Sʷ"));
+text.setAttribute("style", "word-spacing:18px; font-size:56px; transform: translate(350px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Bán âm + /w/"));
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+"   _ c ch d dz h kh l ng nh s".split(" ").forEach((t) => {
+	var g = addG(group, onset_prefix+t+"-small");
+	useG(g, onset_prefix+t+"-medial")
+	group.appendChild(g)
+});
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+"   t th tr x".split(" ").forEach((t) => {
+	var g = useG(addG(group), onset_prefix+t+"-small");
+	useG(g, onset_prefix+t+"-medial")
+	group.appendChild(g)
+});
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Tʷ Thʷ Trʷ Xʷ"));
+text.setAttribute("style", "word-spacing:18px; font-size:56px; transform: translate(350px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+
+
+// NUCLEUS
+svg.appendChild(document.createElementNS(svgns, "g"));
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Ơ Â O Uô Ươ Iê E " + nbsp + "Âu"));
+text.setAttribute("style", "word-spacing:52px; font-size:56px; transform: translate(380px, 60px)");
+group.appendChild(text);
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Vần:"));
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+svg.appendChild(group);
+var finals = "   a2 aw2 o2 u2 y2 i2 e2  aw2".split(" ");
+for (var i = 0; i < finals.length; i++) {
+  group.appendChild(useG(addG(group), vowel_prefix + finals[i]));
+}
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode(""));
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+var finals = "  a aw o u y i e  aw".split(" ");
+for (var i = 0; i < finals.length; i++) {
+  group.appendChild(useG(addG(group), vowel_prefix + finals[i]));
+}
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("A Ă Ô U Ư I Ê " + nbsp + "Au"));
+text.setAttribute("style", "word-spacing:65px; font-size:56px; transform: translate(375px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+
+
+
+
+// TONES
+svg.appendChild(document.createElementNS(svgns, "g"));
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Thanh điệu:"));
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
+group.appendChild(text);
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("hỏi ngã huyền nặng sắc"));
+text.setAttribute("style", "word-spacing: 112px; font-size:50px; transform: translate(350px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.setAttribute("style", "font-size:38px; transform: translate(0, 10px)");
+group.appendChild(text);
+svg.appendChild(group);["", "", 3, "", 4, "", 2, "", 5, "", 1].forEach((t) => {
+    var x = addG(group);
+    if (qatt_tones) {
+    	useG(x, "qt"+t);
+   		if (t) useG(x, "largebox");
+   	} else {
+   		useG(x, "_t"+t);
+   		if (t) useG(x, "smallbox");
+   	}
+    group.appendChild(x);
+});
+
+
+
+// CODA
+svg.appendChild(document.createElementNS(svgns, "g"));
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("I U " + nbsp + " M N NG P T C " + nbsp + "NH CH"));
+text.setAttribute("style", "word-spacing:52px; font-size:56px; transform: translate(375px, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+group = document.createElementNS(svgns, "g");
+text = document.createElementNS(svgns, "text");
+text.appendChild(document.createTextNode("Âm cuối:"));
+text.setAttribute("style", "font-size:44px; transform: translate(0, 60px)");
+group.appendChild(text);
+svg.appendChild(group);
+var finals = "  I U  M N NG P T C  NH CH".split(" ");
+for (var i = 0; i < finals.length; i++) {
+  group.appendChild(useG(addG(group), coda_prefix + finals[i]));
+}
+
+
+// CALCULATE HEIGHT OF SVG
+svg.style.height = svg.children.length * 100 + "px"
+
+function addG(initial, vowel) {
+	var g = document.createElementNS(svgns, "g");
+	if (initial) useG(g, initial)
+	if (vowel) useG(g, vowel);
+	return g;
+}
+function useG(g, id, cls, _tone) {
+	var u = document.createElementNS(svgns,"use");
+	u.setAttributeNS(xlinkns, 'href', '#' + id);
+	if (cls) u.setAttribute('class', cls);
+	g.appendChild(u);
+	if (_tone == 3 || _tone == 4) {
+		//u.setAttribute('transform', "scale(1,.94)");
+		u.setAttribute('vector-effect', 'non-scaling-stroke');
+		u.style["vector-effect"] = "non-scaling-stroke"
+	}
+	return g;
+}
+function paSvg(root, initial, vowel, final, tone, bold, isCoda) {
+	var css = this;
+	var d = document, svg = d.createElementNS(svgns, "svg");
+	var g;
+	var glide = 0;
+	if (initial || vowel){
+		g = addG();
+		useG(g, 'square')
+		svg.appendChild(g);
+	}
+	var color = initial && initial.indexOf("$") >= 0 ? 1 : 0;
+	var underline = initial && initial.indexOf("#") >= 0 ? 1 : 0;
+	svg.setAttribute("class", "char" + (underline?" underline":"") + (color?" color":""));
+	
+	if (initial) {
+		initial = initial.replace("#", "").replace("$", "");
+		var post = getPost(vowel.charAt(0)=="w", vowel)
+		var id = onset_prefix + initial+ '-' + post;
+		if (!document.getElementById(id)) {
+		id = id.replace("xxsmall", "xsmall").replace("large", "xxsmall")
+		}
+		if (!document.getElementById(id)) {
+		id = id.replace("xsmall", "small")
+		}
+		if (!document.getElementById(id)) id = id.replace("xsmall", "small")
+		useG(g, id);
+	}
+	if (vowel) {
+		if (vowel.charAt(0) == "w") {
+			vowel = vowel.substr(1);
+			useG(g, onset_prefix + initial + '-medial');
+		}
+		useG(g, (isCoda ? coda_prefix : vowel_prefix) + vowel);
+		
+	}
+	svg.setAttribute("viewBox", "-10 -25 120 125");
+	svg.style.height = "150px";
+	svg.style.width = "130px";
+	svg.style.marginBottom = "30px";
+	svg.style.verticalAlign = "bottom";
+	svg.style.border = "none";
+	if (g) (root || d.getElementById("out")).appendChild(svg);
+	if (g && vowel && "waeiouy".indexOf(vowel[0]) >= 0) {
+	    if (qatt_tones) useG(g, "qt" + (tone || 0))
+	}
+	if (tone != null && tone < 0){
+		tone = Math.abs(tone);
+		if (!final){
+			paSvg(root, "", "_tlarge"+tone);
+			//paSvg(null, "", vowel)
+		}else{
+			var tonesize = "";
+			if (tone >= 0) tonesize = "small";
+			var g = paSvg(
+				root,
+				(color?"$":"")+(underline?"#":""),
+				final.toUpperCase() + (tone?'_t':'') + tonesize,
+				"",
+				null,
+				bold,
+				true);
+			useG(g, "_t"+tone);
+		}
+	} else {
+		if (tone < 0) tone = -tone
+		if (final) {
+			var tonesize = "";
+			if (tone >= 3) tonesize = "small";
+			if (tone) {
+			    if (qatt_tones) {
+			    	g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase(), 0, null, null, true);
+			    } else {
+			    
+					g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase() + '_t' + tonesize, 0, null, null, true);
+					useG(g, "_t" + tone)
+				}
+			} else {
+				//if (tone) useG(g, "_t" + tone)
+				g = paSvg(root, (color?"$":"")+(underline?"#":""), final.toUpperCase(), 0, null, null, true);
+			}
+		}
+		else if (tone != null) {
+		  if (!qatt_tones) {
+		    g = paSvg(root, (color?"$":"")+(underline?"#":""), '_tlarge' + tone, 0, null, null, true);
+		    //useG(g, "_tlarge" + tone);
+		  } else {
+			//useG(g, "_tlarge" + tone);
+		  }
+		}
+	}
+	//if (final) useG(g, 'square')
+	return g;
+}
+function paChr(t, root){
+	var d = document, el = d.createElement("div");
+	el.style.display = "inline-block";
+	el.style.width = "110px";
+	el.style.height = "110px";
+	el.style.lineHeight = "110px";
+	el.style.textAlign = "center";
+	el.style.verticalAlign = "bottom";
+	el.style.marginBottom = "30px";
+	el.style.fontSize = char_fontsize;
+	el.style.fontWeight = "400";
+	if (t.indexOf("$") >= 0 && t.indexOf("#") >= 0) el.className = "color underline";
+	else if (t.indexOf("$") >= 0) el.className = "color";
+	else if (t.indexOf("#") >= 0) el.className = "underline";
+	t = t.replace("#", "").replace("$", "");
+	(root || d.getElementById("out")).appendChild(el);
+	el.appendChild(d.createTextNode(t));
+}
+function paBr(n){
+	var d = document;
+	d.getElementById("out").appendChild(d.createElement("br"));
+	if (n > 1) {
+		for(var i = 1; i < n; i++) {
+			pa(" ");
+			d.getElementById("out").appendChild(d.createElement("br"));
+		}
+	}
+}
+function pa(T, root){
+	txt = T.split(" ");
+	for (var i=0,ilen=txt.length; i<ilen; i++){
+		var t = txt[i];
+		if (t.indexOf(",") > -1) paSvg.apply(null, [root, ].concat(t.split(",")));
+		else paChr(t, root);
+	}
+}
+
+
+
+pa("tr,aw,m n,aw,m tr,o2,ng c,o,i,4 ng,y2,i,2 t,a ，")
+pa("ch,y,,4 t,a,i,2 ch,y,,4 m,e,nh,5 kh,e2,u,1 l,a,,2 g,e2,t,1 nh,aw,u 。");
+pa("tr,a,i,3 c,wa m,o,t,5 c,u2,c,5 b,e,,3 dz,aw2,u");
+pa("nh,y,ng,4 d,i2,u,2 tr,o,ng th,aw2,i,1 m,a,,2 d,aw,u d,a2,n,1 l,o,ng,2 。");
+pa("l,a,,5 gi,i,,2 b,i,,3 s,aw,c,1 t,y ph,o2,ng ，");
+pa("tr,a2,i,2 x,aw,nh c,we2,n v,a2,i,1 m,a,,1 h,o,ng,1 d,aw,nh,1 g,e2,n 。");
+pa("c,a,u,3 th,a2,m l,aw2,n,2 gi,a2,,3 tr,y2,c,1 d,e2,n,2 ，");
+pa("ph,o,ng t,i,nh,2 c,o2,,1 l,u,c,5 c,o2,n,2 tr,wi2,n,2 s,y,,3 x,aw,nh 。");
+
+
+paBr(2)
+pa(" tr,aw,m n,aw,m 中 c,o,i,4 ng,y2,i,2 t,a ，")
+pa("ch,y,,4 才 ch,y,,4 命 kh,e2,u,1 l,a,,2 g,e2,t,1 nh,aw,u 。");
+pa("tr,a,i,3 c,wa m,o,t,5 局 b,e,,3 橷 ，");
+pa("nh,y,ng,4 調 tr,o,ng th,aw2,i,1 m,a,,2 d,aw,u d,a2,n,1 l,o,ng,2 。");
+pa("l,a,,5 gi,i,,2 彼 嗇 斯 豊 ，");
+pa("tr,a2,i,2 x,aw,nh c,we2,n v,a2,i,1 m,a,,1 紅 打 g,e2,n 。");
+pa("c,a,u,3 th,a2,m l,aw2,n,2 gi,a2,,3 tr,y2,c,1 d,e2,n,2 ，");
+pa("風 情 c,o2,,1 l,u,c,5 c,o2,n,2 傳 史 x,aw,nh 。");
+paBr(2);
+pa(" r,aw,ng,2 n,aw,m 嘉 靖 朝 明 ，");
+pa("b,o,n,1 方 ph,aw,ng,3 l,aw,ng,5 h,a,i 京 v,y,ng,4 v,a,ng,2 。");
+pa("c,o2,,1 nh,a,,2 員 外 户 王 ，");
+pa("家 資 ng,i,,4 c,u,ng,4 常 常 b,aw2,c,5 中 。");
+pa("m,o,t,5 tr,a,i c,o2,n th,y,,1 r,o,t,1 l,o2,ng,2 ，");
+pa("王 觀 l,a,,2 ch,y,,4 綏 dz,o,ng,2 儒 家 。");
+pa("頭 l,o,ng,2 h,a,i 妸 素 娥 ，");
+pa("翠 翹 l,a,,2 姉 㛪 l,a,,2 翠 雲 。");
+paBr(2);
+pa(" 枚 骨 格 雪 精 神 ，");
+pa("m,o,t,5 ng,y2,i m,o,t,5 v,e,,3 m,y2,i,2 分 院 m,y2,i,2 。");
+pa("雲 x,e,m 荘 重 kh,a,c,1 v,a2,i,2 ，");
+pa("囷 tr,aw,ng d,aw2,i,2 d,aw,n,5 n,e,t,1 ng,a,i,2 n,aw,,3 n,a,ng 。");
+pa("花 c,y2,i,2 玉 説 端 莊 ，");
+pa("m,aw2,i th,u2 n,y2,c,1 t,o2,c,1 雪 nh,y2,ng,2 m,aw,u,2 dz,a 。");
+paBr(2);
+//pa("    T R U Y Ệ N  K I Ề U");
+
+
+window.pa = pa
+document.getElementById('writer').dispatchEvent(new Event('input'));
+}
+display()
+</script>
+
+
+<br>
+<br>
+</div>
+</div>
+</body>
+</html>
