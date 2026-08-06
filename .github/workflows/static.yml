@@ -1,0 +1,25 @@
+name: Deploy static content to Pages (branch-based)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # Achtung: write statt nur read, da direkt gepusht wird
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # hier ggf. dein Build-Schritt, falls du einen brauchst
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .   # Pfad zu deinem gebauten/statischen Output
+          # publish_branch: gh-pages  # optional, default ist bereits gh-pages
