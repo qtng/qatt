@@ -123,15 +123,14 @@ class App {
           const progress = this.getLessonProgress(lesson.id);
           html += `
             <div class="col-12 lesson-${lesson.id}">
-              <div class="card p-3 lesson-card" onclick="app.renderLessonPreview('${lesson.id}')">
+              <div class="card p-3 lesson-card ${lesson.classes}" onclick="app.renderLessonPreview('${lesson.id}')">
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="flex-grow-1 me-3">
                     <h5 class="fw-bold mb-1">${lesson.name}</h5>
-                    
                     <small class="opacity-50 mt-1 d-block">${lesson.symbols.length} chữ</small>
                   </div>
                   <div class="d-flex flex-column align-items-stretch">
-                  <div id="thumb-${lesson.id}" class="lesson-thumbnail"></div>
+                  ${lesson.thumb?'<div id="thumb-'+lesson.id+'" class="lesson-thumbnail"></div>':''}
                   <div class="progress mt-1">
                     <div class="progress-bar bg-info" role="progressbar" style="width: ${progress}%;" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
@@ -149,7 +148,7 @@ class App {
     Object.values(this.lessons).forEach(lesson => { 
       const thumbElement = document.getElementById(`thumb-${lesson.id}`);
       if (thumbElement) {
-        this.renderToElement(lesson.symbols[1], this.getActiveStyle(lesson), thumbElement, true); 
+        this.renderToElement(lesson.thumb, this.getActiveStyle(lesson), thumbElement, true);
       }
     });
 
