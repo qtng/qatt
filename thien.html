@@ -260,7 +260,7 @@
                 this.ctx.scale(dpr, dpr);
                 
                 this.center = size / 2;
-                this.baseRadius = (size / 2) - 100;
+                this.baseRadius = (size / 2) - 125;
             }
 
             bindEvents() {
@@ -370,15 +370,15 @@
 
                 const phaseProgress = phaseTime / currentPhaseLength;
                 let easeVal = 0;
-                
+                let increase = 0.15
                 if (localPhase === 0) {
                     easeVal = (1 - Math.cos(phaseProgress * Math.PI)) / 2;
-                    this.state.scaleFactor = 1.0 + (easeVal * 0.05);
+                    this.state.scaleFactor = 1.0 + (easeVal * increase);
                 } else if (localPhase === 1) {
-                    this.state.scaleFactor = 1.05;
+                    this.state.scaleFactor = 1 + increase;
                 } else if (localPhase === 2) {
                     easeVal = (1 + Math.cos(phaseProgress * Math.PI)) / 2;
-                    this.state.scaleFactor = 1.0 + (easeVal * 0.05);
+                    this.state.scaleFactor = 1.0 + (easeVal * increase);
                 } else {
                     this.state.scaleFactor = 1.0;
                 }

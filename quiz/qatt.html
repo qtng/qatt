@@ -26,59 +26,69 @@
         --highlight-rhymes: #60a5fa;
         --highlight-codas: #c084fc;
   	}
-  		.style-selector-wrap,
-  		.reference-svg-container {display:none}
-  		.back-link {color: var(--fgcolor)!important}
-  		#quiz-navbar {
-  			padding-top: 16px!important;
-  			background: rgba(var(--fgcolor-raw),0.4)
-  		}
-  		body {
-  			background: var(--bgcolor);
-  			color: var(--fgcolor);
-  		}
-  		.card {
-  			background: rgba(255,255,255,.05);
-  			color: var(--fgcolor)
-  		}
-  		.symbol-card, .word-grid-item, .lesson-thumbnail  {
-  			background: rgba(0,0,0,.1);
-  			color: var(--fgcolor-inverse)
-  		}
-  		
-  		.progress {background: rgba(255,255,255,.7)}
-  
-		nobr:has(svg:nth-child(2)) {
-        	display: inline-flex;
-        	flex-direction: column-reverse;
-        	align-items: center;
-        	
-        	svg:last-child {
-        		height: calc(0.4 * var(--svg-height))!important;
-        		width: calc(0.7 * var(--svg-height))!important;
-        		border: none!important;
-        		position: relative!important;
-        		bottom: calc(-0.1 * var(--svg-height))!important;
-        		top: .35em!important;
-        		margin-bottom: 0!important;
-        		use {
-        		    stroke-width: calc(1.4 * var(--stroke-width));
-        		}
-        	}
-        	svg:first-child {
-        		position: relative!important;
-        		height: calc(0.7 * var(--svg-height))!important;
-        		width: calc(0.8 * var(--svg-height))!important;
-        		margin-top: 0!important;
-        		use {
-        			stroke-width: calc(1.2 * var(--stroke-width));
-        		}
-        		use[href^="#qt"] {
-        			transform-origin: center;
-        			transform: scale(1, 1.2);
-        		}
-        	}
-        }
+	.style-selector-wrap,
+	.reference-svg-container {display:none}
+	.back-link {color: var(--fgcolor)!important}
+	#quiz-navbar {
+		padding-top: 16px!important;
+		background: rgba(var(--fgcolor-raw),0.4)
+	}
+	body {
+		background: var(--bgcolor);
+		color: var(--fgcolor);
+	}
+	.card {
+		background: rgba(255,255,255,.05);
+		color: var(--fgcolor)
+	}
+	.symbol-card, .word-grid-item, .lesson-thumbnail  {
+		background: rgba(0,0,0,.1);
+		color: var(--fgcolor-inverse)
+	}
+	
+	.progress {background: rgba(255,255,255,.7)}
+
+	nobr:has(svg:nth-child(2)) {
+		display: inline-flex;
+		flex-direction: column-reverse;
+		align-items: center;
+		
+		svg:last-child {
+			height: calc(0.4 * var(--svg-height))!important;
+			width: calc(0.7 * var(--svg-height))!important;
+			border: none!important;
+			position: relative!important;
+			bottom: calc(-0.1 * var(--svg-height))!important;
+			top: .35em!important;
+			margin-bottom: 0!important;
+			use {
+				stroke-width: calc(1.4 * var(--stroke-width));
+			}
+		}
+		svg:first-child {
+			position: relative!important;
+			height: calc(0.7 * var(--svg-height))!important;
+			width: calc(0.8 * var(--svg-height))!important;
+			margin-top: 0!important;
+			use {
+				stroke-width: calc(1.2 * var(--stroke-width));
+			}
+			use[href^="#qt"] {
+				transform-origin: center;
+				transform: scale(1, 1.2);
+			}
+		}
+	}
+	.darken-5 {filter: brightness(95%) contrast(105%)}
+	.darken-10 {filter: brightness(90%) contrast(110%)}
+	.darken-15 {filter: brightness(85%) contrast(115%)}
+	.darken-20 {filter: brightness(80%) contrast(120%)}
+	.darken-25 {filter: brightness(75%) contrast(125%)}
+	.darken-30 {filter: brightness(70%) contrast(130%)}
+	.darken-35 {filter: brightness(65%) contrast(135%)}
+	.darken-40 {filter: brightness(60%) contrast(140%)}
+	.darken-45 {filter: brightness(55%) contrast(145%)}
+	.darken-50 {filter: brightness(50%) contrast(150%)}
 
     /* !!! START OF PROTECTED CSS BLOCK !!! */
     .lesson-onsets :not(.reference-svg-container) > nobr > svg {
@@ -133,11 +143,12 @@ app.addLesson({
 	category: levelName,
 	name: "22 Chữ cơ bản",
 	style: ["3"],
+	thumb: "ngan",
+	classes: "bg-primary",
 	symbols: [
-		"ngan",
-		"oan",
-		"ghen", "hoen",
-		"lơn", "quơn",
+		"lơn", "uơn",
+		"ngan", "hoan",
+		"ghen", "quen",
 		"trưn", "đươn",
 		"năn", "toăn",
 		"thân", "nhuân",
@@ -153,6 +164,8 @@ app.addLesson({
 	category: levelName,
 	name: "Thanh điệu",
 	style: ["3"],
+	classes: "bg-primary darken-10",
+	thumb: "cán",
 	symbols: [
 		"can",
 		"cán", "càn",
@@ -165,6 +178,8 @@ app.addLesson({
 	category: "QATT II — qatt-mini",
 	name: "Âm cuối (theo qatt-mini)",
 	style: ["3"],
+	classes: "bg-primary darken-20",
+	thumb: "cát",
 	symbols: [
 		"cán",
 		"cát",
@@ -193,15 +208,35 @@ const rhymesList = [
 const rhymesList2 = [
     { words: "oa uơ uê oe uy uya" }, 
     { words: "oai oay uơi uây" },
-    { words: "oao oau uâu uêu oeo uyu uyêu" },
+    { words: "oao oau uâu uêu oeo" },
     { words: "oan oăn uơn uân uên oen uyn uyên" }, 
-    { words: "oam oăm uơm uâm uêm oem uym uyêm" },
-    { words: "oang oăng oanh uâng uênh oeng uynh uyêng" },
+    { words: "oam oăm uâm" },
+    { words: "oang oăng oanh uâng uênh oeng uynh" },
 ];
 
 let rhymeIdx = 0;
-rhymesList.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT III — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
-rhymesList2.forEach((rhyme) => { rhymeIdx++; app.addLesson({ id: "rhymes-" + rhymeIdx, category: "QATT III — Quốc Âm Tân Tự mở rộng", name: "Vần " + rhymeIdx, style: ["0"], symbols: rhyme.words.split(" ") }); });
+rhymesList.forEach((rhyme, i) => {
+	rhymeIdx++; app.addLesson({
+		id: "rhymes-" + rhymeIdx,
+		category: "QATT III — Quốc Âm Tân Tự mở rộng",
+		name: "Vần " + rhymeIdx,
+		style: ["0"],
+		classes: "bg-success darken-" + (i * 10),
+		thumb: rhyme.words.split(" ")[1],
+		symbols: rhyme.words.split(" ")
+	});
+});
+rhymesList2.forEach((rhyme, i) => {
+	rhymeIdx++; app.addLesson({
+		id: "rhymes-" + rhymeIdx,
+		category: "QATT III — Quốc Âm Tân Tự mở rộng",
+		name: "Vần " + rhymeIdx,
+		style: ["0"],
+		classes: "bg-danger darken-" + (i * 10),
+		thumb: rhyme.words.split(" ")[1],
+		symbols: rhyme.words.split(" ")
+	});
+});
 	
 window.app = app;
 app.renderLibrary();
