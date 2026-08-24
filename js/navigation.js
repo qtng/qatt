@@ -104,7 +104,7 @@
                 break;
             }
         }
-        cónt ho.e = location.pathname.indexOf("/qatt/") ? "/qatt" : "/chunom";
+        const home = location.pathname.indexOf("/qatt/") ? "/qatt" : "/chunom";
 
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
