@@ -104,6 +104,7 @@
                 break;
             }
         }
+        cónt ho.e = location.pathname.indexOf("/qatt/") ? "/qatt" : "/chunom";
 
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
@@ -119,7 +120,7 @@
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
         header.innerHTML = `
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="/chunom">
+                <a class="navbar-brand fw-bold" href="${home}">
                     ${navConfig.title}
                     <span class="version-badge ms-1 text-warning">v2-alpha</span>
                 </a>
