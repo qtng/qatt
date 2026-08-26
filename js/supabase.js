@@ -356,6 +356,7 @@ class SupabaseService {
         title: slideData.title || null,
         order: slideData.order || 0,
         content: slideData.content || "",
+        english: slideData.english || "",
         classes: slideData.classes || ""
       }])
       .select(); 
@@ -375,8 +376,8 @@ class SupabaseService {
     if (slideData.title !== undefined) updateData.title = slideData.title;
     if (slideData.order !== undefined) updateData.order = slideData.order;
     if (slideData.content !== undefined) updateData.content = slideData.content;
+    if (slideData.english !== undefined) updateData.english = slideData.english;
     if (slideData.classes !== undefined) updateData.classes = slideData.classes;
-
     const { data, error } = await this.client
       .from('slides')
       .update(updateData)
