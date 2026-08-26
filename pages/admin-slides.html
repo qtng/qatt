@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slides Verwaltung</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Container für die App (Navigation wird von navigation.js extern injiziert) -->
+    <div class="container mt-5 pt-3 pb-5 mb-5">
+        <header class="pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">Slides verwalten</h1>
+            <div id="auth-section">
+                <button id="btn-login" class="btn btn-outline-primary d-none">Mit Google einloggen</button>
+                <span id="user-info" class="text-muted d-none"></span>
+            </div>
+        </header>
+
+        <div class="row">
+            <!-- Formular Bereich (Create / Update) -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0" id="form-title">Neuer Slide</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="slide-form">
+                            <input type="hidden" id="slide-id">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Gruppe (Projekt) *</label>
+                                <div class="input-group">
+                                    <select id="slide-group" class="form-select" required>
+                                        <option value="">-- Bitte wählen --</option>
+                                    </select>
+                                    <input type="text" id="slide-group-new" class="form-control d-none" placeholder="Neue Gruppe...">
+                                    <button type="button" id="btn-toggle-new-group" class="btn btn-outline-secondary">Neu</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Titel</label>
+                                <input type="text" id="slide-title" class="form-control">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Sortierung (Order)</label>
+                                <input type="number" step="0.1" id="slide-order" class="form-control" value="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">CSS Klassen</label>
+                                <input type="text" id="slide-classes" class="form-control">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Inhalt (HTML/Tex)</label>
+                                <textarea id="slide-content" class="form-control" rows="8"></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" id="btn-reset" class="btn btn-secondary">Abbrechen</button>
+                                <button type="submit" class="btn btn-primary">Speichern</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listen Bereich (Read / Delete) -->
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Vorhandene Slides</h5>
+                        <div class="input-group" style="width: 300px;">
+                            <select id="filter-group" class="form-select form-select-sm">
+                                <option value="">-- Gruppe wählen --</option>
+                            </select>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-load">Laden</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Gruppe</th>
+                                    <th>Titel</th>
+                                    <th>Public</th>
+                                    <th class="text-end">Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="slides-table-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">Bitte eine Gruppe auswählen und laden.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Externe Abhängigkeiten -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://qatt.org/qatt/js/navigation.js"></script>
+    <script src="https://qatt.org/qatt/js/supabase.js"></script>
+
+    <!-- App Logik -->
+    <script>
+        class SlidesAdminApp {
+            constructor() {
+                if (typeof SupabaseService !== 'undefined') {
+                    this.db = new SupabaseService();
+                }
+                this.currentSlides = [];
+                this.initDOM();
+            }
+
+            initDOM() {
+                this.form = document.getElementById('slide-form');
+                this.tableBody = document.getElementById('slides-table-body');
+                this.filterGroup = document.getElementById('filter-group');
+                this.formGroup = document.getElementById('slide-group');
+                this.formGroupNew = document.getElementById('slide-group-new');
+                this.formTitle = document.getElementById('form-title');
+                
+                document.getElementById('btn-login').addEventListener('click', () => {
+                    if (this.db) this.db.signInWithGoogle();
+                });
+                document.getElementById('btn-load').addEventListener('click', () => this.loadSlides());
+                document.getElementById('btn-reset').addEventListener('click', () => this.resetForm());
+                
+                document.getElementById('btn-toggle-new-group').addEventListener('click', () => this.toggleNewGroupInput());
+                
+                this.form.addEventListener('submit', (e) => this.handleSave(e));
+            }
+
+            async init() {
+                if (!this.db) {
+                    this.tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">Fehler: supabase.js konnte nicht geladen werden.</td></tr>';
+                    return;
+                }
+                
+                const user = await this.db.init();
+                const loginBtn = document.getElementById('btn-login');
+                const userInfo = document.getElementById('user-info');
+
+                if (user && user.app_metadata && user.app_metadata.provider === 'google') {
+                    userInfo.textContent = `Eingeloggt als: ${user.email || user.id.substring(0, 8)}`;
+                    userInfo.classList.remove('d-none');
+                    await this.loadGroups();
+                } else {
+                    loginBtn.classList.remove('d-none');
+                }
+            }
+
+            async loadGroups() {
+                if (!this.db || !this.db.client) return;
+                
+                // Alle Gruppen aus der Datenbank laden
+                const { data, error } = await this.db.client.from('slides').select('group');
+                if (error || !data) return;
+
+                // Eindeutige Gruppen extrahieren und sortieren
+                const uniqueGroups = [...new Set(data.map(item => item.group))].sort();
+                
+                const currentFilter = this.filterGroup.value;
+                const currentForm = this.formGroup.value;
+
+                let optionsHTML = '<option value="">-- Bitte wählen --</option>';
+                uniqueGroups.forEach(g => {
+                    optionsHTML += `<option value="${g}">${g}</option>`;
+                });
+
+                this.filterGroup.innerHTML = optionsHTML;
+                this.formGroup.innerHTML = optionsHTML;
+
+                // Vorherige Auswahl wiederherstellen, falls noch existent
+                if (uniqueGroups.includes(currentFilter)) this.filterGroup.value = currentFilter;
+                if (uniqueGroups.includes(currentForm)) this.formGroup.value = currentForm;
+            }
+
+            toggleNewGroupInput() {
+                const btn = document.getElementById('btn-toggle-new-group');
+
+                if (this.formGroupNew.classList.contains('d-none')) {
+                    // Wechsel zu Texteingabe
+                    this.formGroup.classList.add('d-none');
+                    this.formGroup.required = false;
+                    this.formGroupNew.classList.remove('d-none');
+                    this.formGroupNew.required = true;
+                    this.formGroupNew.focus();
+                    btn.textContent = 'Zurück';
+                } else {
+                    // Wechsel zu Dropdown
+                    this.formGroupNew.classList.add('d-none');
+                    this.formGroupNew.required = false;
+                    this.formGroupNew.value = '';
+                    this.formGroup.classList.remove('d-none');
+                    this.formGroup.required = true;
+                    btn.textContent = 'Neu';
+                }
+            }
+
+            async loadSlides() {
+                if (!this.db) return;
+                const group = this.filterGroup.value;
+                if (!group) {
+                    this.tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Bitte zuerst eine Gruppe auswählen.</td></tr>';
+                    return;
+                }
+
+                this.tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Lade Daten...</td></tr>';
+                
+                // true = includePrivate, damit wir auch die Entwürfe sehen
+                this.currentSlides = await this.db.getSlides(group, true);
+                this.renderTable();
+            }
+
+            renderTable() {
+                this.tableBody.innerHTML = '';
+                if (!this.currentSlides || this.currentSlides.length === 0) {
+                    this.tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Keine Slides in dieser Gruppe gefunden.</td></tr>';
+                    return;
+                }
+
+                this.currentSlides.forEach(slide => {
+                    const tr = document.createElement('tr');
+                    
+                    const publicBadge = slide.is_public 
+                        ? '<span class="badge bg-success">Public</span>' 
+                        : '<span class="badge bg-secondary">Entwurf</span>';
+
+                    tr.innerHTML = `
+                        <td>${slide.order}</td>
+                        <td>${slide.group}</td>
+                        <td>${slide.title || '-'}</td>
+                        <td>${publicBadge}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary btn-edit me-1">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete">Del</button>
+                        </td>
+                    `;
+
+                    tr.querySelector('.btn-edit').addEventListener('click', () => this.editSlide(slide));
+                    
+                    // Inline-Bestätigung statt window.confirm()
+                    const btnDelete = tr.querySelector('.btn-delete');
+                    btnDelete.addEventListener('click', (e) => {
+                        if (btnDelete.classList.contains('confirm-mode')) {
+                            this.deleteSlide(slide.id);
+                        } else {
+                            btnDelete.classList.add('confirm-mode', 'btn-danger', 'text-white');
+                            btnDelete.classList.remove('btn-outline-danger');
+                            btnDelete.textContent = 'Sicher?';
+                            // Reset nach 3 Sekunden
+                            setTimeout(() => {
+                                if (document.body.contains(btnDelete)) {
+                                    btnDelete.classList.remove('confirm-mode', 'btn-danger', 'text-white');
+                                    btnDelete.classList.add('btn-outline-danger');
+                                    btnDelete.textContent = 'Del';
+                                }
+                            }, 3000);
+                        }
+                    });
+                    
+                    this.tableBody.appendChild(tr);
+                });
+            }
+
+            editSlide(slide) {
+                this.formTitle.textContent = "Slide bearbeiten";
+                document.getElementById('slide-id').value = slide.id;
+                
+                // Dropdown korrekt setzen, oder als neues Feld anzeigen, falls Gruppe im Dropdown fehlt
+                const optionExists = Array.from(this.formGroup.options).some(opt => opt.value === slide.group);
+                if (optionExists) {
+                    if (!this.formGroupNew.classList.contains('d-none')) this.toggleNewGroupInput();
+                    this.formGroup.value = slide.group;
+                } else {
+                    if (this.formGroupNew.classList.contains('d-none')) this.toggleNewGroupInput();
+                    this.formGroupNew.value = slide.group;
+                }
+
+                document.getElementById('slide-title').value = slide.title || '';
+                document.getElementById('slide-order').value = slide.order;
+                document.getElementById('slide-classes').value = slide.classes || '';
+                document.getElementById('slide-content').value = slide.content || '';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            resetForm() {
+                this.formTitle.textContent = "Neuer Slide";
+                this.form.reset();
+                document.getElementById('slide-id').value = '';
+                document.getElementById('slide-order').value = '0';
+                
+                // Zurück zum Dropdown, falls Textfeld offen
+                if (!this.formGroupNew.classList.contains('d-none')) {
+                    this.toggleNewGroupInput();
+                }
+            }
+
+            async handleSave(e) {
+                e.preventDefault();
+                if (!this.db) return;
+                
+                const id = document.getElementById('slide-id').value;
+                
+                // Ermittle die Gruppe abhängig davon, welches Feld aktiv ist
+                const isNewGroupActive = !this.formGroupNew.classList.contains('d-none');
+                const group = isNewGroupActive ? this.formGroupNew.value.trim() : this.formGroup.value;
+                
+                if (!group) return; // Sicherstellung, dass eine Gruppe gewählt/eingetippt wurde
+                
+                const slideData = {
+                    title: document.getElementById('slide-title').value.trim(),
+                    order: parseFloat(document.getElementById('slide-order').value) || 0,
+                    classes: document.getElementById('slide-classes').value.trim(),
+                    content: document.getElementById('slide-content').value
+                };
+
+                if (id) {
+                    await this.db.setSlide(id, { group, ...slideData });
+                } else {
+                    await this.db.createSlide(group, slideData);
+                }
+
+                this.resetForm();
+                
+                // Gruppen-Dropdowns aktualisieren
+                await this.loadGroups();
+                
+                // Setze den Filter auf die gerade gespeicherte Gruppe
+                this.filterGroup.value = group;
+                await this.loadSlides();
+            }
+
+            async deleteSlide(id) {
+                if (!this.db) return;
+                await this.db.deleteSlide(id);
+                
+                // Prüfen, ob die Gruppe danach leer ist, und ggf. Dropdowns aktualisieren
+                await this.loadGroups();
+                await this.loadSlides();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new SlidesAdminApp();
+            setTimeout(() => app.init(), 200);
+        });
+    </script>
+</body>
+</html>
+
+                                                           
