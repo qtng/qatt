@@ -324,6 +324,64 @@ class SupabaseService {
     }
     return data;
   }
+
+  // Mehotds for page/tutorial slides
+  async getSlides(group = "") {
+    if (!this.client) await this.init();
+
+    let query = this.client.from('slides').select('*');
+    if (group) query = query.eq('group', group);
+
+    const { data, error } = await query.order('order', { ascending: true });
+    if (error) {
+      console.error("Fetch slides error:", error.message);
+      return [];
+    }
+    return data;
+  }
+
+  async createSlide(group, slideData = {}) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+    if (!group) return { error: "Group is required" };
+
+    const { data, error } = await this.client
+      .from('slides')
+      .insert([{
+        group: group,
+        title: slideData.title || null,
+        order: slideData.order || 0,
+        content: slideData.content || "",
+        classes: slideData.classes || ""
+      }])
+      .select(); 
+
+    if (error) console.error("Create slide error:", error.message);
+    return { data, error };
+  }
+  
+  async setSlide(id, slideData = {}) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+    if (!id) return { error: "ID is required" };
+
+    const updateData = {};
+    if (slideData.group !== undefined) updateData.group = slideData.group;
+    if (slideData.title !== undefined) updateData.title = slideData.title;
+    if (slideData.order !== undefined) updateData.order = slideData.order;
+    if (slideData.content !== undefined) updateData.content = slideData.content;
+    if (slideData.classes !== undefined) updateData.classes = slideData.classes;
+
+    const { data, error } = await this.client
+      .from('slides')
+      .update(updateData)
+      .eq('id', id)
+      .select();
+
+    if (error) console.error("Set slide error:", error.message);
+    return { data, error };
+      }
+  
   
 // end of class
 }
