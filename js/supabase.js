@@ -325,12 +325,14 @@ class SupabaseService {
     return data;
   }
 
-  // Mehotds for page/tutorial slides
-  async getSlides(group = "") {
+  // --- Slide Methods ---
+
+  async getSlides(group = "", includePrivate = false) {
     if (!this.client) await this.init();
 
     let query = this.client.from('slides').select('*');
     if (group) query = query.eq('group', group);
+    if (!includePrivate) query = query.eq('is_public', true);
 
     const { data, error } = await query.order('order', { ascending: true });
     if (error) {
@@ -339,7 +341,9 @@ class SupabaseService {
     }
     return data;
   }
+  
 
+  // Create a new slide
   async createSlide(group, slideData = {}) {
     if (!this.user) await this.init();
     if (!this.user) return { error: "Auth required" };
@@ -359,7 +363,8 @@ class SupabaseService {
     if (error) console.error("Create slide error:", error.message);
     return { data, error };
   }
-  
+
+  // Update an existing slide
   async setSlide(id, slideData = {}) {
     if (!this.user) await this.init();
     if (!this.user) return { error: "Auth required" };
@@ -380,8 +385,22 @@ class SupabaseService {
 
     if (error) console.error("Set slide error:", error.message);
     return { data, error };
-      }
-  
+  }
+
+  // Delete a slide
+  async deleteSlide(id) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+    if (!id) return { error: "ID is required" };
+
+    const { error } = await this.client
+      .from('slides')
+      .delete()
+      .eq('id', id);
+
+    if (error) console.error("Delete slide error:", error.message);
+    return { error };
+  }
   
 // end of class
 }
