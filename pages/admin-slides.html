@@ -12,9 +12,9 @@
     <!-- Container für die App (Navigation wird von navigation.js extern injiziert) -->
     <div class="container mt-5 pt-3 pb-5 mb-5">
         <header class="pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0">Slides verwalten</h1>
+            <h1 class="h3 mb-0">Manage Slides</h1>
             <div id="auth-section">
-                <button id="btn-login" class="btn btn-outline-primary d-none">Mit Google einloggen</button>
+                <button id="btn-login" class="btn btn-outline-primary d-none">Login with Google</button>
                 <span id="user-info" class="text-muted d-none"></span>
             </div>
         </header>
@@ -24,17 +24,17 @@
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h5 class="card-title mb-0" id="form-title">Neuer Slide</h5>
+                        <h5 class="card-title mb-0" id="form-title">New Slide</h5>
                     </div>
                     <div class="card-body">
                         <form id="slide-form">
                             <input type="hidden" id="slide-id">
                             
                             <div class="mb-3">
-                                <label class="form-label">Gruppe (Projekt) *</label>
+                                <label class="form-label">Group *</label>
                                 <div class="input-group">
                                     <select id="slide-group" class="form-select" required>
-                                        <option value="">-- Bitte wählen --</option>
+                                        <!--<option value="">-- Please choose--</option>-->
                                     </select>
                                     <input type="text" id="slide-group-new" class="form-control d-none" placeholder="Neue Gruppe...">
                                     <button type="button" id="btn-toggle-new-group" class="btn btn-outline-secondary">Neu</button>
@@ -42,28 +42,33 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Titel</label>
+                                <label class="form-label">Title</label>
                                 <input type="text" id="slide-title" class="form-control">
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Sortierung (Order)</label>
+                                <label class="form-label">Order</label>
                                 <input type="number" step="0.1" id="slide-order" class="form-control" value="0">
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">CSS Klassen</label>
+                                <label class="form-label">CSS Classes</label>
                                 <input type="text" id="slide-classes" class="form-control">
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Inhalt (HTML/Tex)</label>
+                                <label class="form-label">Content</label>
                                 <textarea id="slide-content" class="form-control" rows="8"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">English</label>
+                                <textarea id="slide-english class="form-control" rows="8"></textarea>
                             </div>
                             
                             <div class="d-flex justify-content-between">
-                                <button type="button" id="btn-reset" class="btn btn-secondary">Abbrechen</button>
-                                <button type="submit" class="btn btn-primary">Speichern</button>
+                                <button type="button" id="btn-reset" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
                             </div>
                         </form>
                     </div>
@@ -74,12 +79,12 @@
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Vorhandene Slides</h5>
+                        <h5 class="mb-0">Existing Slides</h5>
                         <div class="input-group" style="width: 300px;">
                             <select id="filter-group" class="form-select form-select-sm">
-                                <option value="">-- Gruppe wählen --</option>
+                                <!--<option value="">-- Choose Group --</option>-->
                             </select>
-                            <button class="btn btn-outline-secondary btn-sm" id="btn-load">Laden</button>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-load">Load</button>
                         </div>
                     </div>
                     <div class="card-body p-0 table-responsive">
@@ -87,15 +92,15 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Order</th>
-                                    <th>Gruppe</th>
-                                    <th>Titel</th>
+                                    <th>Group</th>
+                                    <th class="text-nowrap text-truncate">Title</th>
                                     <th>Public</th>
-                                    <th class="text-end">Aktionen</th>
+                                    <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="slides-table-body">
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">Bitte eine Gruppe auswählen und laden.</td>
+                                    <td colspan="5" class="text-center text-muted py-4">Please choose a group and load.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -291,6 +296,7 @@
                 document.getElementById('slide-order').value = slide.order;
                 document.getElementById('slide-classes').value = slide.classes || '';
                 document.getElementById('slide-content').value = slide.content || '';
+                document.getElementById('slide-english').value = slide.english || '';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
@@ -322,7 +328,8 @@
                     title: document.getElementById('slide-title').value.trim(),
                     order: parseFloat(document.getElementById('slide-order').value) || 0,
                     classes: document.getElementById('slide-classes').value.trim(),
-                    content: document.getElementById('slide-content').value
+                    content: document.getElementById('slide-content').value,
+                    english: document.getElementById('slide-english').value
                 };
 
                 if (id) {
