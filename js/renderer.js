@@ -977,7 +977,7 @@ class SvgGlyphRenderer {
 	  const type = observer.type != null ? observer.type : localStorage.getItem('qattType') || "0";
       for (let m of mutations) {
         for (let n of m.addedNodes) {
-          if (n.nodeName === tagName) this.render(n.innerText.trim(), n, n.dataset.type ?? type);
+          if (n.nodeName === tagName) this.render(n.textContent.trim(), n, n.dataset.type ?? type);
           else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach((tag) => {
 			this.render(tag.textContent.trim(), tag, tag.dataset.type ?? type)
 		  });
@@ -987,7 +987,7 @@ class SvgGlyphRenderer {
 	const type = options.type != null ? options.type : localStorage.getItem('qattType') || "0";
     observer.observe(document.body, { childList: true, subtree: true });
     document.querySelectorAll(tagName).forEach((tag) => {
-	  this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
+	  this.render(tag.textContent.trim(), tag, tag.dataset.type ?? type);
 	});
   }
 }
