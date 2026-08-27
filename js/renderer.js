@@ -979,7 +979,7 @@ class SvgGlyphRenderer {
         for (let n of m.addedNodes) {
           if (n.nodeName === tagName) this.render(n.innerText.trim(), n, n.dataset.type ?? type);
           else if (n.nodeType === 1) n.querySelectorAll(tagName).forEach((tag) => {
-			this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type)
+			this.render(tag.textContent.trim(), tag, tag.dataset.type ?? type)
 		  });
         }
       }
