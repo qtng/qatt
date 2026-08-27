@@ -238,17 +238,16 @@
                     const tr = document.createElement('tr');
                     
                     const publicBadge = slide.is_public 
-                        ? '<span class="badge bg-success">Public</span>' 
-                        : '<span class="badge bg-secondary">Entwurf</span>';
+                        ? '<span class="badge bg-success">🌐</span>' 
+                        : '<span class="badge bg-secondary">✏️</span>';
 
                     tr.innerHTML = `
                         <td>${slide.order}</td>
-                        <td>${slide.group}</td>
                         <td>${slide.title || '-'}</td>
                         <td>${publicBadge}</td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary btn-edit me-1">Edit</button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete">Del</button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete">x</button>
+                            <button class="btn btn-outline-primary btn-edit ms-1">Edit slide</button>
                         </td>
                     `;
 
@@ -258,17 +257,17 @@
                     const btnDelete = tr.querySelector('.btn-delete');
                     btnDelete.addEventListener('click', (e) => {
                         if (btnDelete.classList.contains('confirm-mode')) {
-                            this.deleteSlide(slide.id);
+                            if (confirm("Confirm deletion") this.deleteSlide(slide.id);
                         } else {
                             btnDelete.classList.add('confirm-mode', 'btn-danger', 'text-white');
                             btnDelete.classList.remove('btn-outline-danger');
-                            btnDelete.textContent = 'Sicher?';
+                            btnDelete.textContent = 'Sure?';
                             // Reset nach 3 Sekunden
                             setTimeout(() => {
                                 if (document.body.contains(btnDelete)) {
                                     btnDelete.classList.remove('confirm-mode', 'btn-danger', 'text-white');
                                     btnDelete.classList.add('btn-outline-danger');
-                                    btnDelete.textContent = 'Del';
+                                    btnDelete.textContent = 'x';
                                 }
                             }, 3000);
                         }
