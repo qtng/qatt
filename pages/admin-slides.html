@@ -256,7 +256,7 @@
                     const btnDelete = tr.querySelector('.btn-delete');
                     btnDelete.addEventListener('click', (e) => {
                         if (btnDelete.classList.contains('confirm-mode')) {
-                            if (confirm("Confirm deletion") this.deleteSlide(slide.id);
+                            if (confirm("Confirm deletion")) this.deleteSlide(slide.id);
                         } else {
                             btnDelete.classList.add('confirm-mode', 'btn-danger', 'text-white');
                             btnDelete.classList.remove('btn-outline-danger');
