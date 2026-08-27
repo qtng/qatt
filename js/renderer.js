@@ -14,10 +14,11 @@ renderer.render("t,i2,ng,1", element, optionalQattType);
 
 // use mutationObserver to automatically render
 // the innerText of the registered tag.
-// The used Qatt type is read from the data-type attribute or
-// falls back to localStorage.qattType if not specified.
+// The used Qatt type read from the data-type attribute or
+// falls back the "type" key in options param.
+// If that is undefined or null, too, the type falls back to localStorage.qattType.
 renderer.observe("TT");
-renderer.observe("TT", {brushFilter: 3})  // 3 is the filter strength, can be any low integer.
+renderer.observe("TT", {type: "1", brushFilter: 3})  // uses qatt type 1. 3 is the filter strength, can be any low integer.
 */
 
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
@@ -973,7 +974,7 @@ class SvgGlyphRenderer {
 	}
 	tagName = (tagName ?? "TT").toUpperCase();
     const observer = new MutationObserver(mutations => {
-	  const type = localStorage.getItem('qattType') || "0";
+	  const type = observer.type != null ? observer.type : localStorage.getItem('qattType') || "0";
       for (let m of mutations) {
         for (let n of m.addedNodes) {
           if (n.nodeName === tagName) this.render(n.innerText.trim(), n, n.dataset.type ?? type);
@@ -983,7 +984,7 @@ class SvgGlyphRenderer {
         }
       }
     });
-	const type = localStorage.getItem('qattType') || "0";
+	const type = options.type != null ? options.type : localStorage.getItem('qattType') || "0";
     observer.observe(document.body, { childList: true, subtree: true });
     document.querySelectorAll(tagName).forEach((tag) => {
 	  this.render(tag.innerText.trim(), tag, tag.dataset.type ?? type);
