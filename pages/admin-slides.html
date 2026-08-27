@@ -91,10 +91,9 @@
                         <table class="table table-hover mb-0 align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th>#</th>
+                                    <th>x</th>
                                     <th class="text-nowrap text-truncate">Title</th>
-                                    <th></th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Edit</th>
                                 </tr>
                             </thead>
                             <tbody id="slides-table-body">
@@ -237,20 +236,24 @@
                     const tr = document.createElement('tr');
                     
                     const publicBadge = slide.is_public 
-                        ? '<span class="badge bg-success">🌐</span>' 
-                        : '<span class="badge bg-secondary">✏️</span>';
+                        ? '🌐' 
+                        : '✏️';
 
                     tr.innerHTML = `
-                        <td>${slide.order}</td>
-                        <td>${slide.title || '-'}</td>
-                        <td>${publicBadge}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-danger btn-delete">x</button>
+                        <td>
+                            <span class="text-danger p-1">x</span
+                        </td>
+                        <td class="clickable text-truncate">
+                            <div class="float-end">${publicBadge}</div>
+                            ${slide.order}.&nbsp;
+                            ${slide.title || '-'}
+                        </td>
+                        <td class="text-end text-nowrap">
                             <button class="btn btn-outline-primary btn-edit ms-1">Edit slide</button>
                         </td>
                     `;
 
-                    tr.querySelector('.btn-edit').addEventListener('click', () => this.editSlide(slide));
+                    tr.querySelector('.clickable, btn-edit').addEventListener('click', () => this.editSlide(slide));
                     
                     // Inline-Bestätigung statt window.confirm()
                     const btnDelete = tr.querySelector('.btn-delete');
