@@ -11,9 +11,9 @@
 
     <!-- Container für die App (Navigation wird von navigation.js extern injiziert) -->
     <div class="container mt-2 pt-3 pb-5 mb-5">
-        <header class="pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0">Manage Slides</h1>
-            <div id="auth-section">
+        <header class="mb-3 d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">Slides</h1>
+            <div class="text-end" id="auth-section">
                 <button id="btn-login" class="btn btn-outline-primary d-none">Login with Google</button>
                 <span id="user-info" class="text-muted d-none"></span>
             </div>
@@ -31,7 +31,7 @@
                             <input type="hidden" id="slide-id">
                             
                             <div class="mb-3">
-                                <label class="form-label">Group *</label>
+                                <label class="form-label small">Group *</label>
                                 <div class="input-group">
                                     <select id="slide-group" class="form-select" required>
                                         <!--<option value="">-- Please choose--</option>-->
@@ -42,7 +42,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Title</label>
+                                <label class="form-label small">Title</label>
                                 <input type="text" id="slide-title" class="form-control">
                             </div>
                             
