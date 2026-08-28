@@ -31,7 +31,6 @@
                             <input type="hidden" id="slide-id">
                             
                             <div class="mb-3">
-                                <label class="form-label small">Group *</label>
                                 <div class="input-group">
                                     <select id="slide-group" class="form-select" required>
                                         <!--<option value="">-- Please choose--</option>-->
@@ -79,8 +78,8 @@
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Slides</h5>
-                        <div class="input-group" style="width: 300px;">
+                        <h5 class="mb-0 me-2">Slides</h5>
+                        <div class="input-group" style="min-width: 250px;">
                             <select id="filter-group" class="form-select form-select-sm">
                                 <!--<option value="">-- Choose Group --</option>-->
                             </select>
@@ -93,7 +92,6 @@
                                 <tr>
                                     <th>x</th>
                                     <th class="text-nowrap text-truncate">Title</th>
-                                    <th class="text-end">Edit</th>
                                 </tr>
                             </thead>
                             <tbody id="slides-table-body">
@@ -248,12 +246,9 @@
                             ${slide.order}&nbsp;
                             ${slide.title || '—'}
                         </td>
-                        <td class="clickable text-end text-nowrap">
-                            <button class="btn btn-outline-primary btn-edit ms-1">Edit slide</button>
-                        </td>
                     `;
 
-                    tr.querySelector('.clickable, .btn-edit').addEventListener('click', () => this.editSlide(slide));
+                    tr.querySelector('.clickable').addEventListener('click', () => this.editSlide(slide));
                     
                     // Inline-Bestätigung statt window.confirm()
                     const btnDelete = tr.querySelector('.delete');
