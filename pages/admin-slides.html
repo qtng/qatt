@@ -241,19 +241,19 @@
 
                     tr.innerHTML = `
                         <td>
-                            <span class="text-danger p-1">x</span
+                            <span class="text-danger p-1">x</span>
                         </td>
                         <td class="clickable text-truncate">
                             <div class="float-end">${publicBadge}</div>
-                            ${slide.order}.&nbsp;
-                            ${slide.title || '-'}
+                            ${slide.order}&nbsp;
+                            ${slide.title || '—'}
                         </td>
-                        <td class="text-end text-nowrap">
+                        <td class="clickable text-end text-nowrap">
                             <button class="btn btn-outline-primary btn-edit ms-1">Edit slide</button>
                         </td>
                     `;
 
-                    tr.querySelector('.clickable, btn-edit').addEventListener('click', () => this.editSlide(slide));
+                    tr.querySelector('.clickable').addEventListener('click', () => this.editSlide(slide));
                     
                     // Inline-Bestätigung statt window.confirm()
                     const btnDelete = tr.querySelector('.btn-delete');
