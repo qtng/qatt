@@ -1,603 +1,736 @@
+/*
+QATT renderer
 
-const qattOptions = {
-      convert: ".qatt",
-      selector: "qatt",
-      mapping: {},
-      ...JSON.parse(document.documentElement.dataset.qatt || "{}")
+const renderer = new QattRenderer(options);
+
+renderer.render("t,i2,ng,1", element);
+
+// use MutationObserver to automatically render
+// the innerText of the registered tag
+renderer.observe("TT");
+*/
+
+const PREFIX = "v2-";
+
+const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
+    	style="height:4800px;width:2540px;"
+    	id="svg">
+    	<defs>
+
+    	<path id="v2-a" data-onsetsize="xsmall" d="M60 10 v80 M50 90 h20 M65 35 h30 m-30 25 h30"/>
+    	<path id="v2-a2" data-onsetsize="xsmall" d="M68 20 h25 m-8 0 v40 c0 5 0 15 -5 30 M80 44 h-18 m0 22 h18"/>
+    	<path id="v2-aw" data-onsetsize="xsmall" d="M73 17 v52 M90 10 v40 c0 5 0 20 -4 40 M62 46 l37-10 M57 36v20"/>
+    	<path id="v2-aw2" data-onsetsize="xsmall" d="M62 15 h36 M71 25 l-8 14 M80 20 v68 m-22-38 h44"/>
+    	<path id="v2-e" data-onsetsize="xsmall" d="M55 15h20 M65 15 v70 M82 25 v50 M99 15 v70"/>
+    	<path id="v2-e2" data-onsetsize="xsmall"  d="M58 10 h40 M58 26 l14-6 m-3 5 v50 M90 10 v75"/>
+    	<path id="v2-i" data-onsetsize="xsmall"  d="M58 10 h40 M69 10 v65 M90 25 v60 m0-60 m-3-5l14 6"/>
+    	<path id="v2-i2" data-onsetsize="xsmall"  d="M58 38 l32-5m-32 30l32-5 M74 13 v77 h1 l20-5"/>
+    	<path id="v2-o" data-onsetsize="xsmall"  d="M58 15 h30 c-4 22 -8 45 -30 70 M64 38 M64 38m4-12l-10 20M64 38 c6 8 14 18 28 40"/>
+    	<path id="v2-o2" data-onsetsize="xsmall" d="M88 10 c0 0 -8 40 -19 56 m-10-6l12 16 M64 23 c0 0 13 15 28 40 M64 86 h30"/>
+    	<path id="v2-u2" data-onsetsize="xsmall" d="M60 25v45 m-2 4l14-14 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
+    	<path id="v2-u" data-onsetsize="xsmall" d="M94 16v50 M82 20 c0 0 -8 40 -18 56 m-7-8l9 18 M62 30 c0 0 14 24 26 50"/>
+    	<path id="v2-y" data-onsetsize="xsmall" d="M66 16 v65 M66 40 h28 m0-8v16 M67 60 l28 3"/>
+		<path id="v2-y2" data-onsetsize="xsmall" d="M64 20 v50 M80 13 v58 h1 l12-5 M60 85 h35"/>
+
+    	<path id="v2-_1" data-onsetsize="xsmall" d="M61 22 m-1-8 v16"/>
+    	<path id="v2-_2" data-onsetsize="xsmall" d="M62 45 m-1-8 v16"/>
+    	<path id="v2-_3" data-onsetsize="xsmall" d="M60 70 m-1-8 v16"/>
+    	<path id="v2-_4" data-onsetsize="xsmall" d="M60 70 m33-3 m1-8 v16"/>
+    	<path id="v2-_5" data-onsetsize="xsmall" d="M62 45 m26 0 m1-8 v16"/>
+    	<path id="v2-_6" data-onsetsize="xsmall" d="M61 22 m30 0 m1-8 v16"/>
+    	<path id="v2-_" d="M61 22 h30 M62 45 h26 M60 70 l34 -3"/>
+
+    	<path id="v2-b" d="M62 30 c0 0 10 10 28 33 M82 15 c0 0 -7 40 -17 55 M57 85 h35"/>
+    	<path id="v2-b1" data-onsetsize="xsmall" d="M62 30 m1 -8 l-5 15"/>
+    	<path id="v2-b2" data-onsetsize="xsmall" d="M82 15 m-17 55 m-6-4 l10 11"/>
+    	<path id="v2-b3" data-onsetsize="xsmall" d="M57 85 m0-8 v16"/>
+    	<path id="v2-b4" data-onsetsize="xsmall" d="M57 85 m35 0 m0-8 v16"/>
+    	<path id="v2-b5" data-onsetsize="xsmall" d="M62 30 m28 33 m5 -8 l-6 15"/>
+    	<path id="v2-b6" data-onsetsize="xsmall" d="M82 15 m-8 -1 h16"/>
+
+    	<path id="v2-c1" data-onsetsize="xsmall" d="M60 40 m-1 -8 v16"/>
+    	<path id="v2-c2" data-onsetsize="xsmall" d="M58 58 m-1 -8 v16"/>
+    	<path id="v2-c3" data-onsetsize="xsmall" d="M58 58 m30 0 m-7 4 l-3 10"/>
+    	<path id="v2-c4" data-onsetsize="xsmall" d="M90 16 m0 64 m-8 0 h16"/>
+    	<path id="v2-c5" data-onsetsize="xsmall" d="M90 16 m-8 0 h16"/>
+    	<path id="v2-c6" data-onsetsize="xsmall" d="M60 40 m30 0 m-10 -4 l-2 -9"/>
+    	<path id="v2-c" d="M90 16 v64 M60 40 h30 M58 58 h30"/>
+
+    	<path id="v2-ch1" data-onsetsize="xsmall" d="M78 20 m-8 -1 h16"/>
+    	<path id="v2-ch2" data-onsetsize="xsmall" d="M60 42 m-1 -8 v16"/>
+    	<path id="v2-ch3" data-onsetsize="xsmall" d="M60 64 m-1 -8 v16"/>
+    	<path id="v2-ch4" data-onsetsize="xsmall" d="M78 20 m-5 62 m-6 1 h16"/>
+    	<path id="v2-ch5" data-onsetsize="xsmall" d="M60 64 m35-6 m1 -8 v16"/>
+    	<path id="v2-ch6" data-onsetsize="xsmall" d="M60 42 m35-6 m1 -8 v16"/>
+  		<path id="v2-ch" d="M60 42 l35-6 M60 64 l35-6 M78 20 c0 30 0 45 -5 62"/>
+
+    	<path id="v2-d1" data-onsetsize="xsmall" d="M78 20 m-8-1 h16"/>
+    	<path id="v2-d2" data-onsetsize="xsmall" d="M62 40 m-1 -8 v16"/>
+    	<path id="v2-d3" data-onsetsize="xsmall" d="M78 20 m0 44 m-12 -8 l11 5"/>
+    	<path id="v2-d4" data-onsetsize="xsmall" d="M60 70 m-1 -8 v16"/>
+    	<path id="v2-d5" data-onsetsize="xsmall" d="M60 70 m36-3 m1 -8 v16"/>
+    	<path id="v2-d6" data-onsetsize="xsmall" d="M62 40 m32 0 m1 -8 v16"/>
+    	<path id="v2-d" d="M62 40 h32 M78 20 v44 M60 70 l36 -3"/>
+
+    	<path id="v2-dz1" data-onsetsize="xsmall" d="M78 20 m-8 -1 h16"/>
+    	<path id="v2-dz2" data-onsetsize="xsmall" d="M60 36 m-1 -8 v16"/>
+    	<path id="v2-dz3" data-onsetsize="xsmall" d="M60 58 m-1 -8 v16"/>
+    	<path id="v2-dz4" data-onsetsize="xsmall" d="M78 20 m-5 62 m-6 1 h16"/>
+    	<path id="v2-dz5" data-onsetsize="xsmall" d="M60 58 m35 6 m1 -8 v16"/>
+    	<path id="v2-dz6" data-onsetsize="xsmall" d="M60 36 m35 6 m1 -8 v16"/>
+    	<path id="v2-dz" d="M60 36 l35 6 M60 58 l35 6 M78 20 c0 30 0 45 -5 62"/>
+
+    	<path id="v2-g1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
+    	<path id="v2-g2" data-onsetsize="xsmall" d="M60 16 m0 64 m-8 0 h16"/>
+    	<path id="v2-g3" data-onsetsize="xsmall" d="M61 58 m4 1 l10 12"/>
+    	<path id="v2-g4" data-onsetsize="xsmall" d="M61 58 m30 0 m0 -8 v16"/>
+    	<path id="v2-g5" data-onsetsize="xsmall" d="M60 40 m30 0 m0 -8 v16"/>
+    	<path id="v2-g6" data-onsetsize="xsmall" d="M60 40 m4 0 l10-12"/>
+    	<path id="v2-g" d="M60 16 v64 M60 40 h30 M61 58 h30"/>
+
+    	<path id="v2-h1" data-onsetsize="xsmall" d="M69 20 m-9 0 h16"/>
+    	<path id="v2-h2" data-onsetsize="xsmall" d="M69 20 m0 46 m-2 -5 l-9 -7"/>
+    	<path id="v2-h3" data-onsetsize="xsmall" d="M59 72 m-2 -8 v16"/>
+    	<path id="v2-h4" data-onsetsize="xsmall" d="M59 72 m36 0 m2 -8 v16"/>
+    	<path id="v2-h5" data-onsetsize="xsmall" d="M85 20 m0 46 m2 -5 l9 -7"/>
+    	<path id="v2-h6" data-onsetsize="xsmall" d="M85 20 m-7 0 h16"/>
+    	<path id="v2-h" d="M69 20 v46 M85 20 v46 M59 72 h36"/>
+
+    	<path id="v2-kh1" data-onsetsize="xsmall" d="M61 18 m0 -8 v16"/>
+    	<path id="v2-kh2" data-onsetsize="xsmall" d="M67 20 m0 8 l-8 10"/>
+    	<path id="v2-kh3" data-onsetsize="xsmall" d="M60 76 m0 -8 v16"/>
+    	<path id="v2-kh4" data-onsetsize="xsmall" d="M60 75 m36 0 m0 -8 v16"/>
+    	<path id="v2-kh5" data-onsetsize="xsmall" d="M67 18 m10 54 m0 -4 l10 -10"/>
+    	<path id="v2-kh6" data-onsetsize="xsmall" d="M61 18 m30 0 m0 -8 v16"/>
+    	<path id="v2-kh" d="M61 18 h30 M67 20 l10 54 M60 76 h36"/>
+
+    	<path id="v2-l1" data-onsetsize="xsmall" d="M79 18 m-7 0 h14"/>
+    	<path id="v2-l2" data-onsetsize="xsmall" d="M63 16 m-10 -3 h16"/>
+    	<path id="v2-l3" data-onsetsize="xsmall" d="M63 16 m-5 64 m-6 0 l15 3"/>
+    	<path id="v2-l4" data-onsetsize="xsmall" d="M79 18 m0 54 m-7 0 h14"/>
+    	<path id="v2-l5" data-onsetsize="xsmall" d="M95 16 m0 58 m-6 4 h14"/>
+    	<path id="v2-l6" data-onsetsize="xsmall" d="M95 16 m-6 -4 h14"/>
+    	<path id="v2-l" d="M63 16 v30 c0 5 0 20 -5 34 M79 18 v54 M95 16 v58"/>
+
+    	<path id="v2-m1" data-onsetsize="xsmall" d="M60 18 m-2 -8 v16"/>
+    	<path id="v2-m2" data-onsetsize="xsmall" d="M66 35 m0-8 l-6 14"/>
+    	<path id="v2-m3" data-onsetsize="xsmall" d="M85 30 m-25 50 m-1 -10 l6 14"/>
+    	<path id="v2-m4" data-onsetsize="xsmall" d="M66 35 m23 42 m0 4 l6-14"/>
+    	<path id="v2-m5" data-onsetsize="xsmall" d="M85 30 m-2-4 l10 15"/>
+    	<path id="v2-m6" data-onsetsize="xsmall" d="M60 18 m30 0 m2 -8 v16"/>
+    	<path id="v2-m" d="M60 18 h30 M85 30 c0 0 -8 30 -20 50 M66 35 c0 0 12 18 23 42"/>
+
+    	<path id="v2-n1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
+		<path id="v2-n2" data-onsetsize="xsmall" d="M60 16 m0 64 m-8 0 h16"/>
+		<path id="v2-n3" data-onsetsize="xsmall" d="M61 46 m3 1 l7 14"/>
+		<path id="v2-n4" data-onsetsize="xsmall" d="M79 24 m0 44 m-8 0 h16"/>
+		<path id="v2-n5" data-onsetsize="xsmall" d="M60 46 m34 0 m0-8 v16"/>
+		<path id="v2-n6" data-onsetsize="xsmall" d="M79 24 m-8 0 h16"/>
+		<path id="v2-n" d="M60 16 v64 M60 46 h34 M79 24 v44"/>
+
+    	<path id="v2-ng1" data-onsetsize="xsmall" d="M60 22 m-2 -8 v16"/>
+    	<path id="v2-ng2" data-onsetsize="xsmall" d="M70 22 m-1 6 l-10 10"/>
+    	<path id="v2-ng3" data-onsetsize="xsmall" d="M70 22 m-6 50 m-6 1 h16"/>
+    	<path id="v2-ng4" data-onsetsize="xsmall" d="M88 22 m0 51 m-8 0 h16"/>
+    	<path id="v2-ng5" data-onsetsize="xsmall" d="M88 22 m1 6 l10 10"/>
+    	<path id="v2-ng6" data-onsetsize="xsmall" d="M60 22 m38 0 m2 -8 v16"/>
+    	<path id="v2-ng" d="M60 22 h38 M70 22 c0 20 0 30 -6 50 M88 22 v51"/>
+
+    	<path id="v2-nh1" data-onsetsize="xsmall" d="M68 20 m-8 0 h16"/>
+    	<path id="v2-nh2" data-onsetsize="xsmall" d="M59 42 m-3 -8 v16"/>
+    	<path id="v2-nh3" data-onsetsize="xsmall" d="M68 20 m-3 55 m-8 0 h16"/>
+    	<path id="v2-nh4" data-onsetsize="xsmall" d="M86 20 m0 56 m-8 0 h16"/>
+    	<path id="v2-nh5" data-onsetsize="xsmall" d="M59 42 m38 8 m1 -8 v16"/>
+    	<path id="v2-nh6" data-onsetsize="xsmall" d="M86 20 m-8 0 h16"/>
+    	<path id="v2-nh" d="M59 42 l38 8 M68 20 c0 20 0 35 -3 55 M86 20 v56"/>
+
+    	<path id="v2-ph1" data-onsetsize="xsmall" d="M57 30 m1-7l-5 15"/>
+		<path id="v2-ph2" data-onsetsize="xsmall" d="M77 20 m-18 56 m-4-8l6 15"/>
+		<path id="v2-ph3" data-onsetsize="xsmall" d="M57 30 m26 50 m6-1l-12 4"/>
+		<path id="v2-ph4" data-onsetsize="xsmall" d="M89 16 m0 50 m-8 0 h16"/>
+		<path id="v2-ph5" data-onsetsize="xsmall" d="M89 16 m-6 0 h14"/>
+		<path id="v2-ph6" data-onsetsize="xsmall" d="M77 20 m-2-6l8 14"/>
+		<path id="v2-ph" data-onsetsize="xsmall" d="M89 16v50 M77 20 c0 0 -8 40 -18 56 M57 30 c0 0 14 24 26 50"/>
+
+		<path id="v2-r1" data-onsetsize="xsmall" d="M61 75 m0-57 m-8 0 h16"/>
+		<path id="v2-r2" data-onsetsize="xsmall" d="M61 75 m-8 0 h16"/>
+		<path id="v2-r3" data-onsetsize="xsmall" d="M61 75 m0-57 m2 12 m20 14 m-1 1 l-4 8"/>
+		<path id="v2-r4" data-onsetsize="xsmall" d="M92 18 m0 56 m-8 0 h16"/>
+		<path id="v2-r5" data-onsetsize="xsmall" d="M92 18 m-8 0 h16"/>
+		<path id="v2-r6" data-onsetsize="xsmall" d="M61 75 m0-57 m2 12 m4 2 l8 -8"/>
+		<path id="v2-r" d="M61 75 v-57 m2 12 l20 14 M92 18 v56"/>
+
+    	<path id="v2-s1" data-onsetsize="xsmall" d="M61 18 m-8 0 h16"/>
+    	<path id="v2-s2" data-onsetsize="xsmall" d="M61 18 m0 57 m-8 0 h16"/>
+    	<path id="v2-s3" data-onsetsize="xsmall" d="M63 71 m4 -2 l8 8"/>
+    	<path id="v2-s4" data-onsetsize="xsmall" d="M92 18 m0 56 m-8 0 h16"/>
+    	<path id="v2-s5" data-onsetsize="xsmall" d="M92 18 m-8 0 h16"/>
+    	<path id="v2-s6" data-onsetsize="xsmall" d="M63 71 m20 -11 m-1 -1 l-4 -8"/>
+    	<path id="v2-s" d="M61 18 v57 M63 71 l20 -11 M92 18 v56"/>
+
+    	<path id="v2-t1" data-onsetsize="xsmall" d="M77 24 m-8 0 h16"/>
+    	<path id="v2-t2" data-onsetsize="xsmall" d="M60 46 m0-8 v16"/>
+    	<path id="v2-t3" data-onsetsize="xsmall" d="M77 24 m0 44 m-8 0 h16"/>
+    	<path id="v2-t4" data-onsetsize="xsmall" d="M60 46 m34 0 m-3 1 l-7 14"/>
+    	<path id="v2-t5" data-onsetsize="xsmall" d="M94 16 m0 64 m-8 0 h16"/>
+    	<path id="v2-t6" data-onsetsize="xsmall" d="M94 16 m-8 0 h16"/>
+    	<path id="v2-t" d="M94 16 v64 M60 46 h34 M77 24 v44"/>
+
+    	<path id="v2-th1" data-onsetsize="xsmall" d="M68 20 m-8 0 h16"/>
+    	<path id="v2-th2" data-onsetsize="xsmall" d="M59 50 m-3 -8 v16"/>
+    	<path id="v2-th3" data-onsetsize="xsmall" d="M68 20 m-3 55 m-8 0 h16"/>
+    	<path id="v2-th4" data-onsetsize="xsmall" d="M86 20 m0 56 m-8 0 h16"/>
+    	<path id="v2-th5" data-onsetsize="xsmall" d="M59 50 m38 -8 m1 -8 v16"/>
+    	<path id="v2-th6" data-onsetsize="xsmall" d="M86 20 m-8 0 h16"/>
+    	<path id="v2-th" d="M59 50 l38 -8 M68 20 c0 20 0 35 -3 55 M86 20 v56"/>
+
+    	<path id="v2-tr1" data-onsetsize="xsmall" d="M64 20 m0-8 v16"/>
+		<path id="v2-tr2" data-onsetsize="xsmall" d="M76 20 m-1 3 l-12 12"/>
+		<path id="v2-tr3" data-onsetsize="xsmall" d="M60 45 m0-8 v16"/>
+		<path id="v2-tr4" data-onsetsize="xsmall" d="M76 20 m0 58 m-8 0 h16"/>
+		<path id="v2-tr5" data-onsetsize="xsmall" d="M60 45 m34 0 m0-8 v16"/>
+		<path id="v2-tr6" data-onsetsize="xsmall" d="M64 20 m26 0 m0-8 v16"/>
+		<path id="v2-tr" d="M76 20 v58 M64 20 h26 M60 45 h34"/>
+
+    	<path id="v2-v1" data-onsetsize="xsmall" d="M60 20 m-8 0 h16"/>
+		<path id="v2-v2" data-onsetsize="xsmall" d="M60 20 m0 50 m-2 4l14-14"/>
+		<path id="v2-v3" data-onsetsize="xsmall" d="M95 15 m-24 70 m-8 1 h16"/>
+		<path id="v2-v4" data-onsetsize="xsmall" d="M71 28 m28 50 m5 -2 l-13 8"/>
+		<path id="v2-v5" data-onsetsize="xsmall" d="M95 15 m-8-1 h16"/>
+		<path id="v2-v6" data-onsetsize="xsmall" d="M71 28 m2-8 l-6 15"/>
+		<path id="v2-v" data-onsetsize="xsmall" d="M60 20v50 M95 15 c-4 22 -7 45 -24 70 M71 28 c0 0 15 24 28 50"/>
+
+    	<path id="v2-x1" data-onsetsize="xsmall" d="M61 18 m0 -8 v16"/>
+    	<path id="v2-x2" data-onsetsize="xsmall" d="M89 19 m-10 51 m0 -4 l-8 -10"/>
+    	<path id="v2-x3" data-onsetsize="xsmall" d="M60 74 m0 -8 v16"/>
+    	<path id="v2-x4" data-onsetsize="xsmall" d="M60 74 m36 0 m0 -8 v16"/>
+    	<path id="v2-x5" data-onsetsize="xsmall" d="M89 19 m-0 6 l8 10"/>
+    	<path id="v2-x6" data-onsetsize="xsmall" d="M61 18 m32 0 m3 -8 v16"/>
+    	<path id="v2-x" d="M61 18 h32 M89 19 l-10 51 M60 74 h36"/>
+
+    	<path id="v2-_-medial" d="M9 22 m0-8 v16"/>
+    	<path id="v2-_-small" d="M11 22 h30 M12 45 h26 M10 70 l34 -3"/>
+    	<path id="v2-b-medial" d="M14 25 m0-8 l-5 16"/>
+    	<path id="v2-b-small" d="M14 25 l30 35 M35 10 c0 0 -7 40 -20 65 M10 80 l38 -5"/>
+    	<path id="v2-c-medial" d="M14 40 m0-8 v16"/>
+    	<path id="v2-c-small" d="M44 18 v60 M14 40 h30 M12 62 l30 -4"/>
+    	<path id="v2-ch-medial" d="M28 20 m-8 0 h16"/>
+    	<path id="v2-ch-small" d="M10 42 l35-6 M10 64 l35-6 M28 20 c0 30 0 45 -5 62"/>
+    	<path id="v2-d-medial" d="M28 20 m-8 0 h16"/>
+    	<path id="v2-d-small" d="M12 40 h32 M28 20 v44 M10 70 l36 -3"/>
+    	<path id="v2-dz-medial" d="M28 20 m-8 0 h16"/>
+    	<path id="v2-dz-small" d="M10 36 l35 6 M10 58 l35 6 M28 20 c0 30 0 45 -5 62"/>
+    	<path id="v2-gi-small" d="M10 36 l35 6 M10 58 l35 6 M28 20 v62"/>
+    	<path id="v2-g-medial" d="M16 18 m-8 0 h16"/>
+    	<path id="v2-g-small" d="M16 18 v65 M16 40 h28 M17 60 l28 3"/>
+    	<path id="v2-h-medial" d="M20 26 m-8 0 h16"/>
+    	<path id="v2-h-small" d="M36 20 v46 M20 26 v37 M10 70 l36 -3"/>
+    	<path id="v2-kh-medial" d="M11 18 m-4 -8 v16"/>
+    	<path id="v2-kh-small" d="M41 18 h-30 m6 0 v2 l10 54M10 76 h36"/>
+    	<path id="v2-l-medial" d="M30 16 m-6 0 h12"/>
+    	<path id="v2-l-small" d="M15 16 v30 c0 5 0 20 -5 34 M30 16 v58 M45 16 v58"/>
+    	<path id="v2-m-medial" d="M10 15 m0 -8 v16"/>
+    	<path id="v2-m-small" d="M10 15 h30 c-4 22 -8 45 -30 70 M16 38 c6 8 14 18 28 40"/>
+    	<path id="v2-n-medial" d="M15 16 m-8 0 h16"/>
+    	<path id="v2-n-small" d="M15 16 v64 M34 23 v44 M20 45 h26"/>
+    	<path id="v2-ng-medial" d="M10 22 m-2-8 v16"/>
+    	<path id="v2-ng-small" d="M10 22 h38 M20 22 c0 20 0 40 -10 50 M38 22 v51"/>
+    	<path id="v2-nh-medial" d="M20 15 m-10 0 h16"/>
+    	<path id="v2-nh-small" d="M8 40 l40 8 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
+    	<path id="v2-ph-medial" d="M9 28 m0-8 l-5 16"/>
+    	<path id="v2-ph-small" d="M45 16 v50 M33 15 c-4 22 -8 45 -28 70 M9 28 c6 8 14 24 28 50"/>
+    	<path id="v2-r-medial" d="M10 18 m-8 0 h16"/>
+    	<path id="v2-r-small" d="M11 70 v-52 m2 12 l20 14 M44 18 v56"/>
+    	<path id="v2-s-medial" d="M11 18 m-8 0 h16"/>
+    	<path id="v2-s-small" d="M11 18 v52 m0 -4 l22 -8 M44 18 v56"/>
+    	<path id="v2-t-medial" d="M24 24 m-8 0 h16"/>
+    	<path id="v2-t-small" d="M44 16 v64 M10 46 h34 M24 24 v44"/>
+    	<path id="v2-th-medial" d="M20 15 m-10 0 h16"/>
+    	<path id="v2-th-small" d="M8 48 l40 -10 M20 15 c0 20 0 45 -10 55 M37 15 v56"/>
+    	<path id="v2-tr-medial" d="M10 20 m0 -8 v16"/>
+    	<path id="v2-tr-small" d="M28 20 v56 M10 20 h36 M13 45 h30"/>
+    	<path id="v2-v-medial" d="M10 16 m-8 0 h16"/>
+    	<path id="v2-v-small" d="M10 16 v56 M44 15 c-4 22 -8 45 -30 70 M23 28 c4 8 10 24 20 50"/>
+    	<path id="v2-x-medial" d="M11 18 m0 -8 v16"/>
+    	<path id="v2-x-small" d="M11 18 h32 m-4 0 l-10 52 M10 74 h36"/>
+
+    	<path id="v2-UU" d="M25 22 h45 v1 c0 0 -15 35 -55 55 M30 27 c0 0 14 33 50 50"/>
+    	<path id="v2-II" d="M25 22 v55 l45-4 M70 22 v55"/>
+		<path id="v2-U" d="M70 22 c0 0 -15 35 -55 55 M25 22 c0 0 15 35 55 55"/>
+    	<path id="v2-I" d="M52 15 l-8 68 M25 35 l50 8 M22 58 l50 8"/>
+    	<path id="v2-M" d="M22 18 h55 m-8 20 c0 0 -12 20 -46 45 M30 37 c0 0 12 20 42 46"/>
+    	<path id="v2-N" d="M20 15 v70 M22 45 l57 4 M53 20 v60"/>
+    	<path id="v2-P" d="M55 15 c0 0 -10 30 -30 63 M20 80 l60 0 M28 24 l40 40"/>
+    	<path id="v2-C" d="M20 37 h55 M20 63 h55 M75 15 v70"/>
+    	<path id="v2-T" d="M17 50 l58 -4 M43 20 v60 M75 15 v70"/>
+    	<path id="v2-NG" d="M15 20 h66 M34 20 c0 20 0 40 -10 60 M62 20 v60"/>
+    	<path id="v2-NH" d="M15 45 l66 10 M34 20 c0 20 0 40 -10 60 M62 20 v60"/>
+		<path id="v2-CH" d="M48 15 l8 68 M25 40 l50 -8 M28 64 l50 -8"/>
+
+    	<path id="qt0" d="M2 90 m0 14 c-12 0 -12 -14 -6 -14"/>
+    	<path id="qt1" d="M98 -5 c12 0 12 14 0 14"/>
+    	<path id="qt2" d="M2 90 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l10-1"/>
+    	<path id="qt3" d="M2 -5 c-12 0 -12 14 0 14"/>
+    	<path id="qt4" d="M2 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l10-1"/>
+    	<path id="qt5" d="M98 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l-10-1"/>
+    	<path id="qt6" d="M98 90 m0-5v5 c12 0 12 14 0 14"/>
+		<path id="qt7" d="M98 90 m0-5v5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14"/>
+
+    	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
+    	</defs>
+    	</svg>`;
+
+// Kodierung: welches Vokal+Finale+Ton-Kombi welchem zusammengesetzten
+// Glyphen-Code (Rahmen + Positions-Strich) entspricht.
+const defaultQattEncoding = {
+      ong: "_1",
+      we2: "_2",
+      ung: "_3",
+      wa2n: "_4",
+      wi: "_5",
+      aw2m: "_6",
+
+      e2: "ng2",
+      o2ng: "ng3",
+      an: "ng4",
+      i: "ng5",
+      waw2m: "ng6",
+
+      wa: "h2",
+      we2ng: "h3",
+      wan: "h4",
+      y2: "h5",
+      e2m: "h6",
+
+      a: "g2",
+      e2ng: "g3",
+      e2n: "g4",
+      y: "g5",
+      u2m: "g6",
+
+      we: "c2",
+      wenh: "c3",
+      we2n: "c4",
+      a2: "c5",
+      om: "c6",
+
+      e: "l2",
+      enh: "l3",
+      a2n: "l4",
+      wa2: "l5",
+      um: "l6",
+
+      aw2u: "tr2",
+      yng: "tr3",
+      ai: "tr4",
+      yn: "tr5",
+      o2m: "tr6",
+
+      waw2u: "d2",
+      wyng: "d3",
+      wai: "d4",
+      y2n: "d5",
+      a2m: "d6",
+
+      au: "n2",
+      aw2ng: "n3",
+      awi: "n4",
+      awn: "n5",
+      y2m: "n6",
+
+      wau: "t2",
+      waw2ng: "t3",
+      wawi: "t4",
+      wawn: "t5",
+      wym: "t6",
+
+      awu: "th2",
+      awng: "th3",
+      a2i: "th4",
+      aw2n: "th5",
+      em: "th6",
+
+      wawu: "nh2",
+      wawng: "nh3",
+      wa2i: "nh4",
+      waw2n: "nh5",
+      im: "nh6",
+
+      u2ng: "ch2",
+      i2ng: "ch3",
+      i2: "ch4",
+      en: "ch5",
+      i2m: "ch6",
+
+      wyng: "dz2",
+      wi2ng: "dz3",
+      wi2: "dz4",
+      wen: "dz5",
+      am: "dz6",
+
+      y2ng: "x2",
+      anh: "x3", awnh: "x3", a2nh: "x3", a2ng: "x3",
+      aw2i: "x4",
+      i2n: "x5",
+      wam: "x6",
+
+      ang: "kh2",
+      wanh: "kh3", wawnh: "kh3", wa2nh: "kh3", wa2ng: "kh3",
+      waw2i: "kh4",
+      wi2n: "kh5",
+      awm: "kh6",
+
+      wang: "s2",
+      inh: "s3",
+      yi: "s4",
+      in: "s5",
+      wawm: "s6",
+
+      oong: "r2",
+      winh: "r3",
+      y2i: "r4",
+      win: "r5",
+      ym: "r6",
+
+      o: "m2",
+      on: "m3",
+      oi: "m4",
+      yu: "m5",
+      y2u: "m6",
+
+      o2: "b2",
+      un: "b3",
+      ui: "b4",
+      iu: "b5",
+      i2u: "b6",
+
+      u2: "v2",
+      o2n: "v3",
+      o2i: "v4",
+      eu: "v5",
+      e2u: "v6",
+
+      u: "ph2",
+      u2n: "ph3",
+      u2i: "ph4",
+      weu: "ph5",
+      we2u: "ph6"
+};
+
+// Kommalose Kurzschreibweise: Codes bestehen aus je 2 Zeichen (Ausnahme "đ" = 1 Zeichen,
+// Alias für "dd"). Zwei Codes hintereinander ergeben eine Einheit (Initial + zweiter Code).
+// Optional folgt ein 5. Zeichen: eine Ziffer wird direkt als Ton übernommen, ein Buchstabe
+// (n/m/g/w/j) wird über digitForLetter() in eine Ziffer übersetzt und an den zweiten Code
+// angehängt - danach kann noch eine Ziffer als Ton folgen. Mehrere Einheiten können direkt
+// aneinandergereiht werden.
+const compactCodeMap = {
+  zz: "_", ll: "l", ng: "ng", hh: "h", gg: "g", cc: "c", tr: "tr",
+  dd: "d", "đ": "d", nn: "n", tt: "t", th: "th", nh: "nh", ch: "ch",
+  dz: "dz", xx: "x", kh: "kh", ss: "s", rr: "r", mm: "m", bb: "b",
+  vv: "v", ph: "ph",
+  pp: "ph", ff: "ph", qq: "c", ww: "ng", jj: "tr", yy: "nh"
+};
+
+// Kapselt das Buchstabe->Ziffer-Mapping für das 5. Zeichen, keyed by Ziel-Basis, damit es
+// sich später leicht pro Basis erweitern/überschreiben lässt (aktuell nur "n" mit Sonderfall).
+const compactDigitLetters = {
+  n: { default: 1, n: 0 },
+  m: { default: 2 },
+  g: { default: 3 },
+  w: { default: 4 },
+  j: { default: 5 }
+};
+
+function digitForLetter(letter, base) {
+  const entry = compactDigitLetters[letter];
+  if (!entry) return null;
+  return String(base in entry ? entry[base] : entry.default);
 }
 
-if (qattOptions.lfix) {
-      qattOptions.mapping = {
-            "ng": "l",
-            "h": "ng",
-            "g": "h",
-            "c": "g",
-            "l": "c",
-            ...qattOptions.mapping
-      }
-}
-((window) => {
-      function Animation(root, attrs, glyphs, opts) {
-        if (typeof root === "object") {
-          opts = root
-          root = root.root
-          attrs = opts.steps
-          glyphs = opts.steps.map(step => step.path)
-          glyphs.splice(0, 0, opts.initial || glyphs[0])
-          glyphs = [glyphs]
-        }
-        this.root = root
-        this.opts = {
-          plain: false,
-          selector: "path",
-          stepDuration: 1250,
-          animDuration: 350,
-          useEasing: true,
-          size: 250,
-          autostart: true,
-          svg: null,
-          animate: true,
-          viewBox: "0 0 1200 1200",
-          preformat: (anim, attr) => attr,
-          ondisplay: (anim, attr) => {},
-          ...opts,
-          pathAttrs: {
-            "stroke-width": Number(document.querySelector("html").dataset.stroke),
-            ...(opts.pathAttrs || {})
-          },
-        }
-        this.stepCounter = null
-        this.attrs = attrs
-        this.glyphs = glyphs
-        if (this.opts.svg) {
-          this.svg = this.opts.svg
-        } else {
-          const svg = document.createElementNS(SVG_NS, "svg")
-          svg.setAttributeNS(null, "viewBox", this.opts.viewBox)
-          this.svg = svg;
-          this.svg.style.width = this.opts.size + "px"
-          this.svg.style.height = this.opts.size + "px"
-          if (this.opts.plain) {
-            root.append(this.svg)
-          } else {
-            this.text = document.createElement("summary")
-            this.stage = document.createElement("figure")
-            this.stage.prepend(this.svg, this.text)
-            root.prepend(this.stage)
-          }
-        }
-        this.svg.addEventListener('click', ()=>this.animate())
-        if (this.opts.autostart) this.start()
-      }
-    
-      Animation.prototype.start = function(){
-        if (this.interval) {
-            this.stop()
-        }
-        this.interval = setInterval(()=>this.animate(), this.opts.stepDuration)
-        this.animate()
-      }
-        
-      Animation.prototype.stop = function(){
-        clearInterval(this.interval)
-        this.interval = null
-      }
-        
-      const SVG_NS = "http://www.w3.org/2000/svg"
-
-      Animation.prototype.animate = function(){
-        if (!this.opts.animate) return
-        this.glyphs.forEach((g, i) => this.animateStep(this.stepCounter, i))
-        this.stepCounter = (this.stepCounter || 0) + 1
-      }
-        
-      Animation.prototype.animateStep = function(step, g) {
-        let glyph = this.svg.querySelectorAll('.glyph')[g]
-        let isInit = false
-        if (step === null) {
-            glyph = document.createElementNS(SVG_NS, "path")
-            glyph.classList.add("glyph")
-            glyph.setAttribute("d", this.glyphs[g][0])
-            glyph.setAttribute("vector-effect", "non-scaling-stroke")
-            Object.keys(this.opts.pathAttrs).forEach((k) => glyph.setAttribute(k,this.opts.pathAttrs[k]))
-            this.svg.append(glyph)
-            step = 0;
-            isInit = true
-        }
-        if(step == this.glyphs[g].length-2) this.stop()
-        step = (step % (this.glyphs[g].length - 1)) + 1
-        const attrs = this.opts.preformat.bind(this)(this, this.attrs[step-1] || {})
-        if (attrs[this.opts.selector]) this.glyphs[g][step] = attrs[this.opts.selector];
-        let to = this.glyphs[g][step]
-        let from
-        if (step == 1) from = this.glyphs[g][this.glyphs[g].length - 1]
-        else from = this.glyphs[g][step-1]
-        if (isInit) from = this.glyphs[g][0] || to
-        else if(from == "" && (to != "" && to != null)) {
-          from = to
-        } else if(from === null && (to != "" && to != null)) {
-          for (var i = (step > 1 ? step : this.glyphs[g].length) - 1; i >= 0; i--) {
-            const p = this.glyphs[g][i]
-            if (p) from = p
-            if (from) break
-          }
-          if (!from) from = this.glyphs[g][0] || to
-        }
-        if (to && glyph.classList.contains("hidden")) {
-          from = this.glyphs[g][0] || from
-        }
-        glyph.classList[to == "" ? "add" : "remove"]("hidden")
-        this.currentPath = to
-        if (to != "" && to != null) {
-            //glyph.setAttribute("d", to)
-            if (attrs.morph || (this.opts.morph && attrs.morph !== false)) {
-              glyph.setAttribute("d", this.glyphs[g][0])
-                this.morphTo(glyph, from, to)
-            } else {
-                glyph.querySelectorAll("animate").forEach((el)=>el.remove())
-                glyph.setAttribute("d", to)
-            }
-        }
-        if (!this.opts.plain){
-            this.stage.querySelectorAll(".text").forEach(t => t.style.display = "")
-            this.stage.querySelectorAll(".text-" + step).forEach(t => t.style.display = "block")
-            const div = document.createElement("h1")
-            const sup = document.createElement("sup")
-            sup.innerHTML = attrs.sup || ""
-            div.innerHTML = attrs.text || ""
-            this.text.innerHTML = ""
-            this.text.append(div)
-            this.sup = sup
-            div.append(sup)
-        }
-        if (this.opts.ondisplay) this.opts.ondisplay.bind(this)(this, attrs)
-      }
-      
-      Animation.prototype.morphTo = function(glyph, a, b) {
-        // remove old animate if present
-        const old = glyph.querySelector("animate")
-        if (old) old.remove()
-      
-        const anim = document.createElementNS(SVG_NS, "animate")
-      
-        anim.setAttribute("attributeName", "d")
-        anim.setAttribute("from", a)
-        anim.setAttribute("to", b)
-        anim.setAttribute("dur", (this.opts.animDuration/1000) + "s")
-        anim.setAttribute("fill", "freeze")
-      
-        if (this.opts.useEasing) {
-          anim.setAttribute("calcMode", "spline")
-          anim.setAttribute("keyTimes", "0;1")
-          anim.setAttribute("keySplines", "0 0 0.5 1")
-        }
-          
-        glyph.appendChild(anim)
-        anim.beginElement()
-      }
-      
-      Animation.prototype.print = function(names, opts) {
-        if (typeof names === "string") names = [names]
-        if (!opts) opts = {}
-        return names.map(name => {
-          let step = 0
-          this.attrs.forEach((a, i) => {
-            if (a.text == name) step = i
-          })
-          const div = document.createElement("div")
-          const anim = new Animation({
-              ...this.opts,
-              plain: true,
-              root: div,
-              stepDuration: 999999999999,
-              steps: [{...this.attrs[step]}],
-              autostart:true,
-              ...opts
-          })
-          anim.opts.animate = false
-          return anim
-        })
-      }
-        
-      Animation.prototype.overlay = function(names, opts) {
-        if (typeof names === "string") names = [names]
-        if (!opts) opts = {}
-        let anim1 = opts.connect
-        names.forEach(name => {
-          let step = 0
-          this.attrs.forEach((a, i) => {
-            if (a.text == name) step = i
-          })
-          const anim = new Animation({
-              ...this.opts,
-              plain: true,
-              root: anim1 ? anim1.root : this.root || document.createElement("div"),
-              svg: anim1 ? anim1.svg : null,
-              stepDuration: 999999999999,
-              steps: [{...this.attrs[step]}],
-              autostart:true,
-              viewBox: "0 0 1100 1100",
-              ...opts
-          })
-          if (!anim1) anim1 = anim
-          anim.opts.animate = false
-        })
-        return anim1
-      }
-
-      Animation.prototype.getStrokes = function() {
-          const d = this.currentPath || "M0 0"
-          const tokens = d
-            .replace(/([MmLlVvHhCc])/g, ' $1 ')
-            .replace(/([^eE])([-+])/g, '$1 $2')
-            .trim()
-            .split(/\s+/);
-        
-          let i = 0;
-          let x = 0;
-          let y = 0;
-        
-          let currentSection = null;
-          const sections = [];
-        
-          function closeSection() {
-            if (currentSection) {
-              sections.push(currentSection);
-              currentSection = null;
-            }
-          }
-        
-          while (i < tokens.length) {
-            const cmd = tokens[i++];
-        
-            switch (cmd) {
-              case 'M': {
-                closeSection();
-                x = parseFloat(tokens[i++]);
-                y = parseFloat(tokens[i++]);
-                //currentSection = { x, y, x2: null, y2: null };
-                break;
-              }
-        
-              case 'm': {
-                closeSection();
-                x += parseFloat(tokens[i++]);
-                y += parseFloat(tokens[i++]);
-                currentSection = { x, y, x2: x, y2: y };
-                break;
-              }
-        
-              case 'l':
-                currentSection.x2 = x += parseFloat(tokens[i++]);
-                currentSection.y2 = y += parseFloat(tokens[i++]);
-                break;
-        
-              case 'h':
-                currentSection.x2 = x += parseFloat(tokens[i++]);
-                break;
-        
-              case 'v':
-                currentSection.y2 = y += parseFloat(tokens[i++]);
-                break;
-        
-              case 'c':
-                i += 4;
-                currentSection.x2 = x += parseFloat(tokens[i++]);
-                currentSection.y2 = y += parseFloat(tokens[i++]);
-                break;
-        
-              default:
-                throw new Error(`Unbekannter Befehl: ${cmd}`);
-            }
-          }
-          closeSection();
-          return sections;
-      }
-      
-      Animation.prototype.clearColorized = function(what){
-        let cls = ".colorized, .dot"
-        if (what == "dots") cls = ".dot";
-        else if (what == "strokes") cls = ".colorized:not(.dot)"
-        requestAnimationFrame(() => {
-          this.svg.querySelectorAll(cls).forEach((el)=>el.remove())
-        })
-      }
-      Animation.prototype.colorizeSegment = function(s, attrs) {
-        const paths = this.getStrokes()
-        const seg = paths[s]
-        if (!seg) return
-        const glyph = document.createElementNS(SVG_NS, "path")
-        glyph.classList.add("glyph", "colorized")
-        if (attrs && attrs.dot) {
-          attrs = {...this.opts.pathAttrs,
-            "stroke-width": Number(document.querySelector("html").dataset.stroke) * 3,
-            "stroke-linecap": "square",
-            ...attrs
-          }
-          glyph.classList.add("dot")
-          if (attrs.dot == 1)
-            var d = `M${seg.x} ${seg.y} L${seg.x} ${seg.y}`
-          else if (attrs.dot == 2)
-            var d = `M${seg.x2} ${seg.y2} L${seg.x2} ${seg.y2}`
-        } else {
-          attrs = {...this.opts.pathAttrs, stroke: "red", ...attrs}
-          var d = `M${seg.x} ${seg.y} L${seg.x2} ${seg.y2}`
-        }
-        glyph.setAttribute("d", d)
-        Object.keys(attrs).forEach((k) => glyph.style[k] = attrs[k])
-        requestAnimationFrame(() => {
-          this.svg.append(glyph)
-          requestAnimationFrame(() => {
-            glyph.classList.add("colorized-active")
-          })
-        })
-      }
-      window.Animation = Animation
-    })(window)
-
-const qatt = new Animation({
-      morph: true,
-      initial: "M200 200 m400 400 l0 0 m0 0 l0 0 m0 0 l0 0",
-      steps: [
-        {
-            text: "ʔ",
-            path: "M200 200 m100 150 l600 0 m-550 250 l500 0 m-550 250 l600 0",
-            qatt: "M200 200 m50 150 l700 0 m-700 250 l700 0 m-700 250 l700 0"
-        },
-        {
-            morph:false,
-            text: "test",
-            path: "M200 200 m0 0 v500 h500",
-            qatt: "M100 100 m0 0 h800 v800 c0 0 -800 0 -800 -800"
-        },
-        {
-          text: "B",
-          path: "M200 200 m400 50 l0 700 m0 0 l0 0 m-400 0 l800 0",
-          qatt: "M200 200 m700 50 l-600 600 m0-600 l600 600 m-700 150 l800 0"
-        },
-        {
-          text: "C", sup: "(K, Q)",
-          path: "M200 200 m200 250 l500 0 m-600 300 l600 0 m0 -550 l0 800",
-          qatt: "M200 200 m100 250 l600 0 m-600 300 l600 0 m0 -550 l0 800"
-        },
-        {
-          text: "CH",
-          path: "M200 200 m100 250 l600 0 m-650 300 l700 0 m-350 -550 l0 800",
-          qatt: "M200 200 m100 350 l600 -200 m-600 500 l600 -200 m-300 -450 l0 800"
-        },
-        {
-          text: "DD",
-          path: "M200 200 m400 50 l0 700 m-350 -400 l700 0 m-750 400 l800 0",
-          qatt: "M200 200 m0 400 l800 0 m-400 -400 l0 800 m-400 0 l800 0"
-        },
-        {
-          text: "D", sup: "(Z)",
-          path: "M200 200 m400 0 l-400 800 m300 -600 l500 600 m-500 -200 l100 150",
-          qatt: "M200 200 m400 0 l0 800 m-300 -650 l600 200 m-600 100 l600 200"
-        },
-        {
-          text: "PH", sup: "(Ph)",
-          path: "M200 200 m100 400 l600 0 m0 0 l0 0 m0 -400 l0 800",
-          qatt: "M200 200 m750 50 l-600 700 m0 -700 l600 700 m150 -750 l0 800"
-        },
-        {
-          text: "G", sup: "(Gh)",
-          path: "M200 200 m100 250 l500 0 m-500 300 l600 0 m-600 -550 l0 800",
-          qatt: "M200 200 m100 0 l0 800 m0 -550 l600 0 m-600 300 l600 0",
-        },
-        {
-          text: "GI", sup: "(J)",
-          path: "M200 200 m400 0 l-400 800 m300 -600 l500 600 m-500 -200 l100 150",
-          qatt: "M200 200 m100 150 l600 200 m-600 100 l600 200 m-300 -650 l0 800"
-        },
-        {
-          text: "H",
-          path: "M200 200 m250 150 l0 600 m300 -700 l0 700 m-550 0 l800 0",
-          qatt: "M200 200 m250 0 l0 800 m300 -800 l0 800 m-550 0 l800 0"
-        },
-        {
-          text: "KH",
-          path: "M200 200 m0 100 l800 0 m-650 0 l0 650 m0 0 l650 0",
-          qatt: "M200 200 m0 0 l800 0 m-700 100 l600 600 m-700 100 l800 0"
-        },
-        {
-          text: "L",
-          xpath: "M200 200 m200 50 l0 550 m400 -600 l0 800 m0 0 l0 0",
-          path: "M200 200 m200 50 l0 800 m250 -750 l0 550 m250 -575 l0 700",
-          qatt: "M200 200 m100 0 l0 800 m300 -800 l0 800 m300-800 l0 800"
-        },
-        {
-          text: "M",
-          path: "M200 200 m400 50 l0 700 m0 0 l0 0 m-400 -700 l800 0",
-          qatt: "M200 200 m0 0 l800 0 m-100 150 l-600 600 m0 -600 l600 600"
-        },
-        {
-          text: "N",
-          path: "M200 200 m100 100 l0 600 m0 -300 l700 0 m-325 -400 l0 800",
-          qatt: "M200 200 m100 0 l0 800 m0 -400 l700 0 m-325 -400 l0 800",
-        },
-        {
-          text: "NG", sup: "(Ngh)",
-          path: "M200 200 m250 50 l0 600 m300 -600 l0 700 m-550 -700 l800 0",
-          qatt: "M200 200 m0 0 l800 0 m-550 0 l0 800 m300 -800 l0 800"
-        },
-        {
-          text: "NH",
-          path: "M200 200 m500 0 l-500 800 m200-800 l-200 320 m350 0 l400 480",
-          qatt: "M200 200 m250 0 l0 800 m300 -800 l0 800 m-550 -500 l800 200"
-        },
-        {
-          text: "R",
-          path: "M200 200 m150 0 l0 800 m-150-800 l800 0 m0 0 l0 800",
-          qatt: "M200 200 m0 0 l0 800 m100-700 l600 600 m100-700 l0 800"
-        },
-        {
-          text: "S",
-          path: "M200 200 m100 0 l0 800 m0 0 l700 -100 m0 -700 l0 800",
-          qatt: "M200 200 m0 0 l0 800 m700 -700 l-600 600 m700 -700 l0 800"
-        },
-        {
-          text: "T",
-          xpath: "M200 200 m0 400 l800 0 m-400-400 l0 800 m0 0l0 0",
-          path: "M200 200 m0 400 l800 0 m-400-400 l0 800 m400 -700l0 600",
-          qatt: "M200 200 m0 400 l800 0 m-400-400 l0 800 m400-800 l0 800"
-        },
-        {
-          text: "TH",
-          path: "M200 200 m250 100 l0 600 m300 -700 l0 800 m-550 -400 l800 0",
-          qatt: "M200 200 m250 0 l0 800 m300 -800 l0 800 m-550 -300 l800 -200"
-        },
-        {
-           text: "TR",
-           path: "M200 200 m150 0 l500 0 m-650 400 l800 0 m-400-400 l0 800",
-           qatt: "M200 200 m0 0 l800 0 m-800 400 l800 0 m-400-400 l0 800"
-        },
-        {
-          text: "V",
-          path: "M200 200 m100 400 l600 0 m0 0 l0 0 m-600 -400 l0 800",
-          qatt: "M200 200 m0 0 l0 800 m750 -750 l-600 700 m0 -700 l600 700"
-        },
-        {
-          text: "X",
-          path: "M200 200 m50 100 l600 0 m0 0 l-50 650 m-600 0 l800 0",
-          qatt: "M200 200 m0 0 l800 0 m-100 100 l-600 600 m-100 100 l800 0"
-        }
-      ],
-      root: document.createElement('figure'),
-      stepDuration: 3000,
-      animDuration: 300,
-      selector: "path",
-      autostart: false,
-      preformat: (anim, attrs)=>{
-          attrs = {
-              ...attrs,
-              sup: attrs.sup
-          }
-          return attrs
-     }
-})
-
-const marks = new Animation({
-        autostart: false,
-        root: document.createElement("div"),
-        initial: "M0 0 c0 0 0 0 0 0 c0 0 0 0 0 0",
-        size: 32,
-        pathAttrs: {"stroke-width": 50},
-        steps: [
-            {
-                text: "0",
-                path: "M0 0 c0 0 0 0 0 0 c0 0 0 0 0 0",
-            }, {
-                text: "1",
-                path: "M100 100 m0-75 c97 0 97 150 0 150 c-97 0 -97 -150 0 -150",
-            }, {
-                text: "2",
-                path: "M1100 100 m0-75 c97 0 97 150 0 150 c-97 0 -97 -150 0 -150",
-            }, {
-                text: "3",
-                path: "M1100 1100 m0-75 c97 0 97 150 0 150 c-97 0 -97 -150 0 -150",
-            }, {
-                text: "4",
-                path: "M100 1100 m0-75 c97 0 97 150 0 150 c-97 0 -97 -150 0 -150",
-            }, {
-                text: "5",
-                path: "M75 75 v150m0-150h150",
-            }, {
-                text: "6",
-                path: "M1125 75 v150m0-150h-150",
-            }, {
-                text: "7",
-                path: "M1125 1125 v-150m0 150h-150",
-            }, {
-                text: "8",
-                path: "M75 1125 v-150m0 150h150",
-            }
-        ]
-    })
-
-
-function writeQATT(root, codes, options) {
-let opts = {
-      mapping: {},
-      dotmap: {
-            '?': [1,3,5,6,4,2],
-            'b': [3,2,5,6,4,1],
-            'c': [1,3,4,6,5,2],
-            'ch': [5,1,3,6,4,2],
-            'dd': [3,1,4,5,6,2],
-            'g': [1,2,5,6,4,3],
-            'h': [1,2,5,6,4,3],
-            'kh': [1,3,5,6,4,2],
-            'l': [3,1,2,4,6,5],
-            'm': [1,5,4,6,3,2],
-            'n': [1,2,3,6,4,5],
-            'ng': [1,3,4,6,5,2],
-            'nh': [1,5,2,4,6,3],
-            'ph': [3,2,4,6,5,1],
-            'r': [1,2,4,6,5,3],
-            's': [1,2,4,6,5,3],
-            't': [3,1,4,2,6,5],
-            'th': [1,5,2,4,6,3],
-            'tr': [1,5,3,6,4,2],
-            'v': [1,2,4,6,3,5],
-            'x': [1,4, 5,6,3,2]
-      },
-      ...qattOptions,
-      ...(options ||{})
-    }
-    codes
-    .trim()
-    .split(/\s+/)
-    .forEach(s => {
-        if (!s.trim()) return
-        if (s[0] == "#") {
-            const span = document.createElement("span")
-            span.innerHTML = s.slice(1)
-            out1.append(span)
-            return
-        }
-        let code = s.replace(/[^a-zA-Z?]/g, "")
-        code = opts.mapping[code] || opts.mapping[code.toLowerCase()] || code
-        let dot = s.split(/[+-]/)[0].replace(/\D/g, "")
-        let tone = "" + parseInt((s.split(/[+-]/)[1] || "").replace(/\D/g, "") || 0)
-        const dotmap = opts.dotmap[code.toLowerCase()]
-        if (dotmap) dot = dotmap[dot - 1]
-        
-        if (tone && s.indexOf("-") >= 0) tone = "" + (parseInt(tone) + 4)
-        const chars = qatt.print(
-          [code.toUpperCase()],
-          {
-              root: root,
-              ...opts,
-              size: opts.size || (s[0] == "." ? 32 : 36),
-              ondisplay: (anim, attrs)=>{
-                  if (dot) {
-                    const seg = parseInt((dot-1) / 2)
-                    const pos = ((dot-1) % 2) + 1
-                    anim.clearColorized()
-                    anim.colorizeSegment(seg, {dot: pos, stroke: "#f00", "stroke-linecap": "square"})
-                  }
-              }
-          }
-        )
-        if (tone != null && tone != "") marks.overlay(tone, {
-            connect: chars[0]
-        })
-      })
+class QattRenderer {
+  constructor(options = {}) {
+    this.qattEncoding = options.qattEncoding || defaultQattEncoding;
+    this.defs = options.defs || defaultSvgDefs;
+    this.container = options.container || document.createElement("div");
+    this.charFontsize = options.charFontsize || "1em";
+    this.svgns = "http://www.w3.org/2000/svg";
+    this.cache = new Map();
+    this.defsElement = null;
+    this._initializeDefs();
+    this._injectFallbackStyles();
   }
 
-  window.addEventListener(
-    "load",
-    ()=>{
-      document.querySelectorAll(qattOptions.convert).forEach((el)=>{
-        const t = el.innerText
-        el.innerHTML = ""
-        let opts = {
-          size: Number(el.dataset.size || 24),
-          ...qattOptions.opts,
-          ...(el.dataset.opts ? JSON.parse(el.dataset.opts) : {})
-        }
-        writeQATT(el, t, opts)
-      })
+  _initializeDefs() {
+    if (!this.defs) return;
+    this.defsElement = document.createElement("div");
+    this.defsElement.innerHTML = this.defs;
+    this.defsElement.style.display = "none";
+    document.body.append(this.defsElement);
+  }
+
+  // Injiziert einmalig ein minimales Default-Stylesheet, damit die gerenderten SVGs auch
+  // ganz ohne eigenes CSS sichtbar sind ("ready to use"). ":where(tt)" statt "tt" sorgt
+  // dafür, dass der "tt"-Teil selbst 0 Spezifität hat - eine eigene Regel wie "tt svg{...}"
+  // gewinnt also immer automatisch dagegen, egal an welcher Stelle im Dokument sie steht.
+  _injectFallbackStyles() {
+    if (document.getElementById("qatt-fallback-style")) return;
+    const style = document.createElement("style");
+    style.id = "qatt-fallback-style";
+    style.textContent = `:where(tt) svg {
+  width: 1em;
+  height: 1em;
+  stroke-width: 6px;
+  stroke: currentColor;
+  fill: transparent;
+}`;
+    document.head.appendChild(style);
+  }
+
+  _getDefById(id) {
+    return this.defsElement && id ? this.defsElement.querySelector(`#${CSS.escape(id)}`) : null;
+  }
+
+  _getPost(hasGlide, nucleus) {
+    let base = nucleus;
+    if (base?.charAt(0) === "w") base = base.substr(1);
+    let post = "small";
+    if (["a", "a2"].includes(base)) post = "large";
+    if (["o", "o2", "e", "e2", "i2", "u2", "y"].includes(base)) post = "xsmall";
+    if (hasGlide) post = (post === "large") ? "small" : "xsmall";
+    return post;
+  }
+
+  _useG(g, id) {
+    const use = document.createElementNS(this.svgns, "use");
+    use.setAttribute("href", "#" + id);
+    use.setAttribute("vector-effect", "non-scaling-stroke");
+    use.style.vectorEffect = "non-scaling-stroke";
+    g.appendChild(use);
+    return g;
+  }
+
+  // render a glyph code, e.g. t,i2,ng,1 - or, without any comma, the
+  // compact notation (e.g. nhhh3, nnhhg0, bbnnn1cchh3 ...)
+  render(text, root) {
+    if (!text.includes(",")) {
+      text = this._decodeCompact(text);
     }
-  );
+    text = text.replace(/\+/g, "").replace(/^[^,\s]*,/g, "$&+").replace(/ [^,]*,/g, "$&+");
+    return this._renderText(text, root);
+  }
+
+  _readCompactCode(str, i) {
+    if (str[i] === "đ") return { code: compactCodeMap["đ"], length: 1 };
+    const pair = str.substr(i, 2);
+    const code = compactCodeMap[pair];
+    return code ? { code, length: 2 } : null;
+  }
+
+  _isDigit(ch) {
+    return ch != null && /[0-9]/.test(ch);
+  }
+
+  // Liest an Position i einen Zweier-Code. Schlägt das fehl - egal ob weil dort nur noch
+  // ein einzelner Buchstabe steht, oder weil die zwei vorhandenen Buchstaben schlicht
+  // keinem Code entsprechen (z.B. "bh") - wird der erste Buchstabe verdoppelt und als
+  // Fallback versucht; es wird dabei nur dieser eine Buchstabe verbraucht, der Rest bleibt
+  // für den nächsten Lesevorgang stehen (z.B. "bh" -> "bb" + weiter mit "h").
+  _readCompactCodeWithFallback(text, i) {
+    const direct = this._readCompactCode(text, i);
+    if (direct) return { code: direct.code, consumed: direct.length };
+    const ch = text[i];
+    if (ch == null || this._isDigit(ch)) return null;
+    const fallback = this._readCompactCode(ch + ch, 0);
+    return fallback ? { code: fallback.code, consumed: 1 } : null;
+  }
+
+  _decodeCompact(text) {
+    const units = [];
+    let i = 0;
+
+    while (i < text.length) {
+      const first = this._readCompactCodeWithFallback(text, i);
+      if (!first) { i += 1; continue; }
+      i += first.consumed;
+
+      // Steht direkt eine Ziffer an, wird kein zweiter Code mehr gelesen - der erste
+      // wird übernommen und die Ziffer weiter unten als Ton (oder Ziffernbuchstabe) behandelt.
+      let second = this._isDigit(text[i]) ? null : this._readCompactCodeWithFallback(text, i);
+      if (second) {
+        i += second.consumed;
+      } else {
+        second = first;
+      }
+
+      let vowel = second.code;
+      let tone = "";
+
+      const next = text[i];
+      if (this._isDigit(next)) {
+        tone = next;
+        i += 1;
+      } else if (next != null && digitForLetter(next, second.code) != null) {
+        vowel += digitForLetter(next, second.code);
+        i += 1;
+        const toneChar = text[i];
+        if (this._isDigit(toneChar)) {
+          tone = toneChar;
+          i += 1;
+        }
+      }
+
+      const fields = [first.code, vowel, "", tone];
+      while (fields.length && fields[fields.length - 1] === "") fields.pop();
+      units.push(fields.join(","));
+    }
+
+    return units.join(" ");
+  }
+
+  _renderText(text, root) {
+    const target = root || this.container;
+    const fragment = document.createDocumentFragment();
+
+    text.split(" ").forEach(t => {
+      if (t.includes(",")) {
+        if (this.cache.has(t)) {
+          this.cache.get(t).forEach(node => fragment.appendChild(node.cloneNode(true)));
+        } else {
+          const tempContainer = document.createElement("div");
+          this._renderSvg(tempContainer, ...t.split(","));
+
+          const nodes = Array.from(tempContainer.childNodes);
+          if (nodes.length > 0) {
+            this.cache.set(t, nodes);
+            nodes.forEach(node => fragment.appendChild(node.cloneNode(true)));
+          }
+        }
+      } else {
+        this._renderChar(t, fragment);
+      }
+    });
+
+    target.innerHTML = "";
+    target.appendChild(fragment);
+  }
+
+  _renderSvg(root, initial, vowel, final, tone, isCoda) {
+    if (vowel && vowel.startsWith("+")) {
+      vowel = vowel.substr(1);
+      if (["t", "p", "c", "ch"].includes(final)) {
+        if (final === "t") final = "n";
+        else if (final === "p") final = "m";
+        else if (final === "c") final = "ng";
+        else if (final === "ch") final = "nh";
+        if (String(tone) === "1") tone = 6;
+        else if (String(tone) === "5") tone = 7;
+      }
+      const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? "" : final)];
+      if (qv) {
+        vowel = qv;
+        final = null;
+
+        if (vowel.endsWith("7")) initial = "w" + initial;
+        else if (vowel.endsWith("8")) final = "II";
+        else if (vowel.endsWith("9")) final = "UU";
+        vowel = vowel.replace(/[789]$/, "");
+      }
+    }
+
+    const svg = document.createElementNS(this.svgns, "svg");
+    let g;
+
+    if (initial || vowel) {
+      g = document.createElementNS(this.svgns, "g");
+      this._useG(g, "square");
+      svg.appendChild(g);
+    }
+
+    if (initial) {
+      initial = initial.replace("#", "").replace("$", "");
+      const post = this._getPost(vowel?.charAt(0) === "w", vowel);
+      let id = PREFIX + initial.replace("w", "") + "-" + post;
+      const hasMark = initial.indexOf("w") === 0;
+      if (!this._getDefById(id)) id = id.replace("xsmall", "small").replace("large", "xxsmall");
+      if (!this._getDefById(id)) id = id.replace("xxsmall", "xsmall").replace("xsmall", "small");
+      this._useG(g, id);
+      if (hasMark) this._useG(g, PREFIX + initial.replace("w", "") + "-medial");
+      initial = initial.replace("w", "");
+    }
+
+    if (vowel) {
+      let vStr = vowel;
+      if (vStr.charAt(0) === "w") {
+        vStr = vStr.substr(1);
+        this._useG(g, `${PREFIX}${initial}-medial`);
+      }
+
+      if (!"aeiouy".includes(vStr[0]) && /\d$/.test(vStr)) {
+        this._useG(g, PREFIX + vStr.replace(/\d/, ""));
+        if (tone || final) {
+          this._useG(g, "qt" + (tone || final || 0));
+        }
+        tone = "";
+      }
+      this._useG(g, PREFIX + vStr);
+    }
+
+    svg.setAttribute("viewBox", "-10 -25 120 125");
+    svg.style.aspectRatio = "13 / 15";
+    svg.style.verticalAlign = "bottom";
+    svg.style.overflow = "visible";
+    svg.setAttribute("preserveAspectRatio", "none");
+
+    if (g) {
+      const nobr = root.tagName === "NOBR" ? root : document.createElement("nobr");
+      nobr.append(svg);
+      if (nobr !== root) root.appendChild(nobr);
+      this._handleTones(nobr, initial, vowel, final, tone, g);
+    } else {
+      this._handleTones(root, initial, vowel, final, tone, g);
+    }
+    return g;
+  }
+
+  _handleTones(root, initial, vowel, final, tone, g) {
+    if (g && tone != null && tone !== "" && tone >= 0 && tone < 8) {
+      this._useG(g, "qt" + (tone || 0));
+    }
+    if (final) {
+      this._renderSvg(root, "", final.toUpperCase(), 0, null, true);
+    }
+  }
+
+  _renderChar(t, root) {
+    const el = document.createElement("div");
+    Object.assign(el.style, {
+      display: "inline-block",
+      width: "110px", height: "110px", lineHeight: "110px",
+      textAlign: "center", verticalAlign: "bottom",
+      marginBottom: "30px", fontSize: this.charFontsize, fontWeight: "400"
+    });
+    el.textContent = t;
+    root.appendChild(el);
+  }
+
+  observe(tagName = "TT") {
+    tagName = tagName.toUpperCase();
+    const observer = new MutationObserver(mutations => {
+      for (const m of mutations) {
+        for (const n of m.addedNodes) {
+          if (n.nodeName === tagName) {
+            this.render(n.textContent.trim(), n);
+          } else if (n.nodeType === 1) {
+            n.querySelectorAll(tagName).forEach(tag => {
+              this.render(tag.textContent.trim(), tag);
+            });
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.querySelectorAll(tagName).forEach(tag => {
+      this.render(tag.textContent.trim(), tag);
+    });
+  }
+}
