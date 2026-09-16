@@ -434,15 +434,16 @@ const compactCodeMap = {
 // Kapselt das Buchstabe->Ziffer-Mapping für das 5. Zeichen, keyed by Ziel-Basis, damit es
 // sich später leicht pro Basis erweitern/überschreiben lässt (aktuell nur "n" mit Sonderfall).
 const compactDigitLetters = {
-  n: { default: 1, n: 0 },
-  m: { default: 2 },
-  g: { default: 3 },
-  w: { default: 4 },
-  j: { default: 5 }
+  /*empty coda*/ "": {default: 1},
+  /*-U coda*/ "": {default: 1},
+  /*-NG coda*/ y: { default: 2, n: 0 },
+  /*-N coda*/ w: { default: 3 },
+  /*-I coda*/ w: { default: 3 },
+  /*-M coda*/ q: { default: 5 },
 };
 
 function digitForLetter(letter, base) {
-  const entry = compactDigitLetters[letter];
+  const entry = compactDigitLetters[letter || ""];
   if (!entry) return null;
   return String(base in entry ? entry[base] : entry.default);
 }
@@ -569,7 +570,7 @@ class QattRenderer {
       if (this._isDigit(next)) {
         tone = next;
         i += 1;
-      } else if (next != null && digitForLetter(next, second.code) != null) {
+      } else if (digitForLetter(next, second.code) != null) {
         vowel += digitForLetter(next, second.code);
         i += 1;
         const toneChar = text[i];
@@ -647,7 +648,6 @@ class QattRenderer {
     }
 
     if (initial) {
-      initial = initial.replace("#", "").replace("$", "");
       const post = this._getPost(vowel?.charAt(0) === "w", vowel);
       let id = PREFIX + initial.replace("w", "") + "-" + post;
       const hasMark = initial.indexOf("w") === 0;
