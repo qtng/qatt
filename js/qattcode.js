@@ -14,8 +14,8 @@ Result:
 
 class QattCode {
             constructor() {
-                this.BASE_2 = new Set(["ng", "tr", "dd", "th", "nh", "ch", "dz", "kh", "ph"]);
-                this.BASE_1 = new Set(["z", "h", "g", "c", "l", "n", "t", "x", "s", "r", "m", "b", "v"]);
+                this.BASE_2 = new Set(["ng", "tr", "th", "nh", "ch", "dz", "kh", "ph"]);
+                this.BASE_1 = new Set(["z", "h", "g", "c", "l", "d", "n", "t", "x", "s", "r", "m", "b", "v"]);
                 
                 // Neue Markierungen übersetzt in den entsprechenden Auslaut (Coda)
                 this.MARKINGS = { 
@@ -34,10 +34,6 @@ class QattCode {
 
             isValid2(str) {
                 return this.BASE_2.has(str) || this.isDoubled(str);
-            }
-
-            expand(str) {
-                return (str.length === 1 && this.BASE_1.has(str) ? str + str : str);
             }
 
             parseChunk(input) {
@@ -64,18 +60,17 @@ class QattCode {
                 }
 
                 if (str.length === 0) {
-                    res.error = "Konsonantenstamm fehlt.";
+                    res.error = "Onset missing.";
                     return res;
                 }
 
                 // 3. Konsonanten-Parsing (Onset & Rhyme)
                 if (this.BASE_2.has(str) || (str.length === 1 && this.BASE_1.has(str))) {
-                    let expanded = this.expand(str);
-                    res.onset = expanded;
-                    res.rhyme = expanded;
-                } else if (this.isDoubled(str)) {
                     res.onset = str;
                     res.rhyme = str;
+                } else if (this.isDoubled(str)) {
+                    res.onset = str[0];
+                    res.rhyme = str[0];
                 } else {
                     let canRaw = "", chiRaw = "";
                     
