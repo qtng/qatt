@@ -82,8 +82,8 @@ class QattCode {
                         canRaw = str.slice(0, -1);
                     }
 
-                    res.rhyme = this.expand(chiRaw);
-                    res.onset = this.expand(canRaw);
+                    res.rhyme = this.isDoubled(chiRaw) ? chiRaw[0] : chiRaw;
+                    res.onset = this.isDoubled(canRaw) ? canRaw[0] : canRaw;
 
                     if (!this.isValid2(res.rhyme)) res.error = `Invalid onset: '${chiRaw}'.`;
                     if (!this.isValid2(res.onset)) res.error += `Invalid rhyme: '${canRaw}'.`;
