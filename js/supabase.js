@@ -403,39 +403,59 @@ class SupabaseService {
     return { error };
   }
 
-    // --- Reading Methods ---
-
+  // --- Reading Methods ---
+  
   async addReading(symbol, ids, reading, source) {
     if (!this.user) await this.init();
     if (!this.user) return { error: "Auth required" };
 
+    const parsedSymbol = symbol ? String(symbol).substring(0, 3) : null;
+    const { error: deleteError } = await this.client
+      .from('readings')
+      .delete()
+      .eq('symbol', parsedSymbol)
+      .eq('ids', ids)
+      .eq('reading', reading)
+      .eq('deleted', true)
+      .eq('user_id', this.user.id); // <- WICHTIG: Erlaubt nur das Löschen eigener Marker
+
+    if (deleteError) {
+      console.error("Soft-delete error", deleteError.message);
+    }
     const { data, error } = await this.client
       .from('readings')
       .insert([{
         user_id: this.user.id,
-        symbol: symbol ? String(symbol).substring(0, 3) : null,
+        symbol: parsedSymbol,
         ids: ids,
         reading: reading,
         source: source
-      }]).select();
+      }])
+      .select();
 
     if (error) console.error("Add reading error:", error.message);
     return { data, error };
   }
 
-  async deleteReading(id) {
+  async deleteReading(symbol, ids, reading, source) {
     if (!this.user) await this.init();
     if (!this.user) return { error: "Auth required" };
-    if (!id) return { error: "ID is required" };
 
-    const { error } = await this.client
-      .from('readings')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', this.user.id);
+    // Statt "DELETE" machen wir einen "INSERT" des Tombstones
+    const { data, error } = await this.client
+    .from('readings')
+    .insert([{
+      user_id: this.user.id,
+      symbol: symbol ? String(symbol).substring(0, 3) : null,
+      ids: ids,
+      reading: reading,
+      source: source,
+      deleted: true 
+    }])
+    .select();
 
-    if (error) console.error("Delete reading error:", error.message);
-    return { error };
+    if (error) console.error("Delete/Hide reading error:", error.message);
+    return { data, error };
   }
 
   async getReadings(own = true) {
