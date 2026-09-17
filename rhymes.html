@@ -1,0 +1,515 @@
+<html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QATT Sprites Overview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://qatt.org/qatt/js/supabase.js"></script>
+
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-rows: auto repeat(5, max-content);
+            grid-auto-columns: max-content;
+            grid-auto-flow: column;
+            column-gap: 0.5rem;
+        }
+        
+        .col-wrapper {
+            display: grid;
+            grid-template-rows: subgrid;
+            grid-row: span 6;
+            row-gap: 1rem;
+            justify-items: center;
+        }
+
+        .sprite-card {
+            transition: opacity 0.2s ease-in-out, transform 0.1s ease-in-out;
+            align-self: end; 
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .sprite-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        }
+
+        .sprite-wrapper {
+            width: 50px;
+            min-height: 75px; 
+            flex-shrink: 0; 
+            background-repeat: no-repeat;
+        }
+
+        .label-container {
+            display: flex;
+            flex-direction: column;
+            width: 150px;
+            height: 75px; 
+            background-color: #f8f9fa;
+            border-left: 1px solid #dee2e6;
+            color: #212529;
+            font-size: 0.8rem;
+            overflow-y: auto;
+            padding: 2px 4px;
+        }
+
+        .entry-item {
+            border-bottom: 1px solid #e9ecef;
+            padding: 2px 0;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+        .entry-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .entry-ids {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .entry-reading {
+            color: #198754;
+        }
+        .entry-source {
+            font-size: 0.7rem;
+            color: #6c757d;
+            font-style: italic;
+            display: block;
+        }
+        
+        .empty-placeholder {
+            color: #adb5bd;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <div class="container-fluid py-4">
+        
+        <div class="app-header">
+            <div></div>
+            <h1 class="m-0 text-center">QATT Sprites Overview</h1>
+            <div id="auth-container" class="text-end" style="min-width: 200px;">
+                <button class="btn btn-outline-primary btn-sm" disabled>Lade Login...</button>
+            </div>
+        </div>
+        
+        <div class="main-grid overflow-x-auto pb-3" id="main-row"></div>
+        
+    </div>
+
+    <!-- Overview Modal -->
+    <div class="modal fade" id="overviewModal" tabindex="-1" aria-labelledby="overviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="overviewModalLabel">Entries for</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul class="list-group list-group-flush" id="overviewList">
+                        <!-- Wird per JS gefüllt -->
+                    </ul>
+                    <div id="overviewEmptyState" class="p-4 text-center text-muted d-none">
+                        No entries yet.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="openAddModalBtn">Add entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Entry Modal -->
+    <div class="modal fade" id="dataEntryModal" tabindex="-1" aria-labelledby="dataEntryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataEntryModalLabel">Add entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="dataEntryForm">
+                        <div class="mb-3">
+                            <label for="inputSymbol" class="form-label fw-bold">Symbol</label>
+                            <input type="text" class="form-control bg-light" id="inputSymbol" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputIds" class="form-label fw-bold">IDS / Chữ Nôm</label>
+                            <input type="text" class="form-control" id="inputIds" placeholder="z.B. ⿰言吾 oder 語">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputReading" class="form-label fw-bold">Reading (Quốc Ngữ)</label>
+                            <input type="text" class="form-control" id="inputReading" placeholder="z.B. ngữ">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputSource" class="form-label fw-bold">Source (optional)</label>
+                            <input type="text" class="form-control" id="inputSource" placeholder="z.B. dictionary, URL">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelAddBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary d-flex align-items-center" id="saveEntryBtn">
+                        <span class="spinner-border spinner-border-sm me-2 d-none" id="saveSpinner" role="status" aria-hidden="true"></span>
+                        <span id="saveBtnText">Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const s = new SupabaseService();
+        let overviewModal;
+        let entryModal;
+        let isAuthenticated = false;
+        let currentSymbol = null;
+        let entriesData = {}; 
+
+        function updateAuthUI() {
+            const authContainer = document.getElementById('auth-container');
+            if (isAuthenticated) {
+                const userName = s.user.user_metadata?.full_name || s.defaultUsername();
+                authContainer.innerHTML = `
+                    <span class="me-3 text-muted small">Logged in as <strong>${userName}</strong></span>
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
+                `;
+            } else {
+                authContainer.innerHTML = `
+                    <button class="btn btn-primary btn-sm" onclick="login()">Login with Google</button>
+                `;
+            }
+        }
+
+        function login() { s.signInWithGoogle(); }
+        async function logout() {
+            if (s.client) {
+                await s.client.auth.signOut();
+                window.location.reload();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            overviewModal = new bootstrap.Modal(document.getElementById('overviewModal'));
+            entryModal = new bootstrap.Modal(document.getElementById('dataEntryModal'));
+            
+            s.init().then(() => {
+                const provider = s.user?.app_metadata?.provider;
+                isAuthenticated = s.user && provider && provider !== 'anonymous';
+                
+                updateAuthUI();
+                buildGrid();
+                loadAndDisplayData();
+            });
+        });
+
+        async function loadAndDisplayData() {
+            try {
+                // Holt ALLE Rohdaten aus Supabase (inkl. deleted: true)
+                const rawData = await s.getReadings(false); 
+                
+                // 1. Alle "Ausblenden"-Markierungen (Tombstones) finden
+                const deletions = rawData.filter(entry => entry.deleted === true);
+
+                // 2. Normale Einträge filtern
+                const validData = rawData.filter(entry => {
+                    // Lösch-Datensätze selbst ausblenden
+                    if (entry.deleted === true) return false;
+
+                    // Prüfen, ob es zu diesem Eintrag einen Lösch-Datensatz gibt, der GILT
+                    const isDeleted = deletions.some(del => {
+                        const isSameEntry = (
+                            del.symbol === entry.symbol &&
+                            (del.ids || '') === (entry.ids || '') &&
+                            (del.reading || '') === (entry.reading || '')
+                        );
+                        
+                        if (!isSameEntry) return false;
+
+                        // WICHTIG: Der Tombstone gilt nur in zwei Fällen:
+                        // 1. Der aktuell eingeloggte Nutzer hat ihn erstellt (Persönliche Ausblendung)
+                        // 2. Der Autor des Eintrags selbst hat ihn erstellt (Autor hat seinen Post gelöscht)
+                        const isMyTombstone = (isAuthenticated && s.user && del.user_id === s.user.id);
+                        const isAuthorTombstone = (del.user_id === entry.user_id);
+
+                        return isMyTombstone || isAuthorTombstone;
+                    });
+
+                    // Nur behalten, wenn er nach obigen Regeln nicht als gelöscht gilt
+                    return !isDeleted; 
+                });
+
+                // Chronologisch sortieren
+                validData.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+                // Nach Symbolen gruppieren
+                entriesData = {};
+                validData.forEach(entry => {
+                    if (entry.symbol) {
+                        if (!entriesData[entry.symbol]) {
+                            entriesData[entry.symbol] = [];
+                        }
+                        entriesData[entry.symbol].push(entry);
+                    }
+                });
+
+                // UI updaten
+                document.querySelectorAll('.sprite-card').forEach(card => {
+                    updateCardUI(card.dataset.symbol);
+                });
+
+            } catch (err) {
+                console.error("Fehler beim Laden der Supabase Daten:", err);
+            }
+        }
+
+        function updateCardUI(symbol) {
+            const card = document.querySelector(`.sprite-card[data-symbol="${symbol}"]`);
+            if (!card) return;
+
+            const labelContainer = card.querySelector('.label-container');
+            const entries = entriesData[symbol] || [];
+
+            if (entries.length === 0) {
+                labelContainer.innerHTML = '<div class="empty-placeholder">none</div>';
+                card.classList.add('opacity-50');
+                return;
+            }
+
+            labelContainer.innerHTML = '';
+            card.classList.remove('opacity-50');
+
+            entries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'entry-item';
+                
+                let html = '';
+                if (entry.ids) html += `<span class="entry-ids">${entry.ids}</span> `;
+                if (entry.reading) html += `<span class="entry-reading">${entry.reading}</span>`;
+                if (entry.source) html += `<span class="entry-source">(${entry.source})</span>`;
+                
+                if (html === '') html = '<i>Leerer Eintrag</i>';
+
+                entryDiv.innerHTML = html;
+                labelContainer.appendChild(entryDiv);
+            });
+
+            labelContainer.scrollTop = labelContainer.scrollHeight;
+        }
+
+        function buildGrid() {
+            const names = "l z ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
+            const row = document.getElementById('main-row');
+
+            names.forEach((name, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-wrapper';
+                
+                if (index % 2 === 1) {
+                    col.classList.add('border-end', 'border-2', 'pe-2');
+                }
+                
+                const title = document.createElement('h3');
+                title.textContent = name;
+                title.className = 'text-center mb-3 w-100 fs-5';
+                title.style.alignSelf = 'end';
+                col.appendChild(title);
+
+                const imageUrl = `https://qatt.org/qatt/img/qatt/${name}.jpg`;
+                const sprites = [];
+
+                for (let i = 0; i < 5; i++) {
+                    const symbolText = `${name}${i + 1}`;
+
+                    const card = document.createElement('div');
+                    card.className = 'sprite-card border rounded shadow-sm bg-white overflow-hidden d-flex align-items-stretch opacity-50';
+                    card.dataset.symbol = symbolText;
+
+                    const sprite = document.createElement('div');
+                    sprite.className = 'sprite-wrapper';
+                    
+                    const labelContainer = document.createElement('div');
+                    labelContainer.className = 'label-container';
+                    labelContainer.innerHTML = '<div class="empty-placeholder">none</div>';
+
+                    card.appendChild(sprite);
+                    card.appendChild(labelContainer);
+
+                    card.addEventListener('click', () => {
+                        if (!isAuthenticated) {
+                            alert("Bitte logge dich ein, um Einträge hinzuzufügen oder zu sehen.");
+                            return;
+                        }
+                        openOverviewModal(symbolText);
+                    });
+
+                    col.appendChild(card);
+                    sprites.push(sprite);
+                }
+
+                row.appendChild(col);
+
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    sprites.forEach((sprite, i) => {
+                        sprite.style.backgroundImage = `url(${imageUrl})`;
+                        sprite.style.backgroundSize = '100% 500%';
+                        sprite.style.backgroundPosition = `0% ${i * 25}%`;
+                    });
+                };
+            });
+        }
+
+        function openOverviewModal(symbol) {
+            currentSymbol = symbol;
+            document.getElementById('overviewModalLabel').textContent = `Einträge für Symbol: ${symbol}`;
+            
+            const listContainer = document.getElementById('overviewList');
+            const emptyState = document.getElementById('overviewEmptyState');
+            
+            listContainer.innerHTML = '';
+            
+            const entries = entriesData[symbol] || [];
+
+            if (entries.length === 0) {
+                emptyState.classList.remove('d-none');
+            } else {
+                emptyState.classList.add('d-none');
+                
+                entries.forEach(entry => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-start py-3';
+                    
+                    const isMine = isAuthenticated && s.user && s.user.id === entry.user_id;
+                    
+                    let html = `
+                        <div class="ms-2 me-auto">
+                            ${entry.ids ? `<div class="fw-bold fs-5 text-primary mb-1">${entry.ids}</div>` : ''}
+                            ${entry.reading ? `<div class="text-success fw-semibold">${entry.reading}</div>` : ''}
+                            ${entry.source ? `<div class="text-muted small mt-1"><i class="bi bi-book"></i> Quelle: ${entry.source}</div>` : ''}
+                            <div class="text-black-50" style="font-size: 0.65rem; margin-top: 4px;">Hinzugefügt am ${new Date(entry.created_at).toLocaleDateString()}</div>
+                        </div>
+                    `;
+                    
+                    if (isAuthenticated) {
+                        const safeIds = (entry.ids || '').replace(/'/g, "\\'");
+                        const safeReading = (entry.reading || '').replace(/'/g, "\\'");
+                        const safeSource = (entry.source || '').replace(/'/g, "\\'");
+                        
+                        const btnClass = isMine ? 'btn-outline-danger' : 'btn-outline-warning text-dark';
+                        const btnText = isMine ? 'Löschen' : 'Ausblenden';
+                        
+                        html += `
+                            <button class="btn btn-sm ${btnClass} ms-3 mt-1" onclick="removeEntry('${symbol}', '${safeIds}', '${safeReading}', '${safeSource}')" title="${btnText}">
+                                ${btnText}
+                            </button>
+                        `;
+                    }
+                    
+                    li.innerHTML = html;
+                    listContainer.appendChild(li);
+                });
+            }
+
+            overviewModal.show();
+        }
+
+        window.removeEntry = async function(symbol, ids, reading, source) {
+            if (!confirm("Möchtest du diesen Eintrag wirklich entfernen/ausblenden?")) return;
+            try {
+                const result = await s.deleteReading(symbol, ids, reading, source);
+                if (result && result.error) {
+                    alert("Fehler: " + result.error.message);
+                } else {
+                    await loadAndDisplayData();
+                    openOverviewModal(symbol);
+                }
+            } catch (err) { 
+                console.error(err);
+                alert("Unerwarteter Fehler."); 
+            }
+        };
+
+        document.getElementById('openAddModalBtn').addEventListener('click', () => {
+            overviewModal.hide();
+            document.getElementById('inputSymbol').value = currentSymbol;
+            document.getElementById('inputIds').value = ''; 
+            document.getElementById('inputReading').value = '';
+            document.getElementById('inputSource').value = '';
+            
+            setTimeout(() => { entryModal.show(); }, 300);
+        });
+
+        document.getElementById('cancelAddBtn').addEventListener('click', () => {
+            setTimeout(() => { overviewModal.show(); }, 300);
+        });
+        document.querySelector('#dataEntryModal .btn-close').addEventListener('click', () => {
+            setTimeout(() => { overviewModal.show(); }, 300);
+        });
+
+        document.getElementById('saveEntryBtn').addEventListener('click', async () => {
+            if (!isAuthenticated) return;
+
+            const symbol = document.getElementById('inputSymbol').value;
+            const ids = document.getElementById('inputIds').value.trim();
+            const reading = document.getElementById('inputReading').value.trim();
+            const source = document.getElementById('inputSource').value.trim();
+            
+            if (!ids && !reading) {
+                alert("Bitte gib zumindest IDS/Chữ Nôm oder Reading ein.");
+                return;
+            }
+
+            const btn = document.getElementById('saveEntryBtn');
+            const spinner = document.getElementById('saveSpinner');
+            const btnText = document.getElementById('saveBtnText');
+
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            btnText.textContent = "Speichert...";
+            
+            try {
+                const result = await s.addReading(symbol, ids, reading, source);
+                
+                if (result && result.error) {
+                    alert("Es gab einen Fehler beim Speichern: " + result.error.message);
+                } else {
+                    await loadAndDisplayData();
+                    entryModal.hide();
+                    setTimeout(() => { openOverviewModal(symbol); }, 300);
+                }
+            } catch (err) {
+                alert("Ein unerwarteter Fehler ist aufgetreten.");
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+                btnText.textContent = "Speichern";
+            }
+        });
+    </script>
+</body>
+</html>
