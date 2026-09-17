@@ -417,7 +417,7 @@ class SupabaseService {
         ids: ids,
         reading: reading,
         source: source
-      }]);
+      }]).select();
 
     if (error) console.error("Add reading error:", error.message);
     return { data, error };
