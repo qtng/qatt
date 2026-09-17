@@ -413,7 +413,7 @@ class SupabaseService {
       .from('readings')
       .insert([{
         user_id: this.user.id,
-        symbol: symbol ? String(symbol).substring(0, 2) : null,
+        symbol: symbol ? String(symbol).substring(0, 3) : null,
         ids: ids,
         reading: reading,
         source: source
