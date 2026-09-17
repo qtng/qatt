@@ -402,6 +402,61 @@ class SupabaseService {
     if (error) console.error("Delete slide error:", error.message);
     return { error };
   }
-  
+
+    // --- Reading Methods ---
+
+  async addReading(symbol, ids, reading, source) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+
+    const { data, error } = await this.client
+      .from('readings')
+      .insert([{
+        user_id: this.user.id,
+        symbol: symbol ? String(symbol).substring(0, 2) : null,
+        ids: ids,
+        reading: reading,
+        source: source
+      }]);
+
+    if (error) console.error("Add reading error:", error.message);
+    return { data, error };
+  }
+
+  async deleteReading(id) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: "Auth required" };
+    if (!id) return { error: "ID is required" };
+
+    const { error } = await this.client
+      .from('readings')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', this.user.id);
+
+    if (error) console.error("Delete reading error:", error.message);
+    return { error };
+  }
+
+  async getReadings(own = true) {
+    if (!this.client) await this.init();
+
+    let query = this.client.from('readings').select('*');
+
+    if (own) {
+      if (!this.user) return [];
+      query = query.eq('user_id', this.user.id);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Get readings error:", error.message);
+      return [];
+    }
+    return data;
+  }
+
+
 // end of class
 }
