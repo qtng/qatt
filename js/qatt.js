@@ -374,7 +374,7 @@ const defaultQattEncoding = {
       en: "ch5",
       i2m: "ch6",
 
-      wyng: "dz2",
+      wy2ng: "dz2",
       wi2ng: "dz3",
       wi2: "dz4",
       wen: "dz5",
@@ -568,7 +568,7 @@ class Qatt {
         else if (final === "c") final = "ng";
         else if (final === "ch") final = "nh";
         if (String(tone) === "1") tone = 6;
-        else if (String(tone) ===ich "5") tone = 7;
+        else if (String(tone) === "5") tone = 7;
       }
       const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? "" : final)];
       if (qv) {
@@ -747,7 +747,7 @@ class QattCode {
                     if (!this.isValid2(res.rhyme)) res.error = `Invalid onset: '${chiRaw}'.`;
                     if (!this.isValid2(res.onset)) res.error += `Invalid rhyme: '${canRaw}'.`;
                 }
-				res.input = chunk;
+				res.input = input;
 				res.code = res.onset + res.rhyme + res.coda + res.tone;
                 return res;
             }
