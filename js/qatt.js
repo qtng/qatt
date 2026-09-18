@@ -695,9 +695,9 @@ class QattCode {
                  this.MARKINGS = { 
                     "i": "i", 
                     "u": "u", 
-                    "y": "n", 
-                    "q": "ng", 
-                    "w": "m" 
+                    "y": "y", "n": "y",
+                    "q": "q", "ng": "q", "nh": "q",
+                    "w": "w", "m": "w",
                 };
                 this.TONES = new Set(["0", "1", "2", "3", "4", "5", "6", "7"]);
             }
