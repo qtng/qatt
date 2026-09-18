@@ -1,17 +1,29 @@
 /*
 QATT renderer
 
-const renderer = new QattRenderer(options);
+const q = new Qatt(options);
 
-renderer.render("t,i2,ng,1", element);
+// Parses QattCode notation into list of QattCode objects.
+// Primarily useful for online keyboards / IME,
+// e.g. to normalize input, count glyphs (SVGs) in advance,
+// show last typed word, or calculate cursor positions.
+q.parse("ngdi2tng0"); // qatt code for "người ta"
+// result: [
+//   {input: "ngddi2" code: "ngdi2", onset:"ng", rhyme: "d", coda: "i", tone: 2},
+//   {input: "tng0", code: "tng0", onset: "t", rhyme: "ng", coda: "", tone: 0}
+// ]
+
+// Renders QattCode notation as SVG, one per QattCode.
+// Also accepts space separated internal render codes (i.e. comma separated onset, rhyme, coda, tone, e.g. "t,i2,ng,1")
+q.render("ngdi2tng0", element); // two SVG, one for "ngdi2" and one for "tng0"
 
 // use MutationObserver to automatically render
 // the innerText of the registered tag
-renderer.observe("TT");
+q.observe("TT");
+
 */
 
 const PREFIX = "v2-";
-
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	style="height:4800px;width:2540px;"
     	id="svg">
@@ -417,38 +429,22 @@ const defaultQattEncoding = {
       we2u: "ph6"
 };
 
-// Kommalose Kurzschreibweise: Codes bestehen aus je 2 Zeichen (Ausnahme "đ" = 1 Zeichen,
-// Alias für "dd"). Zwei Codes hintereinander ergeben eine Einheit (Initial + zweiter Code).
-// Optional folgt ein 5. Zeichen: eine Ziffer wird direkt als Ton übernommen, ein Buchstabe
-// (n/m/g/w/j) wird über digitForLetter() in eine Ziffer übersetzt und an den zweiten Code
-// angehängt - danach kann noch eine Ziffer als Ton folgen. Mehrere Einheiten können direkt
-// aneinandergereiht werden.
-const compactCodeMap = {
-  zz: "_", ll: "l", ng: "ng", hh: "h", gg: "g", cc: "c", tr: "tr",
-  dd: "d", "đ": "d", nn: "n", tt: "t", th: "th", nh: "nh", ch: "ch",
-  dz: "dz", xx: "x", kh: "kh", ss: "s", rr: "r", mm: "m", bb: "b",
-  vv: "v", ph: "ph",
-  pp: "ph", ff: "ph", qq: "c", ww: "ng", jj: "tr", yy: "nh"
-};
-
-// Kapselt das Buchstabe->Ziffer-Mapping für das 5. Zeichen, keyed by Ziel-Basis, damit es
-// sich später leicht pro Basis erweitern/überschreiben lässt (aktuell nur "n" mit Sonderfall).
-const compactDigitLetters = {
-  /*empty coda*/ "": {default: 1},
-  /*-U coda*/ "": {default: 1},
-  /*-NG coda*/ y: { default: 2, n: 0 },
-  /*-N coda*/ w: { default: 3 },
-  /*-I coda*/ w: { default: 3 },
-  /*-M coda*/ q: { default: 5 },
+const qattCodeDigitLetters = {
+  /*empty coda*/ "": {default: 0},
+  /*-U coda*/ "u": {default: 1},
+  /*-NG coda*/ q: { default: 2, n: 0 },
+  /*-N coda*/ y: { default: 3 },
+  /*-I coda*/ i: { default: 4 },
+  /*-M coda*/ w: { default: 5 },
 };
 
 function digitForLetter(letter, base) {
-  const entry = compactDigitLetters[letter || ""];
+  const entry = qattCodeDigitLetters[letter || ""];
   if (!entry) return null;
   return String(base in entry ? entry[base] : entry.default);
 }
 
-class QattRenderer {
+class Qatt {
   constructor(options = {}) {
     this.qattEncoding = options.qattEncoding || defaultQattEncoding;
     this.defs = options.defs || defaultSvgDefs;
@@ -459,6 +455,7 @@ class QattRenderer {
     this.defsElement = null;
     this._initializeDefs();
     this._injectFallbackStyles();
+	this.qc = new QattCode();
   }
 
   _initializeDefs() {
@@ -520,72 +517,19 @@ class QattRenderer {
     return this._renderText(text, root);
   }
 
-  _readCompactCode(str, i) {
-    if (str[i] === "đ") return { code: compactCodeMap["đ"], length: 1 };
-    const pair = str.substr(i, 2);
-    const code = compactCodeMap[pair];
-    return code ? { code, length: 2 } : null;
-  }
-
-  _isDigit(ch) {
-    return ch != null && /[0-9]/.test(ch);
-  }
-
-  // Liest an Position i einen Zweier-Code. Schlägt das fehl - egal ob weil dort nur noch
-  // ein einzelner Buchstabe steht, oder weil die zwei vorhandenen Buchstaben schlicht
-  // keinem Code entsprechen (z.B. "bh") - wird der erste Buchstabe verdoppelt und als
-  // Fallback versucht; es wird dabei nur dieser eine Buchstabe verbraucht, der Rest bleibt
-  // für den nächsten Lesevorgang stehen (z.B. "bh" -> "bb" + weiter mit "h").
-  _readCompactCodeWithFallback(text, i) {
-    const direct = this._readCompactCode(text, i);
-    if (direct) return { code: direct.code, consumed: direct.length };
-    const ch = text[i];
-    if (ch == null || this._isDigit(ch)) return null;
-    const fallback = this._readCompactCode(ch + ch, 0);
-    return fallback ? { code: fallback.code, consumed: 1 } : null;
-  }
-
   _decodeCompact(text) {
-    const units = [];
-    let i = 0;
+    return this.parse(text).map(q => {
+      return [
+		  q.onset == "z" ? "_" : q.onset,
+		  q.rhyme + (digitForLetter(q.coda, q.rhyme)).toString(),
+		  "",
+		  q.tone.toString()
+	  ].join(",")
+	}).join(" ");
+  }
 
-    while (i < text.length) {
-      const first = this._readCompactCodeWithFallback(text, i);
-      if (!first) { i += 1; continue; }
-      i += first.consumed;
-
-      // Steht direkt eine Ziffer an, wird kein zweiter Code mehr gelesen - der erste
-      // wird übernommen und die Ziffer weiter unten als Ton (oder Ziffernbuchstabe) behandelt.
-      let second = this._isDigit(text[i]) ? null : this._readCompactCodeWithFallback(text, i);
-      if (second) {
-        i += second.consumed;
-      } else {
-        second = first;
-      }
-
-      let vowel = second.code;
-      let tone = "";
-
-      const next = text[i];
-      if (this._isDigit(next)) {
-        tone = next;
-        i += 1;
-      } else if (digitForLetter(next, second.code) != null) {
-        vowel += digitForLetter(next, second.code);
-        i += 1;
-        const toneChar = text[i];
-        if (this._isDigit(toneChar)) {
-          tone = toneChar;
-          i += 1;
-        }
-      }
-
-      const fields = [first.code, vowel, "", tone];
-      while (fields.length && fields[fields.length - 1] === "") fields.pop();
-      units.push(fields.join(","));
-    }
-
-    return units.join(" ");
+  parse(text) {
+	  return this.qc.parse(text);
   }
 
   _renderText(text, root) {
@@ -624,7 +568,7 @@ class QattRenderer {
         else if (final === "c") final = "ng";
         else if (final === "ch") final = "nh";
         if (String(tone) === "1") tone = 6;
-        else if (String(tone) === "5") tone = 7;
+        else if (String(tone) ===ich "5") tone = 7;
       }
       const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? "" : final)];
       if (qv) {
@@ -734,3 +678,84 @@ class QattRenderer {
     });
   }
 }
+
+/*
+Qatt Code tokenizer, renders a continuous string
+of qatt codes into a list of qatt code objects.
+e.g
+qc = new QattCode();
+qc.parse("ngddi0"); // -> [{input: "ngddi0", code: "ngdi5", onset:"ng", rhyme: "d", coda: "i", tone: 0}]
+
+codes are normalized, e.g. dd becomes d.
+*/
+class QattCode {
+            constructor() {
+                this.BASE_2 = new Set(["ng", "tr", "th", "nh", "ch", "dz", "kh", "ph"]);
+                this.BASE_1 = new Set(["z", "h", "g", "c", "l", "d", "n", "t", "x", "s", "r", "m", "b", "v"]);
+                 this.MARKINGS = { 
+                    "i": "i", 
+                    "u": "u", 
+                    "y": "n", 
+                    "q": "ng", 
+                    "w": "m" 
+                };
+                this.TONES = new Set(["0", "1", "2", "3", "4", "5", "6", "7"]);
+            }
+            isDoubled(str) {
+                return str.length === 2 && str[0] === str[1] && this.BASE_1.has(str[0]);
+            }
+            isValid2(str) {
+                return this.BASE_2.has(str) || this.isDoubled(str);
+            }
+            parseChunk(input) {
+                let str = input.toLowerCase().trim();
+                let res = { onset: "", rhyme: "", coda: "", tone: 0, error: "" };
+                if (str.length === 0) return res;
+                let lastChar = str.slice(-1);
+                if (this.TONES.has(lastChar)) {
+                    res.tone = parseInt(lastChar, 10);
+                    str = str.slice(0, -1);
+                }
+                if (str.length === 0) return res; 
+                lastChar = str.slice(-1);
+                if (this.MARKINGS[lastChar] !== undefined) {
+                    res.coda = this.MARKINGS[lastChar];
+                    str = str.slice(0, -1);
+                }
+                if (str.length === 0) {
+                    res.error = "Onset missing.";
+                    return res;
+                }
+              if (this.BASE_2.has(str) || (str.length === 1 && this.BASE_1.has(str))) {
+                    res.onset = str;
+                    res.rhyme = str;
+                } else if (this.isDoubled(str)) {
+                    res.onset = str[0];
+                    res.rhyme = str[0];
+                } else {
+                    let canRaw = "", chiRaw = "";
+                    
+                    if (str.length >= 2 && this.isValid2(str.slice(-2))) {
+                        chiRaw = str.slice(-2);
+                        canRaw = str.slice(0, -2);
+                    } else {
+                        chiRaw = str.slice(-1);
+                        canRaw = str.slice(0, -1);
+                    }
+                    res.rhyme = this.isDoubled(chiRaw) ? chiRaw[0] : chiRaw;
+                    res.onset = this.isDoubled(canRaw) ? canRaw[0] : canRaw;
+                    if (!this.isValid2(res.rhyme)) res.error = `Invalid onset: '${chiRaw}'.`;
+                    if (!this.isValid2(res.onset)) res.error += `Invalid rhyme: '${canRaw}'.`;
+                }
+				res.input = chunk;
+				res.code = res.onset + res.rhyme + res.coda + res.tone;
+                return res;
+            }
+            parse(input) {
+                const fullInput = input.toLowerCase();
+                const blocks = fullInput.split(/(?<=[0-7])/).filter(b => b.trim().length > 0);
+                return blocks.map(block => this.parseChunk(block));
+            }
+}
+
+
