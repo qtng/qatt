@@ -21,7 +21,7 @@
                     { name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
                     //{ name: "QATT Reference", url: "/qatt/reference.html", icon: "bi-book-half" },
                     //{ name: "QATT Logo Creator", url: "/qatt/logo-creator.html", icon: "bi-palette" },
-                    { name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-info-circle" }
+                    //{ name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-info-circle" }
                 ]
             }
         ]
