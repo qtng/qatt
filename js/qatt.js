@@ -709,7 +709,7 @@ class QattCode {
             }
             parseChunk(input) {
                 let str = input.toLowerCase().trim();
-                let res = { onset: "", rhyme: "", coda: "", tone: 0, error: "" };
+                let res = { onset: "", rhyme: "", coda: "", tone: null, error: "" };
                 if (str.length === 0) return res;
                 let lastChar = str.slice(-1);
                 if (this.TONES.has(lastChar)) {
