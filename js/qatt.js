@@ -475,8 +475,10 @@ class Qatt {
     const style = document.createElement("style");
     style.id = "qatt-fallback-style";
     style.textContent = `:where(tt) svg {
-  width: 1em;
-  height: 1em;
+  width: 2em;
+  height: 2em;
+  position: relative;
+  top: -.125em;
   stroke-width: 6px;
   stroke: currentColor;
   fill: transparent;
