@@ -30,7 +30,7 @@ class VietnameseParser {
             static VALID_VOWELS = [
                 "ai", "ao", "au", "ay", "ây", "âu", "eo", "êu", "ia", "iê", "iêu", "iu", 
                 "oi", "ôi", "ơi", "ua", "uô", "uôi", "ui", "ưa", "ưi", "ươ", "ươi", "ươu", "ưu", 
-                "ya", "yê", "yêu",
+                "ya", "yê", "yêu", "yu",
                 "a", "ă", "â", "e", "ê", "i", "o", "ô", "ơ", "u", "ư", "y"
             ];
             
