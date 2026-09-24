@@ -330,7 +330,7 @@ const defaultQattEncoding = {
       we2ng: "c3",
       we2n: "c4",
       y: "c5",
-      om: "c6",
+      o2m: "c6",
 
       au: "tr2",
       yng: "tr3",
