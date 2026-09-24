@@ -324,11 +324,11 @@ const defaultQattEncoding = {
       e2ng: "g3",
       e2n: "g4",
       y2: "g5",
-      em: "g6",
+      e2m: "g6",
 
-      we: "c2",
-      weng: "c3",
-      wen: "c4",
+      we2: "c2",
+      we2ng: "c3",
+      we2n: "c4",
       y: "c5",
       om: "c6",
 
