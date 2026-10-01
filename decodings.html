@@ -156,7 +156,7 @@
 <body class="bg-white">
 
     <div class="container-fluid p-0">
-        <h1 class="h2 mt-3 text-center">QATT Rhyme Tables</h1>
+        <h1 class="h2 mt-3 text-center">Quốc Âm Tân Tự</h1>
         
         <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 pt-3 px-3 mb-4">
             Choose decoding: <select id="table-select" class="form-select w-auto shadow-sm">
@@ -521,7 +521,7 @@
                     sprites.forEach((sprite, i) => {
                         sprite.style.backgroundImage = `url(${imageUrl})`;
                         sprite.style.backgroundSize = '100% 500%';
-                        sprite.style.backgroundPosition = `0% ${i * 25}%`;
+                        sprite.style.backgroundPosition = `0% ${i * 25 -i*.5}%`;
                         sprite.parentElement.classList.remove('opacity-75');
                     });
                 };
