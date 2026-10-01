@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quốc Âm Tân Tự Decodings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://qatt.org/qatt/js/navigation.js"></script>
+    <script src="https://qatt.org/qatt/js/parser.js?1"></script>
+    <script src="https://qatt.org/qatt/js/qatt.js?7"></script>
+    
+    <style>
+        :root {
+            /* Default to third-smallest step (out of 0.5 to 2.5 with step 0.25 -> 1.0) */
+            --sprite-w: 60px;
+            --sprite-h: 82.5px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-rows: auto repeat(5, max-content);
+            grid-auto-columns: max-content;
+            grid-auto-flow: column;
+            column-gap: 0;
+            row-gap: 0;
+            overscroll-behavior-x: contain; /* Prevents mobile back-swipe gestures */
+            border: 2px solid #6c757d; /* Dark border framing the table */
+        }
+        
+        /* The invisible 1em spacer for the scroll bounce trick */
+        .main-grid::after {
+            content: "";
+            width: 1em;
+            display: block;
+            grid-row: 1 / -1;
+        }
+
+        .col-wrapper {
+            display: grid;
+            grid-template-rows: subgrid;
+            grid-row: span 7;
+        }
+
+        /* Group 1, Group 2, and then every pair (even) gets the right border */
+        .col-wrapper:nth-child(1),
+        .col-wrapper:nth-child(even) {
+            border-right: 2px solid #6c757d;
+        }
+
+        /* Group styles in Pivot-Mode (border-right becomes border-bottom) */
+        .main-grid.pivot-mode .col-wrapper:nth-child(1),
+        .main-grid.pivot-mode .col-wrapper:nth-child(even) {
+            border-right: none;
+            border-bottom: 2px solid #6c757d;
+        }
+
+        .sprite-card {
+            transition: background-color 0.2s, transform 0.1s;
+            align-self: end; 
+            margin: 0;
+            cursor: pointer;
+            border-radius: 0;
+            border: none;
+            display: flex;
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        .sprite-card:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .sprite-wrapper {
+            width: var(--sprite-w);
+            min-height: var(--sprite-h);
+            flex-shrink: 0; 
+            background-repeat: no-repeat;
+            transition: width 0.2s ease, min-height 0.2s ease;
+        }
+
+        .label-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%; 
+            min-height: 24px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            color: #212529; /* Dunklere Schrift für besseren Kontrast */
+            font-size: 0.84rem;
+            font-style: italic;
+            padding: 0 2px;
+            border-bottom: 1px solid #777;
+        }
+        
+        /* Pivot mode settings via subgrid */
+        .main-grid.pivot-mode {
+            grid-template-columns: auto repeat(5, max-content);
+            grid-auto-rows: max-content;
+            grid-auto-flow: row;
+        }
+
+        .main-grid.pivot-mode::after {
+            width: auto;
+            height: 1em;
+            grid-row: auto;
+            grid-column: 1 / -1;
+        }
+
+        .main-grid.pivot-mode .col-wrapper {
+            grid-template-columns: subgrid;
+            grid-column: span 7;
+            grid-row: auto;
+        }
+        
+        .main-grid.pivot-mode .col-wrapper h3 {
+            align-self: center !important;
+            margin-bottom: 0 !important;
+            padding-right: 1rem;
+            text-align: right !important;
+        }
+
+        /* Horizontal layout for cards in Pivot-Mode */
+        .main-grid.pivot-mode .sprite-card {
+            flex-direction: row; 
+            align-items: stretch;
+        }
+
+        .main-grid.pivot-mode .label-container {
+            border-top: none;
+            border-bottom: none;
+            border-left: 1px solid rgba(0,0,0,0.1);
+            min-width: 40px; 
+            width: auto; 
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 6px;
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <div class="container-fluid p-0">
+        <h1 class="h2 mt-3 text-center">QATT Rhyme Tables</h1>
+        
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 pt-3 px-3 mb-4">
+            Choose decoding: <select id="table-select" class="form-select w-auto shadow-sm">
+                <!--<option value="qoex2">qatt.org standard 2</option>-->
+                <option value="omniglot">omniglot.com</option>
+                <option value="qode" selected>qatt.org</option>
+                <!--<option value="qoex">qatt.org standard</option>-->
+            </select>
+
+            <div class="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded border shadow-sm">
+                <label for="size-slider" class="text-muted small mb-0 fw-bold">Size:</label>
+                <input type="range" id="size-slider" class="form-range" min="0.5" max="2.5" step="0.25" value="1" style="width: 100px;">
+            </div>
+            
+            <button id="btn-pivot" class="btn btn-outline-secondary shadow-sm">Pivot</button>
+        </div>
+
+        <!-- Dynamic Legend Container -->
+        <div id="legend-container" class="mb-3 px-3 text-center"></div>
+        
+        <div class="main-grid overflow-auto" id="main-row"></div>
+
+        <div class="alert alert-info small">
+            <p>Please note that the shown decodings can only be aproximations.
+            Quốc Âm Tân Tự is not
+            fully decipherable because the original rhyme table
+            is written in Chữ Nôm, which often
+            has ambiguous pronunciations. Furthermore a lot of the annotation characters
+            don't exist in any dictionary, so the intended pronunciation is completely unknown.
+            
+            This leads to the rhyme table being underdetermined, not allowing for
+            full recovery without asserting additional hypotheses.
+            
+            Another aspect leading to inconsistencies is that the rhyme table
+            assigns at least six types of rhymes (differentiated by coda) to only five symbol groups denoted by 5 markings, shown above as 5 rows.
+            This led to the 6th rhyme type being scattered all over the place where
+            phonotactical restrictions left an empty slot.
+            A small number of these fill-in rhymes have unclear or competing Chữ Nôm pronunciations
+            and can only be deciphered by applying the bijection hypotheses and guesswork.
+            These are mostly the 8 rhymes in the bottom right corner.
+            The position in the last columns and the last rows
+            suggest that those are the rhymes
+            the author assigned last.
+            
+            </p>
+            <p>The following is a list of hypotheses that ate used in the
+            in the decodings shown on this page.</p>
+            
+            <h4>Hypotheses</h4>
+            <p>
+            <b>Bijection hypothesis:</b> Even though some of the original annotations have he same rhyme in modern Hán Nôm,
+            all known decodings assume that each rhyme occurs only once.
+            <em>Used by: omniglot.org, qatt.org</em>
+            </p>
+            
+            <p>
+            <b>Pair hypotheses:</b> The rounded variant of a rhyme
+            and its unrounded rhyme occur pairwise.
+            This hypotheses often includes the assumption that the khẩu radical (口)
+            often denotes the roundednes of a rhyme instead of being part of the Chữ Nôm character itself.
+            <em>Used by: qatt.org, to a lesser extent by omniglot.com</em>
+            </p>
+            
+            <p>
+            <b>Symmetry hypotheses:</b>
+            Each unrounded rhyme is the mirror image of its unrounded rhyme.
+            This is a stricter variant of the pair hypotheses.
+            This leads to a shift of a number of rhymes that
+            would otherwise violate this condition.
+            <em>Used by: qatt.org</em>
+            </p>
+            
+            <p>
+            <b>Nucleus hypothesis:</b>
+            The 22 base symbols represent the 22 nucleus rhymes of the Vietnamese language.
+            <em>Used by: qatt.org</em>
+            </p>
+            
+            <p>
+            <b>Minority language hypotheses:</b>
+            The superfluous nh/ng rhymes
+            represent certain rhymes of minority languages ending in ng.
+            This hypotheses excludes the vận thư hypotheses.
+            <em>Used by: omniglot.org</em>
+            </p>
+            
+            <p>
+            <b>Vận thư hypotheses:</b>
+            The 6 superfluous rhymes ending in nh/ng
+            reflect the fact that old rhyme dictionaries
+            distinguish between rhymes that modern Quốc Ngữ write with nh coda.
+            E.g. while Quốc Ngữ knows only one anh rhyme, old rhyme dictionaries
+            distinguish two separate anh rhymes, which have merged in modern Vietnamese.
+            The reasoning is that the original document
+            shows strong knowledge in ancient rhyme tables.
+            This hypotheses excludes the minority language hypotheses.
+            <em>Used by: qatt.org</em>
+            </p>
+            
+            <h4>Decodings</h4>
+                   
+            <p>
+            <b>The omniglot.com decoding</b><br>
+            <span class="badge bg-dark">Bijection hypotheses</span>
+            <span class="badge bg-dark">Pair hypotheses</span>
+            <span class="badge bg-dark">Minority language hypotheses</span>
+            <br>
+            This decoding optimizes best fit with modern Quốc Ngữ pronunciation.
+            59% of the rhymes have a pronunciation that match at least one of the modern pronunciations
+            of the original Chữ Nôm annotation. The rest is more or less similar but not exact.
+            This decoding uses the minority language hypotheses
+            and therefore assigns rhymes like ooeng and uưng. It also assigns the rhymes ung, ong and ông
+            even though the inventor of Quốc Âm Tân Tự explicitly described a separate method to write these particular rhymes called <i>Tham Thư</i>.</p>
+            
+            <p>
+            <b>The qatt.org decoding</b><br>
+            <span class="badge bg-dark">Bijection hypotheses</span>
+            <span class="badge bg-dark">Symmetry hypotheses</span>
+            <span class="badge bg-dark">Nucleus hypotheses</span>
+            <span class="badge bg-dark">Vận thư hypotheses</span>
+            <br>
+            This decoding trades exact pronunciation matches
+            for homogenity. It maintains an overall similary with modern pronunciation
+            instead of seeking for exact matches. 38% of the rhymes exactly match modern pronunciation.
+            The rest is more or less similar but not exact.
+            This encoding uses the nucleus hypothesis and the vận thư hypotheses
+            to handle inconsistencies found in Chữ Nôm annotations of the original rhyme table.
+            </p>
+            
+            <!--<p>
+            <b>The qatt.org standard</b><br>
+            This is the work in progress character standard to be used on <a href="https://qatt.org">qatt.org</a>
+            and <a href="https://chunom.org">chunom.org</a>. It is designed to follow the qatt.org decoding but add
+            an extension to make the system practical as an annotation system for Chữ Nôm,
+            i.e. easy to learn and read.
+            The standard adds an extension to the qatt.org decoding to fit it to
+            modern Vietnamese. The extension makes use of rhyme symbols that are unused by the original rhyme table
+            to denote rhymes ending in a rounded semi vowel or consonant.
+            By using otherwise unused symbols the extension stays mostly compatible
+            and avoids obsolete rhymes.
+            </p>-->
+        </div>
+    </div>
+
+    <script>
+        const parser = new VietnameseParser();
+        const names = "l z ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
+        
+        const tables = {
+            qode: [
+                ["ơ", "ơnh", "ơn", "ơi", "ơm"],
+                ["uơ", "uơnh", "uơn", "uơi", "ôm"],
+                ["a", "ang", "an", "ai", "am"],
+                ["oa", "oang", "oan", "oai", "oam"],
+                ["e", "eng", "en", "ươ", "em"],
+                ["oe", "oeng", "oen", "ư", "om"],
+                ["ưu", "ưng", "ưi", "ưn", "ưm"],
+                ["ươu", "ương", "ươi", "ươn", "ươm"],
+                ["âu", "âng", "ây", "ân", "âm"],
+                ["uâu", "uâng", "uây", "uân", "um"],
+                ["au", "ăng", "ay", "ăn", "ăm"],
+                ["oau", "oăng", "oay", "oăn", "oăm"],
+                ["ơng", "iêng", "iê", "iên", "iêm"],
+                ["uơng", "uyêng", "uyê", "uyên", "uôm"],
+                ["êng", "ênh", "ê", "ên", "êm"],
+                ["uêng", "uênh", "uê", "uên", "uêm"],
+                ["ing", "inh", "i", "in", "im"],
+                ["uyng", "uynh", "uy", "uyn", "uym"],
+                ["ô", "ôn", "ôi", "ao", "oao"],
+                ["u", "un", "ui", "eo", "oeo"],
+                ["o", "on", "oi", "iêu", "êu"],
+                ["ua", "uôn", "uôi", "iu", "uyu"]
+            ],
+            qoex: [
+                ["", "anh", "ơn", "ơi", "ơm", "ơ"],
+                ["", "oanh", "uơn", "uơi", "", "uơ"],
+                ["", "ang", "an", "ai", "am", "a"],
+                ["", "oang", "oan", "oai", "oam", "oa"],
+                ["", "eng", "en", "", "em", "e"],
+                ["", "oeng", "oen", "", "", "oe"],
+                ["ưu", "ưng", "ưi", "ưn", "ưm", "ư"],
+                ["ươu", "ương", "ươi", "ươn", "ươm", "ươ"],
+                ["âu", "âng", "ây", "ân", "âm", "â"],
+                ["uâu", "uâng", "uây", "uân", "", "uâ"],
+                ["au", "ăng", "ay", "ăn", "ăm", "ă"],
+                ["oau", "oăng", "oay", "oăn", "oăm", "oă"],
+                ["", "iêng", "", "iên", "iêm", "iê"],
+                ["", "", "", "uyên", "", "uyê"],
+                ["", "ênh", "ê", "ên", "êm", "ê"],
+                ["", "uênh", "uê", "uên", "uêm", "uê"],
+                ["", "inh", "i", "in", "im", "i"],
+                ["", "uynh", "uy", "uyn", "uym", "uy"],
+                ["", "ôn", "ôi", "ao", "oao", "ô"],
+                ["", "un", "ui", "eo", "oeo", "u"],
+                ["", "on", "oi", "iêu", "êu", "o"],
+                ["", "uôn", "uôi", "iu", "uyu", "uô"]
+            ],
+            qoex2: [
+                ["ơ", "anh", "ơn", "ơi", "ơm", ""],
+                ["uơ", "oanh", "uơn", "uơi", "", ""],
+                ["a", "ang", "an", "ai", "am", "ao"],
+                ["oa", "oang", "oan", "oai", "oam", "oao"],
+                ["e", "eng", "en", "", "em", "eo"],
+                ["oe", "oeng", "oen", "", "", "oeo"],
+                ["ư", "ưng", "ưi", "ưn", "ưm", "ưu"],
+                ["ươ", "ương", "ươi", "ươn", "ươm", "ươu"],
+                ["", "âng", "ây", "ân", "âm", "âu"],
+                ["", "uâng", "uây", "uân", "", "uâu"],
+                ["", "ăng", "ay", "ăn", "ăm", "au"],
+                ["", "oăng", "oay", "oăn", "oăm", "oau"],
+                ["", "iêng", "iê", "iên", "iêm", "iêu"],
+                ["", "", "uyê", "uyên", "", ""],
+                ["", "ênh", "ê", "ên", "êm", "êu"],
+                ["", "uênh", "uê", "uên", "uêm", "uêu"],
+                ["", "inh", "i", "in", "im", "iu"],
+                ["", "uynh", "uy", "uyn", "uym", "uyu"],
+                ["ô", "ôn", "ôi", "", "", "ôm"],
+                ["u", "un", "ui", "", "", "um"],
+                ["o", "on", "oi", "", "", "om"],
+                ["ua", "uôn", "uôi", "", "", "uôm"]
+            ],
+            omniglot: [
+                ["ê", "ênh", "ơn", "uơ", "um"],
+                ["oe", "ung", "oan", "uy", "âm"],
+                ["e", "ông", "an", "i", "uâm"],
+                ["oa", "oen", "oeng", "ưa", "em"],
+                ["a", "en", "eng", "ư", "uôm"],
+                ["uê", "uơn", "uênh", "ơ", "ôm"],
+                ["âu", "ưng", "ai", "ưn", "om"],
+                ["uâu", "ooeng", "oai", "ươn", "ơm"],
+                ["ao", "âng", "ay", "ăn", "ươm"],
+                ["oai", "uâng", "oay", "oăn", "uơm"],
+                ["au", "ăng", "ơi", "ân", "êm"],
+                ["oao", "oăng", "uơi", "uân", "im"],
+                ["uông", "iêng", "ia", "ên", "iêm"],
+                ["uưng", "uyêng", "uay", "uên", "am"],
+                ["ương", "anh", "ây", "iên", "oam"],
+                ["ang", "oanh", "uây", "uyên", "ăm"],
+                ["oang", "inh", "ưi", "in", "oăm"],
+                ["ong", "uynh", "ươi", "uyn", "ưm"],
+                ["ô", "ôn", "ôi", "ưu", "ươu"],
+                ["o", "un", "ui", "iu", "iêu"],
+                ["ua", "on", "oi", "êu", "eo"],
+                ["u", "uôn", "uôi", "uêu", "oeo"]
+            ]
+        };
+
+        const nucleusClasses = [
+            { label: "ơ uơ", rhymes: ["ơ", "uơ", "ơi", "uơi", "ơu", "uơu"], color: "#ffb3ba" },
+            { label: "a oa", rhymes: ["a", "oa", "ai", "oai", "ao", "oao"], color: "#ffdfba" },
+            { label: "e oe", rhymes: ["e", "oe", "eo", "oeo"], color: "#ffffba" },
+            { label: "ư ươ", rhymes: ["ư", "ươ", "ưa", "ưi", "ươi", "ưu", "ươu"], color: "#b3f6ff" },
+            { label: "â uâ", rhymes: ["â", "uâ", "ây", "uây", "âu", "uâu"], color: "#e6e6e6" },
+            { label: "ă oă", rhymes: ["ă", "oă", "ay", "oay", "uay", "au", "oau"], color: "#e6ffb3" },
+            { label: "ê uê", rhymes: ["ê", "uê", "êu", "uêu"], color: "#baffc9" },
+            { label: "i uy", rhymes: ["i", "uy", "iu", "uyu"], color: "#bae1ff" },
+            { label: "iê uyê", rhymes: ["ia", "iê", "uya", "uyê", "iêu", "uyêu"], color: "#e8baff" },
+            { label: "ô u", rhymes: ["ô", "u", "ôi", "ui"], color: "#c9c9ff" },
+            { label: "o ua", rhymes: ["o", "ua", "uô", "oi", "uôi"], color: "#ffb3e6" },
+            { rhymes: ["ooe", "uư"], color: "red" },
+        ];
+
+        const row = document.getElementById('main-row');
+        const select = document.getElementById('table-select');
+        const btnPivot = document.getElementById('btn-pivot');
+        const sizeSlider = document.getElementById('size-slider');
+        const legendContainer = document.getElementById('legend-container');
+
+        const startTable = "qode";
+        let currentData = tables[startTable];
+
+        function setNucleusColor(rhyme, el) {
+            if (!rhyme || rhyme === "none") return "#ffffff";
+            const nucleus = rhyme.trim().replace(/(ng|nh|n|m)(\s\(.*?\))?$/, "");
+            const match = nucleusClasses.find(c => c.rhymes.includes(nucleus));
+            if (match) {
+                el.style.backgroundColor = match.color;
+                el.style.opacity = "1";
+            } else {
+                el.style.backgroundColor = "#eee";
+                el.style.opacity = "0.3";
+            }
+        }
+
+        // Generate the legend
+        function renderLegend() {
+            legendContainer.innerHTML = '';
+            nucleusClasses.forEach((cls, i) => {
+                if (!cls.label) return;
+                const item = document.createElement('div');
+                item.className = 'legend-item d-inline-flex flex-column justify-content-center mx-1';
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color m-0';
+                colorBox.style.backgroundColor = cls.color;
+                
+                const label = document.createElement('span');
+                label.className = "small fw-normal";
+                label.innerHTML = cls.label.replace(" ", ",");
+                
+                item.appendChild(colorBox);
+                item.appendChild(label);
+                legendContainer.appendChild(item);
+                if (i == 3 || i == 6 || i == 9) {
+                    item.classList.add("ms-3");
+                }
+            });
+        }
+
+        // Initialize grid elements
+        function initGrid() {
+            names.forEach((name, index) => {
+                const rhymes = currentData[index] || ["none", "none", "none", "none", "none"];
+                const col = document.createElement('div');
+                col.className = 'col-wrapper';
+                
+                const title = document.createElement('h3');
+                title.textContent = name == "z" ? "ʔ" : name;
+                title.className = 'text-center fs-5 w-100 m-0 py-2';
+                title.style.alignSelf = 'end';
+                col.appendChild(title);
+
+                const imageUrl = `https://qatt.org/qatt/img/qatt/${name}.jpg`;
+                const sprites = [];
+                
+                for (let i = 0; i < 6; i++) {
+                    const card = document.createElement('div');
+                    card.className = 'sprite-card bg-white overflow-hidden opacity-75'; 
+                    
+                    card.dataset.name = name;
+                    card.dataset.index = i;
+
+                    const sprite = document.createElement('div');
+                    if (i < 5) sprite.className = 'sprite-wrapper';
+                                        
+                    const labelContainer = document.createElement('div');
+                    labelContainer.className = 'label-container';
+                    labelContainer.id = `label-${index}-${i}`;
+                    labelContainer.textContent = rhymes[i] || '∅';
+                    setNucleusColor(rhymes[i], labelContainer);
+
+                    card.appendChild(sprite);
+                    card.appendChild(labelContainer);
+                    col.appendChild(card);
+                    if (i < 5) {
+                      sprites.push(sprite);
+                    } else {
+                      labelContainer.classList.add("mt-3", "d-block", "text-center")
+                      labelContainer.innerHTML = `
+                      <small>Extension</small><br>
+                        <tt style="margin-top:-.5em" class="fs-1 ms-3 d-inline-block pb-2">${name == 'z' ? '_' : name},</tt>
+                        <br>
+                        ${rhymes[5] || ''}
+                      `;
+                      if (!rhymes[5]) labelContainer.innerHTML = name;
+                    }
+                }
+
+                row.appendChild(col);
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    sprites.forEach((sprite, i) => {
+                        sprite.style.backgroundImage = `url(${imageUrl})`;
+                        sprite.style.backgroundSize = '100% 500%';
+                        sprite.style.backgroundPosition = `0% ${i * 25}%`;
+                        sprite.parentElement.classList.remove('opacity-75');
+                    });
+                };
+            });
+            updateTable(startTable)
+        }
+
+        // Update labels without rebuilding the DOM
+        function updateTable(tableName) {
+            currentData = tables[tableName];
+            names.forEach((name, index) => {
+                const rhymes = currentData[index] || ["none", "none", "none", "none", "none"];
+                for (let i = 0; i < 6; i++) {
+                    const labelContainer = document.getElementById(`label-${index}-${i}`);
+                    if (labelContainer) {console.log(1)
+                        const rhymeText = rhymes[i] || '∅';
+                        const p = parser.parse(rhymes[i]||"");
+                        labelContainer.innerText = rhymeText;
+                        const tt = document.createElement("tt");
+                        tt.innerText = (p?.code||"").replace(/^_/, "").replace("0", "");
+                        console.log(rhymes[i], p?.code)
+                        //if (p) labelContainer.append(tt);
+                        setNucleusColor(rhymeText, labelContainer);
+                        
+                        if (i == 5) {
+                            labelContainer.innerHTML = `
+                            <small>Extension</small><br>
+                            <tt style="margin-top:-.5em" class="ms-3 d-inline-block pb-2">${name == 'z' ? '_' : name},</tt>
+                            <br>
+                            ${rhymes[5] || '∅'}
+                            `;
+                            if (!rhymes[5]) labelContainer.innerHTML = name;
+                        }
+                    }
+                }
+            });
+        }
+
+        // Rubber-Band Bounce Logic
+        let scrollTimeout;
+        row.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const maxScroll = row.scrollWidth - row.clientWidth;
+                
+                // Approximate 1em in pixels
+                const emSize = .25 * parseFloat(getComputedStyle(row).fontSize);
+                
+                // If user scrolled into the CSS ::after spacer, bounce back 1em
+                if (maxScroll > 0 && row.scrollLeft > maxScroll - emSize + 1) { 
+                    row.scrollTo({
+                        left: maxScroll - emSize,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 150);
+        });
+
+        // Event Listeners
+        select.addEventListener('change', (e) => {
+            updateTable(e.target.value);
+        });
+
+        btnPivot.addEventListener('click', () => {
+            row.classList.toggle('pivot-mode');
+            
+            // Adjust scroll position slightly when pivoting to keep things visible
+            setTimeout(() => {
+                row.scrollLeft = 0;
+            }, 50);
+        });
+
+        sizeSlider.addEventListener('input', (e) => {
+            const scale = parseFloat(e.target.value);
+            const baseW = 60;
+            const baseH = 82.5;
+            
+            document.documentElement.style.setProperty('--sprite-w', `${baseW * scale}px`);
+            document.documentElement.style.setProperty('--sprite-h', `${baseH * scale}px`);
+        });
+
+        // Bootstrap the app
+        renderLegend();
+        initGrid();
+
+    </script>
+    
+    <script>
+      const qatt = new Qatt();
+      qatt.observe("tt")
+    </script>
+</body>
+</html>
