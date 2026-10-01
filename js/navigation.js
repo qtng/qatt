@@ -17,6 +17,7 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
+                    { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
                     { name: "Practise QATT", url: "/qatt/quiz/qatt.html", icon: "bi-mortarboard" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
                     //{ name: "QATT Reference", url: "/qatt/reference.html", icon: "bi-book-half" },
