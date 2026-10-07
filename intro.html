@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quốc Âm Tân Tự - Intro</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://qatt.org/qatt/js/navigation.js"></script>
+<script src="https://qatt.org/qatt/js/qatt.js"></script>
+<style>
+  tt svg {font-size: 1em}
+  /*.rhyme-group:nth-child(2n+2) div:not(:nth-child(1)) {
+    background: #eee;
+    color: #aaa;
+  }*/
+  .rhyme-group {
+    margin-bottom: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: start;
+    > label, > div {
+      text-align: center;
+      background: #eee;
+      color: #aaa;
+      &:nth-child(2),
+      &:nth-child(2).onset-b,
+      &:nth-child(2).onset-ph,
+      &:nth-child(4).onset-ch,
+      &:nth-child(4).onset-x,
+      &:nth-child(4).onset-s {
+        background: #39b;
+        color: #fff;
+      }
+      &.coda-n,
+      &.coda-n.onset-b,
+      &.coda-n.onset-ph{
+        background: #aee;
+        color: #000;
+      }
+      &.coda-m,
+      &.coda-m.onset-b,
+      &.coda-m.onset-ph{
+        background: #eaa;
+        color: #000;
+      }
+      &.coda-g, &.coda-h {
+        background: #9ce;
+        color: #000;
+      }
+      margin-left: 2px;
+      width: 3.5em;
+      aspect-ratio: 1 / 1;
+      border-radius: 1000px;
+      svg {font-size: 1.25rem}
+      tt {margin-left: -.75em}
+      label {
+        position: relative;
+        font-size: .9em;
+        width: 100%;
+        top: -.5em;
+      }
+    }
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const qatt = new Qatt();
+    qatt.observe("tt");
+    const onsets = "l _ ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
+    const rhymeGroups = [
+                ["ơ", "anh", "ơn", "ơi", "ơm", "ơ"],
+                ["uơ", "uơng", "uơn", "uơi", "uơm", "uơ uơng uơn uơm"],
+                ["a", "ang", "an", "ai", "am", "a"],
+                ["oa", "oang", "oan", "oai", "oam", "oa"],
+                ["e", "eng", "en", "", "em", "e"],
+                ["oe", "oeng", "oen", "", "", "oe"],
+                ["ư", "ưng", "ưi", "ưn", "ưm", "ư"],
+                ["ươ", "ương", "ươi", "ươn", "ươm", "ươ"],
+                ["âu", "âng", "ây", "ân", "âm", "âu"],
+                ["uâu", "uâng", "uây", "uân", "", "uâu"],
+                ["au", "ăng", "ay", "ăn", "ăm", "au"],
+                ["oau", "oăng", "oay", "oăn", "oăm", "oau"],
+                ["", "iêng", "iê", "iên", "iêm", "iê"],
+                ["", "", "uyê", "uyên", "", "uyê"],
+                ["", "ênh", "ê", "ên", "êm", "ê"],
+                ["", "uênh", "uê", "uên", "uêm", "uê"],
+                ["", "inh", "i", "in", "im", "i"],
+                ["", "uynh", "uy", "uyn", "uym", "uy"],
+                ["ô", "ôn", "ôi", "", "ôm", "ô"],
+                ["u", "un", "ui", "", "um", "u"],
+                ["o", "on", "oi", "", "om", "o"],
+                ["uô", "uôn", "uôi", "", "uôm", "uô"]
+            ];
+    const labels = {
+      "_": "ʔ",
+      "c": "q",
+      "d": "đ",
+      "dz": "d",
+      "g": "gh",
+    }
+    const onsetChars = {...labels, "_": ""};
+    const rhymes = document.getElementById("rhymes");
+    for (let i = 0; i < onsets.length; i += 1) {
+      const onset = onsets[i];
+      const group = document.createElement("div");
+      group.className = "rhyme-group";
+      const div = document.createElement("div");
+      div.className = "bg-warning text-dark";
+      const label = document.createElement("label");
+      label.innerText = labels[onset] || onset;
+      const onsetChar = onsetChars[onset] ?? onset;
+      label.innerText = onsetChar || "ʔ/w";
+      const tt = document.createElement("tt");
+      tt.innerText = "," + onset;
+      div.append(tt);
+      div.append(label);
+      group.append(div);
+      [0, 1, 2, 3, 4, 6].forEach(j => {
+        let rhyme = rhymeGroups[i][j];
+        if (!rhymeGroups[i][5].split(" ").includes(rhyme)) return;
+        const div = document.createElement("div");
+        group.append(div);
+        if (!rhyme) {
+          div.style.visibility = "hidden";
+          return;
+        }
+        const tt = document.createElement("tt");
+        tt.innerText = "," + onset + (j+2);
+        const lbl = document.createElement("label");
+        if (onsetChar == "q") rhyme = ("u" + rhyme).replace("uo", "u")
+        lbl.append(onsetChar + rhyme);
+        div.append(tt);
+        div.append(lbl);
+        div.className = "onset-"+onsetChar+" coda-" + rhyme[rhyme.length-1];
+      });
+      rhymes.append(group);
+    }
+  });
+</script>
+<body class="m-3">
+  <h2>Introduction</h2>
+  <p>Quốc Âm Tân Tự - abbreviated QATT - is a semisyllabic writing system
+    invented between 1840 and 1850 by an anonymous Vietnamese scholar.
+    The system consists of 22 base symbols that can be combined with
+    to form syllables. Words are built by combining two components to form a character.
+  </p>
+  
+  <h2>Spelling</h2>
+  <p>The left part contributes the onset, the right part contributes the rhyme.
+    In this example the left part is the onset <b>x</b>
+    and the right part is the rhyme ng<b>a</b>.
+    Together it is read <b>xa</b>.
+    There are 110 rhyme parts that can be used to write the Vietnamese language.
+  </p>
+  
+  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
+  <div class="h1 pb-3 border border-4 border-dark">
+    <tt class="me-4">,x</tt>
+    <br>X
+  </div>
+  <div class="p-2 h3">+</div>
+  <div class="h1 pb-3 border border-4 border-dark">
+    <tt class="me-4">,ng2</tt>
+    <br>Nga
+  </div>
+  <div class="p-2 h3">=</div>
+  <div class="h1 pb-3 px-4 border border-4 border-dark">
+    <tt class="ms-0">x,ng2</tt>
+    <br>Xa
+  </div>
+  </div>
+  
+  <p class="mt-2">If both sides are the same component,
+    you can leave out the left part.
+  </p>
+  
+  <h2>Clustered spelling</h2>
+  Rhymes that end in a coda (e.g. sao, sen, sang) can be written in an alternative way called Tham Thư.
+  
+  This method places the coda as a separate component in the top half of the character.
+  Tham Thư is also the basis for cursive writing and calligraphy. In calligraphy the top part is often
+  reduced to a single stroke or dot and it might be placed at the side or bottom.
+  
+  <div class="mt-5 m-auto d-flex gap-1 justify-content-center align-items-center text-center">
+  <div class="h2 pb-3 px-3 border border-4 border-dark">
+    <tt class="">kh,h2</tt>
+    <br>khoa
+  </div>
+  <div class="p-2 h3">+</div>
+  <div class="h2 pb-3 border border-4 border-dark">
+    <tt class="me-4">,s4</tt>
+    <br>si
+  </div>
+  <div class="p-2 h3">=</div>
+  <div class="h2 pb-4 px-4 border border-4 border-dark">
+    <div class="d-flex flex-column align-items-center">
+      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,s4</tt>
+      <tt class="ms-0 position-relative" style="top:-10px">kh,h2</tt>
+    </div>
+    Khoai
+  </div>
+  </div>
+  
+  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
+  <div class="h2 pb-3 px-3 border border-4 border-dark">
+    <tt class="">c,ng2</tt>
+    <br>Ca
+  </div>
+  <div class="p-2 h3">+</div>
+  <div class="h2 pb-3 border border-4 border-dark">
+    <tt class="me-4">,m2</tt>
+    <br>mô
+  </div>
+  <div class="p-2 h3">=</div>
+  <div class="h2 pb-4 px-4 border border-4 border-dark">
+    <div class="d-flex flex-column align-items-center">
+      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,m2</tt>
+      <tt class="ms-0 position-relative" style="top:-10px">h,ng2</tt>
+    </div>
+    Cao
+  </div>
+  </div>
+  
+  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
+  <div class="h2 pb-3 px-3 border border-4 border-dark">
+    <tt class="">th,ng2</tt>
+    <br>Tha
+  </div>
+  <div class="p-2 h3">+</div>
+  <div class="h2 pb-3 border border-4 border-dark">
+    <tt class="me-4">,_6</tt>
+    <br>uơm
+  </div>
+  <div class="p-2 h3">=</div>
+  <div class="h2 pb-4 px-2 border border-4 border-dark">
+    <div class="d-flex align-items-center">
+      <div class="d-flex flex-column align-items-center">
+      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,_6</tt>
+      <tt class="ms-0 position-relative" style="top:-10px">th,ng2</tt>
+      </div>
+      or
+      <tt>th,ng6</tt>
+    </div>
+    Tham
+  </div>
+  </div>
+  
+  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
+  <div class="h2 pb-3 px-3 border border-4 border-dark">
+    <tt class="">s,g2</tt>
+    <br>Se
+  </div>
+  <div class="p-2 h3">+</div>
+  <div class="h2 pb-3 border border-4 border-dark">
+    <tt class="me-4">,_4</tt>
+    <br>uơn
+  </div>
+  <div class="p-2 h3">=</div>
+  <div class="h2 pb-4 px-2 border border-4 border-dark">
+    <div class="d-flex align-items-center">
+      <div class="d-flex flex-column align-items-center">
+      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,_4</tt>
+      <tt class="ms-0 position-relative" style="top:-10px">s,g2</tt>
+      </div>
+      or
+      <tt>s,g4</tt>
+    </div>
+    Sen
+  </div>
+  </div>
+  
+  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
+  <div class="h3 pb-3 px-3 border border-4 border-dark">
+    <tt class="">b,v2</tt>
+    <br>Bo
+  </div>
+  <div class="p-2 h3">+</div>
+  <div class="h3 pb-3 border border-4 border-dark">
+    <tt class="me-4">,_3</tt>
+    <br>uơng
+  </div>
+  <div class="p-2 h3">=</div>
+  <div class="h3 pb-4 ps-0 border border-4 border-dark">
+    <div class="d-flex align-items-center">
+      <div class="ms-3 d-flex flex-column align-items-center">
+      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,_3</tt>
+      <tt class="ms-0 position-relative" style="top:-10px">b,v2</tt>
+      </div>
+      or
+      <tt class="position-relative" style="left:-8px">,b2</tt>
+      <tt class="position-relative" style="left:-18px; right: -18px">b,</tt>
+    </div>
+    bong
+  </div>
+  </div>
+
+  <h2 class="mt-4">Level 1 Characters</h2>
+  This is sufficient for calligraphy and
+  normal writing using Tham Thư.
+  <div class="mt-4" id="rhymes"></div>
+  
+  
+</body>
+</html>
