@@ -292,136 +292,112 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	</defs>
     	</svg>`;
 
-// Kodierung: welches Vokal+Finale+Ton-Kombi welchem zusammengesetzten
-// Glyphen-Code (Rahmen + Positions-Strich) entspricht.
 const defaultQattEncoding = {
-
 	  a2: "_2",
       anh: "_3", awnh: "_3", a2nh: "_3",
       a2n: "_4",
       a2i: "_5",
       a2m: "_6",
-	
       wa2: "_2",
       wanh: "_3", wawnh: "_3", wa2nh: "_3",
       wa2n: "_4",
       wa2i: "_5",
       om: "_6",
-
       a: "ng2",
       ang: "ng3",
       an: "ng4",
       ai: "ng5",
       am: "ng6",
-
       wa: "h2",
       wang: "h3",
       wan: "h4",
       wai: "h5",
       wam: "h6",
-
       e2: "g2",
       e2ng: "g3",
       e2n: "g4",
       y2: "g5",
       e2m: "g6",
-
       we2: "c2",
       we2ng: "c3",
       we2n: "c4",
       y: "c5",
       o2m: "c6",
-
       au: "tr2",
       yng: "tr3",
       yi: "tr4",
       yn: "tr5",
       ym: "tr6",
-
       wau: "d2",
       y2ng: "d3",
       y2i: "d4",
       y2n: "d5",
       y2m: "d6",
-
       aw2u: "n2",
       aw2ng: "n3",
       aw2i: "n4",
       aw2n: "n5",
       aw2m: "n6",
-
       waw2u: "t2",
       waw2ng: "t3",
       waw2i: "t4",
       waw2n: "t5",
       um: "t6",
-
       awu: "th2",
       awng: "th3",
       awi: "th4",
       awn: "th5",
       awm: "th6",
-
       wawu: "nh2",
       wawng: "nh3",
       wawi: "nh4",
       wawn: "nh5",
       wawm: "nh6",
-
       a2ng: "ch2",
       i2ng: "ch3",
       i2: "ch4",
       i2n: "ch5",
       i2m: "ch6",
-
       wa2ng: "dz2",
       wi2ng: "dz3",
       wi2: "dz4",
       wi2n: "dz5",
       u2m: "dz6",
-
       eng: "x2",
       enh: "x3",
       e: "x4",
       en: "x5",
       em: "x6",
-
       weng: "kh2",
       wenh: "kh3",
       we: "kh4",
       wen: "kh5",
       wem: "kh6",
-	
       ing: "s2",
       inh: "s3",
       i: "s4",
       in: "s5",
       im: "s6",
-
       wing: "r2",
       winh: "r3",
       wi: "r4",
       win: "r5",
       wim: "r6",
-
       o: "m2",
       on: "m3",
       oi: "m4",
       yu: "m5",
       y2u: "m6",
-
       u: "b2",
       un: "b3",
       ui: "b4",
       eu: "b5",
       i2u: "b6",
-
       o2: "v2",
       o2n: "v3",
       o2i: "v4",
       e2u: "v5",
       we2u: "v6",
-
       u2: "ph2",
       u2n: "ph3",
       u2i: "ph4",
@@ -430,12 +406,14 @@ const defaultQattEncoding = {
 };
 
 const qattCodeDigitLetters = {
-  /*empty coda*/ "": {default: 0},
-  /*-U coda*/ "u": {default: 1},
-  /*-NG coda*/ q: { default: 2, n: 0 },
-  /*-N coda*/ y: { default: 3 },
-  /*-I coda*/ i: { default: 4 },
-  /*-M coda*/ w: { default: 5 },
+  "": {default: 0},
+  q: {default:1},
+  w: {default:2},
+  u: {default: 0, tr:2, d:2, n:2, t:2, th:2, nh:2},
+  y: {default: 3, m:0, b:0, v:0, ph:0},
+  i: {default: 4, z:5,l:5, ng:5, h:5, g:5, c:5},
+  j: {default: 5, z:4,l:4, ng:4, h:4, g:4, c:4, m:3, b:3, v:3, ph:3},
+  p: {default: 6, m:0, b:0, v:0, ph:0},
 };
 
 function digitForLetter(letter, base) {
@@ -464,12 +442,11 @@ class Qatt {
     this.defsElement.innerHTML = this.defs;
     this.defsElement.style.display = "none";
     document.body.append(this.defsElement);
+    this.defsElement.querySelectorAll("path").forEach(el=>{
+      el.setAttribute("vector-effect", "non-scaling-stroke");
+    })
   }
 
-  // Injiziert einmalig ein minimales Default-Stylesheet, damit die gerenderten SVGs auch
-  // ganz ohne eigenes CSS sichtbar sind ("ready to use"). ":where(tt)" statt "tt" sorgt
-  // dafür, dass der "tt"-Teil selbst 0 Spezifität hat - eine eigene Regel wie "tt svg{...}"
-  // gewinnt also immer automatisch dagegen, egal an welcher Stelle im Dokument sie steht.
   _injectFallbackStyles() {
     if (document.getElementById("qatt-fallback-style")) return;
     const style = document.createElement("style");
@@ -479,7 +456,7 @@ class Qatt {
   height: 1.6em;
   position: relative;
   top: -.125em;
-  stroke-width: 6px;
+  stroke-width: 1.25px;
   stroke: currentColor;
   fill: transparent;
 }`;
@@ -509,24 +486,34 @@ class Qatt {
     return g;
   }
 
-  // render a glyph code, e.g. t,i2,ng,1 - or, without any comma, the
-  // compact notation (e.g. nhhh3, nnhhg0, bbnnn1cchh3 ...)
-  render(text, root) {
-    if (!text.includes(",")) {
+  render(text, root, extend) {
+    if (!text.includes(",") && !text.startsWith("SESQUI:")) {
       text = this._decodeCompact(text);
     }
-    text = text.replace(/\+/g, "").replace(/^[^,\s]*,/g, "$&+").replace(/ [^,]*,/g, "$&+");
-    return this._renderText(text, root);
+    return this._renderText(text, root, extend);
+  }
+
+  // Radikal vereinfacht: ein "+" in der Roheingabe trennt zwei VÖLLIG NORMALE,
+  // uneingeschränkte Codes. Der Code VOR dem "+" ist die untere (Haupt-)Komponente,
+  // der Code NACH dem "+" ist die obere (Zusatz-)Komponente - keine Längen- oder
+  // Grammatik-Einschränkungen mehr auf irgendeiner Seite.
+  // Zwischenformat: SESQUI:<preOnset,preRhyme+codaDigit,,preTone>|<onset,rhyme+codaDigit,,tone>
+  // Kein Digit-Suffix wenn coda leer ist, damit "d" statt "d0" etc. herauskommt.
+  _fieldsFor(part) {
+    const codaDigit = part.coda ? digitForLetter(part.coda, part.rhyme) : "";
+    return [
+      part.onset === "z" ? "_" : part.onset,
+      (part.rhyme === "z" ? "_" : part.rhyme) + codaDigit,
+      "",
+      part.tone !== null ? part.tone.toString() : ""
+    ].join(",");
   }
 
   _decodeCompact(text) {
     return this.parse(text).map(q => {
-      return [
-		  q.onset == "z" ? "_" : q.onset,
-		  q.rhyme + (digitForLetter(q.coda, q.rhyme)).toString(),
-		  "",
-		  q.tone.toString()
-	  ].join(",")
+      const mainField = this._fieldsFor(q);
+      if (!q.pre) return mainField;
+      return `SESQUI:${this._fieldsFor(q.pre)}|${mainField}`;
 	}).join(" ");
   }
 
@@ -534,17 +521,25 @@ class Qatt {
 	  return this.qc.parse(text);
   }
 
-  _renderText(text, root) {
+  _renderText(text, root, extend) {
     const target = root || this.container;
     const fragment = document.createDocumentFragment();
 
     text.split(" ").forEach(t => {
-      if (t.includes(",")) {
+      if (t.startsWith("SESQUI:") || t.includes(",")) {
         if (this.cache.has(t)) {
           this.cache.get(t).forEach(node => fragment.appendChild(node.cloneNode(true)));
         } else {
           const tempContainer = document.createElement("div");
-          this._renderSvg(tempContainer, ...t.split(","));
+          if (t.startsWith("SESQUI:")) {
+            const sepIdx = t.indexOf("|");
+            const preFields = t.slice("SESQUI:".length, sepIdx).split(",");
+            const mainFields = t.slice(sepIdx + 1).split(",");
+            this._renderSesqui(tempContainer, preFields, mainFields);
+          } else {
+            const fields = t.split(",");
+            this._renderSvg(tempContainer, ...fields);
+          }
 
           const nodes = Array.from(tempContainer.childNodes);
           if (nodes.length > 0) {
@@ -557,33 +552,11 @@ class Qatt {
       }
     });
 
-    target.innerHTML = "";
+    if (!extend) target.innerHTML = "";
     target.appendChild(fragment);
   }
 
   _renderSvg(root, initial, vowel, final, tone, isCoda) {
-    if (vowel && vowel.startsWith("+")) {
-      vowel = vowel.substr(1);
-      if (["t", "p", "c", "ch"].includes(final)) {
-        if (final === "t") final = "n";
-        else if (final === "p") final = "m";
-        else if (final === "c") final = "ng";
-        else if (final === "ch") final = "nh";
-        if (String(tone) === "1") tone = 6;
-        else if (String(tone) === "5") tone = 7;
-      }
-      const qv = this.qattEncoding[vowel + ((!final || !isNaN(Number(final))) ? "" : final)];
-      if (qv) {
-        vowel = qv;
-        final = null;
-
-        if (vowel.endsWith("7")) initial = "w" + initial;
-        else if (vowel.endsWith("8")) final = "II";
-        else if (vowel.endsWith("9")) final = "UU";
-        vowel = vowel.replace(/[789]$/, "");
-      }
-    }
-
     const svg = document.createElementNS(this.svgns, "svg");
     let g;
 
@@ -610,11 +583,11 @@ class Qatt {
         vStr = vStr.substr(1);
         this._useG(g, `${PREFIX}${initial}-medial`);
       }
-
       if (!"aeiouy".includes(vStr[0]) && /\d$/.test(vStr)) {
         this._useG(g, PREFIX + vStr.replace(/\d/, ""));
         if (tone || final) {
-          this._useG(g, "qt" + (tone || final || 0));
+	      const qt = parseInt(tone || final || 0);
+          if (qt) this._useG(g, "qt" + (qt == 8 ? 0 : qt));
         }
         tone = "";
       }
@@ -639,12 +612,82 @@ class Qatt {
   }
 
   _handleTones(root, initial, vowel, final, tone, g) {
-    if (g && tone != null && tone !== "" && tone >= 0 && tone < 8) {
-      this._useG(g, "qt" + (tone || 0));
+    if (g && tone != null && tone !== "" && tone > 0 && tone <= 8) {
+      this._useG(g, "qt" + (tone == 8 ? 0 : tone));
     }
     if (final) {
       this._renderSvg(root, "", final.toUpperCase(), 0, null, true);
     }
+  }
+
+  // Sesquisilbische Komponente: oben und unten sind grundsätzlich beides ganz
+  // normale, vollständige Zeichen (onset+rhyme+coda+ton), beide über dieselbe
+  // _renderSvg-Logik aufgebaut und dann NUR vertikal gestaucht - AUSSER die
+  // obere Komponente hat onset===rhyme (derselbe Basiscode, z.B. durch die
+  // Einzelbuchstaben-Dopplungskonvention wie bei "s"+"i" -> onset "s" und rhyme
+  // "s" sind identisch). In diesem Sonderfall wird NUR die Reimform gezeigt
+  // (kein doppelt wirkendes onset+rhyme) und dafür wieder horizontal verbreitert
+  // + nach links verschoben, da eine reine Reim-Glyphe nur die rechte Hälfte des
+  // Koordinatensystems ausfüllt.
+  // Erster automatischer Entwurf: keine handgezeichneten Flat-Varianten. Die
+  // bestehenden <use>-Elemente tragen schon vector-effect="non-scaling-stroke",
+  // die Strichstärke bleibt also bei beiden Komponenten konstant.
+  _renderSesqui(root, preFields, mainFields) {
+    const GLYPH_SPAN = 100;   // ungefährer nutzbarer Koordinatenbereich eines einzelnen Zeichens (0-100)
+    const PRE_HEIGHT = 44;    // Höhe der oberen Komponente nach Stauchung
+    const LOWER_HEIGHT = 64;  // Höhe der unteren Komponente(n) nach Stauchung
+    const LOWER_OFFSET = 44;  // y-Start der unteren Komponente; < PRE_HEIGHT -> bewusste leichte
+                               // Überlappung, unproblematisch da Glyphen nie vollflächig sind
+    const PRE_X_SCALE = 1.75;  // nur im Reim-only-Sonderfall: Glyphe ist eine rechte Halbkomponente -> verbreitern
+    const X_SHIFT = -85;      // nur im Reim-only-Sonderfall: Ausgleich nach links (Richtwert)
+    const Y_SHIFT = 14;
+
+    const preSquash = PRE_HEIGHT / GLYPH_SPAN;
+    const lowerSquash = LOWER_HEIGHT / GLYPH_SPAN;
+
+    const mainTemp = document.createElement("div");
+    this._renderSvg(mainTemp, ...mainFields);
+    const mainSvgs = Array.from(mainTemp.querySelectorAll("svg"));
+
+    // onset und rhyme derselbe Basiscode? (rhyme-Feld kann einen Coda-Digit
+    // tragen, z.B. "s4" - den vor dem Vergleich abschneiden)
+    const preRhymeBase = preFields[1].replace(/\d+$/, "");
+    const isRhymeOnly = true; // !preFields[0] || preFields[0] === preRhymeBase;
+
+    const preTemp = document.createElement("div");
+    if (isRhymeOnly) {
+      this._renderSvg(preTemp, "", preFields[1], preFields[2], preFields[3]);
+    } else {
+      this._renderSvg(preTemp, ...preFields);
+    }
+    const preSvgs = Array.from(preTemp.querySelectorAll("svg"));
+
+    const outer = document.createElementNS(this.svgns, "svg");
+    outer.setAttribute("viewBox", "-10 -10 120 120");
+    outer.style.aspectRatio = "1 / 1";
+    outer.style.verticalAlign = "bottom";
+    outer.style.overflow = "visible";
+    outer.setAttribute("preserveAspectRatio", "none");
+
+    const preG = document.createElementNS(this.svgns, "g");
+    preG.setAttribute("transform", isRhymeOnly
+      ? `translate(${X_SHIFT},${Y_SHIFT}) scale(${PRE_X_SCALE},${preSquash})`
+      : `scale(1,${preSquash})`);
+    preSvgs.forEach(s => {
+      Array.from(s.children).forEach(child => preG.appendChild(child));
+    });
+    outer.appendChild(preG);
+
+    const lowerG = document.createElementNS(this.svgns, "g");
+    lowerG.setAttribute("transform", `translate(0,${LOWER_OFFSET}) scale(1,${lowerSquash})`);
+    mainSvgs.forEach(s => {
+      Array.from(s.children).forEach(child => lowerG.appendChild(child));
+    });
+    outer.appendChild(lowerG);
+
+    const nobr = root.tagName === "NOBR" ? root : document.createElement("nobr");
+    nobr.append(outer);
+    if (nobr !== root) root.appendChild(nobr);
   }
 
   _renderChar(t, root) {
@@ -681,83 +724,107 @@ class Qatt {
   }
 }
 
-/*
-Qatt Code tokenizer, renders a continuous string
-of qatt codes into a list of qatt code objects.
-e.g
-qc = new QattCode();
-qc.parse("ngddi0"); // -> [{input: "ngddi0", code: "ngdi5", onset:"ng", rhyme: "d", coda: "i", tone: 0}]
-
-codes are normalized, e.g. dd becomes d.
-*/
 class QattCode {
-            constructor() {
-                this.BASE_2 = new Set(["ng", "tr", "th", "nh", "ch", "dz", "kh", "ph"]);
-                this.BASE_1 = new Set(["z", "h", "g", "c", "l", "d", "n", "t", "x", "s", "r", "m", "b", "v"]);
-                 this.MARKINGS = { 
-                    "i": "i", 
-                    "u": "u", 
-                    "y": "y", "n": "y",
-                    "q": "q", "ng": "q", "nh": "q",
-                    "w": "w", "m": "w",
-                };
-                this.TONES = new Set(["0", "1", "2", "3", "4", "5", "6", "7"]);
+    constructor() {
+        this.BASE_2 = new Set(["ng", "tr", "th", "nh", "ch", "dz", "kh", "ph"]);
+        this.BASE_1 = new Set(["z", "h", "g", "c", "l", "d", "n", "t", "x", "s", "r", "m", "b", "v"]);
+        this.MARKINGS = {
+            "i": "i",
+            "u": "u",
+            "y": "y",
+            "q": "q",
+            "w": "w",
+            "p": "p",
+            "j": "j",
+        };
+        this.TONES = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+    }
+    isDoubled(str) {
+        return str.length === 2 && str[0] === str[1] && this.BASE_1.has(str[0]);
+    }
+    isValid2(str) {
+        return this.BASE_2.has(str) || this.isDoubled(str);
+    }
+
+    // Ein ganz normaler, uneingeschränkter Code: Buchstaben + optionale Coda +
+    // optionale Tonziffer -> {onset, rhyme, coda, tone, error}
+    _parseSingle(raw) {
+        let res = { onset: "", rhyme: "", coda: "", tone: null, error: "" };
+        let str = raw;
+        if (str.length > 0 && this.TONES.has(str.slice(-1))) {
+            res.tone = parseInt(str.slice(-1), 10);
+            str = str.slice(0, -1);
+        }
+        if (str.length === 0) return res;
+
+        const lastChar = str.slice(-1);
+        if (this.MARKINGS[lastChar] !== undefined) {
+            res.coda = this.MARKINGS[lastChar];
+            str = str.slice(0, -1);
+        }
+        if (str.length === 0) {
+            res.error = "Onset missing.";
+            return res;
+        }
+
+        if (this.BASE_2.has(str) || (str.length === 1 && this.BASE_1.has(str))) {
+            res.onset = str;
+            res.rhyme = str;
+        } else if (this.isDoubled(str)) {
+            res.onset = str[0];
+            res.rhyme = str[0];
+        } else {
+            let canRaw = "", chiRaw = "";
+            if (str.length >= 2 && this.isValid2(str.slice(-2))) {
+                chiRaw = str.slice(-2);
+                canRaw = str.slice(0, -2);
+            } else {
+                chiRaw = str.slice(-1);
+                canRaw = str.slice(0, -1);
             }
-            isDoubled(str) {
-                return str.length === 2 && str[0] === str[1] && this.BASE_1.has(str[0]);
+            res.rhyme = this.isDoubled(chiRaw) ? chiRaw[0] : chiRaw;
+            res.onset = this.isDoubled(canRaw) ? canRaw[0] : canRaw;
+            if (!this.isValid2(res.rhyme)) res.error = `Invalid onset: '${chiRaw}'.`;
+            if (!this.isValid2(res.onset)) res.error = (res.error || "") + `Invalid rhyme: '${canRaw}'.`;
+        }
+        return res;
+    }
+
+    _buildCode(res) {
+        const mainCode = res.onset + res.rhyme + res.coda + (res.tone !== null ? res.tone : "");
+        if (!res.pre) return mainCode;
+        const preCode = res.pre.onset + res.pre.rhyme + res.pre.coda + (res.pre.tone !== null ? res.pre.tone : "");
+        return `${mainCode}+${preCode}`;
+    }
+
+    parseChunk(input) {
+        const raw = input.toLowerCase().trim();
+        const plusIdx = raw.indexOf("+");
+
+        let res;
+        if (plusIdx === -1) {
+            res = this._parseSingle(raw);
+            res.pre = null;
+        } else {
+            res = this._parseSingle(raw.slice(0, plusIdx));
+            const preParsed = this._parseSingle(raw.slice(plusIdx + 1));
+            res.pre = preParsed;
+			if (res.tone == null) res.tone = preParsed.tone;
+            preParsed.tone = "";
+            if (preParsed.error) {
+                res.error = (res.error ? res.error + " " : "") + "Oben: " + preParsed.error;
             }
-            isValid2(str) {
-                return this.BASE_2.has(str) || this.isDoubled(str);
-            }
-            parseChunk(input) {
-                let str = input.toLowerCase().trim();
-                let res = { onset: "", rhyme: "", coda: "", tone: null, error: "" };
-                if (str.length === 0) return res;
-                let lastChar = str.slice(-1);
-                if (this.TONES.has(lastChar)) {
-                    res.tone = parseInt(lastChar, 10);
-                    str = str.slice(0, -1);
-                }
-                if (str.length === 0) return res; 
-                lastChar = str.slice(-1);
-                if (this.MARKINGS[lastChar] !== undefined) {
-                    res.coda = this.MARKINGS[lastChar];
-                    str = str.slice(0, -1);
-                }
-                if (str.length === 0) {
-                    res.error = "Onset missing.";
-                    return res;
-                }
-              if (this.BASE_2.has(str) || (str.length === 1 && this.BASE_1.has(str))) {
-                    res.onset = str;
-                    res.rhyme = str;
-                } else if (this.isDoubled(str)) {
-                    res.onset = str[0];
-                    res.rhyme = str[0];
-                } else {
-                    let canRaw = "", chiRaw = "";
-                    
-                    if (str.length >= 2 && this.isValid2(str.slice(-2))) {
-                        chiRaw = str.slice(-2);
-                        canRaw = str.slice(0, -2);
-                    } else {
-                        chiRaw = str.slice(-1);
-                        canRaw = str.slice(0, -1);
-                    }
-                    res.rhyme = this.isDoubled(chiRaw) ? chiRaw[0] : chiRaw;
-                    res.onset = this.isDoubled(canRaw) ? canRaw[0] : canRaw;
-                    if (!this.isValid2(res.rhyme)) res.error = `Invalid onset: '${chiRaw}'.`;
-                    if (!this.isValid2(res.onset)) res.error += `Invalid rhyme: '${canRaw}'.`;
-                }
-				res.input = input;
-				res.code = res.onset + res.rhyme + res.coda + res.tone;
-                return res;
-            }
-            parse(input) {
-                const fullInput = input.toLowerCase();
-                const blocks = fullInput.split(/(?<=[0-7])/).filter(b => b.trim().length > 0);
-                return blocks.map(block => this.parseChunk(block));
-            }
+        }
+        res.input = input;
+        res.code = this._buildCode(res);
+        return res;
+    }
+
+    parse(input) {
+        const fullInput = input.toLowerCase();
+        // nach einer Ziffer nur trennen, wenn nicht direkt ein "+" folgt (sonst würde
+        // eine eigene Tonziffer der vorderen Seite den Code mitten durchschneiden)
+        const blocks = fullInput.split(/(?<=[0-9])(?!\+)/).filter(b => b.trim().length > 0);
+        return blocks.map(block => this.parseChunk(block));
+    }
 }
-
-
