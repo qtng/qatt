@@ -55,11 +55,11 @@
             stroke-linejoin: square;
             }
             .nav-backdrop{
-              background: rgba(33, 37, 41, 0.9);
+              background: rgba(33, 37, 41, 0.95);
               backdrop-filter: blur(15px);
             }
             .navmenu-backdrop{
-              background: rgba(33, 37, 41, 0.05);
+              background: rgba(33, 37, 41, 0.5);
               backdrop-filter: blur(10px);
             }
             .nav-section-header {
