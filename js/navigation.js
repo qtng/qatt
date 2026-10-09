@@ -51,8 +51,8 @@
                 }
             }
             svg { /* global defaults for rendered QATT SVGs */
-            stroke-linecap: square;
-            stroke-linejoin: square;
+              stroke-linecap: square;
+              stroke-linejoin: square;
             }
             .nav-backdrop{
               background: rgba(33, 37, 41, 0.95);
