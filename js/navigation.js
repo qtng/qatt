@@ -54,8 +54,8 @@
             stroke-linecap: square;
             stroke-linejoin: square;
             }
-                .nav-backdrop{
-              background: rgba(33, 37, 41, 0.7);
+            .nav-backdrop{
+              background: rgba(33, 37, 41, 0.9);
               backdrop-filter: blur(15px);
             }
             .navmenu-backdrop{
