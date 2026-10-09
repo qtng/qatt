@@ -10,6 +10,9 @@
                     { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
                     { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
                     { name: "Flashcards", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
+                    { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
+                    { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
+                    { name: "Dictionary: TĐCNTD 2009", url: "/chunom/dict/tdcntd.html", icon: "bi-journal-richtext" },
                 ]
             },
             {
