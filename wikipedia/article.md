@@ -18,7 +18,7 @@ It is notable as one of the few phonetic scripts created by Vietnamese themselve
 
 ## Manuscripts
 
-Two handwritten manuscripts of Quốc Âm Tân Tự are preserved at the Institute for the Study of Hán-Nôm in Hanoi under the archive signature AB.630. Both consist of four pages [!W2] and appear to be copies of the same original text [!W3]. The manuscripts are filed under tiểu học (小學, philology and elementary education), reflecting the pedagogical intent of the work [?S2]. They are catalogued as nôm văn thư (喃文書, Nôm documents) on account of their subject matter [?S2].
+Two handwritten manuscripts of Quốc Âm Tân Tự are preserved at the Institute for the Study of Hán-Nôm in Hanoi under the archive signature AB.630. Both consist of four double pages, numbered as eight pages, and contain the same text with the same page numbering; the second corrects unclear characters and scribal errors of the first. Whether it was copied from the first or both from an earlier original cannot be determined. The manuscripts are filed under tiểu học (小學, philology and elementary education), reflecting the pedagogical intent of the work [?S2]. They are catalogued as nôm văn thư (喃文書, Nôm documents) on account of their subject matter [?S2].
 
 The author identifies himself only as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành.
 
@@ -45,8 +45,6 @@ Quốc Âm Tân Tự occupies a distinctive place in the history of Vietnamese w
 Quốc Âm Tân Tự is built on 22 base components called cán tự (幹字). Each consists of three straight strokes and one short marking stroke. Unlike chữ Hán and chữ Nôm, which are derived from brush strokes, the components are composed entirely of straight lines, giving the script a distinctly geometric appearance with no calligraphic tradition behind it. [?S6]
 
 #### Geometric description of the base components
-
-The geometric descriptions below are intended to make the symbols accessible to visually impaired readers and to allow computational rendering, for example as SVG graphics. [?S7]
 
 The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. Each configuration fills a square cell. Where a configuration contains two parallel lines joined by a third, the two are evenly spaced across the cell and set in from its edges rather than lying on them, while the joining line runs along the edge of the cell and spans its full width or height. The 22 configurations can be grouped by their underlying geometry as follows:
 
@@ -136,8 +134,6 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 
 ### Widerspricht qatt-unicode
 
-- **W2 – Umfang.** Repo: je 4 Doppelseiten, nummeriert als 8 Seiten.
-- **W3 – Abschrift.** Repo: Ob Quelle 2 von Quelle 1 oder beide von einem früheren Original abgeschrieben sind, ist nicht bestimmbar; Quelle 2 korrigiert unklare QATT-Zeichen und offensichtliche Schreibfehler von Quelle 1 (E23).
 - **W4 – „ohne fremden Einfluss“.** Repo: Töne folgen der chinesischen Âm-Dương-Methode, Kombination entspricht dem chinesischen fanqie (反切). Formulierung zu absolut.
 - **W6 – „side by side“.** Repo: Cán Lược und Chi Tự verbinden sich zu *einem* Zeichen in einer quadratischen Zelle; unverbundenes Nebeneinander kommt nur vor, wo der Text Komponenten erklärt (E04).
 
@@ -149,7 +145,7 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 - **S4** – Kolophon 五星聚斗 und Konjunktion 7. Januar 1842: Kolophontext im Repo nicht erfasst (nur 南城居士阮子); astronomische Zuordnung unbelegt. Planeten nahe der Sonne sind zudem unsichtbar.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
-- **S7** – Geometrische Beschreibungen: alle 22 Formen und Zuordnungen vom Autor anhand einer Zeichnung bestätigt (im Repo qatt-unicode nicht enthalten, E01 fehlt; als Quelle für Wikipedia noch nötig). Offen nur noch: Zweckangabe (Barrierefreiheit, SVG) ist eher nicht enzyklopädisch.
+- **E01 – Quelle für die Formen.** Die geometrische Beschreibung der 22 Formen ist vom Autor bestätigt, braucht für Wikipedia aber noch einen Beleg (in qatt-unicode E01, noch leer).
 - **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
 - **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán Tự steckt und gleiche Basis laut Repo als Chi Tự allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
