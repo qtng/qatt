@@ -8,6 +8,8 @@ Markierungen im Text:
   [?Sn]  spekulativ / nicht im Repo qatt-unicode belegt  -> siehe "Prüfliste"
   [!Wn]  widerspricht qatt-unicode                       -> siehe "Prüfliste"
   [+Fn]  fehlt noch, in qatt-unicode belegt              -> siehe "Prüfliste"
+  [MS p. X, col. Y]  Beleg in der Handschrift AB.630, Quelle 1 (Folio 3–10),
+         Seite 1–8, Spalte von rechts; wird später zu <ref>
   [Q]    später das QATT-Unicode-Proposal zitieren, sobald es
          fertig oder als Draft veröffentlicht ist (Abschnitt angegeben)
 -->
@@ -26,11 +28,11 @@ The author identifies himself only as Nam Thành cư sĩ Nguyễn Tử (南城�
 
 ## Dating
 
-The manuscripts contain no explicit date. However, the text can be dated to the reign of Emperor Thiệu Trị (1841–1847) through a naming taboo (kỵ húy): the final stroke of the character 華 (hoa) has been deliberately omitted, a standard practice to avoid writing the name of the emperor's mother, Hồ Thị Hoa. The manuscript was incorporated into what later became the French colonial archive no later than the 1930s, as indicated by the archive signature system. [?S3]
+The manuscripts contain no explicit date. However, the text can be dated to the reign of Emperor Thiệu Trị (1841–1847) through a naming taboo (kỵ húy): the final stroke of the character 華 (hoa), in the phrase 我國附於中華 of the preface, has been deliberately omitted [MS p. 1, col. 4], a standard practice to avoid writing the name of the emperor's mother, Hồ Thị Hoa. The manuscript was incorporated into what later became the French colonial archive no later than the 1930s, as indicated by the archive signature system. [?S3]
 
-The colophon at the end of the preface reads: "On the conjunction of five planets in Đẩu, written by Nam Thành cư sĩ Nguyễn Tử" (五星聚斗，南城居士阮子書). The phrase 五星聚斗 (Ngũ Tinh Tụ Đẩu) refers to a conjunction of five planets in the asterism Đẩu. [?S4]
+The colophon at the end of the preface reads: "On the conjunction of five planets in Đẩu, written by Nam Thành cư sĩ Nguyễn Tử" (五星聚斗，南城居士阮子書) [MS p. 2, col. 5]. The phrase 五星聚斗 (Ngũ Tinh Tụ Đẩu) refers to a conjunction of five planets in the asterism Đẩu.
 
-No five-planet conjunction in Đẩu is known to have occurred during the 19th century, suggesting the reference is literary and auspicious rather than a record of an observed astronomical event. Astronomical records suggest that on 7 January 1842, four planets — Venus, Jupiter, Saturn and Mercury — were clustered closely together near the asterism Đẩu, with the sun in close proximity. This configuration may correspond to the five-body conjunction referenced in the colophon, though this identification remains tentative. [?S4]
+No five-planet conjunction in Đẩu is known [?S4] to have occurred during the 19th century, suggesting the reference is literary and auspicious rather than a record of an observed astronomical event. Astronomical records suggest that on 7 January 1842, four planets — Venus, Jupiter, Saturn and Mercury — were clustered closely together near the asterism Đẩu, with the sun in close proximity. This configuration may correspond to the five-body conjunction referenced in the colophon, though this identification remains tentative. [?S4]
 
 ## Historical background
 
@@ -48,7 +50,7 @@ Quốc Âm Tân Tự is built on 22 base components called cán tự (幹字). E
 
 #### Geometric description of the base components
 
-The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. Each configuration fills a square cell. Where a configuration contains two parallel lines joined by a third, the two are evenly spaced across the cell and set in from its edges rather than lying on them, while the joining line runs along the edge of the cell and spans its full width or height. The 22 configurations can be grouped by their underlying geometry as follows:
+The manuscript lists the 22 cán tự in the section 幹音二十二字 ("the twenty-two characters of the trunk sounds"), each annotated with its name in chữ Nôm. [MS p. 2] The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. Each configuration fills a square cell. Where a configuration contains two parallel lines joined by a third, the two are evenly spaced across the cell and set in from its edges rather than lying on them, while the joining line runs along the edge of the cell and spans its full width or height. The 22 configurations can be grouped by their underlying geometry as follows:
 
 - **Diagonal cross (X) variants** (4 symbols): An X shape with a separate straight line running alongside one of its four sides, parallel to that side and slightly apart from the X without touching it, much like the two strokes of "ll": top (mông), right (phông), bottom (bông) or left (vông). The X is narrowed accordingly so that both together fill the cell.
 - **Orthogonal cross (+) variants** (4 symbols): A + shape with an extra line across the end of one of its four arms, perpendicular to that arm and as long as the crossing arm: top (trông), right (nông), bottom (đông) or left (tông).
@@ -89,7 +91,7 @@ The 22 cán lược (幹畧) are the reduced forms of the cán tự, made by omi
 
 ### Syllable construction and spelling
 
-A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: a cán lược, contributing the onset consonant, followed by a chi tự of a different base, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. The manuscript describes this method in its section Phản thiết hài âm pháp (反切諧音法). [Q 4.2] For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông. [?S9] A cán lược and a chi tự of the same base are not combined in this way, as the pair would add nothing to the chi tự; the chi tự is written alone instead. [Q 4.2]
+A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: a cán lược, contributing the onset consonant, followed by a chi tự of a different base, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. The manuscript describes this method in its section Phản thiết hài âm pháp (反切諧音法). [MS p. 5, col. 6 – p. 6, col. 5] [Q 4.2] For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông. [?S9] A cán lược and a chi tự of the same base are not combined in this way, as the pair would add nothing to the chi tự; the chi tự is written alone instead. [Q 4.2]
 
 Tone is not encoded in the syllable construction itself but is marked separately by a tone marker placed on the combined character.
 
@@ -97,11 +99,11 @@ The cán tự are not used in combination with chi tự; they are only used to r
 
 #### Hợp thư
 
-A second kind of two-component character, the hợp thư, joins a chi tự and the cán lược of the same base, with the chi tự written first. The manuscript describes this arrangement as an exchange of positions. The exchange also reverses the functions of the two components: in a hợp thư the chi tự contributes the onset and the cán lược the rhyme. As each chi tự has exactly one cán lược of the same base, there are 110 possible hợp thư. [Q 4.2]
+A second kind of two-component character, the hợp thư (合書), joins a chi tự and the cán lược of the same base, with the chi tự written first. The manuscript describes this arrangement as an exchange of positions. The exchange also reverses the functions of the two components: in a hợp thư the chi tự contributes the onset and the cán lược the rhyme. As each chi tự has exactly one cán lược of the same base, there are 110 possible hợp thư; the counting section of the manuscript (音數) likewise gives 110 hợp thư, each in eight tones. [MS p. 6, col. 6 – p. 7, col. 2; p. 8] [Q 4.2]
 
 #### Tham thư
 
-A hợp thư may carry a third component, a single chi tự, placed above it; the result is called a tham thư. The base of a tham thư is always a hợp thư, never a single chi tự or a phản thiết combination. The manuscript describes the structure of the tham thư but not how it is read. Only two examples are attested, both built on a hợp thư, and the function of the three components within a tham thư has not been established. [Q 4.3]
+A hợp thư may carry a third component, a single chi tự, placed above it; the result is called a tham thư (參書). The base of a tham thư is always a hợp thư, never a single chi tự or a phản thiết combination. The manuscript describes the structure of the tham thư but not how it is read. Only two examples are attested, both built on a hợp thư, and the function of the three components within a tham thư has not been established. [MS p. 7, col. 3 – p. 8, col. 1] [Q 4.3]
 
 In the manuscript, Quốc Âm Tân Tự characters appear alongside chữ Hán and chữ Nôm, following the same vertical writing direction in columns running from right to left. As a square script, it can reasonably be assumed to support the same range of writing directions, though only vertical writing is attested in the surviving manuscripts. [?S10]
 
@@ -149,10 +151,10 @@ Alle Punkte erledigt.
 - **S1** – „one of the few phonetic scripts created by Vietnamese themselves“: Wertung ohne Beleg.
 - **S2** – „reflecting the pedagogical intent“ / „on account of their subject matter“: Deutung; belegt ist nur die Katalogeinordnung (E32, Katalogangabe fehlt noch).
 - **S3** – Übernahme ins französische Kolonialarchiv „no later than the 1930s“: nicht im Repo, Herleitung aus dem Signatursystem unbelegt.
-- **S4** – Kolophon 五星聚斗 und Konjunktion 7. Januar 1842: Kolophontext im Repo nicht erfasst (nur 南城居士阮子); astronomische Zuordnung unbelegt. Planeten nahe der Sonne sind zudem unsichtbar.
+- **S4** – Kolophon ist in der Handschrift belegt (S. 2, Sp. 5). Spekulativ bleibt nur die astronomische Deutung (Konjunktion 7. Januar 1842, letzter Absatz unter Dating); Planeten nahe der Sonne sind zudem unsichtbar.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
-- **E01 – Quelle für die Formen.** Beleg ist die Handschrift selbst (AB.630), in der die 22 Cán Tự abgebildet sind: Abschnitt 幹音二十二字, S. 2 (qatt-unicode E18). Als Einzelnachweis mit Seitenangabe zitieren. Nach WP:PRIMARY zulässig, solange die Beschreibung rein beschreibend bleibt.
+- **E01 – Formen.** Beleg: Handschrift S. 2, Liste 幹音二十二字 (im Text als [MS p. 2] eingetragen). Alle 22 Formen und Namen mit dem Scan (Quelle 1) abgeglichen: stimmen mit der Beschreibung überein.
 - **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
 - **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán Tự steckt und gleiche Basis laut Repo als Chi Tự allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
@@ -165,7 +167,7 @@ Stellen mit [Q …] stützen sich auf proposal.md in qtng/qatt-unicode (Abschnit
 
 - **Q 4.2** – Phản thiết, Abschnitt 反切諧音法, Weglassen des Cán Lược bei gleicher Basis, Hợp thư. Evidence-Einträge E05, E07, E08, E09 sind dort noch offen (keine Seitenangabe).
 - **Q 4.3** – Tham thư. E10–E13 noch offen.
-- **Hán-Schreibung** von hợp thư und tham thư fehlt (im Proposal nicht angegeben). Bitte ergänzen, falls die Handschrift sie nennt.
+- **Spaltenzählung S. 1:** Die Proposal-Session nennt für das Tabuzeichen 華 (in 我國附於中華) Spalte 5. Nach meiner Zählung von rechts (Titel 國音新字序 = Sp. 1) steht es in Sp. 4; beim Kolophon (S. 2, Sp. 5) stimmen beide Zählungen. Bitte am Scan klären.
 
 ### Fehlt, in qatt-unicode belegt
 
