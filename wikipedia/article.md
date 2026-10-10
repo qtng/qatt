@@ -8,6 +8,8 @@ Markierungen im Text:
   [?Sn]  spekulativ / nicht im Repo qatt-unicode belegt  -> siehe "Prüfliste"
   [!Wn]  widerspricht qatt-unicode                       -> siehe "Prüfliste"
   [+Fn]  fehlt noch, in qatt-unicode belegt              -> siehe "Prüfliste"
+  [Q]    später das QATT-Unicode-Proposal zitieren, sobald es
+         fertig oder als Draft veröffentlicht ist (Abschnitt angegeben)
 -->
 
 # Quốc Âm Tân Tự
@@ -87,13 +89,19 @@ The 22 cán lược (幹畧) are the reduced forms of the cán tự, made by omi
 
 ### Syllable construction and spelling
 
-A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: a cán lược, contributing the onset consonant, followed by a chi tự of a different base, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông. [?S9]
+A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: a cán lược, contributing the onset consonant, followed by a chi tự of a different base, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. The manuscript describes this method in its section Phản thiết hài âm pháp (反切諧音法). [Q 4.2] For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông. [?S9] A cán lược and a chi tự of the same base are not combined in this way, as the pair would add nothing to the chi tự; the chi tự is written alone instead. [Q 4.2]
 
 Tone is not encoded in the syllable construction itself but is marked separately by a tone marker placed on the combined character.
 
 The cán tự are not used in combination with chi tự; they are only used to represent their unchanged inherent pronunciation. Cán tự serve a very specific role in the phản thiết spelling system. They are used to pronounce the cán lược.
 
-[+F1] [+F2]
+#### Hợp thư
+
+A second kind of two-component character, the hợp thư, joins a chi tự and the cán lược of the same base, with the chi tự written first. The manuscript describes this arrangement as an exchange of positions. The exchange also reverses the functions of the two components: in a hợp thư the chi tự contributes the onset and the cán lược the rhyme. As each chi tự has exactly one cán lược of the same base, there are 110 possible hợp thư. [Q 4.2]
+
+#### Tham thư
+
+A hợp thư may carry a third component, a single chi tự, placed above it; the result is called a tham thư. The base of a tham thư is always a hợp thư, never a single chi tự or a phản thiết combination. The manuscript describes the structure of the tham thư but not how it is read. Only two examples are attested, both built on a hợp thư, and the function of the three components within a tham thư has not been established. [Q 4.3]
 
 In the manuscript, Quốc Âm Tân Tự characters appear alongside chữ Hán and chữ Nôm, following the same vertical writing direction in columns running from right to left. As a square script, it can reasonably be assumed to support the same range of writing directions, though only vertical writing is attested in the surviving manuscripts. [?S10]
 
@@ -151,9 +159,15 @@ Alle Punkte erledigt.
 - **S11** – „signals a change … from nasal to stop“: Repo sagt nur: sắc/nặng in Silben auf -p, -t, -c. Auch Liste der Auslaute angleichen (-p, -t, -c/-ch).
 - **S12** – Reimtabelle (Medial-Regel, „approximations“, „no recoverable pronunciation“): nicht im Repo; Tabelle der 110 Chi Tự dort noch offen (E29).
 
+### Später zu zitieren: QATT-Unicode-Proposal
+
+Stellen mit [Q …] stützen sich auf proposal.md in qtng/qatt-unicode (Abschnittsnummer angegeben). Erst zitieren, wenn das Proposal fertig oder als Draft veröffentlicht ist. Bis dahin: Beleg aus der Handschrift selbst (Seitenangaben), soweit im Evidence-Katalog vorhanden.
+
+- **Q 4.2** – Phản thiết, Abschnitt 反切諧音法, Weglassen des Cán Lược bei gleicher Basis, Hợp thư. Evidence-Einträge E05, E07, E08, E09 sind dort noch offen (keine Seitenangabe).
+- **Q 4.3** – Tham thư. E10–E13 noch offen.
+- **Hán-Schreibung** von hợp thư und tham thư fehlt (im Proposal nicht angegeben). Bitte ergänzen, falls die Handschrift sie nennt.
+
 ### Fehlt, in qatt-unicode belegt
 
-- **F1 – Hợp Thư.** Chi Tự und Cán Lược derselben Basis, Chi Tự zuerst; Funktionen getauscht: Chi Tự gibt den Anlaut, Cán Lược den Reim; 110 Hợp Thư. Phản-thiết-Paare: verschiedene Basen, Cán Lược zuerst; gleiche Basis wird als Chi Tự allein geschrieben. Abschnitt der Quelle: Phản Thiết Hài Âm Pháp (反切諧音法).
-- **F2 – Tham Thư.** Hợp Thư mit einem dritten Bestandteil (Chi Tự) darüber; zwei Belege; Lesung nicht geklärt.
 - **F3 – Neutraler Ton.** ngang hat ein eigenes Zeichen (Halbkreis unten links); unmarkierte Zeichen lassen den Ton offen. Tonzeichen auch auf einzeln stehenden Komponenten (S. 6). Runde und eckige Halbkreise sind Handschriftvarianten.
 - **F4 – Liste der 22 Cán Tự** mit Nôm-Glossen, Abschnitt 幹音二十二字 (S. 2); Name der Schrift in der Überschrift der Vorrede 國音新字序 (S. 1), Übersetzung im Repo: „new script for the sounds of the national language“.
