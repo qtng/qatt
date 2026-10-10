@@ -28,7 +28,7 @@ The colophon at the end of the preface reads: "On the conjunction of five planet
 
 No five-planet conjunction in Đẩu is known to have occurred during the 19th century, suggesting the reference is literary and auspicious rather than a record of an observed astronomical event. Astronomical records suggest that on 7 January 1842, four planets — Venus, Jupiter, Saturn and Mercury — were clustered closely together near the asterism Đẩu, with the sun in close proximity. This configuration may correspond to the five-body conjunction referenced in the colophon, though this identification remains tentative.
 
-== Historical Background ==
+== Historical background ==
 
 At the time Quốc Âm Tân Tự was composed, Vietnamese literary culture relied on two writing systems of Chinese origin: chữ Hán, the classical Chinese script used for official and scholarly writing, and chữ Nôm, a logographic script adapted from Chinese characters to represent native Vietnamese words. A third system, chữ Quốc ngữ, a Latin-based script developed by Portuguese and French missionaries in the 17th century, existed but remained confined largely to the Catholic community and had not yet achieved broader cultural legitimacy.
 
@@ -36,12 +36,12 @@ The reign of Emperor Thiệu Trị (1841–1847) was marked by internal unrest, 
 
 Quốc Âm Tân Tự occupies a distinctive place in the history of Vietnamese writing as a phonetic script conceived entirely by a Vietnamese scholar, without missionary or foreign influence. Unlike chữ Nôm, which adapted Chinese logographic principles, it represents an independent phonetic approach to writing Vietnamese rooted in native intellectual tradition.
 
-== Writing System ==
-=== Base Symbols (Cán Lược) ===
+== Writing system ==
+=== Base symbols (cán lược) ===
 
-Quốc Âm Tân Tự is built on 22 geometric base symbols called cán lược (). Unlike chữ Hán and chữ Nôm, which are derived from brush strokes, the cán lược are composed entirely of straight lines, augmented with circles and semicircles, giving the script a distinctly geometric appearance with no calligraphic tradition behind it.
+Quốc Âm Tân Tự is built on 22 geometric base symbols called cán lược (幹畧). Unlike chữ Hán and chữ Nôm, which are derived from brush strokes, the cán lược are composed entirely of straight lines, augmented with circles and semicircles, giving the script a distinctly geometric appearance with no calligraphic tradition behind it.
 
-==== Geometric Description of the Base Symbols ====
+==== Geometric description of the base symbols ====
 
 The geometric descriptions below are intended to make the symbols accessible to visually impaired readers and to allow computational rendering, for example as SVG graphics.
 
@@ -56,7 +56,7 @@ Each cán lược consists of three straight lines arranged in a distinctive geo
 * '''Two verticals with slanted crossbar''': Two vertical lines crossed by a slightly slanted line, slanting either upward or downward (2 symbols): thông, nhông
 * '''One vertical with two slanted parallels''': One vertical line crossed by two parallel slightly slanted lines, slanting either upward or downward (2 symbols): chông, dông
 
-=== Marking System ===
+=== Marking system ===
 
 Each cán lược can be modified by placing a short perpendicular stroke at one of the endpoints of its three lines. Since each line has two endpoints, a three-line symbol has six possible mark positions, yielding six marked variations per base symbol. Together with the unmarked cán lược itself, this gives seven forms per base symbol.
 
@@ -71,7 +71,7 @@ The position of the mark determines the function of the resulting character:
 This simple and consistent marking rule generates the entire character inventory from just 22 base shapes, yielding three distinct classes of characters with three distinct functions: 22 cán lược (onset consonants), 22 cán tự (full -ông syllables) and 110 chi tự (rhymes).
 
 
-=== Cán Tự ===
+=== Cán tự ===
 
 The 22 cán tự (幹字) are non-productive, marked variations of the base symbols whose mark falls on the top or top-left endpoint. Each cán tự represents a full syllable consisting of the onset consonant of its base symbol combined with the -ông rhyme. For example, the cán tự for the base symbol associated with the onset đ- is named đông, the cán tự for m- is named mông, and so on. The cán tự for the zero onset /ʔ/ is simply named ông.
 
@@ -79,11 +79,11 @@ Unlike the cán lược and chi tự, which function as components in syllable c
 
 Their primary purpose is as reference characters in the phản thiết (反切) spelling system. This gives the cán tự a pedagogical function analogous to the letters of an alphabet: they name and isolate individual onset consonants within the syllabic structure of Vietnamese.
 
-=== Chi Tự ===
+=== Chi tự ===
 
 The 110 chi tự (枝字) are the marked variations of the 22 base symbols whose mark falls on any of the five endpoints other than the top or top-left. Each chi tự represents a rhyme, and together they form the rhyme table of the script. Each base symbol contributes exactly five chi tự, and in the manuscript the rhyme table is organised in blocks of five — all chi tự derived from one base symbol are presented together before moving to the next.
 
-=== Syllable Construction and Spelling ===
+=== Syllable construction and spelling ===
 
 A syllable in Quốc Âm Tân Tự is written by placing two characters side by side: a cán lược on the left, contributing the onset consonant, and a chi tự on the right, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the left character and the rhyme of the right character are combined to produce the intended syllable. For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông.
 
@@ -99,17 +99,16 @@ Tone is marked by placing a circle or semicircle at one of the four corners of t
 
 The eight combinations are as follows:
 
-1. '''Semicircle (âm)'''
-* Top left: hỏi
-* Top right: sắc
-* Bottom left: ngang
-* Bottom right: sắc + stop coda
-
-2. '''Circle (dương)'''
-* Top left: ngã
-* Top right: nặng
-* Bottom left: huyền
-* Bottom right: nặng + stop coda
+* '''Semicircle (âm)'''
+** Top left: hỏi
+** Top right: sắc
+** Bottom left: ngang
+** Bottom right: sắc + stop coda
+* '''Circle (dương)'''
+** Top left: ngã
+** Top right: nặng
+** Bottom left: huyền
+** Bottom right: nặng + stop coda
 
 Six of the eight combinations correspond directly to the six tones of modern Quốc ngữ. The remaining two, marked at the bottom right, correspond to the nhập (入) tones of the traditional system: syllables carrying sắc or nặng tone whose final consonant is a stop (/p/, /t/, /c/, /k/) rather than a nasal. The bottom right marker thus simultaneously encodes tone and signals a change in the syllable's final consonant from nasal to stop.
 
