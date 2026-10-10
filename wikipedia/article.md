@@ -36,7 +36,7 @@ At the time Quốc Âm Tân Tự was composed, Vietnamese literary culture relie
 
 The reign of Emperor Thiệu Trị (1841–1847) was marked by internal unrest, economic difficulties and the growing threat of French imperial expansion, which would culminate in the French invasion of 1858. Within this climate of crisis, Vietnamese scholars sought ways to strengthen national identity and improve access to literacy. [?S5] The classification of the Quốc Âm Tân Tự manuscript under 小學 (tiểu học, elementary education) suggests that its author envisioned the script not as an esoteric intellectual exercise but as a practical tool for popular literacy. [?S5]
 
-Quốc Âm Tân Tự occupies a distinctive place in the history of Vietnamese writing as a phonetic script conceived entirely by a Vietnamese scholar, without missionary or foreign influence. [!W4] Unlike chữ Nôm, which adapted Chinese logographic principles, it represents an independent phonetic approach to writing Vietnamese rooted in native intellectual tradition. [!W4]
+Quốc Âm Tân Tự occupies a distinctive place in the history of Vietnamese writing as a phonetic script conceived by a Vietnamese scholar rather than by missionaries. Unlike chữ Nôm, which adapts Hán characters, it represents each syllable phonetically by its onset and rhyme, drawing on the established phonological tradition of Vietnamese scholarship: the phản thiết (反切) method of spelling and the eight-tone system bát thanh (八聲).
 
 ## Writing system
 
@@ -87,7 +87,7 @@ The 22 cán lược (幹畧) are the reduced forms of the cán tự, made by omi
 
 ### Syllable construction and spelling
 
-A syllable in Quốc Âm Tân Tự is written by placing two characters side by side [!W6]: a cán lược on the left, contributing the onset consonant, and a chi tự on the right, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the left character and the rhyme of the right character are combined to produce the intended syllable. For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông. [?S9]
+A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: a cán lược, contributing the onset consonant, followed by a chi tự of a different base, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. For example, if the cán lược for đ is combined with a chi tự representing the rhyme ông, the resulting syllable is đông. [?S9]
 
 Tone is not encoded in the syllable construction itself but is marked separately by a tone marker placed on the combined character.
 
@@ -134,8 +134,7 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 
 ### Widerspricht qatt-unicode
 
-- **W4 – „ohne fremden Einfluss“.** Repo: Töne folgen der chinesischen Âm-Dương-Methode, Kombination entspricht dem chinesischen fanqie (反切). Formulierung zu absolut.
-- **W6 – „side by side“.** Repo: Cán Lược und Chi Tự verbinden sich zu *einem* Zeichen in einer quadratischen Zelle; unverbundenes Nebeneinander kommt nur vor, wo der Text Komponenten erklärt (E04).
+Alle Punkte erledigt.
 
 ### Spekulativ bzw. im Repo nicht belegt
 
