@@ -12,7 +12,7 @@ Markierungen im Text:
 
 # Quốc Âm Tân Tự
 
-**Quốc Âm Tân Tự** (chữ Hán: 國音新字, literally "new script of the national language") is a phonetic semisyllabary for the Vietnamese language proposed in the mid-19th century, during the reign of Emperor Thiệu Trị (1841–1847). It was created by a scholar surnamed Nguyễn from Nam Định [!W1], whose full identity remains unknown.
+**Quốc Âm Tân Tự** (chữ Hán: 國音新字, literally "new script of the national language") is a phonetic semisyllabary for the Vietnamese language proposed in the mid-19th century, during the reign of Emperor Thiệu Trị (1841–1847). Its author, who signs as Nam Thành cư sĩ Nguyễn Tử, remains otherwise unknown.
 
 It is notable as one of the few phonetic scripts created by Vietnamese themselves. [?S1]
 
@@ -20,7 +20,7 @@ It is notable as one of the few phonetic scripts created by Vietnamese themselve
 
 Two handwritten manuscripts of Quốc Âm Tân Tự are preserved at the Institute for the Study of Hán-Nôm in Hanoi under the archive signature AB.630. Both consist of four pages [!W2] and appear to be copies of the same original text [!W3]. The manuscripts are filed under tiểu học (小學, philology and elementary education), reflecting the pedagogical intent of the work [?S2]. They are catalogued as nôm văn thư (喃文書, Nôm documents) on account of their subject matter [?S2].
 
-The author identifies himself only by the literary name Nam Thành cư sĩ Nguyễn Tử — a scholar (cư sĩ) surnamed Nguyễn from Nam Thành, the literary and poetic name for the city of Nam Định (南定) [!W1]. Some sources mistranslate 南城 as "Southern Citadel", failing to recognise it as a place name. [!W1]
+The author identifies himself only as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành.
 
 ## Dating
 
@@ -136,7 +136,6 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 
 ### Widerspricht qatt-unicode
 
-- **W1 – Nam Định.** Repo: Signatur „Nam Thành cư sĩ Nguyễn Tử“ (南城居士阮子); Gleichsetzung Nam Thành = Nam Định ist spekulativ und wird nicht verwendet (E31). Betrifft Einleitung und Abschnitt Manuscripts, inkl. „Southern Citadel“-Satz.
 - **W2 – Umfang.** Repo: je 4 Doppelseiten, nummeriert als 8 Seiten.
 - **W3 – Abschrift.** Repo: Ob Quelle 2 von Quelle 1 oder beide von einem früheren Original abgeschrieben sind, ist nicht bestimmbar; Quelle 2 korrigiert unklare QATT-Zeichen und offensichtliche Schreibfehler von Quelle 1 (E23).
 - **W4 – „ohne fremden Einfluss“.** Repo: Töne folgen der chinesischen Âm-Dương-Methode, Kombination entspricht dem chinesischen fanqie (反切). Formulierung zu absolut.
