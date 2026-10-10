@@ -34,6 +34,12 @@ The colophon at the end of the preface reads: "On the conjunction of five planet
 
 No five-planet conjunction in Đẩu is known [?S4] to have occurred during the 19th century, suggesting the reference is literary and auspicious rather than a record of an observed astronomical event. Astronomical records suggest that on 7 January 1842, four planets — Venus, Jupiter, Saturn and Mercury — were clustered closely together near the asterism Đẩu, with the sun in close proximity. This configuration may correspond to the five-body conjunction referenced in the colophon, though this identification remains tentative. [?S4]
 
+## Preface
+
+The manuscripts open with a preface titled Quốc âm tân tự tự (國音新字序, "preface to the new script for the sounds of the national language"). [MS p. 1, col. 1] It follows the conventional account of the history of writing. It begins with the statement of the Hệ từ truyện (繫辭傳) of the Kinh Dịch (易經) that in antiquity people governed by knotted cords until later sages replaced them with written signs (結繩而治，後世聖人易之以書契), and goes on to the six principles of character formation, lục thư (六書), the burning of books and the change of the script under Qin (秦政焚書改畫), and the phản thiết method of spelling with its level and rising tones, bình and thượng (反切平上). [MS p. 1] [?P1]
+
+The preface then turns to Vietnam, which had a national speech, quốc âm (國音), but no national script, quốc tự (國字). Hán characters were borrowed either for their sound or for their meaning (或諧聲或繹義), and the resulting southern script, Nam tự (南字, that is, chữ Nôm), is described as crude and unintelligible (鄙陋不通). [MS p. 1, col. 5–6] The author presents his script as a simple way of writing the sounds of the language for private notes (一箇簡易之格 … 以便私記). [MS p. 2] [?P1] The preface ends with the colophon 五星聚斗，南城居士阮子書. [MS p. 2, col. 5]
+
 ## Historical background
 
 At the time Quốc Âm Tân Tự was composed, Vietnamese literary culture relied on two writing systems of Chinese origin: chữ Hán, the classical Chinese script used for official and scholarly writing, and chữ Nôm, a logographic script adapted from Chinese characters to represent native Vietnamese words. A third system, chữ Quốc ngữ, a Latin-based script developed by Portuguese and French missionaries in the 17th century, existed but remained confined largely to the Catholic community and had not yet achieved broader cultural legitimacy.
@@ -155,6 +161,7 @@ Alle Punkte erledigt.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
 - **E01 – Formen.** Beleg: Handschrift S. 2, Liste 幹音二十二字 (im Text als [MS p. 2] eingetragen). Alle 22 Formen und Namen mit dem Scan (Quelle 1) abgeglichen: stimmen mit der Beschreibung überein.
+- **P1 – Preface.** Zusammenfassung nach der Lesung der Proposal-Session; am Original zu prüfen, vor allem 鄙陋不通, 或諧聲或繹義 und der Schlusssatz (abgeleitet aus 一箇簡易之格 / 以便私記). Die Einordnung als Nachahmung von Xu Shens 說文解字敘 bewusst weggelassen (WP:NOR). Spaltenangaben nach eigener Zählung (Titel = Sp. 1).
 - **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
 - **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán Tự steckt und gleiche Basis laut Repo als Chi Tự allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
