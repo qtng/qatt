@@ -40,15 +40,15 @@ Quốc Âm Tân Tự occupies a distinctive place in the history of Vietnamese w
 
 ## Writing system
 
-### Base symbols (cán lược) [!W5]
+### Base components (cán tự)
 
-Quốc Âm Tân Tự is built on 22 geometric base symbols called cán lược (幹畧) [!W5]. Unlike chữ Hán and chữ Nôm, which are derived from brush strokes, the cán lược are composed entirely of straight lines, augmented with circles and semicircles, giving the script a distinctly geometric appearance with no calligraphic tradition behind it. [?S6]
+Quốc Âm Tân Tự is built on 22 base components called cán tự (幹字). Each consists of three straight strokes and one short marking stroke. Unlike chữ Hán and chữ Nôm, which are derived from brush strokes, the components are composed entirely of straight lines, giving the script a distinctly geometric appearance with no calligraphic tradition behind it. [?S6]
 
-#### Geometric description of the base symbols
+#### Geometric description of the base components
 
 The geometric descriptions below are intended to make the symbols accessible to visually impaired readers and to allow computational rendering, for example as SVG graphics. [?S7]
 
-Each cán lược consists of three straight lines arranged in a distinctive geometric configuration. The 22 shapes can be grouped by their underlying geometry as follows:
+The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. The 22 configurations can be grouped by their underlying geometry as follows:
 
 - **Diagonal cross (X) variants**: An X shape with an extra line extending perpendicularly from one of its four outer edges (4 symbols): mông, bông, vông, phông
 - **Orthogonal cross (+) variants**: A + shape with an extra line extending perpendicularly from one of its four outer edges (4 symbols): trông, đông, nông, tông
@@ -59,29 +59,33 @@ Each cán lược consists of three straight lines arranged in a distinctive geo
 - **Two verticals with slanted crossbar**: Two vertical lines crossed by a slightly slanted line, slanting either upward or downward (2 symbols): thông, nhông
 - **One vertical with two slanted parallels**: One vertical line crossed by two parallel slightly slanted lines, slanting either upward or downward (2 symbols): chông, dông
 
-### Marking system
+### Derived forms
 
-Each cán lược can be modified by placing a short perpendicular stroke at one of the endpoints of its three lines. Since each line has two endpoints, a three-line symbol has six possible mark positions, yielding six marked variations per base symbol. Together with the unmarked cán lược itself, this gives seven forms per base symbol.
+The marking stroke always sits at the end of one of the three strokes. Since each stroke has two ends, there are six possible positions. In each cán tự the marking stroke occupies the start position, upper left or upper middle depending on the shape. Moving it counter-clockwise from one stroke end to the next yields, in order, the five chi tự (枝字) of the base. Omitting the marking stroke yields the cán lược (幹畧), the reduced form of the base. Each base therefore has seven forms: one cán tự, five chi tự and one cán lược.
 
-The position of the mark determines the function of the resulting character:
+The position of the marking stroke determines the function of the form:
 
-- **Unmarked** — the base symbol itself, the cán lược, representing the onset consonant in syllable construction
-- **Top or top-left endpoint marked** — produces the cán tự (幹字), representing the full syllable with the -ông rhyme
-- **Any of the five remaining endpoints marked** — produces a chi tự (枝字), representing a rhyme
+- **Start position** — the cán tự, representing the full syllable of its onset with the -ông rhyme
+- **Any of the five other positions** — a chi tự, representing a rhyme
+- **No marking stroke** — the cán lược, representing the onset consonant of its base
 
-This simple and consistent marking rule generates the entire character inventory from just 22 base shapes, yielding three distinct classes of characters with three distinct functions: 22 cán lược (onset consonants), 22 cán tự (full -ông syllables) and 110 chi tự (rhymes).
+This simple and consistent rule generates the entire inventory from the 22 base components, yielding three classes of forms with three distinct functions: 22 cán tự (full -ông syllables), 110 chi tự (rhymes) and 22 cán lược (onset consonants).
 
 ### Cán tự
 
-The 22 cán tự (幹字) are non-productive, marked variations of the base symbols whose mark falls on the top or top-left endpoint. Each cán tự represents a full syllable consisting of the onset consonant of its base symbol combined with the -ông rhyme. For example, the cán tự for the base symbol associated with the onset đ- is named đông, the cán tự for m- is named mông, and so on. The cán tự for the zero onset /ʔ/ is simply named ông.
+Each of the 22 cán tự represents a full syllable consisting of the onset consonant of its base combined with the -ông rhyme, and gives the base its name. For example, the cán tự whose onset is đ- is named đông, the one whose onset is m- is named mông, and so on. The cán tự for the zero onset /ʔ/ is simply named ông.
 
-Unlike the cán lược and chi tự, which function as components in syllable construction, cán tự are used independently — written alone with a tone mark to represent their own syllable. They are not combined with a chi tự.
+Unlike the chi tự and cán lược, which function as components in syllable construction, cán tự are used independently — written alone, optionally with a tone mark, to represent their own syllable. They are never combined with other components.
 
 Their primary purpose is as reference characters in the phản thiết (反切) spelling system. This gives the cán tự a pedagogical function analogous to the letters of an alphabet [?S8]: they name and isolate individual onset consonants within the syllabic structure of Vietnamese.
 
 ### Chi tự
 
-The 110 chi tự (枝字) are the marked variations of the 22 base symbols whose mark falls on any of the five endpoints other than the top or top-left. Each chi tự represents a rhyme, and together they form the rhyme table of the script. Each base symbol contributes exactly five chi tự, and in the manuscript the rhyme table is organised in blocks of five — all chi tự derived from one base symbol are presented together before moving to the next.
+The 110 chi tự (枝字) are the variants of the 22 cán tự in which the marking stroke is moved to one of the five other positions. Each chi tự represents a rhyme, and together they form the rhyme table of the script. Each cán tự contributes exactly five chi tự, in the counter-clockwise order of the marking-stroke position, and in the manuscript the rhyme table is organised in blocks of five — all chi tự derived from one base are presented together before moving to the next.
+
+### Cán lược
+
+The 22 cán lược (幹畧) are the reduced forms of the cán tự, made by omitting the marking stroke. A cán lược contributes the onset consonant of its base and does not form a character on its own; it combines with a chi tự. The manuscript writes cán lược standalone only where it explains how components combine.
 
 ### Syllable construction and spelling
 
@@ -136,7 +140,6 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 - **W2 – Umfang.** Repo: je 4 Doppelseiten, nummeriert als 8 Seiten.
 - **W3 – Abschrift.** Repo: Ob Quelle 2 von Quelle 1 oder beide von einem früheren Original abgeschrieben sind, ist nicht bestimmbar; Quelle 2 korrigiert unklare QATT-Zeichen und offensichtliche Schreibfehler von Quelle 1 (E23).
 - **W4 – „ohne fremden Einfluss“.** Repo: Töne folgen der chinesischen Âm-Dương-Methode, Kombination entspricht dem chinesischen fanqie (反切). Formulierung zu absolut.
-- **W5 – Terminologie.** Repo: Die 22 Grundformen sind die **Cán Tự** (3 Striche + Markierungsstrich); **Cán Lược** ist die reduzierte Form ohne Markierungsstrich. Wiki nennt die Grundform cán lược. Betrifft Abschnitte Base symbols, Marking system, Cán tự, Chi tự.
 - **W6 – „side by side“.** Repo: Cán Lược und Chi Tự verbinden sich zu *einem* Zeichen in einer quadratischen Zelle; unverbundenes Nebeneinander kommt nur vor, wo der Text Komponenten erklärt (E04).
 
 ### Spekulativ bzw. im Repo nicht belegt
@@ -146,7 +149,7 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 - **S3** – Übernahme ins französische Kolonialarchiv „no later than the 1930s“: nicht im Repo, Herleitung aus dem Signatursystem unbelegt.
 - **S4** – Kolophon 五星聚斗 und Konjunktion 7. Januar 1842: Kolophontext im Repo nicht erfasst (nur 南城居士阮子); astronomische Zuordnung unbelegt. Planeten nahe der Sonne sind zudem unsichtbar.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
-- **S6** – „no calligraphic tradition behind it“: Wertung; Kreise/Halbkreise sind laut Repo Tonzeichen, nicht Teil der Grundformen.
+- **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
 - **S7** – Geometrische Beschreibungen der 22 Formen: im Repo nicht enthalten (E01 fehlt), nicht prüfbar. Zweckangabe (Barrierefreiheit, SVG) ist eher nicht enzyklopädisch.
 - **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
 - **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán Tự steckt und gleiche Basis laut Repo als Chi Tự allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
