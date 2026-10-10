@@ -50,7 +50,7 @@ The geometric descriptions below are intended to make the symbols accessible to 
 
 The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. Each configuration fills a square cell. Where a configuration contains parallel lines, they are evenly spaced across the cell and set in from its edges rather than lying on them; a line perpendicular to them runs along the edge of the cell and spans its full width or height. The 22 configurations can be grouped by their underlying geometry as follows:
 
-- **Diagonal cross (X) variants** (4 symbols): An X shape with a straight line closing one of its four sides: top (mông), right (bông), bottom (vông) or left (phông).
+- **Diagonal cross (X) variants** (4 symbols): An X shape with a straight line closing one of its four sides: top (vông), right (mông), bottom (bông) or left (phông).
 - **Orthogonal cross (+) variants** (4 symbols): A + shape with an extra line across the end of one of its four arms, perpendicular to that arm and as long as the crossing arm: top (trông), right (nông), bottom (đông) or left (tông).
 - **Two parallel horizontals** (2 symbols): Two evenly spaced horizontal lines, joined by a full-height vertical line along the left edge (gông) or the right edge (công).
 - **Two parallel verticals** (2 symbols): Two evenly spaced vertical lines, joined by a full-width horizontal line along the top edge (ngông, resembling π) or the bottom edge (hông).
