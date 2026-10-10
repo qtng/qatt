@@ -48,16 +48,16 @@ Quốc Âm Tân Tự is built on 22 base components called cán tự (幹字). E
 
 The geometric descriptions below are intended to make the symbols accessible to visually impaired readers and to allow computational rendering, for example as SVG graphics. [?S7]
 
-The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. The 22 configurations can be grouped by their underlying geometry as follows:
+The three strokes of each cán tự form a distinctive geometric configuration, which all forms derived from it share. Each configuration fills a square cell. Where a configuration contains parallel lines, they are evenly spaced across the cell and set in from its edges rather than lying on them; a line perpendicular to them runs along the edge of the cell and spans its full width or height. The 22 configurations can be grouped by their underlying geometry as follows:
 
-- **Diagonal cross (X) variants**: An X shape with an extra line extending perpendicularly from one of its four outer edges (4 symbols): mông, bông, vông, phông
-- **Orthogonal cross (+) variants**: A + shape with an extra line extending perpendicularly from one of its four outer edges (4 symbols): trông, đông, nông, tông
-- **Two parallel horizontals**: Two horizontal lines with a perpendicular vertical line on the left or right (2 symbols): gông, công
-- **Two parallel verticals**: Two vertical lines with a perpendicular horizontal line on the top or bottom (2 symbols): ngông, hông
-- **Triple parallels**: Three parallel horizontal lines (ông); three parallel vertical lines (lông) (2 symbols)
-- **Slash variants**: A left-slanting or right-slanting diagonal with extra lines on either the top/bottom or left/right edges (4 symbols): sông, rông, xông, không
-- **Two verticals with slanted crossbar**: Two vertical lines crossed by a slightly slanted line, slanting either upward or downward (2 symbols): thông, nhông
-- **One vertical with two slanted parallels**: One vertical line crossed by two parallel slightly slanted lines, slanting either upward or downward (2 symbols): chông, dông
+- **Diagonal cross (X) variants** (4 symbols): An X shape with a straight line closing one of its four sides: top (mông), right (bông), bottom (vông) or left (phông).
+- **Orthogonal cross (+) variants** (4 symbols): A + shape with an extra line across the end of one of its four arms, perpendicular to that arm and as long as the crossing arm: top (trông), right (nông), bottom (đông) or left (tông).
+- **Two parallel horizontals** (2 symbols): Two evenly spaced horizontal lines, joined by a full-height vertical line along the left edge (gông) or the right edge (công).
+- **Two parallel verticals** (2 symbols): Two evenly spaced vertical lines, joined by a full-width horizontal line along the top edge (ngông, resembling π) or the bottom edge (hông).
+- **Triple parallels** (2 symbols): Three evenly spaced horizontal lines (ông) or three evenly spaced vertical lines (lông).
+- **Slash variants** (4 symbols): A diagonal with two extra lines along opposite edges of the cell, touching the ends of the diagonal. A diagonal from upper right to lower left (/) with lines along the top and bottom edges forms a Z-like shape (sông); a diagonal from upper left to lower right (\\) with lines along the top and bottom edges forms a mirrored Z (rông); / with lines along the left and right edges forms a mirrored N (xông); \\ with lines along the left and right edges forms an N-like shape (không).
+- **Two verticals with slanted crossbar** (2 symbols): Two evenly spaced vertical lines crossed in the middle by one slightly slanted line that extends beyond both verticals, rising from left to right (thông) or falling from left to right (nhông).
+- **One vertical with two slanted parallels** (2 symbols): One central vertical line crossed by two evenly spaced, parallel, slightly slanted lines, rising from left to right (chông) or falling from left to right (dông).
 
 ### Derived forms
 
@@ -149,7 +149,7 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 - **S4** – Kolophon 五星聚斗 und Konjunktion 7. Januar 1842: Kolophontext im Repo nicht erfasst (nur 南城居士阮子); astronomische Zuordnung unbelegt. Planeten nahe der Sonne sind zudem unsichtbar.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
-- **S7** – Geometrische Beschreibungen der 22 Formen: im Repo nicht enthalten (E01 fehlt), nicht prüfbar. Zweckangabe (Barrierefreiheit, SVG) ist eher nicht enzyklopädisch.
+- **S7** – Geometrische Beschreibungen: im Repo qatt-unicode nicht enthalten (E01 fehlt). Formen und Zuordnungen vom Autor anhand einer Zeichnung geprüft (Parallelen gleichmäßig verteilt, đông/nông korrigiert); noch zu bestätigen: X-Deutung, Slash-Varianten (Berühren der Diagonale, Zuordnung), Triple parallels vom Rand abgerückt. Zweckangabe (Barrierefreiheit, SVG) ist eher nicht enzyklopädisch.
 - **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
 - **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán Tự steckt und gleiche Basis laut Repo als Chi Tự allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
