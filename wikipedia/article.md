@@ -149,7 +149,7 @@ Abgleich mit `qtng/qatt-unicode` (proposal.md, evidence/). Erledigte Punkte bitt
 - **S4** – Kolophon 五星聚斗 und Konjunktion 7. Januar 1842: Kolophontext im Repo nicht erfasst (nur 南城居士阮子); astronomische Zuordnung unbelegt. Planeten nahe der Sonne sind zudem unsichtbar.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
-- **S7** – Geometrische Beschreibungen: im Repo qatt-unicode nicht enthalten (E01 fehlt). Formen und Zuordnungen vom Autor anhand einer Zeichnung geprüft und korrigiert. Noch zu bestätigen: ob die Zusatzlinien der Slash-Varianten die Diagonale berühren. Zweckangabe (Barrierefreiheit, SVG) ist eher nicht enzyklopädisch.
+- **S7** – Geometrische Beschreibungen: alle 22 Formen und Zuordnungen vom Autor anhand einer Zeichnung bestätigt (im Repo qatt-unicode nicht enthalten, E01 fehlt; als Quelle für Wikipedia noch nötig). Offen nur noch: Zweckangabe (Barrierefreiheit, SVG) ist eher nicht enzyklopädisch.
 - **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
 - **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán Tự steckt und gleiche Basis laut Repo als Chi Tự allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
