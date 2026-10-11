@@ -21,6 +21,8 @@ class App {
     this.activeQuizWord = null;
     this.lastQuizWord = null; 
     this.categories = [];
+    this.items = {};      // words of decks: key -> { n: Nôm, qn: quốc ngữ }, see addLesson()
+    this.backUrl = null;  // set for a single deck: where the way back leads, instead of the list of lessons
     
     container.innerHTML = `
 <header class="fixed-header-container">
@@ -52,7 +54,7 @@ class App {
     this.bottomBar = document.getElementById("fixed-bottom-controls");
 	  
     document.getElementById("main-action-btn").addEventListener("click", () => this.startLessonDirectly());
-    document.getElementById("library-btn").addEventListener("click", () => this.renderLibrary());
+    document.getElementById("library-btn").addEventListener("click", () => this.backUrl ? (location.href = this.backUrl) : this.renderLibrary());
 	  
     this.setupAudio();
     this.setupNavigation();
@@ -84,6 +86,7 @@ class App {
 
   // --- VIEWS ---
   renderLibrary(isPop = false) {
+    if (this.backUrl) { location.href = this.backUrl; return; }
     if (!isPop) history.pushState({ view: 'library' }, '');
     this.currentLesson = null;
     this.bottomBar.style.display = "none";
@@ -145,6 +148,13 @@ class App {
     this.updateGlobalCounters();
   }
 
+  // from the quiz back to the overview of the lesson (a single deck) or to the list of lessons
+  leaveQuiz() {
+    this.clearHintTimer();
+    if (this.backUrl && this.currentLesson) this.renderLessonPreview(this.currentLesson.id);
+    else this.renderLibrary();
+  }
+
   renderLessonPreview(lessonId, isPop = false) {
     history[isPop?'replaceState':'pushState']({ view: 'preview', lessonId: lessonId }, '');
     this.currentLesson = this.lessons[lessonId];
@@ -157,6 +167,7 @@ class App {
         <button onclick="app.renderLibrary()" class="back-link btn btn-link text-white-50 text-decoration-none mb-2 p-0">
           ← Quay lại
         </button>
+        ${this.backUrl ? '<button onclick="app.renderLeaderboard()" class="btn btn-sm btn-outline-warning float-end">Bảng xếp hạng</button>' : ''}
         <div class="card p-4 preview-container">
           <div class="mb-4">
             <h3 class="fw-bold">${this.currentLesson.name}</h3>
@@ -185,7 +196,7 @@ class App {
         }
 
         this.renderToElement(word, activeStyle, card);
-        card.innerHTML += this.getProgressEmoji(word, false, 'grid');
+        card.insertAdjacentHTML('beforeend', this.getProgressEmoji(word, false, 'grid'));
         gridElement.appendChild(column).appendChild(card);
     });
   }
@@ -232,13 +243,13 @@ class App {
 	}
 	  
     const correctWord = this.activeQuizWord;
-    const showSvgAsQuestion = Math.random() < 0.5;
+    const forms = this.pickForms(correctWord);
     const activeStyle = this.getActiveStyle(this.currentLesson);
     const lessonClass = `lesson-${this.currentLesson.id}`;
 
     this.mainContainer.innerHTML = `
       <div class="fade-in ${lessonClass}">
-        <button onclick="app.renderLibrary()" class="btn btn-link text-white-50 text-decoration-none mb-2 p-0">
+        <button onclick="app.leaveQuiz()" class="btn btn-link text-white-50 text-decoration-none mb-2 p-0">
           ← Quay lại
         </button>
         <div class="card p-4 quiz-container overflow-hidden">
@@ -264,21 +275,19 @@ class App {
     const questionBox = document.getElementById("q-box");
     const questionWrapper = document.createElement("div");
 
-    if (showSvgAsQuestion) {
-      this.renderToElement(correctWord, activeStyle, questionWrapper, false, false); 
-    } else {
-      questionWrapper.innerHTML = `<h1 class="display-1 fw-bold">${correctWord}</h1>`; 
-    }
+    this.renderForm(forms.q, correctWord, questionWrapper, true);
 
     questionBox.prepend(questionWrapper);
-    this.renderOptions(correctWord, showSvgAsQuestion, activeStyle);
+    this.renderOptions(correctWord, forms);
     this.startHintTimer(correctWord);
   }
 
-  renderOptions(correctWord, questionWasSvg, activeStyle) {
+  renderOptions(correctWord, forms) {
     const optionsContainer = document.getElementById("opts");
+    // only words that can be shown in the form of the answer, and not twice the same answer
+    const symbols = this.currentLesson.symbols.filter(s => s === correctWord || this.isDistractor(s, correctWord, forms.a));
     
-    let unfinishedSymbols = this.currentLesson.symbols.filter(s => this.stats[s].c < 3);
+    let unfinishedSymbols = symbols.filter(s => this.stats[s].c < 3);
     (this.currentLesson.practiceModeItems||[]).forEach(itm => {
         if (unfinishedSymbols.length < this.opts.learningWindow && itm != correctWord) unfinishedSymbols.push(itm);
     });
@@ -289,7 +298,7 @@ class App {
       .sort(() => 0.5 - Math.random())
       .slice(0, 2);
     
-    const fullPool = this.currentLesson.symbols
+    const fullPool = symbols
       .filter(s => s !== correctWord && !windowDistractors.includes(s))
       .sort(() => 0.5 - Math.random());
     
@@ -297,7 +306,7 @@ class App {
     
     let selectedOptions = [correctWord, ...windowDistractors, ...globalDistractor];
     if (selectedOptions.length < 4) {
-      const remaining = this.currentLesson.symbols
+      const remaining = symbols
         .filter(s => !selectedOptions.includes(s))
         .sort(() => 0.5 - Math.random());
       selectedOptions = [...selectedOptions, ...remaining.slice(0, 4 - selectedOptions.length)];
@@ -311,11 +320,7 @@ class App {
       button.dataset.word = option;
       
       const wrapper = document.createElement("div");
-      if (questionWasSvg) {
-        wrapper.textContent = option; 
-      } else {
-        this.renderToElement(option, activeStyle, wrapper, true, false);
-      }
+      this.renderForm(forms.a, option, wrapper, false);
       
       button.appendChild(wrapper);
       button.onclick = () => {
@@ -525,29 +530,110 @@ class App {
     return userStyle;
   }
   
+  // --- words of decks ---
+  // A word of a lesson is a plain string (quốc ngữ, as in the lessons of the script) or the key of a deck item
+  // { n: Nôm, qn: quốc ngữ with one or more syllables } in this.items. A deck item is shown in three forms:
+  // "nom" (the characters), "qatt" (one glyph per syllable) and "text" (quốc ngữ).
+  textOf(word) {
+    return this.items[word]?.qn ?? word;
+  }
+
   // code of a word after the rhyme table of the decoding (null if the word has no glyph)
   getParsedCode(word) {
     const parsed = this.parser.parse(word);
     return parsed ? parsed.qatt : null;
   }
 
-  // The glyph of a word as a <qatt-code> element (qatt.js draws it); a word without a glyph stays as text.
+  // codes of all syllables of a word (a syllable without a glyph is left out)
+  getCodes(word) {
+    return this.textOf(word).split(/\s+/).map(syllable => syllable && this.getParsedCode(syllable)).filter(Boolean);
+  }
+
+  // what a word looks like in a form, as a string to compare answers (null if the word has no such form)
+  formValue(word, form) {
+    if (form === "text") return this.textOf(word);
+    if (form === "qatt") return this.getCodes(word).join(" ") || null;
+    if (form === "nom") return /[一-鿿㐀-䶿\u{20000}-\u{323af}]/u.test(this.items[word]?.n || "") ? this.items[word].n : null;
+    return null;
+  }
+
+  // The forms of the question and of the answers. Lessons of the script: a glyph asked for its text or the other way round.
+  // Decks: any two of the forms the word has, so both the characters and the glyphs come up.
+  pickForms(word) {
+    const forms = this.currentLesson.forms;
+    if (!forms) return Math.random() < 0.5 ? { q: "qatt", a: "text" } : { q: "text", a: "qatt" };
+    const have = forms.filter(form => this.formValue(word, form) !== null).sort(() => 0.5 - Math.random());
+    return have.length > 1 ? { q: have[0], a: have[1] } : { q: "text", a: "text" };
+  }
+
+  // can the word be one of the wrong answers? It needs the form of the answer, and must not look like the right one.
+  isDistractor(word, correctWord, form) {
+    if (!this.currentLesson.forms) return word !== correctWord;
+    const value = this.formValue(word, form);
+    return value !== null && value !== this.formValue(correctWord, form);
+  }
+
+  // shows a word in a form: big as the question, small as an answer
+  renderForm(form, word, element, asQuestion) {
+    element.innerHTML = "";
+    if (form === "qatt") return this.renderToElement(word, null, element, !asQuestion, false);
+    if (form === "nom") {
+      element.className = "nom-chars" + (asQuestion ? " nom-question" : "");
+      element.append(...this.nomChars(this.items[word].n, asQuestion ? 180 : 64));
+      return;
+    }
+    const text = this.textOf(word);
+    if (asQuestion) {
+      const title = document.createElement("h1");
+      title.className = "fw-bold " + (text.length <= 6 ? "display-1" : text.length <= 12 ? "display-4" : "display-6");
+      title.textContent = text;
+      element.append(title);
+    } else {
+      element.textContent = text;
+      if (text.length > 10) element.classList.add("small");
+    }
+  }
+
+  // Nôm characters as images of chunom.org (the Nôm font as fallback, see decks/quiz.html)
+  nomChars(text, size = 64) {
+    return [...(text || "")].map(ch => {
+      if (!/[一-鿿㐀-䶿\u{20000}-\u{323af}]/u.test(ch)) return document.createTextNode(ch);
+      const img = document.createElement("img");
+      img.alt = ch;
+      img.addEventListener("error", () => img.replaceWith(document.createTextNode(ch)));
+      img.src = `https://chunom.org/media/generated/${ch.codePointAt(0).toString(16).toUpperCase()}-${size}.png`;
+      return img;
+    });
+  }
+
+  // The glyph of a word as <qatt-code> elements (qatt.js draws them), one per syllable; a word without a glyph stays as text.
   // style and skipReference are left from the former styles of the script and no longer used.
   renderToElement(word, style, element, skipReference = false, withHint = true) {
     element.innerHTML = "";
-    const mainCode = this.getParsedCode(word);
-    if (mainCode) {
-        const code = document.createElement("qatt-code");
-        code.textContent = mainCode;
-        element.appendChild(code);
+    const codes = this.getCodes(word);
+    const item = this.items[word];
+    if (item && withHint && this.formValue(word, "nom")) { // overview of a deck: the characters above the glyphs
+      const nom = document.createElement("div");
+      nom.className = "nom-chars w-100 text-center";
+      nom.append(...this.nomChars(item.n, 32));
+      element.appendChild(nom);
+    }
+    if (codes.length) {
+        const parent = codes.length > 1 ? Object.assign(document.createElement("div"), { className: "qatt-syllables" }) : element;
+        codes.forEach(mainCode => {
+            const code = document.createElement("qatt-code");
+            code.textContent = mainCode;
+            parent.appendChild(code);
+        });
+        if (parent !== element) element.appendChild(parent);
         if (withHint) {
             const text = document.createElement("div");
             text.className = "w-100 small text-center";
-            text.append(word);
+            text.append(this.textOf(word));
             element.appendChild(text);
         }
     } else {
-        element.textContent = word;
+        element.append(this.textOf(word));
     }
   }
 
@@ -567,7 +653,7 @@ class App {
     startHintTimer(word) { 
     this.clearHintTimer(); 
     this.hintInterval = setInterval(() => { 
-      const correctBtn = document.querySelector(`.options .btn[data-word="${word}"]`); 
+      const correctBtn = [...document.querySelectorAll(".options .btn")].find(btn => btn.dataset.word === word); 
       if (correctBtn) { 
         correctBtn.classList.add('hint-shake'); 
         setTimeout(() => correctBtn.classList.remove('hint-shake'), 800); 
@@ -612,6 +698,7 @@ class App {
   addLesson(options) {
     const lesson = { id: "", name: "", symbols: [], category: "", style: [], ...options };
     this.lessons[lesson.id] = lesson;
+    Object.assign(this.items, lesson.items || {});
     if (!this.categories.includes(lesson.category)) {
       this.categories.push(lesson.category);
     }
@@ -660,7 +747,7 @@ class App {
         card.className = "word-grid-item";
         
         this.renderToElement(word, this.getActiveStyle(lesson), card);
-        card.innerHTML += this.getProgressEmoji(word, false, 'grid');
+        card.insertAdjacentHTML('beforeend', this.getProgressEmoji(word, false, 'grid'));
         lessonDiv.querySelector(`#grid-${lesson.id}`).appendChild(column).appendChild(card);
       });
       fullGrid.appendChild(lessonDiv);
