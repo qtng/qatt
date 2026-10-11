@@ -6,7 +6,7 @@
   <title>QATT reference font</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <style>
-    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=6) format("woff2"), url(font/qatt-prototype.ttf?v=6) format("truetype"); }
+    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=7) format("woff2"), url(font/qatt-prototype.ttf?v=7) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
@@ -30,6 +30,12 @@
     .cell.tone .f { color: var(--accent); }
     .hide-svg .s { display: none; }
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
+    .hops { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .hop { border: 1px solid var(--line); border-radius: .5rem; background: #fffdf8; padding: .2rem .3rem; text-align: center; cursor: pointer; min-width: var(--hopw, 5rem); }
+    .hop:hover { border-color: var(--accent); }
+    .hop .f { font-family: "QATT Prototype"; font-size: var(--size, 4rem); line-height: 1.15; display: block; white-space: nowrap; }
+    .hop .nm { display: block; font-size: .68rem; color: var(--muted); }
+    .guides .hop .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
     #info { margin-top: .5rem; font-size: .9rem; color: var(--muted); min-height: 1.4rem; }
   </style>
   <script defer src="js/navigation.js"></script>
@@ -38,7 +44,7 @@
 <body>
 <main>
   <h1>QATT reference font</h1>
-  <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. The two format characters have a small square as placeholder. This is a prototype; stroke widths and proportions may still change.
+  <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. The component joiner works: <em>A</em> <code>U+F009B</code> <em>B</em> is shown as one square, <em>A</em> in the left and <em>B</em> in the right half (a Hợp Thư is a marked form on the left and the unmarked form of the same Cán on the right, but any two characters can be joined). The Tham Thư combiner only has a small square as placeholder. This is a prototype; stroke widths and proportions may still change.
      Large: the font. Small underneath: the same glyph drawn by <code>qatt.js</code>. Click a character to add it to the sample field.</p>
 
   <div class="bar">
@@ -52,6 +58,11 @@
 
   <div class="sample" id="sample" contenteditable="true" spellcheck="false" aria-label="Sample text"></div>
   <div id="info"></div>
+  <h2 class="h5 mt-4">Component joiner: marked + unmarked</h2>
+  <p>Each Cán as a Hợp Thư: the Cán with marking stroke 1 on the left, the unmarked Cán on the right (<em>A</em> + <code>U+F009B</code> + <em>B</em>). Click one to add it to the sample field.</p>
+  <div class="hops" id="hops"></div>
+
+  <h2 class="h5 mt-4">All characters</h2>
   <div class="grid" id="grid"></div>
 </main>
 
@@ -80,13 +91,29 @@
     return cell;
   });
 
+  // Hợp Thư: marked-1 + joiner + unmarked of each Cán
+  const JOINER = String.fromCodePoint(BASE + 155), hopBox = $('#hops');
+  const stem = g => g.n.replace(/ (UNMARKED|MARKED-\d)$/, '');
+  for (const g of glyphs.filter(g => g.t === 'unmarked')) {
+    const m = glyphs.find(x => x.t === 'marked' && stem(x) === stem(g));
+    if (!m) continue;
+    const text = String.fromCodePoint(BASE + m.o) + JOINER + String.fromCodePoint(BASE + g.o);
+    const hop = document.createElement('div'); hop.className = 'hop';
+    const f = document.createElement('span'); f.className = 'f'; f.textContent = text;
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = stem(g).toLowerCase();
+    hop.append(f, nm);
+    hop.addEventListener('click', () => { sample.append(text); info.textContent = stem(g) + ' — marked 1 + joiner + unmarked'; });
+    hopBox.append(hop);
+  }
+
   const apply = () => {
     const px = +$('#size').value;
     grid.style.setProperty('--size', px + 'px');
     grid.style.setProperty('--cell', Math.max(px * 1.25, 96) + 'px');
     sample.style.fontSize = Math.max(px * .8, 32) + 'px';
     grid.classList.toggle('hide-svg', !$('#svg').checked);
-    grid.classList.toggle('guides', $('#guides').checked);
+    grid.classList.toggle('guides', $('#guides').checked); hopBox.classList.toggle('guides', $('#guides').checked);
+    hopBox.style.setProperty('--size', px + 'px'); hopBox.style.setProperty('--hopw', Math.max(px * 1.25, 96) + 'px');
     for (const c of cells) c.hidden = $('#tonesOnly').checked && c._g.t !== 'tone';
   };
   for (const id of ['#size', '#svg', '#guides', '#tonesOnly']) $(id).addEventListener('input', apply);
