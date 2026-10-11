@@ -61,6 +61,8 @@
     .names .mini { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: .3rem; background: var(--g-bg); border: 1px solid var(--g-border); flex-direction: column; line-height: 1.05; }
     .names .mini .font-glyph { font-size: 1.4rem; }
     .names tr.hit { background: var(--bs-warning-bg-subtle); }
+    .names thead th { background: var(--bs-secondary-bg); white-space: nowrap; }
+    .names tr.sect th { background: var(--bs-tertiary-bg); font-weight: 600; font-size: .95rem; }
     .note-x { color: var(--bs-secondary-color); }
     svg.tonemark { width: 100%; height: 100%; max-width: 2.2rem; }
     .detail-glyph svg.tonemark { max-width: 5.5rem; }
@@ -112,6 +114,14 @@
     </div>
   </details>
 
+  <h2 id="list-title">List of code points</h2>
+  <p>One row per code point with the full name from the draft names list: <code>QUOC AM TAN TU &lt;NAME&gt; UNMARKED</code> or <code>MARKED-1</code> to <code>MARKED-6</code> (the position of the marking stroke); in the names <b>DD</b> stands for đ and <b>DZ</b> for d. The code points are provisional (base <span class="cp" id="l-base"></span>).</p>
+  <div class="row g-2 mb-2">
+    <div class="col-12 col-md-6"><input class="form-control" type="search" id="q" placeholder="Search names, readings, code points…" aria-label="Search the list of code points" autocomplete="off"></div>
+    <div class="col-12 col-md-6 small text-secondary d-flex align-items-center" id="count"></div>
+  </div>
+  <div class="table-responsive"><table class="table table-sm table-hover names align-middle" id="names"></table></div>
+
   <h2>Overview</h2>
   <div class="table-responsive"><table class="table table-sm align-middle" id="overview"></table></div>
 
@@ -122,13 +132,6 @@
   <h2>Tone marks</h2>
   <p>Eight combining marks, one per tone, placed in the four corners of the cluster: the traditional tone order of the eight tones (âm before dương). The drawings are schematic, taken from the description in the proposal (the open side of the semicircle faces the centre); they are not reference glyphs.</p>
   <div class="table-responsive"><table class="table table-sm align-middle" id="tone-table"></table></div>
-
-  <h2>Character list</h2>
-  <div class="row g-2 mb-2">
-    <div class="col-12 col-md-6"><input class="form-control" type="search" id="q" placeholder="Search names, readings, code points…" aria-label="Search the character list" autocomplete="off"></div>
-    <div class="col-12 col-md-6 small text-secondary d-flex align-items-center" id="count"></div>
-  </div>
-  <div class="table-responsive"><table class="table table-sm table-hover names align-middle" id="names"></table></div>
 
   <h2>Character properties</h2>
   <p>Draft values by character class. Values the proposal marks as open are listed in <a href="https://github.com/qtng/qatt-unicode/blob/main/ucd/questions.md">ucd/questions.md</a>.</p>
@@ -325,20 +328,34 @@
   }
 
   // ---------- character list ----------
+  const SECTIONS = { u: 'Forms without marking stroke', m: 'Forms with marking stroke (the six positions of each base)', f: 'Format characters', t: 'Tone marks' };
+  const sectionOf = t => ({ unmarked: 'u', marked: 'm', chi: 'm', combiner: 'f', joiner: 'f', tone: 't' })[t];
   function renderList() {
     const q = $('#q').value.trim().toLowerCase(), t = $('#names'); t.replaceChildren();
-    t.append(el('thead', {}, el('tr', {}, ...['Code point', '', 'Name', 'Annotation'].map(h => el('th', { textContent: h })))));
-    const body = el('tbody'); let n = 0;
+    t.append(el('thead', {}, el('tr', {}, ...['Code point', 'Decimal', 'Glyph', 'Unicode name', 'Notes'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody'); let n = 0, section = null;
+    const ranges = {}; chars.forEach(c => { const k = sectionOf(c.t); (ranges[k] ??= [c.o, c.o])[1] = c.o; });
     chars.forEach(c => {
-      const text = `${U(c.o)} ${hex(cpOf(c.o), 5)} ${off(c.o)} QUOC AM TAN TU ${c.n} ${c.notes.map(x => x[1]).join(' ')}`.toLowerCase();
+      const text = `${U(c.o)} ${hex(cpOf(c.o), 5)} ${cpOf(c.o)} ${off(c.o)} QUOC AM TAN TU ${c.n} ${c.notes.map(x => x[1]).join(' ')}`.toLowerCase();
       if ((q && !text.includes(q)) || (activeGroup && c.t !== activeGroup)) return;
       n++;
+      const k = sectionOf(c.t);
+      if (k !== section) { // a heading row whenever the section changes, like the sub-headings of the Wikipedia block lists
+        section = k; const [a, b] = ranges[k];
+        body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 5, scope: 'colgroup' }, SECTIONS[k], el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(a)}${a === b ? '' : '–' + hex(cpOf(b), 5)}` }))));
+      }
       const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp text-nowrap', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, false); window.scrollTo({ top: $('#chart-title').offsetTop - 70, behavior: 'smooth' }); };
       const tr = el('tr', { className: c.o === selected ? 'hit' : '' }, el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })),
+        el('td', { className: 'cp tt', textContent: String(cpOf(c.o)) }),
         el('td', {}, el('span', { className: `mini g-${c.t}` }, ...glyphContent(c.o))), el('td', {}, el('code', { className: 'name', textContent: 'QUOC AM TAN TU ' + c.n })),
         el('td', { className: 'small' }, ...c.notes.map(noteNode)));
       tr.dataset.o = c.o; body.append(tr);
     });
+    if (!q && !activeGroup) {   // the unassigned rest of the block
+      const first = chars.length, last = SIZE - 1;
+      body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 5, scope: 'colgroup' }, 'Reserved', el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }))),
+        el('tr', { className: 'text-secondary' }, el('td', { className: 'cp', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }), el('td', { className: 'cp tt', textContent: `${cpOf(first)}–${cpOf(last)}` }), el('td'), el('td', { textContent: `${last - first + 1} code points, not assigned` }), el('td', { className: 'small', textContent: 'Reserved for future additions (proposal section 7)' })));
+    }
     t.append(body);
     $('#count').textContent = `${n} of ${chars.length} characters` + (activeGroup ? ` – group: ${GROUPS[activeGroup].label}` : '');
   }
@@ -383,7 +400,7 @@
   function refresh() { buildChart(); renderDetail(); renderList(); }
 
   // ---------- start ----------
-  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#s-commit').textContent = D.source.commit;
+  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#s-commit').textContent = D.source.commit; $('#l-base').textContent = 'U+' + hex(base, 5);
   buildLegend(); buildOverview(); buildCan(); buildTones(); buildProps(); refresh();
   const P = new URLSearchParams(location.search);
   if (P.get('base')) { $('#font-base').value = P.get('base'); }
