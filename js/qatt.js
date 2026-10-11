@@ -594,7 +594,9 @@ class Qatt {
       this._useG(g, PREFIX + vStr);
     }
 
-    svg.setAttribute("viewBox", "-10 -25 120 125");
+    // A rhyme without onset only fills the right half of the box; its viewBox is moved so that it sits in the middle
+    const rhymeOnly = !initial && vowel && !isCoda;
+    svg.setAttribute("viewBox", rhymeOnly ? "17 -25 120 125" : "-10 -25 120 125");
     svg.style.aspectRatio = "13 / 15";
     svg.style.verticalAlign = "bottom";
     svg.style.overflow = "visible";
