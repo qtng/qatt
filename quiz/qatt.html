@@ -11,13 +11,13 @@
   <script src="../../qatt/js/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link  href="../../chunom/css/quiz.css?v=3" rel="stylesheet">
-  <script src="../../chunom/js/quiz.js?v=2"></script>
+  <script src="../../chunom/js/quiz.js?v=3"></script>
 </head>
 <body>
   <div id="app"></div>
   <script>
 async function main() {
-const app = await App.init(document.getElementById("app"));
+const app = await App.init(document.getElementById("app"), { forms: ["qatt", "text"] }); // the quiz of qatt asks glyphs and quốc ngữ
 const basicStyles = ["3"];
 const onsets = "b c ch d đ g h kh l m n ng nh ph r s t th tr v x".split(" ");
 const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
