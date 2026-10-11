@@ -5,7 +5,7 @@ Standalone, the two format characters (combiner, joiner) are drawn as a small sq
 Component joiner: "A joiner B" (A, B any Can/Chi form) is shown as one square cell, A squeezed into the
 left half and B into the right half (an OpenType ccmp rule swaps both for half-width variants and the joiner
 for an empty zero-width glyph). Hop Thu = a marked form on the left and the unmarked one on the right."""
-import json, sys
+import json, re, sys
 import pathops
 from fontTools.svgLib.path import parse_path
 from fontTools.pens.transformPen import TransformPen
@@ -30,6 +30,21 @@ STROKE_UP, STROKE_LOW = 58, 58                    # strokes of the squeezed uppe
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
+BRUSH = json.load(open(sys.argv[3]))['outlines'] if len(sys.argv) > 3 else None
+
+if BRUSH:
+    # the ids of the qatt.js paths: glyphs.json holds their path data; a few marks of different shapes share the same data
+    src = open(__file__.rsplit('/', 2)[0] + '/js/qatt.js').read()
+    IDS = {}
+    for m in re.finditer(r'<path id="([^"]+)"[^>]*?\sd="([^"]+)"', src[src.index('const defaultSvgDefs'):src.index('const defaultQattEncoding')]):
+        IDS.setdefault(m.group(2), []).append(m.group(1))
+    shape_of = lambda i: re.sub(r'^(v2c?-|q[ts])|(\d|-small|-medial)$', '', i)
+
+    def brushed(defs):
+        """centre lines of one glyph -> the brush outlines of the same paths"""
+        ids = [IDS[d] for d in defs]
+        shapes = {shape_of(c[0]) for c in ids if len(c) == 1}
+        return [BRUSH[next((i for i in c if shape_of(i) in shapes), c[0])] for c in ids]
 
 def outline(defs, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None):
     """Stroke the paths into one outline; k squeezes horizontally, centre is the x of the middle of the glyph,
@@ -40,10 +55,10 @@ def outline(defs, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None):
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     matrix = (kx, 0, 0, -SY * grow * v, centre - 49.27 * kx, f)
-    for d in defs:
+    for d in (brushed(defs) if BRUSH else defs):
         p = pathops.Path()
         parse_path(d, TransformPen(p.getPen(), matrix))
-        p.stroke(width, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
+        if not BRUSH: p.stroke(width, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
         p.convertConicsToQuads(0.1)
         p.draw(out.getPen())
     out.simplify(fix_winding=True)
@@ -100,7 +115,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': 'QATT Prototype', 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': 'QATT Brush' if BRUSH else 'QATT Prototype', 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
