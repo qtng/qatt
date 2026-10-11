@@ -11,10 +11,33 @@
     
     <style>
         :root {
+            --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --frame: #8a7660;
             /* Default to third-smallest step (out of 0.5 to 2.5 with step 0.25 -> 1.0) */
             --sprite-w: 60px;
             --sprite-h: 82.5px;
         }
+
+        body {
+            background: linear-gradient(180deg, var(--paper) 0, #fffdf8 18rem) no-repeat, #fffdf8;
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        .page-head { text-align: center; padding: 1.6rem 1rem .4rem; }
+        .page-head .han { color: var(--cinnabar); letter-spacing: .5em; padding-left: .5em; font-size: 1.05rem; }
+        .page-head h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(1.8rem, 6vw, 2.6rem); margin: .2rem 0 .3rem; }
+        .page-head p { color: #5b4d3d; max-width: 36rem; margin: 0 auto; }
+
+        .controls {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem 1rem;
+            margin: 1.1rem auto 1rem; padding: .5rem 1rem; width: fit-content; max-width: calc(100% - 1.5rem);
+            background: rgba(255, 255, 255, .75); border: 1px solid var(--line); border-radius: 2rem;
+        }
+        .controls label { color: #5b4d3d; font-size: .9rem; margin: 0; }
+        .controls .form-select { border-radius: 2rem; border-color: #cdbf9f; background-color: #fff; }
+        .controls .form-range { width: 100px; accent-color: var(--cinnabar); }
+        .btn-pill { border-radius: 2rem; padding: .25rem 1rem; border-color: #b9a982; color: var(--ink); background: #fff; }
+        .btn-pill:hover, .btn-pill:focus-visible, .btn-pill.active { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
 
         .main-grid {
             display: grid;
@@ -24,7 +47,8 @@
             column-gap: 0;
             row-gap: 0;
             overscroll-behavior-x: contain; /* Prevents mobile back-swipe gestures */
-            border: 2px solid #6c757d; /* Dark border framing the table */
+            border: 2px solid var(--frame); /* border framing the table */
+            border-left: none; border-right: none;
         }
         
         /* The invisible 1em spacer for the scroll bounce trick */
@@ -44,14 +68,14 @@
         /* Group 1, Group 2, and then every pair (even) gets the right border */
         .col-wrapper:nth-child(1),
         .col-wrapper:nth-child(even) {
-            border-right: 2px solid #6c757d;
+            border-right: 2px solid var(--frame);
         }
 
         /* Group styles in Pivot-Mode (border-right becomes border-bottom) */
         .main-grid.pivot-mode .col-wrapper:nth-child(1),
         .main-grid.pivot-mode .col-wrapper:nth-child(even) {
             border-right: none;
-            border-bottom: 2px solid #6c757d;
+            border-bottom: 2px solid var(--frame);
         }
 
         .sprite-card {
@@ -90,7 +114,7 @@
             font-size: 0.84rem;
             font-style: italic;
             padding: 0 2px;
-            border-bottom: 1px solid #777;
+            border-bottom: 1px solid #b9a982;
         }
         
         /* Pivot mode settings via subgrid */
@@ -136,12 +160,30 @@
             padding-right: 2px;
         }
 
+        .notes {
+            max-width: 56rem; margin: 2rem auto 3rem; padding: 0 1.25rem;
+            color: #3b3128; font-size: .95rem; line-height: 1.6;
+        }
+        .notes h4 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.35rem; margin: 1.3rem 0 .6rem; color: var(--ink); }
+        .notes p { margin-bottom: .8rem; }
+        .notes b { color: var(--ink); }
+        .notes em { color: #7b6c58; }
+        .notes .badge { background: var(--ink) !important; border-radius: 2rem; font-weight: 500; padding: .35em .7em; }
+
         .legend-item {
             display: flex;
             align-items: center;
             font-size: 0.85rem;
             color: #495057;
             font-weight: 500;
+        }
+
+        /* phones: the legend is scaled down a little (the container gets the width back that scaling takes away) */
+        @media (max-width: 575.98px) {
+            #legend-container { transform: scale(.9); transform-origin: top center; width: 111.2%; margin-inline: -5.6%; margin-bottom: 0 !important; }
+        }
+        @media (max-width: 389.98px) {
+            #legend-container { transform: scale(.8); width: 125%; margin-inline: -12.5%; }
         }
 
         .legend-color {
@@ -153,25 +195,30 @@
         }
     </style>
 </head>
-<body class="bg-white">
+<body>
 
     <div class="container-fluid p-0">
-        <h1 class="h2 mt-3 text-center">Quốc Âm Tân Tự</h1>
-        
-        <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 pt-3 px-3 mb-4">
-            Choose decoding: <select id="table-select" class="form-select w-auto shadow-sm">
+        <header class="page-head">
+            <div class="han">國音新字</div>
+            <h1>Decodings</h1>
+            <p>How the rhyme table of Quốc Âm Tân Tự can be read. Pick a reading and compare.</p>
+        </header>
+
+        <div class="controls">
+            <label for="table-select">Decoding</label>
+            <select id="table-select" class="form-select w-auto">
                 <!--<option value="qoex2">qatt.org standard 2</option>-->
                 <option value="omniglot">omniglot.com</option>
                 <option value="qode" selected>qatt.org</option>
                 <!--<option value="qoex">qatt.org standard</option>-->
             </select>
 
-            <div class="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded border shadow-sm">
-                <label for="size-slider" class="text-muted small mb-0 fw-bold">Size:</label>
-                <input type="range" id="size-slider" class="form-range" min="0.5" max="2.5" step="0.25" value="1" style="width: 100px;">
+            <div class="d-flex align-items-center gap-2">
+                <label for="size-slider">Size</label>
+                <input type="range" id="size-slider" class="form-range" min="0.5" max="2.5" step="0.25" value="1">
             </div>
-            
-            <button id="btn-pivot" class="btn btn-outline-secondary shadow-sm">Pivot</button>
+
+            <button id="btn-pivot" class="btn btn-pill">Pivot</button>
         </div>
 
         <!-- Dynamic Legend Container -->
@@ -179,7 +226,7 @@
         
         <div class="main-grid overflow-auto" id="main-row"></div>
 
-        <div class="alert alert-info small">
+        <div class="notes">
             <p>Please note that the shown decodings can only be approximations.
             Quốc Âm Tân Tự is not
             fully decipherable because the original rhyme table
@@ -603,6 +650,7 @@
 
         btnPivot.addEventListener('click', () => {
             row.classList.toggle('pivot-mode');
+            btnPivot.classList.toggle('active', row.classList.contains('pivot-mode'));
             
             // Adjust scroll position slightly when pivoting to keep things visible
             setTimeout(() => {
