@@ -14,12 +14,13 @@
     h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
     p { margin: .3rem 0 .8rem; color: var(--muted); }
     a { color: var(--accent); }
-    .bar { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; align-items: center; margin: 1rem 0; font-size: .9rem; }
+    .sticky-card { position: sticky; top: 68px; z-index: 5; margin: 1rem 0 .4rem; padding: .5rem .7rem .55rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+    .bar { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center; margin: 0 0 .5rem; font-size: .85rem; }
     .bar label { display: flex; align-items: center; gap: .5rem; }
-    .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .4rem .6rem; min-height: 4.5rem;
+    .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; min-height: 3.4rem;
       font-family: "QATT Prototype"; font-size: 3rem; line-height: 1.3; word-break: break-all; color: var(--ink); }
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
-    .downloads { display: flex; justify-content: center; gap: .5rem; margin-top: .5rem; }
+    .downloads { display: flex; justify-content: center; gap: .5rem; margin-top: .45rem; }
     .downloads .btn { font-size: .75rem; padding: .1rem .6rem; }
     .sample:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
@@ -33,7 +34,7 @@
     .hide-svg .s { display: none; }
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
     h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
-    #info { margin-top: .5rem; font-size: .9rem; color: var(--muted); min-height: 1.4rem; }
+    #info { margin-top: .3rem; font-size: .8rem; color: var(--muted); min-height: 1.2rem; text-align: center; }
   </style>
   <script defer src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
@@ -45,6 +46,7 @@
      Click a character to add it to the sample field.</p>
   <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
 
+  <div class="sticky-card">
   <div class="bar">
     <label>Size <input type="range" id="size" min="20" max="140" value="34"></label>
     <label><input type="checkbox" id="svg"> show qatt.js drawing</label>
@@ -59,6 +61,7 @@
     <a class="btn btn-outline-secondary" href="font/qatt-prototype.woff2" download title="For websites">Download WOFF2</a>
   </div>
   <div id="info"></div>
+  </div>
   <h2 class="sub">Format characters and tone marks</h2>
   <div class="grid" id="grid-marks"></div>
   <h2 class="sub">Letters</h2>
