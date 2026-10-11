@@ -40,8 +40,6 @@
     .g-unmarked { --g-bg: var(--g-unmarked); } .g-marked { --g-bg: var(--g-marked); } .g-chi { --g-bg: var(--g-chi); }
     .g-combiner { --g-bg: var(--g-combiner); } .g-joiner { --g-bg: var(--g-joiner); } .g-tone { --g-bg: var(--g-tone); }
     .dim { opacity: .22; }
-    .font-glyph { font-family: 'QATT preview', 'QATT preview fallback', sans-serif; font-size: 1.75rem; line-height: 1; }
-    .has-font .placeholder-only { display: none; }
     .chip { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--g-border); border-radius: 2rem; padding: .15rem .65rem .15rem .4rem;
             background: transparent; color: inherit; font-size: .85rem; cursor: pointer; }
     .chip .sw { width: 1rem; height: 1rem; border-radius: .25rem; background: var(--g-bg); border: 1px solid var(--g-border); }
@@ -55,7 +53,6 @@
     }
     .detail-glyph { flex: none; width: 6.2rem; height: 6.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--g-border);
                     border-radius: .5rem; background: var(--g-bg, var(--bs-tertiary-bg)); }
-    .detail-glyph .font-glyph { font-size: 3.6rem; }
     .detail-glyph .tok { font-size: 1.2rem; } .detail-glyph .sub { font-size: .95rem; } .detail-glyph .fmt { font-size: 1.1rem; padding: .1rem .5rem; }
     .names td, .names th { vertical-align: top; }
     .names .mini { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: .3rem; background: var(--g-bg); border: 1px solid var(--g-border); flex-direction: column; line-height: 1.05; }
@@ -63,7 +60,6 @@
     .cell.g-tone .qglyph { font-size: 1.45rem; margin-bottom: .55rem; } /* a tone mark sits in a corner of the glyph box: keep it clear of the code number */
     .names .qglyph { font-size: 1.7rem; }
     .detail-glyph .qglyph { font-size: 3.8rem; }
-    .names .mini .font-glyph { font-size: 1.4rem; }
     /* a tone mark sits in a corner of its glyph box: drawn smaller so that the mark stays inside the swatch */
     .names .mini.g-tone .qglyph { font-size: 1.35rem; }
     .sw-tone { display: flex; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; background: var(--g-bg); border: 1px solid var(--g-border); border-radius: .3rem; }
@@ -98,7 +94,7 @@
   <div class="row g-4">
     <div class="col-12 col-xl-9">
       <div class="table-responsive pb-1"><table class="chart" id="chart" aria-labelledby="chart-title"></table></div>
-      <p class="small text-secondary mt-2 mb-0">Rows are sixteen code points each. Select a cell for the details. The QATT glyphs are drawn by <code>qatt.js</code> (provisional until a font exists); dashed = format characters, circles = tone marks.</p>
+      <p class="small text-secondary mt-2 mb-0">Rows are sixteen code points each. Select a cell for the details. The QATT glyphs are drawn by <code>qatt.js</code> (see also the <a href="font.html">reference font</a>); dashed = format characters, circles = tone marks.</p>
     </div>
     <div class="col-12 col-xl-3">
       <div class="card" id="detail" aria-live="polite"></div>
@@ -106,19 +102,7 @@
     </div>
   </div>
 
-  <details class="mt-4" id="font-preview">
-    <summary class="fw-semibold">Preview a font</summary>
-    <div class="mt-2 p-3 border rounded">
-      <p class="small text-secondary">Load a font file to see its glyphs in the chart (the file is read in your browser and not uploaded). Fonts for the script use their own code points, so set the base to the code point of the first character of the block in that font.</p>
-      <div class="row g-2 align-items-end">
-        <div class="col-12 col-md-6"><label class="form-label small mb-1" for="font-file">Font file (.ttf, .otf, .woff, .woff2)</label><input class="form-control form-control-sm" type="file" id="font-file" accept=".ttf,.otf,.woff,.woff2"></div>
-        <div class="col-6 col-md-3"><label class="form-label small mb-1" for="font-base">Base (hex)</label><div class="input-group input-group-sm"><span class="input-group-text">U+</span><input class="form-control cp" id="font-base" value="F0000" maxlength="6" inputmode="text" autocomplete="off"></div></div>
-        <div class="col-6 col-md-3"><button class="btn btn-sm btn-outline-secondary w-100" type="button" id="font-clear" disabled>Remove font</button></div>
-      </div>
-      <div class="small mt-2" id="font-status" role="status"></div>
-      <div class="small text-secondary mt-1">A font can also be linked: <span class="cp">unicode.html?font=URL&amp;base=F0000</span></div>
-    </div>
-  </details>
+  <p class="mt-4">The <a href="font.html">QATT reference font</a> shows all characters in a font built for this proposal.</p>
 
   <h2 id="list-title">List of code points</h2>
   <p>One row per code point with the full name from the draft names list: <code>QUOC AM TAN TU &lt;NAME&gt; UNMARKED</code> or <code>MARKED-1</code> to <code>MARKED-6</code> (the position of the marking stroke); in the names <b>DD</b> stands for đ and <b>DZ</b> for d. The code points are provisional (base <span class="cp" id="l-base"></span>).</p>
@@ -157,8 +141,7 @@
   const D = JSON.parse(document.getElementById('qatt-data').textContent);
   const chars = D.chars, SIZE = D.source.size, COLS = 16;
   let base = D.source.base;                       // code point of offset 0 (provisional)
-  let fontBase = base;                            // code point of offset 0 in the previewed font
-  let hasFont = false, selected = null, activeGroup = null;
+  let selected = null, activeGroup = null;
 
   const $ = (s, r = document) => r.querySelector(s);
   const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
@@ -195,8 +178,7 @@
     const t = typeOf(o); if (t === 'reserved') return [];
     const c = chars[o];
     const nodes = [];
-    if (hasFont) nodes.push(el('span', { className: 'font-glyph', textContent: String.fromCodePoint(fontBase + o) }));
-    else if (t === 'tone') nodes.push(el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
+    if (t === 'tone') nodes.push(el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
     else if (t === 'combiner') nodes.push(el('span', { className: 'fmt', textContent: 'TT' }));
     else if (t === 'joiner') nodes.push(el('span', { className: 'fmt', textContent: 'J' }));
     else nodes.push(el('tt', { className: 'qglyph', textContent: qattCode(c) }));
@@ -379,37 +361,11 @@
     t.append(body);
   }
 
-  // ---------- font preview ----------
-  const status = (msg, ok) => { const s = $('#font-status'); s.textContent = msg; s.className = 'small mt-2 ' + (ok === false ? 'text-danger' : ok ? 'text-success' : ''); };
-  async function useFont(face, label) {
-    const f = await face.load(); document.fonts.add(f);
-    hasFont = true; document.body.classList.add('has-font'); $('#font-clear').disabled = false;
-    status(`Font “${label}” loaded. Showing the glyphs at U+${hex(fontBase, 5)} + offset.`, true);
-    refresh();
-  }
-  function setBase() {
-    const v = parseInt($('#font-base').value.trim().replace(/^U\+/i, ''), 16);
-    if (Number.isNaN(v) || v < 0 || v + SIZE > 0x110000) { status('Base: please enter a hexadecimal code point, e.g. F0000.', false); return false; }
-    fontBase = v; return true;
-  }
-  $('#font-base').addEventListener('change', () => { if (setBase() && hasFont) { status(`Showing the glyphs at U+${hex(fontBase, 5)} + offset.`, true); refresh(); } });
-  $('#font-file').addEventListener('change', async e => {
-    const file = e.target.files[0]; if (!file || !setBase()) return;
-    try { await useFont(new FontFace('QATT preview', await file.arrayBuffer()), file.name); } catch { status('This file could not be loaded as a font.', false); }
-  });
-  $('#font-clear').addEventListener('click', () => {
-    [...document.fonts].filter(f => f.family.replace(/"/g, '') === 'QATT preview').forEach(f => document.fonts.delete(f));
-    hasFont = false; document.body.classList.remove('has-font'); $('#font-clear').disabled = true; $('#font-file').value = ''; status('Font removed.'); refresh();
-  });
-
   function refresh() { buildChart(); renderDetail(); renderList(); }
 
   // ---------- start ----------
   $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#s-commit').textContent = D.source.commit; $('#l-base').textContent = 'U+' + hex(base, 5);
   buildLegend(); buildOverview(); buildCan(); buildTones(); buildProps(); refresh();
-  const P = new URLSearchParams(location.search);
-  if (P.get('base')) { $('#font-base').value = P.get('base'); }
-  if (P.get('font') && setBase()) { $('#font-preview').open = true; useFont(new FontFace('QATT preview', `url(${JSON.stringify(P.get('font'))})`), P.get('font')).catch(() => status('The font could not be loaded.', false)); }
   const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true, false); };
   addEventListener('hashchange', fromHash); fromHash();
 })();

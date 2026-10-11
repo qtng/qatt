@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Build a monospace web font from the QATT stroke glyphs (glyphs.json from extract.js)."""
+"""Build a monospace web font from the QATT stroke glyphs (font/glyphs.json, made from the rendered qatt.js glyphs by extract_glyphs.js).
+The two format characters (combiner, joiner) only get a small square as placeholder."""
 import json, sys
 import pathops
 from fontTools.svgLib.path import parse_path
@@ -13,7 +14,7 @@ BASE = 0xF0000
 UPM = 1000
 SY = 12.6                      # font units per svg unit (vertical): a typical glyph is about as tall as a capital letter
 SX = SY * (13 / 15) / (120 / 125)  # the page stretches the 120x125 viewBox to 13:15
-X0, Y0 = 500 - 50.75 * SX, 983  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
+X0, Y0 = 500 - 49.27 * SX, 958  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
 STROKE, STROKE_TONE = 72, 54   # font units
 ADV = 1000
 
@@ -35,9 +36,13 @@ glyphs['.notdef'] = TTGlyphPen(None).glyph()
 for g in data:
     o, defs = g['o'], g['d']
     tone = g['t'] == 'tone'
-    path = outline(defs, STROKE_TONE if tone else STROKE)
     pen = TTGlyphPen(None)
-    path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+    if g['t'] in ('combiner', 'joiner'):   # format characters: a small centred square as placeholder
+        x0, y0, x1, y1 = 400, 240, 600, 440
+        pen.moveTo((x0, y0)); pen.lineTo((x0, y1)); pen.lineTo((x1, y1)); pen.lineTo((x1, y0)); pen.closePath()
+    else:
+        path = outline(defs, STROKE_TONE if tone else STROKE)
+        path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
     name = 'u%05X' % (BASE + o)
     glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
 
