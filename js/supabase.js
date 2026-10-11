@@ -8,6 +8,13 @@ await s.saveScore(username, score, sunflowers);
 await s.getLeaderboard(topLimit = 20, neighborBuffer = 5);
 await s.setNickname(name);
 await s.signInWithGoogle();
+await s.signInWithEmail(email);   // sends a link
+await s.signOut();
+s.isAnonymous                     // true until the user has signed in (see js/login.js for the dialog)
+
+Everybody starts as an anonymous user (their decks and score belong to it). Signing in with Google or an email
+link turns this user into a permanent one with the same id, so nothing is lost. If the account exists already
+(another device), the user signs in to it instead; the anonymous data of this browser then stays behind.
 */
 class SupabaseService {
   
@@ -39,6 +46,9 @@ class SupabaseService {
     } else {
       await this._authenticate();
     }
+    this.client.auth.onAuthStateChange((event, session) => {
+      if (session && session.user) this.user = session.user;
+    });
     return this.user;
   }
   
@@ -156,18 +166,52 @@ class SupabaseService {
     return data;
   }
 
+  get isAnonymous() {
+    return !!this.user && this.user.is_anonymous !== false;
+  }
+
+  // the page the user returns to after the login (the link in the email, the way back from Google)
+  _returnUrl() {
+    return window.location.origin + window.location.pathname + window.location.search;
+  }
+
   async signInWithGoogle() {
-    const {
-      data,
-      error
-    } = await this.client.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        // Where to redirect after successful login
-        redirectTo: window.location.origin
+    if (!this.client) return { error: new Error('Supabase is not available') };
+    const redirectTo = this._returnUrl();
+    if (this.isAnonymous) {
+      // keeps the user id, so the decks and the score stay with the account
+      const { error } = await this.client.auth.linkIdentity({ provider: 'google', options: { redirectTo } });
+      if (!error) return {};
+      if (error.code !== 'identity_already_exists') {
+        console.error("Login error:", error.message);
+        return { error };
       }
-    });
+      // this Google account belongs to another user already: sign in to it
+    }
+    const { error } = await this.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
     if (error) console.error("Login error:", error.message);
+    return error ? { error } : {};
+  }
+
+  // Sends a link by email. An anonymous user gets the email address (and keeps the id once the link is opened);
+  // an address that exists already gets a link to sign in.
+  async signInWithEmail(email) {
+    if (!this.client) return { error: new Error('Supabase is not available') };
+    email = (email || '').trim();
+    const redirectTo = this._returnUrl();
+    if (this.isAnonymous) {
+      const { error } = await this.client.auth.updateUser({ email }, { emailRedirectTo: redirectTo });
+      if (!error) return { sent: true };
+      if (error.code !== 'email_exists') return { error };
+    }
+    const { error } = await this.client.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+    return error ? { error } : { sent: true };
+  }
+
+  async signOut() {
+    if (!this.client) return;
+    await this.client.auth.signOut();
+    this.user = null;
   }
 
 // --- Deck Methods ---
