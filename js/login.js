@@ -23,7 +23,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 .qatt-login button:disabled { opacity: .6; cursor: default }
 .qatt-login .or { display: flex; align-items: center; gap: .7rem; margin: .9rem 0; color: #a8977e; font-size: .78rem; text-transform: uppercase; letter-spacing: .15em }
 .qatt-login .or::before, .qatt-login .or::after { content: ""; flex: 1; border-top: 1px solid #e4d9c0 }
-.qatt-login input[type=email], .qatt-login input[type=text] { display: block; width: 100%; box-sizing: border-box; border: 1px solid #cdbf9f; border-radius: .7rem; padding: .5rem .8rem; margin-bottom: .6rem; font-size: 1rem; background: #fff; color: #2b2118 }
+.qatt-login input[type=email], .qatt-login input[type=text] { display: block; width: 100%; box-sizing: border-box; border: 1px solid #cdbf9f; border-radius: .7rem; padding: .5rem .8rem; margin-bottom: .6rem; font-size: 1rem; font-family: inherit; background: #fff; color: #2b2118 }
 .qatt-login input[type=email]:focus, .qatt-login input[type=text]:focus { outline: 0; border-color: #a8362a; box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .15) }
 .qatt-login .note { margin: .8rem 0 0; font-size: .85rem; color: #5b4d3d }
 .qatt-login .note.error { color: #a8362a }
@@ -99,12 +99,11 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 			let chosen = null;
 			const dialog = el('dialog', { className: 'qatt-login' });
 			const note = el('p', { className: 'note', hidden: true });
-			const input = el('input', { type: 'text', value: current || db.suggestedName(), maxLength: 40, autocomplete: 'nickname', required: true });
+			const input = el('input', { type: 'text', value: current || db.suggestedName(), autocomplete: 'nickname', required: true });
 			input.setAttribute('aria-label', 'Name');
 			const save = el('button', { type: 'submit', className: 'main', textContent: 'Save' });
 			const form = el('form', { method: 'dialog' },
-				el('h2', { textContent: required ? 'Your name' : 'Change your name' }),
-				el('p', { textContent: 'This name appears in the leaderboard, so you do not have to use your real name. Letters, digits, - and _, 2 to 40 characters; every name exists once.' }),
+				el('h2', { textContent: required ? 'What should we call you?' : 'Your name' }),
 				input, save, note);
 			dialog.append(form);
 			if (!required) {

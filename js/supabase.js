@@ -105,18 +105,20 @@ class SupabaseService {
   
   // --- display name in the leaderboard (profiles.username, unique ignoring case: see the index profiles_username_lower_key) ---
 
-  // letters, digits, hyphen, underscore and single spaces, 2 to 40 characters
+  // Letters of every script (also Han: Chinese, Nôm, Japanese, Korean), digits, hyphen, underscore and single spaces,
+  // up to 40 characters (counted by character, not by UTF-16 unit, so rare Han characters are not cut in the middle).
   static cleanName(name) {
-    return String(name || '')
+    return Array.from(String(name || '')
       .replace(/[^\p{L}\p{N}\-_\s]/ug, '')
       .replace(/\s+/g, ' ')
-      .trim()
+      .trim())
       .slice(0, 40)
+      .join('')
       .trim();
   }
 
   static nameError(name) {
-    if (name.length < 2) return 'The name needs at least 2 characters (letters, digits, - and _).';
+    if (!name) return 'Please enter a name (letters or digits).';
     if (name.toLowerCase() == 'anonymous') return 'Please choose another name.';
     return null;
   }
