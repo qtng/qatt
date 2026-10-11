@@ -559,9 +559,10 @@ class Qatt {
   _renderSvg(root, initial, vowel, final, tone, isCoda) {
     const svg = document.createElementNS(this.svgns, "svg");
     const rhymeAlone = !initial && !!vowel && !isCoda && !(tone > 0) && !final; // nothing but the rhyme
+    const toneAlone = !initial && !vowel && !final && !isCoda && tone > 0 && tone <= 8; // nothing but a tone mark, e.g. ",,,5"
     let g;
 
-    if (initial || vowel) {
+    if (initial || vowel || toneAlone) {
       g = document.createElementNS(this.svgns, "g");
       this._useG(g, "square");
       svg.appendChild(g);

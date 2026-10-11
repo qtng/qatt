@@ -60,6 +60,7 @@
     .names td, .names th { vertical-align: top; }
     .names .mini { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: .3rem; background: var(--g-bg); border: 1px solid var(--g-border); flex-direction: column; line-height: 1.05; }
     .qglyph { font-size: 2rem; line-height: 1; color: inherit; }
+    .cell.g-tone .qglyph { font-size: 1.45rem; margin-bottom: .55rem; } /* a tone mark sits in a corner of the glyph box: keep it clear of the code number */
     .names .qglyph { font-size: 1.7rem; }
     .detail-glyph .qglyph { font-size: 3.8rem; }
     .names .mini .font-glyph { font-size: 1.4rem; }
@@ -67,10 +68,6 @@
     .names thead th { background: var(--bs-secondary-bg); white-space: nowrap; }
     .names tr.sect th { background: var(--bs-tertiary-bg); font-weight: 600; font-size: .95rem; }
     .note-x { color: var(--bs-secondary-color); }
-    svg.tonemark { width: 100%; height: 100%; max-width: 2.2rem; }
-    .detail-glyph svg.tonemark { max-width: 5.5rem; }
-    .tonemark rect { fill: none; stroke: currentColor; stroke-opacity: .3; stroke-dasharray: 2 2; }
-    .tonemark .m { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
     code.name { white-space: normal; word-break: break-word; }
     @media (max-width: 575.98px) { h2 { font-size: 1.25rem; } }
   </style>
@@ -178,21 +175,11 @@
   const typeOf = o => o < chars.length ? chars[o].t : 'reserved';
 
   // ---------- glyph / placeholder ----------
-  function toneSvg(name) {
-    const corner = ['LOWER LEFT', 'UPPER LEFT', 'UPPER RIGHT', 'LOWER RIGHT'].find(c => name.includes(c));
-    const sx = corner.includes('LEFT') ? -1 : 1, sy = corner.includes('UPPER') ? -1 : 1;
-    const cx = 50 + sx * 27, cy = 50 + sy * 27, r = 14, a = Math.atan2(sy, sx);           // direction from the centre to the corner
-    const p = t => `${(cx + r * Math.cos(t)).toFixed(1)} ${(cy + r * Math.sin(t)).toFixed(1)}`;
-    const NS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('class', 'tonemark'); svg.setAttribute('aria-hidden', 'true');
-    const box = document.createElementNS(NS, 'rect'); box.setAttribute('x', 4); box.setAttribute('y', 4); box.setAttribute('width', 92); box.setAttribute('height', 92); svg.append(box);
-    const m = document.createElementNS(NS, 'path'); m.setAttribute('class', 'm');
-    if (name.includes('SEMICIRCLE')) m.setAttribute('d', `M ${p(a - Math.PI / 2)} A ${r} ${r} 0 0 1 ${p(a + Math.PI / 2)}`);   // open side towards the centre
-    else m.setAttribute('d', `M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`);
-    svg.append(m);
-    return svg;
-  }
   const tokOf = c => c.n.split(' ')[0];
+  // tone marks as qatt.js draws them on their own: ",,,<n>" (1 semicircle upper right, 2 circle lower left, 3 semicircle upper left, 4 circle upper left,
+  // 5 circle upper right, 6 semicircle lower right, 7 circle lower right, 8 semicircle lower left)
+  const TONE_DIGIT = { 'SEMICIRCLE UPPER RIGHT': 1, 'CIRCLE LOWER LEFT': 2, 'SEMICIRCLE UPPER LEFT': 3, 'CIRCLE UPPER LEFT': 4, 'CIRCLE UPPER RIGHT': 5, 'SEMICIRCLE LOWER RIGHT': 6, 'CIRCLE LOWER RIGHT': 7, 'SEMICIRCLE LOWER LEFT': 8 };
+  const toneCode = name => ',,,' + TONE_DIGIT[name.replace(/^TONE /, '')];
 
   // QATT glyphs are drawn by qatt.js from a <tt> element: ",<onset>" is the unmarked Cán, ",<onset><n>" the one with marking stroke n
   const qatt = new Qatt(); qatt.observe('TT');
@@ -205,7 +192,7 @@
     const c = chars[o];
     const nodes = [];
     if (hasFont) nodes.push(el('span', { className: 'font-glyph', textContent: String.fromCodePoint(fontBase + o) }));
-    else if (t === 'tone') nodes.push(toneSvg(c.n));
+    else if (t === 'tone') nodes.push(el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
     else if (t === 'combiner') nodes.push(el('span', { className: 'fmt', textContent: 'TT' }));
     else if (t === 'joiner') nodes.push(el('span', { className: 'fmt', textContent: 'J' }));
     else nodes.push(el('tt', { className: 'qglyph', textContent: qattCode(c) }));
@@ -334,7 +321,7 @@
     const body = el('tbody');
     chars.filter(c => c.t === 'tone').forEach(c => {
       const tone = c.notes.find(n => n[0] === '=')[1], rel = c.notes.filter(n => n[0] === 'x').map(n => n[1].replace(/^\(/, '').replace(/\)$/, '').replace(/ - ([0-9A-F]{4})$/, ' – U+$1'));
-      const sw = el('div', { className: 'g-tone', style: 'width:2.6rem;height:2.6rem;background:var(--g-bg);border:1px solid var(--g-border);border-radius:.3rem;padding:.15rem' }, toneSvg(c.n));
+      const sw = el('div', { className: 'g-tone', style: 'width:2.6rem;height:2.6rem;background:var(--g-bg);border:1px solid var(--g-border);border-radius:.3rem;padding:.15rem' }, el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
       const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, true); $('#chart').scrollIntoView({ block: 'center' }); };
       body.append(el('tr', {}, el('td', {}, sw), el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })), el('td', {}, el('code', { className: 'name', textContent: c.n })), el('td', { textContent: tone }),
         el('td', { className: 'small' }, ...rel.map(r => el('div', { textContent: r })))));
