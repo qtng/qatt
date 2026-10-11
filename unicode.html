@@ -14,6 +14,11 @@
       --g-unmarked: #d9e8ff; --g-marked: #d7f0d6; --g-chi: #fff1bf; --g-combiner: #ffdcc0; --g-joiner: #ffdcc0; --g-tone: #e9d9ff;
       --g-reserved: #eceff1; --g-border: #b8c1c9;
     }
+    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .btn-cinnabar { background: #a8362a; border-color: #a8362a; color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    .btn-ink { border-color: #8a7660; color: #2b2118; }
+    .btn-ink:hover { background: #2b2118; border-color: #2b2118; color: #fff; }
     h2 { margin-top: 2.2rem; font-size: 1.45rem; border-bottom: 1px solid var(--g-border); padding-bottom: .25rem; }
     h3 { font-size: 1.1rem; }
     .tt { font-variant-numeric: tabular-nums; }
@@ -78,6 +83,10 @@
   <header>
     <h1 class="h2 border-0 mb-1" style="margin-top:0">Quốc Âm Tân Tự <span class="text-secondary fw-normal">– Unicode block</span></h1>
     <p class="lead mb-2">The proposed block for Quốc Âm Tân Tự (QATT), a script found in Hán Nôm texts: <span id="s-total"></span> characters in a block of <span id="s-size"></span> code points.</p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <a class="btn btn-cinnabar btn-pill" href="font.html">Reference font</a>
+      <a class="btn btn-ink btn-pill" href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">Proposal</a>
+    </div>
     <div class="alert alert-warning small mb-2" role="note">
       <strong>Draft – not part of the Unicode Standard.</strong>
       This page shows the block of the <a href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">QATT Unicode Proposal – Draft</a>.
