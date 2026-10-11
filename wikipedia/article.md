@@ -22,7 +22,7 @@ It is notable as one of the few phonetic scripts created by Vietnamese themselve
 
 ## Manuscripts
 
-Two handwritten manuscripts of Quốc Âm Tân Tự are preserved at the Institute for the Study of Hán-Nôm in Hanoi under the archive signature AB.630. Both consist of four double pages, numbered as eight pages, and contain the same text with the same page numbering; the second corrects unclear characters and scribal errors of the first. Whether it was copied from the first or both from an earlier original cannot be determined. The manuscripts are filed under tiểu học (小學, philology and elementary education), reflecting the pedagogical intent of the work [?S2]. They are catalogued as nôm văn thư (喃文書, Nôm documents) on account of their subject matter [?S2].
+Two handwritten manuscripts of Quốc Âm Tân Tự are preserved at the Institute for the Study of Hán-Nôm in Hanoi under the archive signature AB.630. Both consist of four double pages, numbered as eight pages, and contain the same text with the same page numbering. Whether one was copied from the other or both from an earlier original cannot be determined. The manuscripts are filed under tiểu học (小學, philology and elementary education), reflecting the pedagogical intent of the work [?S2]. They are catalogued as nôm văn thư (喃文書, Nôm documents) on account of their subject matter [?S2].
 
 The author identifies himself only as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành.
 
@@ -67,45 +67,29 @@ The manuscript lists the 22 Cán in the section 幹音二十二字 ("the twenty-
 - **Two verticals with slanted crossbar** (2 symbols): Two evenly spaced vertical lines crossed in the middle by one slightly slanted line that extends beyond both verticals, rising from left to right (thông) or falling from left to right (nhông).
 - **One vertical with two slanted parallels** (2 symbols): One central vertical line crossed by two evenly spaced, parallel, slightly slanted lines, rising from left to right (chông) or falling from left to right (dông).
 
-### Derived forms
+### Forms of each base
 
-The marking stroke always sits at the end of one of the three strokes. Since each stroke has two ends, there are six possible positions. In each Cán the marking stroke occupies the start position, upper left or upper middle depending on the shape. Moving it counter-clockwise from one stroke end to the next yields, in order, the five Chi (枝) of the base. Omitting the marking stroke yields the abbreviated Cán, the reduced form of the base. The manuscript has no name of its own for this form: it calls both the full and the abbreviated form simply Cán (幹). [MS p. 8] Each base therefore has seven forms: one Cán, five Chi and one abbreviated Cán.
-
-The position of the marking stroke determines the function of the form:
-
-- **Start position** — the Cán, representing the full syllable of its onset with the -ông rhyme
-- **Any of the five other positions** — a Chi, representing a rhyme
-- **No marking stroke** — the abbreviated Cán, representing the onset consonant of its base
-
-This simple and consistent rule generates the entire inventory from the 22 base components, yielding three classes of forms with three distinct functions: 22 Cán (full -ông syllables), 110 Chi (rhymes) and 22 abbreviated Cán (onset consonants).
+The marking stroke always sits at the end of one of the three strokes. Since each stroke has two ends, there are six possible positions. In the form shown in the list of the 22 Cán, the marking stroke occupies the start position, upper left or upper middle depending on the shape [MS p. 2]; this form is referred to here as the marked Cán. Moving the marking stroke counter-clockwise from one stroke end to the next yields, in order, the five Chi (枝) of the base. Without a marking stroke, the base appears as the unmarked Cán. The manuscript has no separate name for this form: it calls both the marked and the unmarked form simply Cán (幹). [MS p. 8] Each base therefore has seven forms — the marked Cán, five Chi and the unmarked Cán — giving 22 marked Cán, 110 Chi and 22 unmarked Cán in total.
 
 ### Cán
 
-Each of the 22 Cán represents a full syllable consisting of the onset consonant of its base combined with the -ông rhyme, and gives the base its name. For example, the Cán whose onset is đ- is named đông, the one whose onset is m- is named mông, and so on. The Cán for the zero onset /ʔ/ is simply named ông.
+In the list 幹音二十二字, each marked Cán is annotated with a chữ Nôm character giving its sound, a syllable with the rhyme -ông, for example 東 (đông) or 蒙 (mông). [MS p. 2] Each base is named after this syllable; the base with the zero onset /ʔ/ is named ông (翁).
 
-Unlike the Chi and abbreviated Cán, which function as components in syllable construction, Cán are used independently — written alone, optionally with a tone mark, to represent their own syllable. They are never combined with other components.
-
-Their primary purpose is as reference characters in the phản thiết (反切) spelling system. This gives the Cán a pedagogical function analogous to the letters of an alphabet [?S8]: they name and isolate individual onset consonants within the syllabic structure of Vietnamese.
+Marked and unmarked Cán both appear standing alone, with the same reading, and both can carry tone marks; the manuscript illustrates the eight tones on the standalone unmarked Cán of đông. [MS p. 5] Only the unmarked Cán is combined with other components; the marked Cán never is. [Q 4.1]
 
 ### Chi
 
-The 110 Chi (枝) are the variants of the 22 Cán in which the marking stroke is moved to one of the five other positions. Each Chi represents a rhyme, and together they form the rhyme table of the script. Each Cán contributes exactly five Chi, in the counter-clockwise order of the marking-stroke position, and in the manuscript the rhyme table is organised in blocks of five — all Chi derived from one base are presented together before moving to the next.
-
-### Abbreviated Cán
-
-The 22 abbreviated Cán are the reduced forms of the Cán, made by omitting the marking stroke. Combined with a Chi, an abbreviated Cán contributes the onset consonant of its base. Standing alone, it has the same reading as its Cán: the manuscript illustrates the eight tones on the standalone abbreviated Cán of đông. [MS p. 5] [Q 4.1]
+The 110 Chi are the forms of the 22 bases in which the marking stroke is moved to one of the five other positions. The manuscript lists them in the section 枝字一百一十字 ("the 110 Chi"), in blocks of five per base; the table shows 109, one having been left out. [MS pp. 3–4] In combination with an unmarked Cán of another base, a Chi contributes the rhyme, so that the Chi form the rhyme table of the script. Their individual readings are not secure: the chữ Nôm annotations are often ambiguous or not found in any dictionary. [Q 4.1]
 
 ### Syllable construction and spelling
 
-A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: an abbreviated Cán, contributing the onset consonant, followed by a Chi of a different base, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. The manuscript describes this method in its section Phản thiết hài âm pháp (反切諧音法). [MS p. 5, col. 6 – p. 6, col. 5] [Q 4.2] For example, if the abbreviated Cán for đ is combined with a Chi representing the rhyme ông, the resulting syllable is đông. [?S9] An abbreviated Cán and a Chi of the same base are not combined in this way, as the pair would add nothing to the Chi; the Chi is written alone instead. [Q 4.2]
+A syllable in Quốc Âm Tân Tự is written by combining two components into a single character occupying one square cell: an unmarked Cán on the left, contributing the onset consonant, and a Chi of a different base on the right, contributing the rhyme. The combination is read according to the phản thiết (反切) method, a phonological technique in which the onset of the first component and the rhyme of the second are combined to produce the intended syllable. The manuscript describes this method in its section Phản thiết hài âm pháp (反切諧音法). [MS p. 5, col. 6 – p. 6, col. 5] [Q 4.2] A worked example combines the unmarked Cán of ông with a Chi of chông into a character read yên (annotated 嚥). [MS p. 7, col. 1] An unmarked Cán and a Chi of the same base are not combined in this way, as the pair would add nothing to the Chi; the Chi is written alone instead. [Q 4.2]
 
 Tone is not encoded in the syllable construction itself but is marked separately by a tone marker placed on the combined character.
 
-The Cán are not used in combination with Chi; they are only used to represent their unchanged inherent pronunciation. Cán serve a very specific role in the phản thiết spelling system. They are used to pronounce the abbreviated Cán.
-
 #### Hợp thư
 
-A second kind of two-component character, the hợp thư (合書), joins a Chi and the abbreviated Cán of the same base, with the Chi written first. The manuscript describes this arrangement as an exchange of positions. The exchange also reverses the functions of the two components: in a hợp thư the Chi contributes the onset and the abbreviated Cán the rhyme. As each Chi has exactly one abbreviated Cán of the same base, there are 110 possible hợp thư; the counting section of the manuscript (音數) likewise gives 110 hợp thư, each in eight tones. [MS p. 6, col. 6 – p. 7, col. 2; p. 8] [Q 4.2]
+A second kind of two-component character, the hợp thư (合書), joins a Chi on the left and the unmarked Cán of the same base on the right, as the heading of its section states: 合書左從枝体右從幹体畧法, "hợp thư: the left follows the Chi, the right follows the Cán". As each Chi has exactly one unmarked Cán of the same base, there are 110 possible hợp thư; the counting section of the manuscript (音數) likewise gives 110 hợp thư, each in eight tones. [MS p. 6, col. 6–8; p. 8] [Q 4.2]
 
 #### Tham thư
 
@@ -162,8 +146,6 @@ Alle Punkte erledigt.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
 - **E01 – Formen.** Beleg: Handschrift S. 2, Liste 幹音二十二字 (im Text als [MS p. 2] eingetragen). Alle 22 Formen und Namen mit dem Scan (Quelle 1) abgeglichen: stimmen mit der Beschreibung überein.
 - **P1 – Preface.** Zusammenfassung nach der Lesung der Proposal-Session; am Original zu prüfen, vor allem 鄙陋不通, 或諧聲或繹義 und der Schlusssatz (abgeleitet aus 一箇簡易之格 / 以便私記). Die Einordnung als Nachahmung von Xu Shens 說文解字敘 bewusst weggelassen (WP:NOR). Spaltenangaben nach eigener Zählung (Titel = Sp. 1).
-- **S8** – „pedagogical function analogous to the letters of an alphabet“: Deutung.
-- **S9** – Beispiel đ + Reim ông = đông: fragwürdig, da -ông im Cán steckt und gleiche Basis laut Repo als Chi allein geschrieben wird (E09). Besser: Beispiel mit anderer Basis und anderem Reim.
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
 - **S11** – „signals a change … from nasal to stop“: Repo sagt nur: sắc/nặng in Silben auf -p, -t, -c. Auch Liste der Auslaute angleichen (-p, -t, -c/-ch).
 - **S12** – Reimtabelle (Medial-Regel, „approximations“, „no recoverable pronunciation“): nicht im Repo; Tabelle der 110 Chi dort noch offen (E29).
@@ -172,7 +154,8 @@ Alle Punkte erledigt.
 
 Stellen mit [Q …] stützen sich auf proposal.md in qtng/qatt-unicode (Abschnittsnummer angegeben). Erst zitieren, wenn das Proposal fertig oder als Draft veröffentlicht ist. Bis dahin: Beleg aus der Handschrift selbst (Seitenangaben), soweit im Evidence-Katalog vorhanden.
 
-- **Q 4.2** – Phản thiết, Abschnitt 反切諧音法, Weglassen des abbreviated Cán bei gleicher Basis, Hợp thư. Evidence-Einträge E05, E07, E08, E09 sind dort noch offen (keine Seitenangabe).
+- **Q 4.1** – Formen je Basis, marked/unmarked Cán, Chi-Tabelle, unsichere Lesungen der Chi (E03, E29, E34, E36).
+- **Q 4.2** – Phản thiết, Abschnitt 反切諧音法, Weglassen des unmarked Cán bei gleicher Basis, Hợp thư. Evidence-Einträge E05, E07, E08, E09 sind dort noch offen (keine Seitenangabe).
 - **Q 4.3** – Tham thư. E10–E13 noch offen.
 - **Spaltenzählung S. 1:** Die Proposal-Session nennt für das Tabuzeichen 華 (in 我國附於中華) Spalte 5. Nach meiner Zählung von rechts (Titel 國音新字序 = Sp. 1) steht es in Sp. 4; beim Kolophon (S. 2, Sp. 5) stimmen beide Zählungen. Bitte am Scan klären.
 
