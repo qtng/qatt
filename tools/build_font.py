@@ -21,7 +21,7 @@ UPM = 1000
 SY = 12.6                      # font units per svg unit (vertical): a typical glyph is about as tall as a capital letter
 SX = SY * (13 / 15) / (120 / 125)  # the page stretches the 120x125 viewBox to 13:15
 X0, Y0 = 500 - 49.27 * SX, 958  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
-STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 72, 54, 72, 38   # font units (glyph, standalone tone, joiner half, combining tone)
+STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
@@ -30,7 +30,8 @@ JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
 STACK_UP_X = 0.88                                  # the upper glyph is a bit narrower than the lower one
-STROKE_UP, STROKE_LOW = 58, 58                    # strokes of the squeezed upper and lower glyph
+STROKE_UP, STROKE_LOW = 46, 46                    # strokes of the squeezed upper and lower glyph
+BRUSH_WEIGHT = 0.8             # the brush font: weight of the brush.html export times this
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
@@ -73,7 +74,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
         ids, u = tuple(ids), SY * grow
         key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
-               round(width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
+               round(BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
         if key not in RESULTS:
             JOBS[key] = {'ids': list(ids), 'm': list(key[1:5]), 'w': key[5]}
             return out
