@@ -73,8 +73,6 @@ svg use[href^="#qt"] { stroke-width: calc(var(--stroke-width) * 3 / 4) }
 .lesson-card { transition: transform 0.2s; cursor: pointer; }
 .lesson-card:hover { transform: translateY(-3px); filter: brightness(1.05); }
 
-.reference-svg-container { display: inline-block; margin-left: 1em; opacity: 0.3; vertical-align: middle; }
-.reference-svg-container svg { height: 1.8em!important; --stroke-width: 8px; }
 
 .status-group { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; flex-grow: 1; margin-left: 10px; overflow-x: auto; scrollbar-width: none; }
 
