@@ -23,7 +23,7 @@ STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 72, 54, 58, 38   # font units (g
 ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
 JOINER = 155                   # offset of the component joiner
-GROW, GROW_Y = 1.10, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
+GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
 
