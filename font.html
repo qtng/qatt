@@ -12,6 +12,7 @@
     document.documentElement.dataset.bsTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   </script>
   <script defer src="js/navigation.js"></script>
+  <script src="js/qatt.js"></script>
   <style>
     :root {
       --g-unmarked: #d9e8ff; --g-marked: #d7f0d6; --g-chi: #fff1bf; --g-combiner: #ffdcc0; --g-joiner: #ffdcc0; --g-tone: #e9d9ff;
@@ -59,6 +60,7 @@
     .detail-glyph .tok { font-size: 1.2rem; } .detail-glyph .sub { font-size: .95rem; } .detail-glyph .fmt { font-size: 1.1rem; padding: .1rem .5rem; }
     .names td, .names th { vertical-align: top; }
     .names .mini { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: .3rem; background: var(--g-bg); border: 1px solid var(--g-border); flex-direction: column; line-height: 1.05; }
+    .names .qglyph { display: inline-block; width: 2.4rem; text-align: center; font-size: 1.9rem; line-height: 1; }
     .names .mini .font-glyph { font-size: 1.4rem; }
     .names tr.hit { background: var(--bs-warning-bg-subtle); }
     .names thead th { background: var(--bs-secondary-bg); white-space: nowrap; }
@@ -330,9 +332,16 @@
   // ---------- character list ----------
   const SECTIONS = { u: 'Forms without marking stroke', m: 'Forms with marking stroke (the six positions of each base)', f: 'Format characters', t: 'Tone marks' };
   const sectionOf = t => ({ unmarked: 'u', marked: 'm', chi: 'm', combiner: 'f', joiner: 'f', tone: 't' })[t];
+  // QATT glyphs of the list are drawn by qatt.js from a <tt> element: ",<onset>" is the unmarked Cán, ",<onset><n>" the one with marking stroke n
+  const qatt = new Qatt(); qatt.observe('TT');
+  const onsetOf = n => n === 'ONG' ? '_' : n === 'DDONG' ? 'd' : n === 'DZONG' ? 'dz' : n.slice(0, -3).toLowerCase();
+  function qattGlyph(c) {
+    if (c.b === undefined) return el('span', { className: `mini g-${c.t}` }, ...glyphContent(c.o)); // format and tone characters have no QATT code yet
+    return el('span', { className: 'qglyph' }, el('tt', { textContent: ',' + onsetOf(D.can[c.b].name) + (c.m || '') }));
+  }
   function renderList() {
     const q = $('#q').value.trim().toLowerCase(), t = $('#names'); t.replaceChildren();
-    t.append(el('thead', {}, el('tr', {}, ...['Code point', 'Decimal', 'Glyph', 'Unicode name', 'Notes'].map(h => el('th', { textContent: h })))));
+    t.append(el('thead', {}, el('tr', {}, ...['Code point', 'Glyph', 'Unicode name', 'Notes'].map(h => el('th', { textContent: h })))));
     const body = el('tbody'); let n = 0, section = null;
     const ranges = {}; chars.forEach(c => { const k = sectionOf(c.t); (ranges[k] ??= [c.o, c.o])[1] = c.o; });
     chars.forEach(c => {
@@ -342,19 +351,18 @@
       const k = sectionOf(c.t);
       if (k !== section) { // a heading row whenever the section changes, like the sub-headings of the Wikipedia block lists
         section = k; const [a, b] = ranges[k];
-        body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 5, scope: 'colgroup' }, SECTIONS[k], el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(a)}${a === b ? '' : '–' + hex(cpOf(b), 5)}` }))));
+        body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 4, scope: 'colgroup' }, SECTIONS[k], el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(a)}${a === b ? '' : '–' + hex(cpOf(b), 5)}` }))));
       }
       const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp text-nowrap', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, false); window.scrollTo({ top: $('#chart-title').offsetTop - 70, behavior: 'smooth' }); };
       const tr = el('tr', { className: c.o === selected ? 'hit' : '' }, el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })),
-        el('td', { className: 'cp tt', textContent: String(cpOf(c.o)) }),
-        el('td', {}, el('span', { className: `mini g-${c.t}` }, ...glyphContent(c.o))), el('td', {}, el('code', { className: 'name', textContent: 'QUOC AM TAN TU ' + c.n })),
+        el('td', {}, qattGlyph(c)), el('td', {}, el('code', { className: 'name', textContent: 'QUOC AM TAN TU ' + c.n })),
         el('td', { className: 'small' }, ...c.notes.map(noteNode)));
       tr.dataset.o = c.o; body.append(tr);
     });
     if (!q && !activeGroup) {   // the unassigned rest of the block
       const first = chars.length, last = SIZE - 1;
-      body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 5, scope: 'colgroup' }, 'Reserved', el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }))),
-        el('tr', { className: 'text-secondary' }, el('td', { className: 'cp', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }), el('td', { className: 'cp tt', textContent: `${cpOf(first)}–${cpOf(last)}` }), el('td'), el('td', { textContent: `${last - first + 1} code points, not assigned` }), el('td', { className: 'small', textContent: 'Reserved for future additions (proposal section 7)' })));
+      body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 4, scope: 'colgroup' }, 'Reserved', el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }))),
+        el('tr', { className: 'text-secondary' }, el('td', { className: 'cp', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }), el('td'), el('td', { textContent: `${last - first + 1} code points, not assigned` }), el('td', { className: 'small', textContent: 'Reserved for future additions (proposal section 7)' })));
     }
     t.append(body);
     $('#count').textContent = `${n} of ${chars.length} characters` + (activeGroup ? ` – group: ${GROUPS[activeGroup].label}` : '');
