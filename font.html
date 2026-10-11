@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QATT font test</title>
+  <style>
+    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2) format("woff2"), url(font/qatt-prototype.ttf) format("truetype"); }
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+    main { max-width: 74rem; margin: 0 auto; padding: 1rem 1rem 3rem; }
+    h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
+    p { margin: .3rem 0 .8rem; color: var(--muted); }
+    a { color: var(--accent); }
+    .bar { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; align-items: center; margin: 1rem 0; font-size: .9rem; }
+    .bar label { display: flex; align-items: center; gap: .5rem; }
+    .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .4rem .6rem; min-height: 4.5rem;
+      font-family: "QATT Prototype"; font-size: 3rem; line-height: 1.3; word-break: break-all; color: var(--ink); }
+    .sample:focus { outline: 2px solid rgba(168, 54, 42, .35); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 7rem), 1fr)); gap: .4rem; margin-top: 1rem; }
+    .cell { border: 1px solid var(--line); border-radius: .5rem; background: #fffdf8; padding: .3rem .3rem .4rem; text-align: center; cursor: pointer; position: relative; }
+    .cell:hover { border-color: var(--accent); }
+    .cell .f { font-family: "QATT Prototype"; font-size: var(--size, 4rem); line-height: 1.15; display: block; }
+    .cell .s { display: block; height: 2.4rem; line-height: 2.4rem; font-size: 1rem; color: var(--muted); }
+    .cell .s svg { stroke: currentColor; }
+    .cell .cp { display: block; font: .72rem ui-monospace, Menlo, monospace; color: var(--muted); }
+    .cell .nm { display: block; font-size: .68rem; line-height: 1.2; color: var(--muted); min-height: 1.6em; }
+    .cell.tone .f { color: var(--accent); }
+    .hide-svg .s { display: none; }
+    .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
+    #info { margin-top: .5rem; font-size: .9rem; color: var(--muted); min-height: 1.4rem; }
+  </style>
+  <script src="js/qatt.js"></script>
+</head>
+<body>
+<main>
+  <p><a href="unicode.html">← Unicode chart</a></p>
+  <h1>QATT font test</h1>
+  <p>Prototype font built from the stroke glyphs of <code>qatt.js</code> (monospace, one square per character, code points from <code>U+F0000</code>).
+     Large: the font. Small underneath: the same glyph drawn by <code>qatt.js</code>. Click a character to add it to the sample field.</p>
+
+  <div class="bar">
+    <label>Size <input type="range" id="size" min="24" max="140" value="64"></label>
+    <label><input type="checkbox" id="svg" checked> show qatt.js drawing</label>
+    <label><input type="checkbox" id="guides"> guides</label>
+    <label><input type="checkbox" id="tonesOnly"> tone marks only</label>
+    <button type="button" id="clear">Clear sample</button>
+  </div>
+
+  <div class="sample" id="sample" contenteditable="true" spellcheck="false" aria-label="Sample text"></div>
+  <div id="info"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+(async () => {
+  const BASE = 0xF0000;
+  const glyphs = await (await fetch('font/glyphs.json')).json();
+  const $ = s => document.querySelector(s);
+  const grid = $('#grid'), sample = $('#sample'), info = $('#info');
+  const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
+  const q = new Qatt(); q.observe('TT');
+
+  const cells = glyphs.map(g => {
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + g.t;
+    const f = document.createElement('span'); f.className = 'f'; f.textContent = String.fromCodePoint(BASE + g.o);
+    const s = document.createElement('span'); s.className = 's';
+    const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt);
+    const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = g.n.toLowerCase().replace(/ unmarked$/, '').replace(/ marked-/, ' ·');
+    cell.append(f, s, cp, nm);
+    cell.addEventListener('click', () => { sample.append(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + ' — ' + g.q; });
+    cell._g = g;
+    grid.append(cell);
+    return cell;
+  });
+
+  const apply = () => {
+    const px = +$('#size').value;
+    grid.style.setProperty('--size', px + 'px');
+    grid.style.setProperty('--cell', Math.max(px * 1.25, 96) + 'px');
+    sample.style.fontSize = Math.max(px * .8, 32) + 'px';
+    grid.classList.toggle('hide-svg', !$('#svg').checked);
+    grid.classList.toggle('guides', $('#guides').checked);
+    for (const c of cells) c.hidden = $('#tonesOnly').checked && c._g.t !== 'tone';
+  };
+  for (const id of ['#size', '#svg', '#guides', '#tonesOnly']) $(id).addEventListener('input', apply);
+  $('#clear').addEventListener('click', () => { sample.textContent = ''; });
+  apply();
+})();
+</script>
+</body>
+</html>
