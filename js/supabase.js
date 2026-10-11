@@ -6,7 +6,9 @@ access to leaderboard.
 const s = new SupabaseService();
 await s.saveScore(username, score, sunflowers);
 await s.getLeaderboard(topLimit = 20, neighborBuffer = 5);
-await s.setNickname(name);
+await s.getDisplayName();         // the name in the leaderboard (null if there is none yet)
+await s.setDisplayName(name);     // { name } or { error } (error.code 'name_taken', 'name_invalid'); names are unique, ignoring case
+s.suggestedName();                // a first suggestion from the account (first name or the part of the email before the @)
 await s.signInWithGoogle();
 await s.signInWithEmail(email);   // sends a link
 await s.signOut();
@@ -101,24 +103,65 @@ class SupabaseService {
     return `${adjectives[adjIndex]}${nouns[nounIndex]}_${suffix}`;
   }
   
-  async setNickname(name) {
-    name = name.trim()
-      .replace(/[^\p{L}\p{N}\-_\s]/ug, "")
-      .replace(/[\x00-\x1F\x7F&<>"']/g, "")
-      .replace(/\s+/g, " ");
-    if (name.length < 2) return;
-    if (name.length > 40) name = name.substr(0, 40);
+  // --- display name in the leaderboard (profiles.username, unique ignoring case: see the index profiles_username_lower_key) ---
+
+  // Letters of every script (also Han: Chinese, Nôm, Japanese, Korean), digits, hyphen, underscore and single spaces,
+  // up to 40 characters (counted by character, not by UTF-16 unit, so rare Han characters are not cut in the middle).
+  static cleanName(name) {
+    return Array.from(String(name || '')
+      .replace(/[^\p{L}\p{N}\-_\s]/ug, '')
+      .replace(/\s+/g, ' ')
+      .trim())
+      .slice(0, 40)
+      .join('')
+      .trim();
+  }
+
+  static nameError(name) {
+    if (!name) return 'Please enter a name (letters or digits).';
+    if (name.toLowerCase() == 'anonymous') return 'Please choose another name.';
+    return null;
+  }
+
+  // the name of the user in the leaderboard, null if there is none yet
+  async getDisplayName() {
+    if (!this.client || !this.user) return null;
+    const { data } = await this.client.from('profiles').select('username').eq('user_id', this.user.id).maybeSingle();
+    const name = data && data.username;
+    return name && name != 'Anonymous' ? name : null;
+  }
+
+  // a first suggestion for the name: the first name of the account or the part of the email before the @
+  suggestedName() {
+    const user = this.user || {}, meta = user.user_metadata || {};
+    const raw = meta.given_name || meta.name || meta.full_name || (user.email || '').split('@')[0] || '';
+    return SupabaseService.cleanName(String(raw).split(/\s+/)[0]);
+  }
+
+  async isNameTaken(name) {
+    // ilike without its wildcards: % and _ and \ in the name are escaped
+    const pattern = name.replace(/[\\%_]/g, '\\$&');
+    const { data } = await this.client.from('profiles').select('user_id').ilike('username', pattern).neq('user_id', this.user.id).limit(1);
+    return !!(data && data.length);
+  }
+
+  // Sets the name, also when the user has no profile yet (the score stays as it is). Gives { name } or { error }.
+  async setDisplayName(name) {
+    name = SupabaseService.cleanName(name);
+    const invalid = SupabaseService.nameError(name);
+    if (invalid) return { error: { code: 'name_invalid', message: invalid } };
     if (!this.user) await this.init();
-    if (!this.user) return;
-    const {
-      error
-    } = await this.client
-      .from('profiles')
-      .update({
-        username: name
-      })
-      .eq('user_id', this.user.id);
-    if (error) console.error("Error updating nickname:", error.message);
+    if (!this.user) return { error: { code: 'no_user', message: 'Not available right now.' } };
+    const taken = { code: 'name_taken', message: 'This name is taken, please choose another one.' };
+    if (await this.isNameTaken(name)) return { error: taken };
+    const { error } = await this.client.from('profiles').upsert(
+      { user_id: this.user.id, username: name, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if (error) return { error: error.code == '23505' ? taken : error };
+    return { name };
+  }
+
+  async setNickname(name) {
+    return this.setDisplayName(name);
   }
   
   async getHybridLeaderboard(limit = 10, neighbors = 3) {
