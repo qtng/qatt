@@ -288,6 +288,16 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qt6" d="M98 90 m0-5v5 c12 0 12 14 0 14"/>
 		<path id="qt7" d="M98 90 m0-5v5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14"/>
 
+    	<!-- tone marks on their own (",,,N"): perfect circles and semicircles without the small serif, in the same corners as above -->
+    	<path id="qs0" d="M2 89 a8 8 0 0 0 0 16"/>
+    	<path id="qs1" d="M98 -6 a8 8 0 0 1 0 16"/>
+    	<path id="qs2" d="M2 97 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
+    	<path id="qs3" d="M2 -6 a8 8 0 0 0 0 16"/>
+    	<path id="qs4" d="M2 2 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
+    	<path id="qs5" d="M98 2 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
+    	<path id="qs6" d="M98 89 a8 8 0 0 1 0 16"/>
+    	<path id="qs7" d="M98 97 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
+
     	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
     	</defs>
     	</svg>`;
@@ -607,16 +617,16 @@ class Qatt {
       const nobr = root.tagName === "NOBR" ? root : document.createElement("nobr");
       nobr.append(svg);
       if (nobr !== root) root.appendChild(nobr);
-      this._handleTones(nobr, initial, vowel, final, tone, g);
+      this._handleTones(nobr, initial, vowel, final, tone, g, toneAlone);
     } else {
-      this._handleTones(root, initial, vowel, final, tone, g);
+      this._handleTones(root, initial, vowel, final, tone, g, toneAlone);
     }
     return g;
   }
 
-  _handleTones(root, initial, vowel, final, tone, g) {
+  _handleTones(root, initial, vowel, final, tone, g, standalone) {
     if (g && tone != null && tone !== "" && tone > 0 && tone <= 8) {
-      this._useG(g, "qt" + (tone == 8 ? 0 : tone));
+      this._useG(g, (standalone ? "qs" : "qt") + (tone == 8 ? 0 : tone));
     }
     if (final) {
       this._renderSvg(root, "", final.toUpperCase(), 0, null, true);
