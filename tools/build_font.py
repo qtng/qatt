@@ -15,6 +15,10 @@ from fontTools.pens.cu2quPen import Cu2QuPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.fontBuilder import FontBuilder
 
+# --light: thinner strokes (LIGHT times the stroke widths), family "QATT Prototype Light"
+LIGHT = 0.6
+light = '--light' in sys.argv
+if light: sys.argv.remove('--light')
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
@@ -32,6 +36,9 @@ STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the
 STACK_UP_X = 0.88                                  # the upper glyph is a bit narrower than the lower one
 STROKE_UP, STROKE_LOW = 46, 46                    # strokes of the squeezed upper and lower glyph
 BRUSH_WEIGHT = 0.8             # the brush font: weight of the brush.html export times this
+if light:
+    STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
+    BRUSH_WEIGHT *= LIGHT
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
@@ -161,7 +168,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': 'QATT Brush' if BRUSH else 'QATT Prototype', 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString

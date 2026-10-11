@@ -38,6 +38,12 @@ python3 tools/build_font.py font/glyphs.json font/qatt-prototype      # writes .
 
 Then raise the cache version of the font files in `font.html` (`?v=…`).
 
+**Light variant.** `--light` makes all strokes thinner (`LIGHT` times the stroke widths):
+
+```sh
+python3 tools/build_font.py --light font/glyphs.json font/qatt-prototype-light   # family "QATT Prototype Light"
+```
+
 **Brush variant.** With the export of `brush.html` (`font/brush.json`) as a third argument, the glyphs get its brush
 instead of stroked centre lines. `tools/brush_outlines.js` (Node.js, uses `js/brush.js` and `js/brush-model.js` like the
 editor) lays the brush on the centre lines after they are squeezed and moved into place, so the half-width and stacked
