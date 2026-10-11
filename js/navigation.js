@@ -110,6 +110,13 @@
         }
         const home = '/qatt';
 
+        // logo (also the page icon, unless the page sets its own)
+        const logo = `${relativeLinkPrefix}/qatt/img/logo.svg`;
+        if (!document.querySelector('link[rel~="icon"]')) {
+            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${relativeLinkPrefix}/qatt/img/favicon.svg">
+                <link rel="apple-touch-icon" href="${relativeLinkPrefix}/qatt/img/apple-touch-icon.png">`);
+        }
+
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
 
@@ -117,7 +124,8 @@
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
         header.innerHTML = `
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="${home}">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="${home}">
+                    <img src="${logo}" alt="" width="32" height="32">
                     ${navConfig.title}
                 </a>
                 <div class="ms-auto d-flex align-items-center">
@@ -146,7 +154,7 @@
 
         offcanvas.innerHTML = `
             <div class="offcanvas-header border-bottom border-secondary">
-                <h5 class="offcanvas-title fw-bold text-white">${navConfig.title}</h5>
+                <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2"><img src="${logo}" alt="" width="28" height="28">${navConfig.title}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
