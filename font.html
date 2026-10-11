@@ -24,6 +24,8 @@
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
     .keys { display: flex; justify-content: space-between; gap: .4rem; margin-top: .45rem; }
     .keys .btn { flex: 1 1 0; }
+    .keys.tones { margin-top: .3rem; }
+    .keys.tones .btn { color: var(--accent); font-weight: 600; padding-left: 0; padding-right: 0; }
     .sample:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
     .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
@@ -60,8 +62,9 @@
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009A">B⿱C</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="back" title="Delete the last character" aria-label="Delete the last character">◀</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="back" title="Delete the last character" aria-label="Delete the last character">⌫</button>
   </div>
+  <div class="keys tones" id="tone-keys"></div>
   <div id="info"></div>
   </div>
   <h2 class="sub">Format characters and tone marks</h2>
@@ -114,6 +117,13 @@
   const add = text => { sample.append(text); sample.scrollTop = sample.scrollHeight; };
   $('#joiner').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'joiner').o)); info.textContent = 'component joiner'; });
   $('#stack').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'combiner').o)); info.textContent = 'Tham Thư combiner'; });
+  glyphs.filter(g => g.t === 'tone').sort((a, b) => a.o - b.o).forEach((g, i) => {   // tone buttons 1..8 in the order of the code points
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn btn-sm btn-outline-secondary'; b.textContent = i + 1;
+    b.title = g.n.toLowerCase() + ' — U+' + hex(BASE + g.o);
+    b.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o); });
+    $('#tone-keys').append(b);
+  });
   $('#back').addEventListener('click', () => { sample.textContent = Array.from(sample.textContent).slice(0, -1).join(''); });
   apply();
 })();
