@@ -109,10 +109,14 @@
                 break;
             }
         }
-        const home = '/qatt';
+        // Pages under /chunom (and the domain chunom.org) carry the Chunom.org brand, all others Qatt.org
+        const isChunom = location.pathname.indexOf("/chunom") === 0 || /(^|\.)chunom\.org$/.test(location.hostname);
+        const home = isChunom ? '/chunom' : '/qatt';
 
         // logo (also the page icon, unless the page sets its own)
-        const logo = `${relativeLinkPrefix}/qatt/img/logo.svg`;
+        const logo = isChunom ? `${relativeLinkPrefix}/qatt/img/chunom-logo.gif` : `${relativeLinkPrefix}/qatt/img/logo.svg`;
+        const brandTitle = isChunom ? "Chunom.org" : navConfig.title;
+        const sections = isChunom ? navConfig.sections.slice().reverse() : navConfig.sections; // the Chữ Nôm block first on Chunom.org
         if (!document.querySelector('link[rel~="icon"]')) {
             document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${relativeLinkPrefix}/qatt/img/favicon.svg">
                 <link rel="apple-touch-icon" href="${relativeLinkPrefix}/qatt/img/apple-touch-icon.png">`);
@@ -126,8 +130,9 @@
         header.innerHTML = `
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="${home}">
-                    <img src="${logo}" alt="" width="32" height="32">
-                    ${navConfig.title}
+                    ${isChunom
+                        ? `<img src="${logo}" alt="${brandTitle}" height="42" style="width:auto;border-radius:4px">`
+                        : `<img src="${logo}" alt="" width="32" height="32">${brandTitle}`}
                 </a>
                 <div class="ms-auto d-flex align-items-center">
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
@@ -142,7 +147,7 @@
         offcanvas.id = navId;
         offcanvas.tabIndex = "-1";
 
-        const sectionsHtml = navConfig.sections.map(section => {
+        const sectionsHtml = sections.map(section => {
             const linksHtml = section.links.map(link => {
                 const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
                 return `<a href="${relativeLinkPrefix}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
@@ -155,7 +160,9 @@
 
         offcanvas.innerHTML = `
             <div class="offcanvas-header border-bottom border-secondary">
-                <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2"><img src="${logo}" alt="" width="28" height="28">${navConfig.title}</h5>
+                <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2">${isChunom
+                    ? `<img src="${logo}" alt="${brandTitle}" height="34" style="width:auto;border-radius:4px">`
+                    : `<img src="${logo}" alt="" width="28" height="28">${brandTitle}`}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
