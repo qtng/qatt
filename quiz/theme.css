@@ -1,0 +1,57 @@
+	:root {
+ 		--stroke-width: 6px;
+ 		--svg-height: 2.5em;
+ 		--bgcolor: #3a445c;
+ 		--fgcolor-raw: 255, 255, 255;
+ 		--fgcolor: white;
+ 		--fgcolor-inverse: white;
+ 		--highlight-onsets: #f87171;
+		--highlight-vowels: #60a5fa;
+        --highlight-tones: #4ade80;
+        --highlight-rhymes: #60a5fa;
+        --highlight-codas: #c084fc;
+  	}
+	.back-link {color: var(--fgcolor)!important}
+	#quiz-navbar {
+		padding-top: 16px!important;
+		background: rgba(var(--fgcolor-raw),0.4)
+	}
+	body {
+		background: var(--bgcolor);
+		color: var(--fgcolor);
+	}
+	.card {
+		background: rgba(255,255,255,.05);
+		color: var(--fgcolor)
+	}
+	.symbol-card, .word-grid-item, .lesson-thumbnail  {
+		background: rgba(0,0,0,.1);
+		color: var(--fgcolor-inverse)
+	}
+
+	.progress {background: rgba(255,255,255,.7)}
+
+	.darken-5 {filter: brightness(95%) contrast(105%)}
+	.darken-10 {filter: brightness(90%) contrast(110%)}
+	.darken-15 {filter: brightness(85%) contrast(115%)}
+	.darken-20 {filter: brightness(80%) contrast(120%)}
+	.darken-25 {filter: brightness(75%) contrast(125%)}
+	.darken-30 {filter: brightness(70%) contrast(130%)}
+	.darken-35 {filter: brightness(65%) contrast(135%)}
+	.darken-40 {filter: brightness(60%) contrast(140%)}
+	.darken-45 {filter: brightness(55%) contrast(145%)}
+	.darken-50 {filter: brightness(50%) contrast(150%)}
+
+    /* Highlighting of the parts of a glyph (qatt.js: <qatt-code> with <use href="#v2-…">):
+       onset = the small shape on the left, rhyme = the shape with its marking stroke on the right, tone = the mark in a corner */
+    .lesson-onsets qatt-code use[href$="small"], .lesson-onsets qatt-code use[href$="large"], .lesson-onsets qatt-code use[href$="medial"] { stroke: var(--highlight-onsets) }
+    .lesson-onsets qatt-code use[href^="#qt"] { display: none }
+    .lesson-tones qatt-code use[href^="#qt"] { stroke: var(--highlight-tones) }
+    .lesson-codas qatt-code use[href^="#v2-"]:not([href$="small"]):not([href$="large"]):not([href$="medial"]),
+    [class*="lesson-rhymes-"] qatt-code use[href^="#v2-"]:not([href$="small"]):not([href$="large"]):not([href$="medial"]) { stroke: var(--highlight-rhymes) }
+    qatt-code { --stroke-width: 2px; }
+    .symbol-card qatt-code { --stroke-width: 3px; }
+    qatt-code svg { height: var(--svg-height); width: auto; }
+
+/* the bar of navigation.js is 60px high */
+:root { --external-nav-height: 60px; }
