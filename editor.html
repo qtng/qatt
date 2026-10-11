@@ -138,7 +138,7 @@
             set(key, value) { try { localStorage.setItem('qatt_editor_' + key, value); } catch { /* storage may be blocked */ } }
         };
 
-        const parser = new VietnameseParser(); // the decoding of the glyphs: new VietnameseParser('qode') is the default, see VietnameseParser.DECODINGS
+        const parser = new VietnameseParser(); // the decoding of the glyphs: new VietnameseParser('qatt') is the default, see VietnameseParser.DECODINGS
         new Qatt().observe('qatt-code');
 
         // ---------- text -> glyphs ----------

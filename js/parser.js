@@ -41,7 +41,7 @@ class VietnameseParser {
             // Rhyme tables of the known decodings: DECODINGS[name][row][column] = rhyme written with the shape of the row and the marking stroke
             // column + 2 (a sixth column is the shape without marking stroke).
             static DECODINGS = {
-                    qode: [
+                    qatt: [
                         ["ơ", "ơnh", "ơn", "ơi", "ơm"],
                         ["uơ", "uơnh", "uơn", "uơi", "ôm"],
                         ["a", "ang", "an", "ai", "am"],
@@ -152,7 +152,7 @@ class VietnameseParser {
             static DIACRITIC_MAP = { '\u0300': 'huyen', '\u0301': 'sac', '\u0309': 'hoi', '\u0303': 'nga', '\u0323': 'nang' };
 
             // decoding: name of a table in VietnameseParser.DECODINGS, or a table itself (rows of rhymes, see DECODINGS)
-            constructor(decoding = "qode") {
+            constructor(decoding = "qatt") {
                 this.setDecoding(decoding);
                 // Normalisiere Listen für den Vergleich
                 this.onsets = VietnameseParser.ONSETS.map(s => s.normalize('NFD').toLowerCase());
