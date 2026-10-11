@@ -24,6 +24,7 @@ q.observe("TT");
 */
 
 const PREFIX = "v2-";
+const RHYME_ALONE_PREFIX = "v2c-"; // glyph copies moved to the middle of the box, for rhymes without onset
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	style="height:4800px;width:2540px;"
     	id="svg">
@@ -287,6 +288,198 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qt5" d="M98 -5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14 l-10-1"/>
     	<path id="qt6" d="M98 90 m0-5v5 c12 0 12 14 0 14"/>
 		<path id="qt7" d="M98 90 m0-5v5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14"/>
+
+    	<!-- tone marks on their own (",,,N"): perfect circles and semicircles (radius 12) without the small serif, one in each corner -->
+    	<path id="qs0" d="M12 82 a12 12 0 0 0 0 24"/>
+    	<path id="qs1" d="M88 -2 a12 12 0 0 1 0 24"/>
+    	<path id="qs2" d="M12 94 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+    	<path id="qs3" d="M12 -2 a12 12 0 0 0 0 24"/>
+    	<path id="qs4" d="M12 10 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+    	<path id="qs5" d="M88 10 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+    	<path id="qs6" d="M88 82 a12 12 0 0 1 0 24"/>
+    	<path id="qs7" d="M88 94 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+
+    	<!-- the same glyphs moved to the middle of the box and 50% wider: a rhyme without onset (v2c- = centred) -->
+    	<path id="v2c-a" d="M23.75 10 v80 M8.75 90 h30 M31.25 35 h45 m-45 25 h45"/>
+    	<path id="v2c-a2" d="M35.75 20 h37.5 m-12 0 v40 c0 5 0 15 -7.5 30 M53.75 44 h-27 m0 22 h27"/>
+    	<path id="v2c-aw" d="M43.25 17 v52 M68.75 10 v40 c0 5 0 20 -6 40 M26.75 46 l55.5 -10 M19.25 36 v20"/>
+    	<path id="v2c-aw2" d="M26.75 15 h54 M40.25 25 l-12 14 M53.75 20 v68 m-33 -38 h66"/>
+    	<path id="v2c-e" d="M16.25 15 h30 M31.25 15 v70 M56.75 25 v50 M82.25 15 v70"/>
+    	<path id="v2c-e2" d="M20.75 10 h60 M20.75 26 l21 -6 m-4.5 5 v50 M68.75 10 v75"/>
+    	<path id="v2c-i" d="M20.75 10 h60 M37.25 10 v65 M68.75 25 v60 m0 -60 m-4.5 -5 l21 6"/>
+    	<path id="v2c-i2" d="M20.75 38 l48 -5 m-48 30 l48 -5 M44.75 13 v77 h1.5 l30 -5"/>
+    	<path id="v2c-o" d="M20.75 15 h45 c-6 22 -12 45 -45 70 M29.75 38 M29.75 38 m6 -12 l-15 20 M29.75 38 c9 8 21 18 42 40"/>
+    	<path id="v2c-o2" d="M65.75 10 c0 0 -12 40 -28.5 56 m-15 -6 l18 16 M29.75 23 c0 0 19.5 15 42 40 M29.75 86 h45"/>
+    	<path id="v2c-u2" d="M23.75 25 v45 m-3 4 l21 -14 M76.25 15 c-6 22 -10.5 45 -36 70 M40.25 28 c0 0 22.5 24 42 50"/>
+    	<path id="v2c-u" d="M74.75 16 v50 M56.75 20 c0 0 -12 40 -27 56 m-10.5 -8 l13.5 18 M26.75 30 c0 0 21 24 39 50"/>
+    	<path id="v2c-y" d="M32.75 16 v65 M32.75 40 h42 m0 -8 v16 M34.25 60 l42 3"/>
+    	<path id="v2c-y2" d="M29.75 20 v50 M53.75 13 v58 h1.5 l18 -5 M23.75 85 h52.5"/>
+    	<path id="v2c-_1" d="M25.25 22 m-1.5 -8 v16"/>
+    	<path id="v2c-_2" d="M26.75 45 m-1.5 -8 v16"/>
+    	<path id="v2c-_3" d="M23.75 70 m-1.5 -8 v16"/>
+    	<path id="v2c-_4" d="M23.75 70 m49.5 -3 m1.5 -8 v16"/>
+    	<path id="v2c-_5" d="M26.75 45 m39 0 m1.5 -8 v16"/>
+    	<path id="v2c-_6" d="M25.25 22 m45 0 m1.5 -8 v16"/>
+    	<path id="v2c-_" d="M25.25 22 h45 M26.75 45 h39 M23.75 70 l51 -3"/>
+    	<path id="v2c-b" d="M26.75 30 c0 0 15 10 42 33 M56.75 15 c0 0 -10.5 40 -25.5 55 M19.25 85 h52.5"/>
+    	<path id="v2c-b1" d="M26.75 30 m1.5 -8 l-7.5 15"/>
+    	<path id="v2c-b2" d="M56.75 15 m-25.5 55 m-9 -4 l15 11"/>
+    	<path id="v2c-b3" d="M19.25 85 m0 -8 v16"/>
+    	<path id="v2c-b4" d="M19.25 85 m52.5 0 m0 -8 v16"/>
+    	<path id="v2c-b5" d="M26.75 30 m42 33 m7.5 -8 l-9 15"/>
+    	<path id="v2c-b6" d="M56.75 15 m-12 -1 h24"/>
+    	<path id="v2c-c1" d="M23.75 40 m-1.5 -8 v16"/>
+    	<path id="v2c-c2" d="M20.75 58 m-1.5 -8 v16"/>
+    	<path id="v2c-c3" d="M20.75 58 m45 0 m-10.5 4 l-4.5 10"/>
+    	<path id="v2c-c4" d="M68.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-c5" d="M68.75 16 m-12 0 h24"/>
+    	<path id="v2c-c6" d="M23.75 40 m45 0 m-15 -4 l-3 -9"/>
+    	<path id="v2c-c" d="M68.75 16 v64 M23.75 40 h45 M20.75 58 h45"/>
+    	<path id="v2c-ch1" d="M50.75 20 m-12 -1 h24"/>
+    	<path id="v2c-ch2" d="M23.75 42 m-1.5 -8 v16"/>
+    	<path id="v2c-ch3" d="M23.75 64 m-1.5 -8 v16"/>
+    	<path id="v2c-ch4" d="M50.75 20 m-7.5 62 m-9 1 h24"/>
+    	<path id="v2c-ch5" d="M23.75 64 m52.5 -6 m1.5 -8 v16"/>
+    	<path id="v2c-ch6" d="M23.75 42 m52.5 -6 m1.5 -8 v16"/>
+    	<path id="v2c-ch" d="M23.75 42 l52.5 -6 M23.75 64 l52.5 -6 M50.75 20 c0 30 0 45 -7.5 62"/>
+    	<path id="v2c-d1" d="M50.75 20 m-12 -1 h24"/>
+    	<path id="v2c-d2" d="M26.75 40 m-1.5 -8 v16"/>
+    	<path id="v2c-d3" d="M50.75 20 m0 44 m-18 -8 l16.5 5"/>
+    	<path id="v2c-d4" d="M23.75 70 m-1.5 -8 v16"/>
+    	<path id="v2c-d5" d="M23.75 70 m54 -3 m1.5 -8 v16"/>
+    	<path id="v2c-d6" d="M26.75 40 m48 0 m1.5 -8 v16"/>
+    	<path id="v2c-d" d="M26.75 40 h48 M50.75 20 v44 M23.75 70 l54 -3"/>
+    	<path id="v2c-dz1" d="M50.75 20 m-12 -1 h24"/>
+    	<path id="v2c-dz2" d="M23.75 36 m-1.5 -8 v16"/>
+    	<path id="v2c-dz3" d="M23.75 58 m-1.5 -8 v16"/>
+    	<path id="v2c-dz4" d="M50.75 20 m-7.5 62 m-9 1 h24"/>
+    	<path id="v2c-dz5" d="M23.75 58 m52.5 6 m1.5 -8 v16"/>
+    	<path id="v2c-dz6" d="M23.75 36 m52.5 6 m1.5 -8 v16"/>
+    	<path id="v2c-dz" d="M23.75 36 l52.5 6 M23.75 58 l52.5 6 M50.75 20 c0 30 0 45 -7.5 62"/>
+    	<path id="v2c-g1" d="M23.75 16 m-12 0 h24"/>
+    	<path id="v2c-g2" d="M23.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-g3" d="M25.25 58 m6 1 l15 12"/>
+    	<path id="v2c-g4" d="M25.25 58 m45 0 m0 -8 v16"/>
+    	<path id="v2c-g5" d="M23.75 40 m45 0 m0 -8 v16"/>
+    	<path id="v2c-g6" d="M23.75 40 m6 0 l15 -12"/>
+    	<path id="v2c-g" d="M23.75 16 v64 M23.75 40 h45 M25.25 58 h45"/>
+    	<path id="v2c-h1" d="M37.25 20 m-13.5 0 h24"/>
+    	<path id="v2c-h2" d="M37.25 20 m0 46 m-3 -5 l-13.5 -7"/>
+    	<path id="v2c-h3" d="M22.25 72 m-3 -8 v16"/>
+    	<path id="v2c-h4" d="M22.25 72 m54 0 m3 -8 v16"/>
+    	<path id="v2c-h5" d="M61.25 20 m0 46 m3 -5 l13.5 -7"/>
+    	<path id="v2c-h6" d="M61.25 20 m-10.5 0 h24"/>
+    	<path id="v2c-h" d="M37.25 20 v46 M61.25 20 v46 M22.25 72 h54"/>
+    	<path id="v2c-kh1" d="M25.25 18 m0 -8 v16"/>
+    	<path id="v2c-kh2" d="M34.25 20 m0 8 l-12 10"/>
+    	<path id="v2c-kh3" d="M23.75 76 m0 -8 v16"/>
+    	<path id="v2c-kh4" d="M23.75 75 m54 0 m0 -8 v16"/>
+    	<path id="v2c-kh5" d="M34.25 18 m15 54 m0 -4 l15 -10"/>
+    	<path id="v2c-kh6" d="M25.25 18 m45 0 m0 -8 v16"/>
+    	<path id="v2c-kh" d="M25.25 18 h45 M34.25 20 l15 54 M23.75 76 h54"/>
+    	<path id="v2c-l1" d="M52.25 18 m-10.5 0 h21"/>
+    	<path id="v2c-l2" d="M28.25 16 m-15 -3 h24"/>
+    	<path id="v2c-l3" d="M28.25 16 m-7.5 64 m-9 0 l22.5 3"/>
+    	<path id="v2c-l4" d="M52.25 18 m0 54 m-10.5 0 h21"/>
+    	<path id="v2c-l5" d="M76.25 16 m0 58 m-9 4 h21"/>
+    	<path id="v2c-l6" d="M76.25 16 m-9 -4 h21"/>
+    	<path id="v2c-l" d="M28.25 16 v30 c0 5 0 20 -7.5 34 M52.25 18 v54 M76.25 16 v58"/>
+    	<path id="v2c-m1" d="M23.75 18 m-3 -8 v16"/>
+    	<path id="v2c-m2" d="M32.75 35 m0 -8 l-9 14"/>
+    	<path id="v2c-m3" d="M61.25 30 m-37.5 50 m-1.5 -10 l9 14"/>
+    	<path id="v2c-m4" d="M32.75 35 m34.5 42 m0 4 l9 -14"/>
+    	<path id="v2c-m5" d="M61.25 30 m-3 -4 l15 15"/>
+    	<path id="v2c-m6" d="M23.75 18 m45 0 m3 -8 v16"/>
+    	<path id="v2c-m" d="M23.75 18 h45 M61.25 30 c0 0 -12 30 -30 50 M32.75 35 c0 0 18 18 34.5 42"/>
+    	<path id="v2c-n1" d="M23.75 16 m-12 0 h24"/>
+    	<path id="v2c-n2" d="M23.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-n3" d="M25.25 46 m4.5 1 l10.5 14"/>
+    	<path id="v2c-n4" d="M52.25 24 m0 44 m-12 0 h24"/>
+    	<path id="v2c-n5" d="M23.75 46 m51 0 m0 -8 v16"/>
+    	<path id="v2c-n6" d="M52.25 24 m-12 0 h24"/>
+    	<path id="v2c-n" d="M23.75 16 v64 M23.75 46 h51 M52.25 24 v44"/>
+    	<path id="v2c-ng1" d="M23.75 22 m-3 -8 v16"/>
+    	<path id="v2c-ng2" d="M38.75 22 m-1.5 6 l-15 10"/>
+    	<path id="v2c-ng3" d="M38.75 22 m-9 50 m-9 1 h24"/>
+    	<path id="v2c-ng4" d="M65.75 22 m0 51 m-12 0 h24"/>
+    	<path id="v2c-ng5" d="M65.75 22 m1.5 6 l15 10"/>
+    	<path id="v2c-ng6" d="M23.75 22 m57 0 m3 -8 v16"/>
+    	<path id="v2c-ng" d="M23.75 22 h57 M38.75 22 c0 20 0 30 -9 50 M65.75 22 v51"/>
+    	<path id="v2c-nh1" d="M35.75 20 m-12 0 h24"/>
+    	<path id="v2c-nh2" d="M22.25 42 m-4.5 -8 v16"/>
+    	<path id="v2c-nh3" d="M35.75 20 m-4.5 55 m-12 0 h24"/>
+    	<path id="v2c-nh4" d="M62.75 20 m0 56 m-12 0 h24"/>
+    	<path id="v2c-nh5" d="M22.25 42 m57 8 m1.5 -8 v16"/>
+    	<path id="v2c-nh6" d="M62.75 20 m-12 0 h24"/>
+    	<path id="v2c-nh" d="M22.25 42 l57 8 M35.75 20 c0 20 0 35 -4.5 55 M62.75 20 v56"/>
+    	<path id="v2c-ph1" d="M19.25 30 m1.5 -7 l-7.5 15"/>
+    	<path id="v2c-ph2" d="M49.25 20 m-27 56 m-6 -8 l9 15"/>
+    	<path id="v2c-ph3" d="M19.25 30 m39 50 m9 -1 l-18 4"/>
+    	<path id="v2c-ph4" d="M67.25 16 m0 50 m-12 0 h24"/>
+    	<path id="v2c-ph5" d="M67.25 16 m-9 0 h21"/>
+    	<path id="v2c-ph6" d="M49.25 20 m-3 -6 l12 14"/>
+    	<path id="v2c-ph" d="M67.25 16 v50 M49.25 20 c0 0 -12 40 -27 56 M19.25 30 c0 0 21 24 39 50"/>
+    	<path id="v2c-r1" d="M25.25 75 m0 -57 m-12 0 h24"/>
+    	<path id="v2c-r2" d="M25.25 75 m-12 0 h24"/>
+    	<path id="v2c-r3" d="M25.25 75 m0 -57 m3 12 m30 14 m-1.5 1 l-6 8"/>
+    	<path id="v2c-r4" d="M71.75 18 m0 56 m-12 0 h24"/>
+    	<path id="v2c-r5" d="M71.75 18 m-12 0 h24"/>
+    	<path id="v2c-r6" d="M25.25 75 m0 -57 m3 12 m6 2 l12 -8"/>
+    	<path id="v2c-r" d="M25.25 75 v-57 m3 12 l30 14 M71.75 18 v56"/>
+    	<path id="v2c-s1" d="M25.25 18 m-12 0 h24"/>
+    	<path id="v2c-s2" d="M25.25 18 m0 57 m-12 0 h24"/>
+    	<path id="v2c-s3" d="M28.25 71 m6 -2 l12 8"/>
+    	<path id="v2c-s4" d="M71.75 18 m0 56 m-12 0 h24"/>
+    	<path id="v2c-s5" d="M71.75 18 m-12 0 h24"/>
+    	<path id="v2c-s6" d="M28.25 71 m30 -11 m-1.5 -1 l-6 -8"/>
+    	<path id="v2c-s" d="M25.25 18 v57 M28.25 71 l30 -11 M71.75 18 v56"/>
+    	<path id="v2c-t1" d="M49.25 24 m-12 0 h24"/>
+    	<path id="v2c-t2" d="M23.75 46 m0 -8 v16"/>
+    	<path id="v2c-t3" d="M49.25 24 m0 44 m-12 0 h24"/>
+    	<path id="v2c-t4" d="M23.75 46 m51 0 m-4.5 1 l-10.5 14"/>
+    	<path id="v2c-t5" d="M74.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-t6" d="M74.75 16 m-12 0 h24"/>
+    	<path id="v2c-t" d="M74.75 16 v64 M23.75 46 h51 M49.25 24 v44"/>
+    	<path id="v2c-th1" d="M35.75 20 m-12 0 h24"/>
+    	<path id="v2c-th2" d="M22.25 50 m-4.5 -8 v16"/>
+    	<path id="v2c-th3" d="M35.75 20 m-4.5 55 m-12 0 h24"/>
+    	<path id="v2c-th4" d="M62.75 20 m0 56 m-12 0 h24"/>
+    	<path id="v2c-th5" d="M22.25 50 m57 -8 m1.5 -8 v16"/>
+    	<path id="v2c-th6" d="M62.75 20 m-12 0 h24"/>
+    	<path id="v2c-th" d="M22.25 50 l57 -8 M35.75 20 c0 20 0 35 -4.5 55 M62.75 20 v56"/>
+    	<path id="v2c-tr1" d="M29.75 20 m0 -8 v16"/>
+    	<path id="v2c-tr2" d="M47.75 20 m-1.5 3 l-18 12"/>
+    	<path id="v2c-tr3" d="M23.75 45 m0 -8 v16"/>
+    	<path id="v2c-tr4" d="M47.75 20 m0 58 m-12 0 h24"/>
+    	<path id="v2c-tr5" d="M23.75 45 m51 0 m0 -8 v16"/>
+    	<path id="v2c-tr6" d="M29.75 20 m39 0 m0 -8 v16"/>
+    	<path id="v2c-tr" d="M47.75 20 v58 M29.75 20 h39 M23.75 45 h51"/>
+    	<path id="v2c-v1" d="M23.75 20 m-12 0 h24"/>
+    	<path id="v2c-v2" d="M23.75 20 m0 50 m-3 4 l21 -14"/>
+    	<path id="v2c-v3" d="M76.25 15 m-36 70 m-12 1 h24"/>
+    	<path id="v2c-v4" d="M40.25 28 m42 50 m7.5 -2 l-19.5 8"/>
+    	<path id="v2c-v5" d="M76.25 15 m-12 -1 h24"/>
+    	<path id="v2c-v6" d="M40.25 28 m3 -8 l-9 15"/>
+    	<path id="v2c-v" d="M23.75 20 v50 M76.25 15 c-6 22 -10.5 45 -36 70 M40.25 28 c0 0 22.5 24 42 50"/>
+    	<path id="v2c-x1" d="M25.25 18 m0 -8 v16"/>
+    	<path id="v2c-x2" d="M67.25 19 m-15 51 m0 -4 l-12 -10"/>
+    	<path id="v2c-x3" d="M23.75 74 m0 -8 v16"/>
+    	<path id="v2c-x4" d="M23.75 74 m54 0 m0 -8 v16"/>
+    	<path id="v2c-x5" d="M67.25 19 m0 6 l12 10"/>
+    	<path id="v2c-x6" d="M25.25 18 m48 0 m4.5 -8 v16"/>
+    	<path id="v2c-x" d="M25.25 18 h48 M67.25 19 l-15 51 M23.75 74 h54"/>
+    	<path id="v2c-UU" d="M-28.75 22 h67.5 v1 c0 0 -22.5 35 -82.5 55 M-21.25 27 c0 0 21 33 75 50"/>
+    	<path id="v2c-II" d="M-28.75 22 v55 l67.5 -4 M38.75 22 v55"/>
+    	<path id="v2c-U" d="M38.75 22 c0 0 -22.5 35 -82.5 55 M-28.75 22 c0 0 22.5 35 82.5 55"/>
+    	<path id="v2c-I" d="M11.75 15 l-12 68 M-28.75 35 l75 8 M-33.25 58 l75 8"/>
+    	<path id="v2c-M" d="M-33.25 18 h82.5 m-12 20 c0 0 -18 20 -69 45 M-21.25 37 c0 0 18 20 63 46"/>
+    	<path id="v2c-N" d="M-36.25 15 v70 M-33.25 45 l85.5 4 M13.25 20 v60"/>
+    	<path id="v2c-P" d="M16.25 15 c0 0 -15 30 -45 63 M-36.25 80 l90 0 M-24.25 24 l60 40"/>
+    	<path id="v2c-C" d="M-36.25 37 h82.5 M-36.25 63 h82.5 M46.25 15 v70"/>
+    	<path id="v2c-T" d="M-40.75 50 l87 -4 M-1.75 20 v60 M46.25 15 v70"/>
+    	<path id="v2c-NG" d="M-43.75 20 h99 M-15.25 20 c0 20 0 40 -15 60 M26.75 20 v60"/>
+    	<path id="v2c-NH" d="M-43.75 45 l99 10 M-15.25 20 c0 20 0 40 -15 60 M26.75 20 v60"/>
+    	<path id="v2c-CH" d="M5.75 15 l12 68 M-28.75 40 l75 -8 M-24.25 64 l75 -8"/>
 
     	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
     	</defs>
@@ -558,9 +751,11 @@ class Qatt {
 
   _renderSvg(root, initial, vowel, final, tone, isCoda) {
     const svg = document.createElementNS(this.svgns, "svg");
+    const rhymeAlone = !initial && !!vowel && !isCoda && !(tone > 0) && !final; // nothing but the rhyme
+    const toneAlone = !initial && !vowel && !final && !isCoda && tone > 0 && tone <= 8; // nothing but a tone mark, e.g. ",,,5"
     let g;
 
-    if (initial || vowel) {
+    if (initial || vowel || toneAlone) {
       g = document.createElementNS(this.svgns, "g");
       this._useG(g, "square");
       svg.appendChild(g);
@@ -579,19 +774,20 @@ class Qatt {
 
     if (vowel) {
       let vStr = vowel;
+      const rhymePrefix = rhymeAlone ? RHYME_ALONE_PREFIX : PREFIX; // a rhyme without anything else uses the centred copies of the glyphs
       if (vStr.charAt(0) === "w") {
         vStr = vStr.substr(1);
         this._useG(g, `${PREFIX}${initial}-medial`);
       }
       if (!"aeiouy".includes(vStr[0]) && /\d$/.test(vStr)) {
-        this._useG(g, PREFIX + vStr.replace(/\d/, ""));
+        this._useG(g, rhymePrefix + vStr.replace(/\d/, ""));
         if (tone || final) {
 	      const qt = parseInt(tone || final || 0);
           if (qt) this._useG(g, "qt" + (qt == 8 ? 0 : qt));
         }
         tone = "";
       }
-      this._useG(g, PREFIX + vStr);
+      this._useG(g, rhymePrefix + vStr);
     }
 
     svg.setAttribute("viewBox", "-10 -25 120 125");
@@ -604,16 +800,16 @@ class Qatt {
       const nobr = root.tagName === "NOBR" ? root : document.createElement("nobr");
       nobr.append(svg);
       if (nobr !== root) root.appendChild(nobr);
-      this._handleTones(nobr, initial, vowel, final, tone, g);
+      this._handleTones(nobr, initial, vowel, final, tone, g, toneAlone);
     } else {
-      this._handleTones(root, initial, vowel, final, tone, g);
+      this._handleTones(root, initial, vowel, final, tone, g, toneAlone);
     }
     return g;
   }
 
-  _handleTones(root, initial, vowel, final, tone, g) {
+  _handleTones(root, initial, vowel, final, tone, g, standalone) {
     if (g && tone != null && tone !== "" && tone > 0 && tone <= 8) {
-      this._useG(g, "qt" + (tone == 8 ? 0 : tone));
+      this._useG(g, (standalone ? "qs" : "qt") + (tone == 8 ? 0 : tone));
     }
     if (final) {
       this._renderSvg(root, "", final.toUpperCase(), 0, null, true);
