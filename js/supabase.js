@@ -8,6 +8,10 @@ await s.saveScore(username, score, sunflowers);
 await s.getLeaderboard(topLimit = 20, neighborBuffer = 5);
 await s.getDisplayName();         // the name in the leaderboard (null if there is none yet)
 await s.setDisplayName(name);     // { name } or { error } (error.code 'name_taken', 'name_invalid'); names are unique, ignoring case
+await s.getProfile();            // { name, score } of the user (name null if there is none yet)
+await s.getProgress();            // { rows: [{ key, correct, wrong }] } of the practice, kept on the server (db/practice_progress.sql)
+await s.recordAnswer(key, true);  // counts an answer on the server, gives { data: { correct, wrong, score } }
+await s.importProgress(stats);    // once: takes over the progress of the browser
 s.suggestedName();                // a first suggestion from the account (first name or the part of the email before the @)
 await s.signInWithGoogle();
 await s.signInWithEmail(email);   // sends a link
@@ -123,12 +127,47 @@ class SupabaseService {
     return null;
   }
 
+  // name (null if there is none yet) and score of the user
+  async getProfile() {
+    if (!this.client || !this.user) return null;
+    const { data, error } = await this.client.from('profiles').select('username, score').eq('user_id', this.user.id).maybeSingle();
+    if (error) return null;
+    const name = data && data.username;
+    return { name: name && name != 'Anonymous' ? name : null, score: (data && data.score) || 0 };
+  }
+
   // the name of the user in the leaderboard, null if there is none yet
   async getDisplayName() {
-    if (!this.client || !this.user) return null;
-    const { data } = await this.client.from('profiles').select('username').eq('user_id', this.user.id).maybeSingle();
-    const name = data && data.username;
-    return name && name != 'Anonymous' ? name : null;
+    const profile = await this.getProfile();
+    return profile ? profile.name : null;
+  }
+
+  // --- practice: progress and score are kept on the server, see db/practice_progress.sql ---
+
+  // all words of the user with their counts: { rows: [{ key, correct, wrong }] } or { error }
+  async getProgress() {
+    if (!this.client || !this.user) return { error: new Error('Not available right now.') };
+    const rows = [];
+    for (let from = 0; ; from += 1000) { // the server gives 1000 rows at most
+      const { data, error } = await this.client.from('practice_progress').select('key, correct, wrong').order('key').range(from, from + 999);
+      if (error) return { error };
+      rows.push(...data);
+      if (data.length < 1000) return { rows };
+    }
+  }
+
+  // counts one answer on the server (and changes the score there): { data: { correct, wrong, score } } or { error }
+  async recordAnswer(key, correct) {
+    if (!this.client || !this.user) return { error: new Error('Not available right now.') };
+    const { data, error } = await this.client.rpc('practice_answer', { p_key: key, p_correct: !!correct });
+    return error ? { error } : { data };
+  }
+
+  // takes over the progress that was kept in the browser, once per account: { data: { imported } } or { error }
+  async importProgress(stats) {
+    if (!this.client || !this.user) return { error: new Error('Not available right now.') };
+    const { data, error } = await this.client.rpc('practice_import', { p_stats: stats });
+    return error ? { error } : { data };
   }
 
   // a first suggestion for the name: the first name of the account or the part of the email before the @
