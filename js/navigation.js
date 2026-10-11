@@ -7,7 +7,7 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "QATT Introduction", url: "/qatt/intro.html", icon: "bi-file-earmark" },
+                    { name: "Home", url: "/qatt/index.html", icon: "bi-house" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
                     { name: "Practise QATT", url: "/qatt/quiz/qatt.html", icon: "bi-mortarboard" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
@@ -146,7 +146,7 @@
 
         const sectionsHtml = navConfig.sections.map(section => {
             const linksHtml = section.links.map(link => {
-                const isActive = currentPath === link.url;
+                const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
                 return `<a href="${relativeLinkPrefix}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
                             <i class="bi ${link.icon}"></i> ${link.name}
                         </a>`;
