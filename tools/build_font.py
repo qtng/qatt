@@ -11,13 +11,13 @@ from fontTools.fontBuilder import FontBuilder
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
-SY = 8.5                       # font units per svg unit (vertical)
+SY = 10.4                      # font units per svg unit (vertical): the glyphs fill about 92 % of the em square
 SX = SY * (13 / 15) / (120 / 125)  # the page stretches the 120x125 viewBox to 13:15
-X0, Y0 = 500 - 50 * SX, 870    # svg (0,0) -> font; the 0..100 box is centred in the advance
-STROKE, STROKE_TONE = 48, 36   # font units
+X0, Y0 = 500 - 50 * SX, 966    # svg (0,0) -> font: box centred in the advance, glyph bottoms close to the baseline, tops at about 0.89 em
+STROKE, STROKE_TONE = 59, 44   # font units
 ADV = 1000
 
-data = json.load(open(SRC))['res']
+data = json.load(open(SRC))  # font/glyphs.json
 
 def outline(defs, width):
     out = pathops.Path()
@@ -32,9 +32,8 @@ def outline(defs, width):
 
 glyphs, cmap, order = {}, {}, ['.notdef']
 glyphs['.notdef'] = TTGlyphPen(None).glyph()
-for k in sorted(data, key=int):
-    g, o = data[k], int(k)
-    defs = [df['d'] for u, df in zip(g['uses'], g['defs']) if u != 'square']
+for g in data:
+    o, defs = g['o'], g['d']
     tone = g['t'] == 'tone'
     path = outline(defs, STROKE_TONE if tone else STROKE)
     pen = TTGlyphPen(None)
@@ -46,7 +45,13 @@ fb = FontBuilder(UPM, isTTF=True)
 fb.setupGlyphOrder(order)
 fb.setupCharacterMap(cmap)
 fb.setupGlyf(glyphs)
-fb.setupHorizontalMetrics({n: (ADV, 0) for n in order})
+# left side bearing must equal xMin, else FreeType (Android, Linux) shifts the glyph
+def lsb(n):
+    gl = glyphs[n]
+    if not gl.numberOfContours: return 0
+    gl.recalcBounds(None)
+    return gl.xMin
+fb.setupHorizontalMetrics({n: (ADV, lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
 fb.setupNameTable({'familyName': 'QATT Prototype', 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
