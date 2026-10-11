@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QATT Brush</title>
-  <meta name="description" content="Editor for brush strokes (Kaiti style) on the QATT shapes, with every combination shown live.">
+  <meta name="description" content="Editor for brush strokes (Kaiti style) on the QATT shapes: a library of named strokes and the symbols made of them, with every combination shown live.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <script src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
@@ -21,52 +21,67 @@
     }
     .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); }
     .hero .han { color: var(--cinnabar); font-size: 1.1rem; letter-spacing: .5em; padding-left: .5em; }
-    .hero .lead { max-width: 44rem; color: #4a3d30; font-size: 1.05rem; }
+    .hero .lead { max-width: 46rem; color: #4a3d30; font-size: 1.05rem; }
     .panel { background: #fff; border: 1px solid #e8dcc0; border-radius: .6rem; padding: .8rem; }
     .panel h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.1rem; margin: 0 0 .6rem; }
     .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
     .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    .tabs .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    #views .btn { border-radius: 2rem; padding: .35rem 1.2rem; }
 
     svg.glyph { width: 100%; height: auto; aspect-ratio: 128 / 136; fill: var(--ink); }
     svg.glyph path.faint { fill: #cbbd9f; }
 
-    #groups { flex-wrap: wrap; }
-    #groups .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-    #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr)); gap: .3rem; max-height: 34rem; overflow-y: auto; padding: .1rem; }
-    #list.dense { grid-template-columns: repeat(6, 1fr); }
-    #list .cell { border: 1px solid transparent; background: none; border-radius: .4rem; padding: .25rem .2rem .1rem; display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: .75rem; line-height: 1.1; }
-    #list .cell:hover { border-color: var(--line); }
-    #list .cell.active { border-color: var(--cinnabar); background: rgba(168, 54, 42, .06); }
-    #list .cell.edited span::after { content: " •"; color: var(--cinnabar); }
-    #list .cell svg { width: 2.4rem; }
+    #sym-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr)); gap: .3rem; }
+    .cell, .lib-cell { border: 1px solid transparent; background: none; border-radius: .4rem; padding: .25rem .2rem .1rem; display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: .78rem; line-height: 1.15; }
+    .cell:hover, .lib-cell:hover { border-color: var(--line); }
+    .cell.active, .lib-cell.active { border-color: var(--cinnabar); background: rgba(168, 54, 42, .06); }
+    .cell.edited span::after { content: " •"; color: var(--cinnabar); }
+    .cell svg { width: 2.5rem; }
+    #lib-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: .3rem; }
+    .lib-cell svg { width: 3.2rem; aspect-ratio: 1; }
+    .lib-cell span { text-align: center; color: var(--ink); }
+    .lib-cell small { display: block; color: var(--muted); }
 
-    #canvas { width: 100%; max-width: 34rem; aspect-ratio: 130 / 135; display: block; margin: 0 auto; touch-action: none; user-select: none; background: #fffdf8; border: 1px solid #e8dcc0; border-radius: .4rem; }
-    #canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
-    #canvas .grid .box { fill: none; stroke: var(--line); stroke-width: .35; stroke-dasharray: 1.5 1.5; }
-    #canvas .ctx { fill: #b9ab8f; }
-    #canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
-    #canvas .stroke { fill: var(--ink); cursor: move; }
-    #canvas .stroke.current { fill: var(--cinnabar); }
-    #canvas .skel { fill: none; stroke: #fff; stroke-width: .35; opacity: .9; pointer-events: none; }
-    #canvas .handles line { stroke: #3d8bd4; stroke-width: .3; }
-    #canvas .handles .anchor, #canvas .handles .ctrl { fill: #fff; stroke: #3d8bd4; stroke-width: .45; cursor: grab; }
-    #canvas .handles .ctrl { fill: #3d8bd4; }
-    #canvas .handles .on { fill: var(--cinnabar); stroke: var(--cinnabar); }
-    #canvas .guide { stroke: #e0457b; stroke-width: .3; stroke-dasharray: 1 1; }
+    .edit-canvas { width: 100%; max-width: 32rem; display: block; margin: 0 auto; touch-action: none; user-select: none; background: #fffdf8; border: 1px solid #e8dcc0; border-radius: .4rem; }
+    #canvas { aspect-ratio: 130 / 135; }
+    #lib-canvas { aspect-ratio: 1; max-width: 26rem; }
+    .edit-canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
+    .edit-canvas .grid .box { fill: none; stroke: var(--line); stroke-width: .35; stroke-dasharray: 1.5 1.5; }
+    .edit-canvas .ctx { fill: #b9ab8f; }
+    .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
+    .edit-canvas .stroke { fill: var(--ink); cursor: move; }
+    .edit-canvas .stroke.current { fill: var(--cinnabar); }
+    .edit-canvas .stroke.locked { cursor: default; pointer-events: none; opacity: .55; }
+    .edit-canvas .mark { fill: var(--ink); pointer-events: none; }
+    .edit-canvas .mark.current { fill: var(--cinnabar); pointer-events: auto; cursor: move; }
+    .edit-canvas .handles line { stroke: #3d8bd4; stroke-width: .3; }
+    .edit-canvas .handles .chord { stroke-dasharray: 1 1; }
+    .edit-canvas .handles .skel { fill: none; stroke: #fff; stroke-width: .35; }
+    .edit-canvas .handles circle, .edit-canvas .handles .ctrl { fill: #fff; stroke: #3d8bd4; stroke-width: .5; cursor: grab; }
+    .edit-canvas .handles circle.start { fill: #3d8bd4; }
+    .edit-canvas .handles .ctrl { fill: #3d8bd4; }
+    .edit-canvas .guide { stroke: #e0457b; stroke-width: .3; stroke-dasharray: 1 1; }
 
-    #strokes { display: flex; flex-wrap: wrap; gap: .3rem; }
-    .slider { display: grid; grid-template-columns: 9.5rem 1fr 2.6rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
+    .item-row { display: grid; grid-template-columns: 5.2rem 1fr auto; gap: .4rem; align-items: center; padding: .15rem .3rem; border-radius: .4rem; }
+    .item-row.active { background: rgba(168, 54, 42, .08); }
+    .item-row .item-label { color: var(--ink); text-decoration: none; text-align: left; padding-left: 0; }
+    .item-row.active .item-label { color: var(--cinnabar); font-weight: 600; }
+    #mark-buttons { display: flex; gap: .3rem; flex-wrap: wrap; }
+    .slider { display: grid; grid-template-columns: 9.5rem 1fr 2.8rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
     .slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
     .slider input { width: 100%; accent-color: var(--cinnabar); }
     .ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
     .ctx-grid label { font-size: .8rem; color: var(--muted); }
 
-    #combos, #sample-out { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
-    .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .6rem); cursor: default; }
+    #combos, #sample-out, #lib-uses { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
+    .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .9rem); }
     .combo svg { width: var(--combo); }
-    .combo span { font-size: .78rem; color: var(--muted); line-height: 1.2; text-align: center; }
+    .combo span { font-size: .75rem; color: var(--muted); line-height: 1.2; text-align: center; }
+    #lib-uses .combo { cursor: pointer; }
     #sample-out svg { width: calc(var(--combo) * 1.1); }
     .hint { font-size: .82rem; color: var(--muted); }
+    [hidden] { display: none !important; }
     kbd { background: #efe6d2; color: var(--ink); font-size: .75rem; }
   </style>
 </head>
@@ -75,59 +90,83 @@
   <div class="container text-center">
     <div class="han mb-1">國音新字</div>
     <h1 class="mb-2">QATT Brush</h1>
-    <p class="lead mx-auto mb-0">Lay brush strokes over the centre lines of the QATT shapes and see every combination change while you edit.
+    <p class="lead mx-auto mb-3">Build a library of named brush strokes, then make every symbol from three of them and move only their end points.
       Your work is kept in this browser; export it as JSON to keep a copy.</p>
+    <div class="btn-group tabs" id="views" role="group" aria-label="View">
+      <button type="button" class="btn btn-outline-dark" data-view="symbols">Symbols</button>
+      <button type="button" class="btn btn-outline-dark" data-view="library">Stroke library</button>
+    </div>
   </div>
 </header>
 
 <main class="container-fluid py-3 px-3 px-lg-4">
   <div class="row g-3">
-    <div class="col-lg-3">
+    <!-- symbols view -->
+    <div class="col-lg-3" data-only="symbols">
       <div class="panel">
-        <div class="btn-group btn-group-sm d-flex mb-2" id="groups" role="group" aria-label="Path groups">
-          <button type="button" class="btn btn-outline-dark" data-group="rhyme">Rhymes</button>
-          <button type="button" class="btn btn-outline-dark" data-group="onset">Onsets</button>
-          <button type="button" class="btn btn-outline-dark" data-group="medial">Medials</button>
-          <button type="button" class="btn btn-outline-dark" data-group="mark">Marks</button>
-          <button type="button" class="btn btn-outline-dark" data-group="tone">Tones</button>
-          <button type="button" class="btn btn-outline-dark" data-group="coda">Codas</button>
+        <div class="btn-group btn-group-sm d-flex mb-2 tabs" id="forms" role="group" aria-label="Form">
+          <button type="button" class="btn btn-outline-dark" data-form="rhyme">Rhyme</button>
+          <button type="button" class="btn btn-outline-dark" data-form="onset">Onset</button>
+          <button type="button" class="btn btn-outline-dark" data-form="centred">Centred</button>
         </div>
-        <div id="list"></div>
-        <p class="hint mt-2 mb-0">A dot after the name marks a path you changed.</p>
+        <div id="sym-list"></div>
+        <p class="hint mt-2 mb-0">A dot after the name marks a symbol you changed. Until you change it, a centred form follows its rhyme form.</p>
       </div>
     </div>
-
-    <div class="col-lg-5">
+    <div class="col-lg-5" data-only="symbols">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-          <h2 class="me-auto mb-0" id="path-name"></h2>
+          <h2 class="me-auto mb-0" id="sym-name"></h2>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="undo" title="Undo (Ctrl+Z)">Undo</button>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
         </div>
-        <svg id="canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label><input type="checkbox" id="view-orig"> Original lines</label>
-          <label><input type="checkbox" id="view-skel"> Centre lines</label>
-          <label><input type="checkbox" id="view-snap"> Snap to other strokes</label>
+          <label><input type="checkbox" id="view-snap"> Snap to other end points</label>
         </div>
-        <p class="hint mt-1 mb-2">Drag a stroke to move it, the round handles to move its ends and the square ones to bend it.
-          Arrow keys move the selected stroke or point (<kbd>Shift</kbd> 2, <kbd>Alt</kbd> ¼); hold <kbd>Alt</kbd> while dragging to stop snapping.</p>
-        <div id="strokes" class="mb-2"></div>
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-          <select class="form-select form-select-sm w-auto" id="st-kind" aria-label="Brush form of the stroke"></select>
-          <label class="small"><input type="checkbox" id="st-r"> Reverse direction</label>
+        <p class="hint mt-1 mb-2">Drag a stroke to move it and its end points to place it; the filled point is where the brush starts.
+          <kbd>Shift</kbd> while dragging an end keeps the length, <kbd>Alt</kbd> stops snapping. Arrow keys move the selected stroke.</p>
+        <div id="items" class="d-grid gap-1 mb-2"></div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="small">Marks</span>
+          <div id="mark-buttons"></div>
+          <label class="small d-flex align-items-center gap-2 ms-auto">Visibility <input type="range" id="mark-opacity" min="0" max="1" step="0.05" value="0.3"></label>
         </div>
-        <label class="slider mb-2"><span>Stroke width</span><input type="range" id="st-k" min="0.4" max="1.8" step="0.01"><output id="st-k-v"></output></label>
-        <div class="d-flex flex-wrap gap-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="st-straight">Straighten stroke</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="st-reset">Reset stroke</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="path-reset">Reset path</button>
+        <div id="mark-controls" class="d-flex flex-wrap align-items-center gap-2 mt-2" hidden>
+          <select class="form-select form-select-sm w-auto" id="mark-lib" aria-label="Library stroke of the mark"></select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="mark-left" title="Turn 5° to the left">⟲</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="mark-right" title="Turn 5° to the right">⟳</button>
+          <span class="hint">Only this mark can move now; press its button again to lock it.</span>
         </div>
+        <div class="mt-3"><button type="button" class="btn btn-sm btn-outline-secondary" id="sym-reset">Reset symbol</button></div>
       </div>
     </div>
 
+    <!-- library view -->
+    <div class="col-lg-3" data-only="library">
+      <div class="panel">
+        <h2>Strokes</h2>
+        <div id="lib-list"></div>
+      </div>
+    </div>
+    <div class="col-lg-5" data-only="library">
+      <div class="panel">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <input class="form-control form-control-sm" id="lib-name" aria-label="Name of the stroke" style="max-width: 16rem">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-copy">Duplicate</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-reset">Reset</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" id="lib-delete" title="Only unused strokes can be deleted">Delete</button>
+        </div>
+        <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
+        <p class="hint mt-2 mb-2">Drag the square handles to bend the stroke. The round ones only change this preview (direction and length).</p>
+        <div id="lib-fields" class="d-grid gap-1"></div>
+      </div>
+    </div>
+
+    <!-- both views -->
     <div class="col-lg-4">
-      <div class="panel mb-3">
+      <div class="panel mb-3" data-only="symbols">
         <h2>Context</h2>
         <div class="ctx-grid">
           <label>Onset<select class="form-select form-select-sm" id="ctx-onset"></select></label>
@@ -135,20 +174,11 @@
           <label>Mark<select class="form-select form-select-sm" id="ctx-mark"></select></label>
           <label>Tone<select class="form-select form-select-sm" id="ctx-tone"></select></label>
         </div>
-        <p class="hint mt-2 mb-0">The parts drawn around the selected path in the editor and in the combinations.</p>
+        <p class="hint mt-2 mb-0">The parts drawn around the symbol in the editor and in the combinations.</p>
       </div>
       <div class="panel mb-3">
         <div class="d-flex align-items-center mb-2"><h2 class="me-auto mb-0">Brush</h2><button type="button" class="btn btn-sm btn-link p-0" id="params-reset">Reset</button></div>
         <div id="params" class="d-grid gap-1"></div>
-      </div>
-      <div class="panel mb-3">
-        <div class="d-flex align-items-center gap-2 mb-2">
-          <h2 class="me-auto mb-0">Stroke forms</h2>
-          <select class="form-select form-select-sm w-auto" id="preset" aria-label="Stroke form"></select>
-          <button type="button" class="btn btn-sm btn-link p-0" id="preset-reset">Reset</button>
-        </div>
-        <div id="preset-fields" class="d-grid gap-1"></div>
-        <p class="hint mt-2 mb-0">A stroke form applies to every stroke that uses it. Widths are in units of the brush weight.</p>
       </div>
       <div class="panel">
         <h2>Save</h2>
@@ -161,7 +191,7 @@
       </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-12" data-only="symbols">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
           <h2 class="me-auto mb-0" id="combos-title"></h2>
@@ -172,6 +202,12 @@
         <hr class="my-3">
         <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
         <div id="sample-out"></div>
+      </div>
+    </div>
+    <div class="col-12" data-only="library">
+      <div class="panel">
+        <h2 id="lib-uses-title"></h2>
+        <div id="lib-uses"></div>
       </div>
     </div>
   </div>
