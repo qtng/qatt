@@ -138,7 +138,7 @@
             set(key, value) { try { localStorage.setItem('qatt_editor_' + key, value); } catch { /* storage may be blocked */ } }
         };
 
-        const parser = new VietnameseParser();
+        const parser = new VietnameseParser(); // the decoding of the glyphs: new VietnameseParser('qode') is the default, see VietnameseParser.DECODINGS
         new Qatt().observe('qatt-code');
 
         // ---------- text -> glyphs ----------
@@ -160,11 +160,11 @@
                 plain(line.slice(last, m.index));
                 last = m.index + m[0].length;
                 const parsed = parser.parse(m[0]);
-                if (!parsed) { plain(m[0]); continue; }
+                if (!parsed?.qatt) { plain(m[0]); continue; } // not Vietnamese, or a rhyme the decoding has no glyph for: stays as text
                 const word = document.createElement('span');
                 word.className = 'word';
                 const code = document.createElement('qatt-code');
-                code.textContent = parsed.code;
+                code.textContent = parsed.qatt;
                 const reading = document.createElement('span');
                 reading.className = 'reading';
                 reading.textContent = m[0];
@@ -176,7 +176,7 @@
         }
 
         function codesOf(text) {
-            return text.split('\n').map(line => [...line.matchAll(WORD)].map(m => parser.parse(m[0])?.code ?? m[0]).join(' ')).join('\n');
+            return text.split('\n').map(line => [...line.matchAll(WORD)].map(m => parser.parse(m[0])?.qatt ?? m[0]).join(' ')).join('\n');
         }
 
         let frame = 0;
