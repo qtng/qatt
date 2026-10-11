@@ -38,8 +38,10 @@ python3 tools/build_font.py font/glyphs.json font/qatt-prototype      # writes .
 
 Then raise the cache version of the font files in `font.html` (`?v=…`).
 
-**Brush variant.** With the export of `brush.html` (`font/brush.json`) as a third argument, the glyphs use its filled
-brush outlines of the same `qatt.js` paths instead of stroked centre lines (the stroke widths are then ignored):
+**Brush variant.** With the export of `brush.html` (`font/brush.json`) as a third argument, the glyphs get its brush
+instead of stroked centre lines. `tools/brush_outlines.js` (Node.js, uses `js/brush.js` and `js/brush-model.js` like the
+editor) lays the brush on the centre lines after they are squeezed and moved into place, so the half-width and stacked
+variants keep their stroke widths; the stroke width constants only scale the brush weight per variant:
 
 ```sh
 python3 tools/build_font.py font/glyphs.json font/qatt-brush font/brush.json     # writes font/qatt-brush.ttf / .woff2

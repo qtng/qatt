@@ -13,43 +13,10 @@
   const VIEWBOX = "-14 -28 128 136";   // the glyph box of qatt.js with room for the tone marks in the corners
   const clone = o => JSON.parse(JSON.stringify(o));
 
-  // ---- the original centre lines ----------------------------------------------------------------------------------------------
+  // ---- the model: original paths, default library and symbols (js/brush-model.js) ----------------------------------------------
   const ORIG = {};
   new DOMParser().parseFromString(defaultSvgDefs, "image/svg+xml").querySelectorAll("path[id]").forEach(p => ORIG[p.id] = p.getAttribute("d"));
-  const parsed = {};
-  const original = id => parsed[id] || (parsed[id] = ORIG[id] ? B.parse(ORIG[id]) : []);
-  const centred = ([x, y]) => [1.5 * x - 66.25, y];   // the v2c- copies of qatt.js: a rhyme alone, centred in the box
-
-  // ---- defaults: the library and the symbols made from the original paths ---------------------------------------------------------
-  // The standard library has five strokes; every original stroke goes to the nearest of them.
-  const DEF = (() => {
-    const sym = {}, slight = [];
-    const measure = piece => { const segs = B.normalize(piece.s); return Object.assign({ kind: B.classify(segs) }, B.fit(segs)); };
-    const keyOf = f => {
-      const bend = Math.max(Math.abs(f.h1), Math.abs(f.h2));
-      if (f.kind === "na") return "na";
-      if (f.kind === "shu" && bend < 0.025) return "shu";
-      if (f.kind === "shu" || f.kind === "pie") { if (f.kind === "shu" && bend < 0.1) slight.push(f); return "shu-slight"; }
-      return "heng";
-    };
-    for (const s of SHAPES) {
-      for (const id of ["v2-" + s, `v2-${s}-small`]) {
-        const strokes = original(id).map(p => { const f = measure(p); return { lib: keyOf(f), a: f.a, b: f.b }; });
-        const marks = (id.endsWith("-small") ? [`v2-${s}-medial`] : [1, 2, 3, 4, 5, 6].map(n => "v2-" + s + n))
-          .map(m => { const p = original(m)[0]; if (!p) return null; const f = measure(p); return { lib: "mark", a: f.a, b: f.b }; });
-        sym[id] = { strokes, marks };
-      }
-    }
-    const avg = k => Math.round(slight.reduce((a, x) => a + x[k], 0) / (slight.length || 1) * 1000) / 1000;
-    const lib = {
-      heng: Object.assign({}, B.DEFAULT_PRESETS.heng, { name: "Horizontal", h1: 0, h2: 0 }),
-      shu: Object.assign({}, B.DEFAULT_PRESETS.shu, { name: "Vertical", h1: 0, h2: 0 }),
-      "shu-slight": Object.assign({}, B.DEFAULT_PRESETS.shu, { name: "Vertical, slightly curved", h1: avg("h1"), h2: avg("h2") }),
-      na: Object.assign({}, B.DEFAULT_PRESETS.na, { name: "Right-falling", h1: 0, h2: 0 }),
-      mark: Object.assign({}, B.DEFAULT_PRESETS.line, { name: "Mark", h1: 0, h2: 0, w0: 0.8, ws: 0.85, wm: 0.8, we: 0.8, w1: 0.75 }),
-    };
-    return { lib, sym };
-  })();
+  const M = QattBrushModel(B, SHAPES, ORIG), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;
 
   // ---- state, history, storage --------------------------------------------------------------------------------------------------
   const fresh = () => ({ params: { weight: 7, contrast: 0.2, nib: 0 }, lib: clone(DEF.lib), sym: {} });
@@ -65,40 +32,16 @@
   function doRedo() { if (!redo.length) return; undo.push(JSON.stringify(state)); restore(redo.pop()); }
 
   // ---- symbols and outlines ----------------------------------------------------------------------------------------------------
-  const moveItem = (it, f) => it && Object.assign({}, it, { a: f(it.a), b: f(it.b) });
-  function symbolOf(id) {
-    if (state.sym[id]) return state.sym[id];
-    if (id.startsWith("v2c-")) { const r = symbolOf("v2-" + id.slice(4)); return { strokes: r.strokes.map(it => moveItem(it, centred)), marks: r.marks.map(it => moveItem(it, centred)), derived: true }; }
-    return DEF.sym[id];
-  }
+  const symbolOf = id => M.symbolOf(state, id);
   function editableSymbol(id) {
     if (!state.sym[id]) { state.sym[id] = clone(symbolOf(id)); delete state.sym[id].derived; }
     return state.sym[id];
   }
-  // which symbol and which part of it a qatt.js path id is
-  function target(id) {
-    let m;
-    if ((m = id.match(/^v2-(.+)-small$/)) && SHAPES.includes(m[1])) return { sym: id };
-    if ((m = id.match(/^v2-(.+)-medial$/)) && SHAPES.includes(m[1])) return { sym: `v2-${m[1]}-small`, mark: 0 };
-    if ((m = id.match(/^(v2c?)-(.+?)([1-6])$/)) && SHAPES.includes(m[2])) return { sym: `${m[1]}-${m[2]}`, mark: +m[3] - 1 };
-    if ((m = id.match(/^(v2c?)-(.+)$/)) && SHAPES.includes(m[2])) return { sym: id };
-    return null;
-  }
-  const placed = items => items.filter(Boolean).map(it => B.place(it.a, it.b, state.lib[it.lib] || state.lib.mark || DEF.lib.mark, state.lib[it.lib] ? it.lib : "mark"));
-  // the strokes of a path: placed library strokes for the symbols, the old automatic brush for tones and codas
-  function strokesOf(id) {
-    const t = target(id);
-    if (t) { const s = symbolOf(t.sym); return placed(t.mark === undefined ? s.strokes : [s.marks[t.mark]]); }
-    if (id.startsWith("v2c-")) return B.transform(original("v2-" + id.slice(4)), centred);
-    return original(id);
-  }
+  const placed = items => M.placed(state, items);
+  const strokesOf = id => M.strokesOf(state, id);
   const cache = new Map();
   function outlineOf(id) {
-    if (!cache.has(id)) {
-      const t = target(id);
-      cache.set(id, t ? B.outline(strokesOf(id), state.params, state.lib)
-        : B.outline(strokesOf(id), Object.assign({}, B.DEFAULT_PARAMS, state.params, { weight: state.params.weight * (/^q[ts]/.test(id) ? 0.7 : 1) })));
-    }
+    if (!cache.has(id)) cache.set(id, M.outline(state, id));
     return cache.get(id);
   }
   let frame = null;
