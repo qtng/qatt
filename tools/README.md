@@ -38,6 +38,13 @@ python3 tools/build_font.py font/glyphs.json font/qatt-prototype      # writes .
 
 Then raise the cache version of the font files in `font.html` (`?v=…`).
 
+**Brush variant.** With the export of `brush.html` (`font/brush.json`) as a third argument, the glyphs use its filled
+brush outlines of the same `qatt.js` paths instead of stroked centre lines (the stroke widths are then ignored):
+
+```sh
+python3 tools/build_font.py font/glyphs.json font/qatt-brush font/brush.json     # writes font/qatt-brush.ttf / .woff2
+```
+
 **Design constants** at the top of `build_font.py`: glyph size (`SY`, `GROW`), position (`Y0`), stroke widths
 (`STROKE`, `STROKE_TONE`, `STROKE_HALF`, `STROKE_MARK`, `STROKE_UP`, `STROKE_LOW`), the share of the upper glyph of a
 Tham Thư (`STACK_UP`, `STACK_UP_X`) and the squeeze of the joiner halves (`HALF_X`).
