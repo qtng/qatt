@@ -164,6 +164,10 @@
           <button type="button" class="btn btn-sm btn-outline-danger" id="lib-delete" title="Only unused strokes can be deleted">Delete</button>
         </div>
         <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="d-flex flex-wrap gap-3 mt-2 small">
+          <label class="d-flex align-items-center gap-2">Handles visible <input type="range" id="handle-opacity" min="0" max="1" step="0.05" value="1"></label>
+          <label class="d-flex align-items-center gap-2">Lines visible <input type="range" id="line-opacity" min="0" max="1" step="0.05" value="1"></label>
+        </div>
         <p class="hint mt-2 mb-2">Drag the square handles to bend the stroke. The round ones only change this preview (direction and length).</p>
         <div id="lib-fields" class="d-grid gap-1"></div>
       </div>

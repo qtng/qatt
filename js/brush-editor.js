@@ -413,7 +413,7 @@
     }
   }
   const libCanvas = document.getElementById("lib-canvas");
-  let libDrag = null, libRef = null;
+  let libDrag = null, libRef = null, handleOpacity = 1, lineOpacity = 1;
   function drawLibCanvas() {
     libCanvas.innerHTML = "";
     const e = state.lib[libSel]; if (!e) return;
@@ -422,11 +422,14 @@
     if (!libRef) { const [dx, dy] = libChord(libSel), L = Math.hypot(dx, dy) || 1, f = 60 / L; libRef = { a: [50 - dx * f / 2, 40 - dy * f / 2], b: [50 + dx * f / 2, 40 + dy * f / 2] }; }
     const st = placed([{ lib: libSel, a: libRef.a, b: libRef.b }]);
     el("path", { d: B.outline(st, state.params, state.lib), class: "stroke current" }, libCanvas);
-    const s = st[0].s[0], h = el("g", { class: "handles" }, libCanvas);
-    el("line", { x1: s[0], y1: s[1], x2: s[6], y2: s[7], class: "chord" }, h);
-    el("path", { d: B.skeleton(st), class: "skel" }, h);
-    el("line", { x1: s[0] + (s[6] - s[0]) / 3, y1: s[1] + (s[7] - s[1]) / 3, x2: s[2], y2: s[3] }, h);
-    el("line", { x1: s[0] + (s[6] - s[0]) * 2 / 3, y1: s[1] + (s[7] - s[1]) * 2 / 3, x2: s[4], y2: s[5] }, h);
+    const s = st[0].s[0], lines = el("g", { class: "handles" }, libCanvas);
+    lines.style.opacity = lineOpacity;
+    el("line", { x1: s[0], y1: s[1], x2: s[6], y2: s[7], class: "chord" }, lines);
+    el("path", { d: B.skeleton(st), class: "skel" }, lines);
+    el("line", { x1: s[0] + (s[6] - s[0]) / 3, y1: s[1] + (s[7] - s[1]) / 3, x2: s[2], y2: s[3] }, lines);
+    el("line", { x1: s[0] + (s[6] - s[0]) * 2 / 3, y1: s[1] + (s[7] - s[1]) * 2 / 3, x2: s[4], y2: s[5] }, lines);
+    const h = el("g", { class: "handles" }, libCanvas);
+    h.style.opacity = handleOpacity;
     for (const [k, x, y] of [["h1", s[2], s[3]], ["h2", s[4], s[5]]]) {
       const r = el("rect", { x: x - 1.6, y: y - 1.6, width: 3.2, height: 3.2, class: "ctrl" }, h);
       r.addEventListener("pointerdown", ev => { ev.preventDefault(); begin(); libDrag = { k }; libCanvas.setPointerCapture(ev.pointerId); });
@@ -436,6 +439,8 @@
       c.addEventListener("pointerdown", ev => { ev.preventDefault(); libDrag = { end: k }; libCanvas.setPointerCapture(ev.pointerId); });
     }
   }
+  document.getElementById("handle-opacity").addEventListener("input", e => { handleOpacity = +e.target.value; drawLibCanvas(); });
+  document.getElementById("line-opacity").addEventListener("input", e => { lineOpacity = +e.target.value; drawLibCanvas(); });
   libCanvas.addEventListener("pointermove", ev => {
     if (!libDrag) return;
     const p = toSvg(libCanvas, ev);
