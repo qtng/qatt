@@ -9,7 +9,6 @@
                 links: [
                     { name: "Home", url: "/qatt/index.html", icon: "bi-house" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
-                    { name: "Practise QATT", url: "/qatt/quiz/qatt.html", icon: "bi-mortarboard" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
                     //{ name: "QATT Reference", url: "/qatt/reference.html", icon: "bi-book-half" },
@@ -113,14 +112,7 @@
 
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
-        let highscore;
-        try {
-            highscore = Number(JSON.parse(localStorage.getItem('qatt_stats')||"{}")._score||0);
-        } catch{
-            highscore = 0;
-        }
-        const isQuiz = currentPath.endsWith("/app.html");
-        
+
         const header = document.createElement('nav');
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
         header.innerHTML = `
@@ -129,9 +121,6 @@
                     ${navConfig.title}
                 </a>
                 <div class="ms-auto d-flex align-items-center">
-                    <a style="background:rgba(0,255,0,0.2)" href="${relativeLinkPrefix}/qatt/quiz/qatt.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-light text-decoration-none small me-2 py-1 px-2">
-                        🏆 ${highscore}
-                    </a>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
                     </button>
