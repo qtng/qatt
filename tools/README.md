@@ -49,11 +49,13 @@ python3 tools/build_font.py font/glyphs.json font/qatt-brush font/brush.json    
 
 **Design constants** at the top of `build_font.py`: glyph size (`SY`, `GROW`), position (`Y0`), stroke widths
 (`STROKE`, `STROKE_TONE`, `STROKE_HALF`, `STROKE_MARK`, `STROKE_UP`, `STROKE_LOW`), the share of the upper glyph of a
-Tham Thư (`STACK_UP`, `STACK_UP_X`) and the squeeze of the joiner halves (`HALF_X`).
+Tham Thư (`STACK_UP`, `STACK_UP_X`) and the extent of a joined pair (`PAIR_X0`, `PAIR_X1`).
 
 **What the font does** (OpenType `ccmp`, in `build_font.py`):
 
-- *A* `U+F009B` *B* (component joiner): both become half-width variants, the joiner has no width; one cell, *A* left, *B* right.
+- *A* `U+F009B` *B* (component joiner): one cell like a syllable of `qatt.js`, the joiner has no width; *A* becomes its
+  onset form in the left half (`.left`, a mark of *A* moved from the rhyme form onto the onset form), *B* its rhyme form in
+  the right half (`.right`).
 - *A* `U+F009A` *B* (Tham Thư combiner): *A* (a single form or a joined pair) goes into the lower 55 %, *B* into the upper
   45 % of the cell; the combiner has no width.
 - A tone mark after any character becomes a zero-width variant (the small form of `qatt.js`) that lies over the preceding cell.
@@ -69,7 +71,7 @@ import uharfbuzz as hb
 font = hb.Font(hb.Face(hb.Blob.from_file_path('font/qatt-prototype.ttf')))
 buf = hb.Buffer(); buf.add_str('\U000F0016\U000F009B\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
 print([(font.glyph_to_string(i.codepoint), p.x_advance) for i, p in zip(buf.glyph_infos, buf.glyph_positions)])
-# [('uF0016.half', 500), ('uF009B.zw', 0), ('uF0000.half', 500)]
+# [('uF0016.left', 500), ('uF009B.zw', 0), ('uF0000.right', 500)]
 ```
 
 ## Character data (`unicode.html`): `update_unicode_data.py`
