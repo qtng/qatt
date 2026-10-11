@@ -9,7 +9,6 @@
                 links: [
                     { name: "Home", url: "/qatt/index.html", icon: "bi-house" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
-                    { name: "Practise QATT", url: "/qatt/quiz/qatt.html", icon: "bi-mortarboard" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
                     //{ name: "QATT Reference", url: "/qatt/reference.html", icon: "bi-book-half" },
@@ -120,6 +119,9 @@
             highscore = 0;
         }
         const isQuiz = currentPath.endsWith("/app.html");
+        // The score badge (a link to the quiz, showing the saved high score) is hidden for now but kept on purpose:
+        // the quiz is the part of the site that talks to Supabase. Set showBadge = true again after the app is reworked.
+        const showBadge = false;
         
         const header = document.createElement('nav');
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
@@ -129,7 +131,7 @@
                     ${navConfig.title}
                 </a>
                 <div class="ms-auto d-flex align-items-center">
-                    <a style="background:rgba(0,255,0,0.2)" href="${relativeLinkPrefix}/qatt/quiz/qatt.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-light text-decoration-none small me-2 py-1 px-2">
+                    <a style="background:rgba(0,255,0,0.2)" href="${relativeLinkPrefix}/qatt/quiz/qatt.html" class="${(isQuiz || !showBadge)?'d-none':''} badge rounded-pill border border-success text-light text-decoration-none small me-2 py-1 px-2">
                         🏆 ${highscore}
                     </a>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
