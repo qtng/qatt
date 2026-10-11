@@ -2,6 +2,7 @@
 // get the brush of an export of brush.html, so a squeezed glyph keeps its stroke widths.
 // Usage: node tools/brush_outlines.js font/brush.json jobs.json out.json
 //   jobs.json: [{ids: [qatt.js path ids], m: [sx, sy, tx, ty] (x -> sx*x + tx, y -> sy*y + ty, svg units), w: weight factor}]
+//              an id "v2-X3@onset" is the mark v2-X3 of the rhyme form moved onto the onset form (the box of v2-X onto v2-X-small)
 //   out.json:  [SVG path data of the filled outline of each job]
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const root = path.join(__dirname, "..");
@@ -18,6 +19,23 @@ const [brushFile, jobsFile, outFile] = process.argv.slice(2);
 const exp = JSON.parse(fs.readFileSync(brushFile, "utf8"));
 const state = { params: exp.params, lib: exp.lib, sym: exp.sym || {} };
 const M = QattBrushModel(B, [...ctx.SHAPES].map(s => s === "z" ? "_" : s), ORIG);
-const out = JSON.parse(fs.readFileSync(jobsFile, "utf8")).map(({ ids, m, w }) =>
-  ids.map(id => M.outline(state, id, ([x, y]) => [m[0] * x + m[2], m[1] * y + m[3]], w)).join(""));
+// box of the centre lines (end and control points) of a path
+function box(id) {
+  const b = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const st of M.strokesOf(state, id)) for (const s of st.s) for (let i = 0; i < 8; i += 2) {
+    b[0] = Math.min(b[0], s[i]); b[1] = Math.min(b[1], s[i + 1]); b[2] = Math.max(b[2], s[i]); b[3] = Math.max(b[3], s[i + 1]);
+  }
+  return b;
+}
+function onsetMap(shape) {
+  const [a0, b0, a1, b1] = box("v2-" + shape), [c0, d0, c1, d1] = box(`v2-${shape}-small`);
+  const sx = (c1 - c0) / (a1 - a0), sy = (d1 - d0) / (b1 - b0);
+  return ([x, y]) => [c0 + (x - a0) * sx, d0 + (y - b0) * sy];
+}
+const out = JSON.parse(fs.readFileSync(jobsFile, "utf8")).map(({ ids, m, w }) => ids.map(id => {
+  const f = ([x, y]) => [m[0] * x + m[2], m[1] * y + m[3]];
+  if (!id.endsWith("@onset")) return M.outline(state, id, f, w);
+  const base = id.slice(0, -6), g = onsetMap(base.replace(/^v2-|\d$/g, ""));
+  return M.outline(state, base, p => f(g(p)), w);
+}).join(""));
 fs.writeFileSync(outFile, JSON.stringify(out));
