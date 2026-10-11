@@ -6,7 +6,7 @@
   <title>QATT reference font</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <style>
-    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=16) format("woff2"), url(font/qatt-prototype.ttf?v=16) format("truetype"); }
+    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=17) format("woff2"), url(font/qatt-prototype.ttf?v=17) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
@@ -102,7 +102,8 @@
   });
 
   // Hợp Thư: marked-1 + joiner + unmarked of each Cán
-  const JOINER = String.fromCodePoint(BASE + 155), hopBox = $('#hops');
+  const at = o => String.fromCodePoint(BASE + o), offOf = t => glyphs.find(g => g.t === t).o;   // the offsets follow the proposal (combiner +00, joiner +01, tones +02..+09, unmarked +10.., marked +26..)
+  const JOINER = at(offOf('joiner')), hopBox = $('#hops');
   const stem = g => g.n.replace(/ (UNMARKED|MARKED-\d)$/, '');
   for (const g of glyphs.filter(g => g.t === 'unmarked')) {
     const m = glyphs.find(x => x.t === 'marked' && stem(x) === stem(g));
@@ -117,7 +118,8 @@
   }
 
   // tone marks on a base and on a Hợp Thư
-  const toneBoxes = [[$('#tones1'), String.fromCodePoint(BASE + 3)], [$('#tones2'), String.fromCodePoint(BASE + 22) + JOINER + String.fromCodePoint(BASE)]];
+  const gong = glyphs.find(g => g.n === 'GONG UNMARKED').o, ongMarked = glyphs.find(g => g.n === 'ONG MARKED-1').o, ong = glyphs.find(g => g.n === 'ONG UNMARKED').o;
+  const toneBoxes = [[$('#tones1'), at(gong)], [$('#tones2'), at(ongMarked) + JOINER + at(ong)]];
   for (const [box, base] of toneBoxes) for (const t of glyphs.filter(g => g.t === 'tone')) {
     const text = base + String.fromCodePoint(BASE + t.o);
     const el = document.createElement('div'); el.className = 'hop';
@@ -129,7 +131,7 @@
   }
 
   // Tham Thư: a Cán with a Chi above it, and a Hợp Thư with a Chi above it
-  const COMB = String.fromCodePoint(BASE + 154), at = o => String.fromCodePoint(BASE + o);
+  const COMB = at(offOf('combiner'));
   const byStem = {};
   for (const g of glyphs) if (g.t === 'unmarked' || g.t === 'marked' || g.t === 'chi') { const k = stem(g); (byStem[k] ||= {})[/MARKED-(\d)/.test(g.n) ? +g.n.match(/MARKED-(\d)/)[1] : 0] = g.o; }
   const stems = Object.keys(byStem).filter(k => byStem[k][0] !== undefined && byStem[k][1] !== undefined && byStem[k][2] !== undefined).slice(0, 12);

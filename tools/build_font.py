@@ -22,14 +22,14 @@ X0, Y0 = 500 - 49.27 * SX, 958  # svg (0,0) -> font: glyph content centred in th
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 72, 54, 72, 38   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
-JOINER = 155                   # offset of the component joiner
-COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
 STACK_UP_X = 0.88                                  # the upper glyph is a bit narrower than the lower one
 STROKE_UP, STROKE_LOW = 58, 58                    # strokes of the squeezed upper and lower glyph
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
+JOINER = next(g['o'] for g in data if g['t'] == 'joiner')       # offsets of the two format characters
+COMBINER = next(g['o'] for g in data if g['t'] == 'combiner')
 
 def outline(defs, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None):
     """Stroke the paths into one outline; k squeezes horizontally, centre is the x of the middle of the glyph,

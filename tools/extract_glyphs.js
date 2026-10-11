@@ -16,8 +16,8 @@ const fs = require('fs');
     const TONE = { 'SEMICIRCLE UPPER RIGHT': 1, 'CIRCLE LOWER LEFT': 2, 'SEMICIRCLE UPPER LEFT': 3, 'CIRCLE UPPER LEFT': 4, 'CIRCLE UPPER RIGHT': 5, 'SEMICIRCLE LOWER RIGHT': 6, 'CIRCLE LOWER RIGHT': 7, 'SEMICIRCLE LOWER LEFT': 8 };
     const pathOf = id => { const e = document.getElementById(id); return e && e.getAttribute('d'); };
     const cells = [...document.querySelectorAll('#chart td')];
-    return D.chars.map((c, o) => {
-      const g = { o, n: c.n, t: c.t, q: '', d: [] };
+    return D.chars.map(c => {   // the offsets are not contiguous (reserved gaps), td i of the chart is offset i
+      const o = c.o, g = { o, n: c.n, t: c.t, q: '', d: [] };
       if (c.t === 'tone') {
         const digit = TONE[c.n.replace(/^TONE /, '')];
         g.q = ',,,' + digit;

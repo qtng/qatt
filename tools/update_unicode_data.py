@@ -40,27 +40,34 @@ for line in open(f'{REPO}/ucd/Properties-draft.txt', encoding='utf-8'):
     m = re.match(r'([0-9A-F]+)(?:\.\.([0-9A-F]+))? ; (\S+)', line)
     if m and cur:
         a = int(m.group(1), 16) - base; b = int(m.group(2), 16) - base if m.group(2) else a
-        for o in range(a, b + 1): chars[o][cur] = m.group(3)
+        for o in range(a, b + 1):
+            if o in chars: chars[o][cur] = m.group(3)   # a range may span the reserved gaps
 # --- Cán table from make_ucd.py
 src = open(f'{REPO}/tools/make_ucd.py', encoding='utf-8').read()
 def tup(name): return ast.literal_eval(re.search(name + r' = (\(.*?\))\n', src, re.S).group(1))
 nom, reading = tup('NOM_ANNOTATIONS'), tup('READINGS')
-names = [chars[i]['n'].replace('QUOC AM TAN TU ', '').replace(' UNMARKED', '') for i in range(22)]
-can = [dict(no=i + 1, nom=nom[i], reading=reading[i], name=names[i]) for i in range(22)]
-# --- classify
+# --- classify by name (the offsets follow the proposal: format characters and tone marks first, reserved gaps, then the forms)
 for o, c in chars.items():
     c['n'] = c['n'].replace('QUOC AM TAN TU ', '')
-    if o < 22: c['t'], c['b'] = 'unmarked', o
-    elif o < 154:
-        c['b'], c['m'] = (o - 22) // 6, (o - 22) % 6 + 1
-        c['t'] = 'marked' if c['m'] == 1 else 'chi'
-    elif o == 154: c['t'] = 'combiner'
-    elif o == 155: c['t'] = 'joiner'
-    else: c['t'] = 'tone'
+    n = c['n']
+    if n == 'THAM THU COMBINER': c['t'] = 'combiner'
+    elif n == 'COMPONENT JOINER': c['t'] = 'joiner'
+    elif n.startswith('TONE '): c['t'] = 'tone'
+    elif n.endswith(' UNMARKED'): c['t'] = 'unmarked'
+    else:
+        m = re.search(r' MARKED-(\d)$', n); assert m, n
+        c['m'] = int(m.group(1)); c['t'] = 'marked' if c['m'] == 1 else 'chi'
+unmarked = [c for _, c in sorted(chars.items()) if c['t'] == 'unmarked']
+names = [c['n'].replace(' UNMARKED', '') for c in unmarked]
+assert len(names) == 22
+for c in chars.values():
+    if c['t'] == 'unmarked': c['b'] = names.index(c['n'].replace(' UNMARKED', ''))
+    elif c['t'] in ('marked', 'chi'): c['b'] = names.index(re.sub(r' MARKED-\d$', '', c['n']))
+can = [dict(no=i + 1, nom=nom[i], reading=reading[i], name=names[i]) for i in range(22)]
 commit = subprocess.check_output(['git', '-C', REPO, 'rev-parse', '--short', 'HEAD'], text=True).strip()
 out = dict(source=dict(repo='qtng/qatt-unicode', commit=commit, base=base, size=176, block='Quoc Am Tan Tu', script='Quoc_Am_Tan_Tu'),
            can=can, chars=[chars[o] for o in sorted(chars)])
-assert len(out['chars']) == 164 and sum(1 for c in out['chars'] if c['t'] in ('unmarked', 'marked', 'chi')) == 154
+assert len(out['chars']) == 164 and max(chars) < out['source']['size'] and sum(1 for c in out['chars'] if c['t'] in ('unmarked', 'marked', 'chi')) == 154
 data = json.dumps(out, ensure_ascii=False, separators=(',', ':'))
 assert '</script' not in data
 html = PAGE.read_text(encoding='utf-8')
