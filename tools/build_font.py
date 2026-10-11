@@ -19,7 +19,7 @@ UPM = 1000
 SY = 12.6                      # font units per svg unit (vertical): a typical glyph is about as tall as a capital letter
 SX = SY * (13 / 15) / (120 / 125)  # the page stretches the 120x125 viewBox to 13:15
 X0, Y0 = 500 - 49.27 * SX, 958  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
-STROKE, STROKE_TONE, STROKE_HALF = 72, 54, 58   # font units
+STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 72, 54, 58, 38   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
 JOINER = 155                   # offset of the component joiner
@@ -58,9 +58,9 @@ for g in data:
         outline(defs, STROKE_HALF, HALF_X, 250).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
         halves.append(name)
-    if tone:                                    # zero-width variant that lies over the cell to its left
+    if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
         pen = TTGlyphPen(None)
-        outline(defs, STROKE_TONE, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+        outline(g['dm'], STROKE_MARK, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
         tones.append(name)
 jname = 'u%05X' % (BASE + JOINER)
