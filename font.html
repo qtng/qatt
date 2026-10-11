@@ -15,13 +15,17 @@
     p { margin: .3rem 0 .8rem; color: var(--muted); }
     a { color: var(--accent); }
     .sticky-card { position: sticky; top: 68px; z-index: 5; margin: 1rem 0 .4rem; padding: .5rem .7rem .55rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
-    .bar { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center; margin: 0 0 .5rem; font-size: .85rem; }
-    .bar label { display: flex; align-items: center; gap: .5rem; }
+    .bar { display: flex; gap: .6rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
+    .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
+    .bar label.grow { flex: 1 1 4rem; min-width: 0; }
+    .bar input[type=range] { flex: 1 1 2rem; min-width: 2rem; width: 100%; }
     .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; min-height: 3.4rem;
       font-family: "QATT Prototype"; font-size: 3rem; line-height: 1.3; word-break: break-all; color: var(--ink); }
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
-    .downloads { display: flex; justify-content: center; gap: .5rem; margin-top: .45rem; }
-    .downloads .btn { font-size: .75rem; padding: .1rem .6rem; }
+    .keys { display: flex; justify-content: space-between; gap: .4rem; margin-top: .45rem; }
+    .keys .btn { flex: 1 1 0; }
+    .keys.tones { margin-top: .3rem; }
+    .keys.tones .btn { color: var(--accent); font-weight: 600; padding-left: 0; padding-right: 0; }
     .sample:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
     .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
@@ -43,23 +47,24 @@
 <main>
   <h1>QATT reference font</h1>
   <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. This is a prototype; stroke widths and proportions may still change.
-     Click a character to add it to the sample field.</p>
+     Click a character to add it to the sample field. Download the font: <a href="font/qatt-prototype.ttf" download>TTF</a> (to install it) or <a href="font/qatt-prototype.woff2" download>WOFF2</a> (for websites).</p>
   <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
 
   <div class="sticky-card">
   <div class="bar">
-    <label>Size <input type="range" id="size" min="20" max="140" value="34"></label>
+    <label class="grow">Size <input type="range" id="size" min="20" max="140" value="34"></label>
     <label><input type="checkbox" id="svg"> show qatt.js drawing</label>
     <label><input type="checkbox" id="guides" checked> guides</label>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear">Clear</button>
   </div>
 
   <div class="sample" id="sample" contenteditable="true" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
-  <div class="downloads">
-    <a class="btn btn-outline-secondary" href="font/qatt-prototype.ttf" download title="Install the font on your computer">Download TTF</a>
-    <a class="btn btn-outline-secondary" href="font/qatt-prototype.woff2" download title="For websites">Download WOFF2</a>
+  <div class="keys">
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009A">B⿱C</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="back" title="Delete the last character" aria-label="Delete the last character">⌫</button>
   </div>
+  <div class="keys tones" id="tone-keys"></div>
   <div id="info"></div>
   </div>
   <h2 class="sub">Format characters and tone marks</h2>
@@ -109,7 +114,17 @@
     catch { const r = document.createRange(); r.selectNodeContents(sample); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
     setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
   });
-  $('#clear').addEventListener('click', () => { sample.textContent = ''; });
+  const add = text => { sample.append(text); sample.scrollTop = sample.scrollHeight; };
+  $('#joiner').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'joiner').o)); info.textContent = 'component joiner'; });
+  $('#stack').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'combiner').o)); info.textContent = 'Tham Thư combiner'; });
+  glyphs.filter(g => g.t === 'tone').sort((a, b) => a.o - b.o).forEach((g, i) => {   // tone buttons 1..8 in the order of the code points
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn btn-sm btn-outline-secondary'; b.textContent = i + 1;
+    b.title = g.n.toLowerCase() + ' — U+' + hex(BASE + g.o);
+    b.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o); });
+    $('#tone-keys').append(b);
+  });
+  $('#back').addEventListener('click', () => { sample.textContent = Array.from(sample.textContent).slice(0, -1).join(''); });
   apply();
 })();
 </script>
