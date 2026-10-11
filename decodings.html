@@ -178,6 +178,14 @@
             font-weight: 500;
         }
 
+        /* phones: the legend is scaled down a little (the container gets the width back that scaling takes away) */
+        @media (max-width: 575.98px) {
+            #legend-container { transform: scale(.9); transform-origin: top center; width: 111.2%; margin-inline: -5.6%; margin-bottom: 0 !important; }
+        }
+        @media (max-width: 389.98px) {
+            #legend-container { transform: scale(.8); width: 125%; margin-inline: -12.5%; }
+        }
+
         .legend-color {
             width: 16px;
             height: 16px;
