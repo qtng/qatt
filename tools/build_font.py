@@ -24,8 +24,9 @@ ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
-STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 10, 90   # share of the height for the glyph above; svg y of the top and bottom edge of the area
-STROKE_UP, STROKE_LOW = 50, 58                    # strokes of the squeezed upper and lower glyph
+STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 14, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
+STACK_UP_X = 0.88                                  # the upper glyph is a bit narrower than the lower one
+STROKE_UP, STROKE_LOW = 58, 58                    # strokes of the squeezed upper and lower glyph
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
@@ -74,7 +75,7 @@ for g in data:
         glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
         halves.append(name)
         # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .halflow for a joined pair)
-        add(name + '.up', outline(defs, STROKE_UP, 1.0, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
+        add(name + '.up', outline(defs, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
         add(name + '.low', outline(defs, STROKE_LOW, 1.0, 500, GROW, 1 - STACK_UP, STACK_BOTTOM))
         add(name + '.halflow', outline(defs, STROKE_LOW, HALF_X, 250, GROW, 1 - STACK_UP, STACK_BOTTOM), ADV // 2)
     if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
