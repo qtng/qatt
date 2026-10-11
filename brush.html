@@ -51,7 +51,7 @@
     .edit-canvas .ctx { fill: #b9ab8f; }
     .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
     .edit-canvas .stroke { fill: var(--ink); }
-    #lib-canvas .stroke { cursor: default; }
+    #lib-canvas .stroke { fill: #000; cursor: default; }
     .edit-canvas .stroke.current { fill: var(--cinnabar); }
     .edit-canvas .mark { fill: var(--ink); pointer-events: none; }
     .edit-canvas .mark.current { fill: var(--cinnabar); }
@@ -165,8 +165,7 @@
         </div>
         <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
-          <label class="d-flex align-items-center gap-2">Handles visible <input type="range" id="handle-opacity" min="0" max="1" step="0.05" value="1"></label>
-          <label class="d-flex align-items-center gap-2">Lines visible <input type="range" id="line-opacity" min="0" max="1" step="0.05" value="1"></label>
+          <label class="d-flex align-items-center gap-2">Handles and lines visible <input type="range" id="handle-opacity" min="0" max="1" step="0.05" value="0.5"></label>
         </div>
         <p class="hint mt-2 mb-2">Drag the square handles to bend the stroke. The round ones only change this preview (direction and length).</p>
         <div id="lib-fields" class="d-grid gap-1"></div>

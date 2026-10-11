@@ -413,7 +413,7 @@
     }
   }
   const libCanvas = document.getElementById("lib-canvas");
-  let libDrag = null, libRef = null, handleOpacity = 1, lineOpacity = 1;
+  let libDrag = null, libRef = null, handleOpacity = 0.5;
   function drawLibCanvas() {
     libCanvas.innerHTML = "";
     const e = state.lib[libSel]; if (!e) return;
@@ -421,9 +421,9 @@
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -10, x2: v, y2: 100 }, grid); el("line", { x1: 0, y1: v - 10, x2: 100, y2: v - 10 }, grid); }
     if (!libRef) { const [dx, dy] = libChord(libSel), L = Math.hypot(dx, dy) || 1, f = 60 / L; libRef = { a: [50 - dx * f / 2, 40 - dy * f / 2], b: [50 + dx * f / 2, 40 + dy * f / 2] }; }
     const st = placed([{ lib: libSel, a: libRef.a, b: libRef.b }]);
-    el("path", { d: B.outline(st, state.params, state.lib), class: "stroke current" }, libCanvas);
+    el("path", { d: B.outline(st, state.params, state.lib), class: "stroke" }, libCanvas);
     const s = st[0].s[0], lines = el("g", { class: "handles" }, libCanvas);
-    lines.style.opacity = lineOpacity;
+    lines.style.opacity = handleOpacity;
     el("line", { x1: s[0], y1: s[1], x2: s[6], y2: s[7], class: "chord" }, lines);
     el("path", { d: B.skeleton(st), class: "skel" }, lines);
     el("line", { x1: s[0] + (s[6] - s[0]) / 3, y1: s[1] + (s[7] - s[1]) / 3, x2: s[2], y2: s[3] }, lines);
@@ -440,7 +440,6 @@
     }
   }
   document.getElementById("handle-opacity").addEventListener("input", e => { handleOpacity = +e.target.value; drawLibCanvas(); });
-  document.getElementById("line-opacity").addEventListener("input", e => { lineOpacity = +e.target.value; drawLibCanvas(); });
   libCanvas.addEventListener("pointermove", ev => {
     if (!libDrag) return;
     const p = toSvg(libCanvas, ev);
