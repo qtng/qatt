@@ -299,187 +299,187 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qs6" d="M88 82 a12 12 0 0 1 0 24"/>
     	<path id="qs7" d="M88 94 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
 
-    	<!-- the same glyphs moved 27 to the left: a rhyme without onset sits in the middle of the box (v2c- = centred) -->
-    	<path id="v2c-a" d="M33 10 v80 M23 90 h20 M38 35 h30 m-30 25 h30"/>
-    	<path id="v2c-a2" d="M41 20 h25 m-8 0 v40 c0 5 0 15 -5 30 M53 44 h-18 m0 22 h18"/>
-    	<path id="v2c-aw" d="M46 17 v52 M63 10 v40 c0 5 0 20 -4 40 M35 46 l37 -10 M30 36 v20"/>
-    	<path id="v2c-aw2" d="M35 15 h36 M44 25 l-8 14 M53 20 v68 m-22 -38 h44"/>
-    	<path id="v2c-e" d="M28 15 h20 M38 15 v70 M55 25 v50 M72 15 v70"/>
-    	<path id="v2c-e2" d="M31 10 h40 M31 26 l14 -6 m-3 5 v50 M63 10 v75"/>
-    	<path id="v2c-i" d="M31 10 h40 M42 10 v65 M63 25 v60 m0 -60 m-3 -5 l14 6"/>
-    	<path id="v2c-i2" d="M31 38 l32 -5 m-32 30 l32 -5 M47 13 v77 h1 l20 -5"/>
-    	<path id="v2c-o" d="M31 15 h30 c-4 22 -8 45 -30 70 M37 38 M37 38 m4 -12 l-10 20 M37 38 c6 8 14 18 28 40"/>
-    	<path id="v2c-o2" d="M61 10 c0 0 -8 40 -19 56 m-10 -6 l12 16 M37 23 c0 0 13 15 28 40 M37 86 h30"/>
-    	<path id="v2c-u2" d="M33 25 v45 m-2 4 l14 -14 M68 15 c-4 22 -7 45 -24 70 M44 28 c0 0 15 24 28 50"/>
-    	<path id="v2c-u" d="M67 16 v50 M55 20 c0 0 -8 40 -18 56 m-7 -8 l9 18 M35 30 c0 0 14 24 26 50"/>
-    	<path id="v2c-y" d="M39 16 v65 M39 40 h28 m0 -8 v16 M40 60 l28 3"/>
-    	<path id="v2c-y2" d="M37 20 v50 M53 13 v58 h1 l12 -5 M33 85 h35"/>
-    	<path id="v2c-_1" d="M34 22 m-1 -8 v16"/>
-    	<path id="v2c-_2" d="M35 45 m-1 -8 v16"/>
-    	<path id="v2c-_3" d="M33 70 m-1 -8 v16"/>
-    	<path id="v2c-_4" d="M33 70 m33 -3 m1 -8 v16"/>
-    	<path id="v2c-_5" d="M35 45 m26 0 m1 -8 v16"/>
-    	<path id="v2c-_6" d="M34 22 m30 0 m1 -8 v16"/>
-    	<path id="v2c-_" d="M34 22 h30 M35 45 h26 M33 70 l34 -3"/>
-    	<path id="v2c-b" d="M35 30 c0 0 10 10 28 33 M55 15 c0 0 -7 40 -17 55 M30 85 h35"/>
-    	<path id="v2c-b1" d="M35 30 m1 -8 l-5 15"/>
-    	<path id="v2c-b2" d="M55 15 m-17 55 m-6 -4 l10 11"/>
-    	<path id="v2c-b3" d="M30 85 m0 -8 v16"/>
-    	<path id="v2c-b4" d="M30 85 m35 0 m0 -8 v16"/>
-    	<path id="v2c-b5" d="M35 30 m28 33 m5 -8 l-6 15"/>
-    	<path id="v2c-b6" d="M55 15 m-8 -1 h16"/>
-    	<path id="v2c-c1" d="M33 40 m-1 -8 v16"/>
-    	<path id="v2c-c2" d="M31 58 m-1 -8 v16"/>
-    	<path id="v2c-c3" d="M31 58 m30 0 m-7 4 l-3 10"/>
-    	<path id="v2c-c4" d="M63 16 m0 64 m-8 0 h16"/>
-    	<path id="v2c-c5" d="M63 16 m-8 0 h16"/>
-    	<path id="v2c-c6" d="M33 40 m30 0 m-10 -4 l-2 -9"/>
-    	<path id="v2c-c" d="M63 16 v64 M33 40 h30 M31 58 h30"/>
-    	<path id="v2c-ch1" d="M51 20 m-8 -1 h16"/>
-    	<path id="v2c-ch2" d="M33 42 m-1 -8 v16"/>
-    	<path id="v2c-ch3" d="M33 64 m-1 -8 v16"/>
-    	<path id="v2c-ch4" d="M51 20 m-5 62 m-6 1 h16"/>
-    	<path id="v2c-ch5" d="M33 64 m35 -6 m1 -8 v16"/>
-    	<path id="v2c-ch6" d="M33 42 m35 -6 m1 -8 v16"/>
-    	<path id="v2c-ch" d="M33 42 l35 -6 M33 64 l35 -6 M51 20 c0 30 0 45 -5 62"/>
-    	<path id="v2c-d1" d="M51 20 m-8 -1 h16"/>
-    	<path id="v2c-d2" d="M35 40 m-1 -8 v16"/>
-    	<path id="v2c-d3" d="M51 20 m0 44 m-12 -8 l11 5"/>
-    	<path id="v2c-d4" d="M33 70 m-1 -8 v16"/>
-    	<path id="v2c-d5" d="M33 70 m36 -3 m1 -8 v16"/>
-    	<path id="v2c-d6" d="M35 40 m32 0 m1 -8 v16"/>
-    	<path id="v2c-d" d="M35 40 h32 M51 20 v44 M33 70 l36 -3"/>
-    	<path id="v2c-dz1" d="M51 20 m-8 -1 h16"/>
-    	<path id="v2c-dz2" d="M33 36 m-1 -8 v16"/>
-    	<path id="v2c-dz3" d="M33 58 m-1 -8 v16"/>
-    	<path id="v2c-dz4" d="M51 20 m-5 62 m-6 1 h16"/>
-    	<path id="v2c-dz5" d="M33 58 m35 6 m1 -8 v16"/>
-    	<path id="v2c-dz6" d="M33 36 m35 6 m1 -8 v16"/>
-    	<path id="v2c-dz" d="M33 36 l35 6 M33 58 l35 6 M51 20 c0 30 0 45 -5 62"/>
-    	<path id="v2c-g1" d="M33 16 m-8 0 h16"/>
-    	<path id="v2c-g2" d="M33 16 m0 64 m-8 0 h16"/>
-    	<path id="v2c-g3" d="M34 58 m4 1 l10 12"/>
-    	<path id="v2c-g4" d="M34 58 m30 0 m0 -8 v16"/>
-    	<path id="v2c-g5" d="M33 40 m30 0 m0 -8 v16"/>
-    	<path id="v2c-g6" d="M33 40 m4 0 l10 -12"/>
-    	<path id="v2c-g" d="M33 16 v64 M33 40 h30 M34 58 h30"/>
-    	<path id="v2c-h1" d="M42 20 m-9 0 h16"/>
-    	<path id="v2c-h2" d="M42 20 m0 46 m-2 -5 l-9 -7"/>
-    	<path id="v2c-h3" d="M32 72 m-2 -8 v16"/>
-    	<path id="v2c-h4" d="M32 72 m36 0 m2 -8 v16"/>
-    	<path id="v2c-h5" d="M58 20 m0 46 m2 -5 l9 -7"/>
-    	<path id="v2c-h6" d="M58 20 m-7 0 h16"/>
-    	<path id="v2c-h" d="M42 20 v46 M58 20 v46 M32 72 h36"/>
-    	<path id="v2c-kh1" d="M34 18 m0 -8 v16"/>
-    	<path id="v2c-kh2" d="M40 20 m0 8 l-8 10"/>
-    	<path id="v2c-kh3" d="M33 76 m0 -8 v16"/>
-    	<path id="v2c-kh4" d="M33 75 m36 0 m0 -8 v16"/>
-    	<path id="v2c-kh5" d="M40 18 m10 54 m0 -4 l10 -10"/>
-    	<path id="v2c-kh6" d="M34 18 m30 0 m0 -8 v16"/>
-    	<path id="v2c-kh" d="M34 18 h30 M40 20 l10 54 M33 76 h36"/>
-    	<path id="v2c-l1" d="M52 18 m-7 0 h14"/>
-    	<path id="v2c-l2" d="M36 16 m-10 -3 h16"/>
-    	<path id="v2c-l3" d="M36 16 m-5 64 m-6 0 l15 3"/>
-    	<path id="v2c-l4" d="M52 18 m0 54 m-7 0 h14"/>
-    	<path id="v2c-l5" d="M68 16 m0 58 m-6 4 h14"/>
-    	<path id="v2c-l6" d="M68 16 m-6 -4 h14"/>
-    	<path id="v2c-l" d="M36 16 v30 c0 5 0 20 -5 34 M52 18 v54 M68 16 v58"/>
-    	<path id="v2c-m1" d="M33 18 m-2 -8 v16"/>
-    	<path id="v2c-m2" d="M39 35 m0 -8 l-6 14"/>
-    	<path id="v2c-m3" d="M58 30 m-25 50 m-1 -10 l6 14"/>
-    	<path id="v2c-m4" d="M39 35 m23 42 m0 4 l6 -14"/>
-    	<path id="v2c-m5" d="M58 30 m-2 -4 l10 15"/>
-    	<path id="v2c-m6" d="M33 18 m30 0 m2 -8 v16"/>
-    	<path id="v2c-m" d="M33 18 h30 M58 30 c0 0 -8 30 -20 50 M39 35 c0 0 12 18 23 42"/>
-    	<path id="v2c-n1" d="M33 16 m-8 0 h16"/>
-    	<path id="v2c-n2" d="M33 16 m0 64 m-8 0 h16"/>
-    	<path id="v2c-n3" d="M34 46 m3 1 l7 14"/>
-    	<path id="v2c-n4" d="M52 24 m0 44 m-8 0 h16"/>
-    	<path id="v2c-n5" d="M33 46 m34 0 m0 -8 v16"/>
-    	<path id="v2c-n6" d="M52 24 m-8 0 h16"/>
-    	<path id="v2c-n" d="M33 16 v64 M33 46 h34 M52 24 v44"/>
-    	<path id="v2c-ng1" d="M33 22 m-2 -8 v16"/>
-    	<path id="v2c-ng2" d="M43 22 m-1 6 l-10 10"/>
-    	<path id="v2c-ng3" d="M43 22 m-6 50 m-6 1 h16"/>
-    	<path id="v2c-ng4" d="M61 22 m0 51 m-8 0 h16"/>
-    	<path id="v2c-ng5" d="M61 22 m1 6 l10 10"/>
-    	<path id="v2c-ng6" d="M33 22 m38 0 m2 -8 v16"/>
-    	<path id="v2c-ng" d="M33 22 h38 M43 22 c0 20 0 30 -6 50 M61 22 v51"/>
-    	<path id="v2c-nh1" d="M41 20 m-8 0 h16"/>
-    	<path id="v2c-nh2" d="M32 42 m-3 -8 v16"/>
-    	<path id="v2c-nh3" d="M41 20 m-3 55 m-8 0 h16"/>
-    	<path id="v2c-nh4" d="M59 20 m0 56 m-8 0 h16"/>
-    	<path id="v2c-nh5" d="M32 42 m38 8 m1 -8 v16"/>
-    	<path id="v2c-nh6" d="M59 20 m-8 0 h16"/>
-    	<path id="v2c-nh" d="M32 42 l38 8 M41 20 c0 20 0 35 -3 55 M59 20 v56"/>
-    	<path id="v2c-ph1" d="M30 30 m1 -7 l-5 15"/>
-    	<path id="v2c-ph2" d="M50 20 m-18 56 m-4 -8 l6 15"/>
-    	<path id="v2c-ph3" d="M30 30 m26 50 m6 -1 l-12 4"/>
-    	<path id="v2c-ph4" d="M62 16 m0 50 m-8 0 h16"/>
-    	<path id="v2c-ph5" d="M62 16 m-6 0 h14"/>
-    	<path id="v2c-ph6" d="M50 20 m-2 -6 l8 14"/>
-    	<path id="v2c-ph" d="M62 16 v50 M50 20 c0 0 -8 40 -18 56 M30 30 c0 0 14 24 26 50"/>
-    	<path id="v2c-r1" d="M34 75 m0 -57 m-8 0 h16"/>
-    	<path id="v2c-r2" d="M34 75 m-8 0 h16"/>
-    	<path id="v2c-r3" d="M34 75 m0 -57 m2 12 m20 14 m-1 1 l-4 8"/>
-    	<path id="v2c-r4" d="M65 18 m0 56 m-8 0 h16"/>
-    	<path id="v2c-r5" d="M65 18 m-8 0 h16"/>
-    	<path id="v2c-r6" d="M34 75 m0 -57 m2 12 m4 2 l8 -8"/>
-    	<path id="v2c-r" d="M34 75 v-57 m2 12 l20 14 M65 18 v56"/>
-    	<path id="v2c-s1" d="M34 18 m-8 0 h16"/>
-    	<path id="v2c-s2" d="M34 18 m0 57 m-8 0 h16"/>
-    	<path id="v2c-s3" d="M36 71 m4 -2 l8 8"/>
-    	<path id="v2c-s4" d="M65 18 m0 56 m-8 0 h16"/>
-    	<path id="v2c-s5" d="M65 18 m-8 0 h16"/>
-    	<path id="v2c-s6" d="M36 71 m20 -11 m-1 -1 l-4 -8"/>
-    	<path id="v2c-s" d="M34 18 v57 M36 71 l20 -11 M65 18 v56"/>
-    	<path id="v2c-t1" d="M50 24 m-8 0 h16"/>
-    	<path id="v2c-t2" d="M33 46 m0 -8 v16"/>
-    	<path id="v2c-t3" d="M50 24 m0 44 m-8 0 h16"/>
-    	<path id="v2c-t4" d="M33 46 m34 0 m-3 1 l-7 14"/>
-    	<path id="v2c-t5" d="M67 16 m0 64 m-8 0 h16"/>
-    	<path id="v2c-t6" d="M67 16 m-8 0 h16"/>
-    	<path id="v2c-t" d="M67 16 v64 M33 46 h34 M50 24 v44"/>
-    	<path id="v2c-th1" d="M41 20 m-8 0 h16"/>
-    	<path id="v2c-th2" d="M32 50 m-3 -8 v16"/>
-    	<path id="v2c-th3" d="M41 20 m-3 55 m-8 0 h16"/>
-    	<path id="v2c-th4" d="M59 20 m0 56 m-8 0 h16"/>
-    	<path id="v2c-th5" d="M32 50 m38 -8 m1 -8 v16"/>
-    	<path id="v2c-th6" d="M59 20 m-8 0 h16"/>
-    	<path id="v2c-th" d="M32 50 l38 -8 M41 20 c0 20 0 35 -3 55 M59 20 v56"/>
-    	<path id="v2c-tr1" d="M37 20 m0 -8 v16"/>
-    	<path id="v2c-tr2" d="M49 20 m-1 3 l-12 12"/>
-    	<path id="v2c-tr3" d="M33 45 m0 -8 v16"/>
-    	<path id="v2c-tr4" d="M49 20 m0 58 m-8 0 h16"/>
-    	<path id="v2c-tr5" d="M33 45 m34 0 m0 -8 v16"/>
-    	<path id="v2c-tr6" d="M37 20 m26 0 m0 -8 v16"/>
-    	<path id="v2c-tr" d="M49 20 v58 M37 20 h26 M33 45 h34"/>
-    	<path id="v2c-v1" d="M33 20 m-8 0 h16"/>
-    	<path id="v2c-v2" d="M33 20 m0 50 m-2 4 l14 -14"/>
-    	<path id="v2c-v3" d="M68 15 m-24 70 m-8 1 h16"/>
-    	<path id="v2c-v4" d="M44 28 m28 50 m5 -2 l-13 8"/>
-    	<path id="v2c-v5" d="M68 15 m-8 -1 h16"/>
-    	<path id="v2c-v6" d="M44 28 m2 -8 l-6 15"/>
-    	<path id="v2c-v" d="M33 20 v50 M68 15 c-4 22 -7 45 -24 70 M44 28 c0 0 15 24 28 50"/>
-    	<path id="v2c-x1" d="M34 18 m0 -8 v16"/>
-    	<path id="v2c-x2" d="M62 19 m-10 51 m0 -4 l-8 -10"/>
-    	<path id="v2c-x3" d="M33 74 m0 -8 v16"/>
-    	<path id="v2c-x4" d="M33 74 m36 0 m0 -8 v16"/>
-    	<path id="v2c-x5" d="M62 19 m0 6 l8 10"/>
-    	<path id="v2c-x6" d="M34 18 m32 0 m3 -8 v16"/>
-    	<path id="v2c-x" d="M34 18 h32 M62 19 l-10 51 M33 74 h36"/>
-    	<path id="v2c-UU" d="M-2 22 h45 v1 c0 0 -15 35 -55 55 M3 27 c0 0 14 33 50 50"/>
-    	<path id="v2c-II" d="M-2 22 v55 l45 -4 M43 22 v55"/>
-    	<path id="v2c-U" d="M43 22 c0 0 -15 35 -55 55 M-2 22 c0 0 15 35 55 55"/>
-    	<path id="v2c-I" d="M25 15 l-8 68 M-2 35 l50 8 M-5 58 l50 8"/>
-    	<path id="v2c-M" d="M-5 18 h55 m-8 20 c0 0 -12 20 -46 45 M3 37 c0 0 12 20 42 46"/>
-    	<path id="v2c-N" d="M-7 15 v70 M-5 45 l57 4 M26 20 v60"/>
-    	<path id="v2c-P" d="M28 15 c0 0 -10 30 -30 63 M-7 80 l60 0 M1 24 l40 40"/>
-    	<path id="v2c-C" d="M-7 37 h55 M-7 63 h55 M48 15 v70"/>
-    	<path id="v2c-T" d="M-10 50 l58 -4 M16 20 v60 M48 15 v70"/>
-    	<path id="v2c-NG" d="M-12 20 h66 M7 20 c0 20 0 40 -10 60 M35 20 v60"/>
-    	<path id="v2c-NH" d="M-12 45 l66 10 M7 20 c0 20 0 40 -10 60 M35 20 v60"/>
-    	<path id="v2c-CH" d="M21 15 l8 68 M-2 40 l50 -8 M1 64 l50 -8"/>
+    	<!-- the same glyphs moved to the middle of the box and 50% wider: a rhyme without onset (v2c- = centred) -->
+    	<path id="v2c-a" d="M23.75 10 v80 M8.75 90 h30 M31.25 35 h45 m-45 25 h45"/>
+    	<path id="v2c-a2" d="M35.75 20 h37.5 m-12 0 v40 c0 5 0 15 -7.5 30 M53.75 44 h-27 m0 22 h27"/>
+    	<path id="v2c-aw" d="M43.25 17 v52 M68.75 10 v40 c0 5 0 20 -6 40 M26.75 46 l55.5 -10 M19.25 36 v20"/>
+    	<path id="v2c-aw2" d="M26.75 15 h54 M40.25 25 l-12 14 M53.75 20 v68 m-33 -38 h66"/>
+    	<path id="v2c-e" d="M16.25 15 h30 M31.25 15 v70 M56.75 25 v50 M82.25 15 v70"/>
+    	<path id="v2c-e2" d="M20.75 10 h60 M20.75 26 l21 -6 m-4.5 5 v50 M68.75 10 v75"/>
+    	<path id="v2c-i" d="M20.75 10 h60 M37.25 10 v65 M68.75 25 v60 m0 -60 m-4.5 -5 l21 6"/>
+    	<path id="v2c-i2" d="M20.75 38 l48 -5 m-48 30 l48 -5 M44.75 13 v77 h1.5 l30 -5"/>
+    	<path id="v2c-o" d="M20.75 15 h45 c-6 22 -12 45 -45 70 M29.75 38 M29.75 38 m6 -12 l-15 20 M29.75 38 c9 8 21 18 42 40"/>
+    	<path id="v2c-o2" d="M65.75 10 c0 0 -12 40 -28.5 56 m-15 -6 l18 16 M29.75 23 c0 0 19.5 15 42 40 M29.75 86 h45"/>
+    	<path id="v2c-u2" d="M23.75 25 v45 m-3 4 l21 -14 M76.25 15 c-6 22 -10.5 45 -36 70 M40.25 28 c0 0 22.5 24 42 50"/>
+    	<path id="v2c-u" d="M74.75 16 v50 M56.75 20 c0 0 -12 40 -27 56 m-10.5 -8 l13.5 18 M26.75 30 c0 0 21 24 39 50"/>
+    	<path id="v2c-y" d="M32.75 16 v65 M32.75 40 h42 m0 -8 v16 M34.25 60 l42 3"/>
+    	<path id="v2c-y2" d="M29.75 20 v50 M53.75 13 v58 h1.5 l18 -5 M23.75 85 h52.5"/>
+    	<path id="v2c-_1" d="M25.25 22 m-1.5 -8 v16"/>
+    	<path id="v2c-_2" d="M26.75 45 m-1.5 -8 v16"/>
+    	<path id="v2c-_3" d="M23.75 70 m-1.5 -8 v16"/>
+    	<path id="v2c-_4" d="M23.75 70 m49.5 -3 m1.5 -8 v16"/>
+    	<path id="v2c-_5" d="M26.75 45 m39 0 m1.5 -8 v16"/>
+    	<path id="v2c-_6" d="M25.25 22 m45 0 m1.5 -8 v16"/>
+    	<path id="v2c-_" d="M25.25 22 h45 M26.75 45 h39 M23.75 70 l51 -3"/>
+    	<path id="v2c-b" d="M26.75 30 c0 0 15 10 42 33 M56.75 15 c0 0 -10.5 40 -25.5 55 M19.25 85 h52.5"/>
+    	<path id="v2c-b1" d="M26.75 30 m1.5 -8 l-7.5 15"/>
+    	<path id="v2c-b2" d="M56.75 15 m-25.5 55 m-9 -4 l15 11"/>
+    	<path id="v2c-b3" d="M19.25 85 m0 -8 v16"/>
+    	<path id="v2c-b4" d="M19.25 85 m52.5 0 m0 -8 v16"/>
+    	<path id="v2c-b5" d="M26.75 30 m42 33 m7.5 -8 l-9 15"/>
+    	<path id="v2c-b6" d="M56.75 15 m-12 -1 h24"/>
+    	<path id="v2c-c1" d="M23.75 40 m-1.5 -8 v16"/>
+    	<path id="v2c-c2" d="M20.75 58 m-1.5 -8 v16"/>
+    	<path id="v2c-c3" d="M20.75 58 m45 0 m-10.5 4 l-4.5 10"/>
+    	<path id="v2c-c4" d="M68.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-c5" d="M68.75 16 m-12 0 h24"/>
+    	<path id="v2c-c6" d="M23.75 40 m45 0 m-15 -4 l-3 -9"/>
+    	<path id="v2c-c" d="M68.75 16 v64 M23.75 40 h45 M20.75 58 h45"/>
+    	<path id="v2c-ch1" d="M50.75 20 m-12 -1 h24"/>
+    	<path id="v2c-ch2" d="M23.75 42 m-1.5 -8 v16"/>
+    	<path id="v2c-ch3" d="M23.75 64 m-1.5 -8 v16"/>
+    	<path id="v2c-ch4" d="M50.75 20 m-7.5 62 m-9 1 h24"/>
+    	<path id="v2c-ch5" d="M23.75 64 m52.5 -6 m1.5 -8 v16"/>
+    	<path id="v2c-ch6" d="M23.75 42 m52.5 -6 m1.5 -8 v16"/>
+    	<path id="v2c-ch" d="M23.75 42 l52.5 -6 M23.75 64 l52.5 -6 M50.75 20 c0 30 0 45 -7.5 62"/>
+    	<path id="v2c-d1" d="M50.75 20 m-12 -1 h24"/>
+    	<path id="v2c-d2" d="M26.75 40 m-1.5 -8 v16"/>
+    	<path id="v2c-d3" d="M50.75 20 m0 44 m-18 -8 l16.5 5"/>
+    	<path id="v2c-d4" d="M23.75 70 m-1.5 -8 v16"/>
+    	<path id="v2c-d5" d="M23.75 70 m54 -3 m1.5 -8 v16"/>
+    	<path id="v2c-d6" d="M26.75 40 m48 0 m1.5 -8 v16"/>
+    	<path id="v2c-d" d="M26.75 40 h48 M50.75 20 v44 M23.75 70 l54 -3"/>
+    	<path id="v2c-dz1" d="M50.75 20 m-12 -1 h24"/>
+    	<path id="v2c-dz2" d="M23.75 36 m-1.5 -8 v16"/>
+    	<path id="v2c-dz3" d="M23.75 58 m-1.5 -8 v16"/>
+    	<path id="v2c-dz4" d="M50.75 20 m-7.5 62 m-9 1 h24"/>
+    	<path id="v2c-dz5" d="M23.75 58 m52.5 6 m1.5 -8 v16"/>
+    	<path id="v2c-dz6" d="M23.75 36 m52.5 6 m1.5 -8 v16"/>
+    	<path id="v2c-dz" d="M23.75 36 l52.5 6 M23.75 58 l52.5 6 M50.75 20 c0 30 0 45 -7.5 62"/>
+    	<path id="v2c-g1" d="M23.75 16 m-12 0 h24"/>
+    	<path id="v2c-g2" d="M23.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-g3" d="M25.25 58 m6 1 l15 12"/>
+    	<path id="v2c-g4" d="M25.25 58 m45 0 m0 -8 v16"/>
+    	<path id="v2c-g5" d="M23.75 40 m45 0 m0 -8 v16"/>
+    	<path id="v2c-g6" d="M23.75 40 m6 0 l15 -12"/>
+    	<path id="v2c-g" d="M23.75 16 v64 M23.75 40 h45 M25.25 58 h45"/>
+    	<path id="v2c-h1" d="M37.25 20 m-13.5 0 h24"/>
+    	<path id="v2c-h2" d="M37.25 20 m0 46 m-3 -5 l-13.5 -7"/>
+    	<path id="v2c-h3" d="M22.25 72 m-3 -8 v16"/>
+    	<path id="v2c-h4" d="M22.25 72 m54 0 m3 -8 v16"/>
+    	<path id="v2c-h5" d="M61.25 20 m0 46 m3 -5 l13.5 -7"/>
+    	<path id="v2c-h6" d="M61.25 20 m-10.5 0 h24"/>
+    	<path id="v2c-h" d="M37.25 20 v46 M61.25 20 v46 M22.25 72 h54"/>
+    	<path id="v2c-kh1" d="M25.25 18 m0 -8 v16"/>
+    	<path id="v2c-kh2" d="M34.25 20 m0 8 l-12 10"/>
+    	<path id="v2c-kh3" d="M23.75 76 m0 -8 v16"/>
+    	<path id="v2c-kh4" d="M23.75 75 m54 0 m0 -8 v16"/>
+    	<path id="v2c-kh5" d="M34.25 18 m15 54 m0 -4 l15 -10"/>
+    	<path id="v2c-kh6" d="M25.25 18 m45 0 m0 -8 v16"/>
+    	<path id="v2c-kh" d="M25.25 18 h45 M34.25 20 l15 54 M23.75 76 h54"/>
+    	<path id="v2c-l1" d="M52.25 18 m-10.5 0 h21"/>
+    	<path id="v2c-l2" d="M28.25 16 m-15 -3 h24"/>
+    	<path id="v2c-l3" d="M28.25 16 m-7.5 64 m-9 0 l22.5 3"/>
+    	<path id="v2c-l4" d="M52.25 18 m0 54 m-10.5 0 h21"/>
+    	<path id="v2c-l5" d="M76.25 16 m0 58 m-9 4 h21"/>
+    	<path id="v2c-l6" d="M76.25 16 m-9 -4 h21"/>
+    	<path id="v2c-l" d="M28.25 16 v30 c0 5 0 20 -7.5 34 M52.25 18 v54 M76.25 16 v58"/>
+    	<path id="v2c-m1" d="M23.75 18 m-3 -8 v16"/>
+    	<path id="v2c-m2" d="M32.75 35 m0 -8 l-9 14"/>
+    	<path id="v2c-m3" d="M61.25 30 m-37.5 50 m-1.5 -10 l9 14"/>
+    	<path id="v2c-m4" d="M32.75 35 m34.5 42 m0 4 l9 -14"/>
+    	<path id="v2c-m5" d="M61.25 30 m-3 -4 l15 15"/>
+    	<path id="v2c-m6" d="M23.75 18 m45 0 m3 -8 v16"/>
+    	<path id="v2c-m" d="M23.75 18 h45 M61.25 30 c0 0 -12 30 -30 50 M32.75 35 c0 0 18 18 34.5 42"/>
+    	<path id="v2c-n1" d="M23.75 16 m-12 0 h24"/>
+    	<path id="v2c-n2" d="M23.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-n3" d="M25.25 46 m4.5 1 l10.5 14"/>
+    	<path id="v2c-n4" d="M52.25 24 m0 44 m-12 0 h24"/>
+    	<path id="v2c-n5" d="M23.75 46 m51 0 m0 -8 v16"/>
+    	<path id="v2c-n6" d="M52.25 24 m-12 0 h24"/>
+    	<path id="v2c-n" d="M23.75 16 v64 M23.75 46 h51 M52.25 24 v44"/>
+    	<path id="v2c-ng1" d="M23.75 22 m-3 -8 v16"/>
+    	<path id="v2c-ng2" d="M38.75 22 m-1.5 6 l-15 10"/>
+    	<path id="v2c-ng3" d="M38.75 22 m-9 50 m-9 1 h24"/>
+    	<path id="v2c-ng4" d="M65.75 22 m0 51 m-12 0 h24"/>
+    	<path id="v2c-ng5" d="M65.75 22 m1.5 6 l15 10"/>
+    	<path id="v2c-ng6" d="M23.75 22 m57 0 m3 -8 v16"/>
+    	<path id="v2c-ng" d="M23.75 22 h57 M38.75 22 c0 20 0 30 -9 50 M65.75 22 v51"/>
+    	<path id="v2c-nh1" d="M35.75 20 m-12 0 h24"/>
+    	<path id="v2c-nh2" d="M22.25 42 m-4.5 -8 v16"/>
+    	<path id="v2c-nh3" d="M35.75 20 m-4.5 55 m-12 0 h24"/>
+    	<path id="v2c-nh4" d="M62.75 20 m0 56 m-12 0 h24"/>
+    	<path id="v2c-nh5" d="M22.25 42 m57 8 m1.5 -8 v16"/>
+    	<path id="v2c-nh6" d="M62.75 20 m-12 0 h24"/>
+    	<path id="v2c-nh" d="M22.25 42 l57 8 M35.75 20 c0 20 0 35 -4.5 55 M62.75 20 v56"/>
+    	<path id="v2c-ph1" d="M19.25 30 m1.5 -7 l-7.5 15"/>
+    	<path id="v2c-ph2" d="M49.25 20 m-27 56 m-6 -8 l9 15"/>
+    	<path id="v2c-ph3" d="M19.25 30 m39 50 m9 -1 l-18 4"/>
+    	<path id="v2c-ph4" d="M67.25 16 m0 50 m-12 0 h24"/>
+    	<path id="v2c-ph5" d="M67.25 16 m-9 0 h21"/>
+    	<path id="v2c-ph6" d="M49.25 20 m-3 -6 l12 14"/>
+    	<path id="v2c-ph" d="M67.25 16 v50 M49.25 20 c0 0 -12 40 -27 56 M19.25 30 c0 0 21 24 39 50"/>
+    	<path id="v2c-r1" d="M25.25 75 m0 -57 m-12 0 h24"/>
+    	<path id="v2c-r2" d="M25.25 75 m-12 0 h24"/>
+    	<path id="v2c-r3" d="M25.25 75 m0 -57 m3 12 m30 14 m-1.5 1 l-6 8"/>
+    	<path id="v2c-r4" d="M71.75 18 m0 56 m-12 0 h24"/>
+    	<path id="v2c-r5" d="M71.75 18 m-12 0 h24"/>
+    	<path id="v2c-r6" d="M25.25 75 m0 -57 m3 12 m6 2 l12 -8"/>
+    	<path id="v2c-r" d="M25.25 75 v-57 m3 12 l30 14 M71.75 18 v56"/>
+    	<path id="v2c-s1" d="M25.25 18 m-12 0 h24"/>
+    	<path id="v2c-s2" d="M25.25 18 m0 57 m-12 0 h24"/>
+    	<path id="v2c-s3" d="M28.25 71 m6 -2 l12 8"/>
+    	<path id="v2c-s4" d="M71.75 18 m0 56 m-12 0 h24"/>
+    	<path id="v2c-s5" d="M71.75 18 m-12 0 h24"/>
+    	<path id="v2c-s6" d="M28.25 71 m30 -11 m-1.5 -1 l-6 -8"/>
+    	<path id="v2c-s" d="M25.25 18 v57 M28.25 71 l30 -11 M71.75 18 v56"/>
+    	<path id="v2c-t1" d="M49.25 24 m-12 0 h24"/>
+    	<path id="v2c-t2" d="M23.75 46 m0 -8 v16"/>
+    	<path id="v2c-t3" d="M49.25 24 m0 44 m-12 0 h24"/>
+    	<path id="v2c-t4" d="M23.75 46 m51 0 m-4.5 1 l-10.5 14"/>
+    	<path id="v2c-t5" d="M74.75 16 m0 64 m-12 0 h24"/>
+    	<path id="v2c-t6" d="M74.75 16 m-12 0 h24"/>
+    	<path id="v2c-t" d="M74.75 16 v64 M23.75 46 h51 M49.25 24 v44"/>
+    	<path id="v2c-th1" d="M35.75 20 m-12 0 h24"/>
+    	<path id="v2c-th2" d="M22.25 50 m-4.5 -8 v16"/>
+    	<path id="v2c-th3" d="M35.75 20 m-4.5 55 m-12 0 h24"/>
+    	<path id="v2c-th4" d="M62.75 20 m0 56 m-12 0 h24"/>
+    	<path id="v2c-th5" d="M22.25 50 m57 -8 m1.5 -8 v16"/>
+    	<path id="v2c-th6" d="M62.75 20 m-12 0 h24"/>
+    	<path id="v2c-th" d="M22.25 50 l57 -8 M35.75 20 c0 20 0 35 -4.5 55 M62.75 20 v56"/>
+    	<path id="v2c-tr1" d="M29.75 20 m0 -8 v16"/>
+    	<path id="v2c-tr2" d="M47.75 20 m-1.5 3 l-18 12"/>
+    	<path id="v2c-tr3" d="M23.75 45 m0 -8 v16"/>
+    	<path id="v2c-tr4" d="M47.75 20 m0 58 m-12 0 h24"/>
+    	<path id="v2c-tr5" d="M23.75 45 m51 0 m0 -8 v16"/>
+    	<path id="v2c-tr6" d="M29.75 20 m39 0 m0 -8 v16"/>
+    	<path id="v2c-tr" d="M47.75 20 v58 M29.75 20 h39 M23.75 45 h51"/>
+    	<path id="v2c-v1" d="M23.75 20 m-12 0 h24"/>
+    	<path id="v2c-v2" d="M23.75 20 m0 50 m-3 4 l21 -14"/>
+    	<path id="v2c-v3" d="M76.25 15 m-36 70 m-12 1 h24"/>
+    	<path id="v2c-v4" d="M40.25 28 m42 50 m7.5 -2 l-19.5 8"/>
+    	<path id="v2c-v5" d="M76.25 15 m-12 -1 h24"/>
+    	<path id="v2c-v6" d="M40.25 28 m3 -8 l-9 15"/>
+    	<path id="v2c-v" d="M23.75 20 v50 M76.25 15 c-6 22 -10.5 45 -36 70 M40.25 28 c0 0 22.5 24 42 50"/>
+    	<path id="v2c-x1" d="M25.25 18 m0 -8 v16"/>
+    	<path id="v2c-x2" d="M67.25 19 m-15 51 m0 -4 l-12 -10"/>
+    	<path id="v2c-x3" d="M23.75 74 m0 -8 v16"/>
+    	<path id="v2c-x4" d="M23.75 74 m54 0 m0 -8 v16"/>
+    	<path id="v2c-x5" d="M67.25 19 m0 6 l12 10"/>
+    	<path id="v2c-x6" d="M25.25 18 m48 0 m4.5 -8 v16"/>
+    	<path id="v2c-x" d="M25.25 18 h48 M67.25 19 l-15 51 M23.75 74 h54"/>
+    	<path id="v2c-UU" d="M-28.75 22 h67.5 v1 c0 0 -22.5 35 -82.5 55 M-21.25 27 c0 0 21 33 75 50"/>
+    	<path id="v2c-II" d="M-28.75 22 v55 l67.5 -4 M38.75 22 v55"/>
+    	<path id="v2c-U" d="M38.75 22 c0 0 -22.5 35 -82.5 55 M-28.75 22 c0 0 22.5 35 82.5 55"/>
+    	<path id="v2c-I" d="M11.75 15 l-12 68 M-28.75 35 l75 8 M-33.25 58 l75 8"/>
+    	<path id="v2c-M" d="M-33.25 18 h82.5 m-12 20 c0 0 -18 20 -69 45 M-21.25 37 c0 0 18 20 63 46"/>
+    	<path id="v2c-N" d="M-36.25 15 v70 M-33.25 45 l85.5 4 M13.25 20 v60"/>
+    	<path id="v2c-P" d="M16.25 15 c0 0 -15 30 -45 63 M-36.25 80 l90 0 M-24.25 24 l60 40"/>
+    	<path id="v2c-C" d="M-36.25 37 h82.5 M-36.25 63 h82.5 M46.25 15 v70"/>
+    	<path id="v2c-T" d="M-40.75 50 l87 -4 M-1.75 20 v60 M46.25 15 v70"/>
+    	<path id="v2c-NG" d="M-43.75 20 h99 M-15.25 20 c0 20 0 40 -15 60 M26.75 20 v60"/>
+    	<path id="v2c-NH" d="M-43.75 45 l99 10 M-15.25 20 c0 20 0 40 -15 60 M26.75 20 v60"/>
+    	<path id="v2c-CH" d="M5.75 15 l12 68 M-28.75 40 l75 -8 M-24.25 64 l75 -8"/>
 
     	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
     	</defs>
