@@ -245,3 +245,15 @@ svg use[href^="#qt"] { stroke-width: calc(var(--stroke-width) * 3 / 4) }
     50% {--timer-color: khaki}
     100% {--p: 100; --timer-color: #f06}
 }
+
+/* words of decks: Nôm characters as images (black on transparent) with the font as fallback, and glyphs of several syllables */
+.nom-chars { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .05em; line-height: 1.1;
+             font-family: 'Nom Na Tong Supplement', 'NomKhai-Supplement', 'Han-Nom Gothic Supplement', 'Radicals Supplement', 'pa', 'HanaMinA', 'HanaMinB', serif; }
+.nom-chars img { height: 2.3rem; width: auto; }
+.options .nom-chars { font-size: 2.3rem; }
+.symbol-card .nom-chars { font-size: 5rem; }
+.symbol-card .nom-chars img { height: 5rem; filter: invert(1); }
+.word-grid-item .nom-chars { font-size: 1.6rem; }
+.word-grid-item .nom-chars img { height: 1.6rem; filter: invert(1); }
+.qatt-syllables { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .1em .5em; }
+[class*="lesson-deck-"] .word-grid-item { height: auto; min-height: 85px; flex-direction: column; padding: 8px 4px; }
