@@ -364,6 +364,34 @@ class SupabaseService {
     return data;
   }
 
+  /**
+   * Ids of the user's decks that contain the character `nom` (words are {n, qn}).
+   * The server filters (jsonb containment), so no words are transferred; if that is not possible, the words are filtered here.
+   */
+  async getDeckIdsWithWord(nom) {
+    if (!this.user) await this.init();
+    if (!this.user) return [];
+    const own = () => this.client.from('decks').select('id').eq('user_id', this.user.id);
+    let { data, error } = await own().contains('words', [{ n: nom }]);
+    if (error) {
+      const all = await this.client.from('decks').select('id, words').eq('user_id', this.user.id);
+      if (all.error) return [];
+      data = all.data.filter(d => (d.words || []).some(w => w.n === nom));
+    }
+    return data.map(d => d.id);
+  }
+
+  /**
+   * Adds the word {n, qn} to the deck, or removes the word with n when `present` is false. Only this one deck is loaded.
+   */
+  async setWordInDeck(deckId, word, present) {
+    const deck = await this.getDeck(deckId);
+    if (!deck.id || deck.user_id !== (this.user && this.user.id)) return { error: 'Deck not found' };
+    const words = (deck.words || []).filter(w => w.n !== word.n);
+    if (present) words.push(word);
+    return this.saveDeck({ id: deck.id, title: deck.title, words });
+  }
+
   async getPublicDecks() {
     if (!this.client) await this.init();
 
