@@ -57,7 +57,7 @@
     <label><input type="checkbox" id="guides" checked> guides</label>
   </div>
 
-  <div class="sample" id="sample" contenteditable="true" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
+  <div class="sample" id="sample" contenteditable="true" inputmode="none" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
   <div class="keys">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
@@ -82,6 +82,34 @@
   const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
   const q = new Qatt(); q.observe('TT');
 
+  // editing the sample at the caret (at the end if the field has no caret)
+  const caret = () => {
+    const sel = getSelection();
+    if (sel.rangeCount && sample.contains(sel.anchorNode)) return sel.getRangeAt(0);
+    const r = document.createRange(); r.selectNodeContents(sample); r.collapse(false); return r;
+  };
+  const setCaret = (node, offset) => {
+    const r = document.createRange(); r.setStart(node, offset); r.collapse(true);
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  };
+  const add = text => {
+    const r = caret(); r.deleteContents();
+    const node = document.createTextNode(text); r.insertNode(node);
+    setCaret(node, node.length); sample.normalize();
+  };
+  const backspace = () => {
+    const r = caret();
+    if (!r.collapsed) { r.deleteContents(); setCaret(r.startContainer, r.startOffset); sample.normalize(); return; }
+    const before = document.createRange(); before.selectNodeContents(sample); before.setEnd(r.endContainer, r.endOffset);
+    const at = before.toString().length, text = sample.textContent;
+    if (at === 0) return;                                        // caret at the start: nothing to delete
+    const n = Array.from(text.slice(0, at)).pop().length;       // one character (code point), 2 UTF-16 units for these
+    sample.textContent = text.slice(0, at - n) + text.slice(at);
+    if (sample.firstChild) setCaret(sample.firstChild, at - n);
+  };
+  // the buttons and tiles must not take the caret away from the sample field
+  for (const el of document.querySelectorAll('.sticky-card .keys, #grid-marks, #grid')) el.addEventListener('mousedown', e => e.preventDefault());
+
   // the format characters and the tone marks first, then the letters
   const isMark = g => g.t === 'combiner' || g.t === 'joiner' || g.t === 'tone';
   for (const g of glyphs) {
@@ -93,7 +121,7 @@
     if (g.q) { const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt); } else s.hidden = true;
     const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
     cell.append(f, s, cp);
-    cell.addEventListener('click', () => { sample.append(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
+    cell.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
     grids[isMark(g) ? 0 : 1].append(cell);
   }
 
@@ -114,7 +142,6 @@
     catch { const r = document.createRange(); r.selectNodeContents(sample); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
     setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
   });
-  const add = text => { sample.append(text); sample.scrollTop = sample.scrollHeight; };
   $('#joiner').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'joiner').o)); info.textContent = 'component joiner'; });
   $('#stack').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'combiner').o)); info.textContent = 'Tham Thư combiner'; });
   glyphs.filter(g => g.t === 'tone').sort((a, b) => a.o - b.o).forEach((g, i) => {   // tone buttons 1..8 in the order of the code points
@@ -124,7 +151,7 @@
     b.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o); });
     $('#tone-keys').append(b);
   });
-  $('#back').addEventListener('click', () => { sample.textContent = Array.from(sample.textContent).slice(0, -1).join(''); });
+  $('#back').addEventListener('click', backspace);
   apply();
 })();
 </script>
