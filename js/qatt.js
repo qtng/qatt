@@ -24,6 +24,7 @@ q.observe("TT");
 */
 
 const PREFIX = "v2-";
+const RHYME_ALONE_PREFIX = "v2c-"; // glyph copies moved to the middle of the box, for rhymes without onset
 const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	style="height:4800px;width:2540px;"
     	id="svg">
@@ -297,6 +298,188 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qs5" d="M88 10 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
     	<path id="qs6" d="M88 82 a12 12 0 0 1 0 24"/>
     	<path id="qs7" d="M88 94 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+
+    	<!-- the same glyphs moved 27 to the left: a rhyme without onset sits in the middle of the box (v2c- = centred) -->
+    	<path id="v2c-a" d="M33 10 v80 M23 90 h20 M38 35 h30 m-30 25 h30"/>
+    	<path id="v2c-a2" d="M41 20 h25 m-8 0 v40 c0 5 0 15 -5 30 M53 44 h-18 m0 22 h18"/>
+    	<path id="v2c-aw" d="M46 17 v52 M63 10 v40 c0 5 0 20 -4 40 M35 46 l37 -10 M30 36 v20"/>
+    	<path id="v2c-aw2" d="M35 15 h36 M44 25 l-8 14 M53 20 v68 m-22 -38 h44"/>
+    	<path id="v2c-e" d="M28 15 h20 M38 15 v70 M55 25 v50 M72 15 v70"/>
+    	<path id="v2c-e2" d="M31 10 h40 M31 26 l14 -6 m-3 5 v50 M63 10 v75"/>
+    	<path id="v2c-i" d="M31 10 h40 M42 10 v65 M63 25 v60 m0 -60 m-3 -5 l14 6"/>
+    	<path id="v2c-i2" d="M31 38 l32 -5 m-32 30 l32 -5 M47 13 v77 h1 l20 -5"/>
+    	<path id="v2c-o" d="M31 15 h30 c-4 22 -8 45 -30 70 M37 38 M37 38 m4 -12 l-10 20 M37 38 c6 8 14 18 28 40"/>
+    	<path id="v2c-o2" d="M61 10 c0 0 -8 40 -19 56 m-10 -6 l12 16 M37 23 c0 0 13 15 28 40 M37 86 h30"/>
+    	<path id="v2c-u2" d="M33 25 v45 m-2 4 l14 -14 M68 15 c-4 22 -7 45 -24 70 M44 28 c0 0 15 24 28 50"/>
+    	<path id="v2c-u" d="M67 16 v50 M55 20 c0 0 -8 40 -18 56 m-7 -8 l9 18 M35 30 c0 0 14 24 26 50"/>
+    	<path id="v2c-y" d="M39 16 v65 M39 40 h28 m0 -8 v16 M40 60 l28 3"/>
+    	<path id="v2c-y2" d="M37 20 v50 M53 13 v58 h1 l12 -5 M33 85 h35"/>
+    	<path id="v2c-_1" d="M34 22 m-1 -8 v16"/>
+    	<path id="v2c-_2" d="M35 45 m-1 -8 v16"/>
+    	<path id="v2c-_3" d="M33 70 m-1 -8 v16"/>
+    	<path id="v2c-_4" d="M33 70 m33 -3 m1 -8 v16"/>
+    	<path id="v2c-_5" d="M35 45 m26 0 m1 -8 v16"/>
+    	<path id="v2c-_6" d="M34 22 m30 0 m1 -8 v16"/>
+    	<path id="v2c-_" d="M34 22 h30 M35 45 h26 M33 70 l34 -3"/>
+    	<path id="v2c-b" d="M35 30 c0 0 10 10 28 33 M55 15 c0 0 -7 40 -17 55 M30 85 h35"/>
+    	<path id="v2c-b1" d="M35 30 m1 -8 l-5 15"/>
+    	<path id="v2c-b2" d="M55 15 m-17 55 m-6 -4 l10 11"/>
+    	<path id="v2c-b3" d="M30 85 m0 -8 v16"/>
+    	<path id="v2c-b4" d="M30 85 m35 0 m0 -8 v16"/>
+    	<path id="v2c-b5" d="M35 30 m28 33 m5 -8 l-6 15"/>
+    	<path id="v2c-b6" d="M55 15 m-8 -1 h16"/>
+    	<path id="v2c-c1" d="M33 40 m-1 -8 v16"/>
+    	<path id="v2c-c2" d="M31 58 m-1 -8 v16"/>
+    	<path id="v2c-c3" d="M31 58 m30 0 m-7 4 l-3 10"/>
+    	<path id="v2c-c4" d="M63 16 m0 64 m-8 0 h16"/>
+    	<path id="v2c-c5" d="M63 16 m-8 0 h16"/>
+    	<path id="v2c-c6" d="M33 40 m30 0 m-10 -4 l-2 -9"/>
+    	<path id="v2c-c" d="M63 16 v64 M33 40 h30 M31 58 h30"/>
+    	<path id="v2c-ch1" d="M51 20 m-8 -1 h16"/>
+    	<path id="v2c-ch2" d="M33 42 m-1 -8 v16"/>
+    	<path id="v2c-ch3" d="M33 64 m-1 -8 v16"/>
+    	<path id="v2c-ch4" d="M51 20 m-5 62 m-6 1 h16"/>
+    	<path id="v2c-ch5" d="M33 64 m35 -6 m1 -8 v16"/>
+    	<path id="v2c-ch6" d="M33 42 m35 -6 m1 -8 v16"/>
+    	<path id="v2c-ch" d="M33 42 l35 -6 M33 64 l35 -6 M51 20 c0 30 0 45 -5 62"/>
+    	<path id="v2c-d1" d="M51 20 m-8 -1 h16"/>
+    	<path id="v2c-d2" d="M35 40 m-1 -8 v16"/>
+    	<path id="v2c-d3" d="M51 20 m0 44 m-12 -8 l11 5"/>
+    	<path id="v2c-d4" d="M33 70 m-1 -8 v16"/>
+    	<path id="v2c-d5" d="M33 70 m36 -3 m1 -8 v16"/>
+    	<path id="v2c-d6" d="M35 40 m32 0 m1 -8 v16"/>
+    	<path id="v2c-d" d="M35 40 h32 M51 20 v44 M33 70 l36 -3"/>
+    	<path id="v2c-dz1" d="M51 20 m-8 -1 h16"/>
+    	<path id="v2c-dz2" d="M33 36 m-1 -8 v16"/>
+    	<path id="v2c-dz3" d="M33 58 m-1 -8 v16"/>
+    	<path id="v2c-dz4" d="M51 20 m-5 62 m-6 1 h16"/>
+    	<path id="v2c-dz5" d="M33 58 m35 6 m1 -8 v16"/>
+    	<path id="v2c-dz6" d="M33 36 m35 6 m1 -8 v16"/>
+    	<path id="v2c-dz" d="M33 36 l35 6 M33 58 l35 6 M51 20 c0 30 0 45 -5 62"/>
+    	<path id="v2c-g1" d="M33 16 m-8 0 h16"/>
+    	<path id="v2c-g2" d="M33 16 m0 64 m-8 0 h16"/>
+    	<path id="v2c-g3" d="M34 58 m4 1 l10 12"/>
+    	<path id="v2c-g4" d="M34 58 m30 0 m0 -8 v16"/>
+    	<path id="v2c-g5" d="M33 40 m30 0 m0 -8 v16"/>
+    	<path id="v2c-g6" d="M33 40 m4 0 l10 -12"/>
+    	<path id="v2c-g" d="M33 16 v64 M33 40 h30 M34 58 h30"/>
+    	<path id="v2c-h1" d="M42 20 m-9 0 h16"/>
+    	<path id="v2c-h2" d="M42 20 m0 46 m-2 -5 l-9 -7"/>
+    	<path id="v2c-h3" d="M32 72 m-2 -8 v16"/>
+    	<path id="v2c-h4" d="M32 72 m36 0 m2 -8 v16"/>
+    	<path id="v2c-h5" d="M58 20 m0 46 m2 -5 l9 -7"/>
+    	<path id="v2c-h6" d="M58 20 m-7 0 h16"/>
+    	<path id="v2c-h" d="M42 20 v46 M58 20 v46 M32 72 h36"/>
+    	<path id="v2c-kh1" d="M34 18 m0 -8 v16"/>
+    	<path id="v2c-kh2" d="M40 20 m0 8 l-8 10"/>
+    	<path id="v2c-kh3" d="M33 76 m0 -8 v16"/>
+    	<path id="v2c-kh4" d="M33 75 m36 0 m0 -8 v16"/>
+    	<path id="v2c-kh5" d="M40 18 m10 54 m0 -4 l10 -10"/>
+    	<path id="v2c-kh6" d="M34 18 m30 0 m0 -8 v16"/>
+    	<path id="v2c-kh" d="M34 18 h30 M40 20 l10 54 M33 76 h36"/>
+    	<path id="v2c-l1" d="M52 18 m-7 0 h14"/>
+    	<path id="v2c-l2" d="M36 16 m-10 -3 h16"/>
+    	<path id="v2c-l3" d="M36 16 m-5 64 m-6 0 l15 3"/>
+    	<path id="v2c-l4" d="M52 18 m0 54 m-7 0 h14"/>
+    	<path id="v2c-l5" d="M68 16 m0 58 m-6 4 h14"/>
+    	<path id="v2c-l6" d="M68 16 m-6 -4 h14"/>
+    	<path id="v2c-l" d="M36 16 v30 c0 5 0 20 -5 34 M52 18 v54 M68 16 v58"/>
+    	<path id="v2c-m1" d="M33 18 m-2 -8 v16"/>
+    	<path id="v2c-m2" d="M39 35 m0 -8 l-6 14"/>
+    	<path id="v2c-m3" d="M58 30 m-25 50 m-1 -10 l6 14"/>
+    	<path id="v2c-m4" d="M39 35 m23 42 m0 4 l6 -14"/>
+    	<path id="v2c-m5" d="M58 30 m-2 -4 l10 15"/>
+    	<path id="v2c-m6" d="M33 18 m30 0 m2 -8 v16"/>
+    	<path id="v2c-m" d="M33 18 h30 M58 30 c0 0 -8 30 -20 50 M39 35 c0 0 12 18 23 42"/>
+    	<path id="v2c-n1" d="M33 16 m-8 0 h16"/>
+    	<path id="v2c-n2" d="M33 16 m0 64 m-8 0 h16"/>
+    	<path id="v2c-n3" d="M34 46 m3 1 l7 14"/>
+    	<path id="v2c-n4" d="M52 24 m0 44 m-8 0 h16"/>
+    	<path id="v2c-n5" d="M33 46 m34 0 m0 -8 v16"/>
+    	<path id="v2c-n6" d="M52 24 m-8 0 h16"/>
+    	<path id="v2c-n" d="M33 16 v64 M33 46 h34 M52 24 v44"/>
+    	<path id="v2c-ng1" d="M33 22 m-2 -8 v16"/>
+    	<path id="v2c-ng2" d="M43 22 m-1 6 l-10 10"/>
+    	<path id="v2c-ng3" d="M43 22 m-6 50 m-6 1 h16"/>
+    	<path id="v2c-ng4" d="M61 22 m0 51 m-8 0 h16"/>
+    	<path id="v2c-ng5" d="M61 22 m1 6 l10 10"/>
+    	<path id="v2c-ng6" d="M33 22 m38 0 m2 -8 v16"/>
+    	<path id="v2c-ng" d="M33 22 h38 M43 22 c0 20 0 30 -6 50 M61 22 v51"/>
+    	<path id="v2c-nh1" d="M41 20 m-8 0 h16"/>
+    	<path id="v2c-nh2" d="M32 42 m-3 -8 v16"/>
+    	<path id="v2c-nh3" d="M41 20 m-3 55 m-8 0 h16"/>
+    	<path id="v2c-nh4" d="M59 20 m0 56 m-8 0 h16"/>
+    	<path id="v2c-nh5" d="M32 42 m38 8 m1 -8 v16"/>
+    	<path id="v2c-nh6" d="M59 20 m-8 0 h16"/>
+    	<path id="v2c-nh" d="M32 42 l38 8 M41 20 c0 20 0 35 -3 55 M59 20 v56"/>
+    	<path id="v2c-ph1" d="M30 30 m1 -7 l-5 15"/>
+    	<path id="v2c-ph2" d="M50 20 m-18 56 m-4 -8 l6 15"/>
+    	<path id="v2c-ph3" d="M30 30 m26 50 m6 -1 l-12 4"/>
+    	<path id="v2c-ph4" d="M62 16 m0 50 m-8 0 h16"/>
+    	<path id="v2c-ph5" d="M62 16 m-6 0 h14"/>
+    	<path id="v2c-ph6" d="M50 20 m-2 -6 l8 14"/>
+    	<path id="v2c-ph" d="M62 16 v50 M50 20 c0 0 -8 40 -18 56 M30 30 c0 0 14 24 26 50"/>
+    	<path id="v2c-r1" d="M34 75 m0 -57 m-8 0 h16"/>
+    	<path id="v2c-r2" d="M34 75 m-8 0 h16"/>
+    	<path id="v2c-r3" d="M34 75 m0 -57 m2 12 m20 14 m-1 1 l-4 8"/>
+    	<path id="v2c-r4" d="M65 18 m0 56 m-8 0 h16"/>
+    	<path id="v2c-r5" d="M65 18 m-8 0 h16"/>
+    	<path id="v2c-r6" d="M34 75 m0 -57 m2 12 m4 2 l8 -8"/>
+    	<path id="v2c-r" d="M34 75 v-57 m2 12 l20 14 M65 18 v56"/>
+    	<path id="v2c-s1" d="M34 18 m-8 0 h16"/>
+    	<path id="v2c-s2" d="M34 18 m0 57 m-8 0 h16"/>
+    	<path id="v2c-s3" d="M36 71 m4 -2 l8 8"/>
+    	<path id="v2c-s4" d="M65 18 m0 56 m-8 0 h16"/>
+    	<path id="v2c-s5" d="M65 18 m-8 0 h16"/>
+    	<path id="v2c-s6" d="M36 71 m20 -11 m-1 -1 l-4 -8"/>
+    	<path id="v2c-s" d="M34 18 v57 M36 71 l20 -11 M65 18 v56"/>
+    	<path id="v2c-t1" d="M50 24 m-8 0 h16"/>
+    	<path id="v2c-t2" d="M33 46 m0 -8 v16"/>
+    	<path id="v2c-t3" d="M50 24 m0 44 m-8 0 h16"/>
+    	<path id="v2c-t4" d="M33 46 m34 0 m-3 1 l-7 14"/>
+    	<path id="v2c-t5" d="M67 16 m0 64 m-8 0 h16"/>
+    	<path id="v2c-t6" d="M67 16 m-8 0 h16"/>
+    	<path id="v2c-t" d="M67 16 v64 M33 46 h34 M50 24 v44"/>
+    	<path id="v2c-th1" d="M41 20 m-8 0 h16"/>
+    	<path id="v2c-th2" d="M32 50 m-3 -8 v16"/>
+    	<path id="v2c-th3" d="M41 20 m-3 55 m-8 0 h16"/>
+    	<path id="v2c-th4" d="M59 20 m0 56 m-8 0 h16"/>
+    	<path id="v2c-th5" d="M32 50 m38 -8 m1 -8 v16"/>
+    	<path id="v2c-th6" d="M59 20 m-8 0 h16"/>
+    	<path id="v2c-th" d="M32 50 l38 -8 M41 20 c0 20 0 35 -3 55 M59 20 v56"/>
+    	<path id="v2c-tr1" d="M37 20 m0 -8 v16"/>
+    	<path id="v2c-tr2" d="M49 20 m-1 3 l-12 12"/>
+    	<path id="v2c-tr3" d="M33 45 m0 -8 v16"/>
+    	<path id="v2c-tr4" d="M49 20 m0 58 m-8 0 h16"/>
+    	<path id="v2c-tr5" d="M33 45 m34 0 m0 -8 v16"/>
+    	<path id="v2c-tr6" d="M37 20 m26 0 m0 -8 v16"/>
+    	<path id="v2c-tr" d="M49 20 v58 M37 20 h26 M33 45 h34"/>
+    	<path id="v2c-v1" d="M33 20 m-8 0 h16"/>
+    	<path id="v2c-v2" d="M33 20 m0 50 m-2 4 l14 -14"/>
+    	<path id="v2c-v3" d="M68 15 m-24 70 m-8 1 h16"/>
+    	<path id="v2c-v4" d="M44 28 m28 50 m5 -2 l-13 8"/>
+    	<path id="v2c-v5" d="M68 15 m-8 -1 h16"/>
+    	<path id="v2c-v6" d="M44 28 m2 -8 l-6 15"/>
+    	<path id="v2c-v" d="M33 20 v50 M68 15 c-4 22 -7 45 -24 70 M44 28 c0 0 15 24 28 50"/>
+    	<path id="v2c-x1" d="M34 18 m0 -8 v16"/>
+    	<path id="v2c-x2" d="M62 19 m-10 51 m0 -4 l-8 -10"/>
+    	<path id="v2c-x3" d="M33 74 m0 -8 v16"/>
+    	<path id="v2c-x4" d="M33 74 m36 0 m0 -8 v16"/>
+    	<path id="v2c-x5" d="M62 19 m0 6 l8 10"/>
+    	<path id="v2c-x6" d="M34 18 m32 0 m3 -8 v16"/>
+    	<path id="v2c-x" d="M34 18 h32 M62 19 l-10 51 M33 74 h36"/>
+    	<path id="v2c-UU" d="M-2 22 h45 v1 c0 0 -15 35 -55 55 M3 27 c0 0 14 33 50 50"/>
+    	<path id="v2c-II" d="M-2 22 v55 l45 -4 M43 22 v55"/>
+    	<path id="v2c-U" d="M43 22 c0 0 -15 35 -55 55 M-2 22 c0 0 15 35 55 55"/>
+    	<path id="v2c-I" d="M25 15 l-8 68 M-2 35 l50 8 M-5 58 l50 8"/>
+    	<path id="v2c-M" d="M-5 18 h55 m-8 20 c0 0 -12 20 -46 45 M3 37 c0 0 12 20 42 46"/>
+    	<path id="v2c-N" d="M-7 15 v70 M-5 45 l57 4 M26 20 v60"/>
+    	<path id="v2c-P" d="M28 15 c0 0 -10 30 -30 63 M-7 80 l60 0 M1 24 l40 40"/>
+    	<path id="v2c-C" d="M-7 37 h55 M-7 63 h55 M48 15 v70"/>
+    	<path id="v2c-T" d="M-10 50 l58 -4 M16 20 v60 M48 15 v70"/>
+    	<path id="v2c-NG" d="M-12 20 h66 M7 20 c0 20 0 40 -10 60 M35 20 v60"/>
+    	<path id="v2c-NH" d="M-12 45 l66 10 M7 20 c0 20 0 40 -10 60 M35 20 v60"/>
+    	<path id="v2c-CH" d="M21 15 l8 68 M-2 40 l50 -8 M1 64 l50 -8"/>
 
     	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
     	</defs>
@@ -591,23 +774,23 @@ class Qatt {
 
     if (vowel) {
       let vStr = vowel;
+      const rhymePrefix = rhymeAlone ? RHYME_ALONE_PREFIX : PREFIX; // a rhyme without anything else uses the centred copies of the glyphs
       if (vStr.charAt(0) === "w") {
         vStr = vStr.substr(1);
         this._useG(g, `${PREFIX}${initial}-medial`);
       }
       if (!"aeiouy".includes(vStr[0]) && /\d$/.test(vStr)) {
-        this._useG(g, PREFIX + vStr.replace(/\d/, ""));
+        this._useG(g, rhymePrefix + vStr.replace(/\d/, ""));
         if (tone || final) {
 	      const qt = parseInt(tone || final || 0);
           if (qt) this._useG(g, "qt" + (qt == 8 ? 0 : qt));
         }
         tone = "";
       }
-      this._useG(g, PREFIX + vStr);
+      this._useG(g, rhymePrefix + vStr);
     }
 
-    // A rhyme without onset, tone and coda only fills the right half of the box; its viewBox is moved so that it sits in the middle
-    svg.setAttribute("viewBox", rhymeAlone ? "17 -25 120 125" : "-10 -25 120 125");
+    svg.setAttribute("viewBox", "-10 -25 120 125");
     svg.style.aspectRatio = "13 / 15";
     svg.style.verticalAlign = "bottom";
     svg.style.overflow = "visible";
