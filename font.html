@@ -6,7 +6,7 @@
   <title>QATT reference font</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <style>
-    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=13) format("woff2"), url(font/qatt-prototype.ttf?v=13) format("truetype"); }
+    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=16) format("woff2"), url(font/qatt-prototype.ttf?v=16) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
@@ -67,6 +67,11 @@
   <div class="hops" id="tones1"></div>
   <div class="hops mt-2" id="tones2"></div>
 
+  <h2 class="h5 mt-4">Tham Thư combiner</h2>
+  <p>The Tham Thư combiner <code>U+F009A</code> writes the following character above the preceding one: <em>A</em> + combiner + <em>B</em> puts <em>A</em> in the lower 55 % and <em>B</em> in the upper 45 % of the cell. <em>A</em> can also be a joined pair. Tones go after the whole group. Standalone, the combiner is a small square.</p>
+  <div class="hops" id="tham1"></div>
+  <div class="hops mt-2" id="tham2"></div>
+
   <h2 class="h5 mt-4">All characters</h2>
   <div class="grid" id="grid"></div>
 </main>
@@ -123,13 +128,32 @@
     box.append(el);
   }
 
+  // Tham Thư: a Cán with a Chi above it, and a Hợp Thư with a Chi above it
+  const COMB = String.fromCodePoint(BASE + 154), at = o => String.fromCodePoint(BASE + o);
+  const byStem = {};
+  for (const g of glyphs) if (g.t === 'unmarked' || g.t === 'marked' || g.t === 'chi') { const k = stem(g); (byStem[k] ||= {})[/MARKED-(\d)/.test(g.n) ? +g.n.match(/MARKED-(\d)/)[1] : 0] = g.o; }
+  const stems = Object.keys(byStem).filter(k => byStem[k][0] !== undefined && byStem[k][1] !== undefined && byStem[k][2] !== undefined).slice(0, 12);
+  stems.forEach((k, i) => {
+    const m = byStem[k], chi = m[2 + (i % 5)];
+    add('#tham1', at(m[0]) + COMB + at(chi), k.toLowerCase() + ': unmarked + chi');
+    add('#tham2', at(m[1]) + JOINER + at(m[0]) + COMB + at(chi), k.toLowerCase() + ': Hợp Thư + chi');
+  });
+  function add(sel, text, label) {
+    const hop = document.createElement('div'); hop.className = 'hop';
+    const f = document.createElement('span'); f.className = 'f'; f.textContent = text;
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = label.toLowerCase();
+    hop.append(f, nm);
+    hop.addEventListener('click', () => { sample.append(text); info.textContent = label; });
+    $(sel).append(hop);
+  }
+
   const apply = () => {
     const px = +$('#size').value;
     grid.style.setProperty('--size', px + 'px');
     grid.style.setProperty('--cell', Math.max(px * 1.25, 96) + 'px');
     sample.style.fontSize = Math.max(px * .8, 32) + 'px';
     grid.classList.toggle('hide-svg', !$('#svg').checked);
-    grid.classList.toggle('guides', $('#guides').checked); for (const b of [hopBox, $('#tones1'), $('#tones2')]) { b.classList.toggle('guides', $('#guides').checked); b.style.setProperty('--size', px + 'px'); b.style.setProperty('--hopw', Math.max(px * 1.25, 96) + 'px'); }
+    grid.classList.toggle('guides', $('#guides').checked); for (const b of [hopBox, $('#tones1'), $('#tones2'), $('#tham1'), $('#tham2')]) { b.classList.toggle('guides', $('#guides').checked); b.style.setProperty('--size', px + 'px'); b.style.setProperty('--hopw', Math.max(px * 1.25, 96) + 'px'); }
     for (const c of cells) c.hidden = $('#tonesOnly').checked && c._g.t !== 'tone';
   };
   for (const id of ['#size', '#svg', '#guides', '#tonesOnly']) $(id).addEventListener('input', apply);
