@@ -31,8 +31,16 @@ class SupabaseService {
     this.user = null;
   }
   
+  // An error of the sign-in in the address after the return from Google (in the query or after the #): { code, description } or null
+  _signInReturnError() {
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, '') + '&' + window.location.search.replace(/^\?/, ''));
+    const code = params.get('error_code') || '', description = params.get('error_description') || params.get('error') || '';
+    return code || description ? { code, description } : null;
+  }
+
   async init() {
     if (typeof supabase === 'undefined') return;
+    const returned = this._signInReturnError(); // read before the client works on the address
     this.client = supabase.createClient(this.url, this.key, {
       global: {
         headers: {
@@ -41,6 +49,21 @@ class SupabaseService {
         }
       }
     });
+    if (returned) {
+      this.authError = returned.description || returned.code;
+      const url = new URL(window.location.href);
+      ['error', 'error_code', 'error_description'].forEach(name => url.searchParams.delete(name));
+      window.history.replaceState(null, '', url.pathname + url.search);
+      // "Identity is already linked to another user": this Google account has a user already (the account from before),
+      // so linking it to the anonymous user is not possible. Sign in to that user instead, once.
+      const taken = returned.code == 'identity_already_exists' || /already linked/i.test(returned.description);
+      if (taken && !sessionStorage.getItem('qatt_google_retry')) {
+        sessionStorage.setItem('qatt_google_retry', '1');
+        this.authError = null;
+        await this.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: this._returnUrl() } });
+        await new Promise(resolve => setTimeout(resolve, 8000)); // the browser is on its way to Google
+      }
+    }
     // Check for existing session in localStorage
     const {
       data: {
@@ -49,6 +72,7 @@ class SupabaseService {
     } = await this.client.auth.getSession();
     if (session) {
       this.user = session.user;
+      if (!this.isAnonymous) sessionStorage.removeItem('qatt_google_retry');
     } else {
       await this._authenticate();
     }
