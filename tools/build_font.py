@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build a monospace web font from the QATT stroke glyphs (font/glyphs.json, made from the rendered qatt.js glyphs by extract_glyphs.js).
-The two format characters (combiner, joiner) only get a small square as placeholder.
+Standalone, the two format characters (combiner, joiner) are drawn as a small square.
 
 Component joiner: "A joiner B" (A, B any Can/Chi form) is shown as one square cell, A squeezed into the
 left half and B into the right half (an OpenType ccmp rule swaps both for half-width variants and the joiner

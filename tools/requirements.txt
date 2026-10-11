@@ -1,0 +1,6 @@
+# Python packages for tools/build_font.py (the font build)
+fonttools
+skia-pathops
+brotli
+# optional: check the OpenType rules by shaping text (see tools/README.md)
+uharfbuzz
