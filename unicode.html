@@ -64,6 +64,10 @@
     .names .qglyph { font-size: 1.7rem; }
     .detail-glyph .qglyph { font-size: 3.8rem; }
     .names .mini .font-glyph { font-size: 1.4rem; }
+    /* a tone mark sits in a corner of its glyph box: drawn smaller so that the mark stays inside the swatch */
+    .names .mini.g-tone .qglyph { font-size: 1.35rem; }
+    .sw-tone { display: flex; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; background: var(--g-bg); border: 1px solid var(--g-border); border-radius: .3rem; }
+    .sw-tone .qglyph { font-size: 1.45rem; }
     .names tr.hit { background: var(--bs-warning-bg-subtle); }
     .names thead th { background: var(--bs-secondary-bg); white-space: nowrap; }
     .names tr.sect th { background: var(--bs-tertiary-bg); font-weight: 600; font-size: .95rem; }
@@ -321,7 +325,7 @@
     const body = el('tbody');
     chars.filter(c => c.t === 'tone').forEach(c => {
       const tone = c.notes.find(n => n[0] === '=')[1], rel = c.notes.filter(n => n[0] === 'x').map(n => n[1].replace(/^\(/, '').replace(/\)$/, '').replace(/ - ([0-9A-F]{4})$/, ' – U+$1'));
-      const sw = el('div', { className: 'g-tone', style: 'width:2.6rem;height:2.6rem;background:var(--g-bg);border:1px solid var(--g-border);border-radius:.3rem;padding:.15rem' }, el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
+      const sw = el('div', { className: 'g-tone sw-tone' }, el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
       const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, true); $('#chart').scrollIntoView({ block: 'center' }); };
       body.append(el('tr', {}, el('td', {}, sw), el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })), el('td', {}, el('code', { className: 'name', textContent: c.n })), el('td', { textContent: tone }),
         el('td', { className: 'small' }, ...rel.map(r => el('div', { textContent: r })))));
