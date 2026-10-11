@@ -1,20 +1,7 @@
 (function() {
     const navConfig = {
-        title:  (location.pathname.indexOf("/qatt/") > -1) ? " Chunom.org" : "Chunom.org",
+        title: "Qatt.org",
         sections: [
-            {
-                header: "Chữ Nôm",
-                themeClass: "text-warning",
-                linkClass: "link-nom",
-                links: [
-                    { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
-                    { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
-                    { name: "Flashcards", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
-                    { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
-                    { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
-                    { name: "Dictionary: TĐCNTD 2009", url: "/chunom/dict/tdcntd.html", icon: "bi-journal-richtext" },
-                ]
-            },
             {
                 header: "Quốc Âm Tân Tự (QATT)",
                 themeClass: "text-info",
@@ -28,6 +15,19 @@
                     //{ name: "QATT Reference", url: "/qatt/reference.html", icon: "bi-book-half" },
                     //{ name: "QATT Logo Creator", url: "/qatt/logo-creator.html", icon: "bi-palette" },
                     //{ name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-info-circle" }
+                ]
+            },
+            {
+                header: "Chữ Nôm",
+                themeClass: "text-warning",
+                linkClass: "link-nom",
+                links: [
+                    { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
+                    { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
+                    { name: "Flashcards", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
+                    { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
+                    { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
+                    { name: "Dictionary: TĐCNTD 2009", url: "/chunom/dict/tdcntd.html", icon: "bi-journal-richtext" },
                 ]
             }
         ]
@@ -93,7 +93,6 @@
                 color: #fff !important;
             }
             .offcanvas-nav-link i { margin-right: 12px; width: 20px; text-align: center; }
-            .navbar-brand .version-badge { font-size: 0.7rem; vertical-align: super; }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
         `;
         document.head.appendChild(style);
@@ -110,7 +109,7 @@
                 break;
             }
         }
-        const home = '/chunom'; //location.pathname.indexOf("/qatt") > -1 ? "/qatt" : "/chunom";
+        const home = '/qatt';
 
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
@@ -128,7 +127,6 @@
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" href="${home}">
                     ${navConfig.title}
-                    <span class="version-badge ms-1 text-warning">v2-alpha</span>
                 </a>
                 <div class="ms-auto d-flex align-items-center">
                     <a style="background:rgba(0,255,0,0.2)" href="${relativeLinkPrefix}/qatt/quiz/qatt.html" class="${isQuiz?'d-none':''} badge rounded-pill border border-success text-light text-decoration-none small me-2 py-1 px-2">
