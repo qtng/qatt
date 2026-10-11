@@ -10,11 +10,20 @@
   <script defer src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
   <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --bs-link-color: #a8362a; --bs-link-hover-color: #8c2c22; --bs-link-color-rgb: 168, 54, 42; --bs-link-hover-color-rgb: 140, 44, 34; }
+    body { color: var(--ink); }
+    .hero { background: radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%), linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: #4a3d30; }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
+    .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
     :root {
       --g-unmarked: #d9e8ff; --g-marked: #d7f0d6; --g-chi: #fff1bf; --g-combiner: #ffdcc0; --g-joiner: #ffdcc0; --g-tone: #e9d9ff;
       --g-reserved: #eceff1; --g-border: #b8c1c9;
     }
-    h2 { margin-top: 2.2rem; font-size: 1.45rem; border-bottom: 1px solid var(--g-border); padding-bottom: .25rem; }
+    h2 { margin-top: 2.2rem; font-size: 1.45rem; font-family: Georgia, "Times New Roman", serif; font-weight: 400; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
     h3 { font-size: 1.1rem; }
     .tt { font-variant-numeric: tabular-nums; }
     .cp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -73,12 +82,17 @@
   </style>
 </head>
 <body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">QATT Unicode</h1>
+    <p class="lead mx-auto mb-0">The proposed block for Quốc Âm Tân Tự (QATT), a script found in Hán Nôm texts: <span id="s-total"></span> characters in a block of <span id="s-size"></span> code points.</p>
+  </div>
+</header>
+
 <main class="container-xl py-4" id="top">
 
-  <header>
-    <h1 class="h2 border-0 mb-1" style="margin-top:0">Quốc Âm Tân Tự <span class="text-secondary fw-normal">– Unicode block</span></h1>
-    <p class="lead mb-2">The proposed block for Quốc Âm Tân Tự (QATT), a script found in Hán Nôm texts: <span id="s-total"></span> characters in a block of <span id="s-size"></span> code points.</p>
-    <div class="alert alert-warning small mb-2" role="note">
+  <div class="alert alert-warning small mb-2" role="note">
       <strong>Draft – not part of the Unicode Standard.</strong>
       This page shows the block of the <a href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">QATT Unicode Proposal – Draft</a>.
       The block position is not assigned yet. The code points shown use the provisional base <span class="cp" id="s-base"></span>
@@ -87,7 +101,8 @@
       Data: <a id="s-link" href="https://github.com/qtng/qatt-unicode">qtng/qatt-unicode</a> at <span class="cp" id="s-commit"></span>
       (<span class="cp">ucd/</span> draft files, proposal sections 5–7).
     </div>
-  </header>
+    <p class="text-center mb-0"><a class="btn btn-cinnabar btn-sm" href="font.html">Reference Font</a></p>
+
 
   <h2 id="chart-title">Code chart</h2>
   <div class="d-flex flex-wrap gap-2 mb-3" id="legend" role="group" aria-label="Filter by group"></div>
