@@ -23,7 +23,7 @@
                     { name: "QATT Introduction", url: "/qatt/intro.html", icon: "bi-file-earmark" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
                     { name: "Practise QATT", url: "/qatt/quiz/qatt.html", icon: "bi-mortarboard" },
-                    { name: "QATT Fonts", url: "/qatt/font.html", icon: "bi-fonts" },
+                    { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
                     //{ name: "QATT Reference", url: "/qatt/reference.html", icon: "bi-book-half" },
                     //{ name: "QATT Logo Creator", url: "/qatt/logo-creator.html", icon: "bi-palette" },

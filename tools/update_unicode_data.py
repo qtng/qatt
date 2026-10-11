@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Refresh the character data embedded in font.html from the QATT Unicode proposal repository.
+"""Refresh the character data embedded in unicode.html from the QATT Unicode proposal repository.
 
-Usage: python3 tools/update_font_data.py PATH/TO/qatt-unicode [font.html]
+Usage: python3 tools/update_unicode_data.py PATH/TO/qatt-unicode [unicode.html]
 
 Reads ucd/UnicodeData-draft.txt, ucd/NamesList-draft.txt, ucd/Properties-draft.txt and tools/make_ucd.py
 (readings and Nôm annotations of the 22 Cán) of a checkout of https://github.com/qtng/qatt-unicode and
-replaces the JSON in <script type="application/json" id="qatt-data"> of font.html. The commit of the checkout
+replaces the JSON in <script type="application/json" id="qatt-data"> of unicode.html. The commit of the checkout
 is stored in the data and shown on the page.
 """
 import ast, json, re, subprocess, sys
 from pathlib import Path
 
 REPO = sys.argv[1]
-PAGE = Path(sys.argv[2] if len(sys.argv) > 2 else Path(__file__).resolve().parent.parent / 'font.html')
+PAGE = Path(sys.argv[2] if len(sys.argv) > 2 else Path(__file__).resolve().parent.parent / 'unicode.html')
 base = 0xF0000
 # --- UnicodeData-draft
 chars = {}
