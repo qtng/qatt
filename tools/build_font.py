@@ -23,16 +23,22 @@ STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 72, 54, 72, 38   # font units (g
 ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
 JOINER = 155                   # offset of the component joiner
+COMBINER = 154                 # offset of the Tham Thu combiner
+STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 10, 90   # share of the height for the glyph above; svg y of the top and bottom edge of the area
+STROKE_UP, STROKE_LOW = 50, 58                    # strokes of the squeezed upper and lower glyph
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
 
-def outline(defs, width, k=1.0, centre=500, grow=1.0):
+def outline(defs, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None):
     """Stroke the paths into one outline; k squeezes horizontally, centre is the x of the middle of the glyph,
-    grow enlarges the drawing around its middle."""
+    grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`."""
     out = pathops.Path()
     kx = SX * k * grow
-    matrix = (kx, 0, 0, -SY * grow, centre - 49.27 * kx, Y0 - GROW_Y * SY * (1 - grow))
+    f = Y0 - GROW_Y * SY * (1 - grow)
+    if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
+        f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
+    matrix = (kx, 0, 0, -SY * grow * v, centre - 49.27 * kx, f)
     for d in defs:
         p = pathops.Path()
         parse_path(d, TransformPen(p.getPen(), matrix))
@@ -43,6 +49,12 @@ def outline(defs, width, k=1.0, centre=500, grow=1.0):
     return out
 
 glyphs, cmap, order, adv, halves, tones = {}, {}, ['.notdef'], {}, [], []
+
+def add(name, path, advance=None):
+    pen = TTGlyphPen(None)
+    path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+    glyphs[name] = pen.glyph(); order.append(name)
+    if advance is not None: adv[name] = advance
 glyphs['.notdef'] = TTGlyphPen(None).glyph()
 for g in data:
     o, defs = g['o'], g['d']
@@ -61,12 +73,18 @@ for g in data:
         outline(defs, STROKE_HALF, HALF_X, 250, GROW).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
         halves.append(name)
+        # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .halflow for a joined pair)
+        add(name + '.up', outline(defs, STROKE_UP, 1.0, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
+        add(name + '.low', outline(defs, STROKE_LOW, 1.0, 500, GROW, 1 - STACK_UP, STACK_BOTTOM))
+        add(name + '.halflow', outline(defs, STROKE_LOW, HALF_X, 250, GROW, 1 - STACK_UP, STACK_BOTTOM), ADV // 2)
     if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
         pen = TTGlyphPen(None)
         outline(g['dm'], STROKE_MARK, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
         tones.append(name)
 jname = 'u%05X' % (BASE + JOINER)
+cname = 'u%05X' % (BASE + COMBINER)
+glyphs[cname + '.zw'] = TTGlyphPen(None).glyph(); adv[cname + '.zw'] = 0; order.append(cname + '.zw')
 glyphs[jname + '.zw'] = TTGlyphPen(None).glyph(); adv[jname + '.zw'] = 0; order.append(jname + '.zw')
 
 fb = FontBuilder(UPM, isTTF=True)
@@ -85,23 +103,37 @@ fb.setupNameTable({'familyName': 'QATT Prototype', 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
-comb = 'u%05X' % (BASE + JOINER - 1)
 addOpenTypeFeaturesFromString(fb.font, f'''
 @FULL = [{' '.join(halves)}];
 @HALF = [{' '.join(n + '.half' for n in halves)}];
+@UP = [{' '.join(n + '.up' for n in halves)}];
+@LOW = [{' '.join(n + '.low' for n in halves)}];
+@HALFLOW = [{' '.join(n + '.halflow' for n in halves)}];
 @TONE = [{' '.join(tones)}];
 @TONE_MARK = [{' '.join(n + '.mark' for n in tones)}];
-@BEFORE_TONE = [@FULL @HALF @TONE_MARK {comb} {jname} {jname}.zw];
+@BEFORE_TONE = [@FULL @HALF @UP @TONE_MARK {cname} {cname}.zw {jname} {jname}.zw];
 lookup HALF {{ sub @FULL by @HALF; }} HALF;
 lookup JOINER_ZW {{ sub {jname} by {jname}.zw; }} JOINER_ZW;
+lookup UPPER {{ sub @FULL by @UP; }} UPPER;
+lookup LOWER {{ sub @FULL by @LOW; }} LOWER;
+lookup HALF_LOWER {{ sub @HALF by @HALFLOW; }} HALF_LOWER;
+lookup COMBINER_ZW {{ sub {cname} by {cname}.zw; }} COMBINER_ZW;
 lookup TONE_MARK {{ sub @TONE by @TONE_MARK; }} TONE_MARK;
 lookup JOIN {{ sub @FULL' lookup HALF {jname}' lookup JOINER_ZW @FULL' lookup HALF; }} JOIN;
+lookup STACK {{
+    sub @HALF' lookup HALF_LOWER {jname}.zw @HALF {cname} @FULL;
+    sub [@HALF @HALFLOW] {jname}.zw @HALF' lookup HALF_LOWER {cname} @FULL;
+    sub @HALFLOW {jname}.zw @HALFLOW {cname}' lookup COMBINER_ZW @FULL' lookup UPPER;
+    sub @FULL' lookup LOWER {cname}' lookup COMBINER_ZW @FULL' lookup UPPER;
+}} STACK;
 lookup TONE_AFTER {{ sub @BEFORE_TONE @TONE' lookup TONE_MARK; }} TONE_AFTER;
 feature ccmp {{
     lookup JOIN;
+    lookup STACK;
     lookup TONE_AFTER;
 }} ccmp;
 ''')
+
 
 fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont
