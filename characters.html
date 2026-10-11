@@ -34,7 +34,6 @@
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.set { padding-block: 1.6rem; }
-    section.set + section.set { border-top: 1px solid var(--bs-border-color); }
     h2.tones-h { font-family: Georgia, "Times New Roman", serif; font-weight: 400; text-align: center; margin: 1rem 0 1.6rem; }
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
@@ -73,7 +72,7 @@
     const code = s => s === 'z' ? '_' : s;
     block('the 22 base shapes', SHAPES.map(s => [',' + code(s), s === 'z' ? 'ʔ' : s]));
     for (let m = 1; m <= 5; m++)
-      block('Chi - Marked ' + m, SHAPES.map((s, i) => [',' + code(s) + m, TABLE[i][m - 1]]));
+      block('Chi - Marked ' + m, SHAPES.map((s, i) => [',' + code(s) + (m + 1), TABLE[i][m - 1]]));
 
     const h = document.createElement('h2'); h.className = 'tones-h h1'; h.textContent = 'Tones'; content.append(h);
     const tones = ['sắc', 'huyền', 'hỏi', 'ngã', 'nặng', 'sắc (nhập)', 'nặng (nhập)', 'ngang'];
