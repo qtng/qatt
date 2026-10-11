@@ -6,12 +6,11 @@
 (() => {
   const B = QattBrush;
   const SVGNS = "http://www.w3.org/2000/svg";
-  const STORE = "qatt-brush-v2";
+  const STORE = "qatt-brush-v3";
   const SHAPES = VietnameseParser.SHAPES.map(s => s === "z" ? "_" : s);
   const TABLE = VietnameseParser.DECODINGS.qatt;
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
   const VIEWBOX = "-14 -28 128 136";   // the glyph box of qatt.js with room for the tone marks in the corners
-  const KIND_NAMES = { heng: "Horizontal", shu: "Vertical", pie: "Left-falling", na: "Right-falling", ti: "Rising", dian: "Dot", line: "Line" };
   const clone = o => JSON.parse(JSON.stringify(o));
 
   // ---- the original centre lines ----------------------------------------------------------------------------------------------
@@ -22,28 +21,33 @@
   const centred = ([x, y]) => [1.5 * x - 66.25, y];   // the v2c- copies of qatt.js: a rhyme alone, centred in the box
 
   // ---- defaults: the library and the symbols made from the original paths ---------------------------------------------------------
+  // The standard library has five strokes; every original stroke goes to the nearest of them.
   const DEF = (() => {
-    const lib = {}, sym = {}, groups = {};
+    const sym = {}, slight = [];
     const measure = piece => { const segs = B.normalize(piece.s); return Object.assign({ kind: B.classify(segs) }, B.fit(segs)); };
-    const keyOf = f => { const m = Math.max(Math.abs(f.h1), Math.abs(f.h2)); return m < 0.025 ? f.kind : m < 0.1 ? f.kind + "-slight" : f.kind + "-curved"; };
-    const item = (piece, key) => { const f = measure(piece); return { lib: key || keyOf(f), a: f.a, b: f.b }; };
+    const keyOf = f => {
+      const bend = Math.max(Math.abs(f.h1), Math.abs(f.h2));
+      if (f.kind === "na") return "na";
+      if (f.kind === "shu" && bend < 0.025) return "shu";
+      if (f.kind === "shu" || f.kind === "pie") { if (f.kind === "shu" && bend < 0.1) slight.push(f); return "shu-slight"; }
+      return "heng";
+    };
     for (const s of SHAPES) {
       for (const id of ["v2-" + s, `v2-${s}-small`]) {
-        const strokes = original(id).map(p => {
-          const f = measure(p), key = keyOf(f);
-          (groups[key] = groups[key] || { kind: f.kind, list: [] }).list.push(f);
-          return { lib: key, a: f.a, b: f.b };
-        });
-        const marks = (id.endsWith("-small") ? [`v2-${s}-medial`] : [1, 2, 3, 4, 5, 6].map(n => "v2-" + s + n)).map(m => original(m)[0] ? item(original(m)[0], "tick") : null);
+        const strokes = original(id).map(p => { const f = measure(p); return { lib: keyOf(f), a: f.a, b: f.b }; });
+        const marks = (id.endsWith("-small") ? [`v2-${s}-medial`] : [1, 2, 3, 4, 5, 6].map(n => "v2-" + s + n))
+          .map(m => { const p = original(m)[0]; if (!p) return null; const f = measure(p); return { lib: "mark", a: f.a, b: f.b }; });
         sym[id] = { strokes, marks };
       }
     }
-    for (const [key, g] of Object.entries(groups)) {
-      const straight = key === g.kind, avg = f => straight ? 0 : Math.round(g.list.reduce((a, x) => a + x[f], 0) / g.list.length * 1000) / 1000;
-      lib[key] = Object.assign({}, B.DEFAULT_PRESETS[g.kind], { name: KIND_NAMES[g.kind] + (key.endsWith("-slight") ? ", slightly curved" : key.endsWith("-curved") ? ", curved" : ""), h1: avg("h1"), h2: avg("h2") });
-    }
-    for (const k of ["heng", "shu", "pie", "na", "ti", "dian"]) if (!lib[k]) lib[k] = Object.assign({}, B.DEFAULT_PRESETS[k], { name: KIND_NAMES[k], h1: 0, h2: 0 });
-    lib.tick = Object.assign({}, B.DEFAULT_PRESETS.line, { name: "Tick", h1: 0, h2: 0, w0: 0.8, ws: 0.85, wm: 0.8, we: 0.8, w1: 0.75 });
+    const avg = k => Math.round(slight.reduce((a, x) => a + x[k], 0) / (slight.length || 1) * 1000) / 1000;
+    const lib = {
+      heng: Object.assign({}, B.DEFAULT_PRESETS.heng, { name: "Horizontal", h1: 0, h2: 0 }),
+      shu: Object.assign({}, B.DEFAULT_PRESETS.shu, { name: "Vertical", h1: 0, h2: 0 }),
+      "shu-slight": Object.assign({}, B.DEFAULT_PRESETS.shu, { name: "Vertical, slightly curved", h1: avg("h1"), h2: avg("h2") }),
+      na: Object.assign({}, B.DEFAULT_PRESETS.na, { name: "Right-falling", h1: 0, h2: 0 }),
+      mark: Object.assign({}, B.DEFAULT_PRESETS.line, { name: "Mark", h1: 0, h2: 0, w0: 0.8, ws: 0.85, wm: 0.8, we: 0.8, w1: 0.75 }),
+    };
     return { lib, sym };
   })();
 
@@ -80,7 +84,7 @@
     if ((m = id.match(/^(v2c?)-(.+)$/)) && SHAPES.includes(m[2])) return { sym: id };
     return null;
   }
-  const placed = items => items.filter(Boolean).map(it => B.place(it.a, it.b, state.lib[it.lib] || state.lib.tick || DEF.lib.tick, state.lib[it.lib] ? it.lib : "tick"));
+  const placed = items => items.filter(Boolean).map(it => B.place(it.a, it.b, state.lib[it.lib] || state.lib.mark || DEF.lib.mark, state.lib[it.lib] ? it.lib : "mark"));
   // the strokes of a path: placed library strokes for the symbols, the old automatic brush for tones and codas
   function strokesOf(id) {
     const t = target(id);
@@ -108,7 +112,7 @@
     });
   }
 
-  // ---- composing glyphs (as qatt.js does), readings, speech ---------------------------------------------------------------------
+  // ---- composing glyphs (as qatt.js does), readings ---------------------------------------------------------------------
   function compose({ onset, medial, rhyme, mark, tone }, fixed) {
     const ids = [];
     if (onset) { ids.push(`v2-${onset}-small`); if (medial) ids.push(`v2-${onset}-medial`); }
@@ -147,16 +151,6 @@
     chars[at] = (chars[at] + mark).normalize("NFC");
     return chars.join("");
   }
-  let voice = null;
-  const speakBox = document.getElementById("speak");
-  const findVoice = () => { voice = (window.speechSynthesis ? speechSynthesis.getVoices() : []).find(v => /^vi/i.test(v.lang)) || null; speakBox.disabled = !voice; };
-  if (window.speechSynthesis) { findVoice(); speechSynthesis.addEventListener && speechSynthesis.addEventListener("voiceschanged", findVoice); } else speakBox.disabled = true;
-  function speak(text) {
-    if (!voice || !text || !speakBox.checked) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text); u.voice = voice; u.lang = voice.lang; speechSynthesis.speak(u);
-  }
-
   const el = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
   function glyph(ids, faint) {
     const svg = el("svg", { viewBox: VIEWBOX, class: "glyph" });
@@ -167,14 +161,20 @@
   const shapeName = s => s === "_" ? "ʔ" : s;
 
   // ---- selection --------------------------------------------------------------------------------------------------------------
-  let view = "symbols", form = "rhyme", shape = "ng", item = 0, activeMark = null, markOpacity = 0.3, libSel = "shu";
+  // active: the one stroke ({type: "stroke", i}) or mark ({type: "mark", i}) that can be edited, everything else is locked;
+  // mode: what a drag anywhere on the canvas moves ("all", "a" the start point, "b" the end point), null = no editing
+  let view = "symbols", form = "rhyme", shape = "ng", active = { type: "stroke", i: 0 }, mode = null, markOpacity = 0.3, libSel = "shu";
   const ctx = { onset: "t", rhyme: "ng", mark: 2, tone: 0 };
   const FORMS = { rhyme: { title: "Rhyme forms", id: s => "v2-" + s }, onset: { title: "Onset forms", id: s => `v2-${s}-small` }, centred: { title: "Centred forms", id: s => "v2c-" + s } };
   const symId = () => FORMS[form].id(shape);
   const markIds = (id, n) => { const t = id.match(/^(v2c?)-(.+?)(-small)?$/); return t[3] ? `v2-${t[2]}-medial` : `${t[1]}-${t[2]}${n + 1}`; };
   const markLabel = i => form === "onset" ? "Medial" : String(i + 1);
+  const isActive = (type, i) => active && active.type === type && active.i === i;
+  const activeMark = () => active && active.type === "mark" ? active.i : null;
+  const activeItem = sym => active && (active.type === "mark" ? sym.marks : sym.strokes)[active.i];
+  function fixActive() { if (active && !activeItem(symbolOf(symId()))) active = null; }
 
-  function selectSymbol(s) { shape = s; item = 0; activeMark = null; drawSymbolList(); drawSymbolView(); }
+  function selectSymbol(s) { shape = s; fixActive(); drawSymbolList(); drawSymbolView(); }
 
   // ---- symbols view: list ------------------------------------------------------------------------------------------------------
   function drawSymbolList() {
@@ -204,6 +204,7 @@
   }
   function drawCanvas() {
     canvas.innerHTML = "";
+    canvas.classList.toggle("editing", !!(mode && active));
     const grid = el("g", { class: "grid" }, canvas);
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -20, x2: v, y2: 105 }, grid); el("line", { x1: -5, y1: v, x2: 105, y2: v }, grid); }
     el("rect", { x: -9, y: -9, width: 118, height: 118, class: "box" }, grid);
@@ -215,23 +216,16 @@
     }
     sym.marks.forEach((m, i) => {
       if (!m) return;
-      const p = el("path", { d: B.outline(placed([m]), state.params, state.lib), class: "mark" + (activeMark === i ? " current" : "") }, canvas);
-      if (activeMark !== i) p.style.opacity = markOpacity;
-      else p.addEventListener("pointerdown", e => startDrag(e, { mark: i, body: true }));
+      const p = el("path", { d: B.outline(placed([m]), state.params, state.lib), class: "mark" + (isActive("mark", i) ? " current" : "") }, canvas);
+      if (!isActive("mark", i)) p.style.opacity = markOpacity;
     });
-    sym.strokes.forEach((s, i) => {
-      const p = el("path", { d: B.outline(placed([s]), state.params, state.lib), class: "stroke" + (activeMark === null && i === item ? " current" : "") + (activeMark !== null ? " locked" : "") }, canvas);
-      if (activeMark === null) p.addEventListener("pointerdown", e => startDrag(e, { stroke: i, body: true }));
-    });
+    sym.strokes.forEach((s, i) => el("path", { d: B.outline(placed([s]), state.params, state.lib), class: "stroke" + (isActive("stroke", i) ? " current" : "") }, canvas));
     for (const [x1, y1, x2, y2] of guides) el("line", { x1, y1, x2, y2, class: "guide" }, canvas);
-    const it = activeMark !== null ? sym.marks[activeMark] : sym.strokes[item];
+    const it = activeItem(sym);
     if (!it) return;
     const h = el("g", { class: "handles" }, canvas);
     el("line", { x1: it.a[0], y1: it.a[1], x2: it.b[0], y2: it.b[1] }, h);
-    for (const end of ["a", "b"]) {
-      const c = el("circle", { cx: it[end][0], cy: it[end][1], r: 1.9, class: end === "a" ? "start" : "" }, h);
-      c.addEventListener("pointerdown", e => startDrag(e, activeMark !== null ? { mark: activeMark, end } : { stroke: item, end }));
-    }
+    for (const end of ["a", "b"]) el("circle", { cx: it[end][0], cy: it[end][1], r: 1.9, class: (end === "a" ? "start" : "") + (mode === end || mode === "all" ? " on" : "") }, h);
   }
 
   const toSvg = (svg, e) => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
@@ -244,16 +238,15 @@
     for (const c of contextIds()) for (const st of strokesOf(c)) { const s0 = st.s[0], s1 = st.s[st.s.length - 1]; add([s0[0], s0[1]]); add([s1[6], s1[7]]); }
     return { xs, ys };
   }
-  function startDrag(e, what) {
-    e.preventDefault(); e.stopPropagation();
-    if (what.stroke !== undefined && what.stroke !== item) { item = what.stroke; drawItems(); }
+  // a drag anywhere on the canvas moves the active stroke or mark as the mode says
+  canvas.addEventListener("pointerdown", e => {
+    if (!mode || !active || !activeItem(symbolOf(symId()))) return;
+    e.preventDefault();
     begin();
-    const sym = editableSymbol(symId());
-    const it = what.mark !== undefined ? sym.marks[what.mark] : sym.strokes[what.stroke];
-    drag = { it, end: what.end, a: it.a.slice(), b: it.b.slice(), start: toSvg(canvas, e), targets: snapTargets(it), mark: what.mark !== undefined };
+    const it = activeItem(editableSymbol(symId()));
+    drag = { it, end: mode === "all" ? null : mode, a: it.a.slice(), b: it.b.slice(), start: toSvg(canvas, e), targets: snapTargets(it), mark: active.type === "mark" };
     canvas.setPointerCapture(e.pointerId);
-    drawCanvas();
-  }
+  });
   canvas.addEventListener("pointermove", e => {
     if (!drag) return;
     const p = toSvg(canvas, e);
@@ -280,81 +273,75 @@
     } else drag.it[drag.end] = [drag[drag.end][0] + dx, drag[drag.end][1] + dy];
     changed();
   });
-  const stopDrag = () => { if (!drag) return; drag = null; guides = []; end(); markEdited(); drawCanvas(); };
+  const stopDrag = () => { if (!drag) return; drag = null; guides = []; end(); markEdited(); drawCanvas(); drawItems(); };
   canvas.addEventListener("pointerup", stopDrag);
   canvas.addEventListener("pointercancel", stopDrag);
 
-  function rotateMark(deg) {
-    if (activeMark === null) return;
+  function rotate(deg) {
+    if (!active || !activeItem(symbolOf(symId()))) return;
     begin();
-    const m = editableSymbol(symId()).marks[activeMark], c = [(m.a[0] + m.b[0]) / 2, (m.a[1] + m.b[1]) / 2], r = deg * Math.PI / 180;
+    const m = activeItem(editableSymbol(symId())), c = [(m.a[0] + m.b[0]) / 2, (m.a[1] + m.b[1]) / 2], r = deg * Math.PI / 180;
     const rot = p => [round(c[0] + (p[0] - c[0]) * Math.cos(r) - (p[1] - c[1]) * Math.sin(r)), round(c[1] + (p[0] - c[0]) * Math.sin(r) + (p[1] - c[1]) * Math.cos(r))];
     m.a = rot(m.a); m.b = rot(m.b);
-    end(); markEdited(); changed();
+    end(); markEdited(); changed(); drawItems();
   }
 
+  // arrow keys move what the mode says
   document.addEventListener("keydown", e => {
     if (e.target.closest("input, select, textarea")) return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); (e.shiftKey ? doRedo : doUndo)(); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") { e.preventDefault(); doRedo(); return; }
     if (view !== "symbols") return;
     const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
-    if (!dir) return;
+    if (!dir || !mode || !active || !activeItem(symbolOf(symId()))) return;
     e.preventDefault();
     const step = e.shiftKey ? 2 : e.altKey ? 0.25 : 0.5;
     begin();
-    const sym = editableSymbol(symId()), it = activeMark !== null ? sym.marks[activeMark] : sym.strokes[item];
-    if (it) { it.a = [it.a[0] + dir[0] * step, it.a[1] + dir[1] * step]; it.b = [it.b[0] + dir[0] * step, it.b[1] + dir[1] * step]; }
+    const it = activeItem(editableSymbol(symId()));
+    for (const k of mode === "all" ? ["a", "b"] : [mode]) it[k] = [it[k][0] + dir[0] * step, it[k][1] + dir[1] * step];
     end(); markEdited(); changed();
   });
 
-  // ---- symbols view: strokes and marks -------------------------------------------------------------------------------------
+  // ---- symbols view: what to edit ----------------------------------------------------------------------------------------------
   const libOptions = sel => Object.entries(state.lib).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, v]) => `<option value="${k}"${k === sel ? " selected" : ""}>${v.name.replace(/</g, "&lt;")}</option>`).join("");
+  function button(box, text, on, title, onClick) {
+    const b = document.createElement("button"); b.type = "button";
+    b.className = "btn btn-sm " + (on ? "btn-dark" : "btn-outline-secondary"); b.textContent = text; if (title) b.title = title;
+    b.addEventListener("click", onClick); box.append(b);
+  }
   function drawItems() {
     const id = symId(), sym = symbolOf(id);
     document.getElementById("sym-name").textContent = `${FORMS[form].title.replace(/s$/, "")} ${shapeName(shape)}` + (state.sym[id] ? " · edited" : sym.derived ? " · follows the rhyme form" : "");
-    const box = document.getElementById("items"); box.innerHTML = "";
-    sym.strokes.forEach((s, i) => {
-      const row = document.createElement("div"); row.className = "item-row" + (activeMark === null && i === item ? " active" : "");
-      row.innerHTML = `<button type="button" class="btn btn-sm btn-link item-label">Stroke ${i + 1}</button>
-        <select class="form-select form-select-sm" aria-label="Library stroke of stroke ${i + 1}">${libOptions(s.lib)}</select>
-        <button type="button" class="btn btn-sm btn-outline-secondary" title="Reverse the writing direction">⇄</button>`;
-      row.querySelector(".item-label").addEventListener("click", () => { activeMark = null; item = i; drawItems(); drawCanvas(); drawCombos(); });
-      row.querySelector("select").addEventListener("change", e => { begin(); editableSymbol(id).strokes[i].lib = e.target.value; end(); activeMark = null; item = i; markEdited(); drawItems(); changed(); });
-      row.querySelector(".btn-outline-secondary").addEventListener("click", () => { begin(); const it = editableSymbol(id).strokes[i]; [it.a, it.b] = [it.b, it.a]; end(); markEdited(); changed(); });
-      box.append(row);
-    });
+    const pick = (type, i) => () => { active = isActive(type, i) ? null : { type, i }; drawItems(); drawCanvas(); drawCombos(); };
+    const sb = document.getElementById("stroke-buttons"); sb.innerHTML = "";
+    sym.strokes.forEach((s, i) => button(sb, "ABC"[i] || i + 1, isActive("stroke", i), "Edit this stroke, lock everything else", pick("stroke", i)));
     const mb = document.getElementById("mark-buttons"); mb.innerHTML = "";
-    sym.marks.forEach((m, i) => {
-      if (!m) return;
-      const b = document.createElement("button"); b.type = "button";
-      b.className = "btn btn-sm " + (activeMark === i ? "btn-dark" : "btn-outline-secondary"); b.textContent = markLabel(i);
-      b.title = activeMark === i ? "Lock the mark again" : "Unlock this mark, lock everything else";
-      b.addEventListener("click", () => { activeMark = activeMark === i ? null : i; drawItems(); drawCanvas(); drawCombos(); });
-      mb.append(b);
-    });
-    const mc = document.getElementById("mark-controls");
-    mc.hidden = activeMark === null;
-    if (activeMark !== null) document.getElementById("mark-lib").innerHTML = libOptions(sym.marks[activeMark].lib);
+    sym.marks.forEach((m, i) => { if (m) button(mb, markLabel(i), isActive("mark", i), "Edit this mark, lock everything else", pick("mark", i)); });
+    const md = document.getElementById("mode-buttons"); md.innerHTML = "";
+    for (const [k, text, title] of [["all", "Move all", "A drag moves the whole stroke"], ["a", "Start point", "A drag moves only the start point"], ["b", "End point", "A drag moves only the end point"]])
+      button(md, text, mode === k, title, () => { mode = mode === k ? null : k; drawItems(); drawCanvas(); });
+    const it = activeItem(sym), lib = document.getElementById("item-lib");
+    document.getElementById("item-controls").hidden = !it;
+    if (it) lib.innerHTML = libOptions(it.lib);
     document.getElementById("sym-reset").textContent = form === "centred" ? "Follow the rhyme form" : "Reset symbol";
     document.getElementById("sym-reset").disabled = !state.sym[id];
   }
-  document.getElementById("mark-lib").addEventListener("change", e => { begin(); editableSymbol(symId()).marks[activeMark].lib = e.target.value; end(); markEdited(); changed(); });
-  document.getElementById("mark-left").addEventListener("click", () => rotateMark(-5));
-  document.getElementById("mark-right").addEventListener("click", () => rotateMark(5));
+  document.getElementById("item-lib").addEventListener("change", e => { begin(); activeItem(editableSymbol(symId())).lib = e.target.value; end(); markEdited(); drawItems(); changed(); });
+  document.getElementById("turn-left").addEventListener("click", () => rotate(-5));
+  document.getElementById("turn-right").addEventListener("click", () => rotate(5));
   document.getElementById("mark-opacity").addEventListener("input", e => { markOpacity = +e.target.value; drawCanvas(); });
   document.getElementById("sym-reset").addEventListener("click", () => { begin(); delete state.sym[symId()]; end(); markEdited(); drawItems(); changed(); });
 
   // ---- symbols view: combinations and sample ----------------------------------------------------------------------------------
   function drawCombos() {
     const box = document.getElementById("combos"); box.innerHTML = "";
-    const cells = [], m = activeMark !== null ? activeMark + 1 : ctx.mark || 0, title = document.getElementById("combos-title");
+    const cells = [], m = activeMark() !== null ? activeMark() + 1 : ctx.mark || 0, title = document.getElementById("combos-title");
     if (form === "rhyme") {
       cells.push([compose({ rhyme: shape, mark: m, tone: ctx.tone }), syllable("", shape, m, ctx.tone) || "alone"]);
       for (const o of SHAPES) cells.push([compose({ onset: o, rhyme: shape, mark: m, tone: ctx.tone }), syllable(o, shape, m, ctx.tone)]);
       title.textContent = `Rhyme ${shapeName(shape)} after every onset`;
     } else if (form === "onset") {
-      const medial = activeMark !== null;
+      const medial = activeMark() !== null;
       for (const r of SHAPES) cells.push([compose({ onset: shape, medial, rhyme: r, mark: ctx.mark, tone: ctx.tone }), syllable(shape, r, ctx.mark, ctx.tone)]);
       title.textContent = `Onset ${shapeName(shape)} before every rhyme` + (medial ? ", with the medial" : "");
     } else {
@@ -365,7 +352,6 @@
       const c = document.createElement("div"); c.className = "combo";
       c.append(glyph(ids));
       const lab = document.createElement("span"); lab.textContent = text; c.append(lab);
-      c.addEventListener("click", () => speak(text));
       box.append(c);
     }
     drawSample();
@@ -382,7 +368,7 @@
       const ids = compose({ onset: initial === "_" && !mm[1] ? "" : initial, medial: !!mm[1], rhyme: mm[2], mark: +mm[3] || 0, tone: +tone || 0 })
         .filter(id => target(id) || ORIG[id.replace(/^v2c-/, "v2-")]);
       if (!ids.length) continue;
-      const g = glyph(ids); g.addEventListener("click", () => speak(word)); g.setAttribute("title", word); box.append(g);
+      const g = glyph(ids); g.setAttribute("title", word); box.append(g);
     }
   }
 
@@ -427,7 +413,7 @@
     }
   }
   const libCanvas = document.getElementById("lib-canvas");
-  let libDrag = null, libRef = null;
+  let libDrag = null, libRef = null, handleOpacity = 0.5;
   function drawLibCanvas() {
     libCanvas.innerHTML = "";
     const e = state.lib[libSel]; if (!e) return;
@@ -435,12 +421,15 @@
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -10, x2: v, y2: 100 }, grid); el("line", { x1: 0, y1: v - 10, x2: 100, y2: v - 10 }, grid); }
     if (!libRef) { const [dx, dy] = libChord(libSel), L = Math.hypot(dx, dy) || 1, f = 60 / L; libRef = { a: [50 - dx * f / 2, 40 - dy * f / 2], b: [50 + dx * f / 2, 40 + dy * f / 2] }; }
     const st = placed([{ lib: libSel, a: libRef.a, b: libRef.b }]);
-    el("path", { d: B.outline(st, state.params, state.lib), class: "stroke current" }, libCanvas);
-    const s = st[0].s[0], h = el("g", { class: "handles" }, libCanvas);
-    el("line", { x1: s[0], y1: s[1], x2: s[6], y2: s[7], class: "chord" }, h);
-    el("path", { d: B.skeleton(st), class: "skel" }, h);
-    el("line", { x1: s[0] + (s[6] - s[0]) / 3, y1: s[1] + (s[7] - s[1]) / 3, x2: s[2], y2: s[3] }, h);
-    el("line", { x1: s[0] + (s[6] - s[0]) * 2 / 3, y1: s[1] + (s[7] - s[1]) * 2 / 3, x2: s[4], y2: s[5] }, h);
+    el("path", { d: B.outline(st, state.params, state.lib), class: "stroke" }, libCanvas);
+    const s = st[0].s[0], lines = el("g", { class: "handles" }, libCanvas);
+    lines.style.opacity = handleOpacity;
+    el("line", { x1: s[0], y1: s[1], x2: s[6], y2: s[7], class: "chord" }, lines);
+    el("path", { d: B.skeleton(st), class: "skel" }, lines);
+    el("line", { x1: s[0] + (s[6] - s[0]) / 3, y1: s[1] + (s[7] - s[1]) / 3, x2: s[2], y2: s[3] }, lines);
+    el("line", { x1: s[0] + (s[6] - s[0]) * 2 / 3, y1: s[1] + (s[7] - s[1]) * 2 / 3, x2: s[4], y2: s[5] }, lines);
+    const h = el("g", { class: "handles" }, libCanvas);
+    h.style.opacity = handleOpacity;
     for (const [k, x, y] of [["h1", s[2], s[3]], ["h2", s[4], s[5]]]) {
       const r = el("rect", { x: x - 1.6, y: y - 1.6, width: 3.2, height: 3.2, class: "ctrl" }, h);
       r.addEventListener("pointerdown", ev => { ev.preventDefault(); begin(); libDrag = { k }; libCanvas.setPointerCapture(ev.pointerId); });
@@ -450,6 +439,7 @@
       c.addEventListener("pointerdown", ev => { ev.preventDefault(); libDrag = { end: k }; libCanvas.setPointerCapture(ev.pointerId); });
     }
   }
+  document.getElementById("handle-opacity").addEventListener("input", e => { handleOpacity = +e.target.value; drawLibCanvas(); });
   libCanvas.addEventListener("pointermove", ev => {
     if (!libDrag) return;
     const p = toSvg(libCanvas, ev);
@@ -492,7 +482,7 @@
       lab.textContent = (id.startsWith("v2c-") ? "centred " : id.endsWith("-small") ? "onset " : "rhyme ") + shapeName(s) + (typeof i === "string" ? " · " + (id.endsWith("-small") ? "medial" : "mark " + (+i.slice(1) + 1)) : "");
       c.append(lab);
       c.title = "Open this symbol";
-      c.addEventListener("click", () => { form = id.startsWith("v2c-") ? "centred" : id.endsWith("-small") ? "onset" : "rhyme"; shape = s; item = typeof i === "string" ? 0 : i; activeMark = typeof i === "string" ? +i.slice(1) : null; setView("symbols"); });
+      c.addEventListener("click", () => { form = id.startsWith("v2c-") ? "centred" : id.endsWith("-small") ? "onset" : "rhyme"; shape = s; active = typeof i === "string" ? { type: "mark", i: +i.slice(1) } : { type: "stroke", i }; setView("symbols"); });
       if (!seen.has(t)) { seen.add(t); box.append(c); }
     }
     document.getElementById("lib-uses-title").textContent = box.children.length ? `Used in ${usages(libSel).length} places` : "Not used yet";
@@ -584,7 +574,7 @@
     if (v === "symbols") { drawSymbolList(); drawSymbolView(); } else drawLibView();
   }
   document.querySelectorAll("#views button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
-  document.querySelectorAll("#forms button").forEach(b => b.addEventListener("click", () => { form = b.dataset.form; item = 0; activeMark = null; drawSymbolList(); drawSymbolView(); }));
+  document.querySelectorAll("#forms button").forEach(b => b.addEventListener("click", () => { form = b.dataset.form; fixActive(); drawSymbolList(); drawSymbolView(); }));
   document.getElementById("sample").addEventListener("input", drawSample);
   document.getElementById("size").addEventListener("input", e => document.documentElement.style.setProperty("--combo", e.target.value + "px"));
 
