@@ -24,7 +24,7 @@ ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
-STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 14, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
+STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
 STACK_UP_X = 0.88                                  # the upper glyph is a bit narrower than the lower one
 STROKE_UP, STROKE_LOW = 58, 58                    # strokes of the squeezed upper and lower glyph
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
