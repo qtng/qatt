@@ -558,6 +558,7 @@ class Qatt {
 
   _renderSvg(root, initial, vowel, final, tone, isCoda) {
     const svg = document.createElementNS(this.svgns, "svg");
+    const rhymeAlone = !initial && !!vowel && !isCoda && !(tone > 0) && !final; // nothing but the rhyme
     let g;
 
     if (initial || vowel) {
@@ -594,9 +595,8 @@ class Qatt {
       this._useG(g, PREFIX + vStr);
     }
 
-    // A rhyme without onset only fills the right half of the box; its viewBox is moved so that it sits in the middle
-    const rhymeOnly = !initial && vowel && !isCoda;
-    svg.setAttribute("viewBox", rhymeOnly ? "17 -25 120 125" : "-10 -25 120 125");
+    // A rhyme without onset, tone and coda only fills the right half of the box; its viewBox is moved so that it sits in the middle
+    svg.setAttribute("viewBox", rhymeAlone ? "17 -25 120 125" : "-10 -25 120 125");
     svg.style.aspectRatio = "13 / 15";
     svg.style.verticalAlign = "bottom";
     svg.style.overflow = "visible";
