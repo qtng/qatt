@@ -5,7 +5,7 @@ Standalone, the two format characters (combiner, joiner) are drawn as a small sq
 Component joiner: "A joiner B" (A, B any Can/Chi form) is shown as one square cell, A squeezed into the
 left half and B into the right half (an OpenType ccmp rule swaps both for half-width variants and the joiner
 for an empty zero-width glyph). Hop Thu = a marked form on the left and the unmarked one on the right."""
-import json, re, sys
+import json, os, re, subprocess, sys, tempfile
 import pathops
 from fontTools.svgLib.path import parse_path
 from fontTools.pens.transformPen import TransformPen
@@ -30,7 +30,8 @@ STROKE_UP, STROKE_LOW = 58, 58                    # strokes of the squeezed uppe
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
-BRUSH = json.load(open(sys.argv[3]))['outlines'] if len(sys.argv) > 3 else None
+BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
+JOBS, RESULTS = {}, {}         # brush outlines: requested on a first run over the glyphs, made by brush_outlines.js, used on the second
 
 if BRUSH:
     # the ids of the qatt.js paths: glyphs.json holds their path data; a few marks of different shapes share the same data
@@ -41,10 +42,10 @@ if BRUSH:
     shape_of = lambda i: re.sub(r'^(v2c?-|q[ts])|(\d|-small|-medial)$', '', i)
 
     def brushed(defs):
-        """centre lines of one glyph -> the brush outlines of the same paths"""
+        """centre lines of one glyph -> the ids of the same qatt.js paths"""
         ids = [IDS[d] for d in defs]
         shapes = {shape_of(c[0]) for c in ids if len(c) == 1}
-        return [BRUSH[next((i for i in c if shape_of(i) in shapes), c[0])] for c in ids]
+        return tuple(next((i for i in c if shape_of(i) in shapes), c[0]) for c in ids)
 
 def outline(defs, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None):
     """Stroke the paths into one outline; k squeezes horizontally, centre is the x of the middle of the glyph,
@@ -55,49 +56,73 @@ def outline(defs, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None):
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     matrix = (kx, 0, 0, -SY * grow * v, centre - 49.27 * kx, f)
-    for d in (brushed(defs) if BRUSH else defs):
+    if BRUSH:
+        # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
+        # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
+        ids, u = brushed(defs), SY * grow
+        key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
+               round(width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
+        if key not in RESULTS:
+            JOBS[key] = {'ids': list(ids), 'm': list(key[1:5]), 'w': key[5]}
+            return out
         p = pathops.Path()
-        parse_path(d, TransformPen(p.getPen(), matrix))
-        if not BRUSH: p.stroke(width, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
-        p.convertConicsToQuads(0.1)
+        parse_path(RESULTS[key], TransformPen(p.getPen(), (u, 0, 0, -u, 0, 0)))
         p.draw(out.getPen())
+    else:
+        for d in defs:
+            p = pathops.Path()
+            parse_path(d, TransformPen(p.getPen(), matrix))
+            p.stroke(width, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
+            p.convertConicsToQuads(0.1)
+            p.draw(out.getPen())
     out.simplify(fix_winding=True)
     return out
 
-glyphs, cmap, order, adv, halves, tones = {}, {}, ['.notdef'], {}, [], []
+def make_glyphs():
+    global glyphs, cmap, order, adv, halves, tones
+    glyphs, cmap, order, adv, halves, tones = {}, {}, ['.notdef'], {}, [], []
 
-def add(name, path, advance=None):
-    pen = TTGlyphPen(None)
-    path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
-    glyphs[name] = pen.glyph(); order.append(name)
-    if advance is not None: adv[name] = advance
-glyphs['.notdef'] = TTGlyphPen(None).glyph()
-for g in data:
-    o, defs = g['o'], g['d']
-    tone = g['t'] == 'tone'
-    pen = TTGlyphPen(None)
-    if g['t'] in ('combiner', 'joiner'):   # format characters: a small centred square as placeholder
-        x0, y0, x1, y1 = 400, 240, 600, 440
-        pen.moveTo((x0, y0)); pen.lineTo((x0, y1)); pen.lineTo((x1, y1)); pen.lineTo((x1, y0)); pen.closePath()
-    else:
-        path = outline(defs, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
+    def add(name, path, advance=None):
+        pen = TTGlyphPen(None)
         path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
-    name = 'u%05X' % (BASE + o)
-    glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
-    if g['t'] in ('unmarked', 'marked', 'chi'):   # half-width variant for the component joiner
+        glyphs[name] = pen.glyph(); order.append(name)
+        if advance is not None: adv[name] = advance
+    glyphs['.notdef'] = TTGlyphPen(None).glyph()
+    for g in data:
+        o, defs = g['o'], g['d']
+        tone = g['t'] == 'tone'
         pen = TTGlyphPen(None)
-        outline(defs, STROKE_HALF, HALF_X, 250, GROW).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
-        glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
-        halves.append(name)
-        # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .halflow for a joined pair)
-        add(name + '.up', outline(defs, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
-        add(name + '.low', outline(defs, STROKE_LOW, 1.0, 500, GROW, 1 - STACK_UP, STACK_BOTTOM))
-        add(name + '.halflow', outline(defs, STROKE_LOW, HALF_X, 250, GROW, 1 - STACK_UP, STACK_BOTTOM), ADV // 2)
-    if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
-        pen = TTGlyphPen(None)
-        outline(g['dm'], STROKE_MARK, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
-        glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
-        tones.append(name)
+        if g['t'] in ('combiner', 'joiner'):   # format characters: a small centred square as placeholder
+            x0, y0, x1, y1 = 400, 240, 600, 440
+            pen.moveTo((x0, y0)); pen.lineTo((x0, y1)); pen.lineTo((x1, y1)); pen.lineTo((x1, y0)); pen.closePath()
+        else:
+            path = outline(defs, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
+            path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+        name = 'u%05X' % (BASE + o)
+        glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
+        if g['t'] in ('unmarked', 'marked', 'chi'):   # half-width variant for the component joiner
+            pen = TTGlyphPen(None)
+            outline(defs, STROKE_HALF, HALF_X, 250, GROW).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+            glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
+            halves.append(name)
+            # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .halflow for a joined pair)
+            add(name + '.up', outline(defs, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
+            add(name + '.low', outline(defs, STROKE_LOW, 1.0, 500, GROW, 1 - STACK_UP, STACK_BOTTOM))
+            add(name + '.halflow', outline(defs, STROKE_LOW, HALF_X, 250, GROW, 1 - STACK_UP, STACK_BOTTOM), ADV // 2)
+        if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
+            pen = TTGlyphPen(None)
+            outline(g['dm'], STROKE_MARK, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+            glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
+            tones.append(name)
+
+make_glyphs()
+if BRUSH:   # the outlines requested by the first run, then the glyphs again with them
+    with tempfile.TemporaryDirectory() as tmp:
+        jobs, out = os.path.join(tmp, 'jobs.json'), os.path.join(tmp, 'out.json')
+        json.dump(list(JOBS.values()), open(jobs, 'w'))
+        subprocess.run(['node', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'brush_outlines.js'), BRUSH, jobs, out], check=True)
+        RESULTS.update(zip(JOBS.keys(), json.load(open(out))))
+    make_glyphs()
 jname = 'u%05X' % (BASE + JOINER)
 cname = 'u%05X' % (BASE + COMBINER)
 glyphs[cname + '.zw'] = TTGlyphPen(None).glyph(); adv[cname + '.zw'] = 0; order.append(cname + '.zw')
