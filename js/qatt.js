@@ -288,15 +288,15 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="qt6" d="M98 90 m0-5v5 c12 0 12 14 0 14"/>
 		<path id="qt7" d="M98 90 m0-5v5 c12 0 12 14 0 14 c-12 0 -12 -14 0 -14"/>
 
-    	<!-- tone marks on their own (",,,N"): perfect circles and semicircles without the small serif, in the same corners as above -->
-    	<path id="qs0" d="M2 89 a8 8 0 0 0 0 16"/>
-    	<path id="qs1" d="M98 -6 a8 8 0 0 1 0 16"/>
-    	<path id="qs2" d="M2 97 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    	<path id="qs3" d="M2 -6 a8 8 0 0 0 0 16"/>
-    	<path id="qs4" d="M2 2 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    	<path id="qs5" d="M98 2 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    	<path id="qs6" d="M98 89 a8 8 0 0 1 0 16"/>
-    	<path id="qs7" d="M98 97 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
+    	<!-- tone marks on their own (",,,N"): perfect circles and semicircles (radius 12) without the small serif, one in each corner -->
+    	<path id="qs0" d="M12 82 a12 12 0 0 0 0 24"/>
+    	<path id="qs1" d="M88 -2 a12 12 0 0 1 0 24"/>
+    	<path id="qs2" d="M12 94 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+    	<path id="qs3" d="M12 -2 a12 12 0 0 0 0 24"/>
+    	<path id="qs4" d="M12 10 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+    	<path id="qs5" d="M88 10 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
+    	<path id="qs6" d="M88 82 a12 12 0 0 1 0 24"/>
+    	<path id="qs7" d="M88 94 m-12 0 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0"/>
 
     	<path id="square" style="opacity:.0" stroke-width="2" d="M-9 -9 h118 v118 h-118 z"/>
     	</defs>
