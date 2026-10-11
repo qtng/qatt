@@ -7,11 +7,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="../qatt/js/navigation.js"></script>
     
-    <script src="../qatt/js/parser.js"></script>
-    <script src="../qatt/js/renderer.js"></script>
+    <script src="../qatt/js/parser.js?v=2"></script>
+    <script src="../qatt/js/qatt.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --logo-hue: 0deg; --logo-contrast: 1; --logo-size: 6rem; --logo-thickness: 10px; }
+        :root { --logo-hue: 0deg; --logo-contrast: 1; --logo-size: 6rem; --logo-thickness: 4px; }
         
         /* THEMES */
         .t-default, body[data-theme="default"] .output-container { --logo-color: #fff; --logo-glow: rgba(99,102,241,0.6); --card-bg: radial-gradient(at 0% 0%, rgba(99,102,241,0.15) 0, transparent 50%), #030712; }
@@ -108,21 +108,11 @@
                 <div class="mb-5 text-center"><div id="logoCard" class="output-container"><div id="qattDisplay" class="qatt-output"></div><div id="originalText"></div></div></div>
                 <div class="row g-4 mb-4">
                     <div class="col-6"><label class="slider-label"><span>Size</span><span id="sizeVal">6em</span></label><input type="range" class="form-range" id="sizeSlider" min="1" max="20" step="0.1" value="6"></div>
-                    <div class="col-6"><label class="slider-label"><span>Thickness</span><span id="weightVal">10px</span></label><input type="range" class="form-range" id="weightSlider" min="1" max="18" step="1" value="10"></div>
+                    <div class="col-6"><label class="slider-label"><span>Thickness</span><span id="weightVal">4px</span></label><input type="range" class="form-range" id="weightSlider" min="1" max="18" step="1" value="4"></div>
                 </div>
                 <div class="row g-4 mb-4">
                     <div class="col-6"><label class="slider-label"><span>Hue</span><span id="hueVal">0°</span></label><input type="range" class="form-range" id="hueSlider" min="0" max="360" step="1" value="0"></div>
                     <div class="col-6"><label class="slider-label"><span>Contrast</span><span id="contrastVal">100%</span></label><input type="range" class="form-range" id="contrastSlider" min="0.5" max="2" step="0.1" value="1"></div>
-                </div>
-                <div class="mb-4"><label class="form-label">Writing Style</label>
-                    <select id="typeSelect" class="form-select">
-                        <option value="3">QATT cơ bản</option>
-                        <option value="0">QATT mở rộng</option>
-                        <!--<option value="0.0">QATT âm cuối rời</option>
-                        <option value="1">Giản thể</option>
-                        <option value="2">Giản thể + giản thanh</option>
-                        -->
-                    </select>
                 </div>
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <div class="form-check form-switch">
@@ -144,7 +134,7 @@
         </div>
     </div>
     <script>
-        let parser, renderer;
+        let parser, qatt;
         const $ = id => document.getElementById(id), setProp = (k, v) => document.documentElement.style.setProperty(k, v);
         
         const themes = [
@@ -163,20 +153,20 @@
 
         function init() {
             if (typeof VietnameseParser === 'undefined') return setTimeout(init, 100);
-            parser = new VietnameseParser(); renderer = new SvgGlyphRenderer({ container: document.createElement("div") });
+            parser = new VietnameseParser(); qatt = new Qatt({ container: document.createElement("div") });
             const grid = $('themeGrid');
             themes.forEach(t => {
                 const el = document.createElement('div'); el.className = `theme-tile ${t.class}`; el.dataset.theme = t.id;
                 el.onclick = () => { document.body.dataset.theme = t.id; document.querySelectorAll('.theme-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.theme === t.id)); renderUI(); };
                 el.innerHTML = `<div class="theme-tile-label">${t.label}</div>`; grid.appendChild(el);
             });
-            ['nameInput', 'typeSelect', 'showOriginal', 'sizeSlider', 'weightSlider', 'hueSlider', 'contrastSlider'].forEach(id => $(id).oninput = renderUI);
+            ['nameInput', 'showOriginal', 'sizeSlider', 'weightSlider', 'hueSlider', 'contrastSlider'].forEach(id => $(id).oninput = renderUI);
             renderUI();
         }
 
         function renderUI() {
             if (!parser) return;
-            const text = $('nameInput').value, type = $('typeSelect').value, show = $('showOriginal').checked, sz = $('sizeSlider').value, th = $('weightSlider').value, hue = $('hueSlider').value, ct = $('contrastSlider').value;
+            const text = $('nameInput').value, show = $('showOriginal').checked, sz = $('sizeSlider').value, th = $('weightSlider').value, hue = $('hueSlider').value, ct = $('contrastSlider').value;
             setProp('--logo-size', sz + 'em'); setProp('--logo-thickness', th + 'px'); setProp('--logo-hue', hue + 'deg'); setProp('--logo-contrast', ct);
             
             // Dynamic Vertical Offset (0.075em)
@@ -189,10 +179,9 @@
             if (!text.trim()) return;
             text.split(/\s+/).forEach(w => {
                 const n = parser.parse(w);
-                if (n) {
+                if (n && n.qatt) { // the glyph after the rhyme table of the decoding
                     const s = document.createElement('span');
-                    //let code = n.code.replace(",", ",+").replace('+', (!type || type == "0") ? "+" : "");
-                    renderer.render(n.code, s, +type);
+                    qatt.render(n.qatt, s);
                     out.appendChild(s);
                 }
                 out.appendChild(document.createTextNode(' '));

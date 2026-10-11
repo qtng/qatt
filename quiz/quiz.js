@@ -15,7 +15,7 @@ class App {
     this.maxEnergy = 5; 
     this.currentEnergy = 5;
     this.parser = new VietnameseParser();
-    this.renderer = new SvgGlyphRenderer({});
+    if (!window.qattObserved) { window.qattObserved = true; new Qatt().observe('qatt-code'); } // draws the <qatt-code> elements, once per page
     this.stats = JSON.parse(localStorage.getItem('qatt_stats')) || { _score: 0 };
     this.hintInterval = null;
     this.activeQuizWord = null;
@@ -31,15 +31,6 @@ class App {
         <div id="badge-total" class="score-badge badge-total" title="Tổng điểm">🏆 <span id="val-total">0</span></div>
         <div id="badge-sunflower" class="score-badge badge-sunflower" title="Hoa">🌻 <span id="val-sunflower">0</span></div>
         <div id="badge-coin" class="score-badge badge-coin" title="Vàng">🪙 <span id="val-coin">0</span></div>
-      </div>
-      
-      <div class="style-selector-wrap">
-        <select id="global-style-select">
-          <option selected value="3">QATT-mini</option>
-		  <option value="0">Chính thể</option>
-          <option value="1">Giản thể</option>
-		  <option value="2">Giản thể +</option>
-        </select>
       </div>
     </div>
   </header>
@@ -63,7 +54,6 @@ class App {
     document.getElementById("main-action-btn").addEventListener("click", () => this.startLessonDirectly());
     document.getElementById("library-btn").addEventListener("click", () => this.renderLibrary());
 	  
-    this.setupStyleSelector();
     this.setupAudio();
     this.setupNavigation();
     this.updateGlobalCounters();
@@ -535,43 +525,27 @@ class App {
     return userStyle;
   }
   
-  getParsedCode(word, style) { 
-    const parsed = this.parser.parse(word); 
-    if (!parsed) return null; 
-    let code = parsed.code; 
-    if (style === "-1") {
-        if (!code.includes("+")) {
-            code = code.replace(",", ",+");
-        }
-    } else {
-        code = code.replace("+", "");
-    }
-    return code; 
+  // code of a word after the rhyme table of the decoding (null if the word has no glyph)
+  getParsedCode(word) {
+    const parsed = this.parser.parse(word);
+    return parsed ? parsed.qatt : null;
   }
-  
+
+  // The glyph of a word as a <qatt-code> element (qatt.js draws it); a word without a glyph stays as text.
+  // style and skipReference are left from the former styles of the script and no longer used.
   renderToElement(word, style, element, skipReference = false, withHint = true) {
     element.innerHTML = "";
-    const mainCode = this.getParsedCode(word, style);
+    const mainCode = this.getParsedCode(word);
     if (mainCode) {
-        const mainSvgSpan = document.createElement("span");
-        const formattedCode = style == "0" ? mainCode.replace(",", ",+") : mainCode.replace("+", "");
-        this.renderer.render(formattedCode, mainSvgSpan, Math.max(0, parseInt(style)));
-        element.appendChild(mainSvgSpan);
-
-        if (!skipReference) {
-            const refCode = this.getParsedCode(word, "0");
-            const refSpan = document.createElement("span");
-            refSpan.className = "reference-svg-container";
-            const formattedRefCode = Number(style) > 0 ? refCode.replace(",", ",+") : refCode.replace("+", "");
-            this.renderer.renderText(formattedRefCode, refSpan, Number(style) > 0 ? 0 : 1);
-            element.appendChild(refSpan);
-        }
-		if (withHint) {
-			const text = document.createElement("div");
+        const code = document.createElement("qatt-code");
+        code.textContent = mainCode;
+        element.appendChild(code);
+        if (withHint) {
+            const text = document.createElement("div");
             text.className = "w-100 small text-center";
             text.append(word);
-		    element.appendChild(text);
-		}
+            element.appendChild(text);
+        }
     } else {
         element.textContent = word;
     }
@@ -607,18 +581,6 @@ class App {
 
   clearHintTimer() { 
     if (this.hintInterval) clearInterval(this.hintInterval); 
-  }
-
-  setupStyleSelector() { 
-    const selector = document.getElementById("global-style-select"); 
-    Array.from(selector.options).forEach(opt => {
-      if (opt.value == this.globalStyle) opt.selected = true;
-    });
-    selector.onchange = (event) => { 
-      this.globalStyle = event.target.value; 
-      localStorage.setItem('qattType', this.globalStyle); 
-      this.refreshCurrentView();
-    }; 
   }
 
   setupAudio() { 

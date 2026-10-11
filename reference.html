@@ -6,8 +6,8 @@
     <title>QATT - Character table</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
     <script src="../qatt/js/navigation.js"></script>
-    <script src="../qatt/js/renderer.js"></script>
-    <script src="../qatt/js/parser.js"></script>
+    <script src="../qatt/js/qatt.js"></script>
+    <script src="../qatt/js/parser.js?v=2"></script>
     
     <style>
         :root {
@@ -316,7 +316,16 @@
         	}
         }
     </style>
-    <style id="dynamic-style-tag"></style>
+    <style>
+        /* glyphs by qatt.js: <qatt-code> with <use href="#v2-…"> */
+        qatt-code svg { height: 3.6rem; width: auto; stroke: currentColor; stroke-width: 2.5px; stroke-linecap: round; fill: none; display: inline-block; }
+        qatt-code { transition: transform 0.15s ease; display: inline-block; cursor: pointer; }
+        qatt-code:hover { transform: scale(1.15); color: #fff; }
+        .cell-onset qatt-code use[href$="small"], .cell-onset qatt-code use[href$="large"], .cell-onset qatt-code use[href$="medial"] { stroke: var(--onset-color); }
+        .cell-onset qatt-code use[href^="#qt"] { display: none; }
+        .cell-tone qatt-code use[href^="#qt"] { stroke: var(--tone-color); }
+        .cell-rhyme qatt-code use[href^="#v2-"]:not([href$="small"]):not([href$="large"]):not([href$="medial"]) { stroke: var(--rhyme-color); }
+    </style>
 </head>
 <body>
 
@@ -324,29 +333,12 @@
         <header>
             <h1>QATT Reference</h1>
             
-            <div style="display:none" class="d-none controls">
-                <label for="type-select" style="font-size: 0.85rem; color: var(--text-muted);">Type:</label>
-                <select id="type-select" onchange="handleTypeChange(this.value)">
-                    <option value="0">0</option>
-                    <option value="0.0">0.0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                </select>
-            </div>
-
             <div class="legend">
                 <div class="legend-item"><span class="dot" style="background:var(--onset-color)"></span> Phụ âm đầu</div>
-                <div class="legend-item"><span class="dot" style="background:var(--vowel-color)"></span> Nguyên âm</div>
                 <div class="legend-item"><span class="dot" style="background:var(--tone-color)"></span> Thanh</div>
-                <div class="legend-item"><span class="dot" style="background:var(--coda-color)"></span> Âm cuối</div>
                 <div class="legend-item"><span class="dot" style="background:var(--rhyme-color)"></span> Vần</div>
             </div>
             
-            <div class="legend" style="margin-top:20px; display:inline-block; width:auto; border:1px solid gray; padding:8px">
-            <div class="legend-item" style="text-align: center">
-                ← QATT <span style="margin:0 10px">•</span> QATT-mini →
-            </div>
-            </div>
         </header>
 
         <div id="reference-grid" class="reference-grid"></div>
@@ -364,12 +356,9 @@
     </div>
 
     <script>
-    	let TYPE = "0";
         
         const onsets = " b c ch d đ g gi h k kh l m n ng nh ph r s t th tr v x".split(" ");
-        const vowels = "a ă â ơ ê e i ia ô o u ua ư ưa".split(" ");
         const tones = "an àn ản ãn án ạn át ạt".split(" ");
-        const codas = "o i n m ng nh t p c ch".split(" ");
         const rhymes = `-n an
  ên
  in
@@ -473,134 +462,63 @@
  oai
  oay
  uây`.replace(/[\r\s]+/g, " ").split(" ")
-        let renderer, parser;
-        let onsetRules = [], vowelRules = [], codaRules = [], toneRules = [], rhymeRules = [];
+        let parser;
 
         function formatHTML(html) {
             return html ? html.replace(/></g, '>\n<') : "";
         }
 
-        function inspect(el, label, type) {
+        function inspect(el, label) {
             const display = document.getElementById('code-display');
-            const labelEl = document.getElementById('inspector-label');
-            
             display.innerText = formatHTML(el.innerHTML);
-            
-            const cleanLabel = label.replace(/<[^>]*>/g, "");
-            labelEl.innerText = `SVG SOURCE: ${cleanLabel} (Type ${type})`;
+            document.getElementById('inspector-label').innerText = `SVG SOURCE: ${label.replace(/<[^>]*>/g, "")}`;
             document.getElementById('inspector').classList.add('visible');
         }
 
         function closeInspector() { document.getElementById('inspector').classList.remove('visible'); }
 
         function copyCode() {
-            const text = document.getElementById('code-display').innerText;
             const textarea = document.createElement("textarea");
-            textarea.value = text;
+            textarea.value = document.getElementById('code-display').innerText;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand("copy");
             document.body.removeChild(textarea);
         }
 
+        // One cell: the word, and its glyph after the rhyme table of the decoding (qatt.js draws the <qatt-code> element)
         function createCell(text, type) {
-            const cellId = 'c-' + Math.random().toString(36).substr(2, 5);
             const cellDiv = document.createElement("div");
             cellDiv.className = "cell cell-" + type;
-            cellDiv.id = cellId;
 
             const content = document.createElement("div");
             content.className = "cell-content";
 
             const label = document.createElement("div");
             label.className = "cell-label";
-            
-            let labelHtml = "";
             let wordToParse = text;
-
             if (type === 'onset') {
                 const onsetChar = (text === "" || text === " ") ? "ʔ" : text;
-                labelHtml = `${onsetChar}<span style="font-size: 0.9rem; font-weight: 300;">a</span>`;
+                label.innerHTML = `${onsetChar}<span style="font-size: 0.9rem; font-weight: 300;">a</span>`;
                 wordToParse = (text === "" || text === " ") ? "a" : text + "a";
-            } else if (type === 'coda') {
-                const prefix = ("pct".indexOf(text[text.length-1]) > -1 || text.endsWith("ch")) ? "á" : "a";
-                labelHtml = `<span style="font-size: 0.9rem; font-weight: 300;">${prefix}</span>${text}`;
-                wordToParse = prefix + text;
             } else {
-                labelHtml = (text === "" || text === " ") ? "ʔ" : text;
+                label.textContent = (text === "" || text === " ") ? "ʔ" : text;
             }
-            label.innerHTML = labelHtml;
 
             const glyphs = document.createElement("div");
             glyphs.className = "glyph-container";
-
-            const ttMain = document.createElement("tt");
-            ttMain.className = "main-tt";
-            ttMain.setAttribute("data-type", TYPE);
-            ttMain.onclick = (e) => { e.stopPropagation(); inspect(ttMain, label.innerHTML, TYPE); };
-
-            const ttAlt = document.createElement("tt");
-            ttAlt.setAttribute("data-type", "0");
-            ttAlt.setAttribute("data-is-alt", "true");
-            ttAlt.onclick = (e) => { e.stopPropagation(); inspect(ttAlt, label.innerHTML, "0"); };
-
-            glyphs.append(ttMain, ttAlt);
+            const result = parser.parse(wordToParse);
+            if (result && result.qatt) {
+                const code = document.createElement("qatt-code");
+                code.textContent = result.qatt;
+                code.onclick = (e) => { e.stopPropagation(); inspect(code, label.innerHTML); };
+                glyphs.append(code);
+            } else {
+                glyphs.textContent = "–"; // no glyph for this rhyme in the decoding
+            }
             content.append(label, glyphs);
             cellDiv.appendChild(content);
-
-            const result = parser.parse(wordToParse);
-            
-            if (result && result.code) {
-                renderer.render(result.code, ttMain, parseFloat(TYPE));
-                renderer.render(result.code, ttAlt, 3);
-                //renderer.renderText(result.code.replace(",", ","), ttAlt2, 2);
-
-                const parts = result.code.split(",");
-                
-                if (type === 'onset') {
-                    if (parts[0]) onsetRules.push({ id: cellId, selectorParts: [parts[0] + "-large", "v2-"+parts[0]+"-small"] });
-                }
-                
-                if (type === 'vowel' || type === 'rhyme') {
-                    if (parts[1]) (type === 'rhyme' ? rhymeRules : vowelRules).push({ id: cellId, selectorParts: [parts[1], parts[1] + "-large"] });
-                }
-
-                if (type === 'coda' || type === 'rhyme') {
-                    if (parts[2]) {
-                        const upper = parts[2].toUpperCase();
-                        (type === 'rhyme' ? rhymeRules : codaRules).push({ id: cellId, selectorParts: [upper, upper + "_t"] });
-                    }
-                }
-                
-                if (type === 'tone') {
-                    toneRules.push({ id: cellId, selectorParts: ["qt0", "qt1", "qt2", "qt3", "qt4", "qt5", "qt6", "qt7", "qt8"] });
-                }
-            }
             return cellDiv;
-        }
-
-        function renderAll() {
-            const grid = document.getElementById('reference-grid');
-            grid.innerHTML = "";
-            onsetRules = [];
-            vowelRules = [];
-            codaRules = [];
-            toneRules = [];
-            rhymeRules = [];
-            initialized = false;
-
-            renderSection("Phụ âm đầu", onsets, "onset");
-            renderSection("Nguyên âm", vowels, "vowel");
-            
-            const expandedTones = [];
-            tones.forEach(t => {
-                const base = t.replace(/[nt]/g, ''); 
-                if (TYPE == "2") expandedTones.push(base);           
-                expandedTones.push(t);     
-            });
-            renderSection("Âm cuối", codas, "coda");
-            renderSection("Thanh", expandedTones, "tone");
-            renderSection("Vần", rhymes, "rhyme");
         }
 
         function renderSection(title, items, type) {
@@ -609,47 +527,17 @@
             header.className = `section-title title-${type}`;
             header.innerText = title;
             grid.appendChild(header);
-
             items.forEach(item => {
                 if (item !== undefined) grid.appendChild(createCell(item, type));
             });
         }
 
-        function handleTypeChange(val) {
-            TYPE = val;
-            localStorage.setItem('qattType', val);
-            renderAll();
-        }
-
-		let counter = 0;
-		let initialized = false;
-        setInterval(() => {
-        	counter++;
-        	if (initialized && (counter % 20)) return
-            const styleTag = document.getElementById('dynamic-style-tag');
-            let rules = `use[href^="#_t"] { stroke: var(--) !important; }\n`;
-            onsetRules.forEach(r => r.selectorParts.forEach(p => rules += `#${r.id} use[href="#${p}"] { stroke: var(--onset-color) !important; }\n`));
-            vowelRules.forEach(r => r.selectorParts.forEach(p => rules += `#${r.id} use[href="#${p}"] { stroke: var(--vowel-color) !important; }\n`));
-            codaRules.forEach(r => r.selectorParts.forEach(p => rules += `#${r.id} use[href="#${p}"] { stroke: var(--coda-color) !important; }\n`));
-            toneRules.forEach(r => r.selectorParts.forEach(p => rules += `#${r.id} use[href="#${p}"] { stroke: var(--tone-color) !important; }\n`));
-            rhymeRules.forEach(r => r.selectorParts.forEach(p => rules += `#${r.id} use[href="#${p}"] { stroke: var(--rhyme-color) !important; }\n`));
-            if (styleTag.textContent !== rules) {
-            	styleTag.textContent = rules;
-            	initialized = true;
-            }
-        }, 100);
-
         window.onload = () => {
-            if (typeof VietnameseParser === 'undefined' || typeof SvgGlyphRenderer === 'undefined') {
-                console.error("External scripts not loaded yet.");
-                return;
-            }
-            
-            document.getElementById('type-select').value = TYPE;
-            
             parser = new VietnameseParser();
-            renderer = new SvgGlyphRenderer({});
-            renderAll();
+            new Qatt().observe('qatt-code');
+            renderSection("Phụ âm đầu", onsets, "onset");
+            renderSection("Thanh", tones, "tone");
+            renderSection("Vần", rhymes, "rhyme");
         };
     </script>
 </body>
