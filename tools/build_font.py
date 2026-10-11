@@ -23,16 +23,19 @@ STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 72, 54, 58, 38   # font units (g
 ADV = 1000
 HALF_X = 0.5                   # horizontal squeeze of the half-width variants (the joiner halves)
 JOINER = 155                   # offset of the component joiner
+GROW, GROW_Y = 1.10, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
 
-def outline(defs, width, k=1.0, centre=500):
-    """Stroke the paths into one outline; k squeezes horizontally, centre is the x of the middle of the glyph."""
+def outline(defs, width, k=1.0, centre=500, grow=1.0):
+    """Stroke the paths into one outline; k squeezes horizontally, centre is the x of the middle of the glyph,
+    grow enlarges the drawing around its middle."""
     out = pathops.Path()
-    x0 = centre - 49.27 * SX * k
+    kx = SX * k * grow
+    matrix = (kx, 0, 0, -SY * grow, centre - 49.27 * kx, Y0 - GROW_Y * SY * (1 - grow))
     for d in defs:
         p = pathops.Path()
-        parse_path(d, TransformPen(p.getPen(), (SX * k, 0, 0, -SY, x0, Y0)))
+        parse_path(d, TransformPen(p.getPen(), matrix))
         p.stroke(width, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
         p.convertConicsToQuads(0.1)
         p.draw(out.getPen())
@@ -49,13 +52,13 @@ for g in data:
         x0, y0, x1, y1 = 400, 240, 600, 440
         pen.moveTo((x0, y0)); pen.lineTo((x0, y1)); pen.lineTo((x1, y1)); pen.lineTo((x1, y0)); pen.closePath()
     else:
-        path = outline(defs, STROKE_TONE if tone else STROKE)
+        path = outline(defs, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
         path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
     name = 'u%05X' % (BASE + o)
     glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
     if g['t'] in ('unmarked', 'marked', 'chi'):   # half-width variant for the component joiner
         pen = TTGlyphPen(None)
-        outline(defs, STROKE_HALF, HALF_X, 250).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+        outline(defs, STROKE_HALF, HALF_X, 250, GROW).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
         halves.append(name)
     if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
