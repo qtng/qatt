@@ -3,13 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QATT font test</title>
+  <title>QATT reference font</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <style>
-    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=5) format("woff2"), url(font/qatt-prototype.ttf?v=5) format("truetype"); }
+    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=6) format("woff2"), url(font/qatt-prototype.ttf?v=6) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
-    main { max-width: 74rem; margin: 0 auto; padding: 1rem 1rem 3rem; }
+    main { max-width: 74rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
     h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
     p { margin: .3rem 0 .8rem; color: var(--muted); }
     a { color: var(--accent); }
@@ -31,21 +32,22 @@
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
     #info { margin-top: .5rem; font-size: .9rem; color: var(--muted); min-height: 1.4rem; }
   </style>
+  <script defer src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
 </head>
 <body>
 <main>
-  <p><a href="unicode.html">← Unicode chart</a></p>
-  <h1>QATT font test</h1>
-  <p>Prototype font built from the stroke glyphs of <code>qatt.js</code> (monospace, one square per character, code points from <code>U+F0000</code>).
+  <h1>QATT reference font</h1>
+  <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. The two format characters have a small square as placeholder. This is a prototype; stroke widths and proportions may still change.
      Large: the font. Small underneath: the same glyph drawn by <code>qatt.js</code>. Click a character to add it to the sample field.</p>
 
   <div class="bar">
     <label>Size <input type="range" id="size" min="24" max="140" value="64"></label>
-    <label><input type="checkbox" id="svg" checked> show qatt.js drawing</label>
-    <label><input type="checkbox" id="guides"> guides</label>
+    <label><input type="checkbox" id="svg"> show qatt.js drawing</label>
+    <label><input type="checkbox" id="guides" checked> guides</label>
     <label><input type="checkbox" id="tonesOnly"> tone marks only</label>
-    <button type="button" id="clear">Clear sample</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy sample</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear">Clear sample</button>
   </div>
 
   <div class="sample" id="sample" contenteditable="true" spellcheck="false" aria-label="Sample text"></div>
@@ -67,9 +69,10 @@
     cell.className = 'cell ' + g.t;
     const f = document.createElement('span'); f.className = 'f'; f.textContent = String.fromCodePoint(BASE + g.o);
     const s = document.createElement('span'); s.className = 's';
-    const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt);
+    if (g.q) { const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt); }
     const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
     const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = g.n.toLowerCase().replace(/ unmarked$/, '').replace(/ marked-/, ' ·');
+    if (!g.q) s.hidden = true;
     cell.append(f, s, cp, nm);
     cell.addEventListener('click', () => { sample.append(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + ' — ' + g.q; });
     cell._g = g;
@@ -87,6 +90,12 @@
     for (const c of cells) c.hidden = $('#tonesOnly').checked && c._g.t !== 'tone';
   };
   for (const id of ['#size', '#svg', '#guides', '#tonesOnly']) $(id).addEventListener('input', apply);
+  $('#copy').addEventListener('click', async () => {
+    const btn = $('#copy'), text = sample.textContent;
+    try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+    catch { const r = document.createRange(); r.selectNodeContents(sample); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
+    setTimeout(() => { btn.textContent = 'Copy sample'; }, 1500);
+  });
   $('#clear').addEventListener('click', () => { sample.textContent = ''; });
   apply();
 })();
