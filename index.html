@@ -9,42 +9,55 @@
   <script src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
   <style>
-    .hero { background: var(--bs-tertiary-bg); border-bottom: 1px solid var(--bs-border-color); }
-    .hero h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); }
-    .hero .han { font-size: 1.1rem; letter-spacing: .15em; }
-    .formula { display: flex; align-items: center; justify-content: center; gap: .5rem; }
-    .formula .box { border: 3px solid #212529; background: #fff; text-align: center; padding: .2rem .9rem .3rem; min-width: 5.5rem; }
-    .formula .box tt { font-size: 3.2rem; line-height: 1.1; display: block; }
-    .formula .box small { display: block; font-size: 1rem; }
-    .formula .op { font-size: 1.6rem; color: var(--bs-secondary-color); }
-    @media (max-width: 575.98px) {
-      .formula { gap: .3rem; }
-      .formula .box { min-width: 0; padding: .1rem .5rem .2rem; border-width: 2px; }
-      .formula .box tt { font-size: 2.2rem; }
-      .formula .op { font-size: 1.2rem; }
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
     }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: #4a3d30; }
+    .hero .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .hero .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
+    .hero .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    .hero .btn-ink { border-color: #8a7660; color: var(--ink); }
+    .hero .btn-ink:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
+    @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
+    .glyph-strip tt { font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
+    .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
+    .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
+    .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.block { padding-block: 2rem; }
     section.block + section.block { border-top: 1px solid var(--bs-border-color); }
-    .glyph-row tt { font-size: 2.2rem; margin-right: .15rem; }
     .facts { font-size: .95rem; }
     .facts dt { font-weight: 600; }
+    @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
 <body>
-<script>document.addEventListener('DOMContentLoaded', () => new Qatt().observe('tt'));</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new Qatt().observe('tt');
+    const strip = document.getElementById('glyph-strip');
+    '_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph'.split(' ').forEach(o => { const t = document.createElement('tt'); t.textContent = ',' + o; strip.append(t); });
+  });
+</script>
 
-<header class="hero py-5">
+<header class="hero pt-5 pb-4">
   <div class="container text-center">
-    <h1 class="mb-1">Quốc Âm Tân Tự</h1>
-    <div class="han text-secondary mb-3">國音新字</div>
-    <p class="lead mx-auto mb-4" style="max-width: 40rem">A Vietnamese script of the 1840s, written inside Hán Nôm texts: 22 base symbols that combine in pairs to spell Vietnamese syllables.</p>
-    <div class="formula" aria-label="Example: onset x plus rhyme nga is read xa">
-      <div class="box"><tt>,x</tt><small>x</small></div>
-      <div class="op">+</div>
-      <div class="box"><tt>,ng2</tt><small>nga</small></div>
-      <div class="op">=</div>
-      <div class="box"><tt>x,ng2</tt><small>xa</small></div>
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">Quốc Âm Tân Tự</h1>
+    <p class="lead mx-auto mb-4">A forgotten Vietnamese script from the 1840s, built from just 22 shapes.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-5">
+      <a class="btn btn-cinnabar btn-pill" href="decodings.html">Explore the symbols</a>
+      <a class="btn btn-ink btn-pill" href="unicode.html">Unicode proposal</a>
     </div>
+    <div class="rule" aria-hidden="true">the 22 base shapes</div>
+    <div class="glyph-strip" id="glyph-strip" aria-label="The 22 base shapes of the script"></div>
   </div>
 </header>
 
@@ -52,8 +65,8 @@
 
   <section class="block" id="script">
     <h2 class="h3">The script</h2>
-    <p>Quốc Âm Tân Tự (國音新字, “new script for the sounds of the national language”, abbreviated QATT) is a semisyllabic writing system. It is known from a single text, preserved in two manuscripts at the Institute of Hán Nôm Studies in Hanoi (AB.630) and dated to the reign of Emperor Thiệu Trị (1841–1847).</p>
-    <p>The system consists of <b>22 base symbols</b>, the Cán, each drawn with three strokes. A base exists in seven forms: one without a marking stroke and six with a short marking stroke at one of the six stroke ends. Two components form a character: the <b>left part gives the onset, the right part the rhyme</b>, so the sample above is read <i>xa</i>. There are 110 rhyme parts for writing Vietnamese, and eight tones are marked with circles and semicircles in the corners of a character.</p>
+    <p>Quốc Âm Tân Tự (國音新字) means “new script for the sounds of the national language”. It dates from the 1840s, the reign of Emperor Thiệu Trị, and is known today from a single text that survives in two manuscript copies in Hanoi. The script appears there among Chinese characters and Nôm.</p>
+    <p>Everything is built from 22 basic shapes, each made of three strokes. Add a small stroke at one of six places and a shape turns into six more variants. Two shapes side by side form one character: the left one stands for the beginning of a syllable, the right one for its ending. Small circles and half circles in the corners mark the eight tones.</p>
     <p class="mb-0"><a href="intro.html">Read the introduction</a> · <a href="quiz/qatt.html">Practise QATT</a></p>
   </section>
 
@@ -61,17 +74,15 @@
     <h2 class="h3">Unicode proposal</h2>
     <div class="row g-4">
       <div class="col-lg-7">
-        <p>QATT is not yet part of Unicode. The <a href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">QATT Unicode Proposal – Draft</a> encodes the script as <b>164 characters</b> in the Supplementary Multilingual Plane: 154 components, 2 joiners and 8 tone marks, in a block of 176 code points. Components are encoded in reading order, and every combination is written with an explicit joiner.</p>
-        <p class="mb-0">The block position is not assigned yet. The page <a href="unicode.html">QATT Unicode</a> shows the draft block as a code chart and as a list of all code points with their names, properties and the tone marks.</p>
+        <p>Unicode is the standard that lets every script be displayed on every device, and QATT is not part of it yet. A draft proposal describes how the script could be added: 164 characters, with the shapes as building blocks and a joining character that glues them into one letter.</p>
+        <p class="mb-0">The page <a href="unicode.html">QATT Unicode</a> lays the draft out as a chart and as a list of all characters with their names.</p>
       </div>
       <div class="col-lg-5">
         <div class="card h-100">
           <div class="card-body">
             <dl class="facts row mb-0">
               <dt class="col-5">Characters</dt><dd class="col-7">164</dd>
-              <dt class="col-5">Block size</dt><dd class="col-7">176 code points</dd>
-              <dt class="col-5">Plane</dt><dd class="col-7">SMP (position to be assigned)</dd>
-              <dt class="col-5">Status</dt><dd class="col-7 mb-0">Draft, not part of the Unicode Standard</dd>
+              <dt class="col-5">Status</dt><dd class="col-7 mb-0">Draft, not yet part of Unicode</dd>
             </dl>
           </div>
         </div>
@@ -81,14 +92,11 @@
 
   <section class="block" id="decodings">
     <h2 class="h3">Decodings</h2>
-    <p>The source explains the script with a table of rhymes written in Chữ Nôm. Many of its annotation characters have ambiguous readings, or are not in any dictionary, so the script cannot be decoded without additional hypotheses. The page <a href="decodings.html">Decodings</a> shows the rhyme table of the symbols in the different decodings, the one used on this site and the one of Omniglot, and lists the hypotheses behind them. You can choose a decoding, change the size of the symbols and pivot the table.</p>
+    <p>The only source explains the script with a table written in Chữ Nôm. Many of its hints are ambiguous or lost, so what each symbol sounds like can only be reconstructed with some assumptions. The <a href="decodings.html">Decodings</a> page shows the resulting table of symbols and readings. You can switch between the reading used on this site and the one on Omniglot, enlarge the symbols or turn the table around.</p>
     <p class="mb-0"><a class="btn btn-primary" href="decodings.html">Open the decodings</a></p>
   </section>
 
 </main>
-
-<footer class="container pb-4 small text-secondary">
-  Source code and specification: <a href="https://github.com/qtng/qatt">qtng/qatt</a>
-</footer>
+<div class="pb-4"></div>
 </body>
 </html>
