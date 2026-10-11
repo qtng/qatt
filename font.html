@@ -43,11 +43,13 @@
   <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
 
   <div class="bar">
-    <label>Size <input type="range" id="size" min="24" max="140" value="40"></label>
+    <label>Size <input type="range" id="size" min="20" max="140" value="34"></label>
     <label><input type="checkbox" id="svg"> show qatt.js drawing</label>
     <label><input type="checkbox" id="guides" checked> guides</label>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="clear">Clear</button>
+    <a class="btn btn-sm btn-outline-secondary" href="font/qatt-prototype.ttf" download title="Install the font on your computer">Download TTF</a>
+    <a class="btn btn-sm btn-outline-secondary" href="font/qatt-prototype.woff2" download title="For websites">Download WOFF2</a>
   </div>
 
   <div class="sample" id="sample" contenteditable="true" spellcheck="false" aria-label="Sample text"></div>
@@ -87,7 +89,7 @@
     sample.style.fontSize = Math.max(px * .8, 32) + 'px';
     for (const grid of grids) {
       grid.style.setProperty('--size', px + 'px');
-      grid.style.setProperty('--cell', Math.max(px * 1.5, 56) + 'px');
+      grid.style.setProperty('--cell', Math.max(px * 1.5, 46) + 'px');
       grid.classList.toggle('hide-svg', !$('#svg').checked);
       grid.classList.toggle('guides', $('#guides').checked);
     }
