@@ -1,1 +1,94 @@
-<meta http-equiv="refresh" content="0; url=/qatt/tutorial.html">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qatt.org – Quốc Âm Tân Tự</title>
+  <meta name="description" content="Quốc Âm Tân Tự (QATT), a Vietnamese script from Hán Nôm texts: introduction, Unicode proposal and decodings.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/qatt.js"></script>
+  <style>
+    .hero { background: var(--bs-tertiary-bg); border-bottom: 1px solid var(--bs-border-color); }
+    .hero h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); }
+    .hero .han { font-size: 1.1rem; letter-spacing: .15em; }
+    .formula { display: flex; align-items: center; justify-content: center; gap: .5rem; }
+    .formula .box { border: 3px solid #212529; background: #fff; text-align: center; padding: .2rem .9rem .3rem; min-width: 5.5rem; }
+    .formula .box tt { font-size: 3.2rem; line-height: 1.1; display: block; }
+    .formula .box small { display: block; font-size: 1rem; }
+    .formula .op { font-size: 1.6rem; color: var(--bs-secondary-color); }
+    @media (max-width: 575.98px) {
+      .formula { gap: .3rem; }
+      .formula .box { min-width: 0; padding: .1rem .5rem .2rem; border-width: 2px; }
+      .formula .box tt { font-size: 2.2rem; }
+      .formula .op { font-size: 1.2rem; }
+    }
+    section.block { padding-block: 2rem; }
+    section.block + section.block { border-top: 1px solid var(--bs-border-color); }
+    .glyph-row tt { font-size: 2.2rem; margin-right: .15rem; }
+    .facts { font-size: .95rem; }
+    .facts dt { font-weight: 600; }
+  </style>
+</head>
+<body>
+<script>document.addEventListener('DOMContentLoaded', () => new Qatt().observe('tt'));</script>
+
+<header class="hero py-5">
+  <div class="container text-center">
+    <h1 class="mb-1">Quốc Âm Tân Tự</h1>
+    <div class="han text-secondary mb-3">國音新字</div>
+    <p class="lead mx-auto mb-4" style="max-width: 40rem">A Vietnamese script of the 1840s, written inside Hán Nôm texts: 22 base symbols that combine in pairs to spell Vietnamese syllables.</p>
+    <div class="formula" aria-label="Example: onset x plus rhyme nga is read xa">
+      <div class="box"><tt>,x</tt><small>x</small></div>
+      <div class="op">+</div>
+      <div class="box"><tt>,ng2</tt><small>nga</small></div>
+      <div class="op">=</div>
+      <div class="box"><tt>x,ng2</tt><small>xa</small></div>
+    </div>
+  </div>
+</header>
+
+<main class="container py-2">
+
+  <section class="block" id="script">
+    <h2 class="h3">The script</h2>
+    <p>Quốc Âm Tân Tự (國音新字, “new script for the sounds of the national language”, abbreviated QATT) is a semisyllabic writing system. It is known from a single text, preserved in two manuscripts at the Institute of Hán Nôm Studies in Hanoi (AB.630) and dated to the reign of Emperor Thiệu Trị (1841–1847).</p>
+    <p>The system consists of <b>22 base symbols</b>, the Cán, each drawn with three strokes. A base exists in seven forms: one without a marking stroke and six with a short marking stroke at one of the six stroke ends. Two components form a character: the <b>left part gives the onset, the right part the rhyme</b>, so the sample above is read <i>xa</i>. There are 110 rhyme parts for writing Vietnamese, and eight tones are marked with circles and semicircles in the corners of a character.</p>
+    <p class="mb-0"><a href="intro.html">Read the introduction</a> · <a href="quiz/qatt.html">Practise QATT</a></p>
+  </section>
+
+  <section class="block" id="unicode">
+    <h2 class="h3">Unicode proposal</h2>
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <p>QATT is not yet part of Unicode. The <a href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">QATT Unicode Proposal – Draft</a> encodes the script as <b>164 characters</b> in the Supplementary Multilingual Plane: 154 components, 2 joiners and 8 tone marks, in a block of 176 code points. Components are encoded in reading order, and every combination is written with an explicit joiner.</p>
+        <p class="mb-0">The block position is not assigned yet. The page <a href="unicode.html">QATT Unicode</a> shows the draft block as a code chart and as a list of all code points with their names, properties and the tone marks.</p>
+      </div>
+      <div class="col-lg-5">
+        <div class="card h-100">
+          <div class="card-body">
+            <dl class="facts row mb-0">
+              <dt class="col-5">Characters</dt><dd class="col-7">164</dd>
+              <dt class="col-5">Block size</dt><dd class="col-7">176 code points</dd>
+              <dt class="col-5">Plane</dt><dd class="col-7">SMP (position to be assigned)</dd>
+              <dt class="col-5">Status</dt><dd class="col-7 mb-0">Draft, not part of the Unicode Standard</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="decodings">
+    <h2 class="h3">Decodings</h2>
+    <p>The source explains the script with a table of rhymes written in Chữ Nôm. Many of its annotation characters have ambiguous readings, or are not in any dictionary, so the script cannot be decoded without additional hypotheses. The page <a href="decodings.html">Decodings</a> shows the rhyme table of the symbols in the different decodings, the one used on this site and the one of Omniglot, and lists the hypotheses behind them. You can choose a decoding, change the size of the symbols and pivot the table.</p>
+    <p class="mb-0"><a class="btn btn-primary" href="decodings.html">Open the decodings</a></p>
+  </section>
+
+</main>
+
+<footer class="container pb-4 small text-secondary">
+  Source code and specification: <a href="https://github.com/qtng/qatt">qtng/qatt</a>
+</footer>
+</body>
+</html>
