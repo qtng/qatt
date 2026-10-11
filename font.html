@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Quốc Âm Tân Tự – Unicode block (draft)</title>
+  <meta name="description" content="Draft Unicode block for Quốc Âm Tân Tự: code chart, names list, Cán table, tone marks and character properties.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <script>
+    // follow the system colour scheme (the site navigation bar is always dark)
+    document.documentElement.dataset.bsTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  </script>
+  <script defer src="js/navigation.js"></script>
+  <script src="js/qatt.js"></script>
+  <style>
+    :root {
+      --g-unmarked: #d9e8ff; --g-marked: #d7f0d6; --g-chi: #fff1bf; --g-combiner: #ffdcc0; --g-joiner: #ffdcc0; --g-tone: #e9d9ff;
+      --g-reserved: #eceff1; --g-border: #b8c1c9;
+    }
+    [data-bs-theme=dark] {
+      --g-unmarked: #1d3557; --g-marked: #1f4a2c; --g-chi: #54491a; --g-combiner: #5a3a1c; --g-joiner: #5a3a1c; --g-tone: #3d2b5e;
+      --g-reserved: #23272b; --g-border: #4a5258;
+    }
+    h2 { margin-top: 2.2rem; font-size: 1.45rem; border-bottom: 1px solid var(--g-border); padding-bottom: .25rem; }
+    h3 { font-size: 1.1rem; }
+    .tt { font-variant-numeric: tabular-nums; }
+    .cp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    /* code chart */
+    .chart { border-collapse: separate; border-spacing: 0; font-size: .75rem; width: 100%; min-width: 46rem; table-layout: fixed; }   /* the 16 columns share the width, below 46rem the chart scrolls */
+    .chart th { font-weight: 600; text-align: center; padding: .15rem .25rem; color: var(--bs-secondary-color); white-space: nowrap; }
+    .chart th.rowhead { width: 4.6rem; text-align: right; padding-right: .5rem; position: sticky; left: 0; background: var(--bs-body-bg); z-index: 1; }
+    .chart td { padding: 0; border: 1px solid var(--g-border); border-width: 0 1px 1px 0; }
+    .chart tr:first-child td { border-top-width: 1px; }
+    .chart td:nth-child(2) { border-left-width: 1px; }
+    .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 3.5rem;
+            padding: .1rem; border: 0; background: var(--g-bg, transparent); color: inherit; line-height: 1.1; cursor: pointer; position: relative; }
+    .cell:hover { filter: brightness(.94); }
+    .cell:focus-visible { outline: 3px solid var(--bs-primary); outline-offset: -3px; z-index: 2; }
+    .cell.selected { outline: 3px solid var(--bs-primary); outline-offset: -3px; z-index: 2; }
+    .cell .glyph { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+    .cell .cpno { font-size: .58rem; color: var(--bs-secondary-color); font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .tok { font-size: .66rem; font-weight: 700; letter-spacing: -.02em; }
+    .sub { font-size: .6rem; opacity: .8; }
+    .fmt { border: 1.5px dashed currentColor; border-radius: .25rem; padding: 0 .25rem; font-size: .68rem; font-weight: 700; opacity: .85; }
+    .reserved { background: repeating-linear-gradient(135deg, transparent 0 5px, var(--g-border) 5px 6px), var(--g-reserved); cursor: default; }
+    .g-unmarked { --g-bg: var(--g-unmarked); } .g-marked { --g-bg: var(--g-marked); } .g-chi { --g-bg: var(--g-chi); }
+    .g-combiner { --g-bg: var(--g-combiner); } .g-joiner { --g-bg: var(--g-joiner); } .g-tone { --g-bg: var(--g-tone); }
+    .dim { opacity: .22; }
+    .font-glyph { font-family: 'QATT preview', 'QATT preview fallback', sans-serif; font-size: 1.75rem; line-height: 1; }
+    .has-font .placeholder-only { display: none; }
+    .chip { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--g-border); border-radius: 2rem; padding: .15rem .65rem .15rem .4rem;
+            background: transparent; color: inherit; font-size: .85rem; cursor: pointer; }
+    .chip .sw { width: 1rem; height: 1rem; border-radius: .25rem; background: var(--g-bg); border: 1px solid var(--g-border); }
+    .chip[aria-pressed=true] { background: var(--bs-secondary-bg); border-color: var(--bs-primary); }
+    .detail-glyph { flex: none; width: 6.2rem; height: 6.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--g-border);
+                    border-radius: .5rem; background: var(--g-bg, var(--bs-tertiary-bg)); }
+    .detail-glyph .font-glyph { font-size: 3.6rem; }
+    .detail-glyph .tok { font-size: 1.2rem; } .detail-glyph .sub { font-size: .95rem; } .detail-glyph .fmt { font-size: 1.1rem; padding: .1rem .5rem; }
+    .names td, .names th { vertical-align: top; }
+    .names .mini { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: .3rem; background: var(--g-bg); border: 1px solid var(--g-border); flex-direction: column; line-height: 1.05; }
+    .qglyph { font-size: 2rem; line-height: 1; color: inherit; }
+    .names .qglyph { font-size: 1.7rem; }
+    .detail-glyph .qglyph { font-size: 3.8rem; }
+    .names .mini .font-glyph { font-size: 1.4rem; }
+    .names tr.hit { background: var(--bs-warning-bg-subtle); }
+    .names thead th { background: var(--bs-secondary-bg); white-space: nowrap; }
+    .names tr.sect th { background: var(--bs-tertiary-bg); font-weight: 600; font-size: .95rem; }
+    .note-x { color: var(--bs-secondary-color); }
+    svg.tonemark { width: 100%; height: 100%; max-width: 2.2rem; }
+    .detail-glyph svg.tonemark { max-width: 5.5rem; }
+    .tonemark rect { fill: none; stroke: currentColor; stroke-opacity: .3; stroke-dasharray: 2 2; }
+    .tonemark .m { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+    code.name { white-space: normal; word-break: break-word; }
+    @media (max-width: 575.98px) { h2 { font-size: 1.25rem; } }
+  </style>
+</head>
+<body>
+<main class="container-xl py-4" id="top">
+
+  <header>
+    <h1 class="h2 border-0 mb-1" style="margin-top:0">Quốc Âm Tân Tự <span class="text-secondary fw-normal">– Unicode block</span></h1>
+    <p class="lead mb-2">The proposed block for Quốc Âm Tân Tự (QATT), a script found in Hán Nôm texts: <span id="s-total"></span> characters in a block of <span id="s-size"></span> code points.</p>
+    <div class="alert alert-warning small mb-2" role="note">
+      <strong>Draft – not part of the Unicode Standard.</strong>
+      The block position is not assigned yet. The code points shown use the provisional base <span class="cp" id="s-base"></span>
+      (Supplementary Private Use Area-A); only the <em>offsets</em> within the block come from the proposal.
+      Reference glyphs do not exist yet (proposal section 7.2), so the chart shows labels instead; you can <a href="#font-preview">preview a font</a> below.
+      Data: <a id="s-link" href="https://github.com/qtng/qatt-unicode">qtng/qatt-unicode</a> at <span class="cp" id="s-commit"></span>
+      (<span class="cp">ucd/</span> draft files, proposal sections 5–7).
+    </div>
+  </header>
+
+  <h2 id="chart-title">Code chart</h2>
+  <div class="d-flex flex-wrap gap-2 mb-3" id="legend" role="group" aria-label="Filter by group"></div>
+  <div class="row g-4">
+    <div class="col-12 col-xl-9">
+      <div class="table-responsive pb-1"><table class="chart" id="chart" aria-labelledby="chart-title"></table></div>
+      <p class="small text-secondary mt-2 mb-0">Rows are sixteen code points each. Select a cell for the details. The QATT glyphs are drawn by <code>qatt.js</code> (provisional until a font exists); dashed = format characters, circles = tone marks.</p>
+    </div>
+    <div class="col-12 col-xl-3">
+      <div class="card" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <details class="mt-4" id="font-preview">
+    <summary class="fw-semibold">Preview a font</summary>
+    <div class="mt-2 p-3 border rounded">
+      <p class="small text-secondary">Load a font file to see its glyphs in the chart (the file is read in your browser and not uploaded). Fonts for the script use their own code points, so set the base to the code point of the first character of the block in that font.</p>
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-6"><label class="form-label small mb-1" for="font-file">Font file (.ttf, .otf, .woff, .woff2)</label><input class="form-control form-control-sm" type="file" id="font-file" accept=".ttf,.otf,.woff,.woff2"></div>
+        <div class="col-6 col-md-3"><label class="form-label small mb-1" for="font-base">Base (hex)</label><div class="input-group input-group-sm"><span class="input-group-text">U+</span><input class="form-control cp" id="font-base" value="F0000" maxlength="6" inputmode="text" autocomplete="off"></div></div>
+        <div class="col-6 col-md-3"><button class="btn btn-sm btn-outline-secondary w-100" type="button" id="font-clear" disabled>Remove font</button></div>
+      </div>
+      <div class="small mt-2" id="font-status" role="status"></div>
+      <div class="small text-secondary mt-1">A font can also be linked: <span class="cp">font.html?font=URL&amp;base=F0000</span></div>
+    </div>
+  </details>
+
+  <h2 id="list-title">List of code points</h2>
+  <p>One row per code point with the full name from the draft names list: <code>QUOC AM TAN TU &lt;NAME&gt; UNMARKED</code> or <code>MARKED-1</code> to <code>MARKED-6</code> (the position of the marking stroke); in the names <b>DD</b> stands for đ and <b>DZ</b> for d. The code points are provisional (base <span class="cp" id="l-base"></span>).</p>
+  <div class="row g-2 mb-2">
+    <div class="col-12 col-md-6"><input class="form-control" type="search" id="q" placeholder="Search names, readings, code points…" aria-label="Search the list of code points" autocomplete="off"></div>
+    <div class="col-12 col-md-6 small text-secondary d-flex align-items-center" id="count"></div>
+  </div>
+  <div class="table-responsive"><table class="table table-sm table-hover names align-middle" id="names"></table></div>
+
+  <h2>Overview</h2>
+  <div class="table-responsive"><table class="table table-sm align-middle" id="overview"></table></div>
+
+  <h2>The 22 Cán</h2>
+  <p>Each Cán has seven forms: one without marking stroke and six with the marking stroke in one of the six positions. The marking stroke at position 1 is the marked Cán of the source listing, positions 2 to 6 are the five Chi. The names are the sound names of the source listing (initial + <i>ông</i>); <b>DD</b> stands for đ and <b>DZ</b> for d.</p>
+  <div class="table-responsive"><table class="table table-sm table-hover align-middle tt" id="can-table"></table></div>
+
+  <h2>Tone marks</h2>
+  <p>Eight combining marks, one per tone, placed in the four corners of the cluster: the traditional tone order of the eight tones (âm before dương). The drawings are schematic, taken from the description in the proposal (the open side of the semicircle faces the centre); they are not reference glyphs.</p>
+  <div class="table-responsive"><table class="table table-sm align-middle" id="tone-table"></table></div>
+
+  <h2>Character properties</h2>
+  <p>Draft values by character class. Values the proposal marks as open are listed in <a href="https://github.com/qtng/qatt-unicode/blob/main/ucd/questions.md">ucd/questions.md</a>.</p>
+  <div class="table-responsive"><table class="table table-sm align-middle tt" id="props"></table></div>
+
+  <hr class="mt-4">
+  <p class="small text-secondary">
+    Source: <a href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">QATT Unicode Proposal – Draft</a> (sections 5 to 7) and the draft
+    <a href="https://github.com/qtng/qatt-unicode/tree/main/ucd">character data</a>. This page shows a snapshot of that data; regenerate it when the files change.
+    The older code table with private-use code points of the website is <a href="codetable.html">codetable.html</a>.
+  </p>
+</main>
+
+<script type="application/json" id="qatt-data">{"source":{"repo":"qtng/qatt-unicode","commit":"035e152","base":983040,"size":176,"block":"Quoc Am Tan Tu","script":"Quoc_Am_Tan_Tu"},"can":[{"no":1,"nom":"翁","reading":"ông","name":"ONG"},{"no":2,"nom":"⿰木禺","reading":"ngông","name":"NGONG"},{"no":3,"nom":"胸","reading":"hông","name":"HONG"},{"no":4,"nom":"⿰木功","reading":"gông","name":"GONG"},{"no":5,"nom":"工","reading":"công","name":"CONG"},{"no":6,"nom":"⿰竜羽","reading":"lông","name":"LONG"},{"no":7,"nom":"⿰竜里","reading":"trông","name":"TRONG"},{"no":8,"nom":"東","reading":"đông","name":"DDONG"},{"no":9,"nom":"農","reading":"nông","name":"NONG"},{"no":10,"nom":"宗","reading":"tông","name":"TONG"},{"no":11,"nom":"通","reading":"thông","name":"THONG"},{"no":12,"nom":"⿰亻戍","reading":"nhông","name":"NHONG"},{"no":13,"nom":"柊","reading":"chông","name":"CHONG"},{"no":14,"nom":"⿰月容","reading":"dông","name":"DZONG"},{"no":15,"nom":"衝","reading":"xông","name":"XONG"},{"no":16,"nom":"空","reading":"không","name":"KHONG"},{"no":17,"nom":"滝","reading":"sông","name":"SONG"},{"no":18,"nom":"⿱山庸","reading":"rông","name":"RONG"},{"no":19,"nom":"蒙","reading":"mông","name":"MONG"},{"no":20,"nom":"芃","reading":"bông","name":"BONG"},{"no":21,"nom":"⿰木芃","reading":"vông","name":"VONG"},{"no":22,"nom":"⿰口風","reading":"phông","name":"PHONG"}],"chars":[{"o":0,"n":"ONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: ông 翁"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":0},{"o":1,"n":"NGONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: ngông ⿰木禺"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":1},{"o":2,"n":"HONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: hông 胸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":2},{"o":3,"n":"GONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: gông ⿰木功"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":3},{"o":4,"n":"CONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: công 工"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":4},{"o":5,"n":"LONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: lông ⿰竜羽"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":5},{"o":6,"n":"TRONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: trông ⿰竜里"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":6},{"o":7,"n":"DDONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: đông 東"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":7},{"o":8,"n":"NONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: nông 農"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":8},{"o":9,"n":"TONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: tông 宗"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":9},{"o":10,"n":"THONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: thông 通"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":10},{"o":11,"n":"NHONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: nhông ⿰亻戍"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":11},{"o":12,"n":"CHONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: chông 柊"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":12},{"o":13,"n":"DZONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: dông ⿰月容"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":13},{"o":14,"n":"XONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: xông 衝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":14},{"o":15,"n":"KHONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: không 空"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":15},{"o":16,"n":"SONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: sông 滝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":16},{"o":17,"n":"RONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: rông ⿱山庸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":17},{"o":18,"n":"MONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: mông 蒙"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":18},{"o":19,"n":"BONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: bông 芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":19},{"o":20,"n":"VONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: vông ⿰木芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":20},{"o":21,"n":"PHONG UNMARKED","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","no marking stroke; standalone, it has the reading of the marked Cán of its base: phông ⿰口風"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","t":"unmarked","b":21},{"o":22,"n":"ONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: ông 翁"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":1,"t":"marked"},{"o":23,"n":"ONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":2,"t":"chi"},{"o":24,"n":"ONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":3,"t":"chi"},{"o":25,"n":"ONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":4,"t":"chi"},{"o":26,"n":"ONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":5,"t":"chi"},{"o":27,"n":"ONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":6,"t":"chi"},{"o":28,"n":"NGONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: ngông ⿰木禺"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":1,"t":"marked"},{"o":29,"n":"NGONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":2,"t":"chi"},{"o":30,"n":"NGONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":3,"t":"chi"},{"o":31,"n":"NGONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":4,"t":"chi"},{"o":32,"n":"NGONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":5,"t":"chi"},{"o":33,"n":"NGONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":6,"t":"chi"},{"o":34,"n":"HONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: hông 胸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":1,"t":"marked"},{"o":35,"n":"HONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":2,"t":"chi"},{"o":36,"n":"HONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":3,"t":"chi"},{"o":37,"n":"HONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":4,"t":"chi"},{"o":38,"n":"HONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":5,"t":"chi"},{"o":39,"n":"HONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":6,"t":"chi"},{"o":40,"n":"GONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: gông ⿰木功"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":1,"t":"marked"},{"o":41,"n":"GONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":2,"t":"chi"},{"o":42,"n":"GONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":3,"t":"chi"},{"o":43,"n":"GONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":4,"t":"chi"},{"o":44,"n":"GONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":5,"t":"chi"},{"o":45,"n":"GONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":6,"t":"chi"},{"o":46,"n":"CONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: công 工"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":1,"t":"marked"},{"o":47,"n":"CONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":2,"t":"chi"},{"o":48,"n":"CONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":3,"t":"chi"},{"o":49,"n":"CONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":4,"t":"chi"},{"o":50,"n":"CONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":5,"t":"chi"},{"o":51,"n":"CONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":6,"t":"chi"},{"o":52,"n":"LONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: lông ⿰竜羽"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":1,"t":"marked"},{"o":53,"n":"LONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":2,"t":"chi"},{"o":54,"n":"LONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":3,"t":"chi"},{"o":55,"n":"LONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":4,"t":"chi"},{"o":56,"n":"LONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":5,"t":"chi"},{"o":57,"n":"LONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":6,"t":"chi"},{"o":58,"n":"TRONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: trông ⿰竜里"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":1,"t":"marked"},{"o":59,"n":"TRONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":2,"t":"chi"},{"o":60,"n":"TRONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":3,"t":"chi"},{"o":61,"n":"TRONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":4,"t":"chi"},{"o":62,"n":"TRONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":5,"t":"chi"},{"o":63,"n":"TRONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":6,"t":"chi"},{"o":64,"n":"DDONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: đông 東"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":1,"t":"marked"},{"o":65,"n":"DDONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":2,"t":"chi"},{"o":66,"n":"DDONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":3,"t":"chi"},{"o":67,"n":"DDONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":4,"t":"chi"},{"o":68,"n":"DDONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":5,"t":"chi"},{"o":69,"n":"DDONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":6,"t":"chi"},{"o":70,"n":"NONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: nông 農"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":1,"t":"marked"},{"o":71,"n":"NONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":2,"t":"chi"},{"o":72,"n":"NONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":3,"t":"chi"},{"o":73,"n":"NONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":4,"t":"chi"},{"o":74,"n":"NONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":5,"t":"chi"},{"o":75,"n":"NONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":6,"t":"chi"},{"o":76,"n":"TONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: tông 宗"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":1,"t":"marked"},{"o":77,"n":"TONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":2,"t":"chi"},{"o":78,"n":"TONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":3,"t":"chi"},{"o":79,"n":"TONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":4,"t":"chi"},{"o":80,"n":"TONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":5,"t":"chi"},{"o":81,"n":"TONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":6,"t":"chi"},{"o":82,"n":"THONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: thông 通"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":1,"t":"marked"},{"o":83,"n":"THONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":2,"t":"chi"},{"o":84,"n":"THONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":3,"t":"chi"},{"o":85,"n":"THONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":4,"t":"chi"},{"o":86,"n":"THONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":5,"t":"chi"},{"o":87,"n":"THONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":6,"t":"chi"},{"o":88,"n":"NHONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: nhông ⿰亻戍"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":1,"t":"marked"},{"o":89,"n":"NHONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":2,"t":"chi"},{"o":90,"n":"NHONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":3,"t":"chi"},{"o":91,"n":"NHONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":4,"t":"chi"},{"o":92,"n":"NHONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":5,"t":"chi"},{"o":93,"n":"NHONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":6,"t":"chi"},{"o":94,"n":"CHONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: chông 柊"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":1,"t":"marked"},{"o":95,"n":"CHONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":2,"t":"chi"},{"o":96,"n":"CHONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":3,"t":"chi"},{"o":97,"n":"CHONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":4,"t":"chi"},{"o":98,"n":"CHONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":5,"t":"chi"},{"o":99,"n":"CHONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":6,"t":"chi"},{"o":100,"n":"DZONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: dông ⿰月容"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":1,"t":"marked"},{"o":101,"n":"DZONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":2,"t":"chi"},{"o":102,"n":"DZONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":3,"t":"chi"},{"o":103,"n":"DZONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":4,"t":"chi"},{"o":104,"n":"DZONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":5,"t":"chi"},{"o":105,"n":"DZONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":6,"t":"chi"},{"o":106,"n":"XONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: xông 衝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":1,"t":"marked"},{"o":107,"n":"XONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":2,"t":"chi"},{"o":108,"n":"XONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":3,"t":"chi"},{"o":109,"n":"XONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":4,"t":"chi"},{"o":110,"n":"XONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":5,"t":"chi"},{"o":111,"n":"XONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":6,"t":"chi"},{"o":112,"n":"KHONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: không 空"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":1,"t":"marked"},{"o":113,"n":"KHONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":2,"t":"chi"},{"o":114,"n":"KHONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":3,"t":"chi"},{"o":115,"n":"KHONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":4,"t":"chi"},{"o":116,"n":"KHONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":5,"t":"chi"},{"o":117,"n":"KHONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":6,"t":"chi"},{"o":118,"n":"SONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: sông 滝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":1,"t":"marked"},{"o":119,"n":"SONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":2,"t":"chi"},{"o":120,"n":"SONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":3,"t":"chi"},{"o":121,"n":"SONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":4,"t":"chi"},{"o":122,"n":"SONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":5,"t":"chi"},{"o":123,"n":"SONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":6,"t":"chi"},{"o":124,"n":"RONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: rông ⿱山庸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":1,"t":"marked"},{"o":125,"n":"RONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":2,"t":"chi"},{"o":126,"n":"RONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":3,"t":"chi"},{"o":127,"n":"RONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":4,"t":"chi"},{"o":128,"n":"RONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":5,"t":"chi"},{"o":129,"n":"RONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":6,"t":"chi"},{"o":130,"n":"MONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: mông 蒙"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":1,"t":"marked"},{"o":131,"n":"MONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":2,"t":"chi"},{"o":132,"n":"MONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":3,"t":"chi"},{"o":133,"n":"MONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":4,"t":"chi"},{"o":134,"n":"MONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":5,"t":"chi"},{"o":135,"n":"MONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":6,"t":"chi"},{"o":136,"n":"BONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: bông 芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":1,"t":"marked"},{"o":137,"n":"BONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":2,"t":"chi"},{"o":138,"n":"BONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":3,"t":"chi"},{"o":139,"n":"BONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":4,"t":"chi"},{"o":140,"n":"BONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":5,"t":"chi"},{"o":141,"n":"BONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":6,"t":"chi"},{"o":142,"n":"VONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: vông ⿰木芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":1,"t":"marked"},{"o":143,"n":"VONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":2,"t":"chi"},{"o":144,"n":"VONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":3,"t":"chi"},{"o":145,"n":"VONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":4,"t":"chi"},{"o":146,"n":"VONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":5,"t":"chi"},{"o":147,"n":"VONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":6,"t":"chi"},{"o":148,"n":"PHONG MARKED-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","marked Cán, the Cán of the source listing: phông ⿰口風"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":1,"t":"marked"},{"o":149,"n":"PHONG MARKED-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":2,"t":"chi"},{"o":150,"n":"PHONG MARKED-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":3,"t":"chi"},{"o":151,"n":"PHONG MARKED-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":4,"t":"chi"},{"o":152,"n":"PHONG MARKED-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":5,"t":"chi"},{"o":153,"n":"PHONG MARKED-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi of the base phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":6,"t":"chi"},{"o":154,"n":"THAM THU COMBINER","gc":"Cf","ccc":0,"bidi":"BN","notes":[["*","places the following Chi above a Hợp Thư"]],"gcb":"Extend","incb":"Linker","lb":"GL","eaw":"N","vo":"U","t":"combiner"},{"o":155,"n":"COMPONENT JOINER","gc":"Cf","ccc":0,"bidi":"BN","notes":[["*","joins two components into one character; their order gives the arrangement"]],"gcb":"Extend","incb":"Linker","lb":"GL","eaw":"N","vo":"U","t":"joiner"},{"o":156,"n":"TONE SEMICIRCLE LOWER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm bình (ngang)"],["x","(modifier letter chinese tone yin ping - A700)"],["x","(ideographic level tone mark - 302A)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":157,"n":"TONE CIRCLE LOWER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương bình (huyền)"],["x","(modifier letter chinese tone yang ping - A701)"],["x","(ideographic level tone mark - 302A)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":158,"n":"TONE SEMICIRCLE UPPER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm thượng (hỏi)"],["x","(modifier letter chinese tone yin shang - A702)"],["x","(ideographic rising tone mark - 302B)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":159,"n":"TONE CIRCLE UPPER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương thượng (ngã)"],["x","(modifier letter chinese tone yang shang - A703)"],["x","(ideographic rising tone mark - 302B)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":160,"n":"TONE SEMICIRCLE UPPER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm khứ (sắc)"],["x","(modifier letter chinese tone yin qu - A704)"],["x","(ideographic departing tone mark - 302C)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":161,"n":"TONE CIRCLE UPPER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương khứ (nặng)"],["x","(modifier letter chinese tone yang qu - A705)"],["x","(ideographic departing tone mark - 302C)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":162,"n":"TONE SEMICIRCLE LOWER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm nhập"],["x","(modifier letter chinese tone yin ru - A706)"],["x","(ideographic entering tone mark - 302D)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":163,"n":"TONE CIRCLE LOWER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương nhập"],["x","(modifier letter chinese tone yang ru - A707)"],["x","(ideographic entering tone mark - 302D)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"}]}</script>
+<script>
+(() => {
+  'use strict';
+  const D = JSON.parse(document.getElementById('qatt-data').textContent);
+  const chars = D.chars, SIZE = D.source.size, COLS = 16;
+  let base = D.source.base;                       // code point of offset 0 (provisional)
+  let fontBase = base;                            // code point of offset 0 in the previewed font
+  let hasFont = false, selected = null, activeGroup = null;
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
+  const hex = (n, w = 4) => n.toString(16).toUpperCase().padStart(w, '0');
+  const cpOf = o => base + o;
+  const U = o => 'U+' + hex(cpOf(o), 5);
+  const off = o => '+' + hex(o, 2);
+
+  const GROUPS = {
+    unmarked: { label: 'Unmarked Cán', note: 'Forms without marking stroke' },
+    marked:   { label: 'Marked Cán', note: 'Marking stroke at position 1: the Cán of the source listing' },
+    chi:      { label: 'Chi', note: 'Marking stroke at positions 2 to 6' },
+    combiner: { label: 'Tham Thư combiner', note: 'Format character' },
+    joiner:   { label: 'Component joiner', note: 'Format character' },
+    tone:     { label: 'Tone marks', note: 'Combining marks, one per tone' },
+    reserved: { label: 'Reserved', note: 'Unassigned' },
+  };
+  const typeOf = o => o < chars.length ? chars[o].t : 'reserved';
+
+  // ---------- glyph / placeholder ----------
+  function toneSvg(name) {
+    const corner = ['LOWER LEFT', 'UPPER LEFT', 'UPPER RIGHT', 'LOWER RIGHT'].find(c => name.includes(c));
+    const sx = corner.includes('LEFT') ? -1 : 1, sy = corner.includes('UPPER') ? -1 : 1;
+    const cx = 50 + sx * 27, cy = 50 + sy * 27, r = 14, a = Math.atan2(sy, sx);           // direction from the centre to the corner
+    const p = t => `${(cx + r * Math.cos(t)).toFixed(1)} ${(cy + r * Math.sin(t)).toFixed(1)}`;
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('class', 'tonemark'); svg.setAttribute('aria-hidden', 'true');
+    const box = document.createElementNS(NS, 'rect'); box.setAttribute('x', 4); box.setAttribute('y', 4); box.setAttribute('width', 92); box.setAttribute('height', 92); svg.append(box);
+    const m = document.createElementNS(NS, 'path'); m.setAttribute('class', 'm');
+    if (name.includes('SEMICIRCLE')) m.setAttribute('d', `M ${p(a - Math.PI / 2)} A ${r} ${r} 0 0 1 ${p(a + Math.PI / 2)}`);   // open side towards the centre
+    else m.setAttribute('d', `M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`);
+    svg.append(m);
+    return svg;
+  }
+  const tokOf = c => c.n.split(' ')[0];
+
+  // QATT glyphs are drawn by qatt.js from a <tt> element: ",<onset>" is the unmarked Cán, ",<onset><n>" the one with marking stroke n
+  const qatt = new Qatt(); qatt.observe('TT');
+  const onsetOf = n => n === 'ONG' ? '_' : n === 'DDONG' ? 'd' : n === 'DZONG' ? 'dz' : n.slice(0, -3).toLowerCase();
+  const qattCode = c => ',' + onsetOf(D.can[c.b].name) + (c.m || '');
+
+  /** Content of a glyph box: the real glyph if a font is loaded, else a label describing the character. */
+  function glyphContent(o) {
+    const t = typeOf(o); if (t === 'reserved') return [];
+    const c = chars[o];
+    const nodes = [];
+    if (hasFont) nodes.push(el('span', { className: 'font-glyph', textContent: String.fromCodePoint(fontBase + o) }));
+    else if (t === 'tone') nodes.push(toneSvg(c.n));
+    else if (t === 'combiner') nodes.push(el('span', { className: 'fmt', textContent: 'TT' }));
+    else if (t === 'joiner') nodes.push(el('span', { className: 'fmt', textContent: 'J' }));
+    else nodes.push(el('tt', { className: 'qglyph', textContent: qattCode(c) }));
+    return nodes;
+  }
+
+  // ---------- chart ----------
+  function buildChart() {
+    const t = $('#chart'); t.replaceChildren();
+    const head = el('tr', {}, el('th')); for (let c = 0; c < COLS; c++) head.append(el('th', { scope: 'col', textContent: c.toString(16).toUpperCase() }));
+    t.append(el('thead', {}, head));
+    const body = el('tbody');
+    for (let r = 0; r < SIZE / COLS; r++) {
+      const tr = el('tr', {}, el('th', { scope: 'row', className: 'rowhead cp', textContent: 'U+' + hex(cpOf(r * COLS), 5).slice(0, 4) + '_' }));
+      for (let c = 0; c < COLS; c++) {
+        const o = r * COLS + c, type = typeOf(o), td = el('td');
+        const b = el('button', { type: 'button', className: `cell g-${type}${type === 'reserved' ? ' reserved' : ''}` });
+        b.dataset.o = o; b.dataset.group = type;
+        if (type === 'reserved') { b.disabled = true; b.setAttribute('aria-label', `${U(o)} reserved`); b.append(el('span', { className: 'cpno', textContent: hex(cpOf(o), 5) })); }
+        else {
+          b.title = `${U(o)} ${chars[o].n}`; b.setAttribute('aria-label', `${U(o)} ${chars[o].n}`);
+          b.append(el('span', { className: 'glyph' }, ...glyphContent(o)), el('span', { className: 'cpno', textContent: hex(cpOf(o), 5) }));
+        }
+        td.append(b); tr.append(td);
+      }
+      body.append(tr);
+    }
+    t.append(body);
+    markSelection(); applyGroup();
+  }
+  $('#chart').addEventListener('click', e => { const b = e.target.closest('.cell'); if (b && !b.disabled) select(+b.dataset.o, true); });
+  $('#chart').addEventListener('keydown', e => {            // arrow keys move between the cells
+    const b = e.target.closest('.cell'); if (!b) return;
+    const d = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -COLS, ArrowDown: COLS }[e.key]; if (!d) return;
+    let o = +b.dataset.o + d; while (o >= 0 && o < SIZE && typeOf(o) === 'reserved') o += d;
+    const n = $(`.cell[data-o="${o}"]`); if (n && !n.disabled) { e.preventDefault(); n.focus(); }
+  });
+
+  // ---------- detail ----------
+  function noteNode(n) {
+    const [kind, text] = n;
+    if (kind === 'x') return el('div', { className: 'note-x', textContent: 'See also ' + text.replace(/^\(/, '').replace(/\)$/, '').replace(/ - ([0-9A-F]{4})$/, ' – U+$1') });
+    if (kind === '=') return el('div', {}, el('span', { className: 'text-secondary', textContent: 'Tone: ' }), text);
+    return el('div', { textContent: text });
+  }
+  function renderDetail() {
+    const box = $('#detail'); box.replaceChildren();
+    if (selected == null) { box.append(el('div', { className: 'card-body text-secondary', textContent: 'Select a character in the chart or the list.' })); return; }
+    const c = chars[selected], t = c.t;
+    const g = el('div', { className: `detail-glyph g-${t}` }, ...glyphContent(selected));
+    const rows = [['General_Category', c.gc], ['Canonical_Combining_Class', String(c.ccc)], ['Bidi_Class', c.bidi], ['Grapheme_Cluster_Break', c.gcb],
+      ['Indic_Conjunct_Break', c.incb], ['Line_Break', c.lb], ['East_Asian_Width', c.eaw], ['Vertical_Orientation', c.vo]];
+    const dl = el('dl', { className: 'row small mb-0 gx-2' }); rows.forEach(([k, v]) => dl.append(el('dt', { className: 'col-9 fw-normal text-secondary text-break', textContent: k }), el('dd', { className: 'col-3 cp mb-1', textContent: v })));
+    const nav = el('div', { className: 'd-flex justify-content-between mt-3' },
+      el('button', { type: 'button', className: 'btn btn-sm btn-outline-secondary', textContent: '‹ Previous', disabled: selected === 0, onclick: () => select(selected - 1, true) }),
+      el('button', { type: 'button', className: 'btn btn-sm btn-outline-secondary', textContent: 'Next ›', disabled: selected >= chars.length - 1, onclick: () => select(selected + 1, true) }));
+    box.append(el('div', { className: 'card-body' },
+      el('div', { className: 'd-flex gap-3 align-items-start mb-3' }, g, el('div', {}, el('div', { className: 'small text-secondary', textContent: 'QUOC AM TAN TU' }), el('code', { className: 'name fs-6', textContent: c.n }),
+        el('div', { className: 'cp mt-2' }, el('b', { textContent: U(selected) }), el('div', { className: 'small text-secondary', textContent: `offset ${off(selected)} · ${GROUPS[t].label}` })))),
+      el('div', { className: 'small mb-3' }, ...c.notes.map(noteNode)), dl, nav));
+  }
+
+  function select(o, scroll) {
+    selected = o; markSelection(); renderDetail();
+    history.replaceState(null, '', '#' + hex(cpOf(o), 5));
+    $$('#names tr').forEach(tr => tr.classList.toggle('hit', +tr.dataset.o === o));
+    if (scroll) { const b = $(`.cell[data-o="${o}"]`); b && b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  }
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  function markSelection() { $$('.cell').forEach(b => b.classList.toggle('selected', selected != null && +b.dataset.o === selected)); }
+
+  // ---------- legend / group filter ----------
+  function buildLegend() {
+    const L = $('#legend');
+    Object.entries(GROUPS).filter(([k]) => k !== 'reserved').forEach(([k, g]) => {
+      const n = chars.filter(c => c.t === k).length;
+      const b = el('button', { type: 'button', className: 'chip', title: g.note }, el('span', { className: `sw g-${k}` }), `${g.label} `, el('span', { className: 'text-secondary', textContent: n }));
+      b.setAttribute('aria-pressed', 'false'); b.dataset.group = k;
+      b.onclick = () => { activeGroup = activeGroup === k ? null : k; applyGroup(); renderList(); };
+      L.append(b);
+    });
+  }
+  function applyGroup() {
+    $$('#legend .chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.group === activeGroup)));
+    $$('.cell').forEach(b => b.classList.toggle('dim', !!activeGroup && b.dataset.group !== activeGroup));
+  }
+
+  // ---------- overview / Cán / tone tables ----------
+  const range = (a, b) => a === b ? `${U(a)}` : `${U(a)}–${hex(cpOf(b), 5)}`;
+  function buildOverview() {
+    const t = $('#overview'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['Group', 'Offset', 'Code points (provisional)', 'Count', 'Description'].map(h => el('th', { textContent: h })))));
+    const runs = []; // consecutive offsets of the same group
+    for (let o = 0; o < SIZE; o++) { const g = typeOf(o); const r = runs[runs.length - 1]; if (r && r.g === g && !(g === 'combiner' || g === 'joiner')) r.b = o; else runs.push({ g, a: o, b: o }); }
+    // merge unmarked/marked/chi visually into the two ranges of the proposal: unmarked +00..+15, marked forms +16..+99
+    const merged = []; runs.forEach(r => { const last = merged[merged.length - 1]; if (last && ['marked', 'chi'].includes(r.g) && ['marked', 'chi'].includes(last.g)) { last.b = r.b; last.g = 'marked'; last.both = true; } else merged.push({ ...r }); });
+    const body = el('tbody');
+    merged.forEach(r => {
+      const n = r.b - r.a + 1, g = GROUPS[r.g];
+      body.append(el('tr', {}, el('td', {}, el('span', { className: `chip sw g-${r.g}`, style: 'width:1rem;height:1rem;padding:0;margin-right:.4rem' }), r.both ? 'Marked forms (marked Cán + Chi)' : g.label),
+        el('td', { className: 'cp', textContent: r.a === r.b ? off(r.a) : `${off(r.a)}–${hex(r.b, 2)}` }), el('td', { className: 'cp', textContent: range(r.a, r.b) }), el('td', { textContent: n }),
+        el('td', { className: 'small', textContent: r.both ? 'Six forms per base: MARKED-1 is the marked Cán, MARKED-2 to MARKED-6 are the five Chi (22 + 110 = 132)' : g.note })));
+    });
+    t.append(body);
+  }
+  function buildCan() {
+    const t = $('#can-table'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['No.', 'Nôm annotation', 'Reading', 'Name', 'Unmarked', 'Marked Cán (MARKED-1)', 'Chi (MARKED-2 to -6)'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody');
+    D.can.forEach((c, i) => {
+      const m1 = 22 + 6 * i, link = (o, txt) => { const a = el('a', { href: '#' + hex(cpOf(o), 5), className: 'cp', textContent: txt }); a.onclick = e => { e.preventDefault(); select(o, true); $('#chart').scrollIntoView({ block: 'center' }); }; return a; };
+      body.append(el('tr', {}, el('td', { textContent: c.no }), el('td', { textContent: c.nom, lang: 'zh-Hant' }), el('td', { textContent: c.reading, lang: 'vi' }), el('td', {}, el('code', { textContent: c.name })),
+        el('td', {}, link(i, U(i))), el('td', {}, link(m1, U(m1))), el('td', {}, link(m1 + 1, `${U(m1 + 1)}–${hex(cpOf(m1 + 5), 5)}`))));
+    });
+    t.append(body);
+  }
+  function buildTones() {
+    const t = $('#tone-table'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['', 'Code point', 'Name', 'Tone', 'Related existing characters'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody');
+    chars.filter(c => c.t === 'tone').forEach(c => {
+      const tone = c.notes.find(n => n[0] === '=')[1], rel = c.notes.filter(n => n[0] === 'x').map(n => n[1].replace(/^\(/, '').replace(/\)$/, '').replace(/ - ([0-9A-F]{4})$/, ' – U+$1'));
+      const sw = el('div', { className: 'g-tone', style: 'width:2.6rem;height:2.6rem;background:var(--g-bg);border:1px solid var(--g-border);border-radius:.3rem;padding:.15rem' }, toneSvg(c.n));
+      const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, true); $('#chart').scrollIntoView({ block: 'center' }); };
+      body.append(el('tr', {}, el('td', {}, sw), el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })), el('td', {}, el('code', { className: 'name', textContent: c.n })), el('td', { textContent: tone }),
+        el('td', { className: 'small' }, ...rel.map(r => el('div', { textContent: r })))));
+    });
+    t.append(body);
+  }
+
+  // ---------- character list ----------
+  const SECTIONS = { u: 'Forms without marking stroke', m: 'Forms with marking stroke (the six positions of each base)', f: 'Format characters', t: 'Tone marks' };
+  const sectionOf = t => ({ unmarked: 'u', marked: 'm', chi: 'm', combiner: 'f', joiner: 'f', tone: 't' })[t];
+  function renderList() {
+    const q = $('#q').value.trim().toLowerCase(), t = $('#names'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['Code point', 'Glyph', 'Unicode name', 'Notes'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody'); let n = 0, section = null;
+    const ranges = {}; chars.forEach(c => { const k = sectionOf(c.t); (ranges[k] ??= [c.o, c.o])[1] = c.o; });
+    chars.forEach(c => {
+      const text = `${U(c.o)} ${hex(cpOf(c.o), 5)} ${cpOf(c.o)} ${off(c.o)} QUOC AM TAN TU ${c.n} ${c.notes.map(x => x[1]).join(' ')}`.toLowerCase();
+      if ((q && !text.includes(q)) || (activeGroup && c.t !== activeGroup)) return;
+      n++;
+      const k = sectionOf(c.t);
+      if (k !== section) { // a heading row whenever the section changes, like the sub-headings of the Wikipedia block lists
+        section = k; const [a, b] = ranges[k];
+        body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 4, scope: 'colgroup' }, SECTIONS[k], el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(a)}${a === b ? '' : '–' + hex(cpOf(b), 5)}` }))));
+      }
+      const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp text-nowrap', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, false); window.scrollTo({ top: $('#chart-title').offsetTop - 70, behavior: 'smooth' }); };
+      const tr = el('tr', { className: c.o === selected ? 'hit' : '' }, el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })),
+        el('td', {}, el('span', { className: `mini g-${c.t}` }, ...glyphContent(c.o))), el('td', {}, el('code', { className: 'name', textContent: 'QUOC AM TAN TU ' + c.n })),
+        el('td', { className: 'small' }, ...c.notes.map(noteNode)));
+      tr.dataset.o = c.o; body.append(tr);
+    });
+    if (!q && !activeGroup) {   // the unassigned rest of the block
+      const first = chars.length, last = SIZE - 1;
+      body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 4, scope: 'colgroup' }, 'Reserved', el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }))),
+        el('tr', { className: 'text-secondary' }, el('td', { className: 'cp', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }), el('td'), el('td', { textContent: `${last - first + 1} code points, not assigned` }), el('td', { className: 'small', textContent: 'Reserved for future additions (proposal section 7)' })));
+    }
+    t.append(body);
+    $('#count').textContent = `${n} of ${chars.length} characters` + (activeGroup ? ` – group: ${GROUPS[activeGroup].label}` : '');
+  }
+  $('#q').addEventListener('input', renderList);
+
+  // ---------- properties by class ----------
+  function buildProps() {
+    const t = $('#props'); t.replaceChildren();
+    const cols = [['gc', 'General_Category'], ['ccc', 'Combining class'], ['bidi', 'Bidi_Class'], ['gcb', 'Grapheme_Cluster_Break'], ['incb', 'Indic_Conjunct_Break'], ['lb', 'Line_Break'], ['eaw', 'East_Asian_Width'], ['vo', 'Vertical_Orientation']];
+    t.append(el('thead', {}, el('tr', {}, el('th', { textContent: 'Characters' }), ...cols.map(c => el('th', { textContent: c[1] })))));
+    const body = el('tbody');
+    ['unmarked', 'marked', 'chi', 'combiner', 'joiner', 'tone'].forEach(k => {
+      const c = chars.find(x => x.t === k);
+      body.append(el('tr', {}, el('td', {}, el('span', { className: `chip sw g-${k}`, style: 'width:1rem;height:1rem;padding:0;margin-right:.4rem' }), GROUPS[k].label), ...cols.map(([key]) => el('td', { className: 'cp', textContent: String(c[key]) }))));
+    });
+    t.append(body);
+  }
+
+  // ---------- font preview ----------
+  const status = (msg, ok) => { const s = $('#font-status'); s.textContent = msg; s.className = 'small mt-2 ' + (ok === false ? 'text-danger' : ok ? 'text-success' : ''); };
+  async function useFont(face, label) {
+    const f = await face.load(); document.fonts.add(f);
+    hasFont = true; document.body.classList.add('has-font'); $('#font-clear').disabled = false;
+    status(`Font “${label}” loaded. Showing the glyphs at U+${hex(fontBase, 5)} + offset.`, true);
+    refresh();
+  }
+  function setBase() {
+    const v = parseInt($('#font-base').value.trim().replace(/^U\+/i, ''), 16);
+    if (Number.isNaN(v) || v < 0 || v + SIZE > 0x110000) { status('Base: please enter a hexadecimal code point, e.g. F0000.', false); return false; }
+    fontBase = v; return true;
+  }
+  $('#font-base').addEventListener('change', () => { if (setBase() && hasFont) { status(`Showing the glyphs at U+${hex(fontBase, 5)} + offset.`, true); refresh(); } });
+  $('#font-file').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file || !setBase()) return;
+    try { await useFont(new FontFace('QATT preview', await file.arrayBuffer()), file.name); } catch { status('This file could not be loaded as a font.', false); }
+  });
+  $('#font-clear').addEventListener('click', () => {
+    [...document.fonts].filter(f => f.family.replace(/"/g, '') === 'QATT preview').forEach(f => document.fonts.delete(f));
+    hasFont = false; document.body.classList.remove('has-font'); $('#font-clear').disabled = true; $('#font-file').value = ''; status('Font removed.'); refresh();
+  });
+
+  function refresh() { buildChart(); renderDetail(); renderList(); }
+
+  // ---------- start ----------
+  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#s-commit').textContent = D.source.commit; $('#l-base').textContent = 'U+' + hex(base, 5);
+  buildLegend(); buildOverview(); buildCan(); buildTones(); buildProps(); refresh();
+  const P = new URLSearchParams(location.search);
+  if (P.get('base')) { $('#font-base').value = P.get('base'); }
+  if (P.get('font') && setBase()) { $('#font-preview').open = true; useFont(new FontFace('QATT preview', `url(${JSON.stringify(P.get('font'))})`), P.get('font')).catch(() => status('The font could not be loaded.', false)); }
+  const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true); };
+  addEventListener('hashchange', fromHash); fromHash();
+})();
+</script>
+</body>
+</html>
