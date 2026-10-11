@@ -7,20 +7,12 @@
   <title>Quốc Âm Tân Tự – Unicode block (draft)</title>
   <meta name="description" content="Draft Unicode block for Quốc Âm Tân Tự: code chart, names list, Cán table, tone marks and character properties.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
-  <script>
-    // follow the system colour scheme (the site navigation bar is always dark)
-    document.documentElement.dataset.bsTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  </script>
   <script defer src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
   <style>
     :root {
       --g-unmarked: #d9e8ff; --g-marked: #d7f0d6; --g-chi: #fff1bf; --g-combiner: #ffdcc0; --g-joiner: #ffdcc0; --g-tone: #e9d9ff;
       --g-reserved: #eceff1; --g-border: #b8c1c9;
-    }
-    [data-bs-theme=dark] {
-      --g-unmarked: #1d3557; --g-marked: #1f4a2c; --g-chi: #54491a; --g-combiner: #5a3a1c; --g-joiner: #5a3a1c; --g-tone: #3d2b5e;
-      --g-reserved: #23272b; --g-border: #4a5258;
     }
     h2 { margin-top: 2.2rem; font-size: 1.45rem; border-bottom: 1px solid var(--g-border); padding-bottom: .25rem; }
     h3 { font-size: 1.1rem; }
@@ -54,6 +46,13 @@
             background: transparent; color: inherit; font-size: .85rem; cursor: pointer; }
     .chip .sw { width: 1rem; height: 1rem; border-radius: .25rem; background: var(--g-bg); border: 1px solid var(--g-border); }
     .chip[aria-pressed=true] { background: var(--bs-secondary-bg); border-color: var(--bs-primary); }
+    /* below the xl breakpoint the detail card is a popup that opens when a character is chosen */
+    #detail-backdrop { display: none; }
+    @media (max-width: 1199.98px) {
+      #detail { display: none; }
+      #detail.open { display: block; position: fixed; z-index: 1056; left: 50%; top: 50%; transform: translate(-50%, -50%); width: calc(100% - 1.5rem); max-width: 26rem; max-height: calc(100vh - 1.5rem); max-height: calc(100dvh - 1.5rem); overflow: auto; box-shadow: 0 .5rem 2rem rgba(0,0,0,.4); }
+      #detail-backdrop.open { display: block; position: fixed; inset: 0; z-index: 1055; background: rgba(0,0,0,.5); }
+    }
     .detail-glyph { flex: none; width: 6.2rem; height: 6.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--g-border);
                     border-radius: .5rem; background: var(--g-bg, var(--bs-tertiary-bg)); }
     .detail-glyph .font-glyph { font-size: 3.6rem; }
@@ -101,6 +100,7 @@
     </div>
     <div class="col-12 col-xl-3">
       <div class="card" id="detail" aria-live="polite"></div>
+      <div id="detail-backdrop"></div>
     </div>
   </div>
 
@@ -262,14 +262,20 @@
     const nav = el('div', { className: 'd-flex justify-content-between mt-3' },
       el('button', { type: 'button', className: 'btn btn-sm btn-outline-secondary', textContent: '‹ Previous', disabled: selected === 0, onclick: () => select(selected - 1, true) }),
       el('button', { type: 'button', className: 'btn btn-sm btn-outline-secondary', textContent: 'Next ›', disabled: selected >= chars.length - 1, onclick: () => select(selected + 1, true) }));
-    box.append(el('div', { className: 'card-body' },
+    box.append(el('div', { className: 'card-body position-relative' },
+      el('button', { type: 'button', className: 'btn-close position-absolute top-0 end-0 m-2 d-xl-none', title: 'Close', ariaLabel: 'Close', onclick: closeDetail }),
       el('div', { className: 'd-flex gap-3 align-items-start mb-3' }, g, el('div', {}, el('div', { className: 'small text-secondary', textContent: 'QUOC AM TAN TU' }), el('code', { className: 'name fs-6', textContent: c.n }),
         el('div', { className: 'cp mt-2' }, el('b', { textContent: U(selected) }), el('div', { className: 'small text-secondary', textContent: `offset ${off(selected)} · ${GROUPS[t].label}` })))),
       el('div', { className: 'small mb-3' }, ...c.notes.map(noteNode)), dl, nav));
   }
 
-  function select(o, scroll) {
+  const detailPopup = () => matchMedia('(max-width: 1199.98px)').matches;
+  function closeDetail() { $('#detail').classList.remove('open'); $('#detail-backdrop').classList.remove('open'); }
+  $('#detail-backdrop').addEventListener('click', closeDetail);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+  function select(o, scroll, open = true) {
     selected = o; markSelection(); renderDetail();
+    if (open && detailPopup()) { $('#detail').classList.add('open'); $('#detail-backdrop').classList.add('open'); }
     history.replaceState(null, '', '#' + hex(cpOf(o), 5));
     $$('#names tr').forEach(tr => tr.classList.toggle('hit', +tr.dataset.o === o));
     if (scroll) { const b = $(`.cell[data-o="${o}"]`); b && b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
@@ -413,7 +419,7 @@
   const P = new URLSearchParams(location.search);
   if (P.get('base')) { $('#font-base').value = P.get('base'); }
   if (P.get('font') && setBase()) { $('#font-preview').open = true; useFont(new FontFace('QATT preview', `url(${JSON.stringify(P.get('font'))})`), P.get('font')).catch(() => status('The font could not be loaded.', false)); }
-  const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true); };
+  const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true, false); };
   addEventListener('hashchange', fromHash); fromHash();
 })();
 </script>
