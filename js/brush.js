@@ -4,9 +4,13 @@ QATT brush: turns the centre lines of the qatt.js paths into filled brush stroke
 const strokes = QattBrush.parse("M60 22 h38 M70 22 c0 20 0 30 -6 50");  // centre lines, one entry per stroke
 const d = QattBrush.outline(strokes);                                    // closed outline (fill, nonzero), SVG path data
 
-A stroke is {s: [[x0,y0, x1,y1, x2,y2, x3,y3], ...], p: preset ("auto" or a key of PRESETS), k: width factor, r: reversed}:
-a chain of cubic segments without corners (parse splits a path at its corners, every piece becomes a stroke of its own).
-The brush follows the writing direction (left to right, top to bottom); the width along the stroke comes from a preset.
+A stroke is {s: [[x0,y0, x1,y1, x2,y2, x3,y3], ...], p: preset ("auto" or a key of PRESETS), k: width factor, r: reversed,
+d: directed}: a chain of cubic segments without corners (parse splits a path at its corners, every piece becomes a stroke of
+its own). The brush follows the writing direction (left to right, top to bottom; a directed stroke keeps its own direction);
+the width along the stroke comes from a preset.
+
+A stroke of a library is placed between two points: place(a, b, entry) bends it by the entry's h1 and h2 (offsets of the
+control points at a third and two thirds of the chord, in units of its length, to the left of the writing direction).
 Works in the browser and in node.
 */
 const QattBrush = (() => {
@@ -180,14 +184,14 @@ const QattBrush = (() => {
   // one stroke -> closed polygon [[x, y], ...]
   function strokePolygon(stroke, params, presets) {
     params = Object.assign({}, DEFAULT_PARAMS, params);
-    let segs = normalize(stroke.s.map(s => s.slice()));
+    let segs = stroke.d ? stroke.s.map(s => s.slice()) : normalize(stroke.s.map(s => s.slice()));
     if (stroke.r) segs = reverse(segs);
     const kind = stroke.p && stroke.p !== "auto" ? stroke.p : classify(segs);
     const P = Object.assign({}, DEFAULT_PRESETS.line, (presets || DEFAULT_PRESETS)[kind] || DEFAULT_PRESETS[kind]);
     const W = params.weight * (stroke.k || 1);
 
     // a straight horizontal stroke bows a little upwards
-    if (kind === "heng" && segs.length === 1 && params.bow) {
+    if (kind === "heng" && segs.length === 1 && params.bow && !stroke.d) {
       const s = segs[0], dx = s[6] - s[0], dy = s[7] - s[1], L = Math.hypot(dx, dy);
       const off = (x, y) => Math.abs((x - s[0]) * dy - (y - s[1]) * dx) / L;
       if (off(s[2], s[3]) < 0.01 && off(s[4], s[5]) < 0.01) {
@@ -268,7 +272,32 @@ const QattBrush = (() => {
     return strokes.map(st => Object.assign({}, st, { s: st.s.map(s => [0, 2, 4, 6].flatMap(i => f([s[i], s[i + 1]]))) }));
   }
 
-  return { DEFAULT_PARAMS, DEFAULT_PRESETS, parse, outline, skeleton, transform, classify, normalize, length, strokePolygon };
+  // a point of the chain at the share f of its arc length
+  function pointAt(segs, f) {
+    const total = length(segs);
+    let want = f * total;
+    for (const s of segs) {
+      const l = segLength(s);
+      if (want <= l || s === segs[segs.length - 1]) return bez(s, Math.min(1, want / (l || 1)));
+      want -= l;
+    }
+  }
+  // chain -> {a, b, h1, h2}: its end points and the bend of one cubic through it (h1, h2 as in place)
+  function fit(segs) {
+    const a = [segs[0][0], segs[0][1]], z = segs[segs.length - 1], b = [z[6], z[7]];
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = dy / L, ny = -dx / L;
+    const off = f => { const p = pointAt(segs, f); return ((p[0] - a[0]) * nx + (p[1] - a[1]) * ny) / L; };
+    const o1 = off(1 / 3), o2 = off(2 / 3);
+    return { a, b, h1: 3 * o1 - 1.5 * o2, h2: 3 * o2 - 1.5 * o1 };
+  }
+  // stroke of the library entry `kind` from a to b
+  function place(a, b, entry, kind) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = dy / L, ny = -dx / L;
+    const h1 = (entry.h1 || 0) * L, h2 = (entry.h2 || 0) * L;
+    return { s: [[a[0], a[1], a[0] + dx / 3 + nx * h1, a[1] + dy / 3 + ny * h1, a[0] + dx * 2 / 3 + nx * h2, a[1] + dy * 2 / 3 + ny * h2, b[0], b[1]]], p: kind, k: 1, d: true };
+  }
+
+  return { DEFAULT_PARAMS, fit, place, DEFAULT_PRESETS, parse, outline, skeleton, transform, classify, normalize, length, strokePolygon };
 })();
 
 if (typeof module !== "undefined") module.exports = QattBrush;
