@@ -13,7 +13,7 @@ BASE = 0xF0000
 UPM = 1000
 SY = 8.5                       # font units per svg unit (vertical)
 SX = SY * (13 / 15) / (120 / 125)  # the page stretches the 120x125 viewBox to 13:15
-X0, Y0 = 500 - 50 * SX, 805    # svg (0,0) -> font; the 0..100 box is centred in the advance, vertically on the CJK centre (380)
+X0, Y0 = 500 - 50 * SX, 765    # svg (0,0) -> font: box centred in the advance; svg y 90 (the usual bottom of a glyph) on the baseline, y 10 near cap height
 STROKE, STROKE_TONE = 48, 36   # font units
 ADV = 1000
 
