@@ -39,7 +39,7 @@ def outline(defs, width, k=1.0, centre=500):
     out.simplify(fix_winding=True)
     return out
 
-glyphs, cmap, order, adv, halves = {}, {}, ['.notdef'], {}, []
+glyphs, cmap, order, adv, halves, tones = {}, {}, ['.notdef'], {}, [], []
 glyphs['.notdef'] = TTGlyphPen(None).glyph()
 for g in data:
     o, defs = g['o'], g['d']
@@ -58,6 +58,11 @@ for g in data:
         outline(defs, STROKE_HALF, HALF_X, 250).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         glyphs[name + '.half'] = pen.glyph(); adv[name + '.half'] = ADV // 2; order.append(name + '.half')
         halves.append(name)
+    if tone:                                    # zero-width variant that lies over the cell to its left
+        pen = TTGlyphPen(None)
+        outline(defs, STROKE_TONE, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+        glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
+        tones.append(name)
 jname = 'u%05X' % (BASE + JOINER)
 glyphs[jname + '.zw'] = TTGlyphPen(None).glyph(); adv[jname + '.zw'] = 0; order.append(jname + '.zw')
 
@@ -77,15 +82,24 @@ fb.setupNameTable({'familyName': 'QATT Prototype', 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
+comb = 'u%05X' % (BASE + JOINER - 1)
 addOpenTypeFeaturesFromString(fb.font, f'''
 @FULL = [{' '.join(halves)}];
 @HALF = [{' '.join(n + '.half' for n in halves)}];
+@TONE = [{' '.join(tones)}];
+@TONE_MARK = [{' '.join(n + '.mark' for n in tones)}];
+@BEFORE_TONE = [@FULL @HALF @TONE_MARK {comb} {jname} {jname}.zw];
 lookup HALF {{ sub @FULL by @HALF; }} HALF;
 lookup JOINER_ZW {{ sub {jname} by {jname}.zw; }} JOINER_ZW;
+lookup TONE_MARK {{ sub @TONE by @TONE_MARK; }} TONE_MARK;
+lookup JOIN {{ sub @FULL' lookup HALF {jname}' lookup JOINER_ZW @FULL' lookup HALF; }} JOIN;
+lookup TONE_AFTER {{ sub @BEFORE_TONE @TONE' lookup TONE_MARK; }} TONE_AFTER;
 feature ccmp {{
-    sub @FULL' lookup HALF {jname}' lookup JOINER_ZW @FULL' lookup HALF;
+    lookup JOIN;
+    lookup TONE_AFTER;
 }} ccmp;
 ''')
+
 fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont
 f = TTFont(OUT + '.ttf'); f.flavor = 'woff2'; f.save(OUT + '.woff2')
