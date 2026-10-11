@@ -50,11 +50,11 @@
     .edit-canvas .grid .box { fill: none; stroke: var(--line); stroke-width: .35; stroke-dasharray: 1.5 1.5; }
     .edit-canvas .ctx { fill: #b9ab8f; }
     .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
-    .edit-canvas .stroke { fill: var(--ink); cursor: move; }
+    .edit-canvas .stroke { fill: var(--ink); }
+    #lib-canvas .stroke { cursor: default; }
     .edit-canvas .stroke.current { fill: var(--cinnabar); }
-    .edit-canvas .stroke.locked { cursor: default; pointer-events: none; opacity: .55; }
     .edit-canvas .mark { fill: var(--ink); pointer-events: none; }
-    .edit-canvas .mark.current { fill: var(--cinnabar); pointer-events: auto; cursor: move; }
+    .edit-canvas .mark.current { fill: var(--cinnabar); }
     .edit-canvas .handles line { stroke: #3d8bd4; stroke-width: .3; }
     .edit-canvas .handles .chord { stroke-dasharray: 1 1; }
     .edit-canvas .handles .skel { fill: none; stroke: #fff; stroke-width: .35; }
@@ -63,6 +63,13 @@
     .edit-canvas .handles .ctrl { fill: #3d8bd4; }
     .edit-canvas .guide { stroke: #e0457b; stroke-width: .3; stroke-dasharray: 1 1; }
 
+    .edit-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+    .edit-bar > span { font-size: .85rem; width: 2.6rem; }
+    #stroke-buttons, #mark-buttons, #mode-buttons { display: flex; gap: .3rem; flex-wrap: wrap; }
+    #stroke-buttons .btn { min-width: 2.2rem; font-weight: 600; }
+    #mark-buttons { padding-left: .5rem; border-left: 1px solid var(--line); }
+    #canvas.editing { cursor: crosshair; }
+    .edit-canvas .handles circle.on { stroke: var(--cinnabar); stroke-width: .8; }
     .item-row { display: grid; grid-template-columns: 5.2rem 1fr auto; gap: .4rem; align-items: center; padding: .15rem .3rem; border-radius: .4rem; }
     .item-row.active { background: rgba(168, 54, 42, .08); }
     .item-row .item-label { color: var(--ink); text-decoration: none; text-align: left; padding-left: 0; }
@@ -125,20 +132,18 @@
           <label><input type="checkbox" id="view-orig"> Original lines</label>
           <label><input type="checkbox" id="view-snap"> Snap to other end points</label>
         </div>
-        <p class="hint mt-1 mb-2">Drag a stroke to move it and its end points to place it; the filled point is where the brush starts.
-          <kbd>Shift</kbd> while dragging an end keeps the length, <kbd>Alt</kbd> stops snapping. Arrow keys move the selected stroke.</p>
-        <div id="items" class="d-grid gap-1 mb-2"></div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
-          <span class="small">Marks</span>
-          <div id="mark-buttons"></div>
-          <label class="small d-flex align-items-center gap-2 ms-auto">Visibility <input type="range" id="mark-opacity" min="0" max="1" step="0.05" value="0.3"></label>
+        <div class="edit-bar mt-2">
+          <span>Edit</span><div id="stroke-buttons"></div><div id="mark-buttons"></div>
+          <label class="small d-flex align-items-center gap-2 ms-auto">Marks visible <input type="range" id="mark-opacity" min="0" max="1" step="0.05" value="0.3"></label>
         </div>
-        <div id="mark-controls" class="d-flex flex-wrap align-items-center gap-2 mt-2" hidden>
-          <select class="form-select form-select-sm w-auto" id="mark-lib" aria-label="Library stroke of the mark"></select>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="mark-left" title="Turn 5° to the left">⟲</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="mark-right" title="Turn 5° to the right">⟳</button>
-          <span class="hint">Only this mark can move now; press its button again to lock it.</span>
+        <div class="edit-bar mt-2"><span>Drag</span><div id="mode-buttons"></div></div>
+        <div id="item-controls" class="d-flex flex-wrap align-items-center gap-2 mt-2" hidden>
+          <select class="form-select form-select-sm w-auto" id="item-lib" aria-label="Library stroke"></select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="turn-left" title="Turn 5° to the left">⟲</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="turn-right" title="Turn 5° to the right">⟳</button>
         </div>
+        <p class="hint mt-2 mb-0">Choose a stroke (A, B, C) or a mark and what a drag moves, then drag anywhere on the canvas; everything else stays locked.
+          The filled point is where the brush starts. <kbd>Shift</kbd> while moving a point keeps the length, <kbd>Alt</kbd> stops snapping; the arrow keys move in small steps.</p>
         <div class="mt-3"><button type="button" class="btn btn-sm btn-outline-secondary" id="sym-reset">Reset symbol</button></div>
       </div>
     </div>
@@ -195,7 +200,6 @@
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
           <h2 class="me-auto mb-0" id="combos-title"></h2>
-          <label class="small"><input type="checkbox" id="speak"> Read aloud on click</label>
           <label class="small d-flex align-items-center gap-2">Size <input type="range" id="size" min="28" max="110" value="46"></label>
         </div>
         <div id="combos"></div>
