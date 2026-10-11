@@ -118,8 +118,10 @@
         const brandTitle = isChunom ? "Chunom.org" : navConfig.title;
         const sections = isChunom ? navConfig.sections.slice().reverse() : navConfig.sections; // the Chữ Nôm block first on Chunom.org
         if (!document.querySelector('link[rel~="icon"]')) {
-            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${relativeLinkPrefix}/qatt/img/favicon.svg">
-                <link rel="apple-touch-icon" href="${relativeLinkPrefix}/qatt/img/apple-touch-icon.png">`);
+            const icons = isChunom ? "chunom-favicon" : "favicon";
+            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${relativeLinkPrefix}/qatt/img/${icons}.svg">
+                ${isChunom ? `<link rel="icon" type="image/png" sizes="32x32" href="${relativeLinkPrefix}/qatt/img/chunom-favicon-32.png">` : ''}
+                <link rel="apple-touch-icon" href="${relativeLinkPrefix}/qatt/img/${isChunom ? "chunom-apple-touch-icon" : "apple-touch-icon"}.png">`);
         }
 
         const currentPath = window.location.pathname;
