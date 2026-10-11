@@ -58,6 +58,7 @@
               stroke-linejoin: square;
             }
             .nav-backdrop{
+              height: 60px; /* the page content starts below it, see the body padding */
               background: rgba(33, 37, 41, 0.95);
               backdrop-filter: blur(15px);
             }
@@ -160,7 +161,7 @@
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
         `;
 
-        document.body.style.paddingTop = "62px";
+        document.body.style.paddingTop = "60px";
         document.body.prepend(header);
         document.body.appendChild(offcanvas);
 
