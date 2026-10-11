@@ -12,13 +12,14 @@
   <script src="../../qatt/js/login.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link  href="../../chunom/css/quiz.css?v=4" rel="stylesheet">
-  <script src="../../chunom/js/quiz.js?v=5"></script>
+  <script src="../../chunom/js/quiz.js?v=6"></script>
 </head>
 <body>
   <div id="app"></div>
   <script>
 async function main() {
-const app = await App.init(document.getElementById("app"), { forms: ["qatt", "text"] }); // the quiz of qatt asks glyphs and quốc ngữ
+const app = await App.init(document.getElementById("app"), { forms: ["qatt", "text"], requireLogin: true }); // the quiz of qatt asks glyphs and quốc ngữ, for signed-in users
+if (!app) return; // not signed in: the page asks for the login
 const basicStyles = ["3"];
 const onsets = "b c ch d đ g h kh l m n ng nh ph r s t th tr v x".split(" ");
 const vowels = "ă â a ơ ê e i ia ô o u ua ư ưa".split(" ");
