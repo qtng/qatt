@@ -900,23 +900,27 @@ class Qatt {
 
   observe(tagName = "TT") {
     tagName = tagName.toUpperCase();
+    // An element is drawn once: if it is moved or its parent is added later, its code (replaced by the drawing) is not read again.
+    const draw = tag => {
+      if (tag.dataset.qatt !== undefined) return;
+      const text = tag.textContent.trim();
+      if (!text) return;
+      tag.dataset.qatt = text;
+      this.render(text, tag);
+    };
     const observer = new MutationObserver(mutations => {
       for (const m of mutations) {
         for (const n of m.addedNodes) {
           if (n.nodeName === tagName) {
-            this.render(n.textContent.trim(), n);
+            draw(n);
           } else if (n.nodeType === 1) {
-            n.querySelectorAll(tagName).forEach(tag => {
-              this.render(tag.textContent.trim(), tag);
-            });
+            n.querySelectorAll(tagName).forEach(draw);
           }
         }
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    document.querySelectorAll(tagName).forEach(tag => {
-      this.render(tag.textContent.trim(), tag);
-    });
+    document.querySelectorAll(tagName).forEach(draw);
   }
 }
 

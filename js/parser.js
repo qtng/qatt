@@ -34,7 +34,114 @@ class VietnameseParser {
                 "a", "ă", "â", "e", "ê", "i", "o", "ô", "ơ", "u", "ư", "y"
             ];
             
-            static QATT_ONSET_MAP = {"p": "b", "đ": "d", "d": "dz", "ngh": "ng", "q": "c", "k": "c", "gh": "g"};
+            static QATT_ONSET_MAP = {"p": "b", "đ": "d", "d": "dz", "ngh": "ng", "q": "c", "k": "c", "gh": "g", "gi": "dz"};
+            // The 22 base shapes in the order of the rhyme tables (row i of a table = shape SHAPES[i]; z is the shape without strokes, written "_" in codes)
+            static SHAPES = "l z ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
+
+            // Rhyme tables of the known decodings: DECODINGS[name][row][column] = rhyme written with the shape of the row and the marking stroke
+            // column + 2 (a sixth column is the shape without marking stroke).
+            static DECODINGS = {
+                    qatt: [
+                        ["ơ", "ơnh", "ơn", "ơi", "ơm"],
+                        ["uơ", "uơnh", "uơn", "uơi", "ôm"],
+                        ["a", "ang", "an", "ai", "am"],
+                        ["oa", "oang", "oan", "oai", "oam"],
+                        ["e", "eng", "en", "ươ", "em"],
+                        ["oe", "oeng", "oen", "ư", "om"],
+                        ["ưu", "ưng", "ưi", "ưn", "ưm"],
+                        ["ươu", "ương", "ươi", "ươn", "ươm"],
+                        ["âu", "âng", "ây", "ân", "âm"],
+                        ["uâu", "uâng", "uây", "uân", "um"],
+                        ["au", "ăng", "ay", "ăn", "ăm"],
+                        ["oau", "oăng", "oay", "oăn", "oăm"],
+                        ["ơng", "iêng", "iê", "iên", "iêm"],
+                        ["uơng", "uyêng", "uyê", "uyên", "uôm"],
+                        ["êng", "ênh", "ê", "ên", "êm"],
+                        ["uêng", "uênh", "uê", "uên", "uêm"],
+                        ["ing", "inh", "i", "in", "im"],
+                        ["uyng", "uynh", "uy", "uyn", "uym"],
+                        ["ô", "ôn", "ôi", "ao", "oao"],
+                        ["u", "un", "ui", "eo", "oeo"],
+                        ["o", "on", "oi", "iêu", "êu"],
+                        ["ua", "uôn", "uôi", "iu", "uyu"]
+                    ],
+                    qoex: [
+                        ["", "anh", "ơn", "ơi", "ơm", "ơ"],
+                        ["", "oanh", "uơn", "uơi", "", "uơ"],
+                        ["", "ang", "an", "ai", "am", "a"],
+                        ["", "oang", "oan", "oai", "oam", "oa"],
+                        ["", "eng", "en", "", "em", "e"],
+                        ["", "oeng", "oen", "", "", "oe"],
+                        ["ưu", "ưng", "ưi", "ưn", "ưm", "ư"],
+                        ["ươu", "ương", "ươi", "ươn", "ươm", "ươ"],
+                        ["âu", "âng", "ây", "ân", "âm", "â"],
+                        ["uâu", "uâng", "uây", "uân", "", "uâ"],
+                        ["au", "ăng", "ay", "ăn", "ăm", "ă"],
+                        ["oau", "oăng", "oay", "oăn", "oăm", "oă"],
+                        ["", "iêng", "", "iên", "iêm", "iê"],
+                        ["", "", "", "uyên", "", "uyê"],
+                        ["", "ênh", "ê", "ên", "êm", "ê"],
+                        ["", "uênh", "uê", "uên", "uêm", "uê"],
+                        ["", "inh", "i", "in", "im", "i"],
+                        ["", "uynh", "uy", "uyn", "uym", "uy"],
+                        ["", "ôn", "ôi", "ao", "oao", "ô"],
+                        ["", "un", "ui", "eo", "oeo", "u"],
+                        ["", "on", "oi", "iêu", "êu", "o"],
+                        ["", "uôn", "uôi", "iu", "uyu", "uô"]
+                    ],
+                    qoex2: [
+                        ["ơ", "anh", "ơn", "ơi", "ơm", ""],
+                        ["uơ", "oanh", "uơn", "uơi", "", ""],
+                        ["a", "ang", "an", "ai", "am", "ao"],
+                        ["oa", "oang", "oan", "oai", "oam", "oao"],
+                        ["e", "eng", "en", "", "em", "eo"],
+                        ["oe", "oeng", "oen", "", "", "oeo"],
+                        ["ư", "ưng", "ưi", "ưn", "ưm", "ưu"],
+                        ["ươ", "ương", "ươi", "ươn", "ươm", "ươu"],
+                        ["", "âng", "ây", "ân", "âm", "âu"],
+                        ["", "uâng", "uây", "uân", "", "uâu"],
+                        ["", "ăng", "ay", "ăn", "ăm", "au"],
+                        ["", "oăng", "oay", "oăn", "oăm", "oau"],
+                        ["", "iêng", "iê", "iên", "iêm", "iêu"],
+                        ["", "", "uyê", "uyên", "", ""],
+                        ["", "ênh", "ê", "ên", "êm", "êu"],
+                        ["", "uênh", "uê", "uên", "uêm", "uêu"],
+                        ["", "inh", "i", "in", "im", "iu"],
+                        ["", "uynh", "uy", "uyn", "uym", "uyu"],
+                        ["ô", "ôn", "ôi", "", "", "ôm"],
+                        ["u", "un", "ui", "", "", "um"],
+                        ["o", "on", "oi", "", "", "om"],
+                        ["ua", "uôn", "uôi", "", "", "uôm"]
+                    ],
+                    omniglot: [
+                        ["ê", "ênh", "ơn", "uơ", "um"],
+                        ["oe", "ung", "oan", "uy", "âm"],
+                        ["e", "ông", "an", "i", "uâm"],
+                        ["oa", "oen", "oeng", "ưa", "em"],
+                        ["a", "en", "eng", "ư", "uôm"],
+                        ["uê", "uơn", "uênh", "ơ", "ôm"],
+                        ["âu", "ưng", "ai", "ưn", "om"],
+                        ["uâu", "ooeng", "oai", "ươn", "ơm"],
+                        ["ao", "âng", "ay", "ăn", "ươm"],
+                        ["oai", "uâng", "oay", "oăn", "uơm"],
+                        ["au", "ăng", "ơi", "ân", "êm"],
+                        ["oao", "oăng", "uơi", "uân", "im"],
+                        ["uông", "iêng", "ia", "ên", "iêm"],
+                        ["uưng", "uyêng", "uay", "uên", "am"],
+                        ["ương", "anh", "ây", "iên", "oam"],
+                        ["ang", "oanh", "uây", "uyên", "ăm"],
+                        ["oang", "inh", "ưi", "in", "oăm"],
+                        ["ong", "uynh", "ươi", "uyn", "ưm"],
+                        ["ô", "ôn", "ôi", "ưu", "ươu"],
+                        ["o", "un", "ui", "iu", "iêu"],
+                        ["ua", "on", "oi", "êu", "eo"],
+                        ["u", "uôn", "uôi", "uêu", "oeo"]
+                    ]
+                };
+
+            // Syllables ending in c, ch, t, p use the rhyme of the nasal twin and an entering tone (6 = âm nhập, 7 = dương nhập)
+            static STOP_TWIN = { "c": "ng", "ch": "nh", "t": "n", "p": "m" };
+
             static QATT_VOWEL_MAP = {
                 "a": "a", "ă": "aw", "â": "aw2", "e": "e2", "ê": "e", "i": "i",
                 "ia": "i2", "iê": "i2", "o": "o2", "ơ": "a2", "ô": "o", "u": "u",
@@ -44,13 +151,29 @@ class VietnameseParser {
             static TONE_INT_MAP = {"ngang": 0, "sac": 1, "huyen": 2, "hoi": 3, "nga": 4, "nang": 5};
             static DIACRITIC_MAP = { '\u0300': 'huyen', '\u0301': 'sac', '\u0309': 'hoi', '\u0303': 'nga', '\u0323': 'nang' };
 
-            constructor() {
+            // decoding: name of a table in VietnameseParser.DECODINGS, or a table itself (rows of rhymes, see DECODINGS)
+            constructor(decoding = "qatt") {
+                this.setDecoding(decoding);
                 // Normalisiere Listen für den Vergleich
                 this.onsets = VietnameseParser.ONSETS.map(s => s.normalize('NFD').toLowerCase());
                 this.codas = VietnameseParser.CODAS.map(s => s.normalize('NFD').toLowerCase());
                 this.vowels = VietnameseParser.VALID_VOWELS.map(s => s.normalize('NFD').toLowerCase());
             }
 
+            // Chooses the decoding used for the "qatt" code of parse(): a name or a table.
+            setDecoding(decoding) {
+                const table = typeof decoding === "string" ? VietnameseParser.DECODINGS[decoding] : decoding;
+                if (!Array.isArray(table)) throw new Error("Unknown decoding: " + decoding);
+                this.decoding = decoding;
+                this.rhymes = new Map(); // rhyme -> code of its glyph, e.g. "ư" -> "c5"
+                table.forEach((row, i) => row.forEach((rhyme, j) => {
+                    if (!rhyme || this.rhymes.has(rhyme)) return;
+                    const shape = VietnameseParser.SHAPES[i] === "z" ? "_" : VietnameseParser.SHAPES[i];
+                    this.rhymes.set(rhyme, shape + (j < 5 ? j + 2 : ""));
+                }));
+            }
+
+            // Result: .code is the older code of the phoneme glyphs (renderer.js), .qatt the code of the decoding (qatt.js, see _qattCode)
             parse(word) {
                 if (/[fjwz]/i.test(word) && !word.toLowerCase().startsWith('gi')) return null;
 
@@ -79,6 +202,10 @@ class VietnameseParser {
                         break;
                     }
                 }
+                // what is written after the onset, as in the spelling (the rhyme looked up in the decoding)
+                let spelling = temp.normalize('NFC');
+                if (res.onset == "qu") spelling = "u" + spelling;
+                if (res.onset == "gi" && spelling == "") spelling = "i";
 
                 if (res.onset == "qu") {
                     res.onset = "q";
@@ -130,10 +257,27 @@ class VietnameseParser {
 
                 if (temp !== "" || res.vowel === "") return null;
 
-                return this._finalize(res, toneChar);
+                return this._finalize(res, toneChar, spelling);
             }
 
-            _finalize(res, toneChar) {
+            // Code for qatt.js after the decoding: "onset,shape+marking,,tone", e.g. tự -> "t,c5,,5".
+            // The rhyme (glide, vowel and coda together) is looked up in the rhyme table; syllables ending in c, ch, t, p take the
+            // rhyme of their nasal twin and an entering tone (sắc 6, nặng 7). null if the rhyme is not in the table.
+            _qattCode(res, spelling) {
+                let rhyme = spelling, tone = VietnameseParser.TONE_INT_MAP[res.tone] || 0;
+                const twin = VietnameseParser.STOP_TWIN[res.coda];
+                if (twin) {
+                    rhyme = rhyme.slice(0, rhyme.length - res.coda.length) + twin;
+                    if (res.tone == "sac") tone = 6;
+                    else if (res.tone == "nang") tone = 7;
+                }
+                const glyph = this.rhymes.get(rhyme);
+                if (!glyph) return null;
+                const onset = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_";
+                return [onset, glyph, "", tone].join(",");
+            }
+
+            _finalize(res, toneChar, spelling) {
                 const toNFC = (s) => {
                     if (!s) return "";
                     let t = s.normalize('NFC');
@@ -155,6 +299,7 @@ class VietnameseParser {
 
                 return {
                     code: code,
+                    qatt: this._qattCode(res, spelling),
                     onset: res.onset,
                     glide: res.glide,
                     vowel: toNFC(res.vowel),

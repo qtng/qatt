@@ -7,8 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <script src="../qatt/js/parser.js"></script>
-    <script src="../qatt/js/renderer.js"></script>
+    <script src="../qatt/js/parser.js?v=2"></script>
+    <script src="../qatt/js/qatt.js"></script>
     <script src="../qatt/js/navigation.js"></script>
     
     <style>
@@ -16,7 +16,7 @@
             --primary-blue: #0d6efd;
             --border-gray: #dee2e6;
             --tutorial-bg: #0d6efd;
-            --stroke-width: 4px;
+            --stroke-width: 2px;
             --svg-height: 1.9em;
         }
 
@@ -204,14 +204,6 @@
                 <span class="fw-bold text-primary fs-4">
                     <tt class="svg-bold">v,i</tt><tt class="text-danger">c,i</tt><tt class="text-success svg-bold">b,e</tt><tt class="text-warning">d,i</tt><tt class="text-info svg-bold">_,a</tt>
                 </span>
-                <select class="w-auto form-select-sm form-select" id="typeSelect" onchange="changetype(parseInt(this.value))">
-                    <option value="3" selected>QATT cơ bản</option>
-                    <option value="0">QATT mở rộng</option>
-                    <!--<option value="-1">QATT âm cuối rời</option>
-                    <option value="1">Giản thể</option>
-                    <option value="2">Giản thể + giản thanh</option>
-                	-->
-                </select>
             </div>
 
             <!-- Search Row -->
@@ -271,8 +263,7 @@
     </main>
 
     <script>
-        let parser, renderer;
-        let currentType = Number(document.getElementById("typeSelect").value);
+        let parser, qatt;
         
         const START_TERM = "Quốc Âm Tân Tự";
         const wikiLang = "vi";
@@ -292,12 +283,10 @@
         
         // Init
         function initParser() {
-            if (typeof VietnameseParser !== 'undefined' && typeof SvgGlyphRenderer !== 'undefined') {
+            if (typeof VietnameseParser !== 'undefined' && typeof Qatt !== 'undefined') {
                 parser = new VietnameseParser();
-                renderer = new SvgGlyphRenderer({
-                    container: document.createElement("div"),
-                });
-                renderTTVanilla();
+                qatt = new Qatt({ container: document.createElement("div") });
+                qatt.observe("tt"); // the logo in the header
                 
                 const titleFromUrl = decodeURIComponent(window.location.hash.substring(1));
                 const initialTitle = titleFromUrl || START_TERM;
@@ -319,33 +308,12 @@
             fetchWiki(titleToLoad, false);
         };
 
-        window.changetype = (type) => {
-            currentType = type;
-            document.body.setAttribute("data-type", type.toString());
-            renderTTVanilla();
-            if (currentWikiHtml) {
-                renderWiki();
-            }
-        };
-
-        function renderTTVanilla() {
-            Array.from(document.querySelectorAll("tt")).forEach(el => {
-                const t = el.dataset.codes || el.innerText;
-                const tp = Number((el.dataset.type == null ? currentType : el.dataset.type) || 0);
-                el.innerHTML = "";
-                el.dataset.codes = t;
-                const codeToRender = tp ? t.replace(/\+/g, "") : t;
-                renderer.render(codeToRender, el, tp);
-            });
-        }
-
         function transliterateWord(word) {
             if (!parser) return word;
             const parsed = parser.parse(word.trim());
-            if (parsed) {
-                let code = parsed.code;
+            if (parsed && parsed.qatt) { // the glyph after the rhyme table of the decoding; a word without one stays as it is
                 const div = document.createElement("div");
-                renderer.render(code, div, currentType);
+                qatt.render(parsed.qatt, div);
                 return div.innerHTML;
             }
             return word;
