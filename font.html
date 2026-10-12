@@ -41,7 +41,12 @@
     .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
     .hide-svg .s { display: none; }
     .grid .break { grid-column: 1 / -1; height: .9rem; }
-    .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
+    /* the character cell as the font defines it: the 1 em square, ascender 0.88 em above and descender 0.12 em below the baseline (line-height 1.15 puts the top of the square .075 em from the top of the box);
+       its edges in the darker colour, the middle lines in the lighter one */
+    .guides .f { --edge: #e8b4ac; --mid: #f0ddd9;
+      background:
+        linear-gradient(to right, transparent calc(50% - .5em - .5px), var(--edge) calc(50% - .5em - .5px) calc(50% - .5em + .5px), transparent calc(50% - .5em + .5px), transparent calc(50% - .5px), var(--mid) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .5em - .5px), var(--edge) calc(50% + .5em - .5px) calc(50% + .5em + .5px), transparent calc(50% + .5em + .5px)),
+        linear-gradient(to bottom, transparent calc(.075em - .5px), var(--edge) calc(.075em - .5px) calc(.075em + .5px), transparent calc(.075em + .5px), transparent calc(.575em - .5px), var(--mid) calc(.575em - .5px) calc(.575em + .5px), transparent calc(.575em + .5px), transparent calc(1.075em - .5px), var(--edge) calc(1.075em - .5px) calc(1.075em + .5px), transparent calc(1.075em + .5px)); }
     h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
     #info { margin-top: .3rem; font-size: .8rem; color: var(--muted); min-height: 1.2rem; text-align: center; }
   </style>
