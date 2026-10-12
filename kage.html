@@ -28,7 +28,7 @@
     td:hover:not(.name) { outline: 2px solid var(--accent); outline-offset: -2px; }
     td svg g { fill: var(--ink); }
     .edited { box-shadow: inset 0 0 0 2px var(--accent); }
-    .detail { position: fixed; inset: 0; background: rgba(43, 33, 24, .5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .detail { position: fixed; inset: 0; background: rgba(43, 33, 24, .5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .detail .box { background: #fffdf8; border-radius: .7rem; padding: 1rem; width: min(60rem, 100%); max-height: 100%; overflow: auto; }
     .detail .views { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
     .detail .views svg { width: 15rem; height: 15rem; border: 1px solid var(--line); background: #fff; }
@@ -115,7 +115,7 @@
     detailViews();
   }
   function detailViews() {
-    const s = $("detail").dataset.s, set = new Set([0, 1, 2, 3, 4, 5]);
+    const s = $("detail").dataset.s, set = marksOn;
     $("d-views").innerHTML = views(s, set).map(([n, g]) => `<div>${wrap(g).replace("<svg", "<svg")}<div class="cap">${n}</div></div>`).join("");
   }
   $("d-text").addEventListener("input", () => {
