@@ -1,6 +1,6 @@
 // Seeds font/kage.json: the symbols of QATT in KAGE data (https://glyphwiki.org/wiki/GlyphWiki:KAGE データ仕様), one list of KAGE
 // lines for the strokes and one per mark, for the single form (v2c-X) of every symbol; the halves of a joined pair and of a stack are made from it.
-// The seed is made from the standard stroke library of js/brush-model.js; refine the lines by hand afterwards (kage.html shows them).
+// The seed is made from the standard stroke library of js/brush-model.js; refine the lines by hand afterwards (font-editor.html shows them).
 // Usage: node tools/kage_seed.js [font/kage.json] [--force]   (an existing file is only replaced with --force)
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const root = path.join(__dirname, "..");
@@ -24,7 +24,7 @@ const curve = (head, a, b, h) => {               // quadratic through a, control
   return head + ":" + pt(a) + ":" + pt([(a[0] + b[0]) / 2 + dy * h, (a[1] + b[1]) / 2 - dx * h]) + ":" + pt(b);
 };
 // Mincho conventions found by trial (see the notes in tools/README.md): a horizontal ends in the triangle (1:0:0) unless it ends on
-// another stroke, or is a mark itself (1:0:2); one that ends on a mark gets 1:0:2 only while that mark is drawn (kage.html, tools/kage_outlines.js); a vertical is 1:0:0; a stroke running down to the left is a left sweep (2:0:7); one running to the right
+// another stroke, or is a mark itself (1:0:2); one that ends on a mark gets 1:0:2 only while that mark is drawn (font-editor.html, tools/kage_outlines.js); a vertical is 1:0:0; a stroke running down to the left is a left sweep (2:0:7); one running to the right
 // (down or up) is 2:7:8, thin at the start and heavy at the end; one running up to the left is turned round into a down-right one.
 const touches = (p, others) => others.some(o => {           // does p lie on the segment o.a -> o.b (within 3 units)?
   const dx = o.b[0] - o.a[0], dy = o.b[1] - o.a[1], l2 = dx * dx + dy * dy || 1;
@@ -157,7 +157,7 @@ for (const s of SHAPES) for (const id of ["v2c-" + s]) {
   sym[id] = { strokes: sy.strokes.map(it => line(it, lib, sy.strokes)), marks: sy.marks.map(it => it ? line(it, lib, sy.strokes, true) : null) };
 }
 // Optional left forms (v2l-X) and right forms (v2r-X): the shape is made from the single form (v2c-X) by default; a symbol listed here gets its own
-// left form, a starting point to refine in kage.html. The lowest horizontal stroke of ong, dong, hong and bong is sloped up to its right end (and the
+// left form, a starting point to refine in font-editor.html. The lowest horizontal stroke of ong, dong, hong and bong is sloped up to its right end (and the
 // marks on that end move with it) so that it does not run into the next component.
 const LEFT_SLANT = ["_", "d", "h", "b"], SLANT = 5.7;      // kage units
 const nums = l => l.split(":").map(Number), join = f => f.slice(0, 3).join(":") + ":" + f.slice(3).map(v => Math.round(v * 10) / 10).join(":");
