@@ -139,6 +139,10 @@ class VietnameseParser {
                     ]
                 };
 
+            // Tham Thư: the rhymes the tables lack that are written with the shape of the onset as rhyme shape, plus this marking stroke
+            // (ong 2, ung 3, uông 4), the onset below and the rhyme above (code of parse(): .tham, e.g. vong -> "v,v2,,0")
+            static THAM_THU = { "ong": 2, "ung": 3, "uông": 4 };
+
             // Syllables ending in c, ch, t, p use the rhyme of the nasal twin and an entering tone (6 = âm nhập, 7 = dương nhập)
             static STOP_TWIN = { "c": "ng", "ch": "nh", "t": "n", "p": "m" };
 
@@ -264,6 +268,14 @@ class VietnameseParser {
             // The rhyme (glide, vowel and coda together) is looked up in the rhyme table; syllables ending in c, ch, t, p take the
             // rhyme of their nasal twin and an entering tone (sắc 6, nặng 7). null if the rhyme is not in the table.
             _qattCode(res, spelling) {
+                const { rhyme, tone } = this._rhymeAndTone(res, spelling);
+                const glyph = this.rhymes.get(rhyme);
+                if (!glyph) return null;
+                const onset = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_";
+                return [onset, glyph, "", tone].join(",");
+            }
+
+            _rhymeAndTone(res, spelling) {
                 let rhyme = spelling, tone = VietnameseParser.TONE_INT_MAP[res.tone] || 0;
                 const twin = VietnameseParser.STOP_TWIN[res.coda];
                 if (twin) {
@@ -271,10 +283,16 @@ class VietnameseParser {
                     if (res.tone == "sac") tone = 6;
                     else if (res.tone == "nang") tone = 7;
                 }
-                const glyph = this.rhymes.get(rhyme);
-                if (!glyph) return null;
+                return { rhyme, tone };
+            }
+
+            // Tham Thư code for a rhyme that the table lacks (ong, ung, uông), else null: "onset,onset+mark,,tone"
+            _thamCode(res, spelling) {
+                const { rhyme, tone } = this._rhymeAndTone(res, spelling);
+                const mark = VietnameseParser.THAM_THU[rhyme];
+                if (!mark || this.rhymes.has(rhyme)) return null;
                 const onset = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_";
-                return [onset, glyph, "", tone].join(",");
+                return [onset, onset + mark, "", tone].join(",");
             }
 
             _finalize(res, toneChar, spelling) {
@@ -300,6 +318,7 @@ class VietnameseParser {
                 return {
                     code: code,
                     qatt: this._qattCode(res, spelling),
+                    tham: this._thamCode(res, spelling),
                     onset: res.onset,
                     glide: res.glide,
                     vowel: toNFC(res.vowel),
