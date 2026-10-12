@@ -24,7 +24,7 @@ const curve = (head, a, b, h) => {               // quadratic through a, control
   return head + ":" + pt(a) + ":" + pt([(a[0] + b[0]) / 2 + dy * h, (a[1] + b[1]) / 2 - dx * h]) + ":" + pt(b);
 };
 // Mincho conventions found by trial (see the notes in tools/README.md): a horizontal ends in the triangle (1:0:0) unless it ends on
-// another stroke or is a mark (1:0:2); a vertical is 1:0:0; a stroke running down to the left is a left sweep (2:0:7); one running to the right
+// another stroke or on a mark (the bar of a T), or is a mark itself (1:0:2); a vertical is 1:0:0; a stroke running down to the left is a left sweep (2:0:7); one running to the right
 // (down or up) is 2:7:8, thin at the start and heavy at the end; one running up to the left is turned round into a down-right one.
 const touches = (p, others) => others.some(o => {           // does p lie on the segment o.a -> o.b (within 3 units)?
   const dx = o.b[0] - o.a[0], dy = o.b[1] - o.a[1], l2 = dx * dx + dy * dy || 1;
@@ -154,7 +154,7 @@ let moved = 0;
 for (const s of SHAPES) for (const id of ["v2-" + s, `v2-${s}-small`, "v2c-" + s]) {
   const sy = exact(M.symbolOf({ sym: {} }, id).strokes, M.symbolOf({ sym: {} }, id).marks, id);
   moved += sy.log.length;
-  sym[id] = { strokes: sy.strokes.map(it => line(it, lib, sy.strokes)), marks: sy.marks.map(it => it ? line(it, lib, sy.strokes, true) : null) };
+  sym[id] = { strokes: sy.strokes.map(it => line(it, lib, sy.strokes.concat(sy.marks.filter(Boolean)))), marks: sy.marks.map(it => it ? line(it, lib, sy.strokes, true) : null) };
 }
 fs.writeFileSync(out, JSON.stringify({ format: "qatt-kage", version: 1, scale: S, sym }, null, 1).replace(/\n\s+("[^"\n]*"|null),?(?=\n)/g, m => m.trim() ? " " + m.trim() : m));
 console.log("wrote", out, Object.keys(sym).length, "symbols;", moved, "ends moved onto other strokes");
