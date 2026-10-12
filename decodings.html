@@ -23,10 +23,18 @@
             min-height: 100vh;
         }
 
-        .page-head { text-align: center; padding: 1.6rem 1rem .4rem; }
-        .page-head .han { color: var(--cinnabar); letter-spacing: .5em; padding-left: .5em; font-size: 1.05rem; }
-        .page-head h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(1.8rem, 6vw, 2.6rem); margin: .2rem 0 .3rem; }
-        .page-head p { color: #5b4d3d; max-width: 36rem; margin: 0 auto; }
+        .hero {
+            background:
+                radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+                linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+            border-bottom: 1px solid #e8dcc0;
+            color: var(--ink);
+        }
+        .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+        .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+        .hero .lead { max-width: 38rem; color: #4a3d30; }
+        .btn-hero { border-radius: 2rem; padding: .5rem 1.3rem; }
+        @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
 
         .controls {
             display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem 1rem;
@@ -198,11 +206,13 @@
 <body>
 
     <div class="container-fluid p-0">
-        <header class="page-head">
-            <div class="han">國音新字</div>
-            <h1>Decodings</h1>
-            <p>How the rhyme table of Quốc Âm Tân Tự can be read. Pick a reading and compare.</p>
-            <a class="btn btn-outline-secondary btn-pill mt-3" href="type.html" style="background: transparent; color: inherit">Type QATT</a>
+        <header class="hero pt-5 pb-4">
+            <div class="container text-center">
+                <div class="han mb-2">國音新字</div>
+                <h1 class="mb-3">Decodings</h1>
+                <p class="lead mx-auto mb-4">How the rhyme table of Quốc Âm Tân Tự can be read. Pick a reading and compare.</p>
+                <a class="btn btn-outline-secondary btn-hero" href="editor.html">Type QATT</a>
+            </div>
         </header>
 
         <div class="controls">

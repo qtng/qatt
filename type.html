@@ -1,230 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Type QATT</title>
-  <meta name="description" content="Type Vietnamese and it turns into Quốc Âm Tân Tự text for the QATT fonts.">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
-  <style>
-    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Mincho"; }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
-    .hero {
-      background:
-        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
-        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
-      border-bottom: 1px solid #e8dcc0;
-      color: var(--ink);
-    }
-    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
-    .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
-    .hero .lead { max-width: 38rem; color: #4a3d30; }
-    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
-    .btn-cinnabar { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
-    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
-    main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 1.5rem; }
-    a { color: var(--accent); }
-    .card-box { margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
-    /* one row if there is room, else two: font and size, then reading and Telex */
-    .bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
-    .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; }
-    .bar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; }
-    .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
-    .bar input[type=range] { width: 8rem; accent-color: var(--accent); }
-    #sizeLabel { min-width: 2.6em; color: var(--muted); }
-    #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
-      font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
-    #field:focus { outline: 2px solid rgba(168, 54, 42, .35); }
-    #pending { margin-top: .2rem; min-height: 2.4rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
-    #pending .glyph { font-family: var(--qfont); font-size: 1.8rem; line-height: 1; color: var(--ink); }
-    #pending .word { font-style: italic; }
-    .keys { display: flex; gap: .4rem; margin-top: .2rem; }
-    .keys .btn { flex: 1 1 0; }
-  </style>
-  <script defer src="js/navigation.js"></script>
-  <script src="js/parser.js"></script>
-  <script src="js/qatt-text.js"></script>
-  <script defer src="../chunom/js/ime.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QATT Editor | Qatt.org</title>
+    <meta name="description" content="Type Vietnamese and see it written in Quốc Âm Tân Tự.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script defer src="js/navigation.js"></script>
+    <script defer src="js/parser.js"></script>
+    <script defer src="js/qatt.js"></script>
+    <script defer src="../chunom/js/ime.js"></script>
+
+    <style>
+        :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --glyph: 3rem; }
+
+        body {
+            background: linear-gradient(180deg, var(--paper) 0, #fffdf8 16rem) no-repeat, #fffdf8;
+            color: var(--ink);
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        .editor-head h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(1.7rem, 6vw, 2.4rem); }
+        .editor-head .han { color: var(--accent); letter-spacing: .5em; padding-left: .5em; font-size: 1.05rem; }
+        .editor-head p { color: #5b4d3d; max-width: 36rem; margin-inline: auto; }
+
+        /* the two panes: what you type and what it looks like */
+        .editor {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            box-shadow: 0 .5rem 1.5rem rgba(60, 40, 20, .08);
+            overflow: hidden;
+        }
+        .pane-title { padding: .5rem 1rem .1rem; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: #9a8a70; }
+
+        #source {
+            display: block;
+            width: 100%;
+            min-height: 8rem;
+            padding: .4rem 1rem .8rem;
+            font-size: 1.35rem;
+            line-height: 1.5;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--ink);
+            resize: vertical;
+        }
+
+        .output-pane { border-top: 1px solid var(--line); background: #fffdf8; }
+        #output { padding: .4rem 1rem 1rem; min-height: 9rem; line-height: 1.2; overflow-wrap: anywhere; }
+        #output .empty { color: #9a8a70; font-size: .95rem; padding-top: .4rem; }
+        #output .line { margin-bottom: .3rem; min-height: calc(var(--glyph) * .8); }
+        #output .word { display: inline-block; white-space: nowrap; margin: 0 calc(var(--glyph) * .22) .5rem 0; text-align: center; vertical-align: top; }
+        #output .plain { display: inline-block; font-size: calc(var(--glyph) * .55); margin: 0 .15em .5rem 0; vertical-align: top; padding-top: calc(var(--glyph) * .35); white-space: pre-wrap; }
+        #output qatt-code { font-size: var(--glyph); }
+        #output qatt-code svg { height: 1.2em; width: auto; stroke: currentColor; stroke-width: 1.5px; stroke-linecap: round; fill: none; display: inline-block; vertical-align: top; }
+        #output .reading { display: block; font-size: .72rem; color: #8a7a62; margin-top: .1rem; }
+        body:not(.show-reading) #output .reading { display: none; }
+
+        .bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .5rem .8rem; border-top: 1px solid var(--line); background: #fcf8ee; }
+        .bar .btn { border-radius: 2rem; font-size: .85rem; padding: .25rem .85rem; }
+        .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .btn-accent:hover, .btn-accent:focus-visible { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+        .btn-quiet { border-color: #cdbf9f; color: #5b4d3d; background: #fff; }
+        .btn-quiet:hover { background: #f1e8d2; color: var(--ink); border-color: #b9a982; }
+        .bar .form-check { margin: 0; }
+        .bar .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+        .bar .form-check-label, .bar label { font-size: .88rem; color: #5b4d3d; }
+        .bar .form-range { width: 7.5rem; accent-color: var(--accent); }
+
+        @media (min-width: 992px) {
+            .editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-template-rows: 1fr auto; }
+            .input-pane { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
+            #source { flex: 1; min-height: 18rem; resize: none; }
+            .output-pane { grid-column: 2; grid-row: 1 / span 2; border-top: none; border-left: 1px solid var(--line); }
+            #output { min-height: 22rem; }
+            .bar { grid-column: 1; grid-row: 2; }
+        }
+    </style>
 </head>
 <body>
-<header class="hero pt-5 pb-4 mb-4">
-  <div class="container text-center">
-    <div class="han mb-2">國音新字</div>
-    <h1 class="mb-3">Type QATT</h1>
-    <p class="lead mx-auto mb-4">Type Vietnamese (Quốc Ngữ). Every finished word turns into text for the <a href="font.html">QATT fonts</a>.</p>
-    <a class="btn btn-cinnabar btn-pill" href="decodings.html">Open the decodings</a>
-  </div>
-</header>
-<main>
-  <div class="card-box">
-    <div class="bar">
-      <div class="group">
-        <select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
-        <label><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="sizeLabel">100%</span></label>
-      </div>
-      <div class="group">
-        <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)"></select>
-        <label><input type="checkbox" id="telex" autocomplete="off"> Telex</label>
-      </div>
-    </div>
-    <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Input Quốc Ngữ..."></textarea>
-    <div id="pending" aria-live="polite"></div>
-    <div class="keys">
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="convert" title="Convert every Quốc Ngữ word in the field, e.g. after pasting">Convert all</button>
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="clear">Clear</button>
-    </div>
-  </div>
-</main>
 
-<script src="js/fonts.js"></script>
+<div class="container py-3 pb-5" style="max-width: 68rem">
+
+    <header class="editor-head text-center my-3">
+        <div class="han">國音新字</div>
+        <h1 class="mb-1">QATT Editor</h1>
+        <p class="mb-3">Type Vietnamese and watch it turn into Quốc Âm Tân Tự.</p>
+        <a class="btn btn-outline-secondary" style="border-radius: 2rem; padding: .5rem 1.3rem" href="editor.html">Type QATT</a>
+    </header>
+
+    <div class="editor">
+        <section class="input-pane">
+            <div class="pane-title">Vietnamese</div>
+            <textarea id="source" placeholder="Type here, for example: Quốc âm tân tự" aria-label="Vietnamese text" lang="vi"
+                      spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+        </section>
+
+        <section class="output-pane">
+            <div class="pane-title">Quốc Âm Tân Tự</div>
+            <div id="output" aria-live="polite"></div>
+        </section>
+
+        <div class="bar">
+            <button type="button" class="btn btn-accent" id="copy-btn"><i class="bi bi-clipboard"></i> Copy codes</button>
+            <button type="button" class="btn btn-quiet" id="example-btn"><i class="bi bi-magic"></i> Example</button>
+            <button type="button" class="btn btn-quiet" id="clear-btn"><i class="bi bi-x-lg"></i> Clear</button>
+            <div class="d-flex align-items-center gap-2 ms-lg-auto">
+                <label for="size">Size</label>
+                <input type="range" class="form-range" id="size" min="1.6" max="6" step="0.2" value="3">
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="reading-toggle">
+                <label class="form-check-label" for="reading-toggle">Show reading</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="telex-toggle">
+                <label class="form-check-label" for="telex-toggle">Telex</label>
+            </div>
+        </div>
+    </div>
+
+    <p class="small text-secondary mt-3 mb-0 text-center">
+        Each syllable becomes one glyph: the onset on the left, the rhyme on the right, the tone as a small mark in a corner.
+        Words that cannot be read as Vietnamese stay as they are.
+    </p>
+</div>
+
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const $ = id => document.getElementById(id);
-    const field = $('field'), pending = $('pending');
-    const parser = new VietnameseParser();
-    const NOT_LETTER = /[^\p{L}\p{M}]/u, WORD_END = /[\p{L}\p{M}]+$/u;
+    window.addEventListener('load', () => {
+        const $ = id => document.getElementById(id);
+        const source = $('source'), output = $('output');
+        const store = {
+            get(key, fallback) { try { const v = localStorage.getItem('qatt_editor_' + key); return v === null ? fallback : v; } catch { return fallback; } },
+            set(key, value) { try { localStorage.setItem('qatt_editor_' + key, value); } catch { /* storage may be blocked */ } }
+        };
 
-    // decodings (readings of the rhyme table)
-    for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
-    $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
+        const parser = new VietnameseParser(); // the decoding of the glyphs: new VietnameseParser('qatt') is the default, see VietnameseParser.DECODINGS
+        new Qatt().observe('qatt-code');
 
-    // size: 100% is 33 pixels
-    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.33) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
-    $('size').addEventListener('input', applySize);
-    applySize();
+        // ---------- text -> glyphs ----------
+        const WORD = /[\p{L}\p{M}]+/gu;
 
-    // Telex (typing Vietnamese on a keyboard without a Vietnamese layout)
-    $('telex').checked = !matchMedia('(pointer: coarse)').matches;
-    const ime = window.VietIme ? new VietIme(field, { telex: $('telex').checked, candidates: false }) : null;
-    if (!ime) $('telex').closest('label').hidden = true;
-    $('telex').addEventListener('change', () => { ime?.update({ telex: $('telex').checked }); field.focus(); });
+        // one <span class="word"> per syllable (glyph and, optionally, its reading), plain text for everything else
+        function renderLine(line) {
+            const row = document.createElement('div');
+            row.className = 'line';
+            let last = 0;
+            const plain = text => {
+                if (!text) return;
+                const span = document.createElement('span');
+                span.className = 'plain';
+                span.textContent = text;
+                row.append(span);
+            };
+            for (const m of line.matchAll(WORD)) {
+                plain(line.slice(last, m.index));
+                last = m.index + m[0].length;
+                const parsed = parser.parse(m[0]);
+                if (!parsed?.qatt) { plain(m[0]); continue; } // not Vietnamese, or a rhyme the decoding has no glyph for: stays as text
+                const word = document.createElement('span');
+                word.className = 'word';
+                const code = document.createElement('qatt-code');
+                code.textContent = parsed.qatt;
+                const reading = document.createElement('span');
+                reading.className = 'reading';
+                reading.textContent = m[0];
+                word.append(code, reading);
+                row.append(word);
+            }
+            plain(line.slice(last));
+            return row;
+        }
 
-    // the word that ends right before position `end` is replaced by its QATT characters (if there are any)
-    const convertBefore = end => {
-      const m = WORD_END.exec(field.value.slice(0, end));
-      if (!m) return false;
-      const text = QattText.word(m[0], parser);
-      if (!text) return false;
-      const start = end - m[0].length, caret = field.selectionStart;
-      field.setRangeText(text, start, end, 'end');
-      const at = caret + text.length - m[0].length;
-      field.setSelectionRange(at, at);
-      return true;
-    };
+        function codesOf(text) {
+            return text.split('\n').map(line => [...line.matchAll(WORD)].map(m => parser.parse(m[0])?.qatt ?? m[0]).join(' ')).join('\n');
+        }
 
-    // ---------- keeping the cells whole ----------
-    // A cell is what the font draws as one square: a letter of the block (U+F0000..U+F0099), a joiner U+F009B or combiner U+F009A with
-    // another letter, and the tone marks U+F009C..U+F00A3 after it. Any other character is a cell of its own.
-    const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009B, COMBINER = 0xF009A;
-    const CELL = /[\u{F0000}-\u{F0099}](?:[\u{F009A}\u{F009B}][\u{F0000}-\u{F0099}])*[\u{F009C}-\u{F00A3}]*|[\u{F009A}-\u{F00A3}]+|[^]/gu;
-    const WINDOW = 64;
-    // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
-    const cellAt = (text, pos, which) => {
-      const from = Math.max(0, pos - WINDOW), part = text.slice(from, pos + WINDOW);
-      for (const m of part.matchAll(CELL)) {
-        const start = from + m.index, end = start + m[0].length;
-        if (which === 'before' ? (start < pos && pos <= end) : which === 'after' ? (start <= pos && pos < end) : (start < pos && pos < end)) return { start, end };
-      }
-      return null;
-    };
-    // Removes the joiners and combiners that join nothing: a joiner needs a letter that is still an onset before it and a letter after it
-    // (B J B J B: the second joiner is left over, the first pair is a cell already), a combiner needs a letter on both sides.
-    const tidy = () => {
-      const text = field.value, caret = field.selectionStart, end = field.selectionEnd;
-      const cps = Array.from(text, ch => ch.codePointAt(0));
-      let out = '', open = false, prev = 0, i = 0, dropBeforeStart = 0, dropBeforeEnd = 0;
-      cps.forEach((c, k) => {
-        const next = cps[k + 1], len = c > 0xFFFF ? 2 : 1;
-        let keep = true;
-        if (LETTER(c)) open = prev !== JOINER && prev !== COMBINER;
-        else if (c === JOINER) { keep = open && LETTER(next); open = false; }
-        else if (c === COMBINER) { keep = LETTER(prev) && LETTER(next); open = false; }
-        else open = false;
-        if (keep) { out += String.fromCodePoint(c); prev = c; }
-        else { if (i < caret) dropBeforeStart += len; if (i < end) dropBeforeEnd += len; }
-        i += len;
-      });
-      if (out === text) return;
-      field.value = out;
-      field.setSelectionRange(caret - dropBeforeStart, end - dropBeforeEnd);
-    };
+        let frame = 0;
+        function render() {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => {
+                const text = source.value;
+                if (!text.trim()) {
+                    output.innerHTML = '<div class="empty">The glyphs appear here as you type.</div>';
+                    return;
+                }
+                output.replaceChildren(...text.split('\n').map(renderLine));
+            });
+        }
 
-    // Backspace and Delete remove a whole cell
-    field.addEventListener('beforeinput', e => {
-      if (e.isComposing || (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward')) return;
-      const pos = field.selectionStart;
-      if (pos !== field.selectionEnd) return;
-      const cell = cellAt(field.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
-      if (!cell || field.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
-      e.preventDefault();
-      field.setRangeText('', cell.start, cell.end, 'end');
-      field.setSelectionRange(cell.start, cell.start);
-      tidy();
-      showPending();
+        source.addEventListener('input', () => { store.set('text', source.value); render(); });
+
+        // ---------- Telex (typing Vietnamese on a keyboard without a Vietnamese layout) ----------
+        const telexToggle = $('telex-toggle');
+        telexToggle.checked = store.get('telex', matchMedia('(pointer: coarse)').matches ? 'false' : 'true') === 'true';
+        const ime = window.VietIme ? new VietIme(source, { telex: telexToggle.checked, candidates: false }) : null;
+        if (!ime) telexToggle.closest('.form-check').hidden = true;
+        telexToggle.addEventListener('change', () => {
+            store.set('telex', telexToggle.checked);
+            ime?.update({ telex: telexToggle.checked });
+            source.focus();
+        });
+
+        // ---------- options ----------
+        const size = $('size');
+        const setSize = v => document.documentElement.style.setProperty('--glyph', `${v}rem`);
+        size.value = store.get('size', '3');
+        setSize(size.value);
+        size.addEventListener('input', () => { setSize(size.value); store.set('size', size.value); });
+
+        const reading = $('reading-toggle');
+        reading.checked = store.get('reading', 'false') === 'true';
+        document.body.classList.toggle('show-reading', reading.checked);
+        reading.addEventListener('change', () => {
+            document.body.classList.toggle('show-reading', reading.checked);
+            store.set('reading', reading.checked);
+        });
+
+        // ---------- buttons ----------
+        const copyBtn = $('copy-btn');
+        copyBtn.addEventListener('click', async () => {
+            const label = copyBtn.innerHTML, text = codesOf(source.value);
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch {
+                const area = Object.assign(document.createElement('textarea'), { value: text });
+                document.body.append(area);
+                area.select();
+                document.execCommand('copy');
+                area.remove();
+            }
+            copyBtn.innerHTML = '<i class="bi bi-check-lg"></i> Copied';
+            setTimeout(() => { copyBtn.innerHTML = label; }, 1400);
+        });
+
+        $('example-btn').addEventListener('click', () => {
+            source.value = 'Quốc âm tân tự\nChữ Nôm của người Việt';
+            source.dispatchEvent(new Event('input', { bubbles: true }));
+            source.focus();
+        });
+
+        $('clear-btn').addEventListener('click', () => {
+            source.value = '';
+            source.dispatchEvent(new Event('input', { bubbles: true }));
+            source.focus();
+        });
+
+        source.value = store.get('text', '');
+        render();
     });
-
-    // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
-    let lastPos = 0;
-    const snap = () => {
-      if (document.activeElement !== field) return;
-      let a = field.selectionStart, b = field.selectionEnd;
-      if (a === b) {
-        const cell = cellAt(field.value, a);
-        if (cell) a = b = a > lastPos ? cell.end : cell.start;
-      } else {
-        a = cellAt(field.value, a)?.start ?? a;
-        b = cellAt(field.value, b)?.end ?? b;
-      }
-      if (a !== field.selectionStart || b !== field.selectionEnd) field.setSelectionRange(a, b, field.selectionDirection);
-      lastPos = field.selectionStart;
-    };
-
-    // the character just typed (space, Enter, ...) ends the word before it; when the word was converted, that character is swallowed
-    const flush = length => {
-      const pos = field.selectionStart;
-      if (pos !== field.selectionEnd || pos < length) return;
-      if (!NOT_LETTER.test(field.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
-      const at = field.selectionStart;
-      field.setRangeText('', at - length, at, 'end');
-    };
-    field.addEventListener('input', e => {
-      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1);
-      else if (!e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length);
-      if (!e.isComposing) tidy();
-      showPending();
-    });
-    // keyboards that compose whole words (Android): the space comes with the end of the composition
-    field.addEventListener('compositionend', e => setTimeout(() => {
-      if (e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1);
-      tidy();
-      showPending();
-    }, 0));
-
-    // the word being typed and how it will look
-    function showPending() {
-      const pos = field.selectionStart, m = pos === field.selectionEnd && WORD_END.exec(field.value.slice(0, pos));
-      pending.replaceChildren();
-      if (!m) return;
-      const text = QattText.word(m[0], parser);
-      const word = Object.assign(document.createElement('span'), { className: 'word', textContent: m[0] });
-      pending.append(word);
-      if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
-      else pending.append(' (no QATT letter yet)');
-    }
-    document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === field) showPending(); });
-
-    $('convert').addEventListener('click', () => { field.value = QattText.convert(field.value, parser); showPending(); field.focus(); });
-    $('clear').addEventListener('click', () => { field.value = ''; showPending(); field.focus(); });
-    $('copy').addEventListener('click', async () => {
-      const btn = $('copy');
-      try { await navigator.clipboard.writeText(field.value); btn.textContent = 'Copied'; }
-      catch { field.select(); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
-      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
-    });
-  });
 </script>
+
 </body>
 </html>
