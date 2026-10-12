@@ -19,8 +19,8 @@ from fontTools.fontBuilder import FontBuilder
 LIGHT = 0.6
 light = '--light' in sys.argv
 if light: sys.argv.remove('--light')
-# --bold (KAGE fonts): the heaviest stroke the glyph editor offers for Gothic (its slider goes up to 12, the standard is 5), tones and marks 1.5 times
-BOLD = 12 / 5 if '--bold' in sys.argv else 1.0
+# --bold (KAGE fonts): strokes 1.7 times the standard Gothic (the glyph editor's slider goes up to 2.4 times; that closes the gaps of dense glyphs), tones and marks 1.5 times
+BOLD = 1.7 if '--bold' in sys.argv else 1.0
 if '--bold' in sys.argv: sys.argv.remove('--bold')
 KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Mincho or Gothic
 if '--kage' in sys.argv:
