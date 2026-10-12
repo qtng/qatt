@@ -119,6 +119,17 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
     out.simplify(fix_winding=True)
     return out
 
+TONE_MARGIN = 14               # a tone mark stays this far (font units) inside its cell
+
+def keep_inside(path, lo, hi, margin=TONE_MARGIN):
+    """Shift a glyph sideways, if need be, so that it lies inside [lo + margin, hi - margin]; the corner tones of qatt.js hang a little out of the cell."""
+    x0, _, x1, _ = path.bounds
+    d = lo + margin - x0 if x0 < lo + margin else hi - margin - x1 if x1 > hi - margin else 0
+    if not d: return path
+    out = pathops.Path()
+    path.draw(TransformPen(out.getPen(), (1, 0, 0, 1, d, 0)))
+    return out
+
 def make_glyphs():
     global glyphs, cmap, order, adv, halves, tones, master_w
     glyphs, cmap, order, adv, halves, tones, master_w = {}, {}, ['.notdef'], {}, [], [], {}
@@ -139,6 +150,7 @@ def make_glyphs():
             pen.moveTo((x0, y0)); pen.lineTo((x0, y1)); pen.lineTo((x1, y1)); pen.lineTo((x1, y0)); pen.closePath()
         else:
             path = outline(ids, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
+            if tone: path = keep_inside(path, 0, ADV)
             path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         name = 'u%05X' % (BASE + o)
         glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
@@ -172,7 +184,7 @@ def make_glyphs():
                 add(name + '.rightlow', outline(letter_ids(g, 'right'), STROKE_LOW, PAIR_K, 0, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
         if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
             pen = TTGlyphPen(None)
-            outline(one(g['dm']), STROKE_MARK, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+            keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -500), -ADV, 0).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
             glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
             tones.append(name)
 
