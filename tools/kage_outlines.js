@@ -1,7 +1,7 @@
 // KAGE outlines for the font build (build_font.py --kage): the KAGE lines of the symbols in font/kage.json (made and refined with font-editor.html)
 // are moved first (the squeezes of the half-width and stacked variants), then the KAGE engine (js/kage-engine.min.js) draws the strokes
 // with widths that follow the weight of the variant, so a squeezed glyph keeps its stroke widths. The engine is GPL-3.0 (js/kage-engine.COPYING).
-// Usage: node tools/kage_outlines.js font/kage.json jobs.json out.json [mincho|gothic]
+// Usage: node tools/kage_outlines.js font/kage.json jobs.json out.json [mincho|gothic] [bold factor]
 //   jobs.json: [{ids: [qatt.js path ids], m: [sx, sy, tx, ty] (x -> sx*x + tx, y -> sy*y + ty, svg units), w: weight factor (1 = the standard stroke),
 //                fit: [left, right] (optional: sx and tx are then found so that the outline spans exactly this), ink: true (optional: answer [left, right] of the outline)}]
 //              an id "v2-X3@onset" is the mark v2-X3 of the rhyme form moved onto the onset form (the box of v2-X onto v2-X-small)
@@ -14,7 +14,8 @@ vm.runInContext(fs.readFileSync(path.join(root, "js/kage-engine.min.js"), "utf8"
 const Kage = ctx.Kage;
 const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 
-const [kageFile, jobsFile, outFile, style = "mincho"] = process.argv.slice(2);
+const [kageFile, jobsFile, outFile, style = "mincho", boldArg = "1"] = process.argv.slice(2);
+const bold = +boldArg || 1;                  // build_font.py --bold: 1.7 for Gothic (the stroke), 2.2 for Mincho (the verticals; the thin horizontals stay)
 const data = JSON.parse(fs.readFileSync(kageFile, "utf8")), S = data.scale || 1.9, SYM = data.sym;
 const num = l => l.split(":").map(Number);
 const ptsOf = l => { const f = num(l); return Array.from({ length: (f.length - 3) / 2 }, (_, i) => [f[3 + 2 * i], f[4 + 2 * i]]); };
@@ -66,8 +67,8 @@ function draw({ lines, w }, m) {
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
-  if (style === "gothic") F.kWidth *= w * 0.76;   // the glyphs are drawn GROW (1.18) times larger afterwards, so this is a stroke of about the prototype width
-  else { F.kMinWidthY *= w * 1.2; F.kMinWidthT *= w * 0.75; F.kWidth *= w * 0.75; F.kMinWidthU = 5 * w; }   // kMinWidthU: the triangles at the open ends of the horizontals
+  if (style === "gothic") F.kWidth *= w * 0.76 * bold;   // the glyphs are drawn GROW (1.18) times larger afterwards, so this is a stroke of about the prototype width
+  else { F.kMinWidthY *= w * 0.75; F.kMinWidthT *= w * 0.75 * bold; F.kWidth *= w * 0.75 * bold; F.kMinWidthU = 3.5 * w; }   // kMinWidthU: the triangles at the open ends of the horizontals
   k.kBuhin.push("g", moved.join("$"));
   const polys = new Kage.Polygons(); k.makeGlyph(polys, "g");
   let d = "", a = Infinity, b = -Infinity;

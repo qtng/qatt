@@ -8,9 +8,10 @@
   <style>
     @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=20) format("woff2"), url(font/qatt-prototype.ttf?v=20) format("truetype"); }
     @font-face { font-family: "QATT Prototype Light"; src: url(font/qatt-prototype-light.woff2?v=3) format("woff2"), url(font/qatt-prototype-light.ttf?v=3) format("truetype"); }
-    @font-face { font-family: "QATT Mincho"; src: url(font/qatt-mincho.woff2?v=7) format("woff2"), url(font/qatt-mincho.ttf?v=7) format("truetype"); }
+    @font-face { font-family: "QATT Mincho"; src: url(font/qatt-mincho.woff2?v=9) format("woff2"), url(font/qatt-mincho.ttf?v=9) format("truetype"); }
+    @font-face { font-family: "QATT Mincho Bold"; src: url(font/qatt-mincho-bold.woff2?v=3) format("woff2"), url(font/qatt-mincho-bold.ttf?v=3) format("truetype"); }
     @font-face { font-family: "QATT Gothic"; src: url(font/qatt-gothic.woff2?v=6) format("woff2"), url(font/qatt-gothic.ttf?v=6) format("truetype"); }
-    @font-face { font-family: "QATT Gothic Heavy"; src: url(font/qatt-gothic-heavy.woff2?v=1) format("woff2"), url(font/qatt-gothic-heavy.ttf?v=1) format("truetype"); }
+    @font-face { font-family: "QATT Gothic Bold"; src: url(font/qatt-gothic-bold.woff2?v=3) format("woff2"), url(font/qatt-gothic-bold.ttf?v=3) format("truetype"); }
     @font-face { font-family: "QATT Brush"; src: url(font/qatt-brush.woff2?v=6) format("woff2"), url(font/qatt-brush.ttf?v=6) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
@@ -60,7 +61,7 @@
 
   <div class="sticky-card">
   <div class="bar">
-    <label><select id="font" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Mincho" selected>Mincho</option><option value="QATT Gothic">Gothic</option><option value="QATT Gothic Heavy">Gothic heavy</option><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush-like</option></select></label>
+    <label><select id="font" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Mincho" selected>Mincho</option><option value="QATT Mincho Bold">Mincho bold</option><option value="QATT Gothic">Gothic</option><option value="QATT Gothic Bold">Gothic bold</option><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush-like</option></select></label>
     <label><select id="size" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"><option value="20">60%</option><option value="27">80%</option><option value="34" selected>100%</option><option value="41">120%</option><option value="51">150%</option><option value="68">200%</option><option value="102">300%</option><option value="136">400%</option></select></label>
     <label><input type="checkbox" id="guides" autocomplete="off" checked> Guides</label>
     <label><input type="checkbox" id="svg" autocomplete="off"> SVG</label>
