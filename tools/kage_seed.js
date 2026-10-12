@@ -41,15 +41,15 @@ function line(it, lib, others, isMark) {
   return curve(dx < 0 ? "2:0:7" : "2:7:8", a, b, 0);
 }
 // The paths of qatt.js are not exact: a stroke may end a little beside or short of another one, because a heavy pen hides that. KAGE
-// draws thin strokes, so the ends are put right first: nearly horizontal and vertical strokes become exact, and an end within TOL units
-// of another stroke moves onto it (along its own direction, so its angle is kept).
-const TOL = 5, AXIS = 2;
+// draws thin strokes, so the ends are put right first: nearly horizontal and vertical strokes become exact, and an end that falls short of
+// another stroke by up to TOL units moves onto it (along its own direction, so its angle is kept). Overshoots stay: overhangs are design.
+const TOL = 12, MARK_TOL = 5, AXIS = 2;
 const nearest = (p, o) => {
   const dx = o.b[0] - o.a[0], dy = o.b[1] - o.a[1], l2 = dx * dx + dy * dy || 1;
   const t = Math.max(0, Math.min(1, ((p[0] - o.a[0]) * dx + (p[1] - o.a[1]) * dy) / l2));
   return [o.a[0] + t * dx, o.a[1] + t * dy];
 };
-function exact(strokes, marks) {
+function exact(strokes, marks, id0) {
   const cp = it => it && { lib: it.lib, a: [...it.a], b: [...it.b] };
   const st = strokes.map(cp), mk = marks.map(cp), log = [];
   for (const it of [...st, ...mk.filter(Boolean)]) {
@@ -57,7 +57,7 @@ function exact(strokes, marks) {
     if (Math.abs(it.b[0] - it.a[0]) <= AXIS) it.a[0] = it.b[0] = (it.a[0] + it.b[0]) / 2;
   }
   // an end moves along its own stroke (its direction stays) to where that line meets another stroke, when that is within TOL
-  const snap = (it, k, others) => {
+  const snap = (it, k, others, tol) => {
     const p = it[k], q = it[k === "a" ? "b" : "a"], dx = p[0] - q[0], dy = p[1] - q[1];
     let best = null;
     for (const o of others) {
@@ -66,21 +66,21 @@ function exact(strokes, marks) {
       if (Math.abs(den) < 0.2 * Math.hypot(dx, dy) * ol) continue;           // nearly parallel
       const wx = o.a[0] - q[0], wy = o.a[1] - q[1];
       const t = (wx * oy - wy * ox) / den, u = (wx * dy - wy * dx) / den;     // q + t d = o.a + u (o.b - o.a)
-      if (u < -TOL / ol || u > 1 + TOL / ol || t <= 0) continue;
+      if (u < -tol / ol || u > 1 + tol / ol || t < 1) continue;       // only a gap is closed; an end that overshoots stays (an overhang is part of the design)
       const X = [q[0] + t * dx, q[1] + t * dy], d = Math.hypot(X[0] - p[0], X[1] - p[1]);
-      if (d <= TOL && (!best || d < best.d)) best = { d, X };
+      if (d <= tol && (!best || d < best.d)) best = { d, X };
     }
-    if (best && best.d > 0.05) { log.push(best.d); it[k] = best.X; }
+    if (best && best.d > 0.05) { log.push(best.d); if (process.env.KAGE_DEBUG) console.log(id0, k, "moved", Math.round(best.d * 10) / 10, it[k].map(Math.round), "->", best.X.map(Math.round)); it[k] = best.X; }
   };
-  for (const it of st) { snap(it, "a", st); snap(it, "b", st); }
-  for (const it of mk.filter(Boolean)) { snap(it, "a", st); snap(it, "b", st); }
+  for (const it of st) { snap(it, "a", st, TOL); snap(it, "b", st, TOL); }
+  for (const it of mk.filter(Boolean)) { snap(it, "a", st, MARK_TOL); snap(it, "b", st, MARK_TOL); }
   return { strokes: st, marks: mk, log };
 }
 
 const lib = M.DEF.lib, sym = {};
 let moved = 0;
 for (const s of SHAPES) for (const id of ["v2-" + s, `v2-${s}-small`, "v2c-" + s]) {
-  const sy = exact(M.symbolOf({ sym: {} }, id).strokes, M.symbolOf({ sym: {} }, id).marks);
+  const sy = exact(M.symbolOf({ sym: {} }, id).strokes, M.symbolOf({ sym: {} }, id).marks, id);
   moved += sy.log.length;
   sym[id] = { strokes: sy.strokes.map(it => line(it, lib, sy.strokes)), marks: sy.marks.map(it => it ? line(it, lib, sy.strokes, true) : null) };
 }
