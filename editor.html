@@ -92,6 +92,10 @@
 
     // decodings (readings of the rhyme table)
     for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
+    // a heading inside each dropdown
+    const group = (select, label) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.append(...select.options); select.append(g); select.value = value; };
+    group($('decoding'), 'Choose decoding');
+    group($('font'), 'Choose font');
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
 
     // size: 100% is 33 pixels
