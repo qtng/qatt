@@ -110,7 +110,7 @@ different on the left or on the right gets its own form: `v2l-X` (left half) and
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
 one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
 
-**Bold.** `--bold` (with `--kage`) makes the strokes 1.7 times as heavy: Gothic all strokes (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Mincho only the verticals (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Gothic Bold" and "QATT Mincho Bold":
+**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Mincho only the verticals, 2.0 times (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Gothic Bold" and "QATT Mincho Bold":
 
 ```sh
 python3 tools/build_font.py --kage font/kage.json --gothic --bold font/glyphs.json font/qatt-gothic-bold

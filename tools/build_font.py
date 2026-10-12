@@ -19,14 +19,15 @@ from fontTools.fontBuilder import FontBuilder
 LIGHT = 0.6
 light = '--light' in sys.argv
 if light: sys.argv.remove('--light')
-# --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Mincho verticals 1.7 times, its thin horizontals stay as they are; tones and marks 1.5 times
-BOLD = 1.7 if '--bold' in sys.argv else 1.0
-if '--bold' in sys.argv: sys.argv.remove('--bold')
+# --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Mincho verticals 2.0 times, its thin horizontals stay as they are; tones and marks 1.5 times
+BOLD_ON = '--bold' in sys.argv
+if BOLD_ON: sys.argv.remove('--bold')
 KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Mincho or Gothic
 if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'mincho'
     if '--gothic' in sys.argv: sys.argv.remove('--gothic')
+BOLD = (2.0 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
