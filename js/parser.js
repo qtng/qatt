@@ -209,7 +209,7 @@ class VietnameseParser {
                 }
                 // what is written after the onset, as in the spelling (the rhyme looked up in the decoding)
                 let spelling = temp.normalize('NFC');
-                if (res.onset == "qu") spelling = "u" + spelling;
+                if (res.onset == "qu") spelling = "u" + (spelling == "ôc" ? "âc" : spelling);   // special rule: quốc is treated like quấc
                 if (res.onset == "gi" && spelling == "") spelling = "i";
 
                 if (res.onset == "qu") {
