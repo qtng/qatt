@@ -59,10 +59,10 @@
 
   <div class="sticky-card">
   <div class="bar">
-    <label><select id="font" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Mincho" selected>Mincho</option><option value="QATT Gothic">Gothic</option><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush-like</option></select></label>
-    <label><select id="size" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"><option value="20">60%</option><option value="27">80%</option><option value="34" selected>100%</option><option value="41">120%</option><option value="51">150%</option><option value="68">200%</option><option value="102">300%</option><option value="136">400%</option></select></label>
-    <label><input type="checkbox" id="guides" checked> Guides</label>
-    <label><input type="checkbox" id="svg"> SVG</label>
+    <label><select id="font" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Mincho" selected>Mincho</option><option value="QATT Gothic">Gothic</option><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush-like</option></select></label>
+    <label><select id="size" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"><option value="20">60%</option><option value="27">80%</option><option value="34" selected>100%</option><option value="41">120%</option><option value="51">150%</option><option value="68">200%</option><option value="102">300%</option><option value="136">400%</option></select></label>
+    <label><input type="checkbox" id="guides" autocomplete="off"> Guides</label>
+    <label><input type="checkbox" id="svg" autocomplete="off"> SVG</label>
   </div>
 
   <div class="sample" id="sample" contenteditable="true" inputmode="none" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
@@ -165,13 +165,12 @@
 })();
 </script>
 <script>
-  // font choice: the stroked prototype, the brush font (font/qatt-brush, made with brush.html) or the Mincho and Gothic fonts (font/qatt-mincho, font/qatt-gothic, made with font-editor.html); kept in this browser
+  // font choice: the stroked prototype, the brush font (font/qatt-brush, made with brush.html) or the Mincho and Gothic fonts (font/qatt-mincho, font/qatt-gothic, made with font-editor.html)
   (() => {
     const sel = document.getElementById("font");
     const apply = () => document.documentElement.style.setProperty("--qfont", `"${sel.value}"`);
-    try { const v = localStorage.getItem("qatt-font2"); if ([...sel.options].some(o => o.value === v)) sel.value = v; } catch (e) { }
     apply();
-    sel.addEventListener("change", () => { apply(); try { localStorage.setItem("qatt-font2", sel.value); } catch (e) { } });
+    sel.addEventListener("change", apply);
   })();
 </script>
 </body>
