@@ -163,8 +163,13 @@ def make_glyphs():
             # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .leftlow, .rightlow for a joined pair)
             add(name + '.up', outline(ids, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
             add(name + '.low', outline(ids, STROKE_LOW, 1.0, 500, GROW, 1 - STACK_UP, STACK_BOTTOM))
-            add(name + '.leftlow', outline(letter_ids(g, 'left'), STROKE_LOW, PAIR_K, 500, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
-            add(name + '.rightlow', outline(letter_ids(g, 'right'), STROKE_LOW, PAIR_K, 0, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
+            if KAGE:   # the halves of the lower pair come from the left and right form like the halves of a pair, squeezed in y only
+                half = PAIR_T / 2
+                add(name + '.leftlow', outline(lids, STROKE_LOW, grow=GROW, v=1 - STACK_UP, anchor=STACK_BOTTOM, fit=(PAIR_M, PAIR_M + half)), ADV // 2)
+                add(name + '.rightlow', outline(rids, STROKE_LOW, grow=GROW, v=1 - STACK_UP, anchor=STACK_BOTTOM, fit=(500 - PAIR_M - half, 500 - PAIR_M)), ADV // 2)
+            else:
+                add(name + '.leftlow', outline(letter_ids(g, 'left'), STROKE_LOW, PAIR_K, 500, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
+                add(name + '.rightlow', outline(letter_ids(g, 'right'), STROKE_LOW, PAIR_K, 0, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
         if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
             pen = TTGlyphPen(None)
             outline(one(g['dm']), STROKE_MARK, 1.0, -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
