@@ -67,8 +67,8 @@
     for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
 
-    // size: the sample size of font.html is the number of pixels, the field shows 1.4 times as much
-    const applySize = () => { field.style.fontSize = Math.round($('size').value * 1.4) + 'px'; };
+    // size: the sample size of font.html is the number of pixels, the field shows 0.98 times as much
+    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.98) + 'px'; };
     $('size').addEventListener('input', applySize);
     applySize();
 
