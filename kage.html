@@ -137,7 +137,7 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
   }
   function detailViews() {
     const s = $("detail").dataset.s, set = marksOn;
-    $("d-views").innerHTML = '<div><svg class="edit" id="d-edit" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg><div class="cap">Edit: drag the dots (blue strokes, red marks); drag a line itself to move it whole; Alt = no snapping</div></div>' +
+    $("d-views").innerHTML = '<div><svg class="edit" id="d-edit" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg><div class="cap">Edit: drag the dots (blue strokes, red marks); drag a line itself to move it whole; a horizontal or vertical line stays so (hold Alt to tilt it, which also switches off snapping)</div></div>' +
       views(s, set).map(([n, g]) => `<div>${wrap(g)}<div class="cap">${n}</div></div>`).join("");
     drawEdit();
   }
@@ -174,7 +174,15 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
     if (!e.altKey) { dx = Math.round(dx * 2) / 2; dy = Math.round(dy * 2) / 2; }   // half units; hold Alt for free movement
     const L = { head: drag.L0.head, pts: drag.L0.pts.map(p => p.slice()) };
     if (drag.k === "m") L.pts.forEach(p => { p[0] += dx; p[1] += dy; });
-    else { const p = L.pts[+drag.k]; p[0] += dx; p[1] += dy; }
+    else {
+      const k = +drag.k, p = L.pts[k];
+      p[0] += dx; p[1] += dy;
+      // a straight horizontal line stays horizontal, a vertical one vertical (the other end follows); Alt frees it, curves are free anyway
+      if (!e.altKey && L.pts.length === 2 && L.head[0] === "1") {
+        if (Math.abs(drag.L0.pts[0][1] - drag.L0.pts[1][1]) < 0.05) L.pts[1 - k][1] = p[1];
+        else if (Math.abs(drag.L0.pts[0][0] - drag.L0.pts[1][0]) < 0.05) L.pts[1 - k][0] = p[0];
+      }
+    }
     const id = symId($("detail").dataset.s), sy = symData(id), str = lineStr(L);
     if (drag.it.kind === "s") sy.strokes[drag.it.i] = str; else sy.marks[drag.it.i] = str;
     edits[id] = sy; drag.it.l = str; save();
