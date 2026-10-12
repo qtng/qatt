@@ -29,6 +29,9 @@ const QattText = (() => {
     const on = split(onset), rh = rhyme === "" ? "" : split(rhyme);   // no rhyme: the shape alone (Hợp Thư ông)
     if (!on || rh === null) return null;
     const t = TONES[+tone || 0];
+    // onset and rhyme of the same shape (mô = m + m2): the marked shape alone is the whole syllable (vowel-initial syllables keep their pair)
+    const sameShape = onset !== "_" && rhyme && /^\D+[2-6]$/.test(rhyme) && !/\d/.test(onset) && rhyme.replace(/\d$/, "") === onset;
+    if (sameShape) return rh + (t ? chr(t) : "");
     return on + (rh ? chr(JOINER - BASE) + rh : "") + (t ? chr(t) : "");
   };
 
