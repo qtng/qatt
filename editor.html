@@ -96,10 +96,12 @@
     const group = (select, label) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.append(...select.options); select.append(g); select.value = value; };
     group($('decoding'), 'Choose decoding');
     group($('font'), 'Choose font');
+    $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Mincho)
+    $('font').dispatchEvent(new Event('change'));
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
 
-    // size: 100% is 33 pixels
-    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.33) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
+    // size: 100% is 36 pixels
+    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.363) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
     $('size').addEventListener('input', applySize);
     applySize();
 
