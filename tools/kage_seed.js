@@ -1,7 +1,7 @@
 // Seeds font/kage.json: the symbols of QATT in KAGE data (https://glyphwiki.org/wiki/GlyphWiki:KAGE データ仕様), one list of KAGE
 // lines for the strokes and one per mark, for the rhyme form (v2-X), the onset form (v2-X-small) and the centred form (v2c-X).
 // The seed is made from the standard stroke library of js/brush-model.js; refine the lines by hand afterwards (kage.html shows them).
-// Usage: node tools/kage_seed.js [font/kage.json]   (an existing file is only replaced with --force)
+// Usage: node tools/kage_seed.js [font/kage.json] [--force]   (an existing file is only replaced with --force)
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const root = path.join(__dirname, "..");
 const B = require(path.join(root, "js/brush.js")), Q = require(path.join(root, "js/brush-model.js"));
@@ -155,6 +155,25 @@ for (const s of SHAPES) for (const id of ["v2-" + s, `v2-${s}-small`, "v2c-" + s
   const sy = exact(M.symbolOf({ sym: {} }, id).strokes, M.symbolOf({ sym: {} }, id).marks, id);
   moved += sy.log.length;
   sym[id] = { strokes: sy.strokes.map(it => line(it, lib, sy.strokes)), marks: sy.marks.map(it => it ? line(it, lib, sy.strokes, true) : null) };
+}
+// Optional left forms (v2l-X) and right forms (v2r-X): the shape is made from the single form (v2c-X) by default; a symbol listed here gets its own
+// left form, a starting point to refine in kage.html. The lowest horizontal stroke of ong, dong, hong and bong is sloped up to its right end (and the
+// marks on that end move with it) so that it does not run into the next component.
+const LEFT_SLANT = ["_", "d", "h", "b"], SLANT = 5.7;      // kage units
+const nums = l => l.split(":").map(Number), join = f => f.slice(0, 3).join(":") + ":" + f.slice(3).map(v => Math.round(v * 10) / 10).join(":");
+for (const sh of LEFT_SLANT) {
+  const src = sym["v2c-" + sh], strokes = src.strokes.slice(), marks = src.marks.slice();
+  let low = -1, y = -Infinity;
+  strokes.forEach((l, i) => { const f = nums(l); if (f[0] === 1 && f.length === 7 && Math.abs(f[6] - f[4]) <= 0.3 * Math.abs(f[5] - f[3]) && Math.max(f[4], f[6]) > y) { y = Math.max(f[4], f[6]); low = i; } });
+  if (low < 0) continue;
+  const f = nums(strokes[low]), right = f[3] > f[5] ? 0 : 1;      // the end with the larger x
+  const ex = f[3 + 2 * right], ey = f[4 + 2 * right];
+  f[4 + 2 * right] -= SLANT; strokes[low] = join(f);
+  marks.forEach((m, i) => {                                      // a mark whose middle lies on that end goes up with it
+    if (!m) return; const g = nums(m); if (g.length !== 7 || Math.hypot((g[3] + g[5]) / 2 - ex, (g[4] + g[6]) / 2 - ey) > 1.5) return;
+    g[4] -= SLANT; g[6] -= SLANT; marks[i] = join(g);
+  });
+  sym["v2l-" + sh] = { strokes, marks };
 }
 fs.writeFileSync(out, JSON.stringify({ format: "qatt-kage", version: 1, scale: S, sym }, null, 1).replace(/\n\s+("[^"\n]*"|null),?(?=\n)/g, m => m.trim() ? " " + m.trim() : m));
 console.log("wrote", out, Object.keys(sym).length, "symbols;", moved, "ends moved onto other strokes");

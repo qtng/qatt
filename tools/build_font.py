@@ -35,6 +35,11 @@ ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
+PAIR_GROW = 1.18               # size of a pair (the Can/Chi forms are GROW)
+PAIR_M, PAIR_G = 75, 90        # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
+PAIR_T = 1000 - 2 * PAIR_M - PAIR_G   # what the two halves share
+SPLITS = (45, 50, 55)          # KAGE fonts: share of the left half in per cent; the halves are fitted into these boxes by KAGE
+PAIR_K = float(os.environ.get('PAIR_K', PAIR_K)); PAIR_GROW = float(os.environ.get('PAIR_GROW', PAIR_GROW))
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
@@ -72,9 +77,11 @@ def onset_map(shape):
     sx, sy = (c1 - c0) / (a1 - a0), (d1 - d0) / (b1 - b0)
     return sx, sy, c0 - a0 * sx, d0 - b0 * sy
 
-def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.27):
+def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.27, fit=None, ink=False):
     """Stroke the paths (qatt.js ids) into one outline; k squeezes horizontally, centre is the x the svg x `cx` goes to,
-    grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`."""
+    grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`. KAGE fonts only: fit=(left, right)
+    in font units fits the outline into that box (the strokes are scaled and moved in x, the stroke widths stay); ink=True answers the
+    width of the outline in font units (None until the first run has asked for it)."""
     out = pathops.Path()
     kx = SX * k * grow
     f = Y0 - GROW_Y * SY * (1 - grow)
@@ -87,9 +94,14 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
         ids, u = tuple(ids), SY * grow
         key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
                round(width / STROKE if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
+        if fit: key += (round(fit[0] / u, 4), round(fit[1] / u, 4))
+        if ink: key += ('ink',)
         if key not in RESULTS:
             JOBS[key] = {'ids': list(ids), 'm': list(key[1:5]), 'w': key[5]}
-            return out
+            if fit: JOBS[key]['fit'] = [key[6], key[7]]
+            if ink: JOBS[key]['ink'] = True
+            return None if ink else out
+        if ink: return (RESULTS[key][1] - RESULTS[key][0]) * u
         p = pathops.Path()
         parse_path(RESULTS[key], TransformPen(p.getPen(), (u, 0, 0, -u, 0, 0)))
         p.draw(out.getPen())
@@ -108,8 +120,8 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
     return out
 
 def make_glyphs():
-    global glyphs, cmap, order, adv, halves, tones
-    glyphs, cmap, order, adv, halves, tones = {}, {}, ['.notdef'], {}, [], []
+    global glyphs, cmap, order, adv, halves, tones, master_w
+    glyphs, cmap, order, adv, halves, tones, master_w = {}, {}, ['.notdef'], {}, [], [], {}
     one = lambda ds: tuple(IDS[d][0] for d in ds)   # the tone paths (their data is unique)
 
     def add(name, path, advance=None):
@@ -134,8 +146,19 @@ def make_glyphs():
             # component joiner: the onset form in the left half (.left), the rhyme form in the right half (.right), placed as in a
             # syllable of qatt.js; each is half a cell wide, so the right one is drawn half a cell to the left of its origin
             pair = (PAIR_X0 + PAIR_X1) / 2
-            add(name + '.left', outline(letter_ids(g, 'left'), STROKE_HALF, PAIR_K, 500, GROW, cx=pair), ADV // 2)
-            add(name + '.right', outline(letter_ids(g, 'right'), STROKE_HALF, PAIR_K, 0, GROW, cx=pair), ADV // 2)
+            if KAGE:
+                # the halves are made from the single form (or from the left / right form of the symbol if kage.json has one): KAGE draws it fitted into a box of the left or right half of the cell, in
+                # three splits (left half 45, 50 or 55 % of what the halves share); the font picks the split by the widths of both letters
+                mids = letter_ids(g, 'single')
+                master_w[name] = outline(mids, STROKE, grow=GROW, ink=True)
+                lids, rids = (tuple(re.sub(r'^v2c-', pre, i) for i in mids) for pre in ('v2l-', 'v2r-'))   # the left and right form of a symbol, if it has one (else the single form)
+                for sp in SPLITS:
+                    wl = PAIR_T * sp / 100; sfx = '' if sp == 50 else str(sp)
+                    add(name + '.left' + sfx, outline(lids, STROKE_HALF, grow=GROW, fit=(PAIR_M, PAIR_M + wl)), ADV // 2)
+                    add(name + '.right' + sfx, outline(rids, STROKE_HALF, grow=GROW, fit=(500 - PAIR_M - (PAIR_T - wl), 500 - PAIR_M)), ADV // 2)
+            else:
+                add(name + '.left', outline(letter_ids(g, 'left'), STROKE_HALF, PAIR_K, 500, PAIR_GROW, cx=pair), ADV // 2)
+                add(name + '.right', outline(letter_ids(g, 'right'), STROKE_HALF, PAIR_K, 0, PAIR_GROW, cx=pair), ADV // 2)
             halves.append(name)
             # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .leftlow, .rightlow for a joined pair)
             add(name + '.up', outline(ids, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
@@ -178,30 +201,55 @@ fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
+# KAGE fonts: the letters in three classes by the width of their single form (thirds); a narrow letter on the left of a wide one gets a
+# smaller left half (split 45) and the other way round (55), all other pairs 50/50
+ws = sorted(w for w in master_w.values() if w) if KAGE else []
+if ws:
+    t1, t2 = ws[len(ws) // 3], ws[2 * len(ws) // 3]
+    wcls = {n: 'N' if master_w[n] < t1 else 'W' if master_w[n] >= t2 else 'M' for n in halves}
+    print('width classes: narrow < %d <= mid < %d <= wide (font units); counts' % (t1, t2), {c: sum(1 for v in wcls.values() if v == c) for c in 'NMW'})
+cls = lambda c: ' '.join(n for n in halves if wcls[n] == c) if ws else ''
+LA, RA, LL, RL, join_first = '@LEFT', '@RIGHT', '@LEFTLOW', '@RIGHTLOW', ''
+kage_fea = ''
+if ws:
+    LA, RA, LL, RL = '@LEFT @LEFT45 @LEFT55', '@RIGHT @RIGHT45 @RIGHT55', '@LEFTLOW @LEFTLOW @LEFTLOW', '@RIGHTLOW @RIGHTLOW @RIGHTLOW'
+    join_first = f"sub @FULL_N' lookup LEFT45 {jname}' lookup JOINER_ZW @FULL_W' lookup RIGHT45; sub @FULL_W' lookup LEFT55 {jname}' lookup JOINER_ZW @FULL_N' lookup RIGHT55;"
+    kage_fea = f'''
+@FULL_N = [{cls('N')}];
+@FULL_W = [{cls('W')}];
+@LEFT45 = [{' '.join(n + '.left45' for n in halves)}];
+@RIGHT45 = [{' '.join(n + '.right45' for n in halves)}];
+@LEFT55 = [{' '.join(n + '.left55' for n in halves)}];
+@RIGHT55 = [{' '.join(n + '.right55' for n in halves)}];
+lookup LEFT45 {{ sub @FULL by @LEFT45; }} LEFT45;
+lookup RIGHT45 {{ sub @FULL by @RIGHT45; }} RIGHT45;
+lookup LEFT55 {{ sub @FULL by @LEFT55; }} LEFT55;
+lookup RIGHT55 {{ sub @FULL by @RIGHT55; }} RIGHT55;
+'''
 addOpenTypeFeaturesFromString(fb.font, f'''
 @FULL = [{' '.join(halves)}];
 @LEFT = [{' '.join(n + '.left' for n in halves)}];
-@RIGHT = [{' '.join(n + '.right' for n in halves)}];
+@RIGHT = [{' '.join(n + '.right' for n in halves)}];{kage_fea}
 @UP = [{' '.join(n + '.up' for n in halves)}];
 @LOW = [{' '.join(n + '.low' for n in halves)}];
 @LEFTLOW = [{' '.join(n + '.leftlow' for n in halves)}];
 @RIGHTLOW = [{' '.join(n + '.rightlow' for n in halves)}];
 @TONE = [{' '.join(tones)}];
 @TONE_MARK = [{' '.join(n + '.mark' for n in tones)}];
-@BEFORE_TONE = [@FULL @LEFT @RIGHT @UP @TONE_MARK {cname} {cname}.zw {jname} {jname}.zw];
+@BEFORE_TONE = [@FULL {LA} {RA} @UP @TONE_MARK {cname} {cname}.zw {jname} {jname}.zw];
 lookup LEFT {{ sub @FULL by @LEFT; }} LEFT;
 lookup RIGHT {{ sub @FULL by @RIGHT; }} RIGHT;
 lookup JOINER_ZW {{ sub {jname} by {jname}.zw; }} JOINER_ZW;
 lookup UPPER {{ sub @FULL by @UP; }} UPPER;
 lookup LOWER {{ sub @FULL by @LOW; }} LOWER;
-lookup LEFT_LOWER {{ sub @LEFT by @LEFTLOW; }} LEFT_LOWER;
-lookup RIGHT_LOWER {{ sub @RIGHT by @RIGHTLOW; }} RIGHT_LOWER;
+lookup LEFT_LOWER {{ sub [{LA}] by [{LL}]; }} LEFT_LOWER;
+lookup RIGHT_LOWER {{ sub [{RA}] by [{RL}]; }} RIGHT_LOWER;
 lookup COMBINER_ZW {{ sub {cname} by {cname}.zw; }} COMBINER_ZW;
 lookup TONE_MARK {{ sub @TONE by @TONE_MARK; }} TONE_MARK;
-lookup JOIN {{ sub @FULL' lookup LEFT {jname}' lookup JOINER_ZW @FULL' lookup RIGHT; }} JOIN;
+lookup JOIN {{ {join_first} sub @FULL' lookup LEFT {jname}' lookup JOINER_ZW @FULL' lookup RIGHT; }} JOIN;
 lookup STACK {{
-    sub @LEFT' lookup LEFT_LOWER {jname}.zw @RIGHT {cname} @FULL;
-    sub [@LEFT @LEFTLOW] {jname}.zw @RIGHT' lookup RIGHT_LOWER {cname} @FULL;
+    sub [{LA}]' lookup LEFT_LOWER {jname}.zw [{RA}] {cname} @FULL;
+    sub [{LA} @LEFTLOW] {jname}.zw [{RA}]' lookup RIGHT_LOWER {cname} @FULL;
     sub @LEFTLOW {jname}.zw @RIGHTLOW {cname}' lookup COMBINER_ZW @FULL' lookup UPPER;
     sub @FULL' lookup LOWER {cname}' lookup COMBINER_ZW @FULL' lookup UPPER;
 }} STACK;
