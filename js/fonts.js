@@ -8,8 +8,8 @@ The script defines the @font-face rules itself and fills these selects when it r
 After a font file changes, raise its version `v` here (browser cache).
 */
 const QATT_FONTS = [
-  { family: "QATT Mincho",          label: "Mincho",          file: "qatt-mincho",          v: 10, default: true },
-  { family: "QATT Mincho Bold",     label: "Mincho bold",     file: "qatt-mincho-bold",     v: 5 },
+  { family: "QATT Serif",          label: "Serif",          file: "qatt-serif",          v: 10, default: true },
+  { family: "QATT Serif Bold",     label: "Serif bold",     file: "qatt-serif-bold",     v: 5 },
   { family: "QATT Gothic",          label: "Gothic",          file: "qatt-gothic",          v: 6 },
   { family: "QATT Gothic Bold",     label: "Gothic bold",     file: "qatt-gothic-bold",     v: 3 },
   { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide",     v: 2 },

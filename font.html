@@ -19,7 +19,7 @@
     .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
     .bar label.grow { flex: 1 1 4rem; min-width: 0; }
     .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; min-height: 3.4rem;
-      font-family: var(--qfont, "QATT Mincho"); font-size: 3rem; line-height: 1; word-break: break-all; white-space: pre-wrap; color: var(--ink); }
+      font-family: var(--qfont, "QATT Serif"); font-size: 3rem; line-height: 1; word-break: break-all; white-space: pre-wrap; color: var(--ink); }
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
     .keys { display: flex; justify-content: space-between; gap: .4rem; margin-top: .45rem; }
     .keys .btn { flex: 1 1 0; }
@@ -29,7 +29,7 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
     .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
     .cell:hover { border-color: var(--accent); }
-    .cell .f { font-family: var(--qfont, "QATT Mincho"); font-size: var(--size, 4rem); line-height: 1.15; display: block; padding-bottom: .16em; }
+    .cell .f { font-family: var(--qfont, "QATT Serif"); font-size: var(--size, 4rem); line-height: 1.15; display: block; padding-bottom: .16em; }
     .cell .s { display: block; height: 1.8rem; line-height: 1.8rem; font-size: .8rem; color: var(--muted); }
     .cell .s svg { stroke: currentColor; }
     .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
@@ -50,7 +50,7 @@
      Click a character to add it to the sample field.</p>
   <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
 
-  <p><strong>How the fonts are made.</strong> The Mincho and Gothic fonts are drawn from stroke data that can be refined in the <a href="font-editor.html">glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
+  <p><strong>How the fonts are made.</strong> The Serif and Gothic fonts are drawn from stroke data that can be refined in the <a href="font-editor.html">glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
 
   <div class="sticky-card">
   <div class="bar">
