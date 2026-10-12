@@ -1,5 +1,5 @@
 // Seeds font/kage.json: the symbols of QATT in KAGE data (https://glyphwiki.org/wiki/GlyphWiki:KAGE データ仕様), one list of KAGE
-// lines for the strokes and one per mark, for the rhyme form (v2-X), the onset form (v2-X-small) and the centred form (v2c-X).
+// lines for the strokes and one per mark, for the single form (v2c-X) of every symbol; the halves of a joined pair and of a stack are made from it.
 // The seed is made from the standard stroke library of js/brush-model.js; refine the lines by hand afterwards (kage.html shows them).
 // Usage: node tools/kage_seed.js [font/kage.json] [--force]   (an existing file is only replaced with --force)
 const fs = require("fs"), path = require("path"), vm = require("vm");
@@ -151,7 +151,7 @@ function exact(strokes, marks, id0) {
 
 const lib = M.DEF.lib, sym = {};
 let moved = 0;
-for (const s of SHAPES) for (const id of ["v2-" + s, `v2-${s}-small`, "v2c-" + s]) {
+for (const s of SHAPES) for (const id of ["v2c-" + s]) {
   const sy = exact(M.symbolOf({ sym: {} }, id).strokes, M.symbolOf({ sym: {} }, id).marks, id);
   moved += sy.log.length;
   sym[id] = { strokes: sy.strokes.map(it => line(it, lib, sy.strokes)), marks: sy.marks.map(it => it ? line(it, lib, sy.strokes, true) : null) };
