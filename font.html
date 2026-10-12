@@ -8,8 +8,8 @@
   <style>
     @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=18) format("woff2"), url(font/qatt-prototype.ttf?v=18) format("truetype"); }
     @font-face { font-family: "QATT Prototype Light"; src: url(font/qatt-prototype-light.woff2?v=1) format("woff2"), url(font/qatt-prototype-light.ttf?v=1) format("truetype"); }
-    @font-face { font-family: "QATT Mincho"; src: url(font/qatt-mincho.woff2?v=2) format("woff2"), url(font/qatt-mincho.ttf?v=2) format("truetype"); }
-    @font-face { font-family: "QATT Gothic"; src: url(font/qatt-gothic.woff2?v=1) format("woff2"), url(font/qatt-gothic.ttf?v=1) format("truetype"); }
+    @font-face { font-family: "QATT Mincho"; src: url(font/qatt-mincho.woff2?v=4) format("woff2"), url(font/qatt-mincho.ttf?v=4) format("truetype"); }
+    @font-face { font-family: "QATT Gothic"; src: url(font/qatt-gothic.woff2?v=3) format("woff2"), url(font/qatt-gothic.ttf?v=3) format("truetype"); }
     @font-face { font-family: "QATT Brush"; src: url(font/qatt-brush.woff2?v=4) format("woff2"), url(font/qatt-brush.ttf?v=4) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
@@ -22,7 +22,6 @@
     .bar { display: flex; gap: .6rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
     .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
     .bar label.grow { flex: 1 1 4rem; min-width: 0; }
-    .bar input[type=range] { flex: 1 1 2rem; min-width: 2rem; width: 100%; }
     .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; min-height: 3.4rem;
       font-family: var(--qfont, "QATT Prototype"); font-size: 3rem; line-height: 1.3; word-break: break-all; color: var(--ink); }
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
@@ -56,8 +55,8 @@
 
   <div class="sticky-card">
   <div class="bar">
-    <label><select id="font" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush</option><option value="QATT Mincho">Mincho (KAGE)</option><option value="QATT Gothic">Gothic (KAGE)</option></select></label>
-    <label class="grow">Size <input type="range" id="size" min="20" max="140" value="34"></label>
+    <label><select id="font" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush</option><option value="QATT Mincho">Mincho</option><option value="QATT Gothic">Gothic</option></select></label>
+    <label><select id="size" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"><option value="20">60%</option><option value="27">80%</option><option value="34" selected>100%</option><option value="41">120%</option><option value="51">150%</option><option value="68">200%</option><option value="102">300%</option><option value="136">400%</option></select></label>
     <label><input type="checkbox" id="svg"> show qatt.js drawing</label>
   </div>
 

@@ -34,6 +34,7 @@
     .detail .views svg { width: 15rem; height: 15rem; border: 1px solid var(--line); background: #fff; }
     .detail .views svg g { fill: var(--ink); }
     .detail textarea { width: 100%; font: .78rem/1.35 ui-monospace, Menlo, monospace; height: 9rem; margin-top: .6rem; }
+    #d-free[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: #fff; }
     .detail .cap { font-size: .75rem; color: var(--muted); text-align: center; }
     .detail .views svg.edit { width: 24rem; height: 24rem; touch-action: none; cursor: crosshair; }
     .detail .views svg.edit g.glyph { fill: #cfc4ae; }
@@ -54,10 +55,10 @@
 <main>
   <h1>QATT glyphs with KAGE</h1>
   <p>The symbols drawn by the <a href="https://github.com/kurgm/kage-engine">KAGE engine</a> (glyph outlines from stroke data, as on GlyphWiki), next to the brush outlines of the
-    <a href="brush.html">brush editor</a>. Click a cell to see it large; drag the dots and lines to edit its KAGE data. Prototype.</p>
+    <a href="brush.html">brush editor</a>. Click a cell to see it large; drag the dots and lines to edit its KAGE data. The fonts make the halves of a joined pair from the single form; a symbol can have its own left or right form where it needs to look different. Prototype.</p>
   <div class="bar">
     <label>Form <select id="form" class="form-select form-select-sm">
-      <option value="v2-">Rhyme</option><option value="v2-s">Onset</option><option value="v2c-">Centred</option>
+      <option value="v2c-">Single (centred)</option><option value="v2l-">Left (optional)</option><option value="v2r-">Right (optional)</option><option value="v2-">Rhyme (stack)</option><option value="v2-s">Onset (stack)</option>
     </select></label>
     <span>Marks</span><span class="marks" id="marks"></span>
     <label>Mincho thin <input type="range" id="minY" min="0.5" max="6" step="0.1" value="2"></label>
@@ -70,7 +71,7 @@
   <table id="tbl"></table>
 </main>
 <div class="detail" id="detail" hidden><div class="box">
-  <div class="d-flex justify-content-between align-items-center"><b id="d-title"></b><span><button class="btn btn-sm btn-outline-secondary me-1" id="d-reset">Reset this symbol</button><button class="btn btn-sm btn-outline-secondary" id="d-close">Close</button></span></div>
+  <div class="d-flex justify-content-between align-items-center"><b id="d-title"></b><span><button class="btn btn-sm btn-outline-secondary me-1" id="d-free" aria-pressed="false" title="Let horizontal and vertical lines be tilted">Unlock axes</button><button class="btn btn-sm btn-outline-secondary me-1" id="d-reset">Reset this symbol</button><button class="btn btn-sm btn-outline-secondary" id="d-close">Close</button></span></div>
   <div class="views" id="d-views"></div>
   <textarea id="d-text" spellcheck="false"></textarea>
   <div class="cap">One KAGE line per stroke; the first lines are the strokes, then the marks 1–6 (the medial for the onset form). Changes apply while you type.</div>
@@ -85,7 +86,10 @@
   const M = QattBrushModel(QattBrush, SHAPES, ORIG);
   const $ = id => document.getElementById(id);
   const S = 1.9;
-  let seed = null, brush = null, edits = {}, form = "v2-", marksOn = new Set();
+  let seed = null, brush = null, edits = {}, form = "v2c-", marksOn = new Set();
+  // the left and right form of a symbol are optional: without data they are the single form (the joined pairs of the fonts are made from them)
+  const getSym = id => edits[id] || seed.sym[id] || seed.sym[id.replace(/^v2[lr]-/, "v2c-")];
+  const derived = id => /^v2[lr]-/.test(id) && !edits[id] && !seed.sym[id];
   try { edits = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { edits = {}; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(edits)); } catch (e) { /* ignore */ } };
   const symId = s => form === "v2-s" ? `v2-${s}-small` : form + s;
@@ -101,7 +105,7 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
   return hit ? "1:" + f[1] + ":2:" + f.slice(3).join(":") : l;
 });
   function kageSvg(id, shotai, markSet) {
-    const sy = edits[id] || seed.sym[id];
+    const sy = getSym(id);
     const marks = sy.marks.filter((m, i) => m && markSet.has(i));
     const lines = plainEnds(sy.strokes, marks).concat(marks);
     const k = new Kage();
@@ -112,7 +116,8 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
     return p.generateSVG().replace(/^<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
   }
   function brushSvg(s, markSet) {
-    const ids = [symId(s)].concat(markIds(s).filter((m, i) => markSet.has(i)));
+    const bf = f => f.replace(/^v2[lr]-/, "v2c-");        // the brush editor knows no left and right forms
+    const ids = [bf(symId(s))].concat(markIds(s).map(bf).filter((m, i) => markSet.has(i)));
     const state = { params: brush.params, lib: brush.lib, sym: brush.sym || {} };
     return `<g transform="scale(${S})">` + ids.map(i => `<path d="${M.outline(state, i)}"/>`).join("") + "</g>";
   }
@@ -122,23 +127,23 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
   function render() {
     const set = marksOn;
     $("tbl").innerHTML = "<tr><th></th><th>Brush editor</th><th>KAGE Mincho</th><th>KAGE Gothic</th></tr>" + SHAPES.map(s =>
-      `<tr><td class="name">${s === "_" ? "z" : s}</td>` + views(s, set).map(([n, g]) => `<td data-s="${s}" class="${edits[symId(s)] && n !== "Brush" ? "edited" : ""}">${wrap(g)}</td>`).join("") + "</tr>").join("");
+      `<tr><td class="name">${s === "_" ? "z" : s}</td>` + views(s, set).map(([n, g]) => `<td data-s="${s}" class="${(edits[symId(s)] || (/^v2[lr]-/.test(symId(s)) && seed.sym[symId(s)])) && n !== "Brush" ? "edited" : ""}">${wrap(g)}</td>`).join("") + "</tr>").join("");
   }
   function openDetail(s) {
-    const id = symId(s), sy = edits[id] || seed.sym[id];
-    $("d-title").textContent = `${id}  (${s === "_" ? "z" : s})`;
+    const id = symId(s), sy = getSym(id);
+    $("d-title").textContent = `${id}  (${s === "_" ? "z" : s})` + (derived(id) ? " — no own form yet: it is the single form; edit it to make one" : "");
     $("d-text").value = sy.strokes.concat(sy.marks.map(m => m || "")).join("\n");
     $("detail").hidden = false; $("detail").dataset.s = s;
     detailViews();
   }
   function detailViews() {
     const s = $("detail").dataset.s, set = marksOn;
-    $("d-views").innerHTML = '<div><svg class="edit" id="d-edit" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg><div class="cap">Edit: drag the dots (blue strokes, red marks); drag a line itself to move it whole; Alt = no snapping</div></div>' +
+    $("d-views").innerHTML = '<div><svg class="edit" id="d-edit" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg><div class="cap">Edit: drag the dots (blue strokes, red marks); drag a line itself to move it whole; a horizontal or vertical line stays so ("Unlock axes" or Alt lets you tilt it; Alt also switches off snapping)</div></div>' +
       views(s, set).map(([n, g]) => `<div>${wrap(g)}<div class="cap">${n}</div></div>`).join("");
     drawEdit();
   }
   // ---- editing by dragging -------------------------------------------------------------
-  const symData = id => { const sy = edits[id] || seed.sym[id]; return { strokes: sy.strokes.slice(), marks: sy.marks.slice() }; };
+  const symData = id => { const sy = getSym(id); return { strokes: sy.strokes.slice(), marks: sy.marks.slice() }; };
   const parseLine = l => { const f = l.split(":"); return { head: f.slice(0, 3), pts: Array.from({ length: (f.length - 3) / 2 }, (_, i) => [+f[3 + 2 * i], +f[4 + 2 * i]]) }; };
   const fmt = v => String(Math.round(v * 10) / 10);
   const lineStr = L => L.head.join(":") + ":" + L.pts.map(p => fmt(p[0]) + ":" + fmt(p[1])).join(":");
@@ -157,7 +162,8 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
     const h = `<g class="glyph">${kageSvg(id, "mincho", set)}</g><path class="guide" d="M100 0V200M0 100H200"/>` + rings + dots;
     svg.innerHTML = h; svg._items = items;
   }
-  let drag = null;
+  let drag = null, axesFree = false;
+  $("d-free").onclick = e => { axesFree = !axesFree; e.currentTarget.setAttribute("aria-pressed", axesFree); };
   function point(svg, e) { const m = svg.getScreenCTM().inverse(); return new DOMPoint(e.clientX, e.clientY).matrixTransform(m); }
   document.addEventListener("pointerdown", e => {
     const c = e.target.closest && e.target.closest("#d-edit .h"); if (!c) return;
@@ -170,7 +176,15 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
     if (!e.altKey) { dx = Math.round(dx * 2) / 2; dy = Math.round(dy * 2) / 2; }   // half units; hold Alt for free movement
     const L = { head: drag.L0.head, pts: drag.L0.pts.map(p => p.slice()) };
     if (drag.k === "m") L.pts.forEach(p => { p[0] += dx; p[1] += dy; });
-    else { const p = L.pts[+drag.k]; p[0] += dx; p[1] += dy; }
+    else {
+      const k = +drag.k, p = L.pts[k];
+      p[0] += dx; p[1] += dy;
+      // a straight horizontal line stays horizontal, a vertical one vertical (the other end follows); Alt or the button frees it, curves are free anyway
+      if (!e.altKey && !axesFree && L.pts.length === 2 && L.head[0] === "1") {
+        if (Math.abs(drag.L0.pts[0][1] - drag.L0.pts[1][1]) < 0.05) L.pts[1 - k][1] = p[1];
+        else if (Math.abs(drag.L0.pts[0][0] - drag.L0.pts[1][0]) < 0.05) L.pts[1 - k][0] = p[0];
+      }
+    }
     const id = symId($("detail").dataset.s), sy = symData(id), str = lineStr(L);
     if (drag.it.kind === "s") sy.strokes[drag.it.i] = str; else sy.marks[drag.it.i] = str;
     edits[id] = sy; drag.it.l = str; save();
@@ -185,7 +199,7 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
     document.querySelectorAll("#d-views > div:not(:first-child) svg").forEach((svg, i) => { svg.innerHTML = vs[i][1]; });
   }
   $("d-text").addEventListener("input", () => {
-    const s = $("detail").dataset.s, id = symId(s), nStr = seed.sym[id].strokes.length;
+    const s = $("detail").dataset.s, id = symId(s), nStr = getSym(id).strokes.length;
     const l = $("d-text").value.split("\n");
     edits[id] = { strokes: l.slice(0, nStr).filter(x => x.trim()), marks: l.slice(nStr).map(x => x.trim() || null) };
     save(); detailViews(); render();
