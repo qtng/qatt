@@ -27,7 +27,7 @@ if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'mincho'
     if '--gothic' in sys.argv: sys.argv.remove('--gothic')
-WIDE = 1.5 if '--wide' in sys.argv else 1.0     # --wide (with --kage): a joined pair is 1.5 cells wide, so its halves need no squeezing
+WIDE = 1.25 if '--wide' in sys.argv else 1.0    # --wide (with --kage): a joined pair is 1.25 cells wide, so its halves are squeezed less
 if '--wide' in sys.argv: sys.argv.remove('--wide')
 BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]

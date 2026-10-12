@@ -117,7 +117,7 @@ python3 tools/build_font.py --kage font/kage.json --gothic --bold font/glyphs.js
 python3 tools/build_font.py --kage font/kage.json --bold font/glyphs.json font/qatt-mincho-bold
 ```
 
-**Wide.** `--wide` (with `--kage`) makes a joined pair 1.5 cells wide (each half 750 units instead of 500), so its halves are not squeezed; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Gothic Wide":
+**Wide.** `--wide` (with `--kage`) makes a joined pair 1.25 cells wide (each half 625 units instead of 500), so its halves are squeezed less; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Gothic Wide":
 
 ```sh
 python3 tools/build_font.py --kage font/kage.json --gothic --wide font/glyphs.json font/qatt-gothic-wide
