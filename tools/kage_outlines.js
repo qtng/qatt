@@ -39,6 +39,15 @@ function onsetMap(shape) {                       // the box of the rhyme form on
   const sx = (c1 - c0) / (a1 - a0), sy = (d1 - d0) / (b1 - b0);
   return ([x, y]) => [c0 + (x - a0) * sx, d0 + (y - b0) * sy];
 }
+// a horizontal stroke that ends on a mark (the bar of a T) gets a plain end instead of the triangle while that mark is drawn
+const plainEnds = (strokes, marks) => strokes.map(l => {
+  const f = l.split(":").map(Number);
+  if (f[0] !== 1 || f[2] !== 0 || f.length !== 7 || f[4] !== f[6]) return l;
+  const hit = marks.some(m => { const g = m.split(":").map(Number), n = g.length; if (g[0] !== 1 || n !== 7) return false;
+    const dx = g[5] - g[3], dy = g[6] - g[4], l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((f[5] - g[3]) * dx + (f[6] - g[4]) * dy) / l2));
+    return Math.hypot(g[3] + t * dx - f[5], g[4] + t * dy - f[6]) < 1.5; });
+  return hit ? "1:" + f[1] + ":2:" + f.slice(3).join(":") : l;
+});
 function linesOf(id) {
   const onset = id.endsWith("@onset"), base = onset ? id.slice(0, -6) : id, t = target(base), sy = SYM[t.sym];
   if (!sy) throw new Error("no KAGE symbol " + t.sym);
@@ -51,12 +60,14 @@ function linesOf(id) {
 const out = JSON.parse(fs.readFileSync(jobsFile, "utf8")).map(({ ids, m, w }) => {
   // move the lines: kage units -> svg units -> the matrix -> kage units again (so the widths below keep their meaning)
   const f = ([x, y]) => { const X = m[0] * (x / S) + m[2], Y = m[1] * (y / S) + m[3]; return [X * S, Y * S]; };
-  const lines = ids.flatMap(linesOf).map(l => withPts(l, ptsOf(l).map(f).map(p => p.map(v => Math.round(v * 1000) / 1000))));
+  const all = ids.map(id => ({ mark: target(id.replace(/@onset$/, "")).mark !== undefined, ls: linesOf(id) }));
+  const strokes = all.filter(x => !x.mark).flatMap(x => x.ls), marks = all.filter(x => x.mark).flatMap(x => x.ls);
+  const lines = plainEnds(strokes, marks).concat(marks).map(l => withPts(l, ptsOf(l).map(f).map(p => p.map(v => Math.round(v * 1000) / 1000))));
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
   if (style === "gothic") F.kWidth *= w * 0.9;
-  else { F.kMinWidthY *= w * 1.2; F.kMinWidthT *= w * 0.75; F.kWidth *= w * 0.75; }
+  else { F.kMinWidthY *= w * 1.2; F.kMinWidthT *= w * 0.75; F.kWidth *= w * 0.75; F.kMinWidthU = 5 * w; }   // kMinWidthU: the triangles at the open ends of the horizontals
   k.kBuhin.push("g", lines.join("$"));
   const polys = new Kage.Polygons(); k.makeGlyph(polys, "g");
   let d = "";
