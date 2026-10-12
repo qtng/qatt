@@ -19,9 +19,9 @@ from fontTools.fontBuilder import FontBuilder
 LIGHT = 0.6
 light = '--light' in sys.argv
 if light: sys.argv.remove('--light')
-# --heavy (KAGE fonts): strokes 1.7 times the standard Gothic (the glyph editor's slider goes up to 2.4 times; that closes the gaps of dense glyphs), tones and marks 1.5 times
-HEAVY = 1.7 if '--heavy' in sys.argv else 1.0
-if '--heavy' in sys.argv: sys.argv.remove('--heavy')
+# --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Mincho verticals 1.7 times, its thin horizontals stay as they are; tones and marks 1.5 times
+BOLD = 1.7 if '--bold' in sys.argv else 1.0
+if '--bold' in sys.argv: sys.argv.remove('--bold')
 KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Mincho or Gothic
 if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
@@ -52,7 +52,7 @@ BRUSH_WEIGHT = 0.8             # the brush font: weight of the brush.html export
 if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
     BRUSH_WEIGHT *= LIGHT
-if HEAVY != 1.0: STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
+if BOLD != 1.0: STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
 GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
@@ -97,7 +97,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
         ids, u = tuple(ids), SY * grow
         key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
-               round(width / STROKE * HEAVY if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
+               round(width / STROKE if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
         if fit: key += (round(fit[0] / u, 4), round(fit[1] / u, 4))
         if ink: key += ('ink',)
         if key not in RESULTS:
@@ -198,7 +198,7 @@ if BRUSH or KAGE:   # the outlines requested by the first run, then the glyphs a
         jobs, out = os.path.join(tmp, 'jobs.json'), os.path.join(tmp, 'out.json')
         json.dump(list(JOBS.values()), open(jobs, 'w'))
         here = os.path.dirname(os.path.abspath(__file__))
-        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE] if KAGE else ['node', os.path.join(here, 'brush_outlines.js'), BRUSH, jobs, out], check=True)
+        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE, str(BOLD)] if KAGE else ['node', os.path.join(here, 'brush_outlines.js'), BRUSH, jobs, out], check=True)
         RESULTS.update(zip(JOBS.keys(), json.load(open(out))))
     make_glyphs()
 jname = 'u%05X' % (BASE + JOINER)
@@ -218,7 +218,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Heavy' if HEAVY != 1.0 else ''), 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
