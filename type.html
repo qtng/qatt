@@ -81,14 +81,14 @@
     // the word that ends right before position `end` is replaced by its QATT characters (if there are any)
     const convertBefore = end => {
       const m = WORD_END.exec(field.value.slice(0, end));
-      if (!m) return 0;
+      if (!m) return false;
       const text = QattText.word(m[0], parser);
-      if (!text) return 0;
+      if (!text) return false;
       const start = end - m[0].length, caret = field.selectionStart;
       field.setRangeText(text, start, end, 'end');
       const at = caret + text.length - m[0].length;
       field.setSelectionRange(at, at);
-      return text.length - m[0].length;
+      return true;
     };
 
     // ---------- keeping the cells whole ----------
@@ -158,11 +158,13 @@
       lastPos = field.selectionStart;
     };
 
-    // the character just typed ends the word before it
+    // the character just typed (space, Enter, ...) ends the word before it; when the word was converted, that character is swallowed
     const flush = length => {
       const pos = field.selectionStart;
       if (pos !== field.selectionEnd || pos < length) return;
-      if (NOT_LETTER.test(field.value.slice(pos - length, pos))) convertBefore(pos - length);
+      if (!NOT_LETTER.test(field.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
+      const at = field.selectionStart;
+      field.setRangeText('', at - length, at, 'end');
     };
     field.addEventListener('input', e => {
       if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1);
