@@ -99,7 +99,7 @@ standard stroke library of the brush editor (this overwrites hand edits). Edits 
 
 **KAGE font.** With `--kage font/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
 `js/kage-engine.min.js` in Node.js) from the KAGE data refined in `font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
-their stroke widths. The tones stay stroked circles. `--gothic` selects the Gothic style (family "QATT Gothic", `font/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
+their stroke widths. The tones stay stroked circles (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js; the brush font still has the old proportions). `--gothic` selects the Gothic style (family "QATT Gothic", `font/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
 
 ```sh
 python3 tools/build_font.py --kage font/kage.json font/glyphs.json font/qatt-serif     # writes font/qatt-serif.ttf / .woff2
