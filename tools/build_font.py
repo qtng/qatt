@@ -36,7 +36,7 @@ PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhym
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
 PAIR_GROW = 1.18               # size of a pair (the Can/Chi forms are GROW)
-PAIR_M, PAIR_G = 100, 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
+PAIR_M, PAIR_G = float(os.environ.get('QATT_PAIR_M', 100)), float(os.environ.get('QATT_PAIR_G', 80))       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
 PAIR_T = 1000 - 2 * PAIR_M - PAIR_G   # what the two halves share
 SPLITS = (45, 50, 55)          # KAGE fonts: share of the left half in per cent; the halves are fitted into these boxes by KAGE
 PAIR_K = float(os.environ.get('PAIR_K', PAIR_K)); PAIR_GROW = float(os.environ.get('PAIR_GROW', PAIR_GROW))
