@@ -10,21 +10,37 @@
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Mincho"; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
-    main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
-    h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
-    p { margin: .3rem 0 .8rem; color: var(--muted); }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: #4a3d30; }
+    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .btn-cinnabar { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
+    main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 1.5rem; }
     a { color: var(--accent); }
-    .card-box { margin: 1rem 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
-    .bar { display: flex; flex-wrap: wrap; gap: .4rem .8rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
+    .card-box { margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+    /* one row if there is room, else two: font and size, then reading and Telex */
+    .bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
+    .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; }
     .bar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; }
     .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
+    .bar input[type=range] { width: 8rem; accent-color: var(--accent); }
+    #sizeLabel { min-width: 2.6em; color: var(--muted); }
     #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
       font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
     #field:focus { outline: 2px solid rgba(168, 54, 42, .35); }
-    #pending { margin-top: .4rem; min-height: 3.2rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
-    #pending .glyph { font-family: var(--qfont); font-size: 2.2rem; line-height: 1; color: var(--ink); }
+    #pending { margin-top: .2rem; min-height: 2.4rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
+    #pending .glyph { font-family: var(--qfont); font-size: 1.8rem; line-height: 1; color: var(--ink); }
     #pending .word { font-style: italic; }
-    .keys { display: flex; gap: .4rem; margin-top: .45rem; }
+    .keys { display: flex; gap: .4rem; margin-top: .2rem; }
     .keys .btn { flex: 1 1 0; }
   </style>
   <script defer src="js/navigation.js"></script>
@@ -33,19 +49,27 @@
   <script defer src="../chunom/js/ime.js"></script>
 </head>
 <body>
+<header class="hero pt-5 pb-4 mb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">Type QATT</h1>
+    <p class="lead mx-auto mb-4">Type Vietnamese (Quốc Ngữ). Every finished word turns into text for the <a href="font.html">QATT fonts</a>.</p>
+    <a class="btn btn-cinnabar btn-pill" href="decodings.html">Open the decodings</a>
+  </div>
+</header>
 <main>
-  <h1>Type QATT</h1>
-  <p>Type Vietnamese (Quốc Ngữ). When a word is finished (space, punctuation or Enter) it is replaced by the characters of the QATT Unicode block, which the font shows as Quốc Âm Tân Tự. The result is plain text: copy it anywhere where the <a href="font.html">QATT font</a> is available. Words that have no letter in the chosen reading of the rhyme table stay as typed.
-     See also <a href="editor.html">QATT Editor</a>, which draws the words with <code>qatt.js</code>.</p>
-
   <div class="card-box">
     <div class="bar">
-      <label><select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"></select></label>
-      <label><select id="size" data-qatt-sizes autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"></select></label>
-      <label><select id="decoding" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)"></select></label>
-      <label><input type="checkbox" id="telex" autocomplete="off"> Telex</label>
+      <div class="group">
+        <select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
+        <label><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="sizeLabel">100%</span></label>
+      </div>
+      <div class="group">
+        <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)"></select>
+        <label><input type="checkbox" id="telex" autocomplete="off"> Telex</label>
+      </div>
     </div>
-    <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Quốc âm tân tự"></textarea>
+    <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Input Quốc Ngữ..."></textarea>
     <div id="pending" aria-live="polite"></div>
     <div class="keys">
       <button type="button" class="btn btn-sm btn-outline-secondary" id="convert" title="Convert every Quốc Ngữ word in the field, e.g. after pasting">Convert all</button>
@@ -67,8 +91,8 @@
     for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
 
-    // size: the sample size of font.html is the number of pixels, the field shows 0.98 times as much
-    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.98) + 'px'; };
+    // size: 100% is 33 pixels
+    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.33) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
     $('size').addEventListener('input', applySize);
     applySize();
 
