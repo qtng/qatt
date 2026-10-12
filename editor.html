@@ -7,7 +7,7 @@
   <meta name="description" content="Type Vietnamese and it turns into Quốc Âm Tân Tự text for the QATT fonts.">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <style>
-    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Mincho"; }
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Serif"; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
     .hero {
@@ -96,7 +96,7 @@
     const group = (select, label) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.append(...select.options); select.append(g); select.value = value; };
     group($('decoding'), 'Choose decoding');
     group($('font'), 'Choose font');
-    $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Mincho)
+    $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
 

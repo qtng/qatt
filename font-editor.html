@@ -61,8 +61,8 @@
       <option value="v2c-">Single</option><option value="v2l-">Left (optional)</option><option value="v2r-">Right (optional)</option>
     </select></label>
     <span>Marks</span><span class="marks" id="marks"></span>
-    <label>Mincho thin <input type="range" id="minY" min="0.5" max="6" step="0.1" value="2"></label>
-    <label>Mincho thick <input type="range" id="minT" min="2" max="12" step="0.1" value="6"></label>
+    <label>Serif thin <input type="range" id="minY" min="0.5" max="6" step="0.1" value="2"></label>
+    <label>Serif thick <input type="range" id="minT" min="2" max="12" step="0.1" value="6"></label>
     <label>Gothic <input type="range" id="goth" min="2" max="12" step="0.1" value="5"></label>
     <button class="btn btn-sm btn-outline-secondary" id="undo" disabled>Undo</button>
     <button class="btn btn-sm btn-outline-secondary" id="export">Export JSON</button>
@@ -136,11 +136,11 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
     return `<g transform="scale(${S})">` + ids.map(i => `<path d="${M.outline(state, i)}"/>`).join("") + "</g>";
   }
   const wrap = inner => `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
-  const views = (s, set) => [["Brush", brushSvg(s, set)], ["Mincho", kageSvg(symId(s), "mincho", set)], ["Gothic", kageSvg(symId(s), "gothic", set)]];
+  const views = (s, set) => [["Brush", brushSvg(s, set)], ["Serif", kageSvg(symId(s), "mincho", set)], ["Gothic", kageSvg(symId(s), "gothic", set)]];
 
   function render() {
     const set = marksOn;
-    $("tbl").innerHTML = "<tr><th></th><th>Brush editor</th><th>KAGE Mincho</th><th>KAGE Gothic</th></tr>" + SHAPES.map(s =>
+    $("tbl").innerHTML = "<tr><th></th><th>Brush editor</th><th>KAGE Serif</th><th>KAGE Gothic</th></tr>" + SHAPES.map(s =>
       `<tr><td class="name">${s === "_" ? "z" : s}</td>` + views(s, set).map(([n, g]) => `<td data-s="${s}" class="${((edits[symId(s)] !== undefined && edits[symId(s)] !== null) || (isLR(symId(s)) && own(symId(s)))) && n !== "Brush" ? "edited" : ""}">${wrap(g)}</td>`).join("") + "</tr>").join("");
   }
   function openDetail(s) {
