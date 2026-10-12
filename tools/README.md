@@ -93,12 +93,12 @@ If the data changes (new characters or offsets), run the font steps above again.
 
 ## KAGE prototype
 
-`kage.html` draws the QATT symbols with the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see `js/kage-engine.COPYING`)
+`font-editor.html` draws the QATT symbols with the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see `js/kage-engine.COPYING`)
 next to the brush outlines. `font/kage.json` holds the KAGE data (one line per stroke and mark); `node tools/kage_seed.js --force` regenerates it from the
-standard stroke library of the brush editor (this overwrites hand edits). Edits in `kage.html` live in the browser (`localStorage` `qatt-kage-v1`) and can be exported as JSON.
+standard stroke library of the brush editor (this overwrites hand edits). Edits in `font-editor.html` live in the browser (`localStorage` `qatt-kage-v1`) and can be exported as JSON.
 
 **KAGE font.** With `--kage font/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
-`js/kage-engine.min.js` in Node.js) from the KAGE data refined in `kage.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
+`js/kage-engine.min.js` in Node.js) from the KAGE data refined in `font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
 their stroke widths. The tones stay stroked circles. `--gothic` selects the Gothic style (family "QATT Gothic", `font/qatt-gothic`), the default is Mincho:
 
 ```sh
@@ -107,5 +107,5 @@ python3 tools/build_font.py --kage font/kage.json font/glyphs.json font/qatt-min
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `font/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
-order as the single form; `kage.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
+order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
 one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
