@@ -40,6 +40,7 @@
     .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
     .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
     .hide-svg .s { display: none; }
+    .grid .break { grid-column: 1 / -1; height: .9rem; }
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
     h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
     #info { margin-top: .3rem; font-size: .8rem; color: var(--muted); min-height: 1.2rem; text-align: center; }
@@ -130,6 +131,7 @@
     cell.append(f, s, cp);
     cell.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
     grids[isMark(g) ? 0 : 1].append(cell);
+    if (g.o === 21) { const br = document.createElement('div'); br.className = 'break'; grids[1].append(br); }   // after U+F0015, the 22 basic letters: a new row with some space
   }
 
   const apply = () => {
