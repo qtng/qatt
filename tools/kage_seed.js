@@ -43,7 +43,7 @@ function line(it, lib, others, isMark) {
 // The paths of qatt.js are not exact: a stroke may end a little beside or short of another one, because a heavy pen hides that. KAGE
 // draws thin strokes, so the ends are put right first: nearly horizontal and vertical strokes become exact, and an end that falls short of
 // another stroke by up to TOL units moves onto it (along its own direction, so its angle is kept). Overshoots stay: overhangs are design.
-const TOL = 12, AXIS = 2, MID_TOL = 3.5;   // MID_TOL: how far from the middle of the box a stroke may be to count as the middle one
+const TOL = 12, NEAR = 6, AXIS = 2, MID_TOL = 3.5;   // MID_TOL: how far from the middle of the box a stroke may be to count as the middle one
 const nearest = (p, o) => {
   const dx = o.b[0] - o.a[0], dy = o.b[1] - o.a[1], l2 = dx * dx + dy * dy || 1;
   const t = Math.max(0, Math.min(1, ((p[0] - o.a[0]) * dx + (p[1] - o.a[1]) * dy) / l2));
@@ -129,14 +129,17 @@ function exact(strokes, marks, id0) {
     let best = null;
     for (const e of ends) {
       const dx = e.p[0] - mid[0], dy = e.p[1] - mid[1], d = Math.hypot(dx, dy);
-      // the middle of the mark lies in front of the end (within 35 degrees of the stroke's direction) and the mark is at most 45 degrees off a T
+      // the middle of the mark lies near the end (NEAR units) or in front of it (within 35 degrees of the stroke's direction) and the mark is at most 45 degrees off a T
       let p = [-e.t[1], e.t[0]];
       if (p[0] * vx + p[1] * vy < 0) p = [-p[0], -p[1]];
-      if (d > TOL || (d > 1 && -(dx * e.t[0] + dy * e.t[1]) / d < Math.cos(35 * Math.PI / 180))) continue;
+      if (d > TOL || (d > NEAR && -(dx * e.t[0] + dy * e.t[1]) / d < Math.cos(35 * Math.PI / 180))) continue;
       if (Math.abs(p[0] * vx + p[1] * vy) / L < Math.SQRT1_2) continue;
       if (!best || d < best.d) best = { d, e };
     }
-    if (!best) continue;
+    if (!best) {
+      if (process.env.KAGE_DEBUG) { const c = ends.map(e => ({ d: Math.hypot(e.p[0] - mid[0], e.p[1] - mid[1]), e })).sort((x, y) => x.d - y.d)[0]; console.log(id0, "mark unmatched", mid.map(v => Math.round(v * 10) / 10), "nearest end", c && c.e.p.map(v => Math.round(v * 10) / 10), c && Math.round(c.d * 10) / 10); }
+      continue;
+    }
     let p = [-best.e.t[1], best.e.t[0]];
     if (p[0] * vx + p[1] * vy < 0) p = [-p[0], -p[1]];
     if (process.env.KAGE_DEBUG) console.log(id0, "mark on end", best.e.p.map(v => Math.round(v * 10) / 10), "dist", Math.round(best.d * 10) / 10, "turned", Math.round(Math.abs(Math.atan2(p[0] * vy - p[1] * vx, p[0] * vx + p[1] * vy)) * 180 / Math.PI));
