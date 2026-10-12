@@ -98,6 +98,13 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     matrix = (kx, 0, 0, -SY * grow * v, centre - cx * kx, f)
+    if BRUSH and ids[0].startswith('q'):   # tones: narrower than the letters (see TONE_X), the middle of the tone stays where it is
+        bs = []
+        for i in ids:
+            bp = pathops.Path(); parse_path(PATHS[i], bp.getPen()); bs.append(bp.bounds)
+        cxt = (min(b[0] for b in bs) + max(b[2] for b in bs)) / 2
+        matrix = (kx * TONE_X, 0, 0, matrix[3], matrix[4] + cxt * kx * (1 - TONE_X), f)
+        kx = matrix[0]
     if BRUSH or (KAGE and not ids[0].startswith('q')):   # the tones keep their stroked circles in the KAGE font
         # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant

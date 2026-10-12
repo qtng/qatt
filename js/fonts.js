@@ -15,7 +15,7 @@ const QATT_FONTS = [
   { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide",     v: 3 },
   { family: "QATT Prototype",       label: "Prototype",       file: "qatt-prototype",       v: 21 },
   { family: "QATT Prototype Light", label: "Prototype light", file: "qatt-prototype-light", v: 4 },
-  { family: "QATT Brush",           label: "Brush-like",      file: "qatt-brush",           v: 6 },
+  { family: "QATT Brush",           label: "Brush-like",      file: "qatt-brush",           v: 7 },
 ];
 const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], [51, "150%"], [68, "200%"], [102, "300%"], [136, "400%"]];
 
