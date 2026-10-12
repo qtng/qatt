@@ -43,7 +43,7 @@ function line(it, lib, others, isMark) {
 // The paths of qatt.js are not exact: a stroke may end a little beside or short of another one, because a heavy pen hides that. KAGE
 // draws thin strokes, so the ends are put right first: nearly horizontal and vertical strokes become exact, and an end that falls short of
 // another stroke by up to TOL units moves onto it (along its own direction, so its angle is kept). Overshoots stay: overhangs are design.
-const TOL = 12, MARK_TOL = 5, AXIS = 2;
+const TOL = 12, MARK_TOL = 5, AXIS = 2, MID_TOL = 3.5;   // MID_TOL: how far from the middle of the box a stroke may be to count as the middle one
 const nearest = (p, o) => {
   const dx = o.b[0] - o.a[0], dy = o.b[1] - o.a[1], l2 = dx * dx + dy * dy || 1;
   const t = Math.max(0, Math.min(1, ((p[0] - o.a[0]) * dx + (p[1] - o.a[1]) * dy) / l2));
@@ -57,6 +57,12 @@ function exact(strokes, marks, id0) {
     if (Math.abs(it.b[0] - it.a[0]) <= AXIS) it.a[0] = it.b[0] = (it.a[0] + it.b[0]) / 2;
   }
   // an end moves along its own stroke (its direction stays) to where that line meets another stroke, when that is within TOL
+  // a vertical stroke near the middle of the glyph box goes exactly to the middle, and so does a horizontal one
+  const [cx, cy] = id0.endsWith("-small") ? [27, 48] : id0.startsWith("v2c-") ? [49.25, 48] : [77, 48];
+  for (const it of st) {
+    if (it.a[0] === it.b[0] && Math.abs(it.a[0] - cx) <= MID_TOL && it.a[0] !== cx) { if (process.env.KAGE_DEBUG) console.log(id0, "vertical to the middle", it.a[0], "->", cx); it.a[0] = it.b[0] = cx; }
+    if (it.a[1] === it.b[1] && Math.abs(it.a[1] - cy) <= MID_TOL && it.a[1] !== cy) { if (process.env.KAGE_DEBUG) console.log(id0, "horizontal to the middle", it.a[1], "->", cy); it.a[1] = it.b[1] = cy; }
+  }
   const snap = (it, k, others, tol) => {
     const p = it[k], q = it[k === "a" ? "b" : "a"], dx = p[0] - q[0], dy = p[1] - q[1];
     let best = null;
