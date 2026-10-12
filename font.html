@@ -6,11 +6,11 @@
   <title>QATT reference font</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <style>
-    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=18) format("woff2"), url(font/qatt-prototype.ttf?v=18) format("truetype"); }
-    @font-face { font-family: "QATT Prototype Light"; src: url(font/qatt-prototype-light.woff2?v=1) format("woff2"), url(font/qatt-prototype-light.ttf?v=1) format("truetype"); }
-    @font-face { font-family: "QATT Mincho"; src: url(font/qatt-mincho.woff2?v=5) format("woff2"), url(font/qatt-mincho.ttf?v=5) format("truetype"); }
-    @font-face { font-family: "QATT Gothic"; src: url(font/qatt-gothic.woff2?v=4) format("woff2"), url(font/qatt-gothic.ttf?v=4) format("truetype"); }
-    @font-face { font-family: "QATT Brush"; src: url(font/qatt-brush.woff2?v=4) format("woff2"), url(font/qatt-brush.ttf?v=4) format("truetype"); }
+    @font-face { font-family: "QATT Prototype"; src: url(font/qatt-prototype.woff2?v=19) format("woff2"), url(font/qatt-prototype.ttf?v=19) format("truetype"); }
+    @font-face { font-family: "QATT Prototype Light"; src: url(font/qatt-prototype-light.woff2?v=2) format("woff2"), url(font/qatt-prototype-light.ttf?v=2) format("truetype"); }
+    @font-face { font-family: "QATT Mincho"; src: url(font/qatt-mincho.woff2?v=6) format("woff2"), url(font/qatt-mincho.ttf?v=6) format("truetype"); }
+    @font-face { font-family: "QATT Gothic"; src: url(font/qatt-gothic.woff2?v=5) format("woff2"), url(font/qatt-gothic.ttf?v=5) format("truetype"); }
+    @font-face { font-family: "QATT Brush"; src: url(font/qatt-brush.woff2?v=5) format("woff2"), url(font/qatt-brush.ttf?v=5) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
@@ -54,7 +54,7 @@
      Click a character to add it to the sample field.</p>
   <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
 
-  <p><strong>How the fonts are made.</strong> The Mincho and Gothic fonts are drawn by the <a href="https://github.com/kurgm/kage-engine">KAGE engine</a> from stroke data that can be refined in the <a href="font-editor.html">KAGE glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
+  <p><strong>How the fonts are made.</strong> The Mincho and Gothic fonts are drawn from stroke data that can be refined in the <a href="font-editor.html">glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
 
   <div class="sticky-card">
   <div class="bar">
@@ -163,7 +163,7 @@
 })();
 </script>
 <script>
-  // font choice: the stroked prototype, the brush font (font/qatt-brush, made with brush.html) or the KAGE Mincho and Gothic fonts (font/qatt-mincho, font/qatt-gothic, made with font-editor.html); kept in this browser
+  // font choice: the stroked prototype, the brush font (font/qatt-brush, made with brush.html) or the Mincho and Gothic fonts (font/qatt-mincho, font/qatt-gothic, made with font-editor.html); kept in this browser
   (() => {
     const sel = document.getElementById("font");
     const apply = () => document.documentElement.style.setProperty("--qfont", `"${sel.value}"`);
