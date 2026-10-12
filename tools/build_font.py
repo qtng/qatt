@@ -27,9 +27,9 @@ if '--kage' in sys.argv:
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
-SY = 12.6                      # font units per svg unit (vertical): a typical glyph is about as tall as a capital letter
-SX = SY * (13 / 15) / (120 / 125)  # the page stretches the 120x125 viewBox to 13:15
-X0, Y0 = 500 - 49.27 * SX, 958  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
+SY = float(os.environ.get('QATT_SY', 12.6))   # font units per svg unit (vertical): a typical glyph is about as tall as a capital letter
+SX = SY * float(os.environ.get('QATT_SXF', (13 / 15) / (120 / 125)))   # in x: SY times this factor (the page stretches the 120x125 viewBox to 13:15; 1 would be the same scale in x and y)
+X0, Y0 = 500 - 49.27 * SX, float(os.environ.get('QATT_Y0', 958))  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
