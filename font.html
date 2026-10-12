@@ -12,7 +12,7 @@
     @font-face { font-family: "QATT Mincho Bold"; src: url(font/qatt-mincho-bold.woff2?v=5) format("woff2"), url(font/qatt-mincho-bold.ttf?v=5) format("truetype"); }
     @font-face { font-family: "QATT Gothic"; src: url(font/qatt-gothic.woff2?v=6) format("woff2"), url(font/qatt-gothic.ttf?v=6) format("truetype"); }
     @font-face { font-family: "QATT Gothic Bold"; src: url(font/qatt-gothic-bold.woff2?v=3) format("woff2"), url(font/qatt-gothic-bold.ttf?v=3) format("truetype"); }
-    @font-face { font-family: "QATT Gothic Wide"; src: url(font/qatt-gothic-wide.woff2?v=1) format("woff2"), url(font/qatt-gothic-wide.ttf?v=1) format("truetype"); }
+    @font-face { font-family: "QATT Gothic Wide"; src: url(font/qatt-gothic-wide.woff2?v=2) format("woff2"), url(font/qatt-gothic-wide.ttf?v=2) format("truetype"); }
     @font-face { font-family: "QATT Brush"; src: url(font/qatt-brush.woff2?v=6) format("woff2"), url(font/qatt-brush.ttf?v=6) format("truetype"); }
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
@@ -27,7 +27,7 @@
     .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
     .bar label.grow { flex: 1 1 4rem; min-width: 0; }
     .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; min-height: 3.4rem;
-      font-family: var(--qfont, "QATT Mincho"); font-size: 3rem; line-height: 1; word-break: break-all; color: var(--ink); }
+      font-family: var(--qfont, "QATT Mincho"); font-size: 3rem; line-height: 1; word-break: break-all; white-space: pre-wrap; color: var(--ink); }
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
     .keys { display: flex; justify-content: space-between; gap: .4rem; margin-top: .45rem; }
     .keys .btn { flex: 1 1 0; }
@@ -73,6 +73,7 @@
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009A">B⿱C</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="space" title="Add a space" aria-label="Space">␣</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="back" title="Delete the last character" aria-label="Delete the last character">⌫</button>
   </div>
   <div class="keys tones" id="tone-keys"></div>
@@ -108,6 +109,15 @@
     const node = document.createTextNode(text); r.insertNode(node);
     setCaret(node, node.length); sample.normalize();
   };
+  const textBefore = () => {
+    const r = caret(), before = document.createRange(); before.selectNodeContents(sample); before.setEnd(r.startContainer, r.startOffset);
+    return before.toString();
+  };
+  // one of the 22 basic letters U+F0000 to U+F0015 is the onset of a pair: the component joiner U+F009B follows it, unless it already follows a joiner (then it is the rhyme)
+  const addLetter = o => {
+    const J = String.fromCodePoint(BASE + 155), prev = Array.from(textBefore()).pop();
+    add(String.fromCodePoint(BASE + o) + (o >= 0 && o <= 21 && prev !== J ? J : ''));
+  };
   const backspace = () => {
     const r = caret();
     if (!r.collapsed) { r.deleteContents(); setCaret(r.startContainer, r.startOffset); sample.normalize(); return; }
@@ -132,7 +142,7 @@
     if (g.q) { const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt); } else s.hidden = true;
     const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
     cell.append(f, s, cp);
-    cell.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
+    cell.addEventListener('click', () => { addLetter(g.o); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
     grids[isMark(g) ? 0 : 1].append(cell);
     if (g.o === 21) { const br = document.createElement('div'); br.className = 'break'; grids[1].append(br); }   // after U+F0015, the 22 basic letters: a new row with some space
   }
@@ -163,6 +173,7 @@
     b.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o); });
     $('#tone-keys').append(b);
   });
+  $('#space').addEventListener('click', () => add(' '));
   $('#back').addEventListener('click', backspace);
   apply();
 })();
