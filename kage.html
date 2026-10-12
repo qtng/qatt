@@ -35,6 +35,13 @@
     .detail .views svg g { fill: var(--ink); }
     .detail textarea { width: 100%; font: .78rem/1.35 ui-monospace, Menlo, monospace; height: 9rem; margin-top: .6rem; }
     .detail .cap { font-size: .75rem; color: var(--muted); text-align: center; }
+    .detail .views svg.edit { width: 24rem; height: 24rem; touch-action: none; cursor: crosshair; }
+    .detail .views svg.edit g.glyph { fill: #cfc4ae; }
+    .edit .h { stroke: #fff; stroke-width: .8; cursor: grab; }
+    .edit circle.h.s { fill: #2b6cb0; } .edit circle.h.m { fill: var(--accent); }
+        .edit .body { fill: none; stroke: transparent; stroke-width: 5; stroke-linecap: round; pointer-events: stroke; cursor: move; }
+    .edit .body:hover.s { stroke: rgba(43, 108, 176, .18); } .edit .body:hover.m { stroke: rgba(168, 54, 42, .18); }
+    .edit .guide { stroke: #7b6c58; stroke-width: .25; stroke-dasharray: 2 2; fill: none; }
   </style>
   <script src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
@@ -47,7 +54,7 @@
 <main>
   <h1>QATT glyphs with KAGE</h1>
   <p>The symbols drawn by the <a href="https://github.com/kurgm/kage-engine">KAGE engine</a> (glyph outlines from stroke data, as on GlyphWiki), next to the brush outlines of the
-    <a href="brush.html">brush editor</a>. Click a cell to see it large and to edit its KAGE data. Prototype.</p>
+    <a href="brush.html">brush editor</a>. Click a cell to see it large; drag the dots and lines to edit its KAGE data. Prototype.</p>
   <div class="bar">
     <label>Form <select id="form" class="form-select form-select-sm">
       <option value="v2-">Rhyme</option><option value="v2-s">Onset</option><option value="v2c-">Centred</option>
@@ -63,7 +70,7 @@
   <table id="tbl"></table>
 </main>
 <div class="detail" id="detail" hidden><div class="box">
-  <div class="d-flex justify-content-between align-items-center"><b id="d-title"></b><button class="btn btn-sm btn-outline-secondary" id="d-close">Close</button></div>
+  <div class="d-flex justify-content-between align-items-center"><b id="d-title"></b><span><button class="btn btn-sm btn-outline-secondary me-1" id="d-reset">Reset this symbol</button><button class="btn btn-sm btn-outline-secondary" id="d-close">Close</button></span></div>
   <div class="views" id="d-views"></div>
   <textarea id="d-text" spellcheck="false"></textarea>
   <div class="cap">One KAGE line per stroke; the first lines are the strokes, then the marks 1–6 (the medial for the onset form). Changes apply while you type.</div>
@@ -116,7 +123,56 @@
   }
   function detailViews() {
     const s = $("detail").dataset.s, set = marksOn;
-    $("d-views").innerHTML = views(s, set).map(([n, g]) => `<div>${wrap(g).replace("<svg", "<svg")}<div class="cap">${n}</div></div>`).join("");
+    $("d-views").innerHTML = '<div><svg class="edit" id="d-edit" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"></svg><div class="cap">Edit: drag the dots (blue strokes, red marks); drag a line itself to move it whole; Alt = no snapping</div></div>' +
+      views(s, set).map(([n, g]) => `<div>${wrap(g)}<div class="cap">${n}</div></div>`).join("");
+    drawEdit();
+  }
+  // ---- editing by dragging -------------------------------------------------------------
+  const symData = id => { const sy = edits[id] || seed.sym[id]; return { strokes: sy.strokes.slice(), marks: sy.marks.slice() }; };
+  const parseLine = l => { const f = l.split(":"); return { head: f.slice(0, 3), pts: Array.from({ length: (f.length - 3) / 2 }, (_, i) => [+f[3 + 2 * i], +f[4 + 2 * i]]) }; };
+  const fmt = v => String(Math.round(v * 10) / 10);
+  const lineStr = L => L.head.join(":") + ":" + L.pts.map(p => fmt(p[0]) + ":" + fmt(p[1])).join(":");
+  function drawEdit() {
+    const svg = $("d-edit"); if (!svg) return;
+    const s = $("detail").dataset.s, id = symId(s), sy = symData(id);
+    const all = new Set([0, 1, 2, 3, 4, 5]);
+    const items = [...sy.strokes.map((l, i) => ({ kind: "s", i, l })), ...sy.marks.map((l, i) => l && ({ kind: "m", i, l })).filter(Boolean)];
+    const set = new Set(items.filter(x => x.kind === "m").map(x => x.i));
+    let rings = "", dots = "";
+    items.forEach((it, n) => {
+      const L = parseLine(it.l);
+      L.pts.forEach((p, k) => { dots += `<circle class="h ${it.kind}" data-n="${n}" data-k="${k}" cx="${p[0]}" cy="${p[1]}" r="${k === 1 && L.pts.length === 3 ? 2 : 2.8}"/>`; });
+      rings += `<polyline class="h body ${it.kind}" data-n="${n}" data-k="m" points="${L.pts.map(p => p.join(",")).join(" ")}"/>`;
+    });
+    const h = `<g class="glyph">${kageSvg(id, "mincho", set)}</g><path class="guide" d="M100 0V200M0 100H200"/>` + rings + dots;
+    svg.innerHTML = h; svg._items = items;
+  }
+  let drag = null;
+  function point(svg, e) { const m = svg.getScreenCTM().inverse(); return new DOMPoint(e.clientX, e.clientY).matrixTransform(m); }
+  document.addEventListener("pointerdown", e => {
+    const c = e.target.closest && e.target.closest("#d-edit .h"); if (!c) return;
+    const svg = $("d-edit"), it = svg._items[+c.dataset.n], L = parseLine(it.l), q = point(svg, e);
+    drag = { svg, it, L0: L, k: c.dataset.k, q0: [q.x, q.y] }; svg.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  document.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const q = point(drag.svg, e); let dx = q.x - drag.q0[0], dy = q.y - drag.q0[1];
+    if (!e.altKey) { dx = Math.round(dx * 2) / 2; dy = Math.round(dy * 2) / 2; }   // half units; hold Alt for free movement
+    const L = { head: drag.L0.head, pts: drag.L0.pts.map(p => p.slice()) };
+    if (drag.k === "m") L.pts.forEach(p => { p[0] += dx; p[1] += dy; });
+    else { const p = L.pts[+drag.k]; p[0] += dx; p[1] += dy; }
+    const id = symId($("detail").dataset.s), sy = symData(id), str = lineStr(L);
+    if (drag.it.kind === "s") sy.strokes[drag.it.i] = str; else sy.marks[drag.it.i] = str;
+    edits[id] = sy; drag.it.l = str; save();
+    $("d-text").value = sy.strokes.concat(sy.marks.map(m => m || "")).join("\n");
+    const keep = drag; drawEdit(); $("d-edit")._items.forEach(x => { if (x.kind === keep.it.kind && x.i === keep.it.i) keep.it = x; });
+    refreshViews(); render();
+  });
+  const endDrag = () => { drag = null; };
+  document.addEventListener("pointerup", endDrag); document.addEventListener("pointercancel", endDrag);
+  function refreshViews() {
+    const s = $("detail").dataset.s, set = marksOn, vs = views(s, set);
+    document.querySelectorAll("#d-views > div:not(:first-child) svg").forEach((svg, i) => { svg.innerHTML = vs[i][1]; });
   }
   $("d-text").addEventListener("input", () => {
     const s = $("detail").dataset.s, id = symId(s), nStr = seed.sym[id].strokes.length;
@@ -125,6 +181,7 @@
     save(); detailViews(); render();
   });
   $("tbl").addEventListener("click", e => { const td = e.target.closest("td[data-s]"); if (td) openDetail(td.dataset.s); });
+  $("d-reset").onclick = () => { const s = $("detail").dataset.s; delete edits[symId(s)]; save(); openDetail(s); render(); };
   $("d-close").onclick = () => { $("detail").hidden = true; };
   $("detail").addEventListener("click", e => { if (e.target === $("detail")) $("detail").hidden = true; });
   $("form").onchange = e => { form = e.target.value; buildMarks(); render(); };
