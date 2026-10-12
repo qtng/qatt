@@ -43,7 +43,7 @@ function line(it, lib, others, isMark) {
 // The paths of qatt.js are not exact: a stroke may end a little beside or short of another one, because a heavy pen hides that. KAGE
 // draws thin strokes, so the ends are put right first: nearly horizontal and vertical strokes become exact, and an end that falls short of
 // another stroke by up to TOL units moves onto it (along its own direction, so its angle is kept). Overshoots stay: overhangs are design.
-const TOL = 12, MARK_TOL = 5, AXIS = 2, MID_TOL = 3.5;   // MID_TOL: how far from the middle of the box a stroke may be to count as the middle one
+const TOL = 12, AXIS = 2, MID_TOL = 3.5;   // MID_TOL: how far from the middle of the box a stroke may be to count as the middle one
 const nearest = (p, o) => {
   const dx = o.b[0] - o.a[0], dy = o.b[1] - o.a[1], l2 = dx * dx + dy * dy || 1;
   const t = Math.max(0, Math.min(1, ((p[0] - o.a[0]) * dx + (p[1] - o.a[1]) * dy) / l2));
@@ -114,7 +114,35 @@ function exact(strokes, marks, id0) {
     if (best && best.d > 0.05) { log.push(best.d); if (process.env.KAGE_DEBUG) console.log(id0, k, "moved", Math.round(best.d * 10) / 10, it[k].map(Math.round), "->", best.X.map(Math.round)); it[k] = best.X; }
   };
   for (const it of st) { snap(it, "a", st, TOL); snap(it, "b", st, TOL); }
-  for (const it of mk.filter(Boolean)) { snap(it, "a", st, MARK_TOL); snap(it, "b", st, MARK_TOL); }
+  // A mark sits on the free end of a stroke like the bar of a T: the end nearest to the middle of the mark (within TOL, and the mark roughly
+  // perpendicular to the line from that end to its middle) becomes the middle of the mark, and the mark turns perpendicular to the stroke
+  // there. A mark with no such end stays as it is.
+  const ends = [];
+  for (const it of st) for (const k of ["a", "b"]) {
+    const e = it[k], o = it[k === "a" ? "b" : "a"], l = Math.hypot(e[0] - o[0], e[1] - o[1]) || 1;
+    if (st.some(x => x !== it && Math.hypot(...[0, 1].map(i => nearest(e, x)[i] - e[i])) < 1.2)) continue;   // a junction, not a free end
+    ends.push({ p: e, t: [(e[0] - o[0]) / l, (e[1] - o[1]) / l] });
+  }
+  for (const m of mk.filter(Boolean)) {
+    const mid = [(m.a[0] + m.b[0]) / 2, (m.a[1] + m.b[1]) / 2], vx = m.b[0] - m.a[0], vy = m.b[1] - m.a[1], L = Math.hypot(vx, vy) || 1;
+    const n = [-vy / L, vx / L];
+    let best = null;
+    for (const e of ends) {
+      const dx = e.p[0] - mid[0], dy = e.p[1] - mid[1], d = Math.hypot(dx, dy);
+      // the middle of the mark lies in front of the end (within 35 degrees of the stroke's direction) and the mark is at most 45 degrees off a T
+      let p = [-e.t[1], e.t[0]];
+      if (p[0] * vx + p[1] * vy < 0) p = [-p[0], -p[1]];
+      if (d > TOL || (d > 1 && -(dx * e.t[0] + dy * e.t[1]) / d < Math.cos(35 * Math.PI / 180))) continue;
+      if (Math.abs(p[0] * vx + p[1] * vy) / L < Math.SQRT1_2) continue;
+      if (!best || d < best.d) best = { d, e };
+    }
+    if (!best) continue;
+    let p = [-best.e.t[1], best.e.t[0]];
+    if (p[0] * vx + p[1] * vy < 0) p = [-p[0], -p[1]];
+    if (process.env.KAGE_DEBUG) console.log(id0, "mark on end", best.e.p.map(v => Math.round(v * 10) / 10), "dist", Math.round(best.d * 10) / 10, "turned", Math.round(Math.abs(Math.atan2(p[0] * vy - p[1] * vx, p[0] * vx + p[1] * vy)) * 180 / Math.PI));
+    m.a = [best.e.p[0] - p[0] * L / 2, best.e.p[1] - p[1] * L / 2];
+    m.b = [best.e.p[0] + p[0] * L / 2, best.e.p[1] + p[1] * L / 2];
+  }
   return { strokes: st, marks: mk, log };
 }
 
