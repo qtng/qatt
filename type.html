@@ -64,7 +64,7 @@
     const NOT_LETTER = /[^\p{L}\p{M}]/u, WORD_END = /[\p{L}\p{M}]+$/u;
 
     // decodings (readings of the rhyme table)
-    for (const name of Object.keys(VietnameseParser.DECODINGS)) $('decoding').append(new Option(name, name, name === 'qatt', name === 'qatt'));
+    for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
 
     // size: the sample size of font.html is the number of pixels, the field shows 1.4 times as much
