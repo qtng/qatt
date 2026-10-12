@@ -63,6 +63,12 @@ function exact(strokes, marks, id0) {
     if (it.a[0] === it.b[0] && Math.abs(it.a[0] - cx) <= MID_TOL && it.a[0] !== cx) { if (process.env.KAGE_DEBUG) console.log(id0, "vertical to the middle", it.a[0], "->", cx); it.a[0] = it.b[0] = cx; }
     if (it.a[1] === it.b[1] && Math.abs(it.a[1] - cy) <= MID_TOL && it.a[1] !== cy) { if (process.env.KAGE_DEBUG) console.log(id0, "horizontal to the middle", it.a[1], "->", cy); it.a[1] = it.b[1] = cy; }
   }
+  // l (three verticals) and z (three horizontals): the two outer strokes are equally far from the middle one (the mean of both distances)
+  const shape = id0.replace(/^v2c?-/, "").replace(/-small$/, "");
+  if (shape === "l" || shape === "_") {
+    const ax = shape === "l" ? 0 : 1, [o1, m, o2] = st, mid = it => (it.a[ax] + it.b[ax]) / 2, d = (mid(m) - mid(o1) + mid(o2) - mid(m)) / 2;
+    for (const [it, to] of [[o1, mid(m) - d], [o2, mid(m) + d]]) { const sh = to - mid(it); it.a[ax] += sh; it.b[ax] += sh; }
+  }
   const snap = (it, k, others, tol) => {
     const p = it[k], q = it[k === "a" ? "b" : "a"], dx = p[0] - q[0], dy = p[1] - q[1];
     let best = null;
