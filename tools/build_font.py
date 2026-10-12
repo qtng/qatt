@@ -19,10 +19,10 @@ from fontTools.fontBuilder import FontBuilder
 LIGHT = 0.6
 light = '--light' in sys.argv
 if light: sys.argv.remove('--light')
-# --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Mincho verticals 1.8 times, its thin horizontals stay as they are; tones and marks 1.5 times
+# --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Serif verticals 1.8 times, its thin horizontals stay as they are; tones and marks 1.5 times
 BOLD_ON = '--bold' in sys.argv
 if BOLD_ON: sys.argv.remove('--bold')
-KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Mincho or Gothic
+KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Serif (KAGE style mincho) or Gothic
 if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'mincho'
@@ -228,7 +228,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else '') + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else '') + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString

@@ -99,10 +99,10 @@ standard stroke library of the brush editor (this overwrites hand edits). Edits 
 
 **KAGE font.** With `--kage font/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
 `js/kage-engine.min.js` in Node.js) from the KAGE data refined in `font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
-their stroke widths. The tones stay stroked circles. `--gothic` selects the Gothic style (family "QATT Gothic", `font/qatt-gothic`), the default is Mincho:
+their stroke widths. The tones stay stroked circles. `--gothic` selects the Gothic style (family "QATT Gothic", `font/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
 
 ```sh
-python3 tools/build_font.py --kage font/kage.json font/glyphs.json font/qatt-mincho     # writes font/qatt-mincho.ttf / .woff2
+python3 tools/build_font.py --kage font/kage.json font/glyphs.json font/qatt-serif     # writes font/qatt-serif.ttf / .woff2
 ```
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `font/kage.json`). A symbol that has to look
@@ -110,11 +110,11 @@ different on the left or on the right gets its own form: `v2l-X` (left half) and
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
 one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
 
-**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Mincho only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Gothic Bold" and "QATT Mincho Bold":
+**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Serif only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Gothic Bold" and "QATT Mincho Bold":
 
 ```sh
 python3 tools/build_font.py --kage font/kage.json --gothic --bold font/glyphs.json font/qatt-gothic-bold
-python3 tools/build_font.py --kage font/kage.json --bold font/glyphs.json font/qatt-mincho-bold
+python3 tools/build_font.py --kage font/kage.json --bold font/glyphs.json font/qatt-serif-bold
 ```
 
 **Wide.** `--wide` (with `--kage`) makes a joined pair 1.25 cells wide (each half 625 units instead of 500), so its halves are squeezed less; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Gothic Wide":
