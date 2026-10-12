@@ -15,7 +15,7 @@ const Kage = ctx.Kage;
 const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 
 const [kageFile, jobsFile, outFile, style = "mincho", boldArg = "1"] = process.argv.slice(2);
-const bold = +boldArg || 1;                  // build_font.py --bold: 1.7 for Gothic (the stroke), 2.0 for Mincho (the verticals; the thin horizontals stay)
+const bold = +boldArg || 1;                  // build_font.py --bold: 1.7 for Gothic (the stroke), 2.2 for Mincho (the verticals; the thin horizontals stay)
 const data = JSON.parse(fs.readFileSync(kageFile, "utf8")), S = data.scale || 1.9, SYM = data.sym;
 const num = l => l.split(":").map(Number);
 const ptsOf = l => { const f = num(l); return Array.from({ length: (f.length - 3) / 2 }, (_, i) => [f[3 + 2 * i], f[4 + 2 * i]]); };
