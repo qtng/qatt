@@ -110,8 +110,8 @@ different on the left or on the right gets its own form: `v2l-X` (left half) and
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
 one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
 
-**Gothic bold.** `--bold` (with `--kage --gothic`) draws strokes 1.7 times as heavy as the standard Gothic (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs; tones and marks get 1.5 times) and names the family "QATT Gothic Bold":
+**Gothic heavy.** `--heavy` (with `--kage --gothic`) draws strokes 1.7 times as heavy as the standard Gothic (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs; tones and marks get 1.5 times) and names the family "QATT Gothic Heavy":
 
 ```sh
-python3 tools/build_font.py --kage font/kage.json --gothic --bold font/glyphs.json font/qatt-gothic-bold
+python3 tools/build_font.py --kage font/kage.json --gothic --heavy font/glyphs.json font/qatt-gothic-heavy
 ```
