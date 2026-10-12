@@ -90,3 +90,9 @@ python3 tools/update_unicode_data.py PATH/TO/qatt-unicode            # unicode.h
 ```
 
 If the data changes (new characters or offsets), run the font steps above again.
+
+## KAGE prototype
+
+`kage.html` draws the QATT symbols with the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see `js/kage-engine.COPYING`)
+next to the brush outlines. `font/kage.json` holds the KAGE data (one line per stroke and mark); `node tools/kage_seed.js --force` regenerates it from the
+standard stroke library of the brush editor (this overwrites hand edits). Edits in `kage.html` live in the browser (`localStorage` `qatt-kage-v1`) and can be exported as JSON.

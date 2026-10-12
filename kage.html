@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QATT glyphs with KAGE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <style>
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+    main { max-width: 74rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+    h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
+    p { margin: .3rem 0 .8rem; color: var(--muted); }
+    a { color: var(--accent); }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; margin: .8rem 0; font-size: .85rem; }
+    .bar label { display: flex; align-items: center; gap: .35rem; margin: 0; white-space: nowrap; }
+    .bar input[type=range] { width: 7rem; }
+    .marks { display: flex; gap: .25rem; }
+    .marks button { width: 2rem; padding: .1rem 0; }
+    .marks button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+    table { border-collapse: collapse; background: #fffdf8; }
+    th { font: 600 .75rem system-ui; color: var(--muted); text-align: center; padding: .2rem .4rem; position: sticky; top: 56px; background: var(--paper); z-index: 2; }
+    td { border: 1px solid var(--line); padding: 0; text-align: center; cursor: pointer; }
+    td.name { width: 3rem; font: 600 .9rem ui-monospace, Menlo, monospace; color: var(--muted); cursor: default; }
+    td svg { width: 7.5rem; height: 7.5rem; display: block; }
+    td:hover:not(.name) { outline: 2px solid var(--accent); outline-offset: -2px; }
+    td svg g { fill: var(--ink); }
+    .edited { box-shadow: inset 0 0 0 2px var(--accent); }
+    .detail { position: fixed; inset: 0; background: rgba(43, 33, 24, .5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .detail .box { background: #fffdf8; border-radius: .7rem; padding: 1rem; width: min(60rem, 100%); max-height: 100%; overflow: auto; }
+    .detail .views { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
+    .detail .views svg { width: 15rem; height: 15rem; border: 1px solid var(--line); background: #fff; }
+    .detail .views svg g { fill: var(--ink); }
+    .detail textarea { width: 100%; font: .78rem/1.35 ui-monospace, Menlo, monospace; height: 9rem; margin-top: .6rem; }
+    .detail .cap { font-size: .75rem; color: var(--muted); text-align: center; }
+  </style>
+  <script src="js/navigation.js"></script>
+  <script src="js/qatt.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/brush.js"></script>
+  <script src="js/brush-model.js"></script>
+  <script src="js/kage-engine.min.js"></script>
+</head>
+<body>
+<main>
+  <h1>QATT glyphs with KAGE</h1>
+  <p>The symbols drawn by the <a href="https://github.com/kurgm/kage-engine">KAGE engine</a> (glyph outlines from stroke data, as on GlyphWiki), next to the brush outlines of the
+    <a href="brush.html">brush editor</a>. Click a cell to see it large and to edit its KAGE data. Prototype.</p>
+  <div class="bar">
+    <label>Form <select id="form" class="form-select form-select-sm">
+      <option value="v2-">Rhyme</option><option value="v2-s">Onset</option><option value="v2c-">Centred</option>
+    </select></label>
+    <span>Marks</span><span class="marks" id="marks"></span>
+    <label>Mincho thin <input type="range" id="minY" min="0.5" max="6" step="0.1" value="2"></label>
+    <label>Mincho thick <input type="range" id="minT" min="2" max="12" step="0.1" value="6"></label>
+    <label>Gothic <input type="range" id="goth" min="2" max="12" step="0.1" value="5"></label>
+    <button class="btn btn-sm btn-outline-secondary" id="export">Export JSON</button>
+    <label class="btn btn-sm btn-outline-secondary mb-0">Import JSON<input type="file" id="import" accept=".json" hidden></label>
+    <button class="btn btn-sm btn-outline-secondary" id="reset">Reset edits</button>
+  </div>
+  <table id="tbl"></table>
+</main>
+<div class="detail" id="detail" hidden><div class="box">
+  <div class="d-flex justify-content-between align-items-center"><b id="d-title"></b><button class="btn btn-sm btn-outline-secondary" id="d-close">Close</button></div>
+  <div class="views" id="d-views"></div>
+  <textarea id="d-text" spellcheck="false"></textarea>
+  <div class="cap">One KAGE line per stroke; the first lines are the strokes, then the marks 1–6 (the medial for the onset form). Changes apply while you type.</div>
+</div></div>
+<script>
+(() => {
+  "use strict";
+  const KEY = "qatt-kage-v1";
+  const SHAPES = VietnameseParser.SHAPES.map(s => s === "z" ? "_" : s);
+  const ORIG = {};
+  new DOMParser().parseFromString(defaultSvgDefs, "image/svg+xml").querySelectorAll("path[id]").forEach(p => ORIG[p.id] = p.getAttribute("d"));
+  const M = QattBrushModel(QattBrush, SHAPES, ORIG);
+  const $ = id => document.getElementById(id);
+  const S = 1.9;
+  let seed = null, brush = null, edits = {}, form = "v2-", marksOn = new Set();
+  try { edits = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { edits = {}; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(edits)); } catch (e) { /* ignore */ } };
+  const symId = s => form === "v2-s" ? `v2-${s}-small` : form + s;
+  const markIds = s => form === "v2-s" ? [`v2-${s}-medial`] : [1, 2, 3, 4, 5, 6].map(n => form + s + n);
+
+  function kageSvg(id, shotai, markSet) {
+    const sy = edits[id] || seed.sym[id];
+    const lines = sy.strokes.concat(sy.marks.filter((m, i) => m && markSet.has(i)));
+    const k = new Kage();
+    k.kShotai = shotai === "mincho" ? k.kMincho : k.kGothic;
+    if (shotai === "mincho") { k.kFont.kMinWidthY = +$("minY").value; k.kFont.kMinWidthT = +$("minT").value; } else k.kFont.kWidth = +$("goth").value;
+    k.kBuhin.push("g", lines.join("$"));
+    const p = new Kage.Polygons(); k.makeGlyph(p, "g");
+    return p.generateSVG().replace(/^<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+  }
+  function brushSvg(s, markSet) {
+    const ids = [symId(s)].concat(markIds(s).filter((m, i) => markSet.has(i)));
+    const state = { params: brush.params, lib: brush.lib, sym: brush.sym || {} };
+    return `<g transform="scale(${S})">` + ids.map(i => `<path d="${M.outline(state, i)}"/>`).join("") + "</g>";
+  }
+  const wrap = inner => `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  const views = (s, set) => [["Brush", brushSvg(s, set)], ["Mincho", kageSvg(symId(s), "mincho", set)], ["Gothic", kageSvg(symId(s), "gothic", set)]];
+
+  function render() {
+    const set = marksOn;
+    $("tbl").innerHTML = "<tr><th></th><th>Brush editor</th><th>KAGE Mincho</th><th>KAGE Gothic</th></tr>" + SHAPES.map(s =>
+      `<tr><td class="name">${s === "_" ? "z" : s}</td>` + views(s, set).map(([n, g]) => `<td data-s="${s}" class="${edits[symId(s)] && n !== "Brush" ? "edited" : ""}">${wrap(g)}</td>`).join("") + "</tr>").join("");
+  }
+  function openDetail(s) {
+    const id = symId(s), sy = edits[id] || seed.sym[id];
+    $("d-title").textContent = `${id}  (${s === "_" ? "z" : s})`;
+    $("d-text").value = sy.strokes.concat(sy.marks.map(m => m || "")).join("\n");
+    $("detail").hidden = false; $("detail").dataset.s = s;
+    detailViews();
+  }
+  function detailViews() {
+    const s = $("detail").dataset.s, set = new Set([0, 1, 2, 3, 4, 5]);
+    $("d-views").innerHTML = views(s, set).map(([n, g]) => `<div>${wrap(g).replace("<svg", "<svg")}<div class="cap">${n}</div></div>`).join("");
+  }
+  $("d-text").addEventListener("input", () => {
+    const s = $("detail").dataset.s, id = symId(s), nStr = seed.sym[id].strokes.length;
+    const l = $("d-text").value.split("\n");
+    edits[id] = { strokes: l.slice(0, nStr).filter(x => x.trim()), marks: l.slice(nStr).map(x => x.trim() || null) };
+    save(); detailViews(); render();
+  });
+  $("tbl").addEventListener("click", e => { const td = e.target.closest("td[data-s]"); if (td) openDetail(td.dataset.s); });
+  $("d-close").onclick = () => { $("detail").hidden = true; };
+  $("detail").addEventListener("click", e => { if (e.target === $("detail")) $("detail").hidden = true; });
+  $("form").onchange = e => { form = e.target.value; buildMarks(); render(); };
+  for (const id of ["minY", "minT", "goth"]) $(id).oninput = render;
+  function buildMarks() {
+    const n = form === "v2-s" ? 1 : 6;
+    marksOn = new Set([...marksOn].filter(i => i < n));
+    $("marks").innerHTML = Array.from({ length: n }, (_, i) => `<button class="btn btn-sm btn-outline-secondary ${marksOn.has(i) ? "on" : ""}" data-i="${i}">${form === "v2-s" ? "M" : i + 1}</button>`).join("");
+  }
+  $("marks").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const i = +b.dataset.i; marksOn.has(i) ? marksOn.delete(i) : marksOn.add(i);
+    buildMarks(); render();
+  });
+  $("export").onclick = () => {
+    const sym = Object.assign({}, seed.sym, edits);
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([JSON.stringify({ format: "qatt-kage", version: 1, scale: S, sym }, null, 1)], { type: "application/json" })), download: "kage.json" });
+    a.click();
+  };
+  $("import").onchange = async e => {
+    try { const j = JSON.parse(await e.target.files[0].text()); if (j.format !== "qatt-kage") throw 0; edits = {}; for (const id of Object.keys(j.sym)) if (JSON.stringify(j.sym[id]) !== JSON.stringify(seed.sym[id])) edits[id] = j.sym[id]; save(); render(); }
+    catch (err) { alert("Not a QATT KAGE file."); }
+  };
+  $("reset").onclick = () => { if (confirm("Discard all edits?")) { edits = {}; save(); render(); } };
+  Promise.all([fetch("font/kage.json").then(r => r.json()), fetch("font/brush.json").then(r => r.json())]).then(([k, b]) => { seed = k; brush = b; buildMarks(); render(); });
+})();
+</script>
+</body>
+</html>
