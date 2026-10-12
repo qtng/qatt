@@ -35,6 +35,7 @@ BASE = 0xF0000
 UPM = 1000
 SY = float(os.environ.get('QATT_SY', 10.6))   # font units per svg unit (vertical): the glyph body (about 820 high, with GROW) lies inside the em square (-120 to 880)
 SX = SY * float(os.environ.get('QATT_SXF', 1.2))   # in x: SY times this factor, so that the glyph body is square (the shapes of qatt.js are a little taller than wide)
+TONE_X = (13 / 15 * 125 / 120) / float(os.environ.get('QATT_SXF', 1.2))   # the tones are narrower than the letters by this factor: the x/y scale of qatt.js (box 13:15 around a 120x125 viewBox) instead of SXF
 X0, Y0 = 500 - 49.27 * SX, float(os.environ.get('QATT_Y0', 866))  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
@@ -97,6 +98,13 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     matrix = (kx, 0, 0, -SY * grow * v, centre - cx * kx, f)
+    if BRUSH and ids[0].startswith('q'):   # tones: narrower than the letters (see TONE_X), the middle of the tone stays where it is
+        bs = []
+        for i in ids:
+            bp = pathops.Path(); parse_path(PATHS[i], bp.getPen()); bs.append(bp.bounds)
+        cxt = (min(b[0] for b in bs) + max(b[2] for b in bs)) / 2
+        matrix = (kx * TONE_X, 0, 0, matrix[3], matrix[4] + cxt * kx * (1 - TONE_X), f)
+        kx = matrix[0]
     if BRUSH or (KAGE and not ids[0].startswith('q')):   # the tones keep their stroked circles in the KAGE font
         # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
@@ -115,6 +123,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
         parse_path(RESULTS[key], TransformPen(p.getPen(), (u, 0, 0, -u, 0, 0)))
         p.draw(out.getPen())
     else:
+        paths = []
         for i in ids:
             m = matrix
             if i.endswith('@onset'):   # a mark moved from the rhyme form onto the onset form
@@ -122,6 +131,15 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
                 m = (matrix[0] * sx, 0, 0, matrix[3] * sy, matrix[0] * tx + matrix[4], matrix[3] * ty + matrix[5])
             p = pathops.Path()
             parse_path(PATHS[i], TransformPen(p.getPen(), m))
+            paths.append(p)
+        if ids[0].startswith('q'):    # tones: the circles keep the proportions they have in qatt.js (the letters are widened by SXF, the tones are not); the centre stays
+            x0, y0, x1, y1 = (f(b) for f, b in zip((min, min, max, max), zip(*(p.bounds for p in paths))))
+            cx = (x0 + x1) / 2
+            for p in paths:
+                q = pathops.Path()
+                p.draw(TransformPen(q.getPen(), (TONE_X, 0, 0, 1, cx * (1 - TONE_X), 0)))
+                p.reset(); q.draw(p.getPen())
+        for p in paths:
             p.stroke(width, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
             p.convertConicsToQuads(0.1)
             p.draw(out.getPen())
