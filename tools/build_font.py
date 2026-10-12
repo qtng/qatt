@@ -19,6 +19,11 @@ from fontTools.fontBuilder import FontBuilder
 LIGHT = 0.6
 light = '--light' in sys.argv
 if light: sys.argv.remove('--light')
+KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Mincho or Gothic
+if '--kage' in sys.argv:
+    i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
+    KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'mincho'
+    if '--gothic' in sys.argv: sys.argv.remove('--gothic')
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
@@ -76,12 +81,12 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.2
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     matrix = (kx, 0, 0, -SY * grow * v, centre - cx * kx, f)
-    if BRUSH:
+    if BRUSH or (KAGE and not ids[0].startswith('q')):   # the tones keep their stroked circles in the KAGE font
         # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
         ids, u = tuple(ids), SY * grow
         key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
-               round(BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
+               round(width / STROKE if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
         if key not in RESULTS:
             JOBS[key] = {'ids': list(ids), 'm': list(key[1:5]), 'w': key[5]}
             return out
@@ -144,11 +149,12 @@ def make_glyphs():
             tones.append(name)
 
 make_glyphs()
-if BRUSH:   # the outlines requested by the first run, then the glyphs again with them
+if BRUSH or KAGE:   # the outlines requested by the first run, then the glyphs again with them
     with tempfile.TemporaryDirectory() as tmp:
         jobs, out = os.path.join(tmp, 'jobs.json'), os.path.join(tmp, 'out.json')
         json.dump(list(JOBS.values()), open(jobs, 'w'))
-        subprocess.run(['node', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'brush_outlines.js'), BRUSH, jobs, out], check=True)
+        here = os.path.dirname(os.path.abspath(__file__))
+        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE] if KAGE else ['node', os.path.join(here, 'brush_outlines.js'), BRUSH, jobs, out], check=True)
         RESULTS.update(zip(JOBS.keys(), json.load(open(out))))
     make_glyphs()
 jname = 'u%05X' % (BASE + JOINER)
@@ -168,7 +174,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else ''), 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
