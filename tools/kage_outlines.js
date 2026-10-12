@@ -20,13 +20,13 @@ const num = l => l.split(":").map(Number);
 const ptsOf = l => { const f = num(l); return Array.from({ length: (f.length - 3) / 2 }, (_, i) => [f[3 + 2 * i], f[4 + 2 * i]]); };
 const withPts = (l, pts) => num(l).slice(0, 3).join(":") + ":" + pts.map(p => p[0] + ":" + p[1]).join(":");
 
-// qatt.js path id -> {sym, mark}: the KAGE symbol it belongs to and the index of the mark (undefined: the strokes)
+// qatt.js path id (or v2l-X / v2r-X, the left and right form of a symbol) -> {sym, mark}: the KAGE symbol it belongs to and the index of the mark (undefined: the strokes)
 function target(id) {
   let m;
   if ((m = id.match(/^(v2c?)-(.+)-medial$/)) && SHAPES.includes(m[2])) return { sym: `${m[1]}-${m[2]}-small`.replace("v2c-", "v2-"), mark: 0 };
   if ((m = id.match(/^(v2)-(.+)-small$/)) && SHAPES.includes(m[2])) return { sym: id };
-  if ((m = id.match(/^(v2c?)-(.+?)([1-6])$/)) && SHAPES.includes(m[2])) return { sym: `${m[1]}-${m[2]}`, mark: +m[3] - 1 };
-  if ((m = id.match(/^(v2c?)-(.+)$/)) && SHAPES.includes(m[2])) return { sym: id };
+  if ((m = id.match(/^(v2[clr]?)-(.+?)([1-6])$/)) && SHAPES.includes(m[2])) return { sym: `${m[1]}-${m[2]}`, mark: +m[3] - 1 };
+  if ((m = id.match(/^(v2[clr]?)-(.+)$/)) && SHAPES.includes(m[2])) return { sym: id };
   throw new Error("no KAGE data for " + id);
 }
 // the box of the strokes of a symbol (its end and control points)
@@ -50,7 +50,8 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
   return hit ? "1:" + f[1] + ":2:" + f.slice(3).join(":") : l;
 });
 function linesOf(id) {
-  const onset = id.endsWith("@onset"), base = onset ? id.slice(0, -6) : id, t = target(base), sy = SYM[t.sym];
+  const onset = id.endsWith("@onset"), base = onset ? id.slice(0, -6) : id, t = target(base);
+  const sy = SYM[t.sym] || SYM[t.sym.replace(/^v2[lr]-/, "v2c-")];   // v2l-X / v2r-X (left / right form): only a symbol with its own form has one, the others use the single form
   if (!sy) throw new Error("no KAGE symbol " + t.sym);
   const ls = t.mark === undefined ? sy.strokes : [sy.marks[t.mark]].filter(Boolean);
   if (!onset) return ls;

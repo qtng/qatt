@@ -147,14 +147,15 @@ def make_glyphs():
             # syllable of qatt.js; each is half a cell wide, so the right one is drawn half a cell to the left of its origin
             pair = (PAIR_X0 + PAIR_X1) / 2
             if KAGE:
-                # the halves are made from the single form: KAGE draws it fitted into a box of the left or right half of the cell, in
+                # the halves are made from the single form (or from the left / right form of the symbol if kage.json has one): KAGE draws it fitted into a box of the left or right half of the cell, in
                 # three splits (left half 45, 50 or 55 % of what the halves share); the font picks the split by the widths of both letters
                 mids = letter_ids(g, 'single')
                 master_w[name] = outline(mids, STROKE, grow=GROW, ink=True)
+                lids, rids = (tuple(re.sub(r'^v2c-', pre, i) for i in mids) for pre in ('v2l-', 'v2r-'))   # the left and right form of a symbol, if it has one (else the single form)
                 for sp in SPLITS:
                     wl = PAIR_T * sp / 100; sfx = '' if sp == 50 else str(sp)
-                    add(name + '.left' + sfx, outline(mids, STROKE_HALF, grow=GROW, fit=(PAIR_M, PAIR_M + wl)), ADV // 2)
-                    add(name + '.right' + sfx, outline(mids, STROKE_HALF, grow=GROW, fit=(500 - PAIR_M - (PAIR_T - wl), 500 - PAIR_M)), ADV // 2)
+                    add(name + '.left' + sfx, outline(lids, STROKE_HALF, grow=GROW, fit=(PAIR_M, PAIR_M + wl)), ADV // 2)
+                    add(name + '.right' + sfx, outline(rids, STROKE_HALF, grow=GROW, fit=(500 - PAIR_M - (PAIR_T - wl), 500 - PAIR_M)), ADV // 2)
             else:
                 add(name + '.left', outline(letter_ids(g, 'left'), STROKE_HALF, PAIR_K, 500, PAIR_GROW, cx=pair), ADV // 2)
                 add(name + '.right', outline(letter_ids(g, 'right'), STROKE_HALF, PAIR_K, 0, PAIR_GROW, cx=pair), ADV // 2)
