@@ -27,12 +27,14 @@
     main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 1.5rem; }
     a { color: var(--accent); }
     .card-box { margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
-    /* all controls centred (two rows only if there is no room) */
-    .bar { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
-    .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; }
+    /* all controls centred in one row, the slider gives way on a narrow screen */
+    .bar { display: flex; flex-wrap: nowrap; justify-content: center; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
+    .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; flex: 0 1 auto; min-width: 0; }
+    .bar .group select { min-width: 0; }
+    .bar .sizebox { flex: 1 1 8rem; max-width: 15rem; min-width: 5rem; }
     .bar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; }
     .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
-    .bar input[type=range] { width: 200px; max-width: 45vw; accent-color: var(--accent); }
+    .bar input[type=range] { flex: 1 1 auto; width: 0; min-width: 2.5rem; max-width: 200px; accent-color: var(--accent); }
     #sizeLabel { min-width: 2.6em; color: var(--muted); }
     #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
       font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
@@ -66,7 +68,7 @@
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)"></select>
         <select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
       </div>
-      <label><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="sizeLabel">100%</span></label>
+      <label class="sizebox"><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="sizeLabel">100%</span></label>
     </div>
     <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Input Quốc Ngữ..."></textarea>
     <div class="telex"><label><input type="checkbox" id="telex" autocomplete="off"> Telex</label></div>
