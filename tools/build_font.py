@@ -35,6 +35,8 @@ ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
+PAIR_GROW = 1.18               # size of a pair (the Can/Chi forms are GROW)
+PAIR_K = float(os.environ.get('PAIR_K', PAIR_K)); PAIR_GROW = float(os.environ.get('PAIR_GROW', PAIR_GROW))
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
@@ -134,8 +136,8 @@ def make_glyphs():
             # component joiner: the onset form in the left half (.left), the rhyme form in the right half (.right), placed as in a
             # syllable of qatt.js; each is half a cell wide, so the right one is drawn half a cell to the left of its origin
             pair = (PAIR_X0 + PAIR_X1) / 2
-            add(name + '.left', outline(letter_ids(g, 'left'), STROKE_HALF, PAIR_K, 500, GROW, cx=pair), ADV // 2)
-            add(name + '.right', outline(letter_ids(g, 'right'), STROKE_HALF, PAIR_K, 0, GROW, cx=pair), ADV // 2)
+            add(name + '.left', outline(letter_ids(g, 'left'), STROKE_HALF, PAIR_K, 500, PAIR_GROW, cx=pair), ADV // 2)
+            add(name + '.right', outline(letter_ids(g, 'right'), STROKE_HALF, PAIR_K, 0, PAIR_GROW, cx=pair), ADV // 2)
             halves.append(name)
             # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .leftlow, .rightlow for a joined pair)
             add(name + '.up', outline(ids, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
