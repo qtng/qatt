@@ -27,6 +27,8 @@ if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'mincho'
     if '--gothic' in sys.argv: sys.argv.remove('--gothic')
+WIDE = 1.5 if '--wide' in sys.argv else 1.0     # --wide (with --kage): a joined pair is 1.5 cells wide, so its halves need no squeezing
+if '--wide' in sys.argv: sys.argv.remove('--wide')
 BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
@@ -41,7 +43,9 @@ CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) f
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
 PAIR_GROW = 1.18               # size of a pair (the Can/Chi forms are GROW)
 PAIR_M, PAIR_G = 100, 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
-PAIR_T = 1000 - 2 * PAIR_M - PAIR_G   # what the two halves share
+PAIR_W = 1000 * WIDE           # width of a joined pair
+HALF = int(PAIR_W // 2)        # advance of each half
+PAIR_T = PAIR_W - 2 * PAIR_M - PAIR_G   # what the two halves share
 SPLITS = (45, 50, 55)          # KAGE fonts: share of the left half in per cent; the halves are fitted into these boxes by KAGE
 PAIR_K = float(os.environ.get('PAIR_K', PAIR_K)); PAIR_GROW = float(os.environ.get('PAIR_GROW', PAIR_GROW))
 JOINER = 155                   # offset of the component joiner
@@ -171,19 +175,20 @@ def make_glyphs():
                 lids, rids = (tuple(re.sub(r'^v2c-', pre, i) for i in mids) for pre in ('v2l-', 'v2r-'))   # the left and right form of a symbol, if it has one (else the single form)
                 for sp in SPLITS:
                     wl = PAIR_T * sp / 100; sfx = '' if sp == 50 else str(sp)
-                    add(name + '.left' + sfx, outline(lids, STROKE_HALF, grow=GROW, fit=(PAIR_M, PAIR_M + wl)), ADV // 2)
-                    add(name + '.right' + sfx, outline(rids, STROKE_HALF, grow=GROW, fit=(500 - PAIR_M - (PAIR_T - wl), 500 - PAIR_M)), ADV // 2)
+                    add(name + '.left' + sfx, outline(lids, STROKE_HALF, grow=GROW, fit=(PAIR_M, PAIR_M + wl)), HALF)
+                    add(name + '.right' + sfx, outline(rids, STROKE_HALF, grow=GROW, fit=(HALF - PAIR_M - (PAIR_T - wl), HALF - PAIR_M)), HALF)
             else:
                 add(name + '.left', outline(letter_ids(g, 'left'), STROKE_HALF, PAIR_K, 500, PAIR_GROW, cx=pair), ADV // 2)
                 add(name + '.right', outline(letter_ids(g, 'right'), STROKE_HALF, PAIR_K, 0, PAIR_GROW, cx=pair), ADV // 2)
             halves.append(name)
             # Tham Thu: the glyph squeezed into the upper 45 % (.up) or the lower 55 % (.low, and .leftlow, .rightlow for a joined pair)
             add(name + '.up', outline(ids, STROKE_UP, STACK_UP_X, -500, GROW, STACK_UP, STACK_TOP), 0)   # zero width: lies over the cell to its left
+            if WIDE != 1.0: add(name + '.upw', outline(ids, STROKE_UP, STACK_UP_X, -PAIR_W / 2, GROW, STACK_UP, STACK_TOP), 0)   # the same, over a pair
             add(name + '.low', outline(ids, STROKE_LOW, 1.0, 500, GROW, 1 - STACK_UP, STACK_BOTTOM))
             if KAGE:   # the halves of the lower pair come from the left and right form like the halves of a pair, squeezed in y only
                 half = PAIR_T / 2
-                add(name + '.leftlow', outline(lids, STROKE_LOW, grow=GROW, v=1 - STACK_UP, anchor=STACK_BOTTOM, fit=(PAIR_M, PAIR_M + half)), ADV // 2)
-                add(name + '.rightlow', outline(rids, STROKE_LOW, grow=GROW, v=1 - STACK_UP, anchor=STACK_BOTTOM, fit=(500 - PAIR_M - half, 500 - PAIR_M)), ADV // 2)
+                add(name + '.leftlow', outline(lids, STROKE_LOW, grow=GROW, v=1 - STACK_UP, anchor=STACK_BOTTOM, fit=(PAIR_M, PAIR_M + half)), HALF)
+                add(name + '.rightlow', outline(rids, STROKE_LOW, grow=GROW, v=1 - STACK_UP, anchor=STACK_BOTTOM, fit=(HALF - PAIR_M - half, HALF - PAIR_M)), HALF)
             else:
                 add(name + '.leftlow', outline(letter_ids(g, 'left'), STROKE_LOW, PAIR_K, 500, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
                 add(name + '.rightlow', outline(letter_ids(g, 'right'), STROKE_LOW, PAIR_K, 0, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
@@ -191,6 +196,10 @@ def make_glyphs():
             pen = TTGlyphPen(None)
             keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -500), -ADV, 0).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
             glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
+            if WIDE != 1.0:                         # and over a pair: in the corners of the wide cell
+                pen = TTGlyphPen(None)
+                keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -PAIR_W / 2), -PAIR_W, 0).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+                glyphs[name + '.markw'] = pen.glyph(); adv[name + '.markw'] = 0; order.append(name + '.markw')
             tones.append(name)
 
 make_glyphs()
@@ -219,7 +228,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else ''), 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT ' + KAGE_STYLE.capitalize() if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else '') + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
@@ -248,6 +257,16 @@ lookup RIGHT45 {{ sub @FULL by @RIGHT45; }} RIGHT45;
 lookup LEFT55 {{ sub @FULL by @LEFT55; }} LEFT55;
 lookup RIGHT55 {{ sub @FULL by @RIGHT55; }} RIGHT55;
 '''
+wide_fea = tone_wide = ''; upper_pair = 'UPPER'; BR = RA
+if WIDE != 1.0:   # a pair is 1.5 cells wide: the upper glyph of a stack and a tone after a pair are centred on the pair
+    wide_fea = f'''
+@UPW = [{' '.join(n + '.upw' for n in halves)}];
+@TONE_MARKW = [{' '.join(n + '.markw' for n in tones)}];
+lookup UPPER_W {{ sub @FULL by @UPW; }} UPPER_W;
+lookup TONE_MARK_W {{ sub @TONE by @TONE_MARKW; }} TONE_MARK_W;
+'''
+    upper_pair = 'UPPER_W'; BR = ''
+    tone_wide = f"sub [{RA} @UPW] @TONE' lookup TONE_MARK_W;"
 addOpenTypeFeaturesFromString(fb.font, f'''
 @FULL = [{' '.join(halves)}];
 @LEFT = [{' '.join(n + '.left' for n in halves)}];
@@ -257,8 +276,8 @@ addOpenTypeFeaturesFromString(fb.font, f'''
 @LEFTLOW = [{' '.join(n + '.leftlow' for n in halves)}];
 @RIGHTLOW = [{' '.join(n + '.rightlow' for n in halves)}];
 @TONE = [{' '.join(tones)}];
-@TONE_MARK = [{' '.join(n + '.mark' for n in tones)}];
-@BEFORE_TONE = [@FULL {LA} {RA} @UP @TONE_MARK {cname} {cname}.zw {jname} {jname}.zw];
+@TONE_MARK = [{' '.join(n + '.mark' for n in tones)}];{wide_fea}
+@BEFORE_TONE = [@FULL {LA} {BR} @UP @TONE_MARK {cname} {cname}.zw {jname} {jname}.zw];
 lookup LEFT {{ sub @FULL by @LEFT; }} LEFT;
 lookup RIGHT {{ sub @FULL by @RIGHT; }} RIGHT;
 lookup JOINER_ZW {{ sub {jname} by {jname}.zw; }} JOINER_ZW;
@@ -272,10 +291,10 @@ lookup JOIN {{ {join_first} sub @FULL' lookup LEFT {jname}' lookup JOINER_ZW @FU
 lookup STACK {{
     sub [{LA}]' lookup LEFT_LOWER {jname}.zw [{RA}] {cname} @FULL;
     sub [{LA} @LEFTLOW] {jname}.zw [{RA}]' lookup RIGHT_LOWER {cname} @FULL;
-    sub @LEFTLOW {jname}.zw @RIGHTLOW {cname}' lookup COMBINER_ZW @FULL' lookup UPPER;
+    sub @LEFTLOW {jname}.zw @RIGHTLOW {cname}' lookup COMBINER_ZW @FULL' lookup {upper_pair};
     sub @FULL' lookup LOWER {cname}' lookup COMBINER_ZW @FULL' lookup UPPER;
 }} STACK;
-lookup TONE_AFTER {{ sub @BEFORE_TONE @TONE' lookup TONE_MARK; }} TONE_AFTER;
+lookup TONE_AFTER {{ {tone_wide} sub @BEFORE_TONE @TONE' lookup TONE_MARK; }} TONE_AFTER;
 feature ccmp {{
     lookup JOIN;
     lookup STACK;
