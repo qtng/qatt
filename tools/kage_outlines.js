@@ -66,7 +66,7 @@ const out = JSON.parse(fs.readFileSync(jobsFile, "utf8")).map(({ ids, m, w }) =>
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
-  if (style === "gothic") F.kWidth *= w * 0.9;
+  if (style === "gothic") F.kWidth *= w * 0.76;   // the glyphs are drawn GROW (1.18) times larger afterwards, so this is a stroke of about the prototype width
   else { F.kMinWidthY *= w * 1.2; F.kMinWidthT *= w * 0.75; F.kWidth *= w * 0.75; F.kMinWidthU = 5 * w; }   // kMinWidthU: the triangles at the open ends of the horizontals
   k.kBuhin.push("g", lines.join("$"));
   const polys = new Kage.Polygons(); k.makeGlyph(polys, "g");
