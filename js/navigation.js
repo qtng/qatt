@@ -9,7 +9,7 @@
                 links: [
                     { name: "Home", url: "/qatt/index.html", icon: "bi-house" },
                     { name: "QATT Symbols", url: "/qatt/symbols.html", icon: "bi-grid-3x3-gap" },
-                    { name: "QATT Writer", url: "/qatt/type.html", icon: "bi-keyboard" },
+                    { name: "QATT Writer", url: "/qatt/editor.html", icon: "bi-keyboard" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
