@@ -1,5 +1,5 @@
 /*
-The QATT fonts (font/*.woff2) and the sizes offered by font.html and type.html.
+The QATT fonts (font/*.woff2) and the sizes offered by font.html and editor.html.
 
   <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of font.html)
