@@ -69,6 +69,35 @@ function exact(strokes, marks, id0) {
     const ax = shape === "l" ? 0 : 1, [o1, m, o2] = st, mid = it => (it.a[ax] + it.b[ax]) / 2, d = (mid(m) - mid(o1) + mid(o2) - mid(m)) / 2;
     for (const [it, to] of [[o1, mid(m) - d], [o2, mid(m) + d]]) { const sh = to - mid(it); it.a[ax] += sh; it.b[ax] += sh; }
   }
+  // T and +: the strokes crossing a middle vertical stroke are centred on it (a horizontal one is centred on x, its end marks go with it), and
+  // the free-ended verticals crossing a middle horizontal stroke are centred on it in y. Marks that touch an end of a moved stroke move along.
+  const horiz = it => it.a[1] === it.b[1], vert = it => it.a[0] === it.b[0];
+  const onSeg = (p, o, d) => { const q = nearest(p, o); return Math.hypot(q[0] - p[0], q[1] - p[1]) <= d; };
+  const carry = (it, axis, delta) => {                      // move the marks that touch an old end of it, by delta along axis
+    const ends = [[...it.a], [...it.b]];
+    for (const m of mk.filter(Boolean)) if (ends.some(e => onSeg(e, m, 2.2))) { m.a[axis] += delta; m.b[axis] += delta; }
+  };
+  const note = (what, it, d) => { if (process.env.KAGE_DEBUG) console.log(id0, what, Math.round(d * 100) / 100); };
+  for (const M of st.filter(it => vert(it) && it.a[0] === cx)) {
+    const y0 = Math.min(M.a[1], M.b[1]), y1 = Math.max(M.a[1], M.b[1]);
+    for (const H of st.filter(it => it !== M && horiz(it))) {
+      const x0 = Math.min(H.a[0], H.b[0]), x1 = Math.max(H.a[0], H.b[0]);
+      if (cx < x0 - 0.5 || cx > x1 + 0.5 || H.a[1] < y0 - 0.5 || H.a[1] > y1 + 0.5) continue;
+      const d = cx - (x0 + x1) / 2;
+      if (Math.abs(d) > 0.01) { note("crossbar centred on the vertical by", H, d); carry(H, 0, d); H.a[0] += d; H.b[0] += d; }
+    }
+  }
+  for (const M of st.filter(it => horiz(it) && it.a[1] === cy)) {
+    const x0 = Math.min(M.a[0], M.b[0]), x1 = Math.max(M.a[0], M.b[0]);
+    for (const V of st.filter(it => it !== M && vert(it))) {
+      const y0 = Math.min(V.a[1], V.b[1]), y1 = Math.max(V.a[1], V.b[1]);
+      if (V.a[0] < x0 - 0.5 || V.a[0] > x1 + 0.5 || cy < y0 - 0.5 || cy > y1 + 0.5) continue;
+      const capped = st.some(H => H !== M && horiz(H) && [y0, y1].some(y => Math.abs(H.a[1] - y) < 0.5) && V.a[0] >= Math.min(H.a[0], H.b[0]) - 0.5 && V.a[0] <= Math.max(H.a[0], H.b[0]) + 0.5);
+      const d = cy - (y0 + y1) / 2;
+      if (capped || Math.abs(d) <= 0.01) continue;
+      note("vertical centred on the horizontal by", V, d); carry(V, 1, d); V.a[1] += d; V.b[1] += d;
+    }
+  }
   const snap = (it, k, others, tol) => {
     const p = it[k], q = it[k === "a" ? "b" : "a"], dx = p[0] - q[0], dy = p[1] - q[1];
     let best = null;
