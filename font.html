@@ -41,7 +41,7 @@
     .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
     .hide-svg .s { display: none; }
     .grid .break { grid-column: 1 / -1; height: .9rem; }
-    .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); }
+    .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
     h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
     #info { margin-top: .3rem; font-size: .8rem; color: var(--muted); min-height: 1.2rem; text-align: center; }
   </style>
@@ -61,7 +61,7 @@
   <div class="bar">
     <label><select id="font" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"><option value="QATT Mincho" selected>Mincho</option><option value="QATT Gothic">Gothic</option><option value="QATT Prototype">Prototype</option><option value="QATT Prototype Light">Prototype light</option><option value="QATT Brush">Brush-like</option></select></label>
     <label><select id="size" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"><option value="20">60%</option><option value="27">80%</option><option value="34" selected>100%</option><option value="41">120%</option><option value="51">150%</option><option value="68">200%</option><option value="102">300%</option><option value="136">400%</option></select></label>
-    <label><input type="checkbox" id="guides" autocomplete="off"> Guides</label>
+    <label><input type="checkbox" id="guides" autocomplete="off" checked> Guides</label>
     <label><input type="checkbox" id="svg" autocomplete="off"> SVG</label>
   </div>
 
