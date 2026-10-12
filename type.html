@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Type QATT</title>
+  <meta name="description" content="Type Vietnamese and it turns into Quốc Âm Tân Tự text for the QATT fonts.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+  <style>
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Mincho"; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+    main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+    h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
+    p { margin: .3rem 0 .8rem; color: var(--muted); }
+    a { color: var(--accent); }
+    .card-box { margin: 1rem 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+    .bar { display: flex; flex-wrap: wrap; gap: .4rem .8rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
+    .bar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; }
+    .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
+    #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
+      font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
+    #field:focus { outline: 2px solid rgba(168, 54, 42, .35); }
+    #pending { margin-top: .4rem; min-height: 3.2rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
+    #pending .glyph { font-family: var(--qfont); font-size: 2.2rem; line-height: 1; color: var(--ink); }
+    #pending .word { font-style: italic; }
+    .keys { display: flex; gap: .4rem; margin-top: .45rem; }
+    .keys .btn { flex: 1 1 0; }
+  </style>
+  <script defer src="js/navigation.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script defer src="../chunom/js/ime.js"></script>
+</head>
+<body>
+<main>
+  <h1>Type QATT</h1>
+  <p>Type Vietnamese (Quốc Ngữ). When a word is finished (space, punctuation or Enter) it is replaced by the characters of the QATT Unicode block, which the font shows as Quốc Âm Tân Tự. The result is plain text: copy it anywhere where the <a href="font.html">QATT font</a> is available. Words that have no letter in the chosen reading of the rhyme table stay as typed.
+     See also <a href="editor.html">QATT Editor</a>, which draws the words with <code>qatt.js</code>.</p>
+
+  <div class="card-box">
+    <div class="bar">
+      <label><select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"></select></label>
+      <label><select id="size" data-qatt-sizes autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size"></select></label>
+      <label><select id="decoding" autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)"></select></label>
+      <label><input type="checkbox" id="telex" autocomplete="off"> Telex</label>
+    </div>
+    <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Quốc âm tân tự"></textarea>
+    <div id="pending" aria-live="polite"></div>
+    <div class="keys">
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="convert" title="Convert every Quốc Ngữ word in the field, e.g. after pasting">Convert all</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="clear">Clear</button>
+    </div>
+  </div>
+</main>
+
+<script src="js/fonts.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const $ = id => document.getElementById(id);
+    const field = $('field'), pending = $('pending');
+    const parser = new VietnameseParser();
+    const NOT_LETTER = /[^\p{L}\p{M}]/u, WORD_END = /[\p{L}\p{M}]+$/u;
+
+    // decodings (readings of the rhyme table)
+    for (const name of Object.keys(VietnameseParser.DECODINGS)) $('decoding').append(new Option(name, name, name === 'qatt', name === 'qatt'));
+    $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
+
+    // size: the sample size of font.html is the number of pixels, the field shows 1.4 times as much
+    const applySize = () => { field.style.fontSize = Math.round($('size').value * 1.4) + 'px'; };
+    $('size').addEventListener('input', applySize);
+    applySize();
+
+    // Telex (typing Vietnamese on a keyboard without a Vietnamese layout)
+    $('telex').checked = !matchMedia('(pointer: coarse)').matches;
+    const ime = window.VietIme ? new VietIme(field, { telex: $('telex').checked, candidates: false }) : null;
+    if (!ime) $('telex').closest('label').hidden = true;
+    $('telex').addEventListener('change', () => { ime?.update({ telex: $('telex').checked }); field.focus(); });
+
+    // the word that ends right before position `end` is replaced by its QATT characters (if there are any)
+    const convertBefore = end => {
+      const m = WORD_END.exec(field.value.slice(0, end));
+      if (!m) return 0;
+      const text = QattText.word(m[0], parser);
+      if (!text) return 0;
+      const start = end - m[0].length, caret = field.selectionStart;
+      field.setRangeText(text, start, end, 'end');
+      const at = caret + text.length - m[0].length;
+      field.setSelectionRange(at, at);
+      return text.length - m[0].length;
+    };
+
+    // the character just typed ends the word before it
+    const flush = length => {
+      const pos = field.selectionStart;
+      if (pos !== field.selectionEnd || pos < length) return;
+      if (NOT_LETTER.test(field.value.slice(pos - length, pos))) convertBefore(pos - length);
+    };
+    field.addEventListener('input', e => {
+      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1);
+      else if (!e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length);
+      showPending();
+    });
+    // keyboards that compose whole words (Android): the space comes with the end of the composition
+    field.addEventListener('compositionend', e => setTimeout(() => {
+      if (e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1);
+      showPending();
+    }, 0));
+
+    // the word being typed and how it will look
+    function showPending() {
+      const pos = field.selectionStart, m = pos === field.selectionEnd && WORD_END.exec(field.value.slice(0, pos));
+      pending.replaceChildren();
+      if (!m) return;
+      const text = QattText.word(m[0], parser);
+      const word = Object.assign(document.createElement('span'), { className: 'word', textContent: m[0] });
+      pending.append(word);
+      if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
+      else pending.append(' (no QATT letter yet)');
+    }
+    document.addEventListener('selectionchange', () => { if (document.activeElement === field) showPending(); });
+
+    $('convert').addEventListener('click', () => { field.value = QattText.convert(field.value, parser); showPending(); field.focus(); });
+    $('clear').addEventListener('click', () => { field.value = ''; showPending(); field.focus(); });
+    $('copy').addEventListener('click', async () => {
+      const btn = $('copy');
+      try { await navigator.clipboard.writeText(field.value); btn.textContent = 'Copied'; }
+      catch { field.select(); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  });
+</script>
+</body>
+</html>

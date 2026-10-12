@@ -36,7 +36,7 @@ pip install -r tools/requirements.txt
 python3 tools/build_font.py font/glyphs.json font/qatt-prototype      # writes .ttf and .woff2
 ```
 
-Then raise the cache version of the font files in `font.html` (`?v=…`).
+Then raise the cache version of the font files in `js/fonts.js` (`v`).
 
 **Light variant.** `--light` makes all strokes thinner (`LIGHT` times the stroke widths):
 
@@ -122,3 +122,8 @@ python3 tools/build_font.py --kage font/kage.json --bold font/glyphs.json font/q
 ```sh
 python3 tools/build_font.py --kage font/kage.json --gothic --wide font/glyphs.json font/qatt-gothic-wide
 ```
+
+## Shared pieces of the pages
+
+- `js/fonts.js`: the list of fonts (family, file, cache version `v`) and the sizes. `font.html` and `type.html` take their `<select data-qatt-fonts>` / `<select data-qatt-sizes>` and the `@font-face` rules from it; after a new font build raise `v` there (no longer in `font.html`).
+- `js/qatt-text.js`: code of `parser.js` (`parsed.qatt`, e.g. `t,c5,,5`) to text of the QATT block: onset `U+F009B` rhyme tone mark, one cell. Used by `type.html` (typing Quốc Ngữ turns into font text when a word is finished).
