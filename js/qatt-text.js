@@ -2,6 +2,7 @@
 QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html and font.html)
 
   QattText.syllable("t,c5,,5")   // code of VietnameseParser.parse(...).qatt -> onset U+F009B rhyme tone, one cell
+  QattText.syllable("v,,,0")     // no rhyme (Hợp Thư ông): the shape alone
   QattText.syllable("v2,v,,0")   // code of VietnameseParser.parse(...).hop (Hợp Thư): marked shape U+F009B plain shape
   QattText.word("tự", parser)    // Quốc Ngữ word -> text, or null if there is no glyph for it
   QattText.convert(text, parser) // every Quốc Ngữ word in a text, the rest stays as it is
@@ -25,10 +26,10 @@ const QattText = (() => {
   // the onset may carry a marking stroke too (Hợp Thư: "v2,v,,0")
   const syllable = code => {
     const [onset, rhyme, , tone] = code.split(",");
-    const on = split(onset), rh = split(rhyme);
-    if (!on || !rh) return null;
+    const on = split(onset), rh = rhyme === "" ? "" : split(rhyme);   // no rhyme: the shape alone (Hợp Thư ông)
+    if (!on || rh === null) return null;
     const t = TONES[+tone || 0];
-    return on + chr(JOINER - BASE) + rh + (t ? chr(t) : "");
+    return on + (rh ? chr(JOINER - BASE) + rh : "") + (t ? chr(t) : "");
   };
 
   const word = (w, parser) => {

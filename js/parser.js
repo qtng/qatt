@@ -140,8 +140,9 @@ class VietnameseParser {
                 };
 
             // Hợp Thư: the rhymes the tables lack (ong 2, ung 3, uông 4) are written with one shape, the one of the onset: the shape with the marking
-            // stroke of the rhyme, a joiner, the plain shape (code of parse(): .hop, e.g. vong -> "v2,v,,0"; the onset field carries the stroke)
-            static HOP_THU = { "ong": 2, "ung": 3, "uông": 4 };
+            // stroke of the rhyme, a joiner, the plain shape (code of parse(): .hop, e.g. vong -> "v2,v,,0"; the onset field carries the stroke).
+            // ông is the plain shape alone ("v,,,0": no rhyme)
+            static HOP_THU = { "ong": 2, "ung": 3, "uông": 4, "ông": 0 };
 
             // Syllables ending in c, ch, t, p use the rhyme of the nasal twin and an entering tone (6 = âm nhập, 7 = dương nhập)
             static STOP_TWIN = { "c": "ng", "ch": "nh", "t": "n", "p": "m" };
@@ -290,9 +291,9 @@ class VietnameseParser {
             _hopCode(res, spelling) {
                 const { rhyme, tone } = this._rhymeAndTone(res, spelling);
                 const mark = VietnameseParser.HOP_THU[rhyme];
-                if (!mark || this.rhymes.has(rhyme)) return null;
+                if (mark === undefined || this.rhymes.has(rhyme)) return null;
                 const shape = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_";
-                return [shape + mark, shape, "", tone].join(",");
+                return mark ? [shape + mark, shape, "", tone].join(",") : [shape, "", "", tone].join(",");
             }
 
             _finalize(res, toneChar, spelling) {
