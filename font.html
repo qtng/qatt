@@ -40,6 +40,10 @@
     .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
     .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
     .hide-svg .s { display: none; }
+    .fmt-row { display: flex; align-items: center; gap: .9rem; margin-top: .6rem; }
+    .fmt-row .cell { flex: 0 0 var(--cell, 3.8rem); width: var(--cell, 3.8rem); }
+    .fmt-text { font-size: .9rem; color: var(--muted); }
+    .fmt-text strong { color: var(--ink); }
     .grid .break { grid-column: 1 / -1; height: .9rem; }
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
     h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
@@ -54,8 +58,8 @@
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">QATT reference font</h1>
     <p class="lead mx-auto mb-4">The font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block, one square each. A prototype.</p>
-    <a class="btn btn-outline-secondary btn-pill" href="font-editor.html">Glyph editor</a>
-    <a class="btn btn-cinnabar btn-pill" href="editor.html">Type QATT</a>
+    <a class="btn btn-cinnabar btn-pill" href="font-editor.html">Glyph editor</a>
+    <a class="btn btn-outline-secondary btn-pill" href="editor.html">Type QATT</a>
   </div>
 </header>
 <main>
@@ -76,7 +80,9 @@
   </div>
   <div id="info"></div>
   </div>
-  <h2 class="sub">Format characters and tone marks</h2>
+  <h2 class="sub">Format characters</h2>
+  <div class="formats" id="grid-format"></div>
+  <h2 class="sub">Tone marks</h2>
   <div class="grid" id="grid-marks"></div>
   <h2 class="sub">Letters</h2>
   <div class="grid" id="grid"></div>
@@ -88,7 +94,7 @@
   const BASE = 0xF0000;
   const glyphs = await (await fetch('font/glyphs.json')).json();
   const $ = s => document.querySelector(s);
-  const grids = [$('#grid-marks'), $('#grid')], sample = $('#sample'), info = $('#info');
+  const grids = [$('#grid-format'), $('#grid-marks'), $('#grid')], sample = $('#sample'), info = $('#info');
   const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
   const q = new Qatt(); q.observe('TT');
 
@@ -101,7 +107,10 @@
   };
 
   // the format characters and the tone marks first, then the letters
-  const isMark = g => g.t === 'combiner' || g.t === 'joiner' || g.t === 'tone';
+  const EXPLAIN = {   // what the two format characters do
+    combiner: ['Tham Thư combiner', '<em>A</em> <code>U+F009A</code> <em>B</em> writes <em>B</em> above <em>A</em>; <em>A</em> may be a joined pair.'],
+    joiner: ['Component joiner', '<em>A</em> <code>U+F009B</code> <em>B</em> is shown as one square, <em>A</em> in the left and <em>B</em> in the right half.'],
+  };
   for (const g of glyphs) {
     const cell = document.createElement('div');
     cell.className = 'cell ' + g.t;
@@ -112,8 +121,13 @@
     const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
     cell.append(f, s, cp);
     cell.addEventListener('click', () => { addLetter(g.o); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
-    grids[isMark(g) ? 0 : 1].append(cell);
-    if (g.o === 21) { const br = document.createElement('div'); br.className = 'break'; grids[1].append(br); }   // after U+F0015, the 22 basic letters: a new row with some space
+    if (EXPLAIN[g.t]) {   // a row of its own: the tile, then the name and what it does
+      const row = document.createElement('div'); row.className = 'fmt-row';
+      const text = document.createElement('div'); text.className = 'fmt-text';
+      text.innerHTML = '<strong>' + EXPLAIN[g.t][0] + '</strong> <code>U+' + hex(BASE + g.o) + '</code><br>' + EXPLAIN[g.t][1];
+      row.append(cell, text); grids[0].append(row);
+    } else grids[g.t === 'tone' ? 1 : 2].append(cell);
+    if (g.o === 21) { const br = document.createElement('div'); br.className = 'break'; grids[2].append(br); }   // after U+F0015, the 22 basic letters: a new row with some space
   }
 
   const apply = () => {
