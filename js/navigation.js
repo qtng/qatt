@@ -24,7 +24,7 @@
                 links: [
                     { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
                     { name: "Chữ Nôm Writer", url: "/chunom/ime.html", icon: "bi-pencil-square" },
-                    { name: "Decks", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
+                    { name: "Practice / Decks", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
                     { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
                     { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
                 ]
