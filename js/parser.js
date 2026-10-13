@@ -168,19 +168,6 @@ class VietnameseParser {
                 this.vowels = VietnameseParser.VALID_VOWELS.map(s => s.normalize('NFD').toLowerCase());
             }
 
-            // The decoding of the address (?decoding=omniglot), if it is one of `valid`, else null.
-            static urlDecoding(valid) {
-                const name = new URLSearchParams(location.search).get("decoding");
-                return valid.includes(name) ? name : null;
-            }
-
-            // Puts the decoding into the address (?decoding=...) without a new entry in the history of the browser.
-            static setUrlDecoding(name) {
-                const url = new URL(location.href);
-                url.searchParams.set("decoding", name);
-                history.replaceState(history.state, "", url);
-            }
-
             // Chooses the decoding used for the "qatt" code of parse(): a name or a table.
             setDecoding(decoding) {
                 const table = typeof decoding === "string" ? VietnameseParser.DECODINGS[decoding] : decoding;
