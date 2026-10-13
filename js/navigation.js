@@ -4,6 +4,7 @@
         sections: [
             {
                 header: "Quốc Âm Tân Tự (QATT)",
+                origin: "https://qatt.org",
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
@@ -20,6 +21,7 @@
             },
             {
                 header: "Chữ Nôm",
+                origin: "https://chunom.org",
                 themeClass: "text-warning",
                 linkClass: "link-nom",
                 links: [
@@ -112,17 +114,20 @@
         }
         // Pages under /chunom (and the domain chunom.org) carry the Chunom.org brand, all others Qatt.org
         const isChunom = location.pathname.indexOf("/chunom") === 0 || /(^|\.)chunom\.org$/.test(location.hostname);
-        const home = isChunom ? '/chunom' : '/qatt';
+        // On the two domains (qatt.org, chunom.org) the links to the other site and the shared files carry the domain; elsewhere (local, github.io) they stay relative
+        const live = /(^|\.)(qatt|chunom)\.org$/.test(location.hostname);
+        const qattBase = live ? "https://qatt.org" : relativeLinkPrefix;
+        const home = live ? (isChunom ? 'https://chunom.org/chunom' : 'https://qatt.org/qatt') : (isChunom ? '/chunom' : '/qatt');
 
         // logo (also the page icon, unless the page sets its own)
-        const logo = isChunom ? `${relativeLinkPrefix}/qatt/img/chunom-logo.gif` : `${relativeLinkPrefix}/qatt/img/logo.svg`;
+        const logo = isChunom ? `${qattBase}/qatt/img/chunom-logo.gif` : `${qattBase}/qatt/img/logo.svg`;
         const brandTitle = isChunom ? "Chunom.org" : navConfig.title;
         const sections = isChunom ? navConfig.sections.slice().reverse() : navConfig.sections; // the Chữ Nôm block first on Chunom.org
         if (!document.querySelector('link[rel~="icon"]')) {
             const icons = isChunom ? "chunom-favicon" : "favicon";
-            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${relativeLinkPrefix}/qatt/img/${icons}.svg">
-                ${isChunom ? `<link rel="icon" type="image/png" sizes="32x32" href="${relativeLinkPrefix}/qatt/img/chunom-favicon-32.png">` : ''}
-                <link rel="apple-touch-icon" href="${relativeLinkPrefix}/qatt/img/${isChunom ? "chunom-apple-touch-icon" : "apple-touch-icon"}.png">`);
+            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${qattBase}/qatt/img/${icons}.svg">
+                ${isChunom ? `<link rel="icon" type="image/png" sizes="32x32" href="${qattBase}/qatt/img/chunom-favicon-32.png">` : ''}
+                <link rel="apple-touch-icon" href="${qattBase}/qatt/img/${isChunom ? "chunom-apple-touch-icon" : "apple-touch-icon"}.png">`);
         }
 
         const currentPath = window.location.pathname;
@@ -153,7 +158,7 @@
         const sectionsHtml = sections.map(section => {
             const linksHtml = section.links.map(link => {
                 const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
-                return `<a href="${relativeLinkPrefix}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
+                return `<a href="${live ? section.origin : relativeLinkPrefix}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
                             <i class="bi ${link.icon}"></i> ${link.name}
                         </a>`;
             }).join('');
