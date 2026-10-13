@@ -82,6 +82,12 @@
                     <input checked class="form-check-input" type="checkbox" role="switch" id="readingToggle">
                     <label class="form-check-label" for="readingToggle">Quốc ngữ</label>
                 </div>
+                <select id="decoding" class="form-select w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)">
+                    <optgroup label="Choose decoding">
+                        <option value="qatt" selected>qatt.org</option>
+                        <option value="omniglot">omniglot</option>
+                    </optgroup>
+                </select>
                 <select id="font" data-qatt-fonts class="form-select w-auto" aria-label="Font"></select>
             </div>
         </div>
@@ -229,6 +235,7 @@
 
         qattToggle.addEventListener('change', renderWiki);
         readingToggle.addEventListener('change', updateReading);
+        $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); if (currentWikiHtml) renderWiki(); });
 
         contentArea.addEventListener('click', e => {
             const link = e.target.closest('a');

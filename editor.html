@@ -104,7 +104,6 @@
     // a heading inside each dropdown
     const group = (select, label) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.append(...select.options); select.append(g); select.value = value; };
     group($('decoding'), 'Choose decoding');
-    group($('font'), 'Choose font');
     $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
     $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); });
