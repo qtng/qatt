@@ -106,19 +106,13 @@
     group($('decoding'), 'Choose decoding');
     $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
-    // a new decoding: decode everything with the old one, then convert it again with the new one
+    // a new decoding: every QATT cell is read with the old decoding and written with the new one, other text stays as it is
     $('decoding').addEventListener('change', () => {
-      const SEP = '\u2063';   // keeps neighbouring cells apart as words, removed after the conversion
-      let text = '';
-      for (const [part] of field.value.matchAll(QattText.CELL_ANY)) {
-        const reading = /^[\u{F0000}-\u{F0099}]/u.test(part) ? QattText.reading(part, parser) : null;
-        text += reading && reading !== '?' ? SEP + reading + SEP : part;
-      }
+      const next = new VietnameseParser($('decoding').value);
+      field.value = QattText.recode(field.value, parser, next);
       parser.setDecoding($('decoding').value);
-      field.value = QattText.convert(text, parser).replaceAll(SEP, '');
       showPending();
     });
-
     // size: 100% is 36 pixels
     const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.363) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
     $('size').addEventListener('input', applySize);
@@ -256,6 +250,7 @@
         afterCell = isCell;
       }
       const box = $('readingOut');
+      if (!box.hidden) { box.hidden = true; return; }   // a second click hides it again
       box.textContent = out || '(nothing to read)';
       box.hidden = false;
     });
