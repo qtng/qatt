@@ -140,7 +140,7 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
 
   function render() {
     const set = marksOn;
-    $("tbl").innerHTML = "<tr><th></th><th>Brush editor</th><th>KAGE Serif</th><th>KAGE Gothic</th></tr>" + SHAPES.map(s =>
+    $("tbl").innerHTML = "<tr><th></th><th><a href=\"brush.html\">Brush editor</a></th><th>KAGE Serif</th><th>KAGE Gothic</th></tr>" + SHAPES.map(s =>
       `<tr><td class="name">${s === "_" ? "z" : s}</td>` + views(s, set).map(([n, g]) => `<td data-s="${s}" class="${((edits[symId(s)] !== undefined && edits[symId(s)] !== null) || (isLR(symId(s)) && own(symId(s)))) && n !== "Brush" ? "edited" : ""}">${wrap(g)}</td>`).join("") + "</tr>").join("");
   }
   function openDetail(s) {
