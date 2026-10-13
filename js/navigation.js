@@ -7,7 +7,7 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "QATT", url: "/qatt/index.html", icon: "bi-house" },
+                    { name: "Quốc Âm Tân Tự", url: "/qatt/index.html", icon: "bi-house" },
                     { name: "QATT Writer", url: "/qatt/editor.html", icon: "bi-keyboard" },
                     { name: "QATT Symbols", url: "/qatt/symbols.html", icon: "bi-grid-3x3-gap" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
