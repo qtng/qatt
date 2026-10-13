@@ -179,8 +179,12 @@ class VietnameseParser {
                     const shape = VietnameseParser.SHAPES[i] === "z" ? "_" : VietnameseParser.SHAPES[i];
                     this.rhymes.set(rhyme, shape + (j < 5 ? j + 2 : ""));
                 }));
-                this.glyphs = new Map(); // glyph code -> rhyme, the reverse of this.rhymes (the first rhyme of a glyph)
-                for (const [rhyme, glyph] of this.rhymes) if (!this.glyphs.has(glyph)) this.glyphs.set(glyph, rhyme);
+                this.glyphs = new Map(); // glyph code -> rhyme, the reverse of this.rhymes (also the glyphs whose rhyme another glyph has first)
+                table.forEach((row, i) => row.forEach((rhyme, j) => {
+                    if (!rhyme) return;
+                    const shape = VietnameseParser.SHAPES[i] === "z" ? "_" : VietnameseParser.SHAPES[i];
+                    this.glyphs.set(shape + (j < 5 ? j + 2 : ""), rhyme);
+                }));
             }
 
             // ---------- the reverse: QATT glyph -> Quốc Ngữ ----------

@@ -32,6 +32,8 @@
     .glyph-strip .g:hover { opacity: 1; color: var(--cinnabar); }
     .glyph-strip .lab { font-size: .85rem; color: #6a5a48; line-height: 1.2; }
     .choose { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin: 1.2rem 0 2.2rem; }
+    .tone-box { display: inline-block; padding: .4rem .6rem; margin-bottom: .5rem; border: 1px solid #e4d9c0; border-radius: .6rem; background: #fffdf8; line-height: 1; }
+    .tone-box .g { display: block; line-height: 1; }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.set { padding-block: 1.6rem; }
@@ -217,14 +219,14 @@
   <h2 class="tones-h h1">Tones</h2>
   <section class="set">
     <div class="glyph-strip tones" aria-label="Tones">
-      <div class="item"><span class="g">󰂠</span><span class="lab">sắc</span></div>
-      <div class="item"><span class="g">󰂝</span><span class="lab">huyền</span></div>
-      <div class="item"><span class="g">󰂞</span><span class="lab">hỏi</span></div>
-      <div class="item"><span class="g">󰂟</span><span class="lab">ngã</span></div>
-      <div class="item"><span class="g">󰂡</span><span class="lab">nặng</span></div>
-      <div class="item"><span class="g">󰂢</span><span class="lab">sắc (nhập)</span></div>
-      <div class="item"><span class="g">󰂣</span><span class="lab">nặng (nhập)</span></div>
-      <div class="item"><span class="g">󰂜</span><span class="lab">ngang</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂠</span></span><span class="lab">sắc</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂝</span></span><span class="lab">huyền</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂞</span></span><span class="lab">hỏi</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂟</span></span><span class="lab">ngã</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂡</span></span><span class="lab">nặng</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂢</span></span><span class="lab">sắc (nhập)</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂣</span></span><span class="lab">nặng (nhập)</span></div>
+      <div class="item"><span class="tone-box"><span class="g">󰂜</span></span><span class="lab">ngang</span></div>
     </div>
   </section>
 </main>
