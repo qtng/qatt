@@ -8,8 +8,8 @@
                 linkClass: "link-qatt",
                 links: [
                     { name: "Quốc Âm Tân Tự", bar: "Home", url: "/qatt/index.html", icon: "bi-house" },
-                    { name: "QATT Writer", bar: "Writer", url: "/qatt/editor.html", icon: "bi-pencil-square" },
                     { name: "QATT Symbols", bar: "Symbols", url: "/qatt/symbols.html", icon: "bi-book" },
+                    { name: "QATT Writer", bar: "Writer", url: "/qatt/editor.html", icon: "bi-pencil-square" },
                     { name: "QATT Decodings", bar: "Decodings", url: "/qatt/decodings.html", icon: "bi-puzzle" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
                     { name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-wikipedia" },
@@ -23,10 +23,10 @@
                 linkClass: "link-nom",
                 links: [
                     { name: "Character Search", bar: "Search", url: "/chunom/index.html", icon: "bi-search" },
+                    { name: "Practice / Decks", bar: "Practice", url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
+                    { name: "Chữ Nôm Writer", bar: "Writer", url: "/chunom/writer.html", icon: "bi-pencil-square" },
                     { name: "Dictionary: Génibrel 1898", bar: "Dictionaries", url: "/chunom/dict/genibrel.html", icon: "bi-book" },
                     { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
-                    { name: "Chữ Nôm Writer", bar: "Writer", url: "/chunom/writer.html", icon: "bi-pencil-square" },
-                    { name: "Practice / Decks", bar: "Practice", url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
                 ]
             }
         ]
