@@ -236,7 +236,10 @@
     const parser = new VietnameseParser();
     // the readings of the marked forms: how the parser reads the glyph (as a rhyme without onset) after the decoding
     const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.toQuocNgu({ onset: '_', rhyme: el.dataset.rhyme }) || ''; });
-    document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
+    const decoding = document.getElementById('decoding');
+    const fromUrl = VietnameseParser.urlDecoding([...decoding.options].map(o => o.value));   // ?decoding=omniglot
+    if (fromUrl) { decoding.value = fromUrl; parser.setDecoding(fromUrl); }
+    decoding.addEventListener('change', e => { parser.setDecoding(e.target.value); VietnameseParser.setUrlDecoding(e.target.value); label(); });
     label();
     const font = document.getElementById('font');   // the page starts in Prototype Light
     font.value = 'QATT Prototype Light';
