@@ -6,326 +6,120 @@
     <title>QATT Wikipedia Browser</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <script src="../qatt/js/parser.js?v=3"></script>
-    <script src="../qatt/js/qatt.js"></script>
-    <script src="../qatt/js/navigation.js"></script>
-    
+
+    <script src="js/parser.js?v=3"></script>
+    <script src="js/qatt-text.js"></script>
+    <script defer src="js/navigation.js"></script>
+
     <style>
-        :root {
-            --primary-blue: #0d6efd;
-            --border-gray: #dee2e6;
-            --tutorial-bg: #0d6efd;
-            --stroke-width: 2px;
-            --svg-height: 1.9em;
-        }
+        :root { --qfont: "QATT Gothic"; --border-gray: #dee2e6; }
 
-        /* --- SVG Sizes --- */
-        svg {
-            height: var(--svg-height); 
-            fill: transparent;
-            stroke: currentColor;
-            stroke-width: var(--stroke-width);
-            stroke-linecap: square;
-            stroke-linejoin: square;
-            transition: all 0.2s ease;
-        }
-        
-        nobr:has(svg:nth-child(2)) {
-        	display: inline-flex;
-        	flex-direction: column-reverse;
-        	align-items: center;
-        	
-        	svg:last-child {
-        		height: calc(0.4 * var(--svg-height))!important;
-        		width: calc(0.7 * var(--svg-height))!important;
-        		border: none!important;
-        		position: relative!important;
-        		bottom: calc(-0.1 * var(--svg-height))!important;
-        		top: .35em!important;
-        		margin-bottom: 0!important;
-        		use {
-        		    stroke-width: calc(1.4 * var(--stroke-width));
-        		}
-        	}
-        	svg:first-child {
-        		position: relative!important;
-        		height: calc(0.7 * var(--svg-height))!important;
-        		width: calc(0.8 * var(--svg-height))!important;
-        		margin-top: 0!important;
-        		use {
-        			stroke-width: calc(1.2 * var(--stroke-width));
-        		}
-        		use[href^="#qt"] {
-        			transform-origin: center;
-        			transform: scale(1, 1.2);
-        		}
-        	}
-        }
-        
-        /*use[href^="#qt0"]{
-        	display: none
-        }*/
+        /* the text of the article is set in the QATT font, everything it has no glyph for falls back to the usual font */
+        .qatt-on { font-family: var(--qfont), system-ui, sans-serif; font-size: 1.6rem; line-height: 1.5; }
+        .qatt-on ruby { ruby-position: over; }
+        .qatt-on rt { font-family: system-ui, sans-serif; font-size: .4em; line-height: 1; color: #6c757d; user-select: none; }
+        .no-reading rt { display: none; }
 
-        /* Type 1: Giản thể */
-        body[data-type="1"] svg {
-        	--svg-height: 1.45em;
-            --stroke-width: 5.5px;
-            margin: 0.075em -0.05em;
-        }
-
-        /* Type 2: Giản thể + */
-        body[data-type="2"] svg {
-            -svg-height: 1.4em;
-            --stroke-width: 6.5px;
-            margin: 0 -0.1em;
-        }
-
-        /* Logo Styling */
-        .svg-bold svg { 
-        	--svg-height: 1.6em;
-            --stroke-width: 9.5px;
-            margin: 0 !important;
-        }
-
-        .wiki-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0.5rem;
-            margin-bottom: 1.25rem;
-            display: block;
-            background-color: #f8f9fa;
-        }
-    
-        a svg {
-            border-bottom: 1.5px solid currentColor;
-        }
-        
-        /* Ruby & Transliteration Design */
-        ruby {
-            display: inline-flex;
-            flex-direction: column-reverse; 
-            align-items: center;
-            vertical-align: bottom;
-            white-space: nowrap;
-            margin: 0 1px;
-            font-weight: inherit;
-        }
-
-        .r-base {
-            color: inherit;
-            opacity: 1;
-        }
-
-        ruby rt {
-            display: block;
-            font-size: 1.1em;
-            line-height: 1.2;
-            text-align: center;
-            color: inherit;
-            opacity: 1;
-        }
-
-        ruby.ruby-changed rt {
-            font-weight: 500;
-        }
-
-        /* Flow-Modus: If original is hidden */
-        .hide-original ruby {
-            display: inline;
-            white-space: normal;
-            margin: 0;
-            color: inherit;
-        }
-        
-        .hide-original .r-base { 
-            display: none; 
-        }
-        
-        .hide-original ruby rt {
-            display: inline;
-            font-size: 1.1em;
-            color: inherit;
-            opacity: 1;
-            line-height: inherit;
-        }
-
-        .sticky-header {
-            background: white;
-            z-index: 1020;
-            padding-top: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .content-container {
-            border: 1px solid var(--border-gray);
-            border-radius: 0.5rem;
-            background-color: #fff;
-        }
-
-        .external-wiki-link {
-            color: #6c757d;
-            text-decoration: none;
-            line-height: 1;
-            position: relative;
-            top: -0.1em;
-        }
-
-        .wiki-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid var(--border-gray);
-            margin-bottom: 1.5rem;
-        }
-
-        .type-selector {
-            font-size: 0.85rem;
-            padding: 0.35rem 0.6rem;
-            border-radius: 0.4rem;
-            border: 1px solid var(--border-gray);
-            background-color: #f8f9fa;
-            color: #495057;
-            cursor: pointer;
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+        .wiki-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin-bottom: 1.25rem; display: block; background-color: #f8f9fa; }
+        .content-container { border: 1px solid var(--border-gray); border-radius: 0.5rem; background-color: #fff; }
+        .external-wiki-link { color: #6c757d; text-decoration: none; line-height: 1; position: relative; top: -0.1em; }
+        .wiki-header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-gray); margin-bottom: 1.5rem; }
     </style>
 </head>
-<body class="bg-light" data-type="0">
+<body class="bg-light">
 
-    <header xclass="sticky-header sticky-top">
-        <div class="container">
-            <!-- Top Row: Logo & Type Selector -->
-            <div class="d-flex justify-content-between align-items-end mb-3">
-                <span class="fw-bold text-primary fs-4">
-                    <tt class="svg-bold">v,i</tt><tt class="text-danger">c,i</tt><tt class="text-success svg-bold">b,e</tt><tt class="text-warning">d,i</tt><tt class="text-info svg-bold">_,a</tt>
-                </span>
-            </div>
+    <header>
+        <div class="container pt-4">
+            <h1 class="fw-bold text-primary fs-4 mb-3">QATT Wikipedia</h1>
 
-            <!-- Search Row -->
             <div class="row justify-content-center mb-3">
                 <div class="col-md-8 col-lg-6">
                     <div class="input-group shadow-sm">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm Wikipedia...">
-                        <button id="searchBtn" class="btn btn-primary px-4" type="button">
-                            Tìm
-                        </button>
+                        <button id="searchBtn" class="btn btn-primary px-4" type="button">Tìm</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Options Row -->
-            <div class="d-flex justify-content-center gap-4 mb-2">
-                <div id="showToggleContainer" class="form-check form-switch small">
-                    <input class="form-check-input" type="checkbox" role="switch" id="showOriginalToggle">
-                    <label class="form-check-label" for="showOriginalToggle">Quốc ngữ</label>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
+                <div class="form-check form-switch small m-0">
+                    <input checked class="form-check-input" type="checkbox" role="switch" id="qattToggle">
+                    <label class="form-check-label" for="qattToggle">Quốc Âm Tân Tự</label>
                 </div>
-                <div class="form-check form-switch small">
-                    <input checked class="form-check-input" type="checkbox" role="switch" id="transToggle">
-                    <label class="form-check-label" for="transToggle">Quốc Âm Tân Tự</label>
+                <div id="readingBox" class="form-check form-switch small m-0">
+                    <input checked class="form-check-input" type="checkbox" role="switch" id="readingToggle">
+                    <label class="form-check-label" for="readingToggle">Quốc ngữ</label>
                 </div>
+                <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
             </div>
         </div>
-        <!--<a href="https://qtng.github.io/qatt-dc/tutorial.html" class="d-block bg-primary-subtle text-primary p-2 text-center text-decoration-none shadow-sm">
-            <i class="bi bi-arrow-right"></i> Hướng dẫn học Quốc Âm Tân Tự (Tutorial)
-        </a>-->
     </header>
-    
 
     <main class="container mb-5 mt-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-12">
-                <div class="p-4 content-container border shadow-sm">
-                    <div id="loading" class="text-center py-5 d-none">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Đang tải...</p>
-                    </div>
-                    
-                    <div id="errorMessage" class="alert alert-danger d-none border-0" role="alert"></div>
+        <div class="p-4 content-container border shadow-sm">
+            <div id="loading" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Đang tải...</p>
+            </div>
 
-                    <div id="wikiArea">
-                        <div class="wiki-header-row">
-                            <h1 id="wikiTitle" class="display-6 fw-bold mb-3"></h1>
-                            <a id="wikiExternalLink" href="#" target="_blank" class="external-wiki-link mt-2" title="Mở trong Wikipedia">
-                                <i class="bi bi-box-arrow-up-right fs-4"></i>
-                            </a>
-                        </div>
-                        <div id="contentArea" class="wiki-content"></div>
-                    </div>
+            <div id="errorMessage" class="alert alert-danger d-none border-0" role="alert"></div>
+
+            <div id="wikiArea">
+                <div class="wiki-header-row">
+                    <h1 id="wikiTitle" class="display-6 fw-bold mb-3"></h1>
+                    <a id="wikiExternalLink" href="#" target="_blank" class="external-wiki-link mt-2" title="Mở trong Wikipedia">
+                        <i class="bi bi-box-arrow-up-right fs-4"></i>
+                    </a>
                 </div>
+                <div id="contentArea" class="wiki-content"></div>
             </div>
         </div>
     </main>
 
+    <script src="js/fonts.js?v=2"></script>
     <script>
-        let parser, qatt;
-        
         const START_TERM = "Quốc Âm Tân Tự";
         const wikiLang = "vi";
-        
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
-        const contentArea = document.getElementById('contentArea');
-        const wikiTitle = document.getElementById('wikiTitle');
-        const wikiExternalLink = document.getElementById('wikiExternalLink');
-        const transToggle = document.getElementById('transToggle');
-        const showOriginalToggle = document.getElementById('showOriginalToggle');
-        const errorMessage = document.getElementById('errorMessage');
-        const loading = document.getElementById('loading');
+        const parser = new VietnameseParser();
 
-        let currentWikiHtml = ""; 
+        const $ = id => document.getElementById(id);
+        const searchInput = $('searchInput'), contentArea = $('contentArea'), wikiTitle = $('wikiTitle'), wikiExternalLink = $('wikiExternalLink');
+        const qattToggle = $('qattToggle'), readingToggle = $('readingToggle'), errorMessage = $('errorMessage'), loading = $('loading');
+
+        let currentWikiHtml = "";
         let originalTitle = "";
-        
-        // Init
-        function initParser() {
-            if (typeof VietnameseParser !== 'undefined' && typeof Qatt !== 'undefined') {
-                parser = new VietnameseParser();
-                qatt = new Qatt({ container: document.createElement("div") });
-                qatt.observe("tt"); // the logo in the header
-                
-                const titleFromUrl = decodeURIComponent(window.location.hash.substring(1));
-                const initialTitle = titleFromUrl || START_TERM;
-                
-                history.replaceState({ title: initialTitle }, initialTitle, "#" + encodeURIComponent(initialTitle));
-                fetchWiki(initialTitle, false);
-            } else {
-                setTimeout(initParser, 100);
+
+        // the default font of the page (fonts.js has already filled the dropdown)
+        $('font').value = 'QATT Gothic';
+        $('font').dispatchEvent(new Event('change'));
+
+        // A text with its cells of QATT text wrapped in <ruby>: the cell is the base, the reading its annotation (QattText.reading, a dummy for now)
+        function qattNodes(text) {
+            const out = [];
+            let last = 0;
+            for (const { cell, index } of QattText.cells(text)) {
+                if (index > last) out.push(text.slice(last, index));
+                const ruby = document.createElement('ruby');
+                ruby.append(cell, Object.assign(document.createElement('rt'), { textContent: QattText.reading(cell, parser) }));
+                out.push(ruby);
+                last = index + cell.length;
             }
+            if (last < text.length) out.push(text.slice(last));
+            return out;
         }
 
-        // Browser navigation
-        window.onpopstate = function(event) {
-            const titleToLoad = (event.state && event.state.title) 
-                || decodeURIComponent(window.location.hash.substring(1)) 
-                || START_TERM;
-            
-            searchInput.value = titleToLoad;
-            fetchWiki(titleToLoad, false);
-        };
-
-        function transliterateWord(word) {
-            if (!parser) return word;
-            const parsed = parser.parse(word.trim());
-            if (parsed && parsed.qatt) { // the glyph after the rhyme table of the decoding; a word without one stays as it is
-                const div = document.createElement("div");
-                qatt.render(parsed.qatt, div);
-                return div.innerHTML;
-            }
-            return word;
-        }
-
-        function textToRubyHTML(text) {
-            if (!text) return "";
-            return text.replace(/\s*[abcdeghiklmnopqrstuvxyàáạảãÂâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ]+\s*/ig, (word) => {
-                const trans = transliterateWord(word);
-                const isChanged = trans !== word;
-                return `<ruby class="${isChanged ? 'ruby-changed' : 'ruby-same'}"><span class="r-base">${word}</span><rt>${trans}</rt></ruby>`;
+        // all Quốc Ngữ words of the text nodes below the container become QATT text (the font draws it), the cells get their reading
+        function applyQatt(container) {
+            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+                acceptNode: n => ['script', 'style', 'ruby', 'rt', 'code', 'pre'].includes(n.parentElement.tagName.toLowerCase()) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
             });
+            const nodes = [];
+            let n; while (n = walker.nextNode()) if (n.nodeValue.trim()) nodes.push(n);
+            for (const node of nodes) {
+                const converted = QattText.convert(node.nodeValue, parser);
+                if (converted !== node.nodeValue) node.replaceWith(...qattNodes(converted));
+            }
         }
 
         async function fetchWiki(title, pushToHistory = true) {
@@ -337,18 +131,15 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 if (data.error) throw new Error("Trang không tồn tại.");
-                
+
                 const newTitle = data.parse.title;
                 currentWikiHtml = data.parse.text["*"];
                 originalTitle = newTitle;
-                
-                if (pushToHistory) {
-                    const encodedTitle = encodeURIComponent(newTitle);
-                    if (decodeURIComponent(window.location.hash.substring(1)) !== newTitle) {
-                        history.pushState({ title: newTitle }, newTitle, "#" + encodedTitle);
-                    }
+
+                if (pushToHistory && decodeURIComponent(location.hash.substring(1)) !== newTitle) {
+                    history.pushState({ title: newTitle }, newTitle, "#" + encodeURIComponent(newTitle));
                 }
-                
+
                 renderWiki();
                 searchInput.value = newTitle;
             } catch (err) { showError(err.message); }
@@ -356,51 +147,33 @@
         }
 
         function renderWiki() {
-            wikiTitle.innerHTML = originalTitle;
+            wikiTitle.textContent = originalTitle;
             wikiExternalLink.href = `https://${wikiLang}.wikipedia.org/wiki/${encodeURIComponent(originalTitle.replace(/ /g, '_'))}`;
-            
+
             let html = currentWikiHtml.replace(/src="\/\//g, 'src="https://').replace(/srcset="\/\//g, 'srcset="https://');
             html = html.replace(/src="\/([^/])/g, `src="https://${wikiLang}.wikipedia.org/$1`);
             contentArea.innerHTML = html;
-            
-            if (transToggle.checked) {
-                applyRuby(contentArea);
-                wikiTitle.innerHTML = textToRubyHTML(originalTitle);
+
+            if (qattToggle.checked) {
+                applyQatt(contentArea);
+                applyQatt(wikiTitle);
             }
-            updateHiding();
+            for (const el of [contentArea, wikiTitle]) el.classList.toggle('qatt-on', qattToggle.checked);
+            updateReading();
         }
 
-        function applyRuby(container) {
-            const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
-                acceptNode: n => {
-                    const parentTag = n.parentElement.tagName.toLowerCase();
-                    return ['script', 'style', 'ruby', 'rt', 'code', 'pre'].includes(parentTag) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
-                }
-            });
-            const nodes = [];
-            let n; while (n = walker.nextNode()) if (n.nodeValue.trim()) nodes.push(n);
-            nodes.forEach(textNode => {
-                const rubyHTML = textToRubyHTML(textNode.nodeValue);
-                if (rubyHTML !== textNode.nodeValue) {
-                    const span = document.createElement('span');
-                    span.innerHTML = rubyHTML;
-                    textNode.parentNode.replaceChild(span, textNode);
-                }
-            });
-        }
-
-        function updateHiding() {
-            const hide = !showOriginalToggle.checked && transToggle.checked;
-            [contentArea, wikiTitle].forEach(c => c?.classList.toggle('hide-original', hide));
+        function updateReading() {
+            $('readingBox').classList.toggle('d-none', !qattToggle.checked);
+            for (const el of [contentArea, wikiTitle]) el.classList.toggle('no-reading', !readingToggle.checked);
         }
 
         function setLoading(isLoading) {
             loading.classList.toggle('d-none', !isLoading);
-            if(isLoading) {
-                document.getElementById('wikiArea').classList.add('d-none');
+            if (isLoading) {
+                $('wikiArea').classList.add('d-none');
                 errorMessage.classList.add('d-none');
             } else {
-                document.getElementById('wikiArea').classList.remove('d-none');
+                $('wikiArea').classList.remove('d-none');
             }
         }
 
@@ -409,40 +182,37 @@
             errorMessage.classList.remove('d-none');
         }
 
-        // Event Listener
+        // Browser navigation
+        window.onpopstate = event => {
+            const title = (event.state && event.state.title) || decodeURIComponent(location.hash.substring(1)) || START_TERM;
+            searchInput.value = title;
+            fetchWiki(title, false);
+        };
+
+        const searchBtn = $('searchBtn');
         searchBtn.addEventListener('click', () => {
             const val = searchInput.value.trim();
             if (val) fetchWiki(val, true);
         });
+        searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchBtn.click(); });
 
-        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
+        qattToggle.addEventListener('change', renderWiki);
+        readingToggle.addEventListener('change', updateReading);
 
-        transToggle.addEventListener('change', () => {
-            document.getElementById('showToggleContainer').classList.toggle('d-none', !transToggle.checked);
-            renderWiki();
-        });
-
-        showOriginalToggle.addEventListener('change', updateHiding);
-
-        contentArea.addEventListener('click', (e) => {
+        contentArea.addEventListener('click', e => {
             const link = e.target.closest('a');
-            if (link) {
-                const href = link.getAttribute('href');
-                if (href) {
-                    const isWikiInternal = href.startsWith('/wiki/') || href.includes('.wikipedia.org/wiki/');
-                    if (isWikiInternal && !href.includes(':')) {
-                        e.preventDefault();
-                        const titlePart = href.split('/wiki/')[1].split('#')[0];
-                        const decodedTitle = decodeURIComponent(titlePart).replace(/_/g, ' ');
-                        fetchWiki(decodedTitle);
-                        window.scrollTo(0, 0);
-                    }
-                }
+            const href = link?.getAttribute('href');
+            if (!href) return;
+            if ((href.startsWith('/wiki/') || href.includes('.wikipedia.org/wiki/')) && !href.includes(':')) {
+                e.preventDefault();
+                fetchWiki(decodeURIComponent(href.split('/wiki/')[1].split('#')[0]).replace(/_/g, ' '));
+                window.scrollTo(0, 0);
             }
         });
 
-        window.onload = initParser;
+        const initialTitle = decodeURIComponent(location.hash.substring(1)) || START_TERM;
+        history.replaceState({ title: initialTitle }, initialTitle, "#" + encodeURIComponent(initialTitle));
+        fetchWiki(initialTitle, false);
     </script>
 </body>
 </html>
-
