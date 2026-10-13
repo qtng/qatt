@@ -181,7 +181,7 @@ class VietnameseParser {
                 }));
             }
 
-            // Result: .code is the older code of the phoneme glyphs (renderer.js), .qatt the code of the decoding (qatt.js, see _qattCode)
+            // Result: .code is the older code of the phoneme glyphs (the former renderer.js, removed), .qatt the code of the decoding (qatt.js, see _qattCode)
             parse(word) {
                 if (/[fjwz]/i.test(word) && !word.toLowerCase().startsWith('gi')) return null;
 
