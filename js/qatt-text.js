@@ -10,6 +10,7 @@ QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html
   QattText.reading(cell, parser) // the Quốc Ngữ reading of a cell after the decoding of the parser ("?" if there is none)
   QattText.readings(text)        // { cell: reading } for all cells of a text
   QattText.convert(text, parser) // every Quốc Ngữ word in a text, the rest stays as it is
+  QattText.recode(text, from, to) // every cell by its reading after the decoding of parser `from` written again after the decoding of parser `to`; all other text stays
 */
 const QattText = (() => {
   const BASE = 0xF0000, JOINER = BASE + 155, COMBINER = BASE + 154;
@@ -90,6 +91,12 @@ const QattText = (() => {
   const WORD = /[\p{L}\p{M}]+/gu;
   const convert = (text, parser) => text.replace(WORD, w => word(w, parser) ?? w);
 
-  return { syllable, word, convert, cells, decode, reading, readings, WORD, CELL, CELL_ANY };
+  // every cell is read after one decoding and written again after another one: only the QATT cells change (a cell without a reading or a glyph in `to` stays)
+  const recode = (text, from, to) => text.replace(CELL, cell => {
+    const read = reading(cell, from);
+    return (read !== "?" && word(read, to)) || cell;
+  });
+
+  return { syllable, word, convert, recode, cells, decode, reading, readings, WORD, CELL, CELL_ANY };
 })();
 if (typeof module !== "undefined") module.exports = QattText;
