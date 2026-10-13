@@ -6,12 +6,13 @@ QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html
   QattText.syllable("v2,v,,0")   // code of VietnameseParser.parse(...).hop (Hợp Thư): marked shape U+F009B plain shape
   QattText.word("tự", parser)    // Quốc Ngữ word -> text, or null if there is no glyph for it
   QattText.cells(text)           // the cells of QATT text: [{ cell, index }] (QattText.CELL is the pattern, CELL_ANY also matches every other character)
-  QattText.reading(cell)         // the Quốc Ngữ reading of a cell (dummy: "?")
+  QattText.decode(cell)          // a cell as { onset, rhyme, tone, hop } (the reverse of syllable)
+  QattText.reading(cell, parser) // the Quốc Ngữ reading of a cell after the decoding of the parser ("?" if there is none)
   QattText.readings(text)        // { cell: reading } for all cells of a text
   QattText.convert(text, parser) // every Quốc Ngữ word in a text, the rest stays as it is
 */
 const QattText = (() => {
-  const BASE = 0xF0000, JOINER = BASE + 155;
+  const BASE = 0xF0000, JOINER = BASE + 155, COMBINER = BASE + 154;
   const SHAPES = "_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph".split(" ");   // U+F0000 to U+F0015; with marking stroke n (1..6): U+F0016 + 6 * shape + n - 1
   const TONES = [null, 160, 157, 158, 159, 161, 162, 163, 156];                      // tone 1..8 -> offset of the tone mark
   const chr = o => String.fromCodePoint(BASE + o);
@@ -54,8 +55,34 @@ const QattText = (() => {
   // the cells of QATT text in the order they occur: [{ cell, index }]
   const cells = text => Array.from(text.matchAll(CELL), m => ({ cell: m[0], index: m.index }));
 
-  // The Quốc Ngữ reading of a cell. Dummy for now: "?" (to be refined; the parser will give the decoding and its tables).
-  const reading = (cell, parser) => "?";
+  // A cell of QATT text as the parts of the syllable (the reverse of syllable): { onset, rhyme, tone, hop } or null (a cell that is no syllable,
+  // e.g. a stack with the combiner). onset: shape of the onset, rhyme: code of the rhyme glyph ("" none), hop: "ong" "ung" "uông" for Hợp Thư.
+  const decode = cell => {
+    const cps = Array.from(cell, c => c.codePointAt(0) - BASE);
+    const glyph = o => {
+      if (o < 22) return { shape: SHAPES[o], mark: 0 };
+      if (o < 154) return { shape: SHAPES[Math.floor((o - 22) / 6)], mark: (o - 22) % 6 + 1 };
+      return null;
+    };
+    const first = glyph(cps[0]);
+    if (!first) return null;
+    let i = 1, second = null, joined = false;
+    if (cps[1] === JOINER - BASE) { second = glyph(cps[2]); if (!second) return null; joined = true; i = 3; }
+    else if (cps[1] === COMBINER - BASE) return null;
+    let tone = 0;
+    for (; i < cps.length; i++) { const t = TONES.indexOf(cps[i]); if (t < 0) return null; tone = t; }
+    const code = g => g.shape + (g.mark || "");
+    if (!joined) return first.mark ? { onset: first.shape, rhyme: code(first), tone } : { onset: first.shape, rhyme: "", tone };   // m2 alone is m + m2, a plain shape alone is ông
+    if (first.mark && !second.mark && first.shape === second.shape) return { onset: first.shape, rhyme: "", tone, hop: { 2: "ong", 3: "ung", 4: "uông" }[first.mark] };
+    if (first.mark) return null;
+    return { onset: first.shape, rhyme: code(second), tone };
+  };
+
+  // The Quốc Ngữ reading of a cell with the tables of the parser's decoding (parser.toQuocNgu), "?" if there is none.
+  const reading = (cell, parser) => {
+    const parts = parser && decode(cell);
+    return (parts && parser.toQuocNgu(parts)) || "?";
+  };
 
   // the readings of all cells of a text: { cell: reading } (every cell once)
   const readings = (text, parser) => Object.fromEntries(cells(text).map(c => [c.cell, reading(c.cell, parser)]));
@@ -63,6 +90,6 @@ const QattText = (() => {
   const WORD = /[\p{L}\p{M}]+/gu;
   const convert = (text, parser) => text.replace(WORD, w => word(w, parser) ?? w);
 
-  return { syllable, word, convert, cells, reading, readings, WORD, CELL, CELL_ANY };
+  return { syllable, word, convert, cells, decode, reading, readings, WORD, CELL, CELL_ANY };
 })();
 if (typeof module !== "undefined") module.exports = QattText;
