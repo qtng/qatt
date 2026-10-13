@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build a monospace web font from the QATT stroke glyphs (font/glyphs.json, made from the rendered qatt.js glyphs by extract_glyphs.js).
-Standalone, the two format characters (combiner, joiner) are drawn as a small square.
+Standalone, the two format characters are drawn as the ideographic description characters, half a cell wide: the combiner as U+2FF1 (two boxes above each other), the joiner as U+2FF0 (side by side).
 
 Component joiner: "A joiner B" (A, B any Can/Chi form) is shown as one square cell like a syllable of qatt.js: A in the
 left half in its onset form (v2-X-small), B in the right half in its rhyme form (v2-X); a mark of A is moved from the
@@ -172,15 +172,23 @@ def make_glyphs():
         o, tone, letter = g['o'], g['t'] == 'tone', g['t'] in ('unmarked', 'marked', 'chi')
         ids = letter_ids(g, 'single') if letter else one(g['d']) if tone else ()
         pen = TTGlyphPen(None)
-        if g['t'] in ('combiner', 'joiner'):   # format characters: a small centred square as placeholder
-            x0, y0, x1, y1 = 400, 240, 600, 440
-            pen.moveTo((x0, y0)); pen.lineTo((x0, y1)); pen.lineTo((x1, y1)); pen.lineTo((x1, y0)); pen.closePath()
+        if g['t'] in ('combiner', 'joiner'):   # format characters standing alone: the ideographic description characters as placeholder, half a cell wide
+            # combiner: a frame with a line across (two boxes above each other, U+2FF1), joiner: a frame with a line down the middle (side by side, U+2FF0)
+            x0, y0, x1, y1 = 80, 100, 420, 740
+            frame = pathops.Path()
+            frame.moveTo(x0, y0); frame.lineTo(x0, y1); frame.lineTo(x1, y1); frame.lineTo(x1, y0); frame.close()
+            if g['t'] == 'combiner': frame.moveTo(x0, (y0 + y1) // 2); frame.lineTo(x1, (y0 + y1) // 2)
+            else: frame.moveTo((x0 + x1) // 2, y0); frame.lineTo((x0 + x1) // 2, y1)
+            frame.stroke(40, pathops.LineCap.BUTT_CAP, pathops.LineJoin.MITER_JOIN, 4)
+            frame.simplify(fix_winding=True)
+            frame.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         else:
             path = outline(ids, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
             if tone: path = keep_inside(path, 0, ADV)
             path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         name = 'u%05X' % (BASE + o)
         glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
+        if g['t'] in ('combiner', 'joiner'): adv[name] = ADV // 2
         if letter:
             # component joiner: the onset form in the left half (.left), the rhyme form in the right half (.right), placed as in a
             # syllable of qatt.js; each is half a cell wide, so the right one is drawn half a cell to the left of its origin

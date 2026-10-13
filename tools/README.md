@@ -64,7 +64,7 @@ Tham Thư (`STACK_UP`, `STACK_UP_X`) and the extent of a joined pair (`PAIR_X0`,
 - *A* `U+F009A` *B* (Tham Thư combiner): *A* (a single form or a joined pair) goes into the lower 55 %, *B* into the upper
   45 % of the cell; the combiner has no width.
 - A tone mark after any character becomes a zero-width variant (the small form of `qatt.js`) that lies over the preceding cell.
-- Standalone, the combiner and the joiner are a small square, a tone is the large form.
+- Standalone, the combiner is drawn as U+2FF1 (a frame with a line across, two boxes above each other) and the joiner as U+2FF0 (a frame with a line down the middle), both half a cell wide; a tone is the large form.
 
 The code points are `U+F0000` plus the offset in the proposal (`BASE` in `build_font.py`). The offsets come from the data
 in `unicode.html`.
