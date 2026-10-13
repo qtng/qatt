@@ -32,17 +32,20 @@
         ]
     };
 
+    // the shared libraries (Bootstrap, Bootstrap Icons) come from /vendor next to /js of this script, also when a page of another site loads it
+    const vendor = new URL("../vendor/", document.currentScript ? document.currentScript.src : location.href).href;
+
     function injectDependencies() {
         if (!document.querySelector('link[href*="bootstrap-icons"]')) {
             const icons = document.createElement('link');
             icons.rel = 'stylesheet';
-            icons.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css';
+            icons.href = vendor + 'bootstrap-icons/bootstrap-icons.min.css';
             document.head.appendChild(icons);
         }
 
         if (typeof bootstrap === 'undefined' && !document.querySelector('script[src*="bootstrap"]')) {
             const bsScript = document.createElement('script');
-            bsScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+            bsScript.src = vendor + 'bootstrap/js/bootstrap.bundle.min.js';
             document.head.appendChild(bsScript);
         }
 
