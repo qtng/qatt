@@ -392,6 +392,44 @@ class SupabaseService {
     return this.saveDeck({ id: deck.id, title: deck.title, words });
   }
 
+  /**
+   * Public decks the user took over into "My decks" (no copy, just a link). Newest first.
+   */
+  async getSavedDecks() {
+    if (!this.user) await this.init();
+    if (!this.user) return [];
+    const { data, error } = await this.client
+      .from('deck_saves')
+      .select('created_at, decks!inner(id, user_id, title, count, is_public, image_path)')
+      .eq('user_id', this.user.id)
+      .eq('decks.is_public', true)
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return [];
+    }
+    return data.map(r => ({ ...r.decks, saved: true }));
+  }
+
+  /**
+   * Takes a public deck of somebody else into "My decks" (nothing happens for own or non-public decks, or when already taken).
+   */
+  async saveDeckLink(deck) {
+    if (!this.user) await this.init();
+    if (!this.user || !deck || !deck.id || !deck.is_public || deck.user_id === this.user.id) return;
+    const { error } = await this.client
+      .from('deck_saves')
+      .upsert({ user_id: this.user.id, deck_id: deck.id }, { onConflict: 'user_id,deck_id', ignoreDuplicates: true });
+    if (error) console.error("Save error:", error.message);
+  }
+
+  async removeSavedDeck(deckId) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: 'Not signed in' };
+    const { error } = await this.client.from('deck_saves').delete().eq('user_id', this.user.id).eq('deck_id', deckId);
+    return { error };
+  }
+
   async getPublicDecks() {
     if (!this.client) await this.init();
 
