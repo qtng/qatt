@@ -173,13 +173,14 @@ def make_glyphs():
         ids = letter_ids(g, 'single') if letter else one(g['d']) if tone else ()
         pen = TTGlyphPen(None)
         if g['t'] in ('combiner', 'joiner'):   # format characters standing alone: the ideographic description characters as placeholder, half a cell wide
-            # combiner: a frame with a line across (two boxes above each other, U+2FF1), joiner: a frame with a line down the middle (side by side, U+2FF0)
-            x0, y0, x1, y1 = 80, 100, 420, 740
+            # combiner: a frame with a line across (two boxes above each other, U+2FF1), joiner: a frame with a line down the middle (side by side, U+2FF0);
+            # the same thin line (36 units) in every font, whatever its weight
+            x0, y0, x1, y1 = 90, 260, 410, 580   # a square, half as high as before, centred on the cell (500 wide, middle at 420)
             frame = pathops.Path()
             frame.moveTo(x0, y0); frame.lineTo(x0, y1); frame.lineTo(x1, y1); frame.lineTo(x1, y0); frame.close()
             if g['t'] == 'combiner': frame.moveTo(x0, (y0 + y1) // 2); frame.lineTo(x1, (y0 + y1) // 2)
             else: frame.moveTo((x0 + x1) // 2, y0); frame.lineTo((x0 + x1) // 2, y1)
-            frame.stroke(40, pathops.LineCap.BUTT_CAP, pathops.LineJoin.MITER_JOIN, 4)
+            frame.stroke(36, pathops.LineCap.BUTT_CAP, pathops.LineJoin.MITER_JOIN, 4)
             frame.simplify(fix_winding=True)
             frame.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         else:
