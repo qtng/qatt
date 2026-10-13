@@ -206,7 +206,7 @@ class VietnameseParser {
                 let on = onset in BACK ? BACK[onset] : onset;
                 const next = rh[0];
                 if (onset == "c") { // c, k or q
-                    if (/^(uâ|uê|uy|uơ|oa|oă|oe)/.test(rh)) { on = "qu"; rh = rh.slice(1); if (rh[0] == "o") rh = "u" + rh.slice(1); }
+                    if (/^(uâ|uê|uy|uơ|oa|oă|oe)/.test(rh)) { on = "qu"; rh = rh.slice(1); if (rh[0] == "o") rh = "u" + rh.slice(1); if (rh == "âc") rh = "ôc"; } // quốc is written like quấc
                     else if (/^(e|ê|i|y|iê|ia)/.test(rh)) on = "k";
                 } else if (onset == "g" && /^(e|ê|i)/.test(rh)) on = "gh";
                 else if (onset == "ng" && /^(e|ê|i)/.test(rh)) on = "ngh";
