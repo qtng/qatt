@@ -1,5 +1,5 @@
 /*
-Supabase connector for app.html,
+Supabase connector for the practice (practice/, decks),
 provides authentication and
 access to leaderboard.
 
