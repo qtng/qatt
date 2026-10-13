@@ -7,10 +7,10 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "Quốc Âm Tân Tự", url: "/qatt/index.html", icon: "bi-house" },
-                    { name: "QATT Writer", url: "/qatt/editor.html", icon: "bi-keyboard" },
-                    { name: "QATT Symbols", url: "/qatt/symbols.html", icon: "bi-grid-3x3-gap" },
-                    { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
+                    { name: "Quốc Âm Tân Tự", bar: "Home", url: "/qatt/index.html", icon: "bi-house" },
+                    { name: "QATT Writer", bar: "Writer", url: "/qatt/editor.html", icon: "bi-keyboard" },
+                    { name: "QATT Symbols", bar: "Symbols", url: "/qatt/symbols.html", icon: "bi-grid-3x3-gap" },
+                    { name: "QATT Decodings", bar: "Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
                     { name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-wikipedia" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
@@ -22,9 +22,9 @@
                 themeClass: "text-warning",
                 linkClass: "link-nom",
                 links: [
-                    { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
-                    { name: "Chữ Nôm Writer", url: "/chunom/ime.html", icon: "bi-pencil-square" },
-                    { name: "Practice / Decks", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
+                    { name: "Online Dictionary", bar: "Dictionary", url: "/chunom/index.html", icon: "bi-book" },
+                    { name: "Chữ Nôm Writer", bar: "Writer", url: "/chunom/ime.html", icon: "bi-pencil-square" },
+                    { name: "Practice / Decks", bar: "Practice", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
                     { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
                     { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
                 ]
@@ -96,6 +96,25 @@
                 color: #fff !important;
             }
             .offcanvas-nav-link i { margin-right: 12px; width: 20px; text-align: center; }
+            /* bottom bar of the phone: the links of the current block (those with a "bar" label) and the menu */
+            .bottom-bar { display: none; }
+            @media (max-width: 767.98px) and (min-height: 480px) {
+                body.has-bottom-bar { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+                .bottom-bar {
+                    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030;
+                    padding-bottom: env(safe-area-inset-bottom);
+                    background: rgba(33, 37, 41, 0.95); backdrop-filter: blur(15px);
+                    border-top: 1px solid #495057;
+                }
+                .bottom-bar a, .bottom-bar button {
+                    flex: 1 1 0; min-width: 0; height: 60px; border: 0; background: none; color: #adb5bd;
+                    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+                    font-size: .68rem; text-decoration: none; border-top: 3px solid transparent; white-space: nowrap;
+                }
+                .bottom-bar i { font-size: 1.35rem; line-height: 1; }
+                .bottom-bar .active { color: #fff; border-top-color: var(--bar-accent); }
+                .bottom-bar .active i { color: var(--bar-accent); }
+            }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
         `;
         document.head.appendChild(style);
@@ -172,6 +191,28 @@
             </div>
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
         `;
+
+        // bottom bar for phones: only the links of the block of this page; not on the pages that have their own bar at the bottom
+        const ownBottomBar = /\/(practice|immersive|editor)\.html$/.test(currentPath);
+        if (!ownBottomBar) {
+            const block = sections.find(sec => sec.links.some(l => l.bar));
+            const own = sections.find(sec => sec.linkClass === (isChunom ? 'link-nom' : 'link-qatt')) || block;
+            const barLinks = own.links.filter(l => l.bar).map(link => {
+                const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
+                return `<a href="${relativeLinkPrefix}${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i>${link.bar}</a>`;
+            }).join('');
+            const bar = document.createElement('nav');
+            bar.className = 'bottom-bar';
+            bar.setAttribute('aria-label', 'Main');
+            bar.style.setProperty('--bar-accent', isChunom ? 'var(--bs-warning)' : 'var(--bs-info)');
+            bar.innerHTML = `${barLinks}<button type="button" id="barMenu"><i class="bi bi-list"></i>Menu</button>`;
+            document.body.appendChild(bar);
+            document.body.classList.add('has-bottom-bar');
+            bar.querySelector('#barMenu').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
+            // the safe area below the bar needs viewport-fit=cover
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport && !/viewport-fit/.test(viewport.content)) viewport.content += ', viewport-fit=cover';
+        }
 
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
