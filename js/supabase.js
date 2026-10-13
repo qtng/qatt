@@ -148,9 +148,10 @@ class SupabaseService {
   static nameError(name) {
     if (!name) return 'Please enter a name (letters or digits).';
     if (name.toLowerCase() == 'anonymous') return 'Please choose another name.';
-    // our own names are reserved, also hidden between separators ("Chun-om", "q a t t"); the table profiles checks the same
+    // our domains are reserved, also inside longer names and with other separators ("chunom.org-expert", "Chunom Org"; the dot is
+    // already removed by cleanName); the table profiles checks the same. "chunom" or "qatt" alone are fine.
     const plain = name.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
-    if (/chunom|qatt/.test(plain)) return 'This name is reserved, please choose another one.';
+    if (/chunomorg|qattorg/.test(plain)) return 'This name is reserved, please choose another one.';
     return null;
   }
 
