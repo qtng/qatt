@@ -127,3 +127,10 @@ python3 tools/build_font.py --kage font/kage.json --gothic --wide font/glyphs.js
 
 - `js/fonts.js`: the list of fonts (family, file, cache version `v`) and the sizes. `font.html` takes its `<select data-qatt-fonts>` / `<select data-qatt-sizes>`, `editor.html` the fonts and the `@font-face` rules from it; after a new font build raise `v` there (no longer in `font.html`).
 - `js/qatt-text.js`: code of `parser.js` (`parsed.qatt`, e.g. `t,c5,,5`) to text of the QATT block: onset `U+F009B` rhyme tone mark, one cell. Used by `editor.html` (typing Quốc Ngữ turns into font text when a word is finished).
+
+## Libraries (`vendor/`)
+
+Bootstrap 5.3.3 (CSS, JS bundle) and Bootstrap Icons 1.11.3 (CSS, fonts) are part of the repo, no CDN: `vendor/bootstrap/`, `vendor/bootstrap-icons/` (with their licenses).
+Pages link them relatively (`vendor/…`, `../vendor/…` from a subfolder, `/qatt/vendor/…` in `404.html`); `js/navigation.js` finds the folder from its own address, so pages of other sites that load it get the same files.
+To update: take the files from the npm packages `bootstrap` and `bootstrap-icons` (`dist/css/bootstrap.min.css`, `dist/js/bootstrap.bundle.min.js`, `font/bootstrap-icons.min.css`, `font/fonts/*`).
+Still loaded from a CDN: `@supabase/supabase-js` (practice, admin) and `html2canvas` (logo-creator).
