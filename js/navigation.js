@@ -106,6 +106,8 @@
                     background: rgba(33, 37, 41, 0.95); backdrop-filter: blur(15px);
                     border-top: 1px solid #495057;
                 }
+                .bottom-bar.typing { display: none; } /* while the on-screen keyboard is open */
+                body.bar-typing { padding-bottom: 0; }
                 .bottom-bar a, .bottom-bar button {
                     flex: 1 1 0; min-width: 0; height: 60px; border: 0; background: none; color: #adb5bd;
                     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
@@ -209,6 +211,16 @@
             document.body.appendChild(bar);
             document.body.classList.add('has-bottom-bar');
             bar.querySelector('#barMenu').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
+            // hide it while the on-screen keyboard is open (the visual viewport is much shorter than the window)
+            if (window.visualViewport) {
+                const vv = window.visualViewport;
+                const check = () => {
+                    const open = window.innerHeight - vv.height > 150;
+                    bar.classList.toggle('typing', open);
+                    document.body.classList.toggle('bar-typing', open);
+                };
+                vv.addEventListener('resize', check);
+            }
             // the safe area below the bar needs viewport-fit=cover
             const viewport = document.querySelector('meta[name="viewport"]');
             if (viewport && !/viewport-fit/.test(viewport.content)) viewport.content += ', viewport-fit=cover';
