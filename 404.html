@@ -32,11 +32,36 @@
 <header class="hero pt-5 pb-4">
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
-    <div class="code mb-2">404</div>
-    <h1 class="mb-3">Page not found</h1>
-    <p class="lead mx-auto mb-4">This page does not exist, or it has moved. Try one of these instead.</p>
-    <a class="btn btn-cinnabar btn-pill" href="/qatt/index.html">Back to the start page</a>
+    <div class="code mb-2" id="code">404</div>
+    <h1 class="mb-3" id="title">Page not found</h1>
+    <p class="lead mx-auto mb-4" id="text">This page does not exist, or it has moved.</p>
+    <a class="btn btn-cinnabar btn-pill" id="btn" href="/qatt/index.html">Back to the start page</a>
   </div>
 </header>
+<script>
+  // Obsolete addresses (old links on the internet) and where they go now: the path without a trailing index.html or slash -> the new path.
+  // Add a line here instead of keeping an old html file around.
+  const REDIRECTS = {
+    "/qatt/app.html": "/qatt/practice/",
+    "/qatt/thien.html": "/qatt/vandao/",
+  };
+  const key = location.pathname.replace(/index\.html$/, "").replace(/(.)\/$/, "$1");
+  const target = REDIRECTS[key];
+  if (target) {
+    const url = target + location.search + location.hash;
+    document.title = "Page moved";
+    document.getElementById("code").hidden = true;
+    document.getElementById("title").textContent = "This page has moved";
+    document.getElementById("btn").href = url;
+    document.getElementById("btn").textContent = "Go to the new page";
+    let left = 5;
+    const text = document.getElementById("text");
+    const tick = () => {
+      text.textContent = `The address you opened is out of date. You are redirected in ${left} second${left === 1 ? "" : "s"}.`;
+      if (left-- <= 0) location.replace(url); else setTimeout(tick, 1000);
+    };
+    tick();
+  }
+</script>
 </body>
 </html>
