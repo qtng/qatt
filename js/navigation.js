@@ -194,8 +194,8 @@
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
         `;
 
-        // bottom bar for phones: only the links of the block of this page; not on the pages that have their own bar at the bottom
-        const ownBottomBar = /\/(practice|immersive|editor)\.html$/.test(currentPath);
+        // bottom bar for phones: only the links of the block of this page; not on the immersive page
+        const ownBottomBar = /\/immersive\.html$/.test(currentPath);
         if (!ownBottomBar) {
             const block = sections.find(sec => sec.links.some(l => l.bar));
             const own = sections.find(sec => sec.linkClass === (isChunom ? 'link-nom' : 'link-qatt')) || block;
@@ -212,14 +212,20 @@
             document.body.classList.add('has-bottom-bar');
             bar.querySelector('#barMenu').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
             // hide it while the on-screen keyboard is open (the visual viewport is much shorter than the window)
+            // or while the user has put the cursor in a text field (a field focused by the page itself does not count)
+            let keyboard = false, field = false, lastTouch = 0;
+            const update = () => {
+                const hide = keyboard || field;
+                bar.classList.toggle('typing', hide);
+                document.body.classList.toggle('bar-typing', hide);
+            };
+            const isField = el => el && el.matches && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]), textarea, [contenteditable=true]');
+            ['pointerdown', 'touchstart', 'keydown'].forEach(t => document.addEventListener(t, () => { lastTouch = Date.now(); }, true));
+            document.addEventListener('focusin', e => { if (isField(e.target) && Date.now() - lastTouch < 800) { field = true; update(); } });
+            document.addEventListener('focusout', () => { field = false; update(); });
             if (window.visualViewport) {
                 const vv = window.visualViewport;
-                const check = () => {
-                    const open = window.innerHeight - vv.height > 150;
-                    bar.classList.toggle('typing', open);
-                    document.body.classList.toggle('bar-typing', open);
-                };
-                vv.addEventListener('resize', check);
+                vv.addEventListener('resize', () => { keyboard = window.innerHeight - vv.height > 150; update(); });
             }
             // the safe area below the bar needs viewport-fit=cover
             const viewport = document.querySelector('meta[name="viewport"]');
