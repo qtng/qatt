@@ -10,7 +10,7 @@
   <script src="js/parser.js"></script>
   <script defer src="js/fonts.js"></script>
   <style>
-    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    :root { --qfont: "QATT Prototype Light"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
       background:
         radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
@@ -28,10 +28,10 @@
     @media (min-width: 768px) { .glyph-strip { grid-template-columns: repeat(11, 1fr); } }
     .glyph-strip.tones { grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); max-width: 46rem; }
     .glyph-strip .item { display: flex; flex-direction: column; align-items: center; }
-    .glyph-strip .g { font-family: "QATT Prototype Light"; font-size: 2.4rem; line-height: 1.15; opacity: .85; transition: opacity .15s, color .15s; }
+    .glyph-strip .g { font-family: var(--qfont), sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .85; transition: opacity .15s, color .15s; }
     .glyph-strip .g:hover { opacity: 1; color: var(--cinnabar); }
     .glyph-strip .lab { font-size: .85rem; color: #6a5a48; line-height: 1.2; }
-    .choose { display: flex; justify-content: center; margin: 1.2rem 0 0; }
+    .choose { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin: 1.2rem 0 0; }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.set { padding-block: 1.6rem; }
@@ -51,7 +51,7 @@
 </header>
 
 <main class="container py-4" id="content">
-  <div class="choose"><select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select></div>
+  <div class="choose"><select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select><select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select></div>
   <section class="set">
     <div class="rule" aria-hidden="true">the 22 base shapes</div>
     <div class="glyph-strip" aria-label="the 22 base shapes">
@@ -236,6 +236,9 @@
     const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.glyphs.get(el.dataset.rhyme) || ''; });
     document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
     label();
+    const font = document.getElementById('font');   // the page starts in Prototype Light
+    font.value = 'QATT Prototype Light';
+    font.dispatchEvent(new Event('change'));
   });
 </script>
 </body>
