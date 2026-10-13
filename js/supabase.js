@@ -148,6 +148,9 @@ class SupabaseService {
   static nameError(name) {
     if (!name) return 'Please enter a name (letters or digits).';
     if (name.toLowerCase() == 'anonymous') return 'Please choose another name.';
+    // our own names are reserved, also hidden between separators ("Chun-om", "q a t t"); the table profiles checks the same
+    const plain = name.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+    if (/chunom|qatt/.test(plain)) return 'This name is reserved, please choose another one.';
     return null;
   }
 
