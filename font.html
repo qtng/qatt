@@ -10,7 +10,14 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
     main { max-width: 74rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
-    h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
+    .hero { background: radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%), linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; margin: 0; }
+    .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: #4a3d30; }
+    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .btn-cinnabar { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
     p { margin: .3rem 0 .8rem; color: var(--muted); }
     a { color: var(--accent); }
     .sticky-card { position: sticky; top: 68px; z-index: 5; margin: 1rem 0 .4rem; padding: .5rem .7rem .55rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
@@ -33,6 +40,10 @@
     .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
     .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
     .hide-svg .s { display: none; }
+    .fmt-row { display: flex; align-items: center; gap: .9rem; margin-top: .6rem; }
+    .fmt-row .cell { flex: 0 0 var(--cell, 3.8rem); width: var(--cell, 3.8rem); }
+    .fmt-text { font-size: .9rem; color: var(--muted); }
+    .fmt-text strong { color: var(--ink); }
     .grid .break { grid-column: 1 / -1; height: .9rem; }
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
     h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
@@ -42,14 +53,16 @@
   <script src="js/qatt.js"></script>
 </head>
 <body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">QATT reference font</h1>
+    <p class="lead mx-auto mb-4">The font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block, one square each. A prototype.</p>
+    <a class="btn btn-cinnabar btn-pill" href="font-editor.html">Glyph editor</a>
+    <a class="btn btn-outline-secondary btn-pill" href="editor.html">Type QATT</a>
+  </div>
+</header>
 <main>
-  <h1>QATT reference font</h1>
-  <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. This is a prototype; stroke widths and proportions may still change.
-     Click a character to add it to the sample field. To type Vietnamese and get QATT text, use the <a href="editor.html">QATT Writer</a>.</p>
-  <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
-
-  <p><strong>How the fonts are made.</strong> The Serif and Gothic fonts are drawn from stroke data that can be refined in the <a href="font-editor.html">glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
-
   <div class="sticky-card">
   <div class="bar">
     <label><select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"></select></label>
@@ -67,7 +80,9 @@
   </div>
   <div id="info"></div>
   </div>
-  <h2 class="sub">Format characters and tone marks</h2>
+  <h2 class="sub">Format characters</h2>
+  <div class="formats" id="grid-format"></div>
+  <h2 class="sub">Tone marks</h2>
   <div class="grid" id="grid-marks"></div>
   <h2 class="sub">Letters</h2>
   <div class="grid" id="grid"></div>
@@ -79,7 +94,7 @@
   const BASE = 0xF0000;
   const glyphs = await (await fetch('font/glyphs.json')).json();
   const $ = s => document.querySelector(s);
-  const grids = [$('#grid-marks'), $('#grid')], sample = $('#sample'), info = $('#info');
+  const grids = [$('#grid-format'), $('#grid-marks'), $('#grid')], sample = $('#sample'), info = $('#info');
   const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
   const q = new Qatt(); q.observe('TT');
 
@@ -92,7 +107,10 @@
   };
 
   // the format characters and the tone marks first, then the letters
-  const isMark = g => g.t === 'combiner' || g.t === 'joiner' || g.t === 'tone';
+  const EXPLAIN = {   // what the two format characters do
+    combiner: ['Tham Thư combiner', '<em>A</em> <code>U+F009A</code> <em>B</em> writes <em>B</em> above <em>A</em>; <em>A</em> may be a joined pair.'],
+    joiner: ['Component joiner', '<em>A</em> <code>U+F009B</code> <em>B</em> is shown as one square, <em>A</em> in the left and <em>B</em> in the right half.'],
+  };
   for (const g of glyphs) {
     const cell = document.createElement('div');
     cell.className = 'cell ' + g.t;
@@ -103,8 +121,13 @@
     const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
     cell.append(f, s, cp);
     cell.addEventListener('click', () => { addLetter(g.o); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
-    grids[isMark(g) ? 0 : 1].append(cell);
-    if (g.o === 21) { const br = document.createElement('div'); br.className = 'break'; grids[1].append(br); }   // after U+F0015, the 22 basic letters: a new row with some space
+    if (EXPLAIN[g.t]) {   // a row of its own: the tile, then the name and what it does
+      const row = document.createElement('div'); row.className = 'fmt-row';
+      const text = document.createElement('div'); text.className = 'fmt-text';
+      text.innerHTML = '<strong>' + EXPLAIN[g.t][0] + '</strong> <code>U+' + hex(BASE + g.o) + '</code><br>' + EXPLAIN[g.t][1];
+      row.append(cell, text); grids[0].append(row);
+    } else grids[g.t === 'tone' ? 1 : 2].append(cell);
+    if (g.o === 21) { const br = document.createElement('div'); br.className = 'break'; grids[2].append(br); }   // after U+F0015, the 22 basic letters: a new row with some space
   }
 
   const apply = () => {
