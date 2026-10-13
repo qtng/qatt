@@ -179,6 +179,59 @@ class VietnameseParser {
                     const shape = VietnameseParser.SHAPES[i] === "z" ? "_" : VietnameseParser.SHAPES[i];
                     this.rhymes.set(rhyme, shape + (j < 5 ? j + 2 : ""));
                 }));
+                this.glyphs = new Map(); // glyph code -> rhyme, the reverse of this.rhymes (the first rhyme of a glyph)
+                for (const [rhyme, glyph] of this.rhymes) if (!this.glyphs.has(glyph)) this.glyphs.set(glyph, rhyme);
+            }
+
+            // ---------- the reverse: QATT glyph -> Quốc Ngữ ----------
+            // The spelling of a syllable given as { onset, rhyme, tone, hop } (what QattText.decode makes of a cell of QATT text):
+            // onset: shape of the onset ("_" none), rhyme: code of the rhyme glyph in the table, e.g. "c5" (no rhyme: ông), tone: 0 to 8 as in
+            // the qatt code, hop: "ong", "ung", "uông" for the Hợp Thư writing (the onset shape carries the rhyme). null if there is no reading.
+            toQuocNgu({ onset, rhyme, tone = 0, hop }) {
+                let rh = hop || (rhyme === "" ? "ông" : this.glyphs.get(rhyme));
+                if (rh === undefined) return null;
+                const OPEN = { "iê": "ia", "uyê": "uya", "uô": "ua", "ươ": "ưa" }; // the table writes the open rhymes of the diphthongs with their closed form
+                if (rh in OPEN) rh = OPEN[rh];
+                if (rh == "ơnh") rh = "anh"; // anh / oanh stand for ơnh / uơnh where the table lacks them (see RHYME_SUBSTITUTES)
+                if (rh == "uơnh") rh = "oanh";
+                let t = [null, "sac", "huyen", "hoi", "nga", "nang"][tone] || null;
+                if (tone == 6 || tone == 7) { // entering tones: the nasal of the twin becomes the stop
+                    const stop = { ng: "c", nh: "ch", n: "t", m: "p" };
+                    const m = /(ng|nh|n|m)$/.exec(rh);
+                    if (!m) return null;
+                    rh = rh.slice(0, -m[1].length) + stop[m[1]];
+                    t = tone == 6 ? "sac" : "nang";
+                }
+                const BACK = { "_": "", dz: "d", d: "đ", b: "b", c: "c", g: "g", ng: "ng" };
+                let on = onset in BACK ? BACK[onset] : onset;
+                const next = rh[0];
+                if (onset == "c") { // c, k or q
+                    if (/^(uâ|uê|uy|uơ|oa|oă|oe)/.test(rh)) { on = "qu"; rh = rh.slice(1); if (rh[0] == "o") rh = "u" + rh.slice(1); }
+                    else if (/^(e|ê|i|y|iê|ia)/.test(rh)) on = "k";
+                } else if (onset == "g" && /^(e|ê|i)/.test(rh)) on = "gh";
+                else if (onset == "ng" && /^(e|ê|i)/.test(rh)) on = "ngh";
+                return on + this._tonePlaced(rh, t);
+            }
+
+            // the tone mark on the right vowel of a rhyme (modern spelling: the vowel with a hat or horn, else the middle one, with a coda the second, else the first: hòa, thúy)
+            _tonePlaced(rhyme, tone) {
+                const MARK = { sac: "\u0301", huyen: "\u0300", hoi: "\u0309", nga: "\u0303", nang: "\u0323" };
+                if (!tone) return rhyme;
+                const chars = Array.from(rhyme.normalize("NFC"));
+                const isVowel = c => /[aăâeêioôơuưy]/i.test(c);
+                const vowels = chars.map((c, i) => isVowel(c) ? i : -1).filter(i => i >= 0);
+                // the glide u of qu is not a vowel of the rhyme
+                let at;
+                const modified = vowels.filter(i => /[ăâêôơư]/i.test(chars[i]));
+                if (modified.length) at = modified[modified.length - 1];
+                else if (vowels.length == 1) at = vowels[0];
+                else if (vowels.length == 3) at = vowels[1];
+                else if (vowels.length == 2) {
+                    const closed = vowels[1] < chars.length - 1; // a coda follows: the second vowel (toán), else the first (hòa, thúy, mái)
+                    at = closed ? vowels[1] : vowels[0];
+                } else return rhyme;
+                chars[at] = (chars[at].normalize("NFD")[0] + (chars[at].normalize("NFD").slice(1)) + MARK[tone]).normalize("NFC");
+                return chars.join("");
             }
 
             // Result: .code is the older code of the phoneme glyphs (the former renderer.js, removed), .qatt the code of the decoding (qatt.js, see _qattCode)
