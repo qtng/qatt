@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QATT glyphs with KAGE</title>
+  <title>QATT glyph editor</title>
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <style>
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
@@ -53,9 +53,8 @@
 </head>
 <body>
 <main>
-  <h1>QATT glyphs with KAGE</h1>
-  <p>The symbols drawn by the <a href="https://github.com/kurgm/kage-engine">KAGE engine</a> (glyph outlines from stroke data, as on GlyphWiki), next to the brush outlines of the
-    <a href="brush.html">brush editor</a>. How the fonts are made: see <a href="font.html">the font page</a>. Click a cell to see it large; drag the dots and lines to edit its KAGE data. The fonts make the halves of a joined pair and of a stack from the single form; a symbol can have its own left or right form where it needs to look different. Prototype. Export your changes as JSON and send them to us; font files on request via <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
+  <h1>QATT glyph editor</h1>
+  <p>Edit the strokes of the symbols with the <a href="https://github.com/kurgm/kage-engine">KAGE engine</a> and compare them with the outlines of the <a href="brush.html">brush editor</a>. Click a cell to see it large; drag the dots and lines to change it. Export your changes as JSON and send them to us; font files on request via <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
   <div class="bar">
     <label>Form <select id="form" class="form-select form-select-sm">
       <option value="v2c-">Single</option><option value="v2l-">Left (optional)</option><option value="v2r-">Right (optional)</option>
