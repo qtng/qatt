@@ -12,49 +12,80 @@
     <script defer src="js/navigation.js"></script>
 
     <style>
-        :root { --qfont: "QATT Gothic"; --border-gray: #dee2e6; }
+        :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Gothic"; }
+        body { background: var(--paper); color: var(--ink); }
+        a { color: var(--accent); }
+
+        .hero {
+            background:
+                radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+                linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+            border-bottom: 1px solid #e8dcc0;
+            color: var(--ink);
+        }
+        .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+        .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+        .hero .lead { max-width: 38rem; color: #4a3d30; }
+        @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
+
+        /* the search area stays at the top (below the menu bar) */
+        .search-bar { position: sticky; top: 60px; z-index: 1020; padding: .6rem 0; background: var(--paper); border-bottom: 1px solid var(--line); }
+        .search-bar .input-group { box-shadow: 0 .2rem .6rem rgba(60, 40, 20, .12); border-radius: 2rem; }
+        .search-bar .input-group-text, .search-bar .form-control, .search-bar .btn { border-color: var(--field); background: #fffdf8; }
+        .search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
+        .search-bar .btn { border-radius: 0 2rem 2rem 0; background: var(--accent); border-color: var(--accent); color: #fff; padding: .375rem 1.2rem; }
+        .search-bar .btn:hover { background: #8c2c22; border-color: #8c2c22; }
+        .search-bar .form-control:focus { box-shadow: none; border-color: var(--accent); }
+        .options { font-size: .85rem; margin-top: .5rem; }
+        .options .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+        .options .form-select { font-size: .85rem; padding-top: .1rem; padding-bottom: .1rem; }
+
+        .content-container { background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+        .wiki-header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+        .external-wiki-link { color: var(--muted); text-decoration: none; line-height: 1; position: relative; top: -0.1em; }
+        .wiki-content img { max-width: 100%; height: auto; border-radius: .5rem; margin-bottom: 1.25rem; display: block; }
 
         /* the text of the article is set in the QATT font, everything it has no glyph for falls back to the usual font */
         .qatt-on { font-family: var(--qfont), system-ui, sans-serif; font-size: 1.6rem; line-height: 1.5; }
         .qatt-on ruby { ruby-position: over; }
-        .qatt-on rt { font-family: system-ui, sans-serif; font-size: .4em; line-height: 1; color: #6c757d; user-select: none; }
+        .qatt-on rt { font-family: system-ui, sans-serif; font-size: .4em; line-height: 1; color: var(--muted); user-select: none; }
         .no-reading rt { display: none; }
-
-        .wiki-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin-bottom: 1.25rem; display: block; background-color: #f8f9fa; }
-        .content-container { border: 1px solid var(--border-gray); border-radius: 0.5rem; background-color: #fff; }
-        .external-wiki-link { color: #6c757d; text-decoration: none; line-height: 1; position: relative; top: -0.1em; }
-        .wiki-header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-gray); margin-bottom: 1.5rem; }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <header>
-        <div class="container pt-4">
-            <h1 class="fw-bold text-primary fs-4 mb-3">QATT Wikipedia</h1>
+    <header class="hero pt-5 pb-4">
+        <div class="container text-center">
+            <div class="han mb-2">國音新字</div>
+            <h1 class="mb-3">QATT Wikipedia</h1>
+            <p class="lead mx-auto mb-0">Read Vietnamese Wikipedia in Quốc Âm Tân Tự, with the reading above every character.</p>
+        </div>
+    </header>
 
-            <div class="row justify-content-center mb-3">
+    <div class="search-bar">
+        <div class="container">
+            <div class="row justify-content-center">
                 <div class="col-md-8 col-lg-6">
-                    <div class="input-group shadow-sm">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm Wikipedia...">
-                        <button id="searchBtn" class="btn btn-primary px-4" type="button">Tìm</button>
+                        <button id="searchBtn" class="btn" type="button">Tìm</button>
                     </div>
                 </div>
             </div>
-
-            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
-                <div class="form-check form-switch small m-0">
+            <div class="options d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <div class="form-check form-switch m-0">
                     <input checked class="form-check-input" type="checkbox" role="switch" id="qattToggle">
                     <label class="form-check-label" for="qattToggle">Quốc Âm Tân Tự</label>
                 </div>
-                <div id="readingBox" class="form-check form-switch small m-0">
+                <div id="readingBox" class="form-check form-switch m-0">
                     <input checked class="form-check-input" type="checkbox" role="switch" id="readingToggle">
                     <label class="form-check-label" for="readingToggle">Quốc ngữ</label>
                 </div>
-                <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
+                <select id="font" data-qatt-fonts class="form-select w-auto" aria-label="Font"></select>
             </div>
         </div>
-    </header>
+    </div>
 
     <main class="container mb-5 mt-4">
         <div class="p-4 content-container border shadow-sm">
