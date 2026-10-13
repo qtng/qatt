@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QATT Brush 2</title>
+  <meta name="description" content="Editor for brush strokes on the QATT shapes: every stroke has two end points, a bend, a kind of start and end, and a width gradient; the brush is the same for all.">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/qatt.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/brush.js"></script>
+  <script src="js/brush-model.js"></script>
+  <script src="js/brush2.js"></script>
+  <script src="js/brush2-model.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --line: #dccfb2; --muted: #6a5a48; --combo: 46px; }
+    body { color: var(--ink); background: #fffdf8; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); }
+    .hero .han { color: var(--cinnabar); font-size: 1.1rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 46rem; color: #4a3d30; font-size: 1.05rem; }
+    .panel { background: #fff; border: 1px solid #e8dcc0; border-radius: .6rem; padding: .8rem; }
+    .panel h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.1rem; margin: 0 0 .6rem; }
+    .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    .tabs .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    #views .btn { border-radius: 2rem; padding: .35rem 1.2rem; }
+
+    svg.glyph { width: 100%; height: auto; aspect-ratio: 128 / 136; fill: var(--ink); }
+    svg.glyph path.faint { fill: #cbbd9f; }
+
+    #sym-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr)); gap: .3rem; }
+    .cell, .lib-cell { border: 1px solid transparent; background: none; border-radius: .4rem; padding: .25rem .2rem .1rem; display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: .78rem; line-height: 1.15; }
+    .cell:hover, .lib-cell:hover { border-color: var(--line); }
+    .cell.active, .lib-cell.active { border-color: var(--cinnabar); background: rgba(168, 54, 42, .06); }
+    .cell.edited span::after { content: " •"; color: var(--cinnabar); }
+    .cell svg { width: 2.5rem; }
+    #lib-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr)); gap: .3rem; }
+    .lib-cell svg { width: 3.2rem; aspect-ratio: 1; }
+    .lib-cell span { text-align: center; color: var(--ink); }
+    .lib-cell small { display: block; color: var(--muted); }
+
+    .edit-canvas { width: 100%; max-width: 32rem; display: block; margin: 0 auto; touch-action: none; user-select: none; background: #fffdf8; border: 1px solid #e8dcc0; border-radius: .4rem; }
+    #canvas { aspect-ratio: 130 / 135; }
+    #lib-canvas { aspect-ratio: 1; max-width: 26rem; }
+    .edit-canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
+    .edit-canvas .grid .box { fill: none; stroke: var(--line); stroke-width: .35; stroke-dasharray: 1.5 1.5; }
+    .edit-canvas .ctx { fill: #b9ab8f; }
+    .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
+    .edit-canvas .stroke { fill: var(--ink); }
+    #lib-canvas .stroke { fill: #000; cursor: default; }
+    .edit-canvas .stroke.current { fill: var(--cinnabar); }
+    .edit-canvas .mark { fill: var(--ink); pointer-events: none; }
+    .edit-canvas .mark.current { fill: var(--cinnabar); }
+    .edit-canvas .handles line { stroke: #3d8bd4; stroke-width: .3; }
+    .edit-canvas .handles .chord { stroke-dasharray: 1 1; }
+    .edit-canvas .handles .skel { fill: none; stroke: #fff; stroke-width: .35; }
+    .edit-canvas .handles circle, .edit-canvas .handles .ctrl { fill: #fff; stroke: #3d8bd4; stroke-width: .5; cursor: grab; }
+    .edit-canvas .handles circle.start { fill: #3d8bd4; }
+    .edit-canvas .handles .ctrl { fill: #3d8bd4; }
+    .edit-canvas .guide { stroke: #e0457b; stroke-width: .3; stroke-dasharray: 1 1; }
+
+    .edit-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+    .edit-bar > span { font-size: .85rem; width: 2.6rem; }
+    #stroke-buttons, #mark-buttons, #mode-buttons { display: flex; gap: .3rem; flex-wrap: wrap; }
+    #stroke-buttons .btn { min-width: 2.2rem; font-weight: 600; }
+    #mark-buttons { padding-left: .5rem; border-left: 1px solid var(--line); }
+    #canvas.editing { cursor: crosshair; }
+    .edit-canvas .handles circle.on { stroke: var(--cinnabar); stroke-width: .8; }
+    .item-row { display: grid; grid-template-columns: 5.2rem 1fr auto; gap: .4rem; align-items: center; padding: .15rem .3rem; border-radius: .4rem; }
+    .item-row.active { background: rgba(168, 54, 42, .08); }
+    .item-row .item-label { color: var(--ink); text-decoration: none; text-align: left; padding-left: 0; }
+    .item-row.active .item-label { color: var(--cinnabar); font-weight: 600; }
+    #mark-buttons { display: flex; gap: .3rem; flex-wrap: wrap; }
+    .slider { display: grid; grid-template-columns: 9.5rem 1fr 3.4rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
+    .slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+    .slider input { width: 100%; accent-color: var(--cinnabar); }
+    .ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+    .ctx-grid label { font-size: .8rem; color: var(--muted); }
+
+    #combos, #sample-out, #lib-uses { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
+    .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .9rem); }
+    .combo svg { width: var(--combo); }
+    .combo span { font-size: .75rem; color: var(--muted); line-height: 1.2; text-align: center; }
+    #lib-uses .combo { cursor: pointer; }
+    #sample-out svg { width: calc(var(--combo) * 1.1); }
+    .hint { font-size: .82rem; color: var(--muted); }
+    [hidden] { display: none !important; }
+    kbd { background: #efe6d2; color: var(--ink); font-size: .75rem; }
+  </style>
+</head>
+<body>
+<header class="hero pt-4 pb-3">
+  <div class="container text-center">
+    <div class="han mb-1">國音新字</div>
+    <h1 class="mb-2">QATT Brush 2</h1>
+    <p class="lead mx-auto mb-0">Every stroke has two end points, a bend, a kind of start and end (flat, pointed or kihitsu) and a gradient for its width.
+      Width, angle and size of the ends are the same for all strokes. Your work is kept in this browser; export it as JSON to keep a copy.
+      The first time, the symbols of the <a href="brush.html">first brush editor</a> are taken over.</p>
+    </div>
+</header>
+
+<main class="container-fluid py-3 px-3 px-lg-4">
+  <div class="row g-3">
+    <!-- symbols view -->
+    <div class="col-lg-3">
+      <div class="panel">
+        <div class="btn-group btn-group-sm d-flex mb-2 tabs" id="forms" role="group" aria-label="Form">
+          <button type="button" class="btn btn-outline-dark" data-form="rhyme">Rhyme</button>
+          <button type="button" class="btn btn-outline-dark" data-form="onset">Onset</button>
+          <button type="button" class="btn btn-outline-dark" data-form="centred">Centred</button>
+        </div>
+        <div id="sym-list"></div>
+        <p class="hint mt-2 mb-0">A dot after the name marks a symbol you changed. Until you change it, a centred form follows its rhyme form.</p>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="panel">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <h2 class="me-auto mb-0" id="sym-name"></h2>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+        </div>
+        <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="d-flex flex-wrap gap-3 mt-2 small">
+          <label><input type="checkbox" id="view-orig"> Original lines</label>
+          <label><input type="checkbox" id="view-snap"> Snap to other end points</label>
+        </div>
+        <div class="edit-bar mt-2">
+          <span>Edit</span><div id="stroke-buttons"></div><div id="mark-buttons"></div>
+          <label class="small d-flex align-items-center gap-2 ms-auto">Marks visible <input type="range" id="mark-opacity" min="0" max="1" step="0.05" value="0.3"></label>
+        </div>
+        <div class="edit-bar mt-2"><span>Drag</span><div id="mode-buttons"></div></div>
+        <div id="item-controls" class="d-grid gap-1 mt-2" hidden></div>
+        <p class="hint mt-2 mb-0">Choose a stroke (A, B, C) or a mark and what a drag moves, then drag anywhere on the canvas; everything else stays locked.
+          The filled point is where the brush starts, the square handle bends the stroke (mode Bend: the stroke goes through the pointer). <kbd>Shift</kbd> while moving a point keeps the length, <kbd>Alt</kbd> stops snapping; the arrow keys move in small steps.</p>
+        <div class="mt-3"><button type="button" class="btn btn-sm btn-outline-secondary" id="sym-reset">Reset symbol</button></div>
+      </div>
+    </div>
+
+    <!-- both views -->
+    <div class="col-lg-4">
+      <div class="panel mb-3">
+        <h2>Context</h2>
+        <div class="ctx-grid">
+          <label>Onset<select class="form-select form-select-sm" id="ctx-onset"></select></label>
+          <label>Rhyme<select class="form-select form-select-sm" id="ctx-rhyme"></select></label>
+          <label>Mark<select class="form-select form-select-sm" id="ctx-mark"></select></label>
+          <label>Tone<select class="form-select form-select-sm" id="ctx-tone"></select></label>
+        </div>
+        <p class="hint mt-2 mb-0">The parts drawn around the symbol in the editor and in the combinations.</p>
+      </div>
+      <div class="panel mb-3">
+        <div class="d-flex align-items-center mb-2"><h2 class="me-auto mb-0">Brush</h2><button type="button" class="btn btn-sm btn-link p-0" id="params-reset">Reset</button></div>
+        <div id="params" class="d-grid gap-1"></div>
+      </div>
+      <div class="panel">
+        <h2>Save</h2>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-cinnabar" id="export">Export JSON</button>
+          <label class="btn btn-sm btn-outline-dark mb-0">Import JSON<input type="file" id="import" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="reset-all">Discard all</button>
+        </div>
+        <p class="hint mt-2 mb-0">Changes are saved in this browser automatically. The export holds all symbols and the finished outlines of all paths.</p>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="panel">
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
+          <h2 class="me-auto mb-0" id="combos-title"></h2>
+          <label class="small d-flex align-items-center gap-2">Size <input type="range" id="size" min="28" max="110" value="46"></label>
+        </div>
+        <div id="combos"></div>
+        <hr class="my-3">
+        <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
+        <div id="sample-out"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/brush2-editor.js"></script>
+</body>
+</html>
