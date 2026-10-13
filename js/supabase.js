@@ -353,7 +353,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select('id, user_id, title, count, is_public')
+      .select('id, user_id, title, count, is_public, image_path')
       .eq('user_id', this.user.id)
       .order('updated_at', { ascending: false });
 
@@ -427,12 +427,45 @@ class SupabaseService {
   }
 
   /**
+   * Cover image of a deck: stored in the bucket deck-images under <user id>/<deck id>.jpg.
+   * @param {string} deckId
+   * @param {Blob} blob - the (already scaled) image
+   */
+  async setDeckImage(deckId, blob) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: 'Auth required' };
+    const path = `${this.user.id}/${deckId}.jpg`;
+    const up = await this.client.storage.from('deck-images').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+    if (up.error) return { error: up.error };
+    // the version in the query keeps browsers from showing the old image from their cache
+    const image_path = `${path}?v=${Date.now()}`;
+    const { error } = await this.client.from('decks').update({ image_path }).eq('id', deckId).eq('user_id', this.user.id);
+    return { error, image_path };
+  }
+
+  async removeDeckImage(deckId) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: 'Auth required' };
+    await this.client.storage.from('deck-images').remove([`${this.user.id}/${deckId}.jpg`]);
+    const { error } = await this.client.from('decks').update({ image_path: null }).eq('id', deckId).eq('user_id', this.user.id);
+    return { error };
+  }
+
+  /** Public URL of a deck's cover image (or null). */
+  deckImageUrl(image_path) {
+    if (!image_path) return null;
+    const [path, query] = image_path.split('?');
+    return this.client.storage.from('deck-images').getPublicUrl(path).data.publicUrl + (query ? `?${query}` : '');
+  }
+
+  /**
    * Deletes a deck by id.
    */
   async deleteDeck(id) {
     if (!this.user) await this.init();
     if (!this.user) return { error: "Auth required" };
 
+    await this.client.storage.from('deck-images').remove([`${this.user.id}/${id}.jpg`]);
     const { error } = await this.client
       .from('decks')
       .delete()
