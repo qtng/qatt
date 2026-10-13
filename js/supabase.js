@@ -427,18 +427,23 @@ class SupabaseService {
   }
 
   /**
-   * Cover image of a deck: stored in the bucket deck-images under <user id>/<deck id>.jpg.
+   * Cover image of a deck: stored in the bucket deck-images as <user id>/<deck id>.img (WebP or JPEG, the content type says which).
+   * The name stays the same, so a new image always replaces the old one. Older images were stored as .jpg: they are removed on the way.
    * @param {string} deckId
    * @param {Blob} blob - the (already scaled) image
    */
   async setDeckImage(deckId, blob) {
     if (!this.user) await this.init();
     if (!this.user) return { error: 'Auth required' };
-    const path = `${this.user.id}/${deckId}.jpg`;
-    const up = await this.client.storage.from('deck-images').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+    const base = `${this.user.id}/${deckId}`;
+    const up = await this.client.storage.from('deck-images').upload(`${base}.img`, blob, {
+      upsert: true,
+      contentType: blob.type || 'image/jpeg',
+      cacheControl: '31536000' // the version in image_path keeps browsers from showing an old image
+    });
     if (up.error) return { error: up.error };
-    // the version in the query keeps browsers from showing the old image from their cache
-    const image_path = `${path}?v=${Date.now()}`;
+    await this.client.storage.from('deck-images').remove([`${base}.jpg`]);
+    const image_path = `${base}.img?v=${Date.now()}`;
     const { error } = await this.client.from('decks').update({ image_path }).eq('id', deckId).eq('user_id', this.user.id);
     return { error, image_path };
   }
@@ -446,7 +451,8 @@ class SupabaseService {
   async removeDeckImage(deckId) {
     if (!this.user) await this.init();
     if (!this.user) return { error: 'Auth required' };
-    await this.client.storage.from('deck-images').remove([`${this.user.id}/${deckId}.jpg`]);
+    const base = `${this.user.id}/${deckId}`;
+    await this.client.storage.from('deck-images').remove([`${base}.img`, `${base}.jpg`]);
     const { error } = await this.client.from('decks').update({ image_path: null }).eq('id', deckId).eq('user_id', this.user.id);
     return { error };
   }
@@ -465,7 +471,7 @@ class SupabaseService {
     if (!this.user) await this.init();
     if (!this.user) return { error: "Auth required" };
 
-    await this.client.storage.from('deck-images').remove([`${this.user.id}/${id}.jpg`]);
+    await this.client.storage.from('deck-images').remove([`${this.user.id}/${id}.img`, `${this.user.id}/${id}.jpg`]);
     const { error } = await this.client
       .from('decks')
       .delete()
