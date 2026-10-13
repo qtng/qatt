@@ -10,6 +10,7 @@ QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html
   QattText.reading(cell, parser) // the Quốc Ngữ reading of a cell after the decoding of the parser ("?" if there is none)
   QattText.readings(text)        // { cell: reading } for all cells of a text
   QattText.convert(text, parser) // every Quốc Ngữ word in a text, the rest stays as it is
+  QattText.repairDeletion(before, after, caret) // a deletion that cut a cell in two (a keyboard that deletes one character) becomes the deletion of the whole cell: { value, caret } or null
   QattText.recode(text, from, to) // every cell by its reading after the decoding of parser `from` written again after the decoding of parser `to`; all other text stays
 */
 const QattText = (() => {
@@ -97,6 +98,20 @@ const QattText = (() => {
     return (read !== "?" && word(read, to)) || cell;
   });
 
-  return { syllable, word, convert, recode, cells, decode, reading, readings, WORD, CELL, CELL_ANY };
+  // The text before and after an edit that only deleted characters, the caret after it (where the deleted part was): when the deletion cut into a cell,
+  // the whole cell goes (the writers do this for Backspace and Delete themselves, this catches keyboards that bypass them).
+  const repairDeletion = (before, after, caret) => {
+    const length = before.length - after.length;
+    if (length <= 0 || caret < 0 || caret + length > before.length || before.slice(0, caret) + before.slice(caret + length) !== after) return null;
+    let start = caret, end = caret + length;
+    for (const m of before.matchAll(CELL_ANY)) {
+      const a = m.index, z = a + m[0].length;
+      if (a < caret && caret < z) start = a;
+      if (a < caret + length && caret + length < z) end = z;
+    }
+    return start === caret && end === caret + length ? null : { value: before.slice(0, start) + before.slice(end), caret: start };
+  };
+
+  return { syllable, word, convert, recode, repairDeletion, cells, decode, reading, readings, WORD, CELL, CELL_ANY };
 })();
 if (typeof module !== "undefined") module.exports = QattText;
