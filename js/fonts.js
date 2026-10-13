@@ -8,7 +8,6 @@ The script defines the @font-face rules itself and fills these selects when it r
 */
 const QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif", default: true },
-  { family: "QATT Serif Bold",     label: "Serif bold",     file: "qatt-serif-bold" },
   { family: "QATT Gothic",          label: "Gothic",          file: "qatt-gothic" },
   { family: "QATT Gothic Bold",     label: "Gothic bold",     file: "qatt-gothic-bold" },
   { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide" },
