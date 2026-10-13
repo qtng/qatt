@@ -134,7 +134,7 @@
     // A cell is what the font draws as one square: a letter of the block (U+F0000..U+F0099), a joiner U+F009B or combiner U+F009A with
     // another letter, and the tone marks U+F009C..U+F00A3 after it. Any other character is a cell of its own.
     const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009B, COMBINER = 0xF009A;
-    const CELL = /[\u{F0000}-\u{F0099}](?:[\u{F009A}\u{F009B}][\u{F0000}-\u{F0099}])*[\u{F009C}-\u{F00A3}]*|[\u{F009A}-\u{F00A3}]+|[^]/gu;
+    const CELL = QattText.CELL_ANY;
     const WINDOW = 64;
     // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
     const cellAt = (text, pos, which) => {
