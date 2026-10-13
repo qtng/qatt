@@ -5,6 +5,7 @@ QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html
   QattText.syllable("v,,,0")     // no rhyme (Hợp Thư ông): the shape alone
   QattText.syllable("v2,v,,0")   // code of VietnameseParser.parse(...).hop (Hợp Thư): marked shape U+F009B plain shape
   QattText.word("tự", parser)    // Quốc Ngữ word -> text, or null if there is no glyph for it
+  QattText.reading(cell)         // the Quốc Ngữ reading of a cell of QATT text (dummy: "?"); QattText.CELL finds the cells in a text
   QattText.convert(text, parser) // every Quốc Ngữ word in a text, the rest stays as it is
 */
 const QattText = (() => {
@@ -42,9 +43,15 @@ const QattText = (() => {
     return code ? syllable(code) : null;
   };
 
+  // the cells of QATT text: a letter of the block, joined or stacked letters, the tone marks after them (what the font draws as one square)
+  const CELL = /[\u{F0000}-\u{F0099}](?:[\u{F009A}\u{F009B}][\u{F0000}-\u{F0099}])*[\u{F009C}-\u{F00A3}]*/gu;
+
+  // The Quốc Ngữ reading of a cell. Dummy for now: "?" (to be refined, the reading of QATT characters is not implemented yet).
+  const reading = cell => "?";
+
   const WORD = /[\p{L}\p{M}]+/gu;
   const convert = (text, parser) => text.replace(WORD, w => word(w, parser) ?? w);
 
-  return { syllable, word, convert, WORD };
+  return { syllable, word, convert, reading, WORD, CELL };
 })();
 if (typeof module !== "undefined") module.exports = QattText;
