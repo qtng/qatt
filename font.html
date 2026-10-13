@@ -23,8 +23,6 @@
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
     .keys { display: flex; justify-content: space-between; gap: .4rem; margin-top: .45rem; }
     .keys .btn { flex: 1 1 0; }
-    .keys.tones { margin-top: .3rem; }
-    .keys.tones .btn { color: var(--accent); font-weight: 600; padding-left: 0; padding-right: 0; }
     .sample:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
     .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
@@ -47,7 +45,7 @@
 <main>
   <h1>QATT reference font</h1>
   <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. This is a prototype; stroke widths and proportions may still change.
-     Click a character to add it to the sample field.</p>
+     Click a character to add it to the sample field. To type Vietnamese and get QATT text, use the <a href="editor.html">QATT Writer</a>.</p>
   <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
 
   <p><strong>How the fonts are made.</strong> The Serif and Gothic fonts are drawn from stroke data that can be refined in the <a href="font-editor.html">glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
@@ -60,15 +58,13 @@
     <label><input type="checkbox" id="svg" autocomplete="off"> SVG</label>
   </div>
 
-  <div class="sample" id="sample" contenteditable="true" inputmode="none" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
+  <div class="sample" id="sample" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
   <div class="keys">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009A">B⿱C</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="space" title="Add a space" aria-label="Space">␣</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="back" title="Delete the last character" aria-label="Delete the last character">⌫</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear" title="Empty the sample field">Clear</button>
   </div>
-  <div class="keys tones" id="tone-keys"></div>
   <div id="info"></div>
   </div>
   <h2 class="sub">Format characters and tone marks</h2>
@@ -87,42 +83,13 @@
   const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
   const q = new Qatt(); q.observe('TT');
 
-  // editing the sample at the caret (at the end if the field has no caret)
-  const caret = () => {
-    const sel = getSelection();
-    if (sel.rangeCount && sample.contains(sel.anchorNode)) return sel.getRangeAt(0);
-    const r = document.createRange(); r.selectNodeContents(sample); r.collapse(false); return r;
-  };
-  const setCaret = (node, offset) => {
-    const r = document.createRange(); r.setStart(node, offset); r.collapse(true);
-    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
-  };
-  const add = text => {
-    const r = caret(); r.deleteContents();
-    const node = document.createTextNode(text); r.insertNode(node);
-    setCaret(node, node.length); sample.normalize();
-  };
-  const textBefore = () => {
-    const r = caret(), before = document.createRange(); before.selectNodeContents(sample); before.setEnd(r.startContainer, r.startOffset);
-    return before.toString();
-  };
+  // the sample field is plain text, no caret: characters are added at its end
+  const add = text => { sample.textContent += text; };
   // one of the 22 basic letters U+F0000 to U+F0015 is the onset of a pair: the component joiner U+F009B follows it, unless it already follows a joiner (then it is the rhyme)
   const addLetter = o => {
-    const J = String.fromCodePoint(BASE + 155), prev = Array.from(textBefore()).pop();
+    const J = String.fromCodePoint(BASE + 155), prev = Array.from(sample.textContent).pop();
     add(String.fromCodePoint(BASE + o) + (o >= 0 && o <= 21 && prev !== J ? J : ''));
   };
-  const backspace = () => {
-    const r = caret();
-    if (!r.collapsed) { r.deleteContents(); setCaret(r.startContainer, r.startOffset); sample.normalize(); return; }
-    const before = document.createRange(); before.selectNodeContents(sample); before.setEnd(r.endContainer, r.endOffset);
-    const at = before.toString().length, text = sample.textContent;
-    if (at === 0) return;                                        // caret at the start: nothing to delete
-    const n = Array.from(text.slice(0, at)).pop().length;       // one character (code point), 2 UTF-16 units for these
-    sample.textContent = text.slice(0, at - n) + text.slice(at);
-    if (sample.firstChild) setCaret(sample.firstChild, at - n);
-  };
-  // the buttons and tiles must not take the caret away from the sample field
-  for (const el of document.querySelectorAll('.sticky-card .keys, #grid-marks, #grid')) el.addEventListener('mousedown', e => e.preventDefault());
 
   // the format characters and the tone marks first, then the letters
   const isMark = g => g.t === 'combiner' || g.t === 'joiner' || g.t === 'tone';
@@ -159,15 +126,7 @@
   });
   $('#joiner').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'joiner').o)); info.textContent = 'component joiner'; });
   $('#stack').addEventListener('click', () => { add(String.fromCodePoint(BASE + glyphs.find(g => g.t === 'combiner').o)); info.textContent = 'Tham Thư combiner'; });
-  glyphs.filter(g => g.t === 'tone').sort((a, b) => a.o - b.o).forEach((g, i) => {   // tone buttons 1..8 in the order of the code points
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'btn btn-sm btn-outline-secondary'; b.textContent = i + 1;
-    b.title = g.n.toLowerCase() + ' — U+' + hex(BASE + g.o);
-    b.addEventListener('click', () => { add(String.fromCodePoint(BASE + g.o)); info.textContent = g.n + ' — U+' + hex(BASE + g.o); });
-    $('#tone-keys').append(b);
-  });
-  $('#space').addEventListener('click', () => add(' '));
-  $('#back').addEventListener('click', backspace);
+  $('#clear').addEventListener('click', () => { sample.textContent = ''; info.textContent = ''; });
   apply();
 })();
 </script>
