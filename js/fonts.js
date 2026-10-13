@@ -36,5 +36,12 @@ const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], 
     apply();
     select.addEventListener("change", apply);
   });
-  document.querySelectorAll("select[data-qatt-sizes]").forEach(select => fill(select, QATT_SIZES));
+  document.querySelectorAll("select[data-qatt-sizes]").forEach(select => {
+    fill(select, QATT_SIZES);
+    const group = document.createElement("optgroup");
+    group.label = "Choose size";
+    group.append(...select.options);
+    select.append(group);
+    select.value = QATT_SIZES.find(z => z[2])[0];   // moving the options has lost the selection
+  });
 })();
