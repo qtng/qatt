@@ -415,6 +415,13 @@ class SupabaseService {
     return data.map(r => ({ ...r.decks, saved: true }));
   }
 
+  /** How many users took the own deck over into "My decks" (the server gives the number to the owner only). */
+  async getDeckSaveCount(deckId) {
+    if (!this.client) await this.init();
+    const { data, error } = await this.client.rpc('deck_save_count', { p_deck_id: deckId });
+    return error ? 0 : (data || 0);
+  }
+
   /**
    * Takes a public deck of somebody else into "My decks" (nothing happens for own or non-public decks, or when already taken).
    */
