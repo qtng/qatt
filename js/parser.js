@@ -144,6 +144,9 @@ class VietnameseParser {
             // ông is the plain shape alone ("v,,,0": no rhyme)
             static HOP_THU = { "ong": 2, "ung": 3, "uông": 4, "ông": 0 };
 
+            // Rhymes the table lacks but writes like another one (tried after the table, see _lookup)
+            static RHYME_SUBSTITUTES = { "anh": "ơnh", "oanh": "uơnh" };
+
             // Syllables ending in c, ch, t, p use the rhyme of the nasal twin and an entering tone (6 = âm nhập, 7 = dương nhập)
             static STOP_TWIN = { "c": "ng", "ch": "nh", "t": "n", "p": "m" };
 
@@ -270,10 +273,20 @@ class VietnameseParser {
             // rhyme of their nasal twin and an entering tone (sắc 6, nặng 7). null if the rhyme is not in the table.
             _qattCode(res, spelling) {
                 const { rhyme, tone } = this._rhymeAndTone(res, spelling);
-                const glyph = this.rhymes.get(rhyme);
+                const glyph = this._lookup(rhyme, res);
                 if (!glyph) return null;
                 const onset = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_";
                 return [onset, glyph, "", tone].join(",");
+            }
+
+            // The glyph of a rhyme: the table first, then the substitutes: after qu the glide u is written o (quen = qoen),
+            // and anh / oanh are written ơnh / uơnh where the table has no anh / oanh
+            _lookup(rhyme, res) {
+                const candidates = [rhyme];
+                if (res.onset == "q" && rhyme.startsWith("u")) candidates.push("o" + rhyme.slice(1));
+                for (const r of candidates.slice()) { const alt = VietnameseParser.RHYME_SUBSTITUTES[r]; if (alt) candidates.push(alt); }
+                for (const r of candidates) if (this.rhymes.has(r)) return this.rhymes.get(r);
+                return null;
             }
 
             _rhymeAndTone(res, spelling) {
