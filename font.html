@@ -10,7 +10,14 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
     main { max-width: 74rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
-    h1 { font: 400 1.9rem Georgia, "Times New Roman", serif; margin: .3rem 0 .2rem; }
+    .hero { background: radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%), linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; margin: 0; }
+    .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: #4a3d30; }
+    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .btn-cinnabar { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
     p { margin: .3rem 0 .8rem; color: var(--muted); }
     a { color: var(--accent); }
     .sticky-card { position: sticky; top: 68px; z-index: 5; margin: 1rem 0 .4rem; padding: .5rem .7rem .55rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
@@ -42,14 +49,16 @@
   <script src="js/qatt.js"></script>
 </head>
 <body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">QATT reference font</h1>
+    <p class="lead mx-auto mb-4">The font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block, one square each, from <code>U+F0000</code>. A prototype. Font files on request via <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
+    <a class="btn btn-cinnabar btn-pill" href="editor.html">Type QATT</a>
+    <a class="btn btn-outline-secondary btn-pill" href="font-editor.html">Glyph editor</a>
+  </div>
+</header>
 <main>
-  <h1>QATT reference font</h1>
-  <p>The reference font for the <a href="unicode.html">QATT Unicode proposal</a>: all 164 characters of the draft block (monospace, one square per character, code points from <code>U+F0000</code>), drawn from the strokes of <code>qatt.js</code>. This is a prototype; stroke widths and proportions may still change.
-     Click a character to add it to the sample field. To type Vietnamese and get QATT text, use the <a href="editor.html">QATT Writer</a>.</p>
-  <p>The font includes the combining behaviour: <em>A</em> <code>U+F009B</code> (component joiner) <em>B</em> is shown as one square with <em>A</em> in the left and <em>B</em> in the right half; <em>A</em> <code>U+F009A</code> (Tham Thư combiner) <em>B</em> writes <em>B</em> above <em>A</em> (<em>A</em> may be a joined pair); a tone mark combines with the character before it and sits in one of its corners.</p>
-
-  <p><strong>How the fonts are made.</strong> The Serif and Gothic fonts are drawn from stroke data that can be refined in the <a href="font-editor.html">glyph editor</a>. Edit the symbols there, export the JSON file and send it to us; we generate the font files from it. To request a font file, write to us on <a href="https://www.facebook.com/share/1EgfAjRtLy/">Facebook</a>.</p>
-
   <div class="sticky-card">
   <div class="bar">
     <label><select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Font"></select></label>
