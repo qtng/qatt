@@ -237,7 +237,9 @@
 
         qattToggle.addEventListener('change', renderWiki);
         readingToggle.addEventListener('change', updateReading);
-        $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); if (currentWikiHtml) renderWiki(); });
+        const fromUrl = VietnameseParser.urlDecoding([...$('decoding').options].map(o => o.value));   // ?decoding=omniglot
+        if (fromUrl) { $('decoding').value = fromUrl; parser.setDecoding(fromUrl); }
+        $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); VietnameseParser.setUrlDecoding($('decoding').value); if (currentWikiHtml) renderWiki(); });
 
         contentArea.addEventListener('click', e => {
             const link = e.target.closest('a');

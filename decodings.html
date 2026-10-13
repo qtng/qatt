@@ -6,7 +6,7 @@
     <title>Quốc Âm Tân Tự Decodings</title>
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://qatt.org/qatt/js/navigation.js"></script>
-    <script src="https://qatt.org/qatt/js/parser.js"></script>
+    <script src="js/parser.js"></script>
     <script src="https://qatt.org/qatt/js/qatt.js?7"></script>
     
     <style>
@@ -402,7 +402,8 @@
         const sizeSlider = document.getElementById('size-slider');
         const legendContainer = document.getElementById('legend-container');
 
-        const startTable = "qatt";
+        const startTable = VietnameseParser.urlDecoding([...select.options].map(o => o.value)) || "qatt";   // ?decoding=omniglot
+        select.value = startTable;
         let currentData = tables[startTable];
 
         function setNucleusColor(rhyme, el) {
@@ -559,6 +560,7 @@
 
         // Event Listeners
         select.addEventListener('change', (e) => {
+            VietnameseParser.setUrlDecoding(e.target.value);
             updateTable(e.target.value);
         });
 
