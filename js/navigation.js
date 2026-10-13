@@ -23,7 +23,7 @@
                 linkClass: "link-nom",
                 links: [
                     { name: "Online Dictionary", bar: "Dictionary", url: "/chunom/index.html", icon: "bi-book" },
-                    { name: "Chữ Nôm Writer", bar: "Writer", url: "/chunom/ime.html", icon: "bi-pencil-square" },
+                    { name: "Chữ Nôm Writer", bar: "Writer", url: "/chunom/writer.html", icon: "bi-pencil-square" },
                     { name: "Practice / Decks", bar: "Practice", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
                     { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
                     { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
