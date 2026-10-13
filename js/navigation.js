@@ -118,8 +118,36 @@
                 .bottom-bar .active i { color: var(--bar-accent); }
             }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
+            .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
+            .powered-by a { color: inherit; opacity: .45; text-decoration: none; }
+            .powered-by a:hover { opacity: .9; text-decoration: underline; }
         `;
         document.head.appendChild(style);
+    }
+
+    // footnote "powered by chunom.org": links to license.html, the hash lists the scripts, styles and fonts this page has loaded
+    // (taken when the link is used, so also the files loaded later are in it)
+    function injectFooter(prefix) {
+        const sources = () => {
+            const seen = new Set();
+            performance.getEntriesByType('resource').forEach(e => {
+                const url = new URL(e.name, location.href);
+                if (!/^https?:$/.test(url.protocol) || /license\.html$/.test(url.pathname) || !/\.(js|css|woff2?|ttf|otf)$/i.test(url.pathname)) return;
+                seen.add(url.origin === location.origin ? url.pathname : url.origin + url.pathname);
+            });
+            return [...seen];
+        };
+        const footer = document.createElement('div');
+        footer.className = 'powered-by';
+        const link = document.createElement('a');
+        link.textContent = 'powered by chunom.org';
+        link.title = 'Licenses and the files this page uses';
+        const update = () => { link.href = `${prefix}/qatt/license.html#${sources().map(encodeURIComponent).join(',')}`; };
+        update();
+        ['pointerdown', 'focus', 'touchstart', 'contextmenu'].forEach(t => link.addEventListener(t, update));
+        window.addEventListener('load', update);
+        footer.appendChild(link);
+        document.body.appendChild(footer);
     }
 
     function injectNav() {
@@ -235,6 +263,7 @@
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
         document.body.appendChild(offcanvas);
+        if (!ownBottomBar) injectFooter(relativeLinkPrefix);
 
         const initOffcanvas = () => {
             const toggler = document.getElementById('navTogglerCustom');

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Licenses | Qatt.org</title>
+  <link rel="stylesheet" href="/qatt/vendor/bootstrap/css/bootstrap.min.css">
+  <script src="js/navigation.js"></script>
+  <style>
+    body { background: #fffdf8; color: #2b2118; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    a { color: #a8362a; }
+    #sources { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; list-style: none; padding: 0; }
+    #sources li { padding: .15rem 0; word-break: break-all; }
+    #sources .ext::after { content: " ↗"; opacity: .5; }
+  </style>
+</head>
+<body>
+  <main class="container py-4" style="max-width: 46rem">
+    <h1>Licenses</h1>
+    <p>The sites <a href="https://qatt.org">qatt.org</a> and <a href="https://chunom.org">chunom.org</a> are built with the following components.</p>
+
+    <h2 class="h4 mt-4">Components</h2>
+    <ul>
+      <li><a href="vendor/bootstrap/LICENSE">Bootstrap</a>, MIT license</li>
+      <li><a href="vendor/bootstrap-icons/LICENSE">Bootstrap Icons</a>, MIT license</li>
+      <li><a href="vendor/supabase/LICENSE">Supabase JS</a>, MIT license</li>
+      <li><a href="https://github.com/kurgm/kage-engine">KAGE engine</a> (kage-engine), <a href="js/kage-engine.COPYING">GPL-3.0</a>, draws the strokes of the QATT font</li>
+    </ul>
+
+    <h2 class="h4 mt-4">Sources used</h2>
+    <p class="text-secondary small">The scripts, styles and fonts of the page you came from. Click a file to see it; reload it there to get the newest version.</p>
+    <ul id="sources"></ul>
+    <p id="none" class="text-secondary small" hidden>Open this page with the “powered by chunom.org” link at the end of a page to see its files.</p>
+  </main>
+  <script>
+    (() => {
+      const list = document.getElementById('sources');
+      const files = location.hash.slice(1).split(',').filter(Boolean).map(decodeURIComponent).filter(f => /^(https?:\/\/|\/)/.test(f));
+      document.getElementById('none').hidden = files.length > 0;
+      files.sort((a, b) => (a.startsWith('/') === b.startsWith('/') ? a.localeCompare(b) : a.startsWith('/') ? -1 : 1)).forEach(file => {
+        const a = document.createElement('a');
+        a.href = file;
+        a.textContent = file;
+        if (!file.startsWith('/')) a.className = 'ext';
+        const li = document.createElement('li');
+        li.append(a);
+        list.append(li);
+      });
+    })();
+  </script>
+</body>
+</html>
