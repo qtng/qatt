@@ -402,7 +402,10 @@
         const sizeSlider = document.getElementById('size-slider');
         const legendContainer = document.getElementById('legend-container');
 
-        const startTable = "qatt";
+        // the decoding is in the address (?decoding=omniglot): taken from it at the start, written back when the dropdown changes (no new history entry)
+        const urlName = new URLSearchParams(location.search).get('decoding');
+        const startTable = [...select.options].some(o => o.value === urlName) ? urlName : "qatt";
+        select.value = startTable;
         let currentData = tables[startTable];
 
         function setNucleusColor(rhyme, el) {
@@ -559,6 +562,9 @@
 
         // Event Listeners
         select.addEventListener('change', (e) => {
+            const url = new URL(location.href);
+            url.searchParams.set('decoding', e.target.value);
+            history.replaceState(history.state, '', url);
             updateTable(e.target.value);
         });
 
