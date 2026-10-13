@@ -113,8 +113,9 @@ one); "Use the single form" removes an own form again (also one that `kage.json`
 
 ```sh
 python3 tools/build_font.py --kage font/kage.json --gothic --bold font/glyphs.json font/qatt-gothic-bold
-python3 tools/build_font.py --kage font/kage.json --bold font/glyphs.json font/qatt-serif-bold
 ```
+
+The bold Serif font is not published any more (`--bold` without `--gothic` still builds it).
 
 **Wide.** `--wide` (with `--kage`) makes a joined pair 1.25 cells wide (each half 625 units instead of 500), so its halves are squeezed less; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Gothic Wide":
 
