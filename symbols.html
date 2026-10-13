@@ -31,7 +31,7 @@
     .glyph-strip .g { font-family: var(--qfont), sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .85; transition: opacity .15s, color .15s; }
     .glyph-strip .g:hover { opacity: 1; color: var(--cinnabar); }
     .glyph-strip .lab { font-size: .85rem; color: #6a5a48; line-height: 1.2; }
-    .choose { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin: 1.2rem 0 0; }
+    .choose { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin: 1.2rem 0 2.2rem; }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.set { padding-block: 1.6rem; }
@@ -232,8 +232,8 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const parser = new VietnameseParser();
-    // the readings of the marked forms: the rhyme of the glyph in the table of the decoding
-    const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.glyphs.get(el.dataset.rhyme) || ''; });
+    // the readings of the marked forms: how the parser reads the glyph (as a rhyme without onset) after the decoding
+    const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.toQuocNgu({ onset: '_', rhyme: el.dataset.rhyme }) || ''; });
     document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
     label();
     const font = document.getElementById('font');   // the page starts in Prototype Light
