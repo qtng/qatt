@@ -353,7 +353,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select('id, user_id, title, count, is_public, image_path')
+      .select('id, user_id, title, count, is_public, official, image_path')
       .eq('user_id', this.user.id)
       .order('updated_at', { ascending: false });
 
@@ -400,7 +400,7 @@ class SupabaseService {
     if (!this.user) return [];
     const { data, error } = await this.client
       .from('deck_saves')
-      .select('created_at, decks!inner(id, user_id, title, count, is_public, image_path)')
+      .select('created_at, decks!inner(id, user_id, title, count, is_public, official, image_path)')
       .eq('user_id', this.user.id)
       .eq('decks.is_public', true)
       .order('created_at', { ascending: false });
@@ -428,6 +428,27 @@ class SupabaseService {
     if (!this.user) return { error: 'Not signed in' };
     const { error } = await this.client.from('deck_saves').delete().eq('user_id', this.user.id).eq('deck_id', deckId);
     return { error };
+  }
+
+  /** Publishes the own deck in the catalog of public decks, or takes it back (only the owner can). */
+  async setDeckPublic(deckId, isPublic) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: 'Not signed in' };
+    const { error } = await this.client.from('decks').update({ is_public: !!isPublic }).eq('id', deckId).eq('user_id', this.user.id);
+    return { error };
+  }
+
+  /** Display names of deck owners as { user_id: username } (the catalog shows who published a deck). */
+  async getUsernames(userIds) {
+    if (!this.client) await this.init();
+    const ids = [...new Set(userIds)].filter(Boolean);
+    if (!ids.length) return {};
+    const { data, error } = await this.client.from('profiles').select('user_id, username').in('user_id', ids);
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return {};
+    }
+    return Object.fromEntries(data.map(r => [r.user_id, r.username]));
   }
 
   async getPublicDecks() {
