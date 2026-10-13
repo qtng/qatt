@@ -357,7 +357,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select('id, user_id, title, count, is_public, official, image_path')
+      .select('id, user_id, title, count, is_public, is_official, image_path')
       .eq('user_id', this.user.id)
       .order('updated_at', { ascending: false });
 
@@ -404,7 +404,7 @@ class SupabaseService {
     if (!this.user) return [];
     const { data, error } = await this.client
       .from('deck_saves')
-      .select('created_at, decks!inner(id, user_id, title, count, is_public, official, image_path)')
+      .select('created_at, decks!inner(id, user_id, title, count, is_public, is_official, image_path)')
       .eq('user_id', this.user.id)
       .eq('decks.is_public', true)
       .order('created_at', { ascending: false });
