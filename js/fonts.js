@@ -5,23 +5,22 @@ The QATT fonts (font/*.woff2) and the sizes offered by font.html and editor.html
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of font.html)
 
 The script defines the @font-face rules itself and fills these selects when it runs, so load it after them.
-After a font file changes, raise its version `v` here (browser cache).
 */
 const QATT_FONTS = [
-  { family: "QATT Serif",          label: "Serif",          file: "qatt-serif",          v: 11, default: true },
-  { family: "QATT Serif Bold",     label: "Serif bold",     file: "qatt-serif-bold",     v: 6 },
-  { family: "QATT Gothic",          label: "Gothic",          file: "qatt-gothic",          v: 7 },
-  { family: "QATT Gothic Bold",     label: "Gothic bold",     file: "qatt-gothic-bold",     v: 4 },
-  { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide",     v: 3 },
-  { family: "QATT Prototype",       label: "Prototype",       file: "qatt-prototype",       v: 21 },
-  { family: "QATT Prototype Light", label: "Prototype light", file: "qatt-prototype-light", v: 4 },
-  { family: "QATT Brush",           label: "Brush-like",      file: "qatt-brush",           v: 7 },
+  { family: "QATT Serif",          label: "Serif",          file: "qatt-serif", default: true },
+  { family: "QATT Serif Bold",     label: "Serif bold",     file: "qatt-serif-bold" },
+  { family: "QATT Gothic",          label: "Gothic",          file: "qatt-gothic" },
+  { family: "QATT Gothic Bold",     label: "Gothic bold",     file: "qatt-gothic-bold" },
+  { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide" },
+  { family: "QATT Prototype",       label: "Prototype",       file: "qatt-prototype" },
+  { family: "QATT Prototype Light", label: "Prototype light", file: "qatt-prototype-light" },
+  { family: "QATT Brush",           label: "Brush-like",      file: "qatt-brush" },
 ];
 const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], [51, "150%"], [68, "200%"], [102, "300%"], [136, "400%"]];
 
 (() => {
   const style = document.createElement("style");
-  style.textContent = QATT_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(font/${f.file}.woff2?v=${f.v}) format("woff2"), url(font/${f.file}.ttf?v=${f.v}) format("truetype"); }`).join("\n");
+  style.textContent = QATT_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(font/${f.file}.woff2) format("woff2"), url(font/${f.file}.ttf) format("truetype"); }`).join("\n");
   document.head.append(style);
 
   const fill = (select, items) => {
