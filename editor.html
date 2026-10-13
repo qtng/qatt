@@ -104,7 +104,7 @@
     group($('font'), 'Choose font');
     $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
-    $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); field.focus(); });
+    $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); showPending(); });
 
     // size: 100% is 36 pixels
     const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.363) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
