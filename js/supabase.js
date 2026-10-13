@@ -148,6 +148,10 @@ class SupabaseService {
   static nameError(name) {
     if (!name) return 'Please enter a name (letters or digits).';
     if (name.toLowerCase() == 'anonymous') return 'Please choose another name.';
+    // our domains are reserved, also inside longer names and with other separators ("chunom.org-expert", "Chunom Org"; the dot is
+    // already removed by cleanName); the table profiles checks the same. "chunom" or "qatt" alone are fine.
+    const plain = name.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+    if (/chunomorg|qattorg/.test(plain)) return 'This name is reserved, please choose another one.';
     return null;
   }
 
@@ -353,7 +357,7 @@ class SupabaseService {
 
     const { data, error } = await this.client
       .from('decks')
-      .select('id, user_id, title, count, is_public, image_path')
+      .select('id, user_id, title, count, is_public, is_official, image_path')
       .eq('user_id', this.user.id)
       .order('updated_at', { ascending: false });
 
@@ -390,6 +394,65 @@ class SupabaseService {
     const words = (deck.words || []).filter(w => w.n !== word.n);
     if (present) words.push(word);
     return this.saveDeck({ id: deck.id, title: deck.title, words });
+  }
+
+  /**
+   * Public decks the user took over into "My decks" (no copy, just a link). Newest first.
+   */
+  async getSavedDecks() {
+    if (!this.user) await this.init();
+    if (!this.user) return [];
+    const { data, error } = await this.client
+      .from('deck_saves')
+      .select('created_at, decks!inner(id, user_id, title, count, is_public, is_official, image_path)')
+      .eq('user_id', this.user.id)
+      .eq('decks.is_public', true)
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return [];
+    }
+    return data.map(r => ({ ...r.decks, saved: true }));
+  }
+
+  /**
+   * Takes a public deck of somebody else into "My decks" (nothing happens for own or non-public decks, or when already taken).
+   */
+  async saveDeckLink(deck) {
+    if (!this.user) await this.init();
+    if (!this.user || !deck || !deck.id || !deck.is_public || deck.user_id === this.user.id) return;
+    const { error } = await this.client
+      .from('deck_saves')
+      .upsert({ user_id: this.user.id, deck_id: deck.id }, { onConflict: 'user_id,deck_id', ignoreDuplicates: true });
+    if (error) console.error("Save error:", error.message);
+  }
+
+  async removeSavedDeck(deckId) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: 'Not signed in' };
+    const { error } = await this.client.from('deck_saves').delete().eq('user_id', this.user.id).eq('deck_id', deckId);
+    return { error };
+  }
+
+  /** Publishes the own deck in the catalog of public decks, or takes it back (only the owner can). */
+  async setDeckPublic(deckId, isPublic) {
+    if (!this.user) await this.init();
+    if (!this.user) return { error: 'Not signed in' };
+    const { error } = await this.client.from('decks').update({ is_public: !!isPublic }).eq('id', deckId).eq('user_id', this.user.id);
+    return { error };
+  }
+
+  /** Display names of deck owners as { user_id: username } (the catalog shows who published a deck). */
+  async getUsernames(userIds) {
+    if (!this.client) await this.init();
+    const ids = [...new Set(userIds)].filter(Boolean);
+    if (!ids.length) return {};
+    const { data, error } = await this.client.from('profiles').select('user_id, username').in('user_id', ids);
+    if (error) {
+      console.error("Fetch error:", error.message);
+      return {};
+    }
+    return Object.fromEntries(data.map(r => [r.user_id, r.username]));
   }
 
   async getPublicDecks() {
