@@ -98,12 +98,12 @@
         function qattNodes(text) {
             const out = [];
             let last = 0;
-            for (const m of text.matchAll(QattText.CELL)) {
-                if (m.index > last) out.push(text.slice(last, m.index));
+            for (const { cell, index } of QattText.cells(text)) {
+                if (index > last) out.push(text.slice(last, index));
                 const ruby = document.createElement('ruby');
-                ruby.append(m[0], Object.assign(document.createElement('rt'), { textContent: QattText.reading(m[0]) }));
+                ruby.append(cell, Object.assign(document.createElement('rt'), { textContent: QattText.reading(cell, parser) }));
                 out.push(ruby);
-                last = m.index + m[0].length;
+                last = index + cell.length;
             }
             if (last < text.length) out.push(text.slice(last));
             return out;
