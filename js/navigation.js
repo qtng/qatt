@@ -7,14 +7,14 @@
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "Home", url: "/qatt/index.html", icon: "bi-house" },
-                    { name: "QATT Symbols", url: "/qatt/symbols.html", icon: "bi-grid-3x3-gap" },
+                    { name: "QATT", url: "/qatt/index.html", icon: "bi-house" },
                     { name: "QATT Writer", url: "/qatt/editor.html", icon: "bi-keyboard" },
+                    { name: "QATT Symbols", url: "/qatt/symbols.html", icon: "bi-grid-3x3-gap" },
                     { name: "QATT Decodings", url: "/qatt/decodings.html", icon: "bi-book" },
                     { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
+                    { name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-wikipedia" },
                     //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
                     //{ name: "QATT Logo Creator", url: "/qatt/logo-creator.html", icon: "bi-palette" },
-                    //{ name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-info-circle" }
                 ]
             },
             {
@@ -23,7 +23,7 @@
                 linkClass: "link-nom",
                 links: [
                     { name: "Online Dictionary", url: "/chunom/index.html", icon: "bi-book" },
-                    { name: "Nôm Writer (IME)", url: "/chunom/ime.html", icon: "bi-pencil-square" },
+                    { name: "Chữ Nôm Writer", url: "/chunom/ime.html", icon: "bi-pencil-square" },
                     { name: "Decks", url: "/chunom/decks/index.html", icon: "bi-layers-half" },
                     { name: "Dictionary: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-journal-richtext" },
                     { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-journal-richtext" },
