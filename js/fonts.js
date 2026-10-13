@@ -27,6 +27,11 @@ const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], 
   };
   document.querySelectorAll("select[data-qatt-fonts]").forEach(select => {
     fill(select, QATT_FONTS.map(f => [f.family, f.label, f.default]));
+    const group = document.createElement("optgroup");   // a heading inside the dropdown
+    group.label = "Choose font";
+    group.append(...select.options);
+    select.append(group);
+    select.value = QATT_FONTS.find(f => f.default).family;   // moving the options has lost the selection
     const apply = () => document.documentElement.style.setProperty("--qfont", `"${select.value}"`);
     apply();
     select.addEventListener("change", apply);
