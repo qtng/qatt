@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QATT Symbols</title>
-  <meta name="description" content="The 22 base shapes of Quốc Âm Tân Tự, their five marked forms and the eight tone marks, with the readings of the qatt.org decoding.">
+  <meta name="description" content="The 22 base shapes of Quốc Âm Tân Tự, their five marked forms and the eight tone marks, with the readings of the chosen decoding.">
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <script src="js/navigation.js"></script>
-  <script src="js/qatt.js"></script>
   <script src="js/parser.js"></script>
+  <script defer src="js/fonts.js"></script>
   <style>
-    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    :root { --qfont: "QATT Prototype Light"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
       background:
         radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
@@ -28,14 +28,15 @@
     @media (min-width: 768px) { .glyph-strip { grid-template-columns: repeat(11, 1fr); } }
     .glyph-strip.tones { grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); max-width: 46rem; }
     .glyph-strip .item { display: flex; flex-direction: column; align-items: center; }
-    .glyph-strip tt { font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
-    .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
+    .glyph-strip .g { font-family: var(--qfont), sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .85; transition: opacity .15s, color .15s; }
+    .glyph-strip .g:hover { opacity: 1; color: var(--cinnabar); }
     .glyph-strip .lab { font-size: .85rem; color: #6a5a48; line-height: 1.2; }
+    .choose { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin: 1.2rem 0 0; }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.set { padding-block: 1.6rem; }
     h2.tones-h { font-family: Georgia, "Times New Roman", serif; font-weight: 400; text-align: center; margin: 1rem 0 1.6rem; }
-    @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
+    @media (max-width: 575.98px) { .glyph-strip .g { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
 <body>
@@ -43,51 +44,201 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">QATT Symbols</h1>
-    <p class="lead mx-auto mb-4">The pronunciation shown on this page follows the qatt.org decoding.</p>
+    <p class="lead mx-auto mb-4">The readings of the marked forms follow the decoding you choose.</p>
     <a class="btn btn-cinnabar btn-pill" href="decodings.html">Open the decodings</a>
     <a class="btn btn-outline-secondary btn-pill" href="editor.html">Type QATT</a>
   </div>
 </header>
 
-<main class="container py-4" id="content"></main>
+<main class="container py-4" id="content">
+  <div class="choose"><select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select><select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select></div>
+  <section class="set">
+    <div class="rule" aria-hidden="true">the 22 base shapes</div>
+    <div class="glyph-strip" aria-label="the 22 base shapes">
+      <div class="item"><span class="g">󰀅</span><span class="lab">l</span></div>
+      <div class="item"><span class="g">󰀀</span><span class="lab">ʔ</span></div>
+      <div class="item"><span class="g">󰀁</span><span class="lab">ng</span></div>
+      <div class="item"><span class="g">󰀂</span><span class="lab">h</span></div>
+      <div class="item"><span class="g">󰀃</span><span class="lab">g</span></div>
+      <div class="item"><span class="g">󰀄</span><span class="lab">c</span></div>
+      <div class="item"><span class="g">󰀆</span><span class="lab">tr</span></div>
+      <div class="item"><span class="g">󰀇</span><span class="lab">d</span></div>
+      <div class="item"><span class="g">󰀈</span><span class="lab">n</span></div>
+      <div class="item"><span class="g">󰀉</span><span class="lab">t</span></div>
+      <div class="item"><span class="g">󰀊</span><span class="lab">th</span></div>
+      <div class="item"><span class="g">󰀋</span><span class="lab">nh</span></div>
+      <div class="item"><span class="g">󰀌</span><span class="lab">ch</span></div>
+      <div class="item"><span class="g">󰀍</span><span class="lab">dz</span></div>
+      <div class="item"><span class="g">󰀎</span><span class="lab">x</span></div>
+      <div class="item"><span class="g">󰀏</span><span class="lab">kh</span></div>
+      <div class="item"><span class="g">󰀐</span><span class="lab">s</span></div>
+      <div class="item"><span class="g">󰀑</span><span class="lab">r</span></div>
+      <div class="item"><span class="g">󰀒</span><span class="lab">m</span></div>
+      <div class="item"><span class="g">󰀓</span><span class="lab">b</span></div>
+      <div class="item"><span class="g">󰀔</span><span class="lab">v</span></div>
+      <div class="item"><span class="g">󰀕</span><span class="lab">ph</span></div>
+    </div>
+  </section>
+  <section class="set">
+    <div class="rule" aria-hidden="true">Chi - Marked 1</div>
+    <div class="glyph-strip" aria-label="Chi - Marked 1">
+      <div class="item"><span class="g">󰀵</span><span class="lab" data-rhyme="l2"></span></div>
+      <div class="item"><span class="g">󰀗</span><span class="lab" data-rhyme="_2"></span></div>
+      <div class="item"><span class="g">󰀝</span><span class="lab" data-rhyme="ng2"></span></div>
+      <div class="item"><span class="g">󰀣</span><span class="lab" data-rhyme="h2"></span></div>
+      <div class="item"><span class="g">󰀩</span><span class="lab" data-rhyme="g2"></span></div>
+      <div class="item"><span class="g">󰀯</span><span class="lab" data-rhyme="c2"></span></div>
+      <div class="item"><span class="g">󰀻</span><span class="lab" data-rhyme="tr2"></span></div>
+      <div class="item"><span class="g">󰁁</span><span class="lab" data-rhyme="d2"></span></div>
+      <div class="item"><span class="g">󰁇</span><span class="lab" data-rhyme="n2"></span></div>
+      <div class="item"><span class="g">󰁍</span><span class="lab" data-rhyme="t2"></span></div>
+      <div class="item"><span class="g">󰁓</span><span class="lab" data-rhyme="th2"></span></div>
+      <div class="item"><span class="g">󰁙</span><span class="lab" data-rhyme="nh2"></span></div>
+      <div class="item"><span class="g">󰁟</span><span class="lab" data-rhyme="ch2"></span></div>
+      <div class="item"><span class="g">󰁥</span><span class="lab" data-rhyme="dz2"></span></div>
+      <div class="item"><span class="g">󰁫</span><span class="lab" data-rhyme="x2"></span></div>
+      <div class="item"><span class="g">󰁱</span><span class="lab" data-rhyme="kh2"></span></div>
+      <div class="item"><span class="g">󰁷</span><span class="lab" data-rhyme="s2"></span></div>
+      <div class="item"><span class="g">󰁽</span><span class="lab" data-rhyme="r2"></span></div>
+      <div class="item"><span class="g">󰂃</span><span class="lab" data-rhyme="m2"></span></div>
+      <div class="item"><span class="g">󰂉</span><span class="lab" data-rhyme="b2"></span></div>
+      <div class="item"><span class="g">󰂏</span><span class="lab" data-rhyme="v2"></span></div>
+      <div class="item"><span class="g">󰂕</span><span class="lab" data-rhyme="ph2"></span></div>
+    </div>
+  </section>
+  <section class="set">
+    <div class="rule" aria-hidden="true">Chi - Marked 2</div>
+    <div class="glyph-strip" aria-label="Chi - Marked 2">
+      <div class="item"><span class="g">󰀶</span><span class="lab" data-rhyme="l3"></span></div>
+      <div class="item"><span class="g">󰀘</span><span class="lab" data-rhyme="_3"></span></div>
+      <div class="item"><span class="g">󰀞</span><span class="lab" data-rhyme="ng3"></span></div>
+      <div class="item"><span class="g">󰀤</span><span class="lab" data-rhyme="h3"></span></div>
+      <div class="item"><span class="g">󰀪</span><span class="lab" data-rhyme="g3"></span></div>
+      <div class="item"><span class="g">󰀰</span><span class="lab" data-rhyme="c3"></span></div>
+      <div class="item"><span class="g">󰀼</span><span class="lab" data-rhyme="tr3"></span></div>
+      <div class="item"><span class="g">󰁂</span><span class="lab" data-rhyme="d3"></span></div>
+      <div class="item"><span class="g">󰁈</span><span class="lab" data-rhyme="n3"></span></div>
+      <div class="item"><span class="g">󰁎</span><span class="lab" data-rhyme="t3"></span></div>
+      <div class="item"><span class="g">󰁔</span><span class="lab" data-rhyme="th3"></span></div>
+      <div class="item"><span class="g">󰁚</span><span class="lab" data-rhyme="nh3"></span></div>
+      <div class="item"><span class="g">󰁠</span><span class="lab" data-rhyme="ch3"></span></div>
+      <div class="item"><span class="g">󰁦</span><span class="lab" data-rhyme="dz3"></span></div>
+      <div class="item"><span class="g">󰁬</span><span class="lab" data-rhyme="x3"></span></div>
+      <div class="item"><span class="g">󰁲</span><span class="lab" data-rhyme="kh3"></span></div>
+      <div class="item"><span class="g">󰁸</span><span class="lab" data-rhyme="s3"></span></div>
+      <div class="item"><span class="g">󰁾</span><span class="lab" data-rhyme="r3"></span></div>
+      <div class="item"><span class="g">󰂄</span><span class="lab" data-rhyme="m3"></span></div>
+      <div class="item"><span class="g">󰂊</span><span class="lab" data-rhyme="b3"></span></div>
+      <div class="item"><span class="g">󰂐</span><span class="lab" data-rhyme="v3"></span></div>
+      <div class="item"><span class="g">󰂖</span><span class="lab" data-rhyme="ph3"></span></div>
+    </div>
+  </section>
+  <section class="set">
+    <div class="rule" aria-hidden="true">Chi - Marked 3</div>
+    <div class="glyph-strip" aria-label="Chi - Marked 3">
+      <div class="item"><span class="g">󰀷</span><span class="lab" data-rhyme="l4"></span></div>
+      <div class="item"><span class="g">󰀙</span><span class="lab" data-rhyme="_4"></span></div>
+      <div class="item"><span class="g">󰀟</span><span class="lab" data-rhyme="ng4"></span></div>
+      <div class="item"><span class="g">󰀥</span><span class="lab" data-rhyme="h4"></span></div>
+      <div class="item"><span class="g">󰀫</span><span class="lab" data-rhyme="g4"></span></div>
+      <div class="item"><span class="g">󰀱</span><span class="lab" data-rhyme="c4"></span></div>
+      <div class="item"><span class="g">󰀽</span><span class="lab" data-rhyme="tr4"></span></div>
+      <div class="item"><span class="g">󰁃</span><span class="lab" data-rhyme="d4"></span></div>
+      <div class="item"><span class="g">󰁉</span><span class="lab" data-rhyme="n4"></span></div>
+      <div class="item"><span class="g">󰁏</span><span class="lab" data-rhyme="t4"></span></div>
+      <div class="item"><span class="g">󰁕</span><span class="lab" data-rhyme="th4"></span></div>
+      <div class="item"><span class="g">󰁛</span><span class="lab" data-rhyme="nh4"></span></div>
+      <div class="item"><span class="g">󰁡</span><span class="lab" data-rhyme="ch4"></span></div>
+      <div class="item"><span class="g">󰁧</span><span class="lab" data-rhyme="dz4"></span></div>
+      <div class="item"><span class="g">󰁭</span><span class="lab" data-rhyme="x4"></span></div>
+      <div class="item"><span class="g">󰁳</span><span class="lab" data-rhyme="kh4"></span></div>
+      <div class="item"><span class="g">󰁹</span><span class="lab" data-rhyme="s4"></span></div>
+      <div class="item"><span class="g">󰁿</span><span class="lab" data-rhyme="r4"></span></div>
+      <div class="item"><span class="g">󰂅</span><span class="lab" data-rhyme="m4"></span></div>
+      <div class="item"><span class="g">󰂋</span><span class="lab" data-rhyme="b4"></span></div>
+      <div class="item"><span class="g">󰂑</span><span class="lab" data-rhyme="v4"></span></div>
+      <div class="item"><span class="g">󰂗</span><span class="lab" data-rhyme="ph4"></span></div>
+    </div>
+  </section>
+  <section class="set">
+    <div class="rule" aria-hidden="true">Chi - Marked 4</div>
+    <div class="glyph-strip" aria-label="Chi - Marked 4">
+      <div class="item"><span class="g">󰀸</span><span class="lab" data-rhyme="l5"></span></div>
+      <div class="item"><span class="g">󰀚</span><span class="lab" data-rhyme="_5"></span></div>
+      <div class="item"><span class="g">󰀠</span><span class="lab" data-rhyme="ng5"></span></div>
+      <div class="item"><span class="g">󰀦</span><span class="lab" data-rhyme="h5"></span></div>
+      <div class="item"><span class="g">󰀬</span><span class="lab" data-rhyme="g5"></span></div>
+      <div class="item"><span class="g">󰀲</span><span class="lab" data-rhyme="c5"></span></div>
+      <div class="item"><span class="g">󰀾</span><span class="lab" data-rhyme="tr5"></span></div>
+      <div class="item"><span class="g">󰁄</span><span class="lab" data-rhyme="d5"></span></div>
+      <div class="item"><span class="g">󰁊</span><span class="lab" data-rhyme="n5"></span></div>
+      <div class="item"><span class="g">󰁐</span><span class="lab" data-rhyme="t5"></span></div>
+      <div class="item"><span class="g">󰁖</span><span class="lab" data-rhyme="th5"></span></div>
+      <div class="item"><span class="g">󰁜</span><span class="lab" data-rhyme="nh5"></span></div>
+      <div class="item"><span class="g">󰁢</span><span class="lab" data-rhyme="ch5"></span></div>
+      <div class="item"><span class="g">󰁨</span><span class="lab" data-rhyme="dz5"></span></div>
+      <div class="item"><span class="g">󰁮</span><span class="lab" data-rhyme="x5"></span></div>
+      <div class="item"><span class="g">󰁴</span><span class="lab" data-rhyme="kh5"></span></div>
+      <div class="item"><span class="g">󰁺</span><span class="lab" data-rhyme="s5"></span></div>
+      <div class="item"><span class="g">󰂀</span><span class="lab" data-rhyme="r5"></span></div>
+      <div class="item"><span class="g">󰂆</span><span class="lab" data-rhyme="m5"></span></div>
+      <div class="item"><span class="g">󰂌</span><span class="lab" data-rhyme="b5"></span></div>
+      <div class="item"><span class="g">󰂒</span><span class="lab" data-rhyme="v5"></span></div>
+      <div class="item"><span class="g">󰂘</span><span class="lab" data-rhyme="ph5"></span></div>
+    </div>
+  </section>
+  <section class="set">
+    <div class="rule" aria-hidden="true">Chi - Marked 5</div>
+    <div class="glyph-strip" aria-label="Chi - Marked 5">
+      <div class="item"><span class="g">󰀹</span><span class="lab" data-rhyme="l6"></span></div>
+      <div class="item"><span class="g">󰀛</span><span class="lab" data-rhyme="_6"></span></div>
+      <div class="item"><span class="g">󰀡</span><span class="lab" data-rhyme="ng6"></span></div>
+      <div class="item"><span class="g">󰀧</span><span class="lab" data-rhyme="h6"></span></div>
+      <div class="item"><span class="g">󰀭</span><span class="lab" data-rhyme="g6"></span></div>
+      <div class="item"><span class="g">󰀳</span><span class="lab" data-rhyme="c6"></span></div>
+      <div class="item"><span class="g">󰀿</span><span class="lab" data-rhyme="tr6"></span></div>
+      <div class="item"><span class="g">󰁅</span><span class="lab" data-rhyme="d6"></span></div>
+      <div class="item"><span class="g">󰁋</span><span class="lab" data-rhyme="n6"></span></div>
+      <div class="item"><span class="g">󰁑</span><span class="lab" data-rhyme="t6"></span></div>
+      <div class="item"><span class="g">󰁗</span><span class="lab" data-rhyme="th6"></span></div>
+      <div class="item"><span class="g">󰁝</span><span class="lab" data-rhyme="nh6"></span></div>
+      <div class="item"><span class="g">󰁣</span><span class="lab" data-rhyme="ch6"></span></div>
+      <div class="item"><span class="g">󰁩</span><span class="lab" data-rhyme="dz6"></span></div>
+      <div class="item"><span class="g">󰁯</span><span class="lab" data-rhyme="x6"></span></div>
+      <div class="item"><span class="g">󰁵</span><span class="lab" data-rhyme="kh6"></span></div>
+      <div class="item"><span class="g">󰁻</span><span class="lab" data-rhyme="s6"></span></div>
+      <div class="item"><span class="g">󰂁</span><span class="lab" data-rhyme="r6"></span></div>
+      <div class="item"><span class="g">󰂇</span><span class="lab" data-rhyme="m6"></span></div>
+      <div class="item"><span class="g">󰂍</span><span class="lab" data-rhyme="b6"></span></div>
+      <div class="item"><span class="g">󰂓</span><span class="lab" data-rhyme="v6"></span></div>
+      <div class="item"><span class="g">󰂙</span><span class="lab" data-rhyme="ph6"></span></div>
+    </div>
+  </section>
+  <h2 class="tones-h h1">Tones</h2>
+  <section class="set">
+    <div class="glyph-strip tones" aria-label="Tones">
+      <div class="item"><span class="g">󰂠</span><span class="lab">sắc</span></div>
+      <div class="item"><span class="g">󰂝</span><span class="lab">huyền</span></div>
+      <div class="item"><span class="g">󰂞</span><span class="lab">hỏi</span></div>
+      <div class="item"><span class="g">󰂟</span><span class="lab">ngã</span></div>
+      <div class="item"><span class="g">󰂡</span><span class="lab">nặng</span></div>
+      <div class="item"><span class="g">󰂢</span><span class="lab">sắc (nhập)</span></div>
+      <div class="item"><span class="g">󰂣</span><span class="lab">nặng (nhập)</span></div>
+      <div class="item"><span class="g">󰂜</span><span class="lab">ngang</span></div>
+    </div>
+  </section>
+</main>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const SHAPES = VietnameseParser.SHAPES, TABLE = VietnameseParser.DECODINGS.qatt;
-    const content = document.getElementById('content');
-
-    // one block: a rule with the title and a strip of glyphs, each with a label below
-    const block = (title, items, cls) => {
-      const sec = document.createElement('section'); sec.className = 'set';
-      const rule = document.createElement('div'); rule.className = 'rule'; rule.setAttribute('aria-hidden', 'true'); rule.textContent = title;
-      const strip = document.createElement('div'); strip.className = 'glyph-strip ' + (cls || ''); strip.setAttribute('aria-label', title);
-      for (const [code, label] of items) {
-        const item = document.createElement('div'); item.className = 'item';
-        const tt = document.createElement('tt'); tt.textContent = code;
-        const lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = label;
-        item.append(tt, lab); strip.append(item);
-      }
-      sec.append(rule, strip); content.append(sec);
-    };
-
-    const code = s => s === 'z' ? '_' : s;
-    block('the 22 base shapes', SHAPES.map(s => [',' + code(s), s === 'z' ? 'ʔ' : s]));
-    for (let m = 1; m <= 5; m++)
-      block('Chi - Marked ' + m, SHAPES.map((s, i) => [',' + code(s) + (m + 1), TABLE[i][m - 1]]));
-
-    const h = document.createElement('h2'); h.className = 'tones-h h1'; h.textContent = 'Tones'; content.append(h);
-    const tones = ['sắc', 'huyền', 'hỏi', 'ngã', 'nặng', 'sắc (nhập)', 'nặng (nhập)', 'ngang'];
-    const sec = document.createElement('section'); sec.className = 'set';
-    const strip = document.createElement('div'); strip.className = 'glyph-strip tones'; strip.setAttribute('aria-label', 'Tones');
-    tones.forEach((name, i) => {
-      const item = document.createElement('div'); item.className = 'item';
-      const tt = document.createElement('tt'); tt.textContent = ',_,,' + (i + 1);
-      const lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = name;
-      item.append(tt, lab); strip.append(item);
-    });
-    sec.append(strip); content.append(sec);
-
-    new Qatt().observe('tt');
+    const parser = new VietnameseParser();
+    // the readings of the marked forms: the rhyme of the glyph in the table of the decoding
+    const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.glyphs.get(el.dataset.rhyme) || ''; });
+    document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
+    label();
+    const font = document.getElementById('font');   // the page starts in Prototype Light
+    font.value = 'QATT Prototype Light';
+    font.dispatchEvent(new Event('change'));
   });
 </script>
 </body>
