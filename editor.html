@@ -80,7 +80,7 @@
     <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off"><label class="form-check-label" for="telex">Telex</label></div>
     <div id="pending" aria-live="polite"></div>
     <div class="keys">
-      <button type="button" class="btn btn-accent" id="copy"><i class="bi bi-clipboard"></i> Copy</button>
+      <button type="button" class="btn btn-accent" id="copy">Copy</button>
       <button type="button" class="btn btn-quiet" id="example"><i class="bi bi-magic"></i> Example</button>
       <button type="button" class="btn btn-quiet" id="convert" title="Convert every Quốc Ngữ word in the field, e.g. after pasting"><i class="bi bi-arrow-repeat"></i> Convert all</button>
       <button type="button" class="btn btn-quiet" id="clear"><i class="bi bi-x-lg"></i> Clear</button>
@@ -231,8 +231,8 @@
     }
     document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === field) showPending(); });
 
-    $('convert').addEventListener('click', () => { field.value = QattText.convert(field.value, parser); showPending(); field.focus(); });
-    $('example').addEventListener('click', () => { field.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser); showPending(); field.focus(); });
+    $('convert').addEventListener('click', () => { field.value = QattText.convert(field.value, parser); showPending(); });   // no focus: the keyboard of a phone stays closed
+    $('example').addEventListener('click', () => { field.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser); showPending(); });
     $('clear').addEventListener('click', () => { field.value = ''; showPending(); field.focus(); });
     $('copy').addEventListener('click', async () => {
       const btn = $('copy');
