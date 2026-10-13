@@ -427,11 +427,20 @@ class SupabaseService {
    */
   async saveDeckLink(deck) {
     if (!this.user) await this.init();
-    if (!this.user || !deck || !deck.id || !deck.is_public || deck.user_id === this.user.id) return;
+    if (!this.user || !deck || !deck.id || !deck.is_public || deck.user_id === this.user.id) return { error: null };
     const { error } = await this.client
       .from('deck_saves')
       .upsert({ user_id: this.user.id, deck_id: deck.id }, { onConflict: 'user_id,deck_id', ignoreDuplicates: true });
     if (error) console.error("Save error:", error.message);
+    return { error };
+  }
+
+  /** Whether the user took this deck over into "My decks". */
+  async isDeckSaved(deckId) {
+    if (!this.user) await this.init();
+    if (!this.user) return false;
+    const { data, error } = await this.client.from('deck_saves').select('deck_id').eq('user_id', this.user.id).eq('deck_id', deckId).maybeSingle();
+    return !error && !!data;
   }
 
   async removeSavedDeck(deckId) {
