@@ -24,7 +24,7 @@
     .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
     .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
     .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
-    .word { font-family: Georgia, "Times New Roman", serif; font-size: clamp(4rem, 18vw, 8rem); line-height: 1.1; color: var(--ink); text-align: center; margin: 1.2rem 0 .6rem; }
+    .word { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; line-height: 1.1; color: var(--ink); text-align: center; margin: 1rem 0 .8rem; }
     .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; margin-top: .6rem; }
     .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
     .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
@@ -60,7 +60,9 @@
 
 <main class="container py-3" id="content">
   <div class="d-flex justify-content-center gap-2 mt-2">
+    <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select>
     <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="reload" aria-label="New word" title="New word"><i class="bi bi-arrow-clockwise"></i></button>
   </div>
   <div class="mood" id="mood" aria-live="polite">🙂</div>
   <div class="word" id="word" lang="vi"></div>
@@ -113,7 +115,7 @@
 
     function start(word) {
       let a = analyse(word);
-      if (!a) { word = WORDS[0]; a = analyse(word); }
+      if (!a) { word = WORDS.find(w => analyse(w)); a = analyse(word); }
       answer = word;
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       tone = a.tone; code = a.code; hits = misses = 0;
@@ -199,11 +201,14 @@
       $('done').hidden = false;
     }
 
-    $('next').addEventListener('click', () => {
+    const another = () => {
       let w;
       do { w = WORDS[Math.floor(Math.random() * WORDS.length)]; } while (w === answer && WORDS.length > 1);
       start(w);
-    });
+    };
+    $('next').addEventListener('click', another);
+    $('reload').addEventListener('click', another);
+    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); start(answer); });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
     start(wanted || WORDS[Math.floor(Math.random() * WORDS.length)]);
