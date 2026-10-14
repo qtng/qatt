@@ -14,7 +14,9 @@
   const VIEWBOX = "0 0 100 100";   // the cell of a glyph in the font: the em box of Noto Sans CJK, 100 x 100 svg units -> 1000 x 1000 font units (10 per unit)
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
+  const PLACE = { x: 4.2, y: 4.2, s: 91.6 };   // global placement of the drawing in the cell: offset x, y (svg units) and scale (%); 0..100 -> the ICF box of Noto Sans CJK
   const migrate = st => {
+    st.place = Object.assign({}, PLACE, st.place);
     for (const k of ["h", "v"]) { const g = (st.guides = st.guides || {})[k] || []; while (g.length < 6) g.push(null); g.length = 6; st.guides[k] = g; }
     if (st.offsets) return st;
     for (const e of Object.values(st.lib || {})) {
@@ -37,7 +39,7 @@
   const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;
 
   // ---- state, history, storage --------------------------------------------------------------------------------------------------
-  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, offsets: true, guides: { h: Array(6).fill(null), v: Array(6).fill(null) } });
+  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, offsets: true, place: clone(PLACE), guides: { h: Array(6).fill(null), v: Array(6).fill(null) } });
   let state = fresh();
   try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.lib && s.sym) state = migrate(Object.assign(fresh(), s)); } catch (e) { }
   const undo = [], redo = [];
@@ -113,11 +115,13 @@
     chars[at] = (chars[at] + mark).normalize("NFC");
     return chars.join("");
   }
+  const placeTransform = () => `translate(${state.place.x} ${state.place.y}) scale(${state.place.s / 100})`;
   const el = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
   function glyph(ids, faint) {
     const svg = el("svg", { viewBox: VIEWBOX, class: "glyph" });
-    for (const id of faint || []) el("path", { "data-id": id, d: outlineOf(id), class: "faint" }, svg);
-    for (const id of ids) el("path", { "data-id": id, d: outlineOf(id) }, svg);
+    const g = el("g", { transform: placeTransform() }, svg);
+    for (const id of faint || []) el("path", { "data-id": id, d: outlineOf(id), class: "faint" }, g);
+    for (const id of ids) el("path", { "data-id": id, d: outlineOf(id) }, g);
     return svg;
   }
   const shapeName = s => s === "_" ? "ʔ" : s;
@@ -176,29 +180,32 @@
     el("rect", { x: fx(34), y: fy(842), width: (966 - 34) / 10, height: (842 + 80) / 10, class: "noto" }, grid);
     el("rect", { x: fx(13), y: fy(855), width: (987 - 13) / 10, height: (855 + 96) / 10, class: "noto limit" }, grid);
     el("line", { x1: 0, y1: 88, x2: 100, y2: 88, class: "base" }, grid);   // romn baseline (font y 0); the ideographic baseline (-120) is the lower edge of the cell
-    for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
-    for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 115, class: "gline" }, canvas);
+    const content = el("g", { class: "content", transform: placeTransform() }, canvas);   // everything that is drawn, edited and exported lies in this placement
+    el("rect", { x: 0, y: 0, width: 100, height: 100, class: "letterwin" }, content);   // the old 0..100 window of the letters of qatt.js
+    for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, content);
+    for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 115, class: "gline" }, content);
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
-    for (const c of ctxIds) el("path", { "data-id": c, d: outlineOf(c), class: "ctx" }, canvas);
+    for (const c of ctxIds) el("path", { "data-id": c, d: outlineOf(c), class: "ctx" }, content);
     if (viewOpt.orig) for (const c of [id, ...sym.marks.map((m, i) => markIds(id, i))].concat(ctxIds)) {
       const o = c.startsWith("v2c-") ? B.skeleton(B.transform(original("v2-" + c.slice(4)), centred)) : ORIG[c];
-      if (o) el("path", { d: o, class: "orig" }, canvas);
+      if (o) el("path", { d: o, class: "orig" }, content);
     }
     sym.marks.forEach((m, i) => {
       if (!m) return;
-      const p = el("path", { d: itemD(m), class: "mark" + (isActive("mark", i) ? " current" : "") }, canvas);
+      const p = el("path", { d: itemD(m), class: "mark" + (isActive("mark", i) ? " current" : "") }, content);
       if (!isActive("mark", i)) p.style.opacity = markOpacity;
     });
-    sym.strokes.forEach((s, i) => el("path", { d: itemD(s), class: "stroke" + (isActive("stroke", i) ? " current" : "") }, canvas));
-    for (const [x1, y1, x2, y2] of guides) el("line", { x1, y1, x2, y2, class: "guide" }, canvas);
+    sym.strokes.forEach((s, i) => el("path", { d: itemD(s), class: "stroke" + (isActive("stroke", i) ? " current" : "") }, content));
+    for (const [x1, y1, x2, y2] of guides) el("line", { x1, y1, x2, y2, class: "guide" }, content);
     const it = activeItem(sym);
     if (!it) return;
-    const h = el("g", { class: "handles" }, canvas);
+    const h = el("g", { class: "handles" }, content);
     el("line", { x1: it.a[0], y1: it.a[1], x2: it.b[0], y2: it.b[1] }, h);
     for (const end of ["a", "b"]) el("circle", { cx: it[end][0], cy: it[end][1], r: 1.9, class: (end === "a" ? "start" : "") + (mode === end || mode === "all" ? " on" : "") }, h);
   }
 
-  const toSvg = (svg, e) => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
+  const toSvg = (node, e) => { const p = (node.ownerSVGElement || node).createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(node.getScreenCTM().inverse()); };
+  const canvasPoint = e => toSvg(canvas.querySelector(".content") || canvas, e);   // in the coordinates of the drawing (inside the placement)
   const round = v => Math.round(v * 4) / 4;
   function snapTargets(skip) {
     const xs = [], ys = [];
@@ -216,12 +223,12 @@
     e.preventDefault();
     begin();
     const it = activeItem(editableSymbol(symId()));
-    drag = { it, end: mode === "all" ? null : mode, a: it.a.slice(), b: it.b.slice(), start: toSvg(canvas, e), targets: snapTargets(it), mark: active.type === "mark" };
+    drag = { it, end: mode === "all" ? null : mode, a: it.a.slice(), b: it.b.slice(), start: canvasPoint(e), targets: snapTargets(it), mark: active.type === "mark" };
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener("pointermove", e => {
     if (!drag) return;
-    const p = toSvg(canvas, e);
+    const p = canvasPoint(e);
     let dx = round(p.x - drag.start.x), dy = round(p.y - drag.start.y);
     guides = [];
     const moving = drag.end ? [drag[drag.end]] : [drag.a, drag.b];
@@ -495,6 +502,17 @@
       });
       box.append(row);
     }
+    // placement: offset and scale of the whole drawing in the cell (the letters of qatt.js lie in 0..100, the ICF box is 4.2..95.8)
+    const prow = document.createElement("div"); prow.className = "guide-row";
+    prow.innerHTML = `<span>Placement of the drawing: offset x, offset y (svg units), scale (%)</span><div>${[["x", 0.1], ["y", 0.1], ["s", 0.1]].map(([k, st]) => `<input type="number" step="${st}" class="form-control form-control-sm" aria-label="Placement ${k}" value="${state.place[k]}">`).join("")}</div>`;
+    prow.querySelectorAll("input").forEach((inp, i) => {
+      const k = "xys"[i];
+      inp.addEventListener("input", () => { if (inp.value === "" || isNaN(+inp.value) || (k === "s" && +inp.value <= 0)) return; begin(); state.place[k] = +inp.value; setView(view); });
+      inp.addEventListener("change", () => end());
+    });
+    const reset = document.createElement("button"); reset.type = "button"; reset.className = "btn btn-link btn-sm p-0"; reset.textContent = "Reset placement";
+    reset.addEventListener("click", () => { begin(); state.place = clone(PLACE); end(); renderAll(); });
+    box.append(prow, reset);
   }
   document.getElementById("params-reset").addEventListener("click", () => { begin(); state.params = fresh().params; state.guides = fresh().guides; end(); drawParams(); changed(); });
   function drawContext() {
@@ -518,7 +536,7 @@
       const c = "v2c-" + id.slice(3);
       if (id.startsWith("v2-") && (ORIG[c] || target(c))) outlines[c] = outlineOf(c);
     }
-    const data = { format: "qatt-brush", version: 3, params: state.params, guides: state.guides, lib: state.lib, sym: state.sym, outlines };
+    const data = { format: "qatt-brush", version: 3, params: state.params, guides: state.guides, place: state.place, lib: state.lib, sym: state.sym, outlines };
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
     a.download = "qatt-brush.json"; a.click();
@@ -530,7 +548,7 @@
     try {
       const d = JSON.parse(await f.text());
       if (d.format !== "qatt-brush" || d.version !== 3) throw new Error("not an export of brush2.html (version 3)");
-      begin(); end(); restore(JSON.stringify({ params: Object.assign(fresh().params, d.params), guides: d.guides || fresh().guides, lib: d.lib, sym: d.sym }));
+      begin(); end(); restore(JSON.stringify({ params: Object.assign(fresh().params, d.params), guides: d.guides || fresh().guides, place: d.place, offsets: true, lib: d.lib, sym: d.sym }));
     } catch (err) { alert("Import failed: " + err.message); }
     e.target.value = "";
   });

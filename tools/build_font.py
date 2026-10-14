@@ -53,7 +53,7 @@ PAIR_W = 1000 * WIDE           # width of a joined pair
 HALF = int(PAIR_W // 2)        # advance of each half
 PAIR_T = PAIR_W - 2 * PAIR_M - PAIR_G   # what the two halves share
 SPLITS = (45, 50, 55)          # KAGE fonts: share of the left half in per cent; the halves are fitted into these boxes by KAGE
-PAIR_K = float(os.environ.get('PAIR_K', PAIR_K)); PAIR_GROW = float(os.environ.get('PAIR_GROW', PAIR_GROW))
+PAIR_K = float(os.environ.get('PAIR_K', PAIR_K))
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
@@ -64,7 +64,17 @@ if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
     BRUSH_WEIGHT *= LIGHT
 if BOLD != 1.0: STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
-GROW, GROW_Y = 1.0, 60         # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
+# Placement of the letters in the cell (as in brush2.html): svg x, y -> offset + scale * (x, y); the letters of qatt.js lie in 0..100, the ICF box is 4.2..95.8 (scale 0.916, offset 4.2).
+# It is done as GROW around the point (50, 50) plus the rest of the offset; a brush2 export can hold its own "place" (x, y, s in per cent). Tones keep their size and corner positions.
+PLACE = [4.2, 4.2, 91.6]
+if len(sys.argv) > 3:
+    try:
+        _p = json.load(open(sys.argv[3])).get('place') or {}
+        PLACE = [float(_p.get(k, d)) for k, d in zip('xys', PLACE)]
+    except (OSError, ValueError, AttributeError): pass
+GROW, GROW_Y = PLACE[2] / 100, 50
+EXTRA_X, EXTRA_Y = PLACE[0] - (1 - GROW) * 50, PLACE[1] - (1 - GROW) * 50   # what is left of the offset, svg units
+PAIR_GROW = GROW
 
 data = json.load(open(SRC))  # font/glyphs.json
 BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
@@ -102,6 +112,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
     f = Y0 - GROW_Y * SY * (1 - grow)
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
+    if not fit and not ids[0].startswith('q'): centre, f = centre + EXTRA_X * SX, f - EXTRA_Y * SY
     matrix = (kx, 0, 0, -SY * grow * v, centre - cx * kx, f)
     if BRUSH and ids[0].startswith('q'):   # tones: narrower than the letters (see TONE_X), the middle of the tone stays where it is
         bs = []
