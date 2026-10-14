@@ -11,7 +11,7 @@
   const SHAPES = VietnameseParser.SHAPES.map(s => s === "z" ? "_" : s);
   const TABLE = VietnameseParser.DECODINGS.qatt;
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
-  const VIEWBOX = "-12.5 -12.5 125 125";   // the symbol viewBox of qatt.js = the cell of a glyph in the font (125 x 125 svg units -> 1000 x 1000 font units)
+  const VIEWBOX = "0 0 100 100";   // the cell of a glyph in the font: the em box of Noto Sans CJK, 100 x 100 svg units -> 1000 x 1000 font units (10 per unit)
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
   const migrate = st => {
@@ -168,14 +168,14 @@
     canvas.innerHTML = "";
     canvas.classList.toggle("editing", !!(mode && active));
     const grid = el("g", { class: "grid" }, canvas);
-    for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -12.5, x2: v, y2: 112.5 }, grid); el("line", { x1: -12.5, y1: v, x2: 112.5, y2: v }, grid); }
-    el("rect", { x: -7.25, y: -7.25, width: 114.5, height: 114.5, class: "box" }, grid);   // ICF box of Noto Sans CJK (font x 42..958, y -78..838)
-    el("rect", { x: -12.5, y: -12.5, width: 125, height: 125, class: "window" }, grid);   // the font cell (VIEWBOX)
+    for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: 0, x2: v, y2: 100 }, grid); el("line", { x1: 0, y1: v, x2: 100, y2: v }, grid); }
+    el("rect", { x: 4.2, y: 4.2, width: 91.6, height: 91.6, class: "box" }, grid);   // ICF box of Noto Sans CJK (font x 42..958, y -78..838)
+    el("rect", { x: 0, y: 0, width: 100, height: 100, class: "window" }, grid);   // the font cell (VIEWBOX)
     // Noto Sans CJK, measured over all unified ideographs of Noto Sans JP: dense glyphs (font x 34..966, y -80..842) and the outermost overshoot (x 13..987, y -96..855)
-    const fx = u => u / 8 - 12.5, fy = u => (880 - u) / 8 - 12.5;
-    el("rect", { x: fx(34), y: fy(842), width: (966 - 34) / 8, height: (842 + 80) / 8, class: "noto" }, grid);
-    el("rect", { x: fx(13), y: fy(855), width: (987 - 13) / 8, height: (855 + 96) / 8, class: "noto limit" }, grid);
-    el("line", { x1: -12.5, y1: 97.5, x2: 112.5, y2: 97.5, class: "base" }, grid);   // romn baseline (font y 0); the ideographic baseline (-120) is the lower edge of the cell
+    const fx = u => u / 10, fy = u => (880 - u) / 10;
+    el("rect", { x: fx(34), y: fy(842), width: (966 - 34) / 10, height: (842 + 80) / 10, class: "noto" }, grid);
+    el("rect", { x: fx(13), y: fy(855), width: (987 - 13) / 10, height: (855 + 96) / 10, class: "noto limit" }, grid);
+    el("line", { x1: 0, y1: 88, x2: 100, y2: 88, class: "base" }, grid);   // romn baseline (font y 0); the ideographic baseline (-120) is the lower edge of the cell
     for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
     for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 115, class: "gline" }, canvas);
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
