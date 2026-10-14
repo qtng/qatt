@@ -161,8 +161,8 @@
                 break;
             }
         }
-        // Pages under /chunom (and the domain chunom.org) carry the Chunom.org brand, all others Qatt.org
-        const isChunom = location.pathname.indexOf("/chunom") === 0 || /(^|\.)chunom\.org$/.test(location.hostname);
+        // Pages under /chunom and /pages (and the domain chunom.org) carry the Chunom.org brand, all others Qatt.org
+        const isChunom = /^\/(chunom|pages)(\/|$)/.test(location.pathname) || /(^|\.)chunom\.org$/.test(location.hostname);
         const home = isChunom ? '/chunom' : '/qatt';
 
         // logo (also the page icon, unless the page sets its own)
