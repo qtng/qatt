@@ -7,7 +7,7 @@ const d = QattBrush2.outline(strokes, params);      // closed outline (fill, non
 
 Item (what an editor stores): a, b end points, bend (the offset of the middle of the arc from the chord, in units of the chord,
 positive to the left of the writing direction), s and e the kind of the start and the end, g the gradient (-1..1).
-Kinds of ends: "flat" (cut straight), "point" (a round tip), "kihitsu" (a pressed head, then cut straight).
+Kinds of ends: "flat" (cut straight), "point" (a round tip), "kihitsu" (a pressed head, then cut straight), "kihitsu-inv" (the same with the cut mirrored).
 Params (all widths in units of weight): weight, flatWidth and flatAngle (width and angle of the cut of flat ends),
 pointRadius (radius of a pointed end), kihitsuSize and kihitsuAngle (width of the head and angle of its cut; the angle counts from the nearest axis of the page, a
 form can override it per end with sa and ea).
@@ -19,7 +19,7 @@ Works in the browser and in node.
 */
 const QattBrush2 = (() => {
   const DEFAULT_PARAMS = { weight: 7, flatWidth: 1, flatAngle: 0, pointRadius: 0.06, kihitsuSize: 1.5, kihitsuAngle: 20 };
-  const KINDS = { flat: "Flat", point: "Pointed", kihitsu: "Kihitsu" };
+  const KINDS = { flat: "Flat", point: "Pointed", kihitsu: "Kihitsu", "kihitsu-inv": "Kihitsu (inverted)" };
 
   const bez = (c, t) => { const u = 1 - t; return [u * u * u * c[0] + 3 * u * u * t * c[2] + 3 * u * t * t * c[4] + t * t * t * c[6], u * u * u * c[1] + 3 * u * u * t * c[3] + 3 * u * t * t * c[5] + t * t * t * c[7]]; };
   const der = (c, t) => { const u = 1 - t; return [3 * u * u * (c[2] - c[0]) + 6 * u * t * (c[4] - c[2]) + 3 * t * t * (c[6] - c[4]), 3 * u * u * (c[3] - c[1]) + 6 * u * t * (c[5] - c[3]) + 3 * t * t * (c[7] - c[5])]; };
@@ -30,7 +30,8 @@ const QattBrush2 = (() => {
     const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, h = (bend || 0) / 0.75 * L, nx = dy / L, ny = -dx / L;
     return [a[0], a[1], a[0] + dx / 3 + nx * h, a[1] + dy / 3 + ny * h, a[0] + dx * 2 / 3 + nx * h, a[1] + dy * 2 / 3 + ny * h, b[0], b[1]];
   }
-  const stroke = it => ({ c: curve(it.a, it.b, it.bend), s: it.s || "flat", e: it.e || "flat", g: it.g || 0, sa: it.sa, ea: it.ea, si: !!it.si, ei: !!it.ei });
+  const base = k => k === "kihitsu-inv" ? "kihitsu" : k || "flat";
+  const stroke = it => ({ c: curve(it.a, it.b, it.bend), s: base(it.s), e: base(it.e), g: it.g || 0, sa: it.sa, ea: it.ea, si: it.s === "kihitsu-inv" || !!it.si, ei: it.e === "kihitsu-inv" || !!it.ei });
   const transform = (strokes, f) => strokes.map(st => Object.assign({}, st, { c: [0, 2, 4, 6].flatMap(i => f([st.c[i], st.c[i + 1]])) }));
 
   // the part of the polyline in front of the plane through c with outward normal u (the rest is cut off)
@@ -66,7 +67,7 @@ const QattBrush2 = (() => {
       return w;
     };
     // angles of the cuts: a kihitsu has the global angle (or the one of the form) whatever the direction of the stroke
-    const angle = (k, own, inv) => (inv ? -1 : 1) * clamp(k === "kihitsu" ? (typeof own === "number" ? own : params.kihitsuAngle) : params.flatAngle, -70, 70) * Math.PI / 180;
+    const angle = (k, own, inv) => (inv ? -1 : 1) * clamp(k === "kihitsu" ? params.kihitsuAngle + (+own || 0) : params.flatAngle, -70, 70) * Math.PI / 180;
     const aS = angle(st.s, st.sa, st.si), aE = angle(st.e, st.ea, st.ei);
 
     // samples along the centre line: point, unit tangent, arc length
