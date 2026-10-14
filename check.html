@@ -25,23 +25,28 @@
     .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
     .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
     .word { font-family: Georgia, "Times New Roman", serif; font-size: clamp(4rem, 18vw, 8rem); line-height: 1.1; color: var(--ink); text-align: center; margin: 1.2rem 0 .6rem; }
-    .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; background: #fffdf8; overflow: hidden; }
+    .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; margin-top: .6rem; }
+    .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
     .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
     .cell + .cell { border-left: 2px solid #cdbd9a; }
-    .cell.near { opacity: .4; }
-    .cell.solved { color: #146c43; }
-    .row-label { text-align: center; font-size: .75rem; letter-spacing: .25em; text-transform: uppercase; color: #a8977e; margin: 1rem 0 .4rem; }
+    .cell { background: var(--bs-warning-bg-subtle); }
+    .cell.near { background: var(--bs-warning-border-subtle); color: rgba(43, 33, 24, .4); }
+    .cell.solved { background: var(--bs-success-border-subtle); color: #0f5132; }
+    .cell .g { display: inline-block; }
+    .cells.two .g { transform: scale(.75, 1); }
+    #variants, #bases, #tones { margin-top: .8rem; }
+    .pad.grid8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: .3rem; max-width: 34rem; }
+    .grid8 .gbtn { width: 100%; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
     .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: #fffdf8; border: 1px solid #d9ccb0; border-radius: .5rem; color: var(--ink); }
     .gbtn:hover:not(:disabled) { border-color: var(--cinnabar); }
     .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; color: #0f5132; opacity: 1; }
     .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; color: #842029; opacity: 1; }
-    .gbtn.tone { width: 4.2rem; }
-    .done { text-align: center; margin-top: 1.6rem; }
+        .done { text-align: center; margin-top: 1.6rem; }
     .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
     .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
-    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .gbtn.tone { width: 3.6rem; } }
+    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } }
   </style>
 </head>
 <body>
@@ -57,21 +62,13 @@
   <div class="d-flex justify-content-center gap-2 mt-2">
     <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
   </div>
+  <div class="mood" id="mood" aria-live="polite">🙂</div>
   <div class="word" id="word" lang="vi"></div>
   <div class="cells" id="cells" aria-label="The symbols of the word"></div>
 
-  <div id="bases">
-    <div class="row-label">Shapes</div>
-    <div class="pad" id="basePad"></div>
-  </div>
-  <div id="variants" hidden>
-    <div class="row-label">Marked forms</div>
-    <div class="pad" id="variantPad"></div>
-  </div>
-  <div id="tones" hidden>
-    <div class="row-label">Tone</div>
-    <div class="pad" id="tonePad"></div>
-  </div>
+  <div id="variants" hidden><div class="pad" id="variantPad"></div></div>
+  <div id="bases"><div class="pad" id="basePad"></div></div>
+  <div id="tones" hidden><div class="pad grid8" id="tonePad"></div></div>
 
   <div class="done" id="done" hidden>
     <div class="full" id="full"></div>
@@ -94,7 +91,11 @@
     const toneGlyph = n => Array.from(QattText.syllable('_,,,' + n))[1];                          // the tone mark alone (n = 8: ngang)
     const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
 
-    let slots, tone, code, answer;
+    let slots, tone, code, answer, hits, misses;
+    const GOOD = ['😍', '🥰', '🤩', '🥳', '🎯', '🎉', '🎊'], BAD = ['🤡', '👻', '🤯', '😱', '😵‍💫', '😩', '👾'];
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    // the mood: 🙂 at the start, the first hit 😃, later hits a random cheerful one; the first miss 😧, later misses a random upset one
+    const mood = ok => { $('mood').textContent = ok ? (++hits === 1 ? '😃' : pick(GOOD)) : (++misses === 1 ? '😧' : pick(BAD)); };
 
     // the cells of the word: [{ shape, mark }] and the tone, from the code of the parser
     function analyse(word) {
@@ -115,9 +116,11 @@
       if (!a) { word = WORDS[0]; a = analyse(word); }
       answer = word;
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
-      tone = a.tone; code = a.code;
+      tone = a.tone; code = a.code; hits = misses = 0;
+      $('mood').textContent = '🙂'; $('bases').hidden = false;
       $('word').textContent = word;
       $('done').hidden = $('tones').hidden = $('variants').hidden = true;
+      $('variantPad').replaceChildren();
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
       const pad = $('basePad');
@@ -134,20 +137,25 @@
     const verdict = (b, ok) => { b.classList.add(ok ? 'ok' : 'bad'); b.disabled = true; };
 
     function renderCells() {
+      $('cells').classList.toggle('two', slots.length === 2);
       $('cells').replaceChildren(...slots.map(s => {
         const d = document.createElement('div');
         d.className = 'cell' + (s.state === 'near' ? ' near' : s.state === 'full' ? ' solved' : '');
-        d.textContent = s.state === 'empty' ? '' : glyph(s.shape, s.state === 'full' ? s.mark : 0);
+        const g = document.createElement('span');
+        g.className = 'g';
+        g.textContent = s.state === 'empty' ? '' : glyph(s.shape, s.state === 'full' ? s.mark : 0);
+        d.append(g);
         return d;
       }));
     }
 
     function pickShape(shape, b) {
-      const hits = slots.filter(s => s.shape === shape);
-      verdict(b, hits.length > 0);
-      if (!hits.length) return;
-      for (const s of hits) s.state = s.mark ? 'near' : 'full';
-      if (hits.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
+      const found = slots.filter(s => s.shape === shape);
+      verdict(b, found.length > 0);
+      mood(found.length > 0);
+      if (!found.length) return;
+      for (const s of found) s.state = s.mark ? 'near' : 'full';
+      if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
         const group = document.createElement('div');
         group.className = 'group';
         group.append(...MARKS.map(m => button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb))));
@@ -159,27 +167,33 @@
     }
 
     function pickMark(shape, mark, b) {
-      const hits = slots.filter(s => s.shape === shape && s.mark === mark);
-      verdict(b, hits.length > 0);
-      for (const s of hits) s.state = 'full';
+      const found = slots.filter(s => s.shape === shape && s.mark === mark);
+      verdict(b, found.length > 0);
+      mood(found.length > 0);
+      for (const s of found) s.state = 'full';
       renderCells();
       update();
     }
 
-    // all cells filled: the tones appear, the marked forms go, the shapes are locked
+    // all cells filled (also the faint ones): the shapes go and the tones appear; all cells exact: the marked forms go too
     function update() {
-      if (!slots.every(s => s.state === 'full') || !$('tones').hidden) return;
+      if (slots.some(s => s.state === 'empty')) return;
+      $('bases').hidden = true;
+      if (slots.every(s => s.state === 'full')) $('variants').hidden = true;
+      if (!$('tones').hidden) return;
       $('tones').hidden = false;
-      $('variants').hidden = true;
-      for (const b of $('basePad').querySelectorAll('button')) b.disabled = true;
       $('tonePad').replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8].map(n => button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b))));
     }
 
     function pickTone(n, b) {
       const ok = (n === 8 ? 0 : n) === tone;
       verdict(b, ok);
+      mood(ok);
       if (!ok) return;
       for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
+      for (const x of slots) x.state = 'full';   // the faint cells show their marked forms
+      $('variants').hidden = true;
+      renderCells();
       $('full').textContent = QattText.syllable(code);
       $('reading').textContent = answer;
       $('done').hidden = false;
