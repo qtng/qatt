@@ -106,7 +106,7 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-qatt",
         site: onChunom ? QATT_SITE : "",
         links: [
-            { name: "Quốc Âm Tân Tự", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
+            { name: "Home", vi: "Trang chủ", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
             { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barOrder: 2, barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
