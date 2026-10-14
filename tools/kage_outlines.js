@@ -1,7 +1,7 @@
-// KAGE outlines for the font build (build_font.py --kage): the KAGE lines of the symbols in font/kage.json (made and refined with font-editor.html)
+// KAGE outlines for the font build (build_font.py --kage): the KAGE lines of the symbols in fonts/kage.json (made and refined with font-editor.html)
 // are moved first (the squeezes of the half-width and stacked variants), then the KAGE engine (js/kage-engine.min.js) draws the strokes
 // with widths that follow the weight of the variant, so a squeezed glyph keeps its stroke widths. The engine is GPL-3.0 (js/kage-engine.COPYING).
-// Usage: node tools/kage_outlines.js font/kage.json jobs.json out.json [mincho|gothic] [bold factor]
+// Usage: node tools/kage_outlines.js fonts/kage.json jobs.json out.json [mincho|gothic] [bold factor]
 //   jobs.json: [{ids: [qatt.js path ids], m: [sx, sy, tx, ty] (x -> sx*x + tx, y -> sy*y + ty, svg units), w: weight factor (1 = the standard stroke),
 //                fit: [left, right] (optional: sx and tx are then found so that the outline spans exactly this), ink: true (optional: answer [left, right] of the outline)}]
 //              an id "v2-X3@onset" is the mark v2-X3 of the rhyme form moved onto the onset form (the box of v2-X onto v2-X-small)

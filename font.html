@@ -94,7 +94,7 @@
 <script>
 (async () => {
   const BASE = 0xF0000;
-  const glyphs = await (await fetch('font/glyphs.json')).json();
+  const glyphs = await (await fetch('fonts/glyphs.json')).json();
   const $ = s => document.querySelector(s);
   const grids = [$('#grid-format'), $('#grid-marks'), $('#grid')], sample = $('#sample'), info = $('#info');
   const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
