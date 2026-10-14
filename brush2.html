@@ -50,7 +50,7 @@
     #canvas { aspect-ratio: 130 / 135; }
     #lib-canvas { aspect-ratio: 1; max-width: 26rem; }
     .edit-canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
-    .edit-canvas .grid .box { fill: none; stroke: var(--line); stroke-width: .35; stroke-dasharray: 1.5 1.5; }
+    .edit-canvas .grid .box { fill: none; stroke: #7a1f17; stroke-width: .5; }
     .edit-canvas .ctx { fill: #b9ab8f; }
     .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
     .edit-canvas .stroke { fill: var(--ink); }
@@ -81,7 +81,7 @@
     .slider { display: grid; grid-template-columns: 9.5rem 1fr 2.8rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
     .slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
     .slider input { width: 100%; accent-color: var(--cinnabar); }
-    .ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
+    .ctx-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
     .ctx-grid label { font-size: .8rem; color: var(--muted); }
 
     #sample-out { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
@@ -100,7 +100,7 @@
     }
     .edit-canvas .gline { stroke: #2f9e6b; stroke-width: .3; stroke-dasharray: 2 1; pointer-events: none; }
     .guide-row { font-size: .85rem; margin-top: .3rem; }
-    .guide-row > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: .3rem; }
+    .guide-row > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; }
     .hint { font-size: .82rem; color: var(--muted); }
     [hidden] { display: none !important; }
     kbd { background: #efe6d2; color: var(--ink); font-size: .75rem; }
