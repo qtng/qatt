@@ -15,6 +15,7 @@
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
   const migrate = st => {
+    for (const k of ["h", "v"]) { const g = (st.guides = st.guides || {})[k] || []; while (g.length < 6) g.push(null); g.length = 6; st.guides[k] = g; }
     if (st.offsets) return st;
     for (const e of Object.values(st.lib || {})) {
       for (const [k, own, inv] of [["s", "sa", "si"], ["e", "ea", "ei"]]) {
@@ -36,7 +37,7 @@
   const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;
 
   // ---- state, history, storage --------------------------------------------------------------------------------------------------
-  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, offsets: true, guides: { h: [null, null, null, null], v: [null, null, null, null] } });
+  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, offsets: true, guides: { h: Array(6).fill(null), v: Array(6).fill(null) } });
   let state = fresh();
   try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.lib && s.sym) state = migrate(Object.assign(fresh(), s)); } catch (e) { }
   const undo = [], redo = [];
@@ -480,7 +481,7 @@
     // guides: positions are typed in; empty = off; the canvas and the snapping use them
     for (const [k, name] of [["h", "Horizontal guides (y)"], ["v", "Vertical guides (x)"]]) {
       const row = document.createElement("div"); row.className = "guide-row";
-      row.innerHTML = `<span>${name}</span><div>${[0, 1, 2, 3].map(i => `<input type="number" step="0.25" class="form-control form-control-sm" aria-label="${name} ${i + 1}">`).join("")}</div>`;
+      row.innerHTML = `<span>${name}</span><div>${[0, 1, 2, 3, 4, 5].map(i => `<input type="number" step="0.25" class="form-control form-control-sm" aria-label="${name} ${i + 1}">`).join("")}</div>`;
       row.querySelectorAll("input").forEach((inp, i) => {
         if (state.guides[k][i] !== null) inp.value = state.guides[k][i];
         inp.addEventListener("input", () => { begin(); state.guides[k][i] = inp.value === "" || isNaN(+inp.value) ? null : +inp.value; drawCanvas(); });
