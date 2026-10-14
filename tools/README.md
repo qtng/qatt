@@ -131,6 +131,6 @@ python3 tools/build_font.py --kage fonts/kage.json --gothic --wide fonts/glyphs.
 ## Libraries (`vendor/`)
 
 Bootstrap 5.3.3 (CSS, JS bundle) and Bootstrap Icons 1.11.3 (CSS, fonts) are part of the repo, no CDN: `vendor/bootstrap/`, `vendor/bootstrap-icons/` (with their licenses).
-Pages link them relatively (`vendor/…`, `../vendor/…` from a subfolder, `/qatt/vendor/…` in `404.html`); `js/navigation.js` finds the folder from its own address, so pages of other sites that load it get the same files.
+Pages link them relatively (`vendor/…`, `../vendor/…` from a subfolder, `/vendor/…` in `404.html`); `js/navigation.js` finds the folder from its own address, so pages of other sites that load it get the same files.
 To update: take the files from the npm packages `bootstrap` and `bootstrap-icons` (`dist/css/bootstrap.min.css`, `dist/js/bootstrap.bundle.min.js`, `font/bootstrap-icons.min.css`, `font/fonts/*`).
 `vendor/supabase/` holds supabase-js 2.117.3 (UMD build `supabase.min.js`, pinned instead of the floating `@2`). Only `logo-creator.html` (unused) still loads html2canvas from a CDN.
