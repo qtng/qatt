@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>Page not found</title>
-  <!-- GitHub Pages serves this file for every address under /qatt/ that does not exist, at any depth: everything here is absolute. -->
-  <link rel="stylesheet" href="/qatt/vendor/bootstrap/css/bootstrap.min.css">
-  <script src="https://qatt.org/qatt/js/navigation.js"></script>
+  <!-- GitHub Pages serves this file for every address of qatt.org that does not exist, at any depth: everything here is absolute. -->
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <script src="/js/navigation.js"></script>
   <style>
     :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     body { background: #fffdf8; color: var(--ink); }
@@ -35,16 +35,18 @@
     <div class="code mb-2" id="code">404</div>
     <h1 class="mb-3" id="title">Page not found</h1>
     <p class="lead mx-auto mb-4" id="text">This page does not exist, or it has moved.</p>
-    <a class="btn btn-cinnabar btn-pill" id="btn" href="/qatt/index.html">Back to the start page</a>
+    <a class="btn btn-cinnabar btn-pill" id="btn" href="/index.html">Back to the start page</a>
   </div>
 </header>
 <script>
   // Obsolete addresses (old links on the internet) and where they go now: the path without a trailing index.html or slash -> the new path.
   // Add a line here instead of keeping an old html file around.
   const REDIRECTS = {
-    "/qatt/app.html": "/qatt/practice/",
-    "/qatt/thien.html": "/qatt/vandao/",
+    "/app.html": "/practice/",
+    "/thien.html": "/vandao/",
   };
+  // The old address of this site had a folder /qatt/ in front of every path (qatt.org/qatt/editor.html is now qatt.org/editor.html)
+  if (location.pathname.startsWith("/qatt/")) REDIRECTS[location.pathname.replace(/index\.html$/, "").replace(/(.)\/$/, "$1")] = location.pathname.slice(5);
   const key = location.pathname.replace(/index\.html$/, "").replace(/(.)\/$/, "$1");
   const target = REDIRECTS[key];
   if (target) {
