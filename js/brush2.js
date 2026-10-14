@@ -9,7 +9,8 @@ Item (what an editor stores): a, b end points, bend (the offset of the middle of
 positive to the left of the writing direction), s and e the kind of the start and the end, g the gradient (-1..1).
 Kinds of ends: "flat" (cut straight), "point" (a round tip), "kihitsu" (a pressed head, then cut straight).
 Params (all widths in units of weight): weight, flatWidth and flatAngle (width and angle of the cut of flat ends),
-pointRadius (radius of a pointed end), kihitsuSize and kihitsuAngle (width of the head and angle of its cut).
+pointRadius (radius of a pointed end), kihitsuSize and kihitsuAngle (width of the head and angle of its cut; the angle counts from the nearest axis of the page, a
+form can override it per end with sa and ea).
 
 Width: the two ends have a width (flat and kihitsu: flatWidth, point: twice the radius); from the thin to the thick end it
 follows w = thin + (thick - thin) * t^p with t from 0 at the thin end to 1 at the thick end and p = 2^(3g): g = 0 is linear,
@@ -29,7 +30,7 @@ const QattBrush2 = (() => {
     const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, h = (bend || 0) / 0.75 * L, nx = dy / L, ny = -dx / L;
     return [a[0], a[1], a[0] + dx / 3 + nx * h, a[1] + dy / 3 + ny * h, a[0] + dx * 2 / 3 + nx * h, a[1] + dy * 2 / 3 + ny * h, b[0], b[1]];
   }
-  const stroke = it => ({ c: curve(it.a, it.b, it.bend), s: it.s || "flat", e: it.e || "flat", g: it.g || 0 });
+  const stroke = it => ({ c: curve(it.a, it.b, it.bend), s: it.s || "flat", e: it.e || "flat", g: it.g || 0, sa: it.sa, ea: it.ea });
   const transform = (strokes, f) => strokes.map(st => Object.assign({}, st, { c: [0, 2, 4, 6].flatMap(i => f([st.c[i], st.c[i + 1]])) }));
 
   // the part of the polyline in front of the plane through c with outward normal u (the rest is cut off)
@@ -64,7 +65,9 @@ const QattBrush2 = (() => {
       if (st.e === "kihitsu") w += Math.max(0, Kh - w) * bump(L - s);
       return w;
     };
-    const angle = k => clamp(k === "kihitsu" ? params.kihitsuAngle : params.flatAngle, -70, 70) * Math.PI / 180;
+    // angles of the cuts: a kihitsu has the global angle (or the one of the form) whatever the direction of the stroke
+    const angle = (k, own) => clamp(k === "kihitsu" ? (typeof own === "number" ? own : params.kihitsuAngle) : params.flatAngle, -70, 70) * Math.PI / 180;
+    const aS = angle(st.s, st.sa), aE = angle(st.e, st.ea);
 
     // samples along the centre line: point, unit tangent, arc length
     const n = Math.max(8, Math.ceil(L / 1.2)), pts = [];
@@ -77,29 +80,31 @@ const QattBrush2 = (() => {
       pts.push({ x: q[0], y: q[1], tx, ty, s: acc });
     }
     const first = pts[0], last = pts[pts.length - 1];
-    // a straight cut is slanted: the centre line runs on a little beyond the end, the outline is cut at the slanted line
-    const ext = (k, from, dir) => {
-      if (k === "point") return [];
-      const m = Math.abs(Math.tan(angle(k))) * Math.max(Fw, Kh) / 2 + 2, out = [];
+    // a straight cut is slanted: the centre line runs on a little beyond the end, the outline is cut at the slanted line.
+    // The cut of a kihitsu is measured from the nearest axis of the page (a stroke that is turned a little keeps its cut);
+    // the cut of a flat end from the direction of the stroke.
+    const cdx = c[6] - c[0], cdy = c[7] - c[1];
+    const axis = Math.hypot(cdx, cdy) < 1e-6 ? null : Math.abs(cdx) >= Math.abs(cdy) ? [Math.sign(cdx), 0] : [0, Math.sign(cdy)];
+    const cutPlane = (k, q, dir, a) => {   // outward normal of the cut at q, the same slant at both ends
+      const frame = (t, n) => [dir * (t[0] * Math.cos(a) - n[0] * Math.sin(a)), dir * (t[1] * Math.cos(a) - n[1] * Math.sin(a))];
+      const own = frame([q.tx, q.ty], [q.ty, -q.tx]);
+      if (k !== "kihitsu" || !axis) return own;
+      const u = frame(axis, [axis[1], -axis[0]]);
+      return u[0] * q.tx * dir + u[1] * q.ty * dir > 0.25 ? u : own;
+    };
+    const uS = st.s === "point" ? null : cutPlane(st.s, first, -1, aS), uE = st.e === "point" ? null : cutPlane(st.e, last, 1, aE);
+    const ext = (u, from, dir) => {
+      if (!u) return [];
+      const cs = Math.max(0.25, Math.abs(u[0] * from.tx + u[1] * from.ty)), m = Math.min(40, Math.sqrt(1 - cs * cs) / cs * Math.max(Fw, Kh) / 2 + 2), out = [];
       for (let j = 1; j * 1.2 <= m + 1.2; j++) out.push({ x: from.x + dir * from.tx * j * 1.2, y: from.y + dir * from.ty * j * 1.2, tx: from.tx, ty: from.ty, s: from.s + dir * j * 1.2 });
       return out;
     };
-    const all = [...ext(st.s, first, -1).reverse(), ...pts, ...ext(st.e, last, 1)];
+    const all = [...ext(uS, first, -1).reverse(), ...pts, ...ext(uE, last, 1)];
     let left = all.map(q => { const w = width(q.s) / 2; return [q.x + q.ty * w, q.y - q.tx * w]; });
     let right = all.map(q => { const w = width(q.s) / 2; return [q.x - q.ty * w, q.y + q.tx * w]; });
 
-    const cutPlane = (k, q, dir) => {   // outward normal of the cut at q, the same slant at both ends
-      const a = angle(k), nx = q.ty, ny = -q.tx;
-      return [dir * (q.tx * Math.cos(a) - nx * Math.sin(a)), dir * (q.ty * Math.cos(a) - ny * Math.sin(a))];
-    };
-    if (st.e !== "point") {
-      const u = cutPlane(st.e, last, 1), at = [last.x, last.y];
-      left = trim(left, at, u); right = trim(right, at, u);
-    }
-    if (st.s !== "point") {
-      const u = cutPlane(st.s, first, -1), at = [first.x, first.y];
-      left = trim(left.reverse(), at, u).reverse(); right = trim(right.reverse(), at, u).reverse();
-    }
+    if (uE) { const at = [last.x, last.y]; left = trim(left, at, uE); right = trim(right, at, uE); }
+    if (uS) { const at = [first.x, first.y]; left = trim(left.reverse(), at, uS).reverse(); right = trim(right.reverse(), at, uS).reverse(); }
 
     const K = 10, endCap = [], startCap = [];
     if (st.e === "point") {
