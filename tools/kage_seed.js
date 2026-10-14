@@ -1,7 +1,7 @@
-// Seeds font/kage.json: the symbols of QATT in KAGE data (https://glyphwiki.org/wiki/GlyphWiki:KAGE データ仕様), one list of KAGE
+// Seeds fonts/kage.json: the symbols of QATT in KAGE data (https://glyphwiki.org/wiki/GlyphWiki:KAGE データ仕様), one list of KAGE
 // lines for the strokes and one per mark, for the single form (v2c-X) of every symbol; the halves of a joined pair and of a stack are made from it.
 // The seed is made from the standard stroke library of js/brush-model.js; refine the lines by hand afterwards (font-editor.html shows them).
-// Usage: node tools/kage_seed.js [font/kage.json] [--force]   (an existing file is only replaced with --force)
+// Usage: node tools/kage_seed.js [fonts/kage.json] [--force]   (an existing file is only replaced with --force)
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const root = path.join(__dirname, "..");
 const B = require(path.join(root, "js/brush.js")), Q = require(path.join(root, "js/brush-model.js"));
@@ -13,7 +13,7 @@ const ORIG = {};
 for (const m of defs.matchAll(/<path id="([^"]+)"[^>]*?\sd="([^"]+)"/g)) ORIG[m[1]] = m[2];
 const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 const M = Q(B, SHAPES, ORIG);
-const out = process.argv.slice(2).find(a => !a.startsWith("--")) || path.join(root, "font/kage.json");
+const out = process.argv.slice(2).find(a => !a.startsWith("--")) || path.join(root, "fonts/kage.json");
 if (fs.existsSync(out) && !process.argv.includes("--force")) { console.error(out + " exists (use --force)"); process.exit(1); }
 
 const S = 1.9;                                   // qatt.js units -> KAGE box of 200

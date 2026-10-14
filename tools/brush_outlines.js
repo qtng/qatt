@@ -1,6 +1,6 @@
 // Brush outlines for the font build (build_font.py): the centre lines of the qatt.js paths are moved first and then
 // get the brush of an export of brush.html or brush2.html, so a squeezed glyph keeps its stroke widths.
-// Usage: node tools/brush_outlines.js font/brush.json jobs.json out.json
+// Usage: node tools/brush_outlines.js fonts/brush.json jobs.json out.json
 //   jobs.json: [{ids: [qatt.js path ids], m: [sx, sy, tx, ty] (x -> sx*x + tx, y -> sy*y + ty, svg units), w: weight factor}]
 //              an id "v2-X3@onset" is the mark v2-X3 of the rhyme form moved onto the onset form (the box of v2-X onto v2-X-small)
 //   out.json:  [SVG path data of the filled outline of each job]

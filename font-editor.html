@@ -253,7 +253,7 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
   $("reset").onclick = () => { if (confirm("Discard all edits?")) { checkpoint(); edits = {}; save(); render(); } };
   for (const id of ["undo", "d-undo"]) $(id).onclick = undo;
   document.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z" && document.activeElement !== $("d-text")) { e.preventDefault(); undo(); } });
-  Promise.all([fetch("font/kage.json").then(r => r.json()), fetch("font/brush.json").then(r => r.json())]).then(([k, b]) => { seed = k; brush = b; buildMarks(); render(); });
+  Promise.all([fetch("fonts/kage.json").then(r => r.json()), fetch("fonts/brush.json").then(r => r.json())]).then(([k, b]) => { seed = k; brush = b; buildMarks(); render(); });
 })();
 </script>
 </body>
