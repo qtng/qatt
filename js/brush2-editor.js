@@ -171,6 +171,10 @@
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -12.5, x2: v, y2: 112.5 }, grid); el("line", { x1: -12.5, y1: v, x2: 112.5, y2: v }, grid); }
     el("rect", { x: -7.25, y: -7.25, width: 114.5, height: 114.5, class: "box" }, grid);   // ICF box of Noto Sans CJK (font x 42..958, y -78..838)
     el("rect", { x: -12.5, y: -12.5, width: 125, height: 125, class: "window" }, grid);   // the font cell (VIEWBOX)
+    // Noto Sans CJK, measured over all unified ideographs of Noto Sans JP: dense glyphs (font x 34..966, y -80..842) and the outermost overshoot (x 13..987, y -96..855)
+    const fx = u => u / 8 - 12.5, fy = u => (880 - u) / 8 - 12.5;
+    el("rect", { x: fx(34), y: fy(842), width: (966 - 34) / 8, height: (842 + 80) / 8, class: "noto" }, grid);
+    el("rect", { x: fx(13), y: fy(855), width: (987 - 13) / 8, height: (855 + 96) / 8, class: "noto limit" }, grid);
     el("line", { x1: -12.5, y1: 97.5, x2: 112.5, y2: 97.5, class: "base" }, grid);   // romn baseline (font y 0); the ideographic baseline (-120) is the lower edge of the cell
     for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
     for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 115, class: "gline" }, canvas);
