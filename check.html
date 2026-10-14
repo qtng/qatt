@@ -57,10 +57,10 @@
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
     .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: var(--b, #fffdf8); border: 2px solid var(--bc, #d9ccb0); border-radius: .55rem; box-shadow: 0 2px 0 var(--bc, #d9ccb0); color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s, box-shadow .12s; }
-    /* the kinds of buttons in their own colours: shapes cream, marked forms terracotta, tones blue */
+    /* the kinds of buttons in their own colours: shapes cream, marked forms blue, tones orange */
     #basePad { --b: #fff8e6; --bc: #cdb98a; }
-    #variantPad { --b: #fbe6dc; --bc: #d9a58f; }
-    #tonePad { --b: #e3eef8; --bc: #92b4d3; }
+    #variantPad { --b: #e3eef8; --bc: #92b4d3; }
+    #tonePad { --b: #fde7cf; --bc: #e0a766; }
     .gbtn:hover:not(:disabled) { border-color: var(--ink); transform: translateY(-1px); }
     .gbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
     .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; box-shadow: 0 2px 0 #198754; color: #0f5132; opacity: 1; }
@@ -76,6 +76,17 @@
     .card { max-width: 24rem; margin-top: .8rem; }
     .card.task, .card.done { border: 3px solid var(--ink); border-radius: .9rem; box-shadow: 5px 5px 0 var(--ink), inset 0 3px 0 rgba(255, 255, 255, .65), inset 0 -4px 0 rgba(43, 33, 24, .08); }
     .card.task { background: linear-gradient(180deg, #fff1c9 0%, #fbe3a6 100%); }
+    .card.task { position: relative; }
+    .card.task::after { content: ""; position: absolute; inset: 0; border-radius: .6rem; background: #e5483a; opacity: 0; mix-blend-mode: multiply; pointer-events: none; transition: opacity 1s ease; }
+    .card.task.late::after { opacity: .3; }
+    .card.task .card-body { position: relative; z-index: 1; }
+    .foot { display: flex; justify-content: space-between; align-items: center; margin-top: .4rem; }
+    .timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); font-size: 1.05rem; }
+    .timer .bi { margin-right: .3rem; }
+    .late .timer { color: #842029; }
+    .speak { width: 2.4rem; height: 2.4rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; background: #fffdf8; border: 2px solid var(--ink); border-radius: 50%; box-shadow: 0 2px 0 var(--ink); color: var(--ink); transition: transform .12s, box-shadow .12s; }
+    .speak:hover { transform: translateY(-1px); }
+    .speak:active { transform: translateY(2px); box-shadow: none; }
     .task .cells { border-color: var(--ink); box-shadow: 3px 3px 0 rgba(43, 33, 24, .35); }
     .task .cell + .cell { border-left-color: var(--ink); }
     .card .cells { margin-bottom: .4rem; }
@@ -108,6 +119,10 @@
         <img class="nom" id="nom" alt="" hidden>
       </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
+      <div class="foot">
+        <span class="timer" id="timer" title="One minute per word"><i class="bi bi-stopwatch"></i><span id="time">1:00</span></span>
+        <button type="button" class="speak" id="speak" aria-label="Read the word aloud"><i class="bi bi-volume-up-fill"></i></button>
+      </div>
     </div>
   </div>
 
@@ -212,11 +227,39 @@
       return { w: FALLBACK.find(w => analyse(w)) };
     };
 
+    // the countdown of one minute per word; at 0 the card turns reddish, the game goes on
+    const LIMIT = 60;
+    let deadline = 0, ticker = null;
+    const stopTimer = () => { clearInterval(ticker); ticker = null; };
+    function tick() {
+      const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      $('time').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+      if (!left) { stopTimer(); $('task').classList.add('late'); }
+    }
+    function startTimer() {
+      stopTimer();
+      $('task').classList.remove('late');
+      deadline = Date.now() + LIMIT * 1000;
+      tick(); ticker = setInterval(tick, 250);
+    }
+
+    // read the word aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
+    let speaker = null;
+    $('speak').addEventListener('click', () => {
+      const say = () => { speaker = speaker || new AudioManager(new Audio(), {}); speaker.speak(answer, 'auto', 0.8); };
+      if (typeof AudioManager !== 'undefined') return say();
+      const sc = document.createElement('script');
+      sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
+      sc.onload = say;
+      document.head.append(sc);
+    });
+
     let nomOf = '';
     function start(word, nom) {
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
+      startTimer();
       const img = $('nom');
       img.hidden = true;
       const ch = nom && [...nom][0];   // the first character of the Nôm form as a 32px image, as in the Chunom site
@@ -317,6 +360,7 @@
       verdict(b, ok);
       mood(ok);
       if (!ok) return;
+      stopTimer();
       for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
       for (const x of slots) x.state = 'full';   // the faint cells show their marked forms
       show($('variants'), false);
