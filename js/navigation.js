@@ -187,7 +187,7 @@ window.Lang = window.Lang || (function() {
               background: rgba(33, 37, 41, 0.95);
               backdrop-filter: blur(15px);
             }
-            .lang-switch { display: flex; align-items: center; gap: .35rem; margin-left: .25rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
+            .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
             .lang-switch button.active { color: #fff; text-decoration: underline; text-underline-offset: .3em; }
@@ -297,10 +297,10 @@ window.Lang = window.Lang || (function() {
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="${home}">
                     ${navConfig.brand(logo, brandTitle, false)}
                 </a>
-                <div class="lang-switch" role="group" aria-label="Language">
-                    <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
-                </div>
                 <div class="ms-auto d-flex align-items-center">
+                    <div class="lang-switch" role="group" aria-label="Language">
+                        <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
+                    </div>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -370,7 +370,7 @@ window.Lang = window.Lang || (function() {
             if (viewport && !/viewport-fit/.test(viewport.content)) viewport.content += ', viewport-fit=cover';
         }
 
-        // language switch EN | VI next to the logo; the choice is remembered (Lang.set)
+        // language switch EN | VI next to the menu button; the choice is remembered (Lang.set)
         const langButtons = header.querySelectorAll('.lang-switch button');
         const markLang = () => langButtons.forEach(b => { const on = b.dataset.lang === Lang.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
         langButtons.forEach(b => b.addEventListener('click', () => Lang.set(b.dataset.lang)));
