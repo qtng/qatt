@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QATT Check</title>
+  <title>Sound Check</title>
   <meta name="description" content="Spell a Vietnamese word in Quốc Âm Tân Tự: find the symbols of onset and rhyme, then the tone.">
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <script src="js/navigation.js"></script>
@@ -101,7 +101,7 @@
 <body>
 <header class="hero pt-5 pb-4">
   <div class="container text-center">
-    <h1 class="mb-3">QATT Check</h1>
+    <h1 class="mb-3">Sound Check</h1>
     <p class="lead mx-auto mb-0">Which symbols spell this word?</p>
   </div>
 </header>
@@ -122,7 +122,7 @@
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
       <div class="foot">
         <span class="timer" id="timer" title="One minute per word"><i class="bi bi-stopwatch"></i><span id="time">1:00</span></span>
-        <button type="button" class="speak" id="speak" aria-label="Sound on or off" aria-pressed="false"><i class="bi bi-volume-mute-fill"></i></button>
+        <button type="button" class="speak" id="speak" aria-label="Sound on or off" aria-pressed="true"><i class="bi bi-volume-up-fill"></i></button>
       </div>
     </div>
   </div>
@@ -179,7 +179,7 @@
     }
     const react = (cls) => { const m = $('mood'); m.classList.remove('bounce', 'shake'); void m.offsetWidth; m.classList.add(cls); };
 
-    let slots, tone, code, answer;
+    let slots, tone, code, answer, hop;
     const GOOD = ['😃', '🤗', '😊', '🙃'], BAD = ['😧', '😩', '😵', '😒', '😣', '🤨', '😱', '🤯', '😖'];
     const pick = a => a[Math.floor(Math.random() * a.length)];
     // the mood: 🙂 at the start, a random cheerful one after a hit, a random upset one after a miss
@@ -192,11 +192,11 @@
       if (!c) return null;
       const [onset, rhyme, , t] = c.split(',');
       const on = piece(onset), rh = rhyme ? piece(rhyme) : null;
-      let cells;
-      if (!rh) cells = [on];                                                    // the shape alone (ông)
-      else if (rh.mark && !on.mark && on.shape === rh.shape) cells = [rh];      // onset and rhyme of one shape: one marked letter
-      else cells = [on, rh];
-      return { cells, tone: +t || 0, code: c };
+      let cells;   // role: what the cell stands for, to spell the word again from the cells
+      if (!rh) cells = [{ ...on, role: 'onset' }];                                                          // the shape alone (ông)
+      else if (rh.mark && !on.mark && on.shape === rh.shape) cells = [{ ...rh, role: 'both' }];             // onset and rhyme of one shape: one marked letter
+      else cells = [{ ...on, role: 'onset' }, { ...rh, role: 'rhyme' }];
+      return { cells, tone: +t || 0, code: c, hop: !parsed.qatt };
     }
 
     // one line of the CSV, with quoted fields
@@ -245,8 +245,8 @@
     }
 
     // sound on/off (off at the start): every click on a shape or a tone is read aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
-    let sound = false, speaker = null;
-    try { sound = localStorage.getItem('qattCheckSound') === '1'; } catch (e) {}
+    let sound = true, speaker = null;   // on unless it was switched off
+    try { sound = localStorage.getItem('qattCheckSound') !== '0'; } catch (e) {}
     const withSpeaker = fn => {
       const go = () => { speaker = speaker || new AudioManager(new Audio(), {}); fn(speaker); };
       if (typeof AudioManager !== 'undefined') return go();
@@ -268,8 +268,26 @@
       if (sound) withSpeaker(() => {});   // load the speech now
     });
     showSound();
+    if (sound) withSpeaker(() => {});   // load the speech early
     // the onset is read with the rhyme ông (mông, nhông, …); the tone with the whole word in that tone
     const sayOnset = shape => say(parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }));
+    // a marked form: the word as the cells show it now, the clicked form on the cells of its shape, a missing cell filled with the plain clicked shape
+    const sayMarked = (shape, mark) => {
+      if (hop) return;   // the Hợp Thư writing (one shape for onset and rhyme) is not spelled
+      const cell = s => {
+        if (s.state === 'empty') return { shape, mark: 0, role: s.role };
+        return { shape: s.shape, mark: s.shape === shape && s.mark ? mark : s.state === 'full' ? s.mark : 0, role: s.role };
+      };
+      const cells = slots.map(cell);
+      const code = c => c.shape + (c.mark || '');
+      let onset, rhyme;
+      for (const c of cells) {
+        if (c.role === 'both') { onset = c.shape; rhyme = code(c); }
+        else if (c.role === 'onset') { onset = c.shape; rhyme = ''; }
+        else rhyme = code(c);
+      }
+      say(parser.toQuocNgu({ onset, rhyme, tone: 0 }));
+    };
     const TONE_NAME = { 1: null, 2: 'huyen', 3: 'hoi', 4: 'nga', 5: 'sac', 6: 'nang', 7: 'sac', 8: 'nang' };
     const wordInTone = (word, n) => {
       const bare = word.normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
@@ -296,7 +314,7 @@
         img.src = `${CHUNOM_SITE}chunom-assets/generated/32/${ch.codePointAt(0).toString(16).toUpperCase()}.webp`;
       }
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
-      tone = a.tone; code = a.code;
+      tone = a.tone; code = a.code; hop = a.hop;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
       $('word').textContent = word;
       for (const id of ['tones', 'variants']) show($(id), false);
@@ -359,6 +377,7 @@
     }
 
     function pickMark(shape, mark, b) {
+      sayMarked(shape, mark);   // before the cells change
       const found = slots.filter(s => s.shape === shape && s.mark === mark);
       verdict(b, found.length > 0);
       mood(found.length > 0);
