@@ -33,10 +33,11 @@
     .cell.near { background: var(--bs-warning-border-subtle); color: rgba(43, 33, 24, .4); }
     .cell.solved { background: var(--bs-success-border-subtle); color: #0f5132; }
     .cell .g { display: inline-block; }
+    .cells.two .cell { width: 5.25rem; }   /* two cells: the box is squeezed to 75% of its width, like the glyphs */
     .cells.two .g { transform: scale(.75, 1); }
     #variants, #bases, #tones { margin-top: .8rem; }
-    .pad.grid8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: .3rem; max-width: 34rem; }
-    .grid8 .gbtn { width: 100%; }
+    .pad.grid8 { gap: .3rem; max-width: 34rem; }   /* 8 buttons per row, the last row centred */
+    .grid8 .gbtn { width: calc((100% - 7 * .3rem) / 8); height: auto; aspect-ratio: 1; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
     .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: #fffdf8; border: 1px solid #d9ccb0; border-radius: .5rem; color: var(--ink); }
@@ -46,7 +47,7 @@
         .done { text-align: center; margin-top: 1.6rem; }
     .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
     .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
-    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } }
+    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } }
   </style>
 </head>
 <body>
