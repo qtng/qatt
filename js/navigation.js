@@ -87,12 +87,12 @@ window.Lang = window.Lang || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Quốc Âm Tân Tự", bar: "Home", barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "QATT Symbols", bar: "Symbols", barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
+            { name: "Symbols", bar: "Symbols", barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "QATT Writer", bar: "Write", barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", bar: "Practice", barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
-            { name: "QATT Decodings", url: "/decodings.html", icon: "bi-puzzle" },
-            { name: "QATT Unicode", url: "/unicode.html", icon: "bi-fonts" },
-            { name: "QATT Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
+            { name: "Decodings", url: "/decodings.html", icon: "bi-puzzle" },
+            { name: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
+            { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
     };
     const nomBlock = {
