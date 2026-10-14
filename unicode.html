@@ -7,7 +7,7 @@
   <title>Quốc Âm Tân Tự – Unicode block (draft)</title>
   <meta name="description" content="Draft Unicode block for Quốc Âm Tân Tự: code chart, names list, Cán table, tone marks and character properties.">
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-  <script defer src="js/navigation.js"></script>
+  <script src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
   <style>
     :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --bs-link-color: #a8362a; --bs-link-hover-color: #8c2c22; --bs-link-color-rgb: 168, 54, 42; --bs-link-hover-color-rgb: 140, 44, 34; }
@@ -101,10 +101,10 @@
       Data: <a id="s-link" href="https://github.com/qtng/qatt-unicode">qtng/qatt-unicode</a> at <span class="cp" id="s-commit"></span>
       (<span class="cp">ucd/</span> draft files, proposal sections 5–7).
     </div>
-    <p class="text-center mb-0 d-flex justify-content-center gap-2"><a class="btn btn-cinnabar btn-sm" href="font.html">Reference Font</a><a class="btn btn-outline-dark btn-sm" href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">View proposal draft</a></p>
+    <p class="text-center mb-0 d-flex justify-content-center gap-2"><a class="btn btn-cinnabar btn-sm" href="font.html" data-vi="Phông chữ tham chiếu">Reference font</a><a class="btn btn-outline-dark btn-sm" href="https://github.com/qtng/qatt-unicode/blob/main/proposal.md">View proposal draft</a></p>
 
 
-  <h2 id="chart-title">Code chart</h2>
+  <h2 id="chart-title" data-vi="Bảng mã">Code chart</h2>
   <div class="d-flex flex-wrap gap-2 mb-3" id="legend" role="group" aria-label="Filter by group"></div>
   <div class="row g-4">
     <div class="col-12 col-xl-9">
@@ -117,26 +117,26 @@
     </div>
   </div>
 
-  <h2 id="list-title">List of code points</h2>
+  <h2 id="list-title" data-vi="Danh sách điểm mã">List of code points</h2>
   <p>One row per code point with the full name from the draft names list: <code>QUOC AM TAN TU &lt;NAME&gt; UNMARKED</code> or <code>MARKED-1</code> to <code>MARKED-6</code> (the position of the marking stroke); in the names <b>DD</b> stands for đ and <b>DZ</b> for d. The code points are provisional (base <span class="cp" id="l-base"></span>).</p>
   <div class="row g-2 mb-2">
-    <div class="col-12 col-md-6"><input class="form-control" type="search" id="q" placeholder="Search names, readings, code points…" aria-label="Search the list of code points" autocomplete="off"></div>
+    <div class="col-12 col-md-6"><input class="form-control" type="search" id="q" placeholder="Search names, readings, code points…" data-vi-placeholder="Tìm tên, cách đọc, điểm mã…" aria-label="Search the list of code points" autocomplete="off"></div>
     <div class="col-12 col-md-6 small text-secondary d-flex align-items-center" id="count"></div>
   </div>
   <div class="table-responsive"><table class="table table-sm table-hover names align-middle" id="names"></table></div>
 
-  <h2>Overview</h2>
+  <h2 data-vi="Tổng quan">Overview</h2>
   <div class="table-responsive"><table class="table table-sm align-middle" id="overview"></table></div>
 
-  <h2>The 22 Cán</h2>
+  <h2 data-vi="22 Cán">22 Cán</h2>
   <p>Each Cán has seven forms: one without marking stroke and six with the marking stroke in one of the six positions; the seven forms of a base are consecutive code points (unmarked first). The marking stroke at position 1 is the marked Cán of the source listing, positions 2 to 6 are the five Chi. The names are the sound names of the source listing (initial + <i>ông</i>); <b>DD</b> stands for đ and <b>DZ</b> for d.</p>
   <div class="table-responsive"><table class="table table-sm table-hover align-middle tt" id="can-table"></table></div>
 
-  <h2>Tone marks</h2>
+  <h2 data-vi="Dấu thanh">Tone marks</h2>
   <p>Eight combining marks, one per tone, placed in the four corners of the cluster: the traditional tone order of the eight tones (âm before dương). The drawings are schematic, taken from the description in the proposal (the open side of the semicircle faces the centre); they are not reference glyphs.</p>
   <div class="table-responsive"><table class="table table-sm align-middle" id="tone-table"></table></div>
 
-  <h2>Character properties</h2>
+  <h2 data-vi="Thuộc tính ký tự">Character properties</h2>
   <p>Draft values by character class. Values the proposal marks as open are listed in <a href="https://github.com/qtng/qatt-unicode/blob/main/ucd/questions.md">ucd/questions.md</a>.</p>
   <div class="table-responsive"><table class="table table-sm align-middle tt" id="props"></table></div>
 
