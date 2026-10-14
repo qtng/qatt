@@ -10,7 +10,7 @@
   <script src="js/parser.js"></script>
   <script defer src="js/fonts.js"></script>
   <style>
-    :root { --qfont: "QATT Prototype Light"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    :root { --qfont: "QATT Gothic Bold"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
       background:
         radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
@@ -238,8 +238,8 @@
     const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.toQuocNgu({ onset: '_', rhyme: el.dataset.rhyme }) || ''; });
     document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
     label();
-    const font = document.getElementById('font');   // the page starts in Prototype Light
-    font.value = 'QATT Prototype Light';
+    const font = document.getElementById('font');   // the page starts in Gothic bold
+    font.value = 'QATT Gothic Bold';
     font.dispatchEvent(new Event('change'));
   });
 </script>
