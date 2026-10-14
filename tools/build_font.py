@@ -39,6 +39,8 @@ CELL = (-12.5, -12.5, 125, 125)  # qatt.js viewBox
 SY = float(os.environ.get('QATT_SY', 8))      # font units per svg unit (vertical): the cell height 125 fills the em (1000)
 SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 125 x 125)
 TONE_X = 1.0                   # the tones have the same scale as the letters
+# Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
+ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y -7.25 .. 107.25
 X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 97.5
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
@@ -259,7 +261,7 @@ def lsb(n):
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
 fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else '') + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
-fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
+fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 # KAGE fonts: the letters in three classes by the width of their single form (thirds); a narrow letter on the left of a wide one gets a
@@ -332,6 +334,22 @@ feature ccmp {{
 }} ccmp;
 ''')
 
+# BASE table as in Noto Sans CJK: the baselines of the cell (horizontal text): romn 0, ideo -120 (bottom of the em box), icfb/icft the ideographic character face box
+from fontTools.ttLib import newTable
+from fontTools.ttLib.tables import otTables as ot
+BASELINES = {'icfb': ICF_B, 'icft': ICF_T, 'ideo': -120, 'romn': 0}
+_ax = ot.Axis(); _ax.BaseTagList = ot.BaseTagList(); _ax.BaseTagList.BaselineTag = sorted(BASELINES); _ax.BaseTagList.BaseTagCount = 4
+_ax.BaseScriptList = ot.BaseScriptList(); _ax.BaseScriptList.BaseScriptRecord = []
+for _tag, _def in (('DFLT', 'ideo'), ('hani', 'ideo'), ('kana', 'ideo'), ('latn', 'romn')):
+    _r = ot.BaseScriptRecord(); _r.BaseScriptTag = _tag; _r.BaseScript = ot.BaseScript(); _bv = _r.BaseScript.BaseValues = ot.BaseValues()
+    _bv.DefaultIndex = sorted(BASELINES).index(_def); _bv.BaseCoord = []
+    for _t in sorted(BASELINES):
+        _c = ot.BaseCoord(); _c.Format = 1; _c.Coordinate = BASELINES[_t]; _bv.BaseCoord.append(_c)
+    _bv.BaseCoordCount = 4; _r.BaseScript.BaseLangSysRecord = []; _r.BaseScript.BaseLangSysCount = 0; _r.BaseScript.DefaultMinMax = None
+    _ax.BaseScriptList.BaseScriptRecord.append(_r)
+_ax.BaseScriptList.BaseScriptCount = 4; _ax.MinMax = None if hasattr(_ax, 'MinMax') else None
+_base = newTable('BASE'); _base.table = ot.BASE(); _base.table.Version = 0x00010000; _base.table.HorizAxis = _ax; _base.table.VertAxis = None
+fb.font['BASE'] = _base
 
 fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont

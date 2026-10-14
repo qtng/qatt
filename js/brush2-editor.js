@@ -169,9 +169,9 @@
     canvas.classList.toggle("editing", !!(mode && active));
     const grid = el("g", { class: "grid" }, canvas);
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -12.5, x2: v, y2: 112.5 }, grid); el("line", { x1: -12.5, y1: v, x2: 112.5, y2: v }, grid); }
-    el("rect", { x: -9, y: -9, width: 118, height: 118, class: "box" }, grid);
+    el("rect", { x: -7.25, y: -7.25, width: 114.5, height: 114.5, class: "box" }, grid);   // ICF box of Noto Sans CJK (font x 42..958, y -78..838)
     el("rect", { x: -12.5, y: -12.5, width: 125, height: 125, class: "window" }, grid);   // the font cell (VIEWBOX)
-    el("line", { x1: -12.5, y1: 97.5, x2: 112.5, y2: 97.5, class: "base" }, grid);   // the baseline of the font (svg y 97.5)
+    el("line", { x1: -12.5, y1: 97.5, x2: 112.5, y2: 97.5, class: "base" }, grid);   // romn baseline (font y 0); the ideographic baseline (-120) is the lower edge of the cell
     for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
     for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 115, class: "gline" }, canvas);
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
