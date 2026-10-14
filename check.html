@@ -108,7 +108,7 @@
 <main class="container py-3" id="content">
   <div class="d-flex justify-content-center gap-2 mt-2">
     <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select>
-    <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
+    <select id="font" data-qatt-fonts data-qatt-default="QATT Brush" class="form-select form-select-sm w-auto" aria-label="Font"></select>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="reload">Skip</button>
   </div>
   <div class="card task mx-auto" id="task">
@@ -367,9 +367,9 @@
       renderCells();
       $('full').textContent = QattText.syllable(code);
       $('reading').textContent = answer;
-      // the success card takes the place of the task, after a short moment to see the last cell
+      // the success card takes the place of the task, after a moment to see the last cell
       show($('tones'), false);
-      setTimeout(() => show($('task'), false).then(() => show($('done'), true)), 450);
+      setTimeout(() => show($('task'), false).then(() => show($('done'), true)), 1000);
     }
 
     const another = () => { const e = draw(); start(e.w, e.nom); };
