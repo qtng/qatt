@@ -13,6 +13,19 @@
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
   const VIEWBOX = "-14 -28 128 136";   // the glyph box of qatt.js with room for the tone marks in the corners
   const clone = o => JSON.parse(JSON.stringify(o));
+  // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
+  const migrate = st => {
+    if (st.offsets) return st;
+    for (const e of Object.values(st.lib || {})) {
+      for (const [k, own, inv] of [["s", "sa", "si"], ["e", "ea", "ei"]]) {
+        if (e[inv] && e[k] === "kihitsu") e[k] = "kihitsu-inv";
+        delete e[inv];
+        if (typeof e[own] === "number") { const d = e[own] - ((st.params || {}).kihitsuAngle ?? 20); if (d) e[own] = d; else delete e[own]; }
+      }
+    }
+    st.offsets = true;
+    return st;
+  };
 
   // ---- the model: original paths, default library and symbols (js/brush-model.js) ----------------------------------------------
   const ORIG = {};
@@ -23,15 +36,15 @@
   const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;
 
   // ---- state, history, storage --------------------------------------------------------------------------------------------------
-  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, guides: { h: [null, null, null, null], v: [null, null, null, null] } });
+  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, offsets: true, guides: { h: [null, null, null, null], v: [null, null, null, null] } });
   let state = fresh();
-  try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.lib && s.sym) state = Object.assign(fresh(), s); } catch (e) { }
+  try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.lib && s.sym) state = migrate(Object.assign(fresh(), s)); } catch (e) { }
   const undo = [], redo = [];
   let pending = false, saveTimer = null;
   const begin = () => { if (!pending) { undo.push(JSON.stringify(state)); if (undo.length > 200) undo.shift(); redo.length = 0; pending = true; } };
   const end = () => { pending = false; save(); };
   const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { } }, 300); };
-  const restore = json => { state = Object.assign(fresh(), JSON.parse(json)); if (!state.lib[libSel]) libSel = Object.keys(state.lib)[0]; save(); renderAll(); };
+  const restore = json => { state = migrate(Object.assign(fresh(), JSON.parse(json))); if (!state.lib[libSel]) libSel = Object.keys(state.lib)[0]; save(); renderAll(); };
   function doUndo() { if (!undo.length) return; redo.push(JSON.stringify(state)); restore(undo.pop()); }
   function doRedo() { if (!redo.length) return; undo.push(JSON.stringify(state)); restore(redo.pop()); }
 
@@ -413,18 +426,9 @@
     const e = state.lib[libSel], box = document.getElementById("lib-fields"); box.innerHTML = "";
     kindSelect(box, "Start", e, "s"); kindSelect(box, "End", e, "e");
     slider(box, "Bend", e.bend || 0, -0.3, 0.3, 0.005, v => e.bend = v, v => v.toFixed(3));
-    // kihitsu angle of one end: empty = the global angle of the brush
-    for (const [key, own, label, inv] of [["s", "sa", "Start kihitsu angle", "si"], ["e", "ea", "End kihitsu angle", "ei"]]) {
-      if (e[key] !== "kihitsu") continue;
-      const row = document.createElement("label"); row.className = "slider kind";
-      row.innerHTML = `<span>${label}</span><input type="number" step="1" min="-70" max="70" class="form-control form-control-sm" placeholder="global (${state.params.kihitsuAngle})"><label class="small text-nowrap"><input type="checkbox" class="form-check-input inv"> invert</label>`;
-      const cb = row.querySelector(".inv"); cb.checked = !!e[inv];
-      cb.addEventListener("change", () => { begin(); if (cb.checked) e[inv] = true; else delete e[inv]; changed(); end(); });
-      const inp = row.querySelector("input[type=number]"); if (typeof e[own] === "number") inp.value = e[own];
-      inp.addEventListener("input", () => { begin(); if (inp.value === "" || isNaN(+inp.value)) delete e[own]; else e[own] = +inp.value; changed(); });
-      inp.addEventListener("change", () => end());
-      box.append(row);
-    }
+    // kihitsu angle of one end: an offset added to the global angle of the brush
+    for (const [key, own, label] of [["s", "sa", "Start angle offset"], ["e", "ea", "End angle offset"]])
+      if (/^kihitsu/.test(e[key])) slider(box, label, e[own] || 0, -45, 45, 1, v => { if (v) e[own] = v; else delete e[own]; }, v => (v > 0 ? "+" : "") + v + "°");
     if ((e.s === "point") !== (e.e === "point"))
       slider(box, "Gradient", e.g || 0, -1, 1, 0.01, v => e.g = v, v => v < -0.005 ? "full " + (-v).toFixed(2) : v > 0.005 ? "slim " + v.toFixed(2) : "linear");
   }
