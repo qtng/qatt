@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sound Check</title>
+  <meta name="description" content="Spell a Vietnamese word in Quốc Âm Tân Tự: find the symbols of onset and rhyme, then the tone.">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script defer src="js/fonts.js"></script>
+  <style>
+    :root { --qfont: "QATT Serif"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    .head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .5rem; margin-bottom: .8rem; }
+    .word { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; line-height: 1.1; color: var(--ink); text-align: left; overflow-wrap: anywhere; }
+    .nom { justify-self: end; width: 32px; height: 32px; display: block; }
+    .nom img { display: block; }
+    .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; }
+    .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
+    .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
+    .cell + .cell { border-left: 2px solid #cdbd9a; }
+    .cell { background: var(--bs-warning-bg-subtle); transition: background-color .3s ease, color .3s ease; }
+    .cell.near { background: var(--bs-warning-border-subtle); color: rgba(43, 33, 24, .4); }
+    .cell.solved { background: var(--bs-success-border-subtle); color: #0f5132; }
+    .cell .g { display: inline-block; }
+    .cell.pop .g { animation: pop .35s ease-out; }
+    .cell.pop { animation: flash .45s ease-out; }
+    @keyframes pop { 0% { opacity: 0; transform: scale(.6); } 60% { opacity: 1; transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes flash { 0% { filter: brightness(1.12); } 100% { filter: none; } }
+    .cells.two .cell.pop .g { animation-name: pop2; }
+    @keyframes pop2 { 0% { opacity: 0; transform: scale(.45, .6); } 60% { opacity: 1; transform: scale(.84, 1.12); } 100% { opacity: 1; transform: scale(.75, 1); } }
+    .mood { display: block; }
+    .mood.bounce { animation: bounce .5s ease-out; }
+    .mood.shake { animation: shake .4s ease-in-out; }
+    @keyframes bounce { 0% { transform: scale(.7); } 40% { transform: translateY(-.5rem) scale(1.2); } 70% { transform: translateY(.1rem) scale(.95); } 100% { transform: none; } }
+    @keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-.4rem) rotate(-8deg); } 40% { transform: translateX(.4rem) rotate(8deg); } 60% { transform: translateX(-.3rem) rotate(-5deg); } 80% { transform: translateX(.2rem) rotate(3deg); } }
+    .cells.two .cell { width: 5.25rem; }   /* two cells: the box is squeezed to 75% of its width, like the glyphs */
+    .cells.two .g { transform: scale(.75, 1); }
+    #variants, #bases, #tones { margin-top: .8rem; }
+    .tones { display: flex; justify-content: center; gap: 1.6rem; }
+    .tones .block { display: grid; grid-template-columns: repeat(2, 1fr); gap: .3rem; }
+    .tones .gbtn { width: 4.2rem; height: 4.2rem; }
+    .pad.grid8 { gap: .3rem; max-width: 34rem; }   /* 8 buttons per row, the last row centred */
+    .grid8 .gbtn { width: calc((100% - 7 * .3rem) / 8); height: auto; aspect-ratio: 1; }
+    .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
+    .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
+    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: var(--b, #fffdf8); border: 2px solid var(--bc, #d9ccb0); border-radius: .55rem; box-shadow: 0 2px 0 var(--bc, #d9ccb0); color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s, box-shadow .12s; }
+    /* the kinds of buttons in their own colours: shapes cream, marked forms blue, tones orange */
+    #basePad { --b: #fff8e6; --bc: #cdb98a; }
+    #variantPad { --b: #e3eef8; --bc: #92b4d3; }
+    #tonePad { --b: #fde7cf; --bc: #e0a766; }
+    .gbtn:hover:not(:disabled) { border-color: var(--ink); transform: translateY(-1px); }
+    .gbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+    .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; box-shadow: 0 2px 0 #198754; color: #0f5132; opacity: 1; }
+    .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; box-shadow: 0 2px 0 #dc3545; color: #842029; opacity: 1; animation: shake .4s ease-in-out; }
+    .gbtn.ok:disabled { animation: okpop .35s ease-out; }
+    @keyframes okpop { 0% { transform: scale(.9); } 50% { transform: scale(1.12); } 100% { transform: none; } }
+    .gbtn.fresh { animation: rise .3s ease-out backwards; animation-delay: calc(var(--i, 0) * 35ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(.5rem) scale(.9); } }
+    .done.card { animation: glow 1.2s ease-out; }
+    @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+    /* the cards like a retro game: tinted, a thick outline and a hard shadow */
+    .card { max-width: 24rem; margin-top: .8rem; }
+    .card.task, .card.done { border: 3px solid var(--ink); border-radius: .9rem; box-shadow: 5px 5px 0 var(--ink), inset 0 3px 0 rgba(255, 255, 255, .65), inset 0 -4px 0 rgba(43, 33, 24, .08); }
+    .card.task { background: linear-gradient(180deg, #fff1c9 0%, #fbe3a6 100%); }
+    .card.task { position: relative; }
+    .card.task::after { content: ""; position: absolute; inset: 0; border-radius: .6rem; background: #e5483a; opacity: 0; mix-blend-mode: multiply; pointer-events: none; transition: opacity 1s ease; }
+    .card.task.late::after { opacity: .3; }
+    .card.task .card-body { position: relative; z-index: 1; }
+    .foot { display: flex; justify-content: space-between; align-items: center; margin-top: .4rem; }
+    .timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); font-size: 1.05rem; }
+    .timer .bi { margin-right: .3rem; }
+    .late .timer { color: #842029; }
+    .speak { width: 2.4rem; height: 2.4rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; background: #fffdf8; border: 2px solid var(--ink); border-radius: 50%; box-shadow: 0 2px 0 var(--ink); color: var(--ink); transition: transform .12s, box-shadow .12s; }
+    .speak:hover { transform: translateY(-1px); }
+    .speak:active { transform: translateY(2px); box-shadow: none; }
+    .task .cells { border-color: var(--ink); box-shadow: 3px 3px 0 rgba(43, 33, 24, .35); }
+    .task .cell + .cell { border-left-color: var(--ink); }
+    .card .cells { margin-bottom: .4rem; }
+    .done { text-align: center; }
+    .done.card { background: linear-gradient(180deg, #d9f2e3 0%, #b9e4cc 100%); box-shadow: 5px 5px 0 #146c43, inset 0 3px 0 rgba(255, 255, 255, .65); border-color: #146c43; }
+    .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
+    .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
+    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <h1 class="mb-3">Sound Check</h1>
+    <p class="lead mx-auto mb-0">Which symbols spell this word?</p>
+  </div>
+</header>
+
+<main class="container py-3" id="content">
+  <div class="d-flex justify-content-center gap-2 mt-2">
+    <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select>
+    <select id="font" data-qatt-fonts data-qatt-default="QATT Brush" class="form-select form-select-sm w-auto" aria-label="Font"></select>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="reload">Skip</button>
+  </div>
+  <div class="card task mx-auto" id="task">
+    <div class="card-body">
+      <div class="head">
+        <div class="word" id="word" lang="vi"></div>
+        <div class="mood" id="mood" aria-live="polite">🙂</div>
+        <a class="nom" id="nomLink" target="_blank" rel="noopener" title="Details in the dictionary" hidden><img id="nom" alt="" width="32" height="32"></a>
+      </div>
+      <div class="cells" id="cells" aria-label="The symbols of the word"></div>
+      <div class="foot">
+        <span class="timer" id="timer" title="One minute per word"><i class="bi bi-stopwatch"></i><span id="time">1:00</span></span>
+        <button type="button" class="speak" id="speak" aria-label="Sound on or off" aria-pressed="true"><i class="bi bi-volume-up-fill"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="variants" hidden><div class="pad" id="variantPad"></div></div>
+  <div id="bases"><div class="pad grid8" id="basePad"></div></div>
+  <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
+  <div class="card done mx-auto" id="done" hidden>
+    <div class="card-body">
+      <div class="full" id="full"></div>
+      <div class="reading mb-3" id="reading"></div>
+      <button type="button" class="btn btn-cinnabar btn-pill" id="next">Next word</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const parser = new VietnameseParser();
+    // the words: the entries of the dictionary of the Chunom site that have a rank and are one syllable (word + Nôm character);
+    // until it is loaded (or if it fails) a short list of common syllables serves
+    const CHUNOM_SITE = 'https://v2.chunom.org/';
+    let DICT = [];
+    const FALLBACK = ['Quốc', 'Âm', 'Tân', 'Tự', 'người', 'nước', 'việt', 'nam', 'nhà', 'tôi', 'bạn', 'đẹp', 'trời', 'gió', 'hoa', 'sách',
+      'chữ', 'nôm', 'thơ', 'lòng', 'thương', 'xuân', 'hạ', 'thu', 'đông', 'sáng', 'chiều', 'đêm', 'sông', 'núi', 'biển', 'cá', 'gà', 'mèo'];
+    // the shapes as buttons
+    const SHAPES = 'l _ ng h g c tr d n t th nh ch dz x kh s r m b v ph'.split(' ');   // the order of symbols.html (l first)
+    const MARKS = [2, 3, 4, 5, 6];
+    const $ = id => document.getElementById(id);
+    const glyph = (shape, mark = 0) => QattText.syllable(shape + (mark || '') + ',,,0');   // one letter of the font
+    // the tone marks in code point order 1..8 (U+F009C..U+F00A3): ngang, huyền, hỏi, ngã, sắc, nặng, sắc nhập, nặng nhập; the tone code of the syllable for each
+    const toneGlyph = n => String.fromCodePoint(0xF0000 + 155 + n);
+    const TONE_CODE = { 1: 0, 2: 2, 3: 3, 4: 4, 5: 1, 6: 5, 7: 6, 8: 7 };
+    // two blocks of four:  3 5 | 4 6  /  1 7 | 2 8
+    const TONE_BLOCKS = [[3, 5, 1, 7], [4, 6, 2, 8]];
+    const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
+
+    // fade and fold an element in or out instead of switching it at once; resolves when done
+    const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function show(el, on) {
+      if (el._anim) { el._anim.cancel(); el._anim = null; el.style.overflow = ''; }
+      if (REDUCED || on === !el.hidden) { el.hidden = !on; return Promise.resolve(); }
+      el.hidden = false;
+      const full = getComputedStyle(el), h = el.offsetHeight + 'px', m = full.marginTop;
+      const open = { opacity: 1, height: h, marginTop: m, transform: 'none' };
+      const shut = { opacity: 0, height: '0px', marginTop: '0px', transform: 'translateY(.5rem)' };
+      el.style.overflow = 'hidden';
+      const a = el._anim = el.animate(on ? [shut, open] : [open, shut], { duration: on ? 280 : 200, easing: 'ease-out' });
+      return new Promise(done => {
+        a.onfinish = () => { el._anim = null; el.style.overflow = ''; el.hidden = !on; done(); };
+        a.oncancel = done;
+      });
+    }
+    const react = (cls) => { const m = $('mood'); m.classList.remove('bounce', 'shake'); void m.offsetWidth; m.classList.add(cls); };
+
+    let slots, tone, code, answer, hop;
+    const GOOD = ['😃', '🤗', '😊', '🙃'], BAD = ['😧', '😩', '😵', '😒', '😣', '🤨', '😱', '🤯', '😖'];
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    // the mood: 🙂 at the start, a random cheerful one after a hit, a random upset one after a miss
+    const mood = ok => { $('mood').textContent = pick(ok ? GOOD : BAD); react(ok ? 'bounce' : 'shake'); };
+
+    // the cells of the word: [{ shape, mark }] and the tone, from the code of the parser
+    function analyse(word) {
+      const parsed = parser.parse(word);
+      const c = parsed && (parsed.qatt || parsed.hop);
+      if (!c) return null;
+      const [onset, rhyme, , t] = c.split(',');
+      const on = piece(onset), rh = rhyme ? piece(rhyme) : null;
+      let cells;   // role: what the cell stands for, to spell the word again from the cells
+      if (!rh) cells = [{ ...on, role: 'onset' }];                                                          // the shape alone (ông)
+      else if (rh.mark && !on.mark && on.shape === rh.shape) cells = [{ ...rh, role: 'both' }];             // onset and rhyme of one shape: one marked letter
+      else cells = [{ ...on, role: 'onset' }, { ...rh, role: 'rhyme' }];
+      return { cells, tone: +t || 0, code: c, hop: !parsed.qatt };
+    }
+
+    // one line of the CSV, with quoted fields
+    const csvRow = line => {
+      const out = []; let i = 0;
+      while (i <= line.length) {
+        if (line[i] === '"') {
+          let v = ''; i++;
+          while (i < line.length && !(line[i] === '"' && line[i + 1] !== '"')) { v += line[i] === '"' ? '"' : line[i]; i += line[i] === '"' ? 2 : 1; }
+          out.push(v); i += 2;   // the closing quote and the comma
+        } else { const j = line.indexOf(',', i); const e = j < 0 ? line.length : j; out.push(line.slice(i, e)); i = e + 1; }
+      }
+      return out;
+    };
+    const loadDict = () => fetch(CHUNOM_SITE + 'chunom/dict.csv').then(r => r.ok ? r.text() : Promise.reject(r.status)).then(text => {
+      const seen = new Set();
+      for (const line of text.split('\n')) {
+        const r = csvRow(line.replace(/\r$/, ''));
+        const w = (r[0] || '').trim();
+        if (!w || /\s/.test(w) || !parseInt(r[5]) || !r[1]) continue;   // one syllable, with a rank
+        if (!seen.has(w + r[1])) { seen.add(w + r[1]); DICT.push({ w, nom: r[1] }); }
+      }
+    });
+    const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
+    // a random entry that the parser can spell, not the one just shown
+    const draw = () => {
+      const list = pool();
+      for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (e.w !== answer && analyse(e.w)) return e; }
+      return { w: FALLBACK.find(w => analyse(w)) };
+    };
+
+    // the countdown of one minute per word; at 0 the card turns reddish, the game goes on
+    const LIMIT = 60;
+    let deadline = 0, ticker = null;
+    const stopTimer = () => { clearInterval(ticker); ticker = null; };
+    function tick() {
+      const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      $('time').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+      if (!left) { stopTimer(); $('task').classList.add('late'); $('mood').textContent = '💔'; react('shake'); }
+    }
+    function startTimer() {
+      stopTimer();
+      $('task').classList.remove('late');
+      deadline = Date.now() + LIMIT * 1000;
+      tick(); ticker = setInterval(tick, 250);
+    }
+
+    // sound on/off (off at the start): every click on a shape or a tone is read aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
+    let sound = true, speaker = null;   // on unless it was switched off
+    try { sound = localStorage.getItem('qattCheckSound') !== '0'; } catch (e) {}
+    const withSpeaker = fn => {
+      const go = () => { speaker = speaker || new AudioManager(new Audio(), {}); fn(speaker); };
+      if (typeof AudioManager !== 'undefined') return go();
+      const sc = document.createElement('script');
+      sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
+      sc.onload = go;
+      document.head.append(sc);
+    };
+    const say = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };
+    const showSound = () => {
+      $('speak').setAttribute('aria-pressed', sound);
+      $('speak').title = sound ? 'Sound on' : 'Sound off';
+      $('speak').firstElementChild.className = 'bi ' + (sound ? 'bi-volume-up-fill' : 'bi-volume-mute-fill');
+    };
+    $('speak').addEventListener('click', () => {
+      sound = !sound;
+      try { localStorage.setItem('qattCheckSound', sound ? '1' : '0'); } catch (e) {}
+      showSound();
+      if (sound) withSpeaker(() => {});   // load the speech now
+    });
+    showSound();
+    if (sound) withSpeaker(() => {});   // load the speech early
+    // the onset is read with the rhyme ông (mông, nhông, …); the tone with the whole word in that tone
+    const sayOnset = shape => say(parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }));
+    // a marked form: the word as the cells show it now, the clicked form on the cells of its shape, a missing cell filled with the plain clicked shape
+    const sayMarked = (shape, mark) => {
+      if (hop) return;   // the Hợp Thư writing (one shape for onset and rhyme) is not spelled
+      const cell = s => {
+        if (s.state === 'empty') return { shape, mark: 0, role: s.role };
+        return { shape: s.shape, mark: s.shape === shape && s.mark ? mark : s.state === 'full' ? s.mark : 0, role: s.role };
+      };
+      const cells = slots.map(cell);
+      const code = c => c.shape + (c.mark || '');
+      let onset, rhyme;
+      for (const c of cells) {
+        if (c.role === 'both') { onset = c.shape; rhyme = code(c); }
+        else if (c.role === 'onset') { onset = c.shape; rhyme = ''; }
+        else rhyme = code(c);
+      }
+      say(parser.toQuocNgu({ onset, rhyme, tone: 0 }));
+    };
+    const TONE_NAME = { 1: null, 2: 'huyen', 3: 'hoi', 4: 'nga', 5: 'sac', 6: 'nang', 7: 'sac', 8: 'nang' };
+    const wordInTone = (word, n) => {
+      const bare = word.normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
+      let m = /^(ngh|ng|nh|gh|ph|th|ch|tr|kh|gi|qu|[bcdđghklmnprstvx])?(.*)$/i.exec(bare);
+      let onset = m[1] || '', rhyme = m[2];
+      if (/^gi$/i.test(onset) && !/[aăâeêioôơuưy]/i.test(rhyme)) { onset = onset[0]; rhyme = 'i' + rhyme; }   // gì: g + ì
+      return onset + parser._tonePlaced(rhyme, TONE_NAME[n]);
+    };
+
+    let nomOf = '';
+    function start(word, nom) {
+      let a = analyse(word);
+      if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
+      answer = word; nomOf = nom || '';
+      startTimer();
+      const img = $('nom');
+      $('nomLink').hidden = true;
+      const ch = nom && [...nom][0];   // the first character of the Nôm form as a 32px image, as in the Chunom site
+      if (ch) {
+        img.alt = nom;
+        $('nomLink').href = CHUNOM_SITE + 'chunom/index.html?detail=' + encodeURIComponent(ch);   // the details of the character in the dictionary
+        img.onload = () => { $('nomLink').hidden = false; };
+        img.onerror = () => { $('nomLink').hidden = true; };
+        img.src = `${CHUNOM_SITE}chunom-assets/generated/32/${ch.codePointAt(0).toString(16).toUpperCase()}.webp`;
+      }
+      slots = a.cells.map(c => ({ ...c, state: 'empty' }));
+      tone = a.tone; code = a.code; hop = a.hop;
+      $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
+      $('word').textContent = word;
+      for (const id of ['tones', 'variants']) show($(id), false);
+      $('variantPad').replaceChildren();
+      $('tonePad').replaceChildren();
+      const pad = $('basePad');
+      pad.replaceChildren(...SHAPES.map(s => button(glyph(s), 'gbtn', b => pickShape(s, b))));
+      $('cells').replaceChildren();
+      renderCells();
+      show($('bases'), true);
+      show($('done'), false).then(() => show($('task'), true));
+    }
+
+    function button(text, cls, onclick) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = cls + ' fresh'; b.textContent = text;
+      b.addEventListener('click', () => onclick(b));
+      return b;
+    }
+    const verdict = (b, ok) => { b.classList.add(ok ? 'ok' : 'bad'); b.disabled = true; };
+
+    function renderCells() {
+      $('cells').classList.toggle('two', slots.length === 2);
+      const box = $('cells');
+      if (box.children.length !== slots.length) box.replaceChildren(...slots.map(() => {
+        const d = document.createElement('div'), g = document.createElement('span');
+        d.className = 'cell'; g.className = 'g'; d.append(g);
+        d.addEventListener('animationend', e => { if (e.target === d) d.classList.remove('pop'); });
+        return d;
+      }));
+      slots.forEach((s, i) => {   // update the cells in place so that the colours can fade
+        const d = box.children[i], g = d.firstChild;
+        const text = s.state === 'empty' ? '' : glyph(s.shape, s.state === 'full' ? s.mark : 0);
+        d.classList.toggle('near', s.state === 'near');
+        d.classList.toggle('solved', s.state === 'full');
+        if (g.textContent !== text) {
+          g.textContent = text;
+          if (text) { d.classList.remove('pop'); void d.offsetWidth; d.classList.add('pop'); }
+        }
+      });
+    }
+
+    function pickShape(shape, b) {
+      const found = slots.filter(s => s.shape === shape);
+      verdict(b, found.length > 0);
+      mood(found.length > 0);
+      sayOnset(shape);   // right or wrong
+      if (!found.length) return;
+      for (const s of found) s.state = s.mark ? 'near' : 'full';
+      if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
+        const group = document.createElement('div');
+        group.className = 'group';
+        group.append(...MARKS.map(m => button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb))));
+        group.querySelectorAll('button').forEach((x, i) => x.style.setProperty('--i', i));
+        $('variantPad').append(group);
+        show($('variants'), true);
+      }
+      renderCells();
+      update();
+    }
+
+    function pickMark(shape, mark, b) {
+      sayMarked(shape, mark);   // before the cells change
+      const found = slots.filter(s => s.shape === shape && s.mark === mark);
+      verdict(b, found.length > 0);
+      mood(found.length > 0);
+      for (const s of found) s.state = 'full';
+      renderCells();
+      update();
+    }
+
+    // all cells filled (also the faint ones): the shapes go; all cells exact (no faint one left): the marked forms go and the tones appear
+    function update() {
+      if (slots.some(s => s.state === 'empty')) return;
+      show($('bases'), false);
+      if (slots.some(s => s.state === 'near') || !$('tones').hidden) return;
+      show($('variants'), false);
+      show($('tones'), true);
+      $('tonePad').replaceChildren(...TONE_BLOCKS.map(block => {
+        const d = document.createElement('div');
+        d.className = 'block';
+        d.append(...block.map((n, i) => { const b = button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b)); b.style.setProperty('--i', i); return b; }));
+        return d;
+      }));
+    }
+
+    function pickTone(n, b) {
+      const ok = TONE_CODE[n] === tone;
+      verdict(b, ok);
+      mood(ok);
+      // right or wrong: the word in the tone of the button; a word ending in p, t, c or ch only takes the entering tones 7 and 8
+      if (n > 6 || !/(p|t|c|ch)$/i.test(answer)) say(wordInTone(answer, n));
+      if (!ok) return;
+      stopTimer();
+      for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
+      for (const x of slots) x.state = 'full';   // the faint cells show their marked forms
+      show($('variants'), false);
+      renderCells();
+      $('full').textContent = QattText.syllable(code);
+      $('reading').textContent = answer;
+      // the success card takes the place of the task, after a moment to see the last cell
+      show($('tones'), false);
+      setTimeout(() => show($('task'), false).then(() => show($('done'), true)), 1000);
+    }
+
+    const another = () => { const e = draw(); start(e.w, e.nom); };
+    $('next').addEventListener('click', another);
+    $('reload').addEventListener('click', another);
+    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); start(answer, nomOf); });   // the same word after the other decoding
+
+    const wanted = new URLSearchParams(location.search).get('word');
+    loadDict().catch(() => {}).then(() => {   // without the dictionary the short list is used
+      if (wanted) start(wanted, (DICT.find(e => e.w === wanted.trim().toLowerCase()) || {}).nom);
+      else another();
+    });
+  });
+</script>
+</body>
+</html>
