@@ -30,6 +30,7 @@ const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], 
     fill(select, QATT_FONTS.map(f => [f.family, f.label, f.default]));
     const group = document.createElement("optgroup");   // a heading inside the dropdown
     group.label = "Choose font";
+    group.setAttribute("data-vi-label", "Lựa chọn phông chữ");   // see Lang in navigation.js
     group.append(...select.options);
     select.append(group);
     select.value = select.dataset.qattDefault || QATT_FONTS.find(f => f.default).family;   // moving the options has lost the selection
@@ -41,6 +42,7 @@ const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], 
     fill(select, QATT_SIZES);
     const group = document.createElement("optgroup");
     group.label = "Choose size";
+    group.setAttribute("data-vi-label", "Lựa chọn cỡ chữ");
     group.append(...select.options);
     select.append(group);
     select.value = QATT_SIZES.find(z => z[2])[0];   // moving the options has lost the selection
