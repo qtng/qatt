@@ -98,6 +98,9 @@
       .rightcol { display: contents; }
       .o1 { order: 1; } .o2 { order: 2; } .o3 { order: 3; } .o4 { order: 4; } .o5 { order: 5; } .o6 { order: 6; }
     }
+    .edit-canvas .gline { stroke: #2f9e6b; stroke-width: .3; stroke-dasharray: 2 1; pointer-events: none; }
+    .guide-row { font-size: .85rem; margin-top: .3rem; }
+    .guide-row > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: .3rem; }
     .hint { font-size: .82rem; color: var(--muted); }
     [hidden] { display: none !important; }
     kbd { background: #efe6d2; color: var(--ink); font-size: .75rem; }
@@ -144,7 +147,7 @@
         <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label><input type="checkbox" id="view-orig"> Original lines</label>
-          <label><input type="checkbox" id="view-snap"> Snap to other end points</label>
+          <label><input type="checkbox" id="view-snap"> Snap to other end points and guides</label>
         </div>
         <div class="edit-bar mt-2">
           <span>Edit</span><div id="stroke-buttons"></div><div id="mark-buttons"></div>

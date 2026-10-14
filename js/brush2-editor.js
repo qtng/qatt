@@ -23,7 +23,7 @@
   const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;
 
   // ---- state, history, storage --------------------------------------------------------------------------------------------------
-  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {} });
+  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {}, guides: { h: [null, null, null, null], v: [null, null, null, null] } });
   let state = fresh();
   try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.lib && s.sym) state = Object.assign(fresh(), s); } catch (e) { }
   const undo = [], redo = [];
@@ -156,6 +156,8 @@
     const grid = el("g", { class: "grid" }, canvas);
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -20, x2: v, y2: 105 }, grid); el("line", { x1: -5, y1: v, x2: 105, y2: v }, grid); }
     el("rect", { x: -9, y: -9, width: 118, height: 118, class: "box" }, grid);
+    for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
+    for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 105, class: "gline" }, canvas);
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
     for (const c of ctxIds) el("path", { "data-id": c, d: outlineOf(c), class: "ctx" }, canvas);
     if (viewOpt.orig) for (const c of [id, ...sym.marks.map((m, i) => markIds(id, i))].concat(ctxIds)) {
@@ -181,6 +183,8 @@
   function snapTargets(skip) {
     const xs = [], ys = [];
     const add = p => { xs.push(p[0]); ys.push(p[1]); };
+    for (const x of state.guides.v) if (x !== null) xs.push(x);
+    for (const y of state.guides.h) if (y !== null) ys.push(y);
     const sym = symbolOf(symId());
     sym.strokes.forEach(it => { if (it !== skip) { add(it.a); add(it.b); } });
     for (const c of contextIds()) for (const st of strokesOf(c)) { const s0 = st.c || st.s[0], s1 = st.c || st.s[st.s.length - 1]; add([s0[0], s0[1]]); add([s1[6], s1[7]]); }
@@ -457,8 +461,19 @@
   function drawParams() {
     const box = document.getElementById("params"); box.innerHTML = "";
     for (const [k, name, min, max, step] of PARAM_FIELDS) slider(box, name, state.params[k], min, max, step, v => state.params[k] = v);
+    // guides: positions are typed in; empty = off; the canvas and the snapping use them
+    for (const [k, name] of [["h", "Horizontal guides (y)"], ["v", "Vertical guides (x)"]]) {
+      const row = document.createElement("div"); row.className = "guide-row";
+      row.innerHTML = `<span>${name}</span><div>${[0, 1, 2, 3].map(i => `<input type="number" step="0.25" class="form-control form-control-sm" aria-label="${name} ${i + 1}">`).join("")}</div>`;
+      row.querySelectorAll("input").forEach((inp, i) => {
+        if (state.guides[k][i] !== null) inp.value = state.guides[k][i];
+        inp.addEventListener("input", () => { begin(); state.guides[k][i] = inp.value === "" || isNaN(+inp.value) ? null : +inp.value; drawCanvas(); });
+        inp.addEventListener("change", () => end());
+      });
+      box.append(row);
+    }
   }
-  document.getElementById("params-reset").addEventListener("click", () => { begin(); state.params = fresh().params; end(); drawParams(); changed(); });
+  document.getElementById("params-reset").addEventListener("click", () => { begin(); state.params = fresh().params; state.guides = fresh().guides; end(); drawParams(); changed(); });
   function drawContext() {
     const opts = (list, none) => `<option value="">${none}</option>` + list.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
     const o = document.getElementById("ctx-onset"), r = document.getElementById("ctx-rhyme"), m = document.getElementById("ctx-mark"), t = document.getElementById("ctx-tone");
@@ -480,7 +495,7 @@
       const c = "v2c-" + id.slice(3);
       if (id.startsWith("v2-") && (ORIG[c] || target(c))) outlines[c] = outlineOf(c);
     }
-    const data = { format: "qatt-brush", version: 3, params: state.params, lib: state.lib, sym: state.sym, outlines };
+    const data = { format: "qatt-brush", version: 3, params: state.params, guides: state.guides, lib: state.lib, sym: state.sym, outlines };
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
     a.download = "qatt-brush.json"; a.click();
@@ -492,7 +507,7 @@
     try {
       const d = JSON.parse(await f.text());
       if (d.format !== "qatt-brush" || d.version !== 3) throw new Error("not an export of brush2.html (version 3)");
-      begin(); end(); restore(JSON.stringify({ params: Object.assign(fresh().params, d.params), lib: d.lib, sym: d.sym }));
+      begin(); end(); restore(JSON.stringify({ params: Object.assign(fresh().params, d.params), guides: d.guides || fresh().guides, lib: d.lib, sym: d.sym }));
     } catch (err) { alert("Import failed: " + err.message); }
     e.target.value = "";
   });
