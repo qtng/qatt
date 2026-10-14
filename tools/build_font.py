@@ -64,9 +64,9 @@ if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
     BRUSH_WEIGHT *= LIGHT
 if BOLD != 1.0: STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
-# Placement of the letters in the cell (as in brush2.html): svg x, y -> offset + scale * (x, y); the letters of qatt.js lie in 0..100, the ICF box is 4.2..95.8 (scale 0.916, offset 4.2).
+# Placement of the letters in the cell (as in brush2.html): svg x, y -> offset + scale * (x, y); the letters of qatt.js lie in 0..100, the ink of all brush forms is 7..95.6 high and the ICF box is 4.2..95.8 (scale 1.034, offset -1.7 / -3.0).
 # It is done as GROW around the point (50, 50) plus the rest of the offset; a brush2 export can hold its own "place" (x, y, s in per cent). Tones keep their size and corner positions.
-PLACE = [4.2, 4.2, 91.6]
+PLACE = [-1.7, -3.0, 103.4]
 if len(sys.argv) > 3:
     try:
         _p = json.load(open(sys.argv[3])).get('place') or {}

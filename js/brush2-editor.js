@@ -12,11 +12,13 @@
   const TABLE = VietnameseParser.DECODINGS.qatt;
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
   const VIEWBOX = "0 0 100 100";   // the cell of a glyph in the font: the em box of Noto Sans CJK, 100 x 100 svg units -> 1000 x 1000 font units (10 per unit)
+  const ICF_T = 4.2, ICF_H = 91.6;   // the ICF box of Noto Sans CJK: top and height in svg units
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
-  const PLACE = { x: 4.2, y: 4.2, s: 91.6 };   // global placement of the drawing in the cell: offset x, y (svg units) and scale (%); 0..100 -> the ICF box of Noto Sans CJK
+  const PLACE = { x: 0.4, y: 6.1, s: 99.3 };   // global placement of the drawing in the cell: offset x, y (svg units) and scale (%); 0..100 -> the ICF box of Noto Sans CJK
   const migrate = st => {
     st.place = Object.assign({}, PLACE, st.place);
+    if ((st.place.x === 4.2 && st.place.y === 4.2 && st.place.s === 91.6) || (st.place.x === -1.7 && st.place.y === -3 && st.place.s === 103.4)) st.place = Object.assign({}, PLACE);   // the first default (the whole 0..100 window into the ICF box)
     for (const k of ["h", "v"]) { const g = (st.guides = st.guides || {})[k] || []; while (g.length < 6) g.push(null); g.length = 6; st.guides[k] = g; }
     if (st.offsets) return st;
     for (const e of Object.values(st.lib || {})) {
@@ -512,7 +514,21 @@
     });
     const reset = document.createElement("button"); reset.type = "button"; reset.className = "btn btn-link btn-sm p-0"; reset.textContent = "Reset placement";
     reset.addEventListener("click", () => { begin(); state.place = clone(PLACE); end(); renderAll(); });
-    box.append(prow, reset);
+    const fit = document.createElement("button"); fit.type = "button"; fit.className = "btn btn-outline-secondary btn-sm mt-2 me-2"; fit.textContent = "Fit to ICF box";
+    fit.title = "Measures the ink of all symbols (rhyme, onset and centred forms) and scales the drawing so that the highest top and the lowest bottom touch the ICF box; the middle stays at x = 50";
+    fit.addEventListener("click", () => {
+      const tmp = el("svg", { width: 0, height: 0, style: "position:absolute" }, document.body), path = el("path", {}, tmp);
+      let y0 = Infinity, y1 = -Infinity;
+      for (const f of Object.values(FORMS)) for (const sh of SHAPES) {
+        path.setAttribute("d", outlineOf(f.id(sh)));
+        const b = path.getBBox(); if (b.height) { y0 = Math.min(y0, b.y); y1 = Math.max(y1, b.y + b.height); }
+      }
+      tmp.remove();
+      if (!(y1 > y0)) return;
+      const sc = ICF_H / (y1 - y0), r = v => Math.round(v * 10) / 10;
+      begin(); state.place = { x: r((1 - sc) * 50), y: r(ICF_T - sc * y0), s: r(sc * 100) }; end(); renderAll();
+    });
+    box.append(prow, fit, reset);
   }
   document.getElementById("params-reset").addEventListener("click", () => { begin(); state.params = fresh().params; state.guides = fresh().guides; end(); drawParams(); changed(); });
   function drawContext() {
