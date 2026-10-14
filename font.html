@@ -26,9 +26,9 @@
     .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
     .bar label.grow { flex: 1 1 4rem; min-width: 0; }
     .sample { width: 100%; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; min-height: 3.4rem;
-      font-family: var(--qfont, "QATT Serif"); font-size: 3rem; line-height: 1; word-break: break-all; white-space: pre-wrap; color: var(--ink); }
+      font-family: var(--qfont, "QATT Serif"); font-size: 3rem; line-height: 1; word-break: break-all; white-space: pre-wrap; overflow: auto; max-height: 8rem; color: var(--ink); }
     .sample:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .7; font: .95rem system-ui, -apple-system, sans-serif; }
-    .keys { display: flex; justify-content: space-between; gap: .4rem; margin-top: .45rem; }
+    .keys { display: flex; justify-content: space-between; gap: .4rem; margin: 0 0 .45rem; }
     .keys .btn { flex: 1 1 0; }
     .sample:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
@@ -73,13 +73,13 @@
     <label><input type="checkbox" id="svg" autocomplete="off"> SVG</label>
   </div>
 
-  <div class="sample" id="sample" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
   <div class="keys">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009A">B⿱C</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="clear" title="Empty the sample field">Clear</button>
   </div>
+  <div class="sample" id="sample" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
   <div id="info"></div>
   </div>
   <h2 class="sub">Format characters</h2>
