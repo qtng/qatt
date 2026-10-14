@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QATT Check</title>
+  <meta name="description" content="Spell a Vietnamese word in Quốc Âm Tân Tự: find the symbols of onset and rhyme, then the tone.">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script defer src="js/fonts.js"></script>
+  <style>
+    :root { --qfont: "QATT Serif"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+    .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
+    .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
+    .word { font-family: Georgia, "Times New Roman", serif; font-size: clamp(4rem, 18vw, 8rem); line-height: 1.1; color: var(--ink); text-align: center; margin: 1.2rem 0 .6rem; }
+    .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; background: #fffdf8; overflow: hidden; }
+    .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
+    .cell + .cell { border-left: 2px solid #cdbd9a; }
+    .cell.near { opacity: .4; }
+    .cell.solved { color: #146c43; }
+    .row-label { text-align: center; font-size: .75rem; letter-spacing: .25em; text-transform: uppercase; color: #a8977e; margin: 1rem 0 .4rem; }
+    .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
+    .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
+    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: #fffdf8; border: 1px solid #d9ccb0; border-radius: .5rem; color: var(--ink); }
+    .gbtn:hover:not(:disabled) { border-color: var(--cinnabar); }
+    .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; color: #0f5132; opacity: 1; }
+    .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; color: #842029; opacity: 1; }
+    .gbtn.tone { width: 4.2rem; }
+    .done { text-align: center; margin-top: 1.6rem; }
+    .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
+    .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
+    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .gbtn.tone { width: 3.6rem; } }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">QATT Check</h1>
+    <p class="lead mx-auto mb-0">Which symbols spell this word? Tap a shape to see where it occurs.</p>
+  </div>
+</header>
+
+<main class="container py-3" id="content">
+  <div class="d-flex justify-content-center gap-2 mt-2">
+    <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
+  </div>
+  <div class="word" id="word" lang="vi"></div>
+  <div class="cells" id="cells" aria-label="The symbols of the word"></div>
+
+  <div id="bases">
+    <div class="row-label">Shapes</div>
+    <div class="pad" id="basePad"></div>
+  </div>
+  <div id="variants" hidden>
+    <div class="row-label">Marked forms</div>
+    <div class="pad" id="variantPad"></div>
+  </div>
+  <div id="tones" hidden>
+    <div class="row-label">Tone</div>
+    <div class="pad" id="tonePad"></div>
+  </div>
+
+  <div class="done" id="done" hidden>
+    <div class="full" id="full"></div>
+    <div class="reading mb-3" id="reading"></div>
+    <button type="button" class="btn btn-cinnabar btn-pill" id="next">Next word</button>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const parser = new VietnameseParser();
+    // the words: the name of the script first, then common syllables (?word=... checks any other word)
+    const WORDS = ['Quốc', 'Âm', 'Tân', 'Tự', 'người', 'nước', 'việt', 'nam', 'nhà', 'tôi', 'bạn', 'đẹp', 'trời', 'gió', 'hoa', 'sách',
+      'chữ', 'nôm', 'thơ', 'lòng', 'thương', 'xuân', 'hạ', 'thu', 'đông', 'sáng', 'chiều', 'đêm', 'sông', 'núi', 'biển', 'cá', 'gà', 'mèo'];
+    // the shapes in the order of the font
+    const SHAPES = '_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph'.split(' ');
+    const MARKS = [2, 3, 4, 5, 6];
+    const $ = id => document.getElementById(id);
+    const glyph = (shape, mark = 0) => QattText.syllable(shape + (mark || '') + ',,,0');   // one letter of the font
+    const toneGlyph = n => Array.from(QattText.syllable('_,,,' + n))[1];                          // the tone mark alone (n = 8: ngang)
+    const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
+
+    let slots, tone, code, answer;
+
+    // the cells of the word: [{ shape, mark }] and the tone, from the code of the parser
+    function analyse(word) {
+      const parsed = parser.parse(word);
+      const c = parsed && (parsed.qatt || parsed.hop);
+      if (!c) return null;
+      const [onset, rhyme, , t] = c.split(',');
+      const on = piece(onset), rh = rhyme ? piece(rhyme) : null;
+      let cells;
+      if (!rh) cells = [on];                                                    // the shape alone (ông)
+      else if (rh.mark && !on.mark && on.shape === rh.shape) cells = [rh];      // onset and rhyme of one shape: one marked letter
+      else cells = [on, rh];
+      return { cells, tone: +t || 0, code: c };
+    }
+
+    function start(word) {
+      let a = analyse(word);
+      if (!a) { word = WORDS[0]; a = analyse(word); }
+      answer = word;
+      slots = a.cells.map(c => ({ ...c, state: 'empty' }));
+      tone = a.tone; code = a.code;
+      $('word').textContent = word;
+      $('done').hidden = $('tones').hidden = $('variants').hidden = true;
+      $('variantPad').replaceChildren();
+      $('tonePad').replaceChildren();
+      const pad = $('basePad');
+      pad.replaceChildren(...SHAPES.map(s => button(glyph(s), 'gbtn', b => pickShape(s, b))));
+      renderCells();
+    }
+
+    function button(text, cls, onclick) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = cls; b.textContent = text;
+      b.addEventListener('click', () => onclick(b));
+      return b;
+    }
+    const verdict = (b, ok) => { b.classList.add(ok ? 'ok' : 'bad'); b.disabled = true; };
+
+    function renderCells() {
+      $('cells').replaceChildren(...slots.map(s => {
+        const d = document.createElement('div');
+        d.className = 'cell' + (s.state === 'near' ? ' near' : s.state === 'full' ? ' solved' : '');
+        d.textContent = s.state === 'empty' ? '' : glyph(s.shape, s.state === 'full' ? s.mark : 0);
+        return d;
+      }));
+    }
+
+    function pickShape(shape, b) {
+      const hits = slots.filter(s => s.shape === shape);
+      verdict(b, hits.length > 0);
+      if (!hits.length) return;
+      for (const s of hits) s.state = s.mark ? 'near' : 'full';
+      if (hits.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
+        const group = document.createElement('div');
+        group.className = 'group';
+        group.append(...MARKS.map(m => button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb))));
+        $('variantPad').append(group);
+        $('variants').hidden = false;
+      }
+      renderCells();
+      update();
+    }
+
+    function pickMark(shape, mark, b) {
+      const hits = slots.filter(s => s.shape === shape && s.mark === mark);
+      verdict(b, hits.length > 0);
+      for (const s of hits) s.state = 'full';
+      renderCells();
+      update();
+    }
+
+    // all cells filled: the tones appear
+    function update() {
+      if (!slots.every(s => s.state === 'full') || !$('tones').hidden) return;
+      $('tones').hidden = false;
+      $('tonePad').replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8].map(n => button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b))));
+    }
+
+    function pickTone(n, b) {
+      const ok = (n === 8 ? 0 : n) === tone;
+      verdict(b, ok);
+      if (!ok) return;
+      for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
+      $('full').textContent = QattText.syllable(code);
+      $('reading').textContent = answer;
+      $('done').hidden = false;
+    }
+
+    $('next').addEventListener('click', () => {
+      let w;
+      do { w = WORDS[Math.floor(Math.random() * WORDS.length)]; } while (w === answer && WORDS.length > 1);
+      start(w);
+    });
+
+    const wanted = new URLSearchParams(location.search).get('word');
+    start(wanted || WORDS[Math.floor(Math.random() * WORDS.length)]);
+  });
+</script>
+</body>
+</html>
