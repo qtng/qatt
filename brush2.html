@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QATT Brush 2</title>
-  <meta name="description" content="Editor for brush strokes on the QATT shapes: every stroke has two end points, a bend, a kind of start and end, and a width gradient; the brush is the same for all.">
+  <meta name="description" content="Editor for brush strokes on the QATT shapes: a library of forms (bend, kind of start and end, width gradient) and the symbols made of them; the brush is the same for all.">
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <script src="js/navigation.js"></script>
   <script src="js/qatt.js"></script>
@@ -78,13 +78,15 @@
     .item-row .item-label { color: var(--ink); text-decoration: none; text-align: left; padding-left: 0; }
     .item-row.active .item-label { color: var(--cinnabar); font-weight: 600; }
     #mark-buttons { display: flex; gap: .3rem; flex-wrap: wrap; }
-    .slider { display: grid; grid-template-columns: 9.5rem 1fr 3.4rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
+    .slider { display: grid; grid-template-columns: 9.5rem 1fr 2.8rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
     .slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
     .slider input { width: 100%; accent-color: var(--cinnabar); }
     .ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
     .ctx-grid label { font-size: .8rem; color: var(--muted); }
 
-    #combos, #sample-out, #lib-uses { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
+    #sample-out, #lib-uses { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
+    #combos { display: flex; flex-wrap: nowrap; gap: 0; margin: 0 0 .25rem; }
+    #combos svg { flex: 1 1 0; min-width: 0; width: 0; height: auto; }
     .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .9rem); }
     .combo svg { width: var(--combo); }
     .combo span { font-size: .75rem; color: var(--muted); line-height: 1.2; text-align: center; }
@@ -100,16 +102,20 @@
   <div class="container text-center">
     <div class="han mb-1">國音新字</div>
     <h1 class="mb-2">QATT Brush 2</h1>
-    <p class="lead mx-auto mb-0">Every stroke has two end points, a bend, a kind of start and end (flat, pointed or kihitsu) and a gradient for its width.
-      Width, angle and size of the ends are the same for all strokes. Your work is kept in this browser; export it as JSON to keep a copy.
-      The first time, the symbols of the <a href="brush.html">first brush editor</a> are taken over.</p>
+    <p class="lead mx-auto mb-3">A library of stroke forms: each has a bend, a kind of start and end (flat, pointed or kihitsu) and a gradient for its width.
+      Every symbol is made of three of them between two end points. Width, angle and size of the ends are the same for all forms.
+      Your work is kept in this browser; export it as JSON to keep a copy. The first time, the symbols of the <a href="brush.html">first brush editor</a> are taken over.</p>
+    <div class="btn-group tabs" id="views" role="group" aria-label="View">
+      <button type="button" class="btn btn-outline-dark" data-view="symbols">Symbols</button>
+      <button type="button" class="btn btn-outline-dark" data-view="library">Stroke library</button>
     </div>
+  </div>
 </header>
 
 <main class="container-fluid py-3 px-3 px-lg-4">
   <div class="row g-3">
     <!-- symbols view -->
-    <div class="col-lg-3">
+    <div class="col-lg-3" data-only="symbols">
       <div class="panel">
         <div class="btn-group btn-group-sm d-flex mb-2 tabs" id="forms" role="group" aria-label="Form">
           <button type="button" class="btn btn-outline-dark" data-form="rhyme">Rhyme</button>
@@ -120,13 +126,14 @@
         <p class="hint mt-2 mb-0">A dot after the name marks a symbol you changed. Until you change it, a centred form follows its rhyme form.</p>
       </div>
     </div>
-    <div class="col-lg-5">
+    <div class="col-lg-5" data-only="symbols">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
           <h2 class="me-auto mb-0" id="sym-name"></h2>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="undo" title="Undo (Ctrl+Z)">Undo</button>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
         </div>
+        <div id="combos"></div>
         <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label><input type="checkbox" id="view-orig"> Original lines</label>
@@ -137,16 +144,44 @@
           <label class="small d-flex align-items-center gap-2 ms-auto">Marks visible <input type="range" id="mark-opacity" min="0" max="1" step="0.05" value="0.3"></label>
         </div>
         <div class="edit-bar mt-2"><span>Drag</span><div id="mode-buttons"></div></div>
-        <div id="item-controls" class="d-grid gap-1 mt-2" hidden></div>
+        <div id="item-controls" class="d-flex flex-wrap align-items-center gap-2 mt-2" hidden>
+          <select class="form-select form-select-sm w-auto" id="item-lib" aria-label="Library stroke"></select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="turn-left" title="Turn 5° to the left">⟲</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="turn-right" title="Turn 5° to the right">⟳</button>
+        </div>
         <p class="hint mt-2 mb-0">Choose a stroke (A, B, C) or a mark and what a drag moves, then drag anywhere on the canvas; everything else stays locked.
-          The filled point is where the brush starts, the square handle bends the stroke (mode Bend: the stroke goes through the pointer). <kbd>Shift</kbd> while moving a point keeps the length, <kbd>Alt</kbd> stops snapping; the arrow keys move in small steps.</p>
+          The filled point is where the brush starts. <kbd>Shift</kbd> while moving a point keeps the length, <kbd>Alt</kbd> stops snapping; the arrow keys move in small steps.</p>
         <div class="mt-3"><button type="button" class="btn btn-sm btn-outline-secondary" id="sym-reset">Reset symbol</button></div>
+      </div>
+    </div>
+
+    <!-- library view -->
+    <div class="col-lg-3" data-only="library">
+      <div class="panel">
+        <h2>Strokes</h2>
+        <div id="lib-list"></div>
+      </div>
+    </div>
+    <div class="col-lg-5" data-only="library">
+      <div class="panel">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <input class="form-control form-control-sm" id="lib-name" aria-label="Name of the stroke" style="max-width: 16rem">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-copy">Duplicate</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-reset">Reset</button>
+          <button type="button" class="btn btn-sm btn-outline-danger" id="lib-delete" title="Only unused strokes can be deleted">Delete</button>
+        </div>
+        <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="d-flex flex-wrap gap-3 mt-2 small">
+          <label class="d-flex align-items-center gap-2">Handles and lines visible <input type="range" id="handle-opacity" min="0" max="1" step="0.05" value="0.5"></label>
+        </div>
+        <p class="hint mt-2 mb-2">Drag the square handle to bend the stroke. The round ones only change this preview (direction and length).</p>
+        <div id="lib-fields" class="d-grid gap-1"></div>
       </div>
     </div>
 
     <!-- both views -->
     <div class="col-lg-4">
-      <div class="panel mb-3">
+      <div class="panel mb-3" data-only="symbols">
         <h2>Context</h2>
         <div class="ctx-grid">
           <label>Onset<select class="form-select form-select-sm" id="ctx-onset"></select></label>
@@ -167,20 +202,20 @@
           <label class="btn btn-sm btn-outline-dark mb-0">Import JSON<input type="file" id="import" accept="application/json,.json" hidden></label>
           <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="reset-all">Discard all</button>
         </div>
-        <p class="hint mt-2 mb-0">Changes are saved in this browser automatically. The export holds all symbols and the finished outlines of all paths.</p>
+        <p class="hint mt-2 mb-0">Changes are saved in this browser automatically. The export also holds the finished outlines of all paths.</p>
       </div>
     </div>
 
-    <div class="col-12">
+    <div class="col-12" data-only="symbols">
       <div class="panel">
-        <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
-          <h2 class="me-auto mb-0" id="combos-title"></h2>
-          <label class="small d-flex align-items-center gap-2">Size <input type="range" id="size" min="28" max="110" value="46"></label>
-        </div>
-        <div id="combos"></div>
-        <hr class="my-3">
         <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
         <div id="sample-out"></div>
+      </div>
+    </div>
+    <div class="col-12" data-only="library">
+      <div class="panel">
+        <h2 id="lib-uses-title"></h2>
+        <div id="lib-uses"></div>
       </div>
     </div>
   </div>

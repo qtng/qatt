@@ -1,35 +1,37 @@
-// Editor of brush2.html. Each of the 66 symbols (22 shapes as rhyme, onset and centred form) is three strokes between two end
-// points, plus its marks (six for the rhyme and the centred form, the medial for the onset form). Per stroke: the position of
-// its end points, its bend, the kind of its two ends and the gradient of its width. The brush itself (weight, flat ends, pointed
-// ends, kihitsu) is the same for all strokes. Everything is kept in localStorage and can be exported and imported as JSON.
+// Editor of brush2.html. Two views:
+// - Symbols: each of the 66 symbols (22 shapes as rhyme, onset and centred form) is three strokes from the library between
+//   two end points, plus its marks (six for the rhyme and the centred form, the medial for the onset form).
+// - Stroke library: named strokes (bend, kind of the two ends and gradient of the width) used by the symbols; the brush
+//   (weight, flat ends, pointed ends, kihitsu) is the same for all of them.
+// Everything is kept in localStorage and can be exported and imported as JSON (the export also holds the finished outlines).
 (() => {
   const B = QattBrush, B2 = QattBrush2;
   const SVGNS = "http://www.w3.org/2000/svg";
-  const STORE = "qatt-brush2-v1";
+  const STORE = "qatt-brush2-v2";
   const SHAPES = VietnameseParser.SHAPES.map(s => s === "z" ? "_" : s);
   const TABLE = VietnameseParser.DECODINGS.qatt;
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
   const VIEWBOX = "-14 -28 128 136";   // the glyph box of qatt.js with room for the tone marks in the corners
   const clone = o => JSON.parse(JSON.stringify(o));
 
-  // start: the symbols of the last export of brush.html (font/brush.json) are converted, this is the base of the model
+  // ---- the model: original paths, default library and symbols (js/brush-model.js) ----------------------------------------------
   const ORIG = {};
   new DOMParser().parseFromString(defaultSvgDefs, "image/svg+xml").querySelectorAll("path[id]").forEach(p => ORIG[p.id] = p.getAttribute("d"));
   fetch("font/brush.json").then(r => r.ok ? r.json() : null).catch(() => null).then(base => start(base));
 
   function start(base) {
-  const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), target = M.target, centred = M.centred;
+  const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;
 
   // ---- state, history, storage --------------------------------------------------------------------------------------------------
-  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), sym: {} });
+  const fresh = () => ({ params: clone(B2.DEFAULT_PARAMS), lib: clone(DEF.lib), sym: {} });
   let state = fresh();
-  try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.params && s.sym) state = Object.assign(fresh(), s); } catch (e) { }
+  try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.lib && s.sym) state = Object.assign(fresh(), s); } catch (e) { }
   const undo = [], redo = [];
   let pending = false, saveTimer = null;
   const begin = () => { if (!pending) { undo.push(JSON.stringify(state)); if (undo.length > 200) undo.shift(); redo.length = 0; pending = true; } };
   const end = () => { pending = false; save(); };
   const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { } }, 300); };
-  const restore = json => { state = Object.assign(fresh(), JSON.parse(json)); save(); renderAll(); };
+  const restore = json => { state = Object.assign(fresh(), JSON.parse(json)); if (!state.lib[libSel]) libSel = Object.keys(state.lib)[0]; save(); renderAll(); };
   function doUndo() { if (!undo.length) return; redo.push(JSON.stringify(state)); restore(undo.pop()); }
   function doRedo() { if (!redo.length) return; undo.push(JSON.stringify(state)); restore(redo.pop()); }
 
@@ -39,8 +41,9 @@
     if (!state.sym[id]) { state.sym[id] = clone(symbolOf(id)); delete state.sym[id].derived; }
     return state.sym[id];
   }
+  const placed = items => M.placed(state, items);
+  const itemD = it => B2.outline(placed([it]), state.params);
   const strokesOf = id => M.strokesOf(state, id);
-  const itemD = it => B2.outline(M.placed([it]), state.params);
   const cache = new Map();
   function outlineOf(id) {
     if (!cache.has(id)) cache.set(id, M.outline(state, id));
@@ -52,7 +55,8 @@
     frame = requestAnimationFrame(() => {
       frame = null; cache.clear();
       document.querySelectorAll("path[data-id]").forEach(p => { const d = outlineOf(p.dataset.id); if (p.getAttribute("d") !== d) p.setAttribute("d", d); });
-      drawCanvas();
+      if (view === "symbols") drawCanvas(); else drawLibCanvas();
+      document.querySelectorAll("path[data-lib]").forEach(p => p.setAttribute("d", libPreviewD(p.dataset.lib, 0.62)));
     });
   }
 
@@ -106,11 +110,12 @@
 
   // ---- selection --------------------------------------------------------------------------------------------------------------
   // active: the one stroke ({type: "stroke", i}) or mark ({type: "mark", i}) that can be edited, everything else is locked;
-  // mode: what a drag anywhere on the canvas moves ("all", "a" the start point, "b" the end point, "bend"), null = no editing
-  let form = "rhyme", shape = "ng", active = { type: "stroke", i: 0 }, mode = null, markOpacity = 0.3;
+  // mode: what a drag anywhere on the canvas moves ("all", "a" the start point, "b" the end point), null = no editing
+  let view = "symbols", form = "rhyme", shape = "ng", active = { type: "stroke", i: 0 }, mode = null, markOpacity = 0.3, libSel = "shu";
   const ctx = { onset: "t", rhyme: "ng", mark: 2, tone: 0 };
   const FORMS = { rhyme: { title: "Rhyme forms", id: s => "v2-" + s }, onset: { title: "Onset forms", id: s => `v2-${s}-small` }, centred: { title: "Centred forms", id: s => "v2c-" + s } };
   const symId = () => FORMS[form].id(shape);
+  const markIds = (id, n) => { const t = id.match(/^(v2c?)-(.+?)(-small)?$/); return t[3] ? `v2-${t[2]}-medial` : `${t[1]}-${t[2]}${n + 1}`; };
   const markLabel = i => form === "onset" ? "Medial" : String(i + 1);
   const isActive = (type, i) => active && active.type === type && active.i === i;
   const activeMark = () => active && active.type === "mark" ? active.i : null;
@@ -119,7 +124,7 @@
 
   function selectSymbol(s) { shape = s; fixActive(); drawSymbolList(); drawSymbolView(); }
 
-  // ---- symbols: list ------------------------------------------------------------------------------------------------------------
+  // ---- symbols view: list ------------------------------------------------------------------------------------------------------
   function drawSymbolList() {
     document.querySelectorAll("#forms button").forEach(b => b.classList.toggle("active", b.dataset.form === form));
     const list = document.getElementById("sym-list"); list.innerHTML = "";
@@ -135,7 +140,7 @@
   }
   const markEdited = () => document.querySelectorAll("#sym-list .cell").forEach((c, i) => c.classList.toggle("edited", !!state.sym[FORMS[form].id(SHAPES[i])]));
 
-  // ---- symbols: canvas ---------------------------------------------------------------------------------------------------------
+  // ---- symbols view: canvas -------------------------------------------------------------------------------------------------
   const canvas = document.getElementById("canvas");
   let drag = null, guides = [];
   const viewOpt = { orig: false, snap: true };
@@ -145,7 +150,6 @@
     if (form === "onset") return compose({ onset: shape, rhyme: ctx.rhyme, mark: ctx.mark, tone: ctx.tone }, true).filter(id => id !== symId());
     return [];
   }
-  const markIds = (id, n) => { const t = id.match(/^(v2c?)-(.+?)(-small)?$/); return t[3] ? `v2-${t[2]}-medial` : `${t[1]}-${t[2]}${n + 1}`; };
   function drawCanvas() {
     canvas.innerHTML = "";
     canvas.classList.toggle("editing", !!(mode && active));
@@ -155,7 +159,7 @@
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
     for (const c of ctxIds) el("path", { "data-id": c, d: outlineOf(c), class: "ctx" }, canvas);
     if (viewOpt.orig) for (const c of [id, ...sym.marks.map((m, i) => markIds(id, i))].concat(ctxIds)) {
-      const o = c.startsWith("v2c-") ? B.skeleton(B.transform(M.original("v2-" + c.slice(4)), centred)) : ORIG[c];
+      const o = c.startsWith("v2c-") ? B.skeleton(B.transform(original("v2-" + c.slice(4)), centred)) : ORIG[c];
       if (o) el("path", { d: o, class: "orig" }, canvas);
     }
     sym.marks.forEach((m, i) => {
@@ -167,10 +171,9 @@
     for (const [x1, y1, x2, y2] of guides) el("line", { x1, y1, x2, y2, class: "guide" }, canvas);
     const it = activeItem(sym);
     if (!it) return;
-    const h = el("g", { class: "handles" }, canvas), c = B2.curve(it.a, it.b, it.bend), mid = [0.125 * c[0] + 0.375 * c[2] + 0.375 * c[4] + 0.125 * c[6], 0.125 * c[1] + 0.375 * c[3] + 0.375 * c[5] + 0.125 * c[7]];
+    const h = el("g", { class: "handles" }, canvas);
     el("line", { x1: it.a[0], y1: it.a[1], x2: it.b[0], y2: it.b[1] }, h);
     for (const end of ["a", "b"]) el("circle", { cx: it[end][0], cy: it[end][1], r: 1.9, class: (end === "a" ? "start" : "") + (mode === end || mode === "all" ? " on" : "") }, h);
-    el("rect", { x: mid[0] - 1.5, y: mid[1] - 1.5, width: 3, height: 3, class: "ctrl" + (mode === "bend" ? " on" : "") }, h);
   }
 
   const toSvg = (svg, e) => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
@@ -180,7 +183,7 @@
     const add = p => { xs.push(p[0]); ys.push(p[1]); };
     const sym = symbolOf(symId());
     sym.strokes.forEach(it => { if (it !== skip) { add(it.a); add(it.b); } });
-    for (const c of contextIds()) for (const st of strokesOf(c)) { const l = st.s && st.s.length ? st.s[st.s.length - 1] : null; add(l ? [st.s[0][0], st.s[0][1]] : [st.c[0], st.c[1]]); add(l ? [l[6], l[7]] : [st.c[6], st.c[7]]); }
+    for (const c of contextIds()) for (const st of strokesOf(c)) { const s0 = st.c || st.s[0], s1 = st.c || st.s[st.s.length - 1]; add([s0[0], s0[1]]); add([s1[6], s1[7]]); }
     return { xs, ys };
   }
   // a drag anywhere on the canvas moves the active stroke or mark as the mode says
@@ -191,16 +194,10 @@
     const it = activeItem(editableSymbol(symId()));
     drag = { it, end: mode === "all" ? null : mode, a: it.a.slice(), b: it.b.slice(), start: toSvg(canvas, e), targets: snapTargets(it), mark: active.type === "mark" };
     canvas.setPointerCapture(e.pointerId);
-    if (mode === "bend") canvas.dispatchEvent(new PointerEvent("pointermove", { clientX: e.clientX, clientY: e.clientY }));
   });
   canvas.addEventListener("pointermove", e => {
     if (!drag) return;
     const p = toSvg(canvas, e);
-    if (drag.end === "bend") {   // the arc goes through the pointer: its offset from the chord, in units of the chord
-      const dx = drag.b[0] - drag.a[0], dy = drag.b[1] - drag.a[1], L = Math.hypot(dx, dy) || 1;
-      drag.it.bend = Math.max(-0.5, Math.min(0.5, Math.round(((p.x - drag.a[0]) * dy - (p.y - drag.a[1]) * dx) / L / L * 200) / 200));
-      changed(); return;
-    }
     let dx = round(p.x - drag.start.x), dy = round(p.y - drag.start.y);
     guides = [];
     const moving = drag.end ? [drag[drag.end]] : [drag.a, drag.b];
@@ -242,8 +239,9 @@
     if (e.target.closest("input, select, textarea")) return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); (e.shiftKey ? doRedo : doUndo)(); return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") { e.preventDefault(); doRedo(); return; }
+    if (view !== "symbols") return;
     const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
-    if (!dir || !mode || mode === "bend" || !active || !activeItem(symbolOf(symId()))) return;
+    if (!dir || !mode || !active || !activeItem(symbolOf(symId()))) return;
     e.preventDefault();
     const step = e.shiftKey ? 2 : e.altKey ? 0.25 : 0.5;
     begin();
@@ -252,21 +250,12 @@
     end(); markEdited(); changed();
   });
 
-  // ---- symbols: what to edit ---------------------------------------------------------------------------------------------------
+  // ---- symbols view: what to edit ----------------------------------------------------------------------------------------------
+  const libOptions = sel => Object.entries(state.lib).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, v]) => `<option value="${k}"${k === sel ? " selected" : ""}>${v.name.replace(/</g, "&lt;")}</option>`).join("");
   function button(box, text, on, title, onClick) {
     const b = document.createElement("button"); b.type = "button";
     b.className = "btn btn-sm " + (on ? "btn-dark" : "btn-outline-secondary"); b.textContent = text; if (title) b.title = title;
     b.addEventListener("click", onClick); box.append(b);
-  }
-  function slider(box, label, value, min, max, step, onInput, fmt) {
-    const row = document.createElement("label"); row.className = "slider";
-    row.innerHTML = `<span>${label}</span><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
-    const input = row.querySelector("input"), out = row.querySelector("output"), show = v => fmt ? fmt(+v) : (+v).toFixed(step < 0.01 ? 3 : step < 1 ? 2 : 0);
-    input.value = value; out.textContent = show(value);
-    input.addEventListener("input", () => { begin(); onInput(+input.value); out.textContent = show(input.value); changed(); });
-    input.addEventListener("change", () => end());
-    box.append(row);
-    return row;
   }
   function drawItems() {
     const id = symId(), sym = symbolOf(id);
@@ -277,55 +266,33 @@
     const mb = document.getElementById("mark-buttons"); mb.innerHTML = "";
     sym.marks.forEach((m, i) => { if (m) button(mb, markLabel(i), isActive("mark", i), "Edit this mark, lock everything else", pick("mark", i)); });
     const md = document.getElementById("mode-buttons"); md.innerHTML = "";
-    for (const [k, text, title] of [["all", "Move all", "A drag moves the whole stroke"], ["a", "Start point", "A drag moves only the start point"], ["b", "End point", "A drag moves only the end point"], ["bend", "Bend", "A drag bends the stroke: it goes through the pointer"]])
+    for (const [k, text, title] of [["all", "Move all", "A drag moves the whole stroke"], ["a", "Start point", "A drag moves only the start point"], ["b", "End point", "A drag moves only the end point"]])
       button(md, text, mode === k, title, () => { mode = mode === k ? null : k; drawItems(); drawCanvas(); });
-    const it = activeItem(sym), box = document.getElementById("item-controls");
-    box.hidden = !it; box.innerHTML = "";
-    if (it) {
-      const kind = (label, key) => {
-        const row = document.createElement("label"); row.className = "slider kind";
-        row.innerHTML = `<span>${label}</span><select class="form-select form-select-sm">${Object.entries(B2.KINDS).map(([k, t]) => `<option value="${k}">${t}</option>`).join("")}</select><output></output>`;
-        const sel = row.querySelector("select"); sel.value = it[key] || "flat";
-        sel.addEventListener("change", () => { begin(); activeItem(editableSymbol(symId()))[key] = sel.value; end(); markEdited(); changed(); drawItems(); });
-        box.append(row);
-      };
-      kind("Start", "s"); kind("End", "e");
-      const edit = () => activeItem(editableSymbol(symId()));
-      slider(box, "Bend", it.bend || 0, -0.3, 0.3, 0.005, v => edit().bend = v, v => v.toFixed(3));
-      const sameWidth = (it.s === "point") === (it.e === "point");
-      if (!sameWidth) slider(box, "Gradient", it.g || 0, -1, 1, 0.01, v => edit().g = v, v => v < -0.005 ? "full " + (-v).toFixed(2) : v > 0.005 ? "slim " + v.toFixed(2) : "linear").classList.add("gradient");
-      const tr = document.createElement("div"); tr.className = "d-flex gap-2";
-      for (const [t, d, title] of [["⟲", -5, "Turn 5° to the left"], ["⟳", 5, "Turn 5° to the right"]]) button(tr, t, false, title, () => rotate(d));
-      box.append(tr);
-    }
+    const it = activeItem(sym), lib = document.getElementById("item-lib");
+    document.getElementById("item-controls").hidden = !it;
+    if (it) lib.innerHTML = libOptions(it.lib);
     document.getElementById("sym-reset").textContent = form === "centred" ? "Follow the rhyme form" : "Reset symbol";
     document.getElementById("sym-reset").disabled = !state.sym[id];
   }
+  document.getElementById("item-lib").addEventListener("change", e => { begin(); activeItem(editableSymbol(symId())).lib = e.target.value; end(); markEdited(); drawItems(); changed(); });
+  document.getElementById("turn-left").addEventListener("click", () => rotate(-5));
+  document.getElementById("turn-right").addEventListener("click", () => rotate(5));
   document.getElementById("mark-opacity").addEventListener("input", e => { markOpacity = +e.target.value; drawCanvas(); });
   document.getElementById("sym-reset").addEventListener("click", () => { begin(); delete state.sym[symId()]; end(); markEdited(); drawItems(); changed(); });
 
   // ---- symbols view: combinations and sample ----------------------------------------------------------------------------------
+  // one line of glyphs above the canvas, no labels: the symbol with every onset, rhyme or mark, to check the strokes
   function drawCombos() {
     const box = document.getElementById("combos"); box.innerHTML = "";
-    const cells = [], m = activeMark() !== null ? activeMark() + 1 : ctx.mark || 0, title = document.getElementById("combos-title");
+    const cells = [], m = activeMark() !== null ? activeMark() + 1 : ctx.mark || 0;
     if (form === "rhyme") {
-      cells.push([compose({ rhyme: shape, mark: m, tone: ctx.tone }), syllable("", shape, m, ctx.tone) || "alone"]);
-      for (const o of SHAPES) cells.push([compose({ onset: o, rhyme: shape, mark: m, tone: ctx.tone }), syllable(o, shape, m, ctx.tone)]);
-      title.textContent = `Rhyme ${shapeName(shape)} after every onset`;
+      cells.push(compose({ rhyme: shape, mark: m, tone: ctx.tone }));
+      for (const o of SHAPES) cells.push(compose({ onset: o, rhyme: shape, mark: m, tone: ctx.tone }));
     } else if (form === "onset") {
       const medial = activeMark() !== null;
-      for (const r of SHAPES) cells.push([compose({ onset: shape, medial, rhyme: r, mark: ctx.mark, tone: ctx.tone }), syllable(shape, r, ctx.mark, ctx.tone)]);
-      title.textContent = `Onset ${shapeName(shape)} before every rhyme` + (medial ? ", with the medial" : "");
-    } else {
-      for (const s of SHAPES) cells.push([compose({ rhyme: s, mark: m }), syllable("", s, m) || shapeName(s)]);
-      title.textContent = "All centred forms" + (m ? ` with mark ${m}` : "");
-    }
-    for (const [ids, text] of cells) {
-      const c = document.createElement("div"); c.className = "combo";
-      c.append(glyph(ids));
-      const lab = document.createElement("span"); lab.textContent = text; c.append(lab);
-      box.append(c);
-    }
+      for (const r of SHAPES) cells.push(compose({ onset: shape, medial, rhyme: r, mark: ctx.mark, tone: ctx.tone }));
+    } else for (const s of SHAPES) cells.push(compose({ rhyme: s, mark: m }));
+    for (const ids of cells) box.append(glyph(ids));
     drawSample();
   }
   const vp = new VietnameseParser();
@@ -346,6 +313,145 @@
 
   function drawSymbolView() { drawItems(); drawCanvas(); drawCombos(); }
 
+  // ---- library view -------------------------------------------------------------------------------------------------------------
+  // where a library stroke is used: [symbol id, stroke index or "m" + mark index]
+  function usages(key) {
+    const out = [];
+    for (const f of Object.keys(FORMS)) for (const s of SHAPES) {
+      const id = FORMS[f].id(s), sym = symbolOf(id);
+      sym.strokes.forEach((it, i) => { if (it.lib === key) out.push([id, i]); });
+      sym.marks.forEach((it, i) => { if (it && it.lib === key) out.push([id, "m" + i]); });
+    }
+    return out;
+  }
+  // the typical chord of a library stroke: average direction and length of its uses
+  function libChord(key) {
+    let dx = 0, dy = 0, n = 0;
+    for (const [id, i] of usages(key)) {
+      const sym = symbolOf(id), it = typeof i === "string" ? sym.marks[+i.slice(1)] : sym.strokes[i];
+      dx += it.b[0] - it.a[0]; dy += it.b[1] - it.a[1]; n++;
+    }
+    if (!n) return [0, 50];
+    return [dx / n, dy / n];
+  }
+  function libPreviewD(key, scale) {
+    const [dx, dy] = libChord(key), L = Math.hypot(dx, dy) || 1, f = 70 * scale / L;
+    const a = [50 - dx * f / 2, 40 - dy * f / 2], b = [50 + dx * f / 2, 40 + dy * f / 2];
+    return B2.outline(placed([{ lib: key, a, b }]), state.params);
+  }
+  function drawLibList() {
+    const list = document.getElementById("lib-list"); list.innerHTML = "";
+    for (const [key, e] of Object.entries(state.lib).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+      const cell = document.createElement("button"); cell.type = "button"; cell.className = "lib-cell" + (key === libSel ? " active" : "");
+      const svg = el("svg", { viewBox: "0 -10 100 100", class: "glyph" }); el("path", { "data-lib": key, d: libPreviewD(key, 0.62) }, svg);
+      const n = usages(key).length;
+      cell.append(svg);
+      const lab = document.createElement("span"); lab.innerHTML = `${e.name.replace(/</g, "&lt;")}<small>${n ? "used " + n + "×" : "unused"}</small>`; cell.append(lab);
+      cell.addEventListener("click", () => { libSel = key; drawLibView(); });
+      list.append(cell);
+    }
+  }
+  const libCanvas = document.getElementById("lib-canvas");
+  let libDrag = null, libRef = null, handleOpacity = 0.5;
+  function drawLibCanvas() {
+    libCanvas.innerHTML = "";
+    const e = state.lib[libSel]; if (!e) return;
+    const grid = el("g", { class: "grid" }, libCanvas);
+    for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -10, x2: v, y2: 100 }, grid); el("line", { x1: 0, y1: v - 10, x2: 100, y2: v - 10 }, grid); }
+    if (!libRef) { const [dx, dy] = libChord(libSel), L = Math.hypot(dx, dy) || 1, f = 60 / L; libRef = { a: [50 - dx * f / 2, 40 - dy * f / 2], b: [50 + dx * f / 2, 40 + dy * f / 2] }; }
+    const st = placed([{ lib: libSel, a: libRef.a, b: libRef.b }]);
+    el("path", { d: B2.outline(st, state.params), class: "stroke" }, libCanvas);
+    const c = st[0].c, lines = el("g", { class: "handles" }, libCanvas);
+    lines.style.opacity = handleOpacity;
+    el("line", { x1: c[0], y1: c[1], x2: c[6], y2: c[7], class: "chord" }, lines);
+    el("path", { d: B2.skeleton(st), class: "skel" }, lines);
+    const h = el("g", { class: "handles" }, libCanvas);
+    h.style.opacity = handleOpacity;
+    const mid = [0.125 * c[0] + 0.375 * c[2] + 0.375 * c[4] + 0.125 * c[6], 0.125 * c[1] + 0.375 * c[3] + 0.375 * c[5] + 0.125 * c[7]];
+    const r = el("rect", { x: mid[0] - 1.6, y: mid[1] - 1.6, width: 3.2, height: 3.2, class: "ctrl" }, h);
+    r.addEventListener("pointerdown", ev => { ev.preventDefault(); begin(); libDrag = { k: "bend" }; libCanvas.setPointerCapture(ev.pointerId); });
+    for (const k of ["a", "b"]) {
+      const o = el("circle", { cx: libRef[k][0], cy: libRef[k][1], r: 2, class: k === "a" ? "start" : "" }, h);
+      o.addEventListener("pointerdown", ev => { ev.preventDefault(); libDrag = { end: k }; libCanvas.setPointerCapture(ev.pointerId); });
+    }
+  }
+  document.getElementById("handle-opacity").addEventListener("input", e => { handleOpacity = +e.target.value; drawLibCanvas(); });
+  libCanvas.addEventListener("pointermove", ev => {
+    if (!libDrag) return;
+    const p = toSvg(libCanvas, ev);
+    if (libDrag.end) { libRef[libDrag.end] = [p.x, p.y]; drawLibCanvas(); return; }
+    // bend: the distance of the handle from the chord, in units of its length, to the left of the writing direction
+    const { a, b } = libRef, dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1;
+    state.lib[libSel].bend = Math.max(-0.5, Math.min(0.5, Math.round(((p.x - a[0]) * dy / L - (p.y - a[1]) * dx / L) / L * 200) / 200));
+    changed(); drawLibFields();
+  });
+  const stopLibDrag = () => { if (!libDrag) return; if (libDrag.k) end(); libDrag = null; };
+  libCanvas.addEventListener("pointerup", stopLibDrag);
+  libCanvas.addEventListener("pointercancel", stopLibDrag);
+
+  function slider(box, label, value, min, max, step, onInput, fmt) {
+    const row = document.createElement("label"); row.className = "slider";
+    row.innerHTML = `<span>${label}</span><input type="range" min="${min}" max="${max}" step="${step}"><output></output>`;
+    const input = row.querySelector("input"), out = row.querySelector("output"), show = v => fmt ? fmt(+v) : (+v).toFixed(step < 0.01 ? 3 : step < 1 ? 2 : 0);
+    input.value = value; out.textContent = show(value);
+    input.addEventListener("input", () => { begin(); onInput(+input.value); out.textContent = show(input.value); changed(); });
+    input.addEventListener("change", () => end());
+    box.append(row);
+  }
+  const kindSelect = (box, label, e, key) => {
+    const row = document.createElement("label"); row.className = "slider kind";
+    row.innerHTML = `<span>${label}</span><select class="form-select form-select-sm">${Object.entries(B2.KINDS).map(([k, t]) => `<option value="${k}">${t}</option>`).join("")}</select><output></output>`;
+    const sel = row.querySelector("select"); sel.value = e[key] || "flat";
+    sel.addEventListener("change", () => { begin(); e[key] = sel.value; end(); drawLibFields(); changed(); });
+    box.append(row);
+  };
+  function drawLibFields() {
+    const e = state.lib[libSel], box = document.getElementById("lib-fields"); box.innerHTML = "";
+    kindSelect(box, "Start", e, "s"); kindSelect(box, "End", e, "e");
+    slider(box, "Bend", e.bend || 0, -0.3, 0.3, 0.005, v => e.bend = v, v => v.toFixed(3));
+    if ((e.s === "point") !== (e.e === "point"))
+      slider(box, "Gradient", e.g || 0, -1, 1, 0.01, v => e.g = v, v => v < -0.005 ? "full " + (-v).toFixed(2) : v > 0.005 ? "slim " + v.toFixed(2) : "linear");
+  }
+  function drawLibUses() {
+    const box = document.getElementById("lib-uses"); box.innerHTML = "";
+    const seen = new Set();
+    for (const [id, i] of usages(libSel)) {
+      const c = document.createElement("div"); c.className = "combo";
+      const t = typeof i === "string" ? markIds(id, +i.slice(1)) : id;
+      const s = id.match(/^v2c?-(.+?)(-small)?$/)[1];
+      c.append(glyph(typeof i === "string" ? [t] : [id], typeof i === "string" ? [id] : []));
+      const lab = document.createElement("span");
+      lab.textContent = (id.startsWith("v2c-") ? "centred " : id.endsWith("-small") ? "onset " : "rhyme ") + shapeName(s) + (typeof i === "string" ? " · " + (id.endsWith("-small") ? "medial" : "mark " + (+i.slice(1) + 1)) : "");
+      c.append(lab);
+      c.title = "Open this symbol";
+      c.addEventListener("click", () => { form = id.startsWith("v2c-") ? "centred" : id.endsWith("-small") ? "onset" : "rhyme"; shape = s; active = typeof i === "string" ? { type: "mark", i: +i.slice(1) } : { type: "stroke", i }; setView("symbols"); });
+      if (!seen.has(t)) { seen.add(t); box.append(c); }
+    }
+    document.getElementById("lib-uses-title").textContent = box.children.length ? `Used in ${usages(libSel).length} places` : "Not used yet";
+  }
+  function drawLibView() {
+    libRef = null;
+    drawLibList();
+    const e = state.lib[libSel];
+    document.getElementById("lib-name").value = e.name;
+    document.getElementById("lib-delete").disabled = usages(libSel).length > 0;
+    drawLibCanvas(); drawLibFields(); drawLibUses();
+  }
+  document.getElementById("lib-name").addEventListener("input", e => { begin(); state.lib[libSel].name = e.target.value || "Unnamed"; });
+  document.getElementById("lib-name").addEventListener("change", () => { end(); drawLibList(); });
+  document.getElementById("lib-copy").addEventListener("click", () => {
+    begin(); const key = "s" + Date.now().toString(36);
+    state.lib[key] = Object.assign(clone(state.lib[libSel]), { name: state.lib[libSel].name + " (copy)" });
+    end(); libSel = key; drawLibView();
+  });
+  document.getElementById("lib-delete").addEventListener("click", () => {
+    if (usages(libSel).length || Object.keys(state.lib).length < 2) return;
+    begin(); delete state.lib[libSel]; end(); libSel = Object.keys(state.lib)[0]; drawLibView();
+  });
+  document.getElementById("lib-reset").addEventListener("click", () => {
+    if (!DEF.lib[libSel]) return;
+    begin(); state.lib[libSel] = Object.assign(clone(DEF.lib[libSel]), { name: state.lib[libSel].name }); end(); drawLibView(); changed();
+  });
 
   // ---- brush settings, context, storage -----------------------------------------------------------------------------------------
   const PARAM_FIELDS = [["weight", "Weight", 3, 12, 0.1], ["flatWidth", "Flat end: width", 0.3, 1.6, 0.01], ["flatAngle", "Flat end: angle", -60, 60, 1],
@@ -376,10 +482,7 @@
       const c = "v2c-" + id.slice(3);
       if (id.startsWith("v2-") && (ORIG[c] || target(c))) outlines[c] = outlineOf(c);
     }
-    // every symbol is written out, so the export does not depend on the base of the model
-    const sym = {};
-    for (const f of Object.keys(FORMS)) for (const s of SHAPES) { const id = FORMS[f].id(s), y = clone(symbolOf(id)); delete y.derived; sym[id] = y; }
-    const data = { format: "qatt-brush", version: 3, params: state.params, sym, outlines };
+    const data = { format: "qatt-brush", version: 3, params: state.params, lib: state.lib, sym: state.sym, outlines };
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
     a.download = "qatt-brush.json"; a.click();
@@ -390,13 +493,13 @@
     const f = e.target.files[0]; if (!f) return;
     try {
       const d = JSON.parse(await f.text());
-      if (d.format !== "qatt-brush" || d.version !== 3) throw new Error("not a qatt-brush file of version 3 (export of this page)");
-      begin(); end(); restore(JSON.stringify({ params: Object.assign(fresh().params, d.params), sym: d.sym }));
+      if (d.format !== "qatt-brush" || d.version !== 3) throw new Error("not an export of brush2.html (version 3)");
+      begin(); end(); restore(JSON.stringify({ params: Object.assign(fresh().params, d.params), lib: d.lib, sym: d.sym }));
     } catch (err) { alert("Import failed: " + err.message); }
     e.target.value = "";
   });
   document.getElementById("reset-all").addEventListener("click", () => {
-    if (!confirm("Discard all changes (symbols and brush settings)?")) return;
+    if (!confirm("Discard all changes (symbols, library and brush settings)?")) return;
     begin(); end(); restore(JSON.stringify(fresh()));
   });
   document.getElementById("undo").addEventListener("click", doUndo);
@@ -407,11 +510,17 @@
   }
 
   // ---- start ------------------------------------------------------------------------------------------------------------------
+  function setView(v) {
+    view = v;
+    document.querySelectorAll("#views button").forEach(b => b.classList.toggle("active", b.dataset.view === v));
+    document.querySelectorAll("[data-only]").forEach(e => e.hidden = e.dataset.only !== v);
+    if (v === "symbols") { drawSymbolList(); drawSymbolView(); } else drawLibView();
+  }
+  document.querySelectorAll("#views button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
   document.querySelectorAll("#forms button").forEach(b => b.addEventListener("click", () => { form = b.dataset.form; fixActive(); drawSymbolList(); drawSymbolView(); }));
   document.getElementById("sample").addEventListener("input", drawSample);
-  document.getElementById("size").addEventListener("input", e => document.documentElement.style.setProperty("--combo", e.target.value + "px"));
 
-  function renderAll() { cache.clear(); drawParams(); drawContext(); drawSymbolList(); drawSymbolView(); }
+  function renderAll() { drawParams(); drawContext(); setView(view); }
   renderAll();
   }
 })();
