@@ -414,11 +414,13 @@
     kindSelect(box, "Start", e, "s"); kindSelect(box, "End", e, "e");
     slider(box, "Bend", e.bend || 0, -0.3, 0.3, 0.005, v => e.bend = v, v => v.toFixed(3));
     // kihitsu angle of one end: empty = the global angle of the brush
-    for (const [key, own, label] of [["s", "sa", "Start kihitsu angle"], ["e", "ea", "End kihitsu angle"]]) {
+    for (const [key, own, label, inv] of [["s", "sa", "Start kihitsu angle", "si"], ["e", "ea", "End kihitsu angle", "ei"]]) {
       if (e[key] !== "kihitsu") continue;
       const row = document.createElement("label"); row.className = "slider kind";
-      row.innerHTML = `<span>${label}</span><input type="number" step="1" min="-70" max="70" class="form-control form-control-sm" placeholder="global (${state.params.kihitsuAngle})"><output></output>`;
-      const inp = row.querySelector("input"); if (typeof e[own] === "number") inp.value = e[own];
+      row.innerHTML = `<span>${label}</span><input type="number" step="1" min="-70" max="70" class="form-control form-control-sm" placeholder="global (${state.params.kihitsuAngle})"><label class="small text-nowrap"><input type="checkbox" class="form-check-input inv"> invert</label>`;
+      const cb = row.querySelector(".inv"); cb.checked = !!e[inv];
+      cb.addEventListener("change", () => { begin(); if (cb.checked) e[inv] = true; else delete e[inv]; changed(); end(); });
+      const inp = row.querySelector("input[type=number]"); if (typeof e[own] === "number") inp.value = e[own];
       inp.addEventListener("input", () => { begin(); if (inp.value === "" || isNaN(+inp.value)) delete e[own]; else e[own] = +inp.value; changed(); });
       inp.addEventListener("change", () => end());
       box.append(row);
