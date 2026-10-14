@@ -74,9 +74,9 @@ in `unicode.html`.
 ```python
 import uharfbuzz as hb
 font = hb.Font(hb.Face(hb.Blob.from_file_path('font/qatt-prototype.ttf')))
-buf = hb.Buffer(); buf.add_str('\U000F0016\U000F009B\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
+buf = hb.Buffer(); buf.add_str('\U000F0001\U000F009B\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
 print([(font.glyph_to_string(i.codepoint), p.x_advance) for i, p in zip(buf.glyph_infos, buf.glyph_positions)])
-# [('uF0016.left', 500), ('uF009B.zw', 0), ('uF0000.right', 500)]
+# [('uF0001.left', 500), ('uF009B.zw', 0), ('uF0000.right', 500)]
 ```
 
 ## Character data (`unicode.html`): `update_unicode_data.py`

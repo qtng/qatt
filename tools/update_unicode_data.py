@@ -45,15 +45,15 @@ for line in open(f'{REPO}/ucd/Properties-draft.txt', encoding='utf-8'):
 src = open(f'{REPO}/tools/make_ucd.py', encoding='utf-8').read()
 def tup(name): return ast.literal_eval(re.search(name + r' = (\(.*?\))\n', src, re.S).group(1))
 nom, reading = tup('NOM_ANNOTATIONS'), tup('READINGS')
-names = [chars[i]['n'].replace('QUOC AM TAN TU ', '').replace(' UNMARKED', '') for i in range(22)]
+names = [chars[7 * i]['n'].replace('QUOC AM TAN TU ', '').replace(' UNMARKED', '') for i in range(22)]
 can = [dict(no=i + 1, nom=nom[i], reading=reading[i], name=names[i]) for i in range(22)]
 # --- classify
 for o, c in chars.items():
     c['n'] = c['n'].replace('QUOC AM TAN TU ', '')
-    if o < 22: c['t'], c['b'] = 'unmarked', o
-    elif o < 154:
-        c['b'], c['m'] = (o - 22) // 6, (o - 22) % 6 + 1
-        c['t'] = 'marked' if c['m'] == 1 else 'chi'
+    if o < 154:   # 22 bases x 7 forms: form 0 unmarked, 1 the marked Cán, 2..6 the Chi
+        c['b'], c['m'] = o // 7, o % 7
+        c['t'] = 'unmarked' if c['m'] == 0 else 'marked' if c['m'] == 1 else 'chi'
+        if c['m'] == 0: del c['m']
     elif o == 154: c['t'] = 'combiner'
     elif o == 155: c['t'] = 'joiner'
     else: c['t'] = 'tone'

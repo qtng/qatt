@@ -15,13 +15,13 @@ QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html
 */
 const QattText = (() => {
   const BASE = 0xF0000, JOINER = BASE + 155, COMBINER = BASE + 154;
-  const SHAPES = "_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph".split(" ");   // U+F0000 to U+F0015; with marking stroke n (1..6): U+F0016 + 6 * shape + n - 1
+  const SHAPES = "_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph".split(" ");   // shape i: U+F0000 + 7 * i, with marking stroke n (1..6): U+F0000 + 7 * i + n
   const TONES = [null, 160, 157, 158, 159, 161, 162, 163, 156];                      // tone 1..8 -> offset of the tone mark
   const chr = o => String.fromCodePoint(BASE + o);
 
   const letter = (shape, mark) => {
     const i = SHAPES.indexOf(shape);
-    return i < 0 ? null : chr(mark ? 22 + 6 * i + mark - 1 : i);
+    return i < 0 ? null : chr(7 * i + mark);
   };
 
   // "onset,rhyme,,tone", e.g. "t,c5,,5": the rhyme is a shape and a marking stroke (none: the plain shape)
@@ -62,8 +62,7 @@ const QattText = (() => {
   const decode = cell => {
     const cps = Array.from(cell, c => c.codePointAt(0) - BASE);
     const glyph = o => {
-      if (o < 22) return { shape: SHAPES[o], mark: 0 };
-      if (o < 154) return { shape: SHAPES[Math.floor((o - 22) / 6)], mark: (o - 22) % 6 + 1 };
+      if (o < 154) return { shape: SHAPES[Math.floor(o / 7)], mark: o % 7 };
       return null;
     };
     const first = glyph(cps[0]);
