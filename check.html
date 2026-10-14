@@ -235,7 +235,7 @@
     function tick() {
       const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
       $('time').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
-      if (!left) { stopTimer(); $('task').classList.add('late'); $('mood').textContent = '😥'; react('shake'); }
+      if (!left) { stopTimer(); $('task').classList.add('late'); $('mood').textContent = '💔'; react('shake'); }
     }
     function startTimer() {
       stopTimer();
