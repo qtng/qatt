@@ -122,7 +122,7 @@
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
       <div class="foot">
         <span class="timer" id="timer" title="One minute per word"><i class="bi bi-stopwatch"></i><span id="time">1:00</span></span>
-        <button type="button" class="speak" id="speak" aria-label="Read the word aloud"><i class="bi bi-volume-up-fill"></i></button>
+        <button type="button" class="speak" id="speak" aria-label="Sound on or off" aria-pressed="false"><i class="bi bi-volume-mute-fill"></i></button>
       </div>
     </div>
   </div>
@@ -244,16 +244,40 @@
       tick(); ticker = setInterval(tick, 250);
     }
 
-    // read the word aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
-    let speaker = null;
-    $('speak').addEventListener('click', () => {
-      const say = () => { speaker = speaker || new AudioManager(new Audio(), {}); speaker.speak(answer, 'auto', 0.8); };
-      if (typeof AudioManager !== 'undefined') return say();
+    // sound on/off (off at the start): every click on a shape or a tone is read aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
+    let sound = false, speaker = null;
+    try { sound = localStorage.getItem('qattCheckSound') === '1'; } catch (e) {}
+    const withSpeaker = fn => {
+      const go = () => { speaker = speaker || new AudioManager(new Audio(), {}); fn(speaker); };
+      if (typeof AudioManager !== 'undefined') return go();
       const sc = document.createElement('script');
       sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
-      sc.onload = say;
+      sc.onload = go;
       document.head.append(sc);
+    };
+    const say = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };
+    const showSound = () => {
+      $('speak').setAttribute('aria-pressed', sound);
+      $('speak').title = sound ? 'Sound on' : 'Sound off';
+      $('speak').firstElementChild.className = 'bi ' + (sound ? 'bi-volume-up-fill' : 'bi-volume-mute-fill');
+    };
+    $('speak').addEventListener('click', () => {
+      sound = !sound;
+      try { localStorage.setItem('qattCheckSound', sound ? '1' : '0'); } catch (e) {}
+      showSound();
+      if (sound) withSpeaker(() => {});   // load the speech now
     });
+    showSound();
+    // the onset is read with the rhyme ông (mông, nhông, …); the tone with the whole word in that tone
+    const sayOnset = shape => say(parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }));
+    const TONE_NAME = { 1: null, 2: 'huyen', 3: 'hoi', 4: 'nga', 5: 'sac', 6: 'nang', 7: 'sac', 8: 'nang' };
+    const wordInTone = (word, n) => {
+      const bare = word.normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
+      let m = /^(ngh|ng|nh|gh|ph|th|ch|tr|kh|gi|qu|[bcdđghklmnprstvx])?(.*)$/i.exec(bare);
+      let onset = m[1] || '', rhyme = m[2];
+      if (/^gi$/i.test(onset) && !/[aăâeêioôơuưy]/i.test(rhyme)) { onset = onset[0]; rhyme = 'i' + rhyme; }   // gì: g + ì
+      return onset + parser._tonePlaced(rhyme, TONE_NAME[n]);
+    };
 
     let nomOf = '';
     function start(word, nom) {
@@ -319,6 +343,7 @@
       const found = slots.filter(s => s.shape === shape);
       verdict(b, found.length > 0);
       mood(found.length > 0);
+      sayOnset(shape);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
@@ -361,6 +386,7 @@
       const ok = TONE_CODE[n] === tone;
       verdict(b, ok);
       mood(ok);
+      say(wordInTone(answer, n));   // right or wrong: the word in the tone of the button
       if (!ok) return;
       stopTimer();
       for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
