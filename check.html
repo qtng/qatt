@@ -98,8 +98,8 @@
     // the words: the name of the script first, then common syllables (?word=... checks any other word)
     const WORDS = ['Quốc', 'Âm', 'Tân', 'Tự', 'người', 'nước', 'việt', 'nam', 'nhà', 'tôi', 'bạn', 'đẹp', 'trời', 'gió', 'hoa', 'sách',
       'chữ', 'nôm', 'thơ', 'lòng', 'thương', 'xuân', 'hạ', 'thu', 'đông', 'sáng', 'chiều', 'đêm', 'sông', 'núi', 'biển', 'cá', 'gà', 'mèo'];
-    // the shapes in the order of the font
-    const SHAPES = '_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph'.split(' ');
+    // the shapes as buttons
+    const SHAPES = 'l _ ng h g c tr d n t th nh ch dz x kh s r m b v ph'.split(' ');   // the order of symbols.html (l first)
     const MARKS = [2, 3, 4, 5, 6];
     const $ = id => document.getElementById(id);
     const glyph = (shape, mark = 0) => QattText.syllable(shape + (mark || '') + ',,,0');   // one letter of the font
