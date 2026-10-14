@@ -102,15 +102,15 @@
 <header class="hero pt-5 pb-4">
   <div class="container text-center">
     <h1 class="mb-3">Sound Check</h1>
-    <p class="lead mx-auto mb-0">Which symbols spell this word?</p>
+    <p class="lead mx-auto mb-0" data-vi="Những chữ nào ghép nên từ này?">Which symbols spell this word?</p>
   </div>
 </header>
 
 <main class="container py-3" id="content">
   <div class="d-flex justify-content-center gap-2 mt-2">
-    <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select>
+    <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select>
     <select id="font" data-qatt-fonts data-qatt-default="QATT Brush" class="form-select form-select-sm w-auto" aria-label="Font"></select>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="reload">Skip</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="reload" data-vi="Bỏ qua">Skip</button>
   </div>
   <div class="card task mx-auto" id="task">
     <div class="card-body">
@@ -134,7 +134,7 @@
     <div class="card-body">
       <div class="full" id="full"></div>
       <div class="reading mb-3" id="reading"></div>
-      <button type="button" class="btn btn-cinnabar btn-pill" id="next">Next word</button>
+      <button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button>
     </div>
   </div>
 

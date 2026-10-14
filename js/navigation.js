@@ -11,6 +11,7 @@
 //   Lang.current        "en" or "vi"
 //   Lang.set("vi")      choose and remember a language, the page changes at once; the event "langchange" is sent to the document
 //   Lang.t("Next", "Tiếp")   the text for the language, for texts that are not in a tag of their own
+// Attributes: data-vi-label, data-vi-title, data-vi-placeholder, data-vi-aria-label give the attribute without data-vi- (e.g. the label of an <optgroup>) its text in vi.
 window.Lang = window.Lang || (function() {
     const KEY = "lang";
     const valid = l => l === "en" || l === "vi";
@@ -43,15 +44,34 @@ window.Lang = window.Lang || (function() {
         if (text !== want) el.textContent = want;
         st.shown = want;
     };
+    const ATTRS = ["label", "title", "placeholder", "aria-label"];
+    const attrStates = new WeakMap();   // per tag and attribute: the English value and the value shown last
+    const applyAttr = (el, name) => {
+        const vi = el.getAttribute("data-vi-" + name), cur = el.getAttribute(name);
+        if (vi === null || cur === null) return;
+        let sts = attrStates.get(el);
+        if (!sts) attrStates.set(el, sts = {});
+        let st = sts[name];
+        if (!st) sts[name] = st = { en: cur, shown: cur };
+        else if (cur !== st.shown) st.en = cur;
+        const want = current === "vi" ? vi : st.en;
+        if (cur !== want) el.setAttribute(name, want);
+        st.shown = want;
+    };
+    const applyAll = el => { apply(el); ATTRS.forEach(a => applyAttr(el, a)); };
+    const SELECTOR = ["data-vi", ...ATTRS.map(a => "data-vi-" + a)].map(a => `[${a}]`).join(",");
     const all = root => {
         if (root.nodeType !== 1 && root.nodeType !== 9) return;
-        if (root.nodeType === 1) apply(root);
-        root.querySelectorAll("[data-vi]").forEach(apply);
+        if (root.nodeType === 1) applyAll(root);
+        root.querySelectorAll(SELECTOR).forEach(applyAll);
     };
     const flush = () => { for (const el of [...waiting]) if (el.nextSibling || document.readyState !== "loading") apply(el); };
     new MutationObserver(records => {
         for (const r of records) {
-            if (r.type === "attributes") apply(r.target);
+            if (r.type === "attributes") {
+                const name = r.attributeName.replace(/^data-vi-/, "");
+                if (ATTRS.includes(name)) applyAttr(r.target, name); else apply(r.target);
+            }
             else if (r.type === "characterData") r.target.parentElement && apply(r.target.parentElement);
             else {
                 if (r.target.nodeType === 1) apply(r.target);   // its content changed
@@ -59,7 +79,7 @@ window.Lang = window.Lang || (function() {
             }
         }
         flush();
-    }).observe(document, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["data-vi"] });
+    }).observe(document, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["data-vi", ...ATTRS, ...ATTRS.map(a => "data-vi-" + a)] });
     document.addEventListener("DOMContentLoaded", () => { flush(); all(document); });
 
     const setLang = l => {

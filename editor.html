@@ -62,10 +62,10 @@
 <header class="hero pt-5 pb-4 mb-4">
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
-    <h1 class="mb-3">Type QATT</h1>
+    <h1 class="mb-3" data-vi="Gõ chữ QATT">Type QATT</h1>
     <p class="lead mx-auto mb-4">Type Vietnamese (Quốc Ngữ). Every finished word turns into text for the <a href="font.html">QATT fonts</a>.</p>
-    <a class="btn btn-cinnabar btn-pill" href="symbols.html">Open the symbols</a>
-    <a class="btn btn-cinnabar btn-pill" href="decodings.html">Open the decodings</a>
+    <a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Bảng chữ">Symbol table</a>
+    <a class="btn btn-cinnabar btn-pill" href="decodings.html" data-vi="Giải mã">Decoding</a>
   </div>
 </header>
 <main>
@@ -102,8 +102,8 @@
     // decodings (readings of the rhyme table)
     for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
     // a heading inside each dropdown
-    const group = (select, label) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.append(...select.options); select.append(g); select.value = value; };
-    group($('decoding'), 'Choose decoding');
+    const group = (select, label, vi) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.setAttribute('data-vi-label', vi); g.append(...select.options); select.append(g); select.value = value; };
+    group($('decoding'), 'Choose decoding', 'Lựa chọn cách giải mã');
     $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
     // a new decoding: every QATT cell is read with the old decoding and written with the new one, other text stays as it is
