@@ -11,6 +11,7 @@
 //   Lang.current        "en" or "vi"
 //   Lang.set("vi")      choose and remember a language, the page changes at once; the event "langchange" is sent to the document
 //   Lang.t("Next", "Tiếp")   the text for the language, for texts that are not in a tag of their own
+// Attributes: data-vi-label, data-vi-title, data-vi-placeholder, data-vi-aria-label give the attribute without data-vi- (e.g. the label of an <optgroup>) its text in vi.
 window.Lang = window.Lang || (function() {
     const KEY = "lang";
     const valid = l => l === "en" || l === "vi";
@@ -43,15 +44,34 @@ window.Lang = window.Lang || (function() {
         if (text !== want) el.textContent = want;
         st.shown = want;
     };
+    const ATTRS = ["label", "title", "placeholder", "aria-label"];
+    const attrStates = new WeakMap();   // per tag and attribute: the English value and the value shown last
+    const applyAttr = (el, name) => {
+        const vi = el.getAttribute("data-vi-" + name), cur = el.getAttribute(name);
+        if (vi === null || cur === null) return;
+        let sts = attrStates.get(el);
+        if (!sts) attrStates.set(el, sts = {});
+        let st = sts[name];
+        if (!st) sts[name] = st = { en: cur, shown: cur };
+        else if (cur !== st.shown) st.en = cur;
+        const want = current === "vi" ? vi : st.en;
+        if (cur !== want) el.setAttribute(name, want);
+        st.shown = want;
+    };
+    const applyAll = el => { apply(el); ATTRS.forEach(a => applyAttr(el, a)); };
+    const SELECTOR = ["data-vi", ...ATTRS.map(a => "data-vi-" + a)].map(a => `[${a}]`).join(",");
     const all = root => {
         if (root.nodeType !== 1 && root.nodeType !== 9) return;
-        if (root.nodeType === 1) apply(root);
-        root.querySelectorAll("[data-vi]").forEach(apply);
+        if (root.nodeType === 1) applyAll(root);
+        root.querySelectorAll(SELECTOR).forEach(applyAll);
     };
     const flush = () => { for (const el of [...waiting]) if (el.nextSibling || document.readyState !== "loading") apply(el); };
     new MutationObserver(records => {
         for (const r of records) {
-            if (r.type === "attributes") apply(r.target);
+            if (r.type === "attributes") {
+                const name = r.attributeName.replace(/^data-vi-/, "");
+                if (ATTRS.includes(name)) applyAttr(r.target, name); else apply(r.target);
+            }
             else if (r.type === "characterData") r.target.parentElement && apply(r.target.parentElement);
             else {
                 if (r.target.nodeType === 1) apply(r.target);   // its content changed
@@ -59,7 +79,7 @@ window.Lang = window.Lang || (function() {
             }
         }
         flush();
-    }).observe(document, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["data-vi"] });
+    }).observe(document, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["data-vi", ...ATTRS, ...ATTRS.map(a => "data-vi-" + a)] });
     document.addEventListener("DOMContentLoaded", () => { flush(); all(document); });
 
     const setLang = l => {
@@ -86,10 +106,10 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-qatt",
         site: onChunom ? QATT_SITE : "",
         links: [
-            { name: "Quốc Âm Tân Tự", bar: "Home", barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
-            { name: "QATT Writer", vi: "Gõ chữ QATT", bar: "Write", barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
-            { name: "Practice", vi: "Luyện tập", bar: "Practice", barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
+            { name: "Quốc Âm Tân Tự", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
+            { name: "QATT Writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
+            { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
+            { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barOrder: 2, barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
@@ -101,9 +121,9 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-nom",
         site: onChunom ? "" : CHUNOM_SITE,
         links: [
-            { name: "Character Search", vi: "Tra cứu chữ", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
-            { name: "Practice / Decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
-            { name: "Chữ Nôm Writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
+            { name: "Character search", vi: "Tra cứu chữ", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
+            { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
+            { name: "Chữ Nôm writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
             { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
         ]
