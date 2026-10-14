@@ -85,15 +85,19 @@
     .ctx-grid label { font-size: .8rem; color: var(--muted); }
 
     #sample-out { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
-    #combos { display: flex; flex-wrap: nowrap; gap: 0; margin: 0 0 .25rem; }
-    #combos svg { flex: 1 1 0; min-width: 0; width: 0; height: auto; }
     .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .9rem); }
     .combo svg { width: var(--combo); }
     .combo span { font-size: .75rem; color: var(--muted); line-height: 1.2; text-align: center; }
-    #lib-uses { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 .25rem; }
-    #lib-uses svg { flex: 0 0 calc(100% / 18); width: calc(100% / 18); height: auto; cursor: pointer; }
-    #lib-uses svg:hover { background: rgba(168, 54, 42, .08); }
     #sample-out svg { width: calc(var(--combo) * 1.1); }
+    /* comparison glyphs: one line, scroll sideways, size from the slider */
+    #combos, #lib-uses { display: flex; flex-wrap: nowrap; gap: 0; margin: 0 0 .25rem; overflow-x: auto; }
+    #combos svg, #lib-uses svg { flex: 0 0 var(--cg, 40px); width: var(--cg, 40px); height: auto; }
+    #lib-uses svg { cursor: pointer; }
+    #lib-uses svg:hover { background: rgba(168, 54, 42, .08); }
+    @media (max-width: 991.98px) {
+      .rightcol { display: contents; }
+      .o1 { order: 1; } .o2 { order: 2; } .o3 { order: 3; } .o4 { order: 4; } .o5 { order: 5; } .o6 { order: 6; }
+    }
     .hint { font-size: .82rem; color: var(--muted); }
     [hidden] { display: none !important; }
     kbd { background: #efe6d2; color: var(--ink); font-size: .75rem; }
@@ -117,7 +121,7 @@
 <main class="container-fluid py-3 px-3 px-lg-4">
   <div class="row g-3">
     <!-- symbols view -->
-    <div class="col-lg-3" data-only="symbols">
+    <div class="col-lg-3 o1" data-only="symbols">
       <div class="panel">
         <div class="btn-group btn-group-sm d-flex mb-2 tabs" id="forms" role="group" aria-label="Form">
           <button type="button" class="btn btn-outline-dark" data-form="rhyme">Rhyme</button>
@@ -128,13 +132,14 @@
         <p class="hint mt-2 mb-0">A dot after the name marks a symbol you changed. Until you change it, a centred form follows its rhyme form.</p>
       </div>
     </div>
-    <div class="col-lg-5" data-only="symbols">
+    <div class="col-lg-5 o3" data-only="symbols">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
           <h2 class="me-auto mb-0" id="sym-name"></h2>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="undo" title="Undo (Ctrl+Z)">Undo</button>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
         </div>
+        <label class="small d-flex align-items-center gap-2 mb-1">Size of the comparison <input type="range" class="cmp-size" min="16" max="120"></label>
         <div id="combos"></div>
         <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
@@ -158,13 +163,13 @@
     </div>
 
     <!-- library view -->
-    <div class="col-lg-3" data-only="library">
+    <div class="col-lg-3 o1" data-only="library">
       <div class="panel">
         <h2>Strokes</h2>
         <div id="lib-list"></div>
       </div>
     </div>
-    <div class="col-lg-5" data-only="library">
+    <div class="col-lg-5 o3" data-only="library">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
           <input class="form-control form-control-sm" id="lib-name" aria-label="Name of the stroke" style="max-width: 16rem">
@@ -172,6 +177,7 @@
           <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-reset">Reset</button>
           <button type="button" class="btn btn-sm btn-outline-danger" id="lib-delete" title="Only unused strokes can be deleted">Delete</button>
         </div>
+        <label class="small d-flex align-items-center gap-2 mb-1">Size of the comparison <input type="range" class="cmp-size" min="16" max="120"></label>
         <div id="lib-uses"></div>
         <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
@@ -182,9 +188,10 @@
       </div>
     </div>
 
-    <!-- both views -->
-    <div class="col-lg-4">
-      <div class="panel mb-3" data-only="symbols">
+    <!-- both views; on a phone the order is: list, brush, canvas, context, sample, save -->
+    <div class="col-lg-4 rightcol">
+      <div class="o4" data-only="symbols">
+      <div class="panel mb-3">
         <h2>Context</h2>
         <div class="ctx-grid">
           <label>Onset<select class="form-select form-select-sm" id="ctx-onset"></select></label>
@@ -194,10 +201,22 @@
         </div>
         <p class="hint mt-2 mb-0">The parts drawn around the symbol in the editor and in the combinations.</p>
       </div>
+      </div>
+      <div class="o2">
       <div class="panel mb-3">
         <div class="d-flex align-items-center mb-2"><h2 class="me-auto mb-0">Brush</h2><button type="button" class="btn btn-sm btn-link p-0" id="params-reset">Reset</button></div>
         <div id="params" class="d-grid gap-1"></div>
       </div>
+      </div>
+    </div>
+
+    <div class="col-12 o5" data-only="symbols">
+      <div class="panel">
+        <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
+        <div id="sample-out"></div>
+      </div>
+    </div>
+    <div class="col-12 o6">
       <div class="panel">
         <h2>Save</h2>
         <div class="d-flex flex-wrap gap-2">
@@ -206,13 +225,6 @@
           <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="reset-all">Discard all</button>
         </div>
         <p class="hint mt-2 mb-0">Changes are saved in this browser automatically. The export also holds the finished outlines of all paths.</p>
-      </div>
-    </div>
-
-    <div class="col-12" data-only="symbols">
-      <div class="panel">
-        <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
-        <div id="sample-out"></div>
       </div>
     </div>
   </div>
