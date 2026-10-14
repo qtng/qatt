@@ -54,11 +54,11 @@
     .btn-quiet:hover { background: #f1e8d2; color: var(--ink); border-color: #b9a982; }
     /* the list of all characters below the editor */
     #characters { margin-top: 2rem; }
-    .scroll-x { overflow-x: auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 51px), 1fr)); gap: .35rem; margin-top: .6rem; }
+    /* the tables use the full width: one base (7 forms) per row for the letters, the 8 tone marks in one row; the glyphs scale with the cells */
+    .grid { --cols: 8; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: .35rem; margin-top: .6rem; container-type: inline-size; }
     .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
     .cell:hover { border-color: var(--accent); }
-    .cell .f { font-family: var(--qfont, "QATT Serif"); font-size: var(--size, 34px); line-height: 1.15; display: block; padding-bottom: .16em; }
+    .cell .f { font-family: var(--qfont, "QATT Serif"); font-size: calc((100cqw - (var(--cols) - 1) * .35rem) / var(--cols) * .66); line-height: 1.15; display: block; padding-bottom: .16em; }
     .cell .s { display: block; height: 1.8rem; line-height: 1.8rem; font-size: .8rem; color: var(--muted); }
     .cell .s svg { stroke: currentColor; }
     .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
@@ -68,7 +68,9 @@
     .fmt-row .cell { flex: 0 0 var(--cell, 51px); width: var(--cell, 51px); }
     .fmt-text { font-size: .9rem; color: var(--muted); }
     .fmt-text strong { color: var(--ink); }
-    #grid { grid-template-columns: repeat(7, var(--cell, 51px)); }   /* one base per row: the unmarked form, the marked Cán, the five Chi */
+    .fmt-row .cell .f { font-size: 34px; }
+    @media (max-width: 575.98px) { #grid-marks { --cols: 4; } .cell .cp { font-size: .5rem; } }
+    #grid { --cols: 7; }   /* one base per row: the unmarked form, the marked Cán, the five Chi */
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
     #characters h2 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; color: var(--ink); }
     #characters h2:first-child { margin-top: 0; }
@@ -115,9 +117,9 @@
     <h2>Format characters</h2>
     <div class="formats guides" id="grid-format"></div>
     <h2>Tone marks</h2>
-    <div class="scroll-x"><div class="grid guides" id="grid-marks"></div></div>
+    <div class="grid guides" id="grid-marks"></div>
     <h2>Letters</h2>
-    <div class="scroll-x"><div class="grid guides" id="grid"></div></div>
+    <div class="grid guides" id="grid"></div>
   </section>
 </main>
 
@@ -313,7 +315,7 @@
       field.setRangeText(text, field.selectionStart, field.selectionEnd, 'end');
       if (!/[\u{F009A}\u{F009B}]$/u.test(text)) tidy();   // a joiner or combiner waits for the letter after it
       lastPos = field.selectionStart; showPending();
-      if (matchMedia('(pointer: fine)').matches) field.focus();
+      if (matchMedia('(pointer: fine)').matches) field.focus({ preventScroll: true });   // the list stays where it is
     };
     // one of the 22 unmarked letters (U+F0000 + 7 * n) is the onset of a pair: the component joiner follows it, unless it already follows a joiner (then it is the rhyme)
     const insertLetter = o => {
