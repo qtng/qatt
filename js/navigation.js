@@ -15,7 +15,7 @@
                     { name: "Quốc Âm Tân Tự", bar: "Home", url: "/index.html", icon: "bi-house" },
                     { name: "QATT Symbols", bar: "Symbols", url: "/symbols.html", icon: "bi-book" },
                     { name: "QATT Writer", bar: "Write", url: "/editor.html", icon: "bi-pencil-square" },
-                    { name: "QATT Check", bar: "Practice", url: "/check.html", icon: "bi-patch-check" },
+                    { name: "Sound Check", bar: "Practice", url: "/check.html", icon: "bi-patch-check" },
                     { name: "QATT Decodings", url: "/decodings.html", icon: "bi-puzzle" },
                     { name: "QATT Unicode", url: "/unicode.html", icon: "bi-fonts" },
                     { name: "QATT Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
