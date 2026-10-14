@@ -29,12 +29,26 @@
       <li><a href="https://github.com/kurgm/kage-engine">KAGE engine</a> (kage-engine), <a href="js/kage-engine.COPYING">GPL-3.0</a>, draws the strokes of the QATT font</li>
     </ul>
 
+    <h2 class="h4 mt-4" data-vi="Ngôn ngữ">Language</h2>
+    <p class="text-secondary small">Vietnamese texts are being added page by page. Pages show them where they have a translation, the rest stays English. The browser language is used until you choose here.</p>
+    <div class="btn-group btn-group-sm mb-2" role="group" id="lang" aria-label="Language">
+      <button type="button" class="btn btn-outline-secondary" data-lang="en">English</button>
+      <button type="button" class="btn btn-outline-secondary" data-lang="vi">Tiếng Việt</button>
+    </div>
+
     <h2 class="h4 mt-4">Sources used</h2>
     <p class="text-secondary small">The scripts, styles and fonts of the page you came from. Click a file to see it; reload it there to get the newest version.</p>
     <ul id="sources"></ul>
     <p id="none" class="text-secondary small" hidden>Open this page with the “powered by chunom.org” link at the end of a page to see its files.</p>
   </main>
   <script>
+    (() => {
+      // the language switch (Lang is defined by js/navigation.js)
+      const buttons = document.querySelectorAll('#lang button');
+      const mark = () => buttons.forEach(b => { const on = b.dataset.lang === Lang.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+      buttons.forEach(b => b.addEventListener('click', () => { Lang.set(b.dataset.lang); mark(); }));
+      mark();
+    })();
     (() => {
       const list = document.getElementById('sources');
       const files = location.hash.slice(1).split(',').filter(Boolean).map(decodeURIComponent).filter(f => /^(https?:\/\/|\/)/.test(f));
