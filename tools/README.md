@@ -125,7 +125,7 @@ python3 tools/build_font.py --kage font/kage.json --gothic --wide font/glyphs.js
 
 ## Shared pieces of the pages
 
-- `js/fonts.js`: the list of fonts (family, file) and the sizes. `font.html` takes its `<select data-qatt-fonts>` / `<select data-qatt-sizes>`, `editor.html` the fonts and the `@font-face` rules from it.html`).
+- `js/fonts.js`: the list of fonts (family, file) and the sizes. `editor.html` takes its `<select data-qatt-fonts>` / `<select data-qatt-sizes>` and the `@font-face` rules from it.html`).
 - `js/qatt-text.js`: code of `parser.js` (`parsed.qatt`, e.g. `t,c5,,5`) to text of the QATT block: onset `U+F009B` rhyme tone mark, one cell. Used by `editor.html` (typing Quốc Ngữ turns into font text when a word is finished).
 
 ## Libraries (`vendor/`)
