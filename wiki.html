@@ -169,7 +169,7 @@
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                if (data.error) throw new Error("Trang không tồn tại.");
+                if (data.error) { await showNoPage(title); return; }
 
                 const newTitle = data.parse.title;
                 currentWikiHtml = data.parse.text["*"];
@@ -183,6 +183,30 @@
                 searchInput.value = newTitle;
             } catch (err) { showError(err.message); }
             finally { setLoading(false); }
+        }
+
+        // Seite nicht gefunden: wie bei Wikipedia Vorschlag und Suchtreffer (list=search) mit Links zeigen
+        async function showNoPage(term) {
+            const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const link = t => `<a href="/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}">${esc(t)}</a>`;
+            let html = `<p class="text-muted">Trang “${esc(term)}” không tồn tại.</p>`;
+            try {
+                const url = `https://${wikiLang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&srlimit=20&srprop=snippet&srinfo=suggestion&format=json&origin=*`;
+                const q = (await (await fetch(url)).json()).query || {};
+                const suggestion = q.searchinfo && q.searchinfo.suggestion;
+                if (suggestion) html += `<p>Có phải bạn muốn tìm: <b>${link(suggestion)}</b>?</p>`;
+                const hits = q.search || [];
+                if (hits.length) {
+                    html += '<h2 class="h5 mt-4">Kết quả tìm kiếm</h2><ul class="list-unstyled">' + hits.map(h => {
+                        // the snippet is HTML with <span class="searchmatch">: keep only the text
+                        const snippet = new DOMParser().parseFromString(h.snippet, 'text/html').body.textContent;
+                        return `<li class="mb-3"><b>${link(h.title)}</b><div class="small text-muted">${esc(snippet)}…</div></li>`;
+                    }).join('') + '</ul>';
+                } else if (!suggestion) html += '<p class="text-muted">Không có kết quả phù hợp.</p>';
+            } catch (e) { console.error('Search suggestions failed', e); }
+            currentWikiHtml = html;
+            originalTitle = term;
+            renderWiki();
         }
 
         function renderWiki() {
