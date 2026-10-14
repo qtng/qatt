@@ -43,6 +43,12 @@
         .content-container { background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
         .wiki-header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
         .external-wiki-link { color: var(--muted); text-decoration: none; line-height: 1; position: relative; top: -0.1em; }
+        /* Seite nicht gefunden: Vorschlag und Trefferkarten */
+        .no-page .suggest { background: #fffdf8; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: .5rem; padding: .75rem 1rem; }
+        .no-page .hit { display: block; background: #fffdf8; border: 1px solid var(--line); border-radius: .6rem; padding: .75rem 1rem; margin-bottom: .6rem; text-decoration: none; color: var(--ink); box-shadow: 0 .1rem .3rem rgba(60, 40, 20, .06); transition: transform .12s, border-color .12s; }
+        .no-page .hit:hover, .no-page .hit:focus-visible { transform: translateY(-1px); border-color: var(--accent); }
+        .no-page .hit b { color: var(--accent); font-weight: 600; }
+        .no-page .hit .snippet { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
         .wiki-content img { max-width: 100%; height: auto; border-radius: .5rem; margin-bottom: 1.25rem; display: block; }
 
         /* the text of the article is set in the QATT font, everything it has no glyph for falls back to the usual font */
@@ -164,6 +170,7 @@
         async function fetchWiki(title, pushToHistory = true) {
             if (!title) return;
             const titleCasedTitle = title.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+            noPageRequest++;
             setLoading(true);
             const url = `https://${wikiLang}.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(titleCasedTitle)}&format=json&origin=*&prop=text|displaytitle`;
             try {
@@ -186,25 +193,30 @@
         }
 
         // Seite nicht gefunden: wie bei Wikipedia Vorschlag und Suchtreffer (list=search) mit Links zeigen
+        let noPageRequest = 0;
         async function showNoPage(term) {
+            const request = ++noPageRequest;
             const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-            const link = t => `<a href="/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}">${esc(t)}</a>`;
-            let html = `<p class="text-muted">Trang “${esc(term)}” không tồn tại.</p>`;
+            const href = t => `/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
+            let html = `<div class="no-page"><p class="text-muted fs-5">Trang “${esc(term)}” không tồn tại.</p>`;
             try {
                 const url = `https://${wikiLang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term)}&srlimit=20&srprop=snippet&srinfo=suggestion&format=json&origin=*`;
-                const q = (await (await fetch(url)).json()).query || {};
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const q = (await response.json()).query || {};
                 const suggestion = q.searchinfo && q.searchinfo.suggestion;
-                if (suggestion) html += `<p>Có phải bạn muốn tìm: <b>${link(suggestion)}</b>?</p>`;
+                if (suggestion) html += `<p class="suggest">Có phải bạn muốn tìm: <b><a href="${href(suggestion)}">${esc(suggestion)}</a></b>?</p>`;
                 const hits = q.search || [];
                 if (hits.length) {
-                    html += '<h2 class="h5 mt-4">Kết quả tìm kiếm</h2><ul class="list-unstyled">' + hits.map(h => {
+                    html += '<h2 class="h5 mt-4 mb-3">Kết quả tìm kiếm</h2>' + hits.map(h => {
                         // the snippet is HTML with <span class="searchmatch">: keep only the text
-                        const snippet = new DOMParser().parseFromString(h.snippet, 'text/html').body.textContent;
-                        return `<li class="mb-3"><b>${link(h.title)}</b><div class="small text-muted">${esc(snippet)}…</div></li>`;
-                    }).join('') + '</ul>';
+                        const snippet = new DOMParser().parseFromString(h.snippet || '', 'text/html').body.textContent;
+                        return `<a class="hit" href="${href(h.title)}"><b>${esc(h.title)}</b>${snippet ? `<div class="snippet">${esc(snippet)}…</div>` : ''}</a>`;
+                    }).join('');
                 } else if (!suggestion) html += '<p class="text-muted">Không có kết quả phù hợp.</p>';
             } catch (e) { console.error('Search suggestions failed', e); }
-            currentWikiHtml = html;
+            if (request !== noPageRequest) return; // a newer search has taken over
+            currentWikiHtml = html + '</div>';
             originalTitle = term;
             renderWiki();
         }
