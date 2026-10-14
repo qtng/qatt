@@ -12,7 +12,7 @@
     <script defer src="js/navigation.js"></script>
 
     <style>
-        :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Brush"; }
+        :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Gothic"; }
         body { background: var(--paper); color: var(--ink); }
         a { color: var(--accent); }
 
@@ -136,7 +136,7 @@
         let originalTitle = "";
 
         // the default font of the page (fonts.js has already filled the dropdown)
-        $('font').value = 'QATT Brush';
+        $('font').value = 'QATT Gothic';
         $('font').dispatchEvent(new Event('change'));
 
         // A text with its cells of QATT text wrapped in <ruby>: the cell is the base, the reading its annotation (QattText.reading, a dummy for now)
