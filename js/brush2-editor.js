@@ -518,6 +518,12 @@
   document.querySelectorAll("#forms button").forEach(b => b.addEventListener("click", () => { form = b.dataset.form; fixActive(); drawSymbolList(); drawSymbolView(); }));
   document.getElementById("sample").addEventListener("input", drawSample);
 
+  // size of the comparison glyphs: four next to each other on a phone
+  const cmp = document.querySelectorAll(".cmp-size");
+  const setSize = v => { document.documentElement.style.setProperty("--cg", v + "px"); cmp.forEach(c => c.value = v); };
+  cmp.forEach(c => c.addEventListener("input", () => setSize(+c.value)));
+  setSize(innerWidth < 576 ? Math.floor((innerWidth - 60) / 4) : 40);
+
   function renderAll() { drawParams(); drawContext(); setView(view); }
   renderAll();
   }
