@@ -35,7 +35,7 @@
   // ---- the model: original paths, default library and symbols (js/brush-model.js) ----------------------------------------------
   const ORIG = {};
   new DOMParser().parseFromString(defaultSvgDefs, "image/svg+xml").querySelectorAll("path[id]").forEach(p => ORIG[p.id] = p.getAttribute("d"));
-  fetch("font/brush.json").then(r => r.ok ? r.json() : null).catch(() => null).then(base => start(base));
+  fetch("fonts/brush.json").then(r => r.ok ? r.json() : null).catch(() => null).then(base => start(base));
 
   function start(base) {
   const M = QattBrush2Model(B, B2, SHAPES, ORIG, base), DEF = M.DEF, original = M.original, centred = M.centred, target = M.target;

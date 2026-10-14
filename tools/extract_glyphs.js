@@ -1,6 +1,6 @@
-// Reads the drawing of every character of the QATT block from the rendered unicode.html (qatt.js) and writes font/glyphs.json:
+// Reads the drawing of every character of the QATT block from the rendered unicode.html (qatt.js) and writes fonts/glyphs.json:
 //   [{o: offset, n: name, t: type, q: qatt code, d: [stroke paths], dm: [paths of the combining form, tones only]}]
-// Usage: node tools/extract_glyphs.js http://localhost:8790/unicode.html font/glyphs.json
+// Usage: node tools/extract_glyphs.js http://localhost:8790/unicode.html fonts/glyphs.json
 // (serve the repository with e.g. `python3 -m http.server 8790`; needs playwright and a chromium, PLAYWRIGHT_MODULE and CHROMIUM may point to them)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const fs = require('fs');

@@ -1,5 +1,5 @@
 /*
-The QATT fonts (font/*.woff2) and the sizes offered by font.html and editor.html.
+The QATT fonts (fonts/*.woff2) and the sizes offered by font.html and editor.html.
 
   <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of font.html)
@@ -19,7 +19,7 @@ const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], 
 
 (() => {
   const style = document.createElement("style");
-  style.textContent = QATT_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(font/${f.file}.woff2) format("woff2"), url(font/${f.file}.ttf) format("truetype"); }`).join("\n");
+  style.textContent = QATT_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2) format("woff2"), url(fonts/${f.file}.ttf) format("truetype"); }`).join("\n");
   document.head.append(style);
 
   const fill = (select, items) => {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a monospace web font from the QATT stroke glyphs (font/glyphs.json, made from the rendered qatt.js glyphs by extract_glyphs.js).
+"""Build a monospace web font from the QATT stroke glyphs (fonts/glyphs.json, made from the rendered qatt.js glyphs by extract_glyphs.js).
 Standalone, the two format characters are drawn as the ideographic description characters, half a cell wide: the combiner as U+2FF1 (two boxes above each other), the joiner as U+2FF0 (side by side).
 
 Component joiner: "A joiner B" (A, B any Can/Chi form) is shown as one square cell like a syllable of qatt.js: A in the
@@ -22,7 +22,7 @@ if light: sys.argv.remove('--light')
 # --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Serif verticals 1.8 times, its thin horizontals stay as they are; tones and marks 1.5 times
 BOLD_ON = '--bold' in sys.argv
 if BOLD_ON: sys.argv.remove('--bold')
-KAGE = KAGE_STYLE = None      # --kage font/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Serif (KAGE style mincho) or Gothic
+KAGE = KAGE_STYLE = None      # --kage fonts/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Serif (KAGE style mincho) or Gothic
 if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'mincho'
@@ -76,7 +76,7 @@ GROW, GROW_Y = PLACE[2] / 100, 50
 EXTRA_X, EXTRA_Y = PLACE[0] - (1 - GROW) * 50, PLACE[1] - (1 - GROW) * 50   # what is left of the offset, svg units
 PAIR_GROW = GROW
 
-data = json.load(open(SRC))  # font/glyphs.json
+data = json.load(open(SRC))  # fonts/glyphs.json
 BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
 JOBS, RESULTS = {}, {}         # brush outlines: requested on a first run over the glyphs, made by brush_outlines.js, used on the second
 
