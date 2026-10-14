@@ -29,10 +29,21 @@
     .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
     .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
     .cell + .cell { border-left: 2px solid #cdbd9a; }
-    .cell { background: var(--bs-warning-bg-subtle); }
+    .cell { background: var(--bs-warning-bg-subtle); transition: background-color .3s ease, color .3s ease; }
     .cell.near { background: var(--bs-warning-border-subtle); color: rgba(43, 33, 24, .4); }
     .cell.solved { background: var(--bs-success-border-subtle); color: #0f5132; }
     .cell .g { display: inline-block; }
+    .cell.pop .g { animation: pop .35s ease-out; }
+    .cell.pop { animation: flash .45s ease-out; }
+    @keyframes pop { 0% { opacity: 0; transform: scale(.6); } 60% { opacity: 1; transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes flash { 0% { filter: brightness(1.12); } 100% { filter: none; } }
+    .cells.two .cell.pop .g { animation-name: pop2; }
+    @keyframes pop2 { 0% { opacity: 0; transform: scale(.45, .6); } 60% { opacity: 1; transform: scale(.84, 1.12); } 100% { opacity: 1; transform: scale(.75, 1); } }
+    .mood { display: block; }
+    .mood.bounce { animation: bounce .5s ease-out; }
+    .mood.shake { animation: shake .4s ease-in-out; }
+    @keyframes bounce { 0% { transform: scale(.7); } 40% { transform: translateY(-.5rem) scale(1.2); } 70% { transform: translateY(.1rem) scale(.95); } 100% { transform: none; } }
+    @keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-.4rem) rotate(-8deg); } 40% { transform: translateX(.4rem) rotate(8deg); } 60% { transform: translateX(-.3rem) rotate(-5deg); } 80% { transform: translateX(.2rem) rotate(3deg); } }
     .cells.two .cell { width: 5.25rem; }   /* two cells: the box is squeezed to 75% of its width, like the glyphs */
     .cells.two .g { transform: scale(.75, 1); }
     #variants, #bases, #tones { margin-top: .8rem; }
@@ -43,10 +54,18 @@
     .grid8 .gbtn { width: calc((100% - 7 * .3rem) / 8); height: auto; aspect-ratio: 1; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
-    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: #fffdf8; border: 1px solid #d9ccb0; border-radius: .5rem; color: var(--ink); }
-    .gbtn:hover:not(:disabled) { border-color: var(--cinnabar); }
+    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: #fffdf8; border: 1px solid #d9ccb0; border-radius: .5rem; color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s; }
+    .gbtn:hover:not(:disabled) { border-color: var(--cinnabar); transform: translateY(-1px); }
+    .gbtn:active:not(:disabled) { transform: scale(.94); }
     .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; color: #0f5132; opacity: 1; }
-    .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; color: #842029; opacity: 1; }
+    .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; color: #842029; opacity: 1; animation: shake .4s ease-in-out; }
+    .gbtn.ok:disabled { animation: okpop .35s ease-out; }
+    @keyframes okpop { 0% { transform: scale(.9); } 50% { transform: scale(1.12); } 100% { transform: none; } }
+    .gbtn.fresh { animation: rise .3s ease-out backwards; animation-delay: calc(var(--i, 0) * 35ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(.5rem) scale(.9); } }
+    .done.card { animation: glow 1.2s ease-out; }
+    @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
         .card { max-width: 24rem; margin-top: .8rem; }
     .card .cells { margin-bottom: .2rem; }
     .done { text-align: center; }
@@ -109,11 +128,29 @@
     const TONE_BLOCKS = [[3, 5, 1, 7], [4, 6, 2, 8]];
     const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
 
+    // fade and fold an element in or out instead of switching it at once; resolves when done
+    const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function show(el, on) {
+      if (el._anim) { el._anim.cancel(); el._anim = null; el.style.overflow = ''; }
+      if (REDUCED || on === !el.hidden) { el.hidden = !on; return Promise.resolve(); }
+      el.hidden = false;
+      const full = getComputedStyle(el), h = el.offsetHeight + 'px', m = full.marginTop;
+      const open = { opacity: 1, height: h, marginTop: m, transform: 'none' };
+      const shut = { opacity: 0, height: '0px', marginTop: '0px', transform: 'translateY(.5rem)' };
+      el.style.overflow = 'hidden';
+      const a = el._anim = el.animate(on ? [shut, open] : [open, shut], { duration: on ? 280 : 200, easing: 'ease-out' });
+      return new Promise(done => {
+        a.onfinish = () => { el._anim = null; el.style.overflow = ''; el.hidden = !on; done(); };
+        a.oncancel = done;
+      });
+    }
+    const react = (cls) => { const m = $('mood'); m.classList.remove('bounce', 'shake'); void m.offsetWidth; m.classList.add(cls); };
+
     let slots, tone, code, answer;
     const GOOD = ['😃', '🤗', '😊', '🙃'], BAD = ['😧', '😩', '😵', '😒', '😣', '🤨', '😱', '🤯', '😖'];
     const pick = a => a[Math.floor(Math.random() * a.length)];
     // the mood: 🙂 at the start, a random cheerful one after a hit, a random upset one after a miss
-    const mood = ok => { $('mood').textContent = pick(ok ? GOOD : BAD); };
+    const mood = ok => { $('mood').textContent = pick(ok ? GOOD : BAD); react(ok ? 'bounce' : 'shake'); };
 
     // the cells of the word: [{ shape, mark }] and the tone, from the code of the parser
     function analyse(word) {
@@ -135,21 +172,22 @@
       answer = word;
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       tone = a.tone; code = a.code;
-      $('mood').textContent = '🙂'; $('bases').hidden = false;
+      $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
       $('word').textContent = word;
-      $('done').hidden = $('tones').hidden = $('variants').hidden = true;
-      $('task').hidden = false;
-      $('variantPad').replaceChildren();
+      for (const id of ['tones', 'variants']) show($(id), false);
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
       const pad = $('basePad');
       pad.replaceChildren(...SHAPES.map(s => button(glyph(s), 'gbtn', b => pickShape(s, b))));
+      $('cells').replaceChildren();
       renderCells();
+      show($('bases'), true);
+      show($('done'), false).then(() => show($('task'), true));
     }
 
     function button(text, cls, onclick) {
       const b = document.createElement('button');
-      b.type = 'button'; b.className = cls; b.textContent = text;
+      b.type = 'button'; b.className = cls + ' fresh'; b.textContent = text;
       b.addEventListener('click', () => onclick(b));
       return b;
     }
@@ -157,15 +195,23 @@
 
     function renderCells() {
       $('cells').classList.toggle('two', slots.length === 2);
-      $('cells').replaceChildren(...slots.map(s => {
-        const d = document.createElement('div');
-        d.className = 'cell' + (s.state === 'near' ? ' near' : s.state === 'full' ? ' solved' : '');
-        const g = document.createElement('span');
-        g.className = 'g';
-        g.textContent = s.state === 'empty' ? '' : glyph(s.shape, s.state === 'full' ? s.mark : 0);
-        d.append(g);
+      const box = $('cells');
+      if (box.children.length !== slots.length) box.replaceChildren(...slots.map(() => {
+        const d = document.createElement('div'), g = document.createElement('span');
+        d.className = 'cell'; g.className = 'g'; d.append(g);
+        d.addEventListener('animationend', e => { if (e.target === d) d.classList.remove('pop'); });
         return d;
       }));
+      slots.forEach((s, i) => {   // update the cells in place so that the colours can fade
+        const d = box.children[i], g = d.firstChild;
+        const text = s.state === 'empty' ? '' : glyph(s.shape, s.state === 'full' ? s.mark : 0);
+        d.classList.toggle('near', s.state === 'near');
+        d.classList.toggle('solved', s.state === 'full');
+        if (g.textContent !== text) {
+          g.textContent = text;
+          if (text) { d.classList.remove('pop'); void d.offsetWidth; d.classList.add('pop'); }
+        }
+      });
     }
 
     function pickShape(shape, b) {
@@ -178,8 +224,9 @@
         const group = document.createElement('div');
         group.className = 'group';
         group.append(...MARKS.map(m => button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb))));
+        group.querySelectorAll('button').forEach((x, i) => x.style.setProperty('--i', i));
         $('variantPad').append(group);
-        $('variants').hidden = false;
+        show($('variants'), true);
       }
       renderCells();
       update();
@@ -197,14 +244,14 @@
     // all cells filled (also the faint ones): the shapes go; all cells exact (no faint one left): the marked forms go and the tones appear
     function update() {
       if (slots.some(s => s.state === 'empty')) return;
-      $('bases').hidden = true;
+      show($('bases'), false);
       if (slots.some(s => s.state === 'near') || !$('tones').hidden) return;
-      $('variants').hidden = true;
-      $('tones').hidden = false;
+      show($('variants'), false);
+      show($('tones'), true);
       $('tonePad').replaceChildren(...TONE_BLOCKS.map(block => {
         const d = document.createElement('div');
         d.className = 'block';
-        d.append(...block.map(n => button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b))));
+        d.append(...block.map((n, i) => { const b = button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b)); b.style.setProperty('--i', i); return b; }));
         return d;
       }));
     }
@@ -216,12 +263,13 @@
       if (!ok) return;
       for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
       for (const x of slots) x.state = 'full';   // the faint cells show their marked forms
-      $('variants').hidden = true;
+      show($('variants'), false);
       renderCells();
       $('full').textContent = QattText.syllable(code);
       $('reading').textContent = answer;
-      $('task').hidden = $('tones').hidden = true;   // the success card takes the place of the task
-      $('done').hidden = false;
+      // the success card takes the place of the task, after a short moment to see the last cell
+      show($('tones'), false);
+      setTimeout(() => show($('task'), false).then(() => show($('done'), true)), 450);
     }
 
     const another = () => {
