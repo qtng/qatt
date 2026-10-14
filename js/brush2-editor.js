@@ -11,7 +11,7 @@
   const SHAPES = VietnameseParser.SHAPES.map(s => s === "z" ? "_" : s);
   const TABLE = VietnameseParser.DECODINGS.qatt;
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
-  const VIEWBOX = "-12.5 -25 125 125";   // the symbol viewBox of qatt.js = the cell of a glyph in the font (125 x 125 svg units -> 1000 x 1000 font units)
+  const VIEWBOX = "-12.5 -12.5 125 125";   // the symbol viewBox of qatt.js = the cell of a glyph in the font (125 x 125 svg units -> 1000 x 1000 font units)
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
   const migrate = st => {
@@ -168,12 +168,12 @@
     canvas.innerHTML = "";
     canvas.classList.toggle("editing", !!(mode && active));
     const grid = el("g", { class: "grid" }, canvas);
-    for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -20, x2: v, y2: 105 }, grid); el("line", { x1: -5, y1: v, x2: 105, y2: v }, grid); }
+    for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -12.5, x2: v, y2: 112.5 }, grid); el("line", { x1: -12.5, y1: v, x2: 112.5, y2: v }, grid); }
     el("rect", { x: -9, y: -9, width: 118, height: 118, class: "box" }, grid);
-    el("rect", { x: -12.5, y: -25, width: 125, height: 125, class: "window" }, grid);   // the font cell (VIEWBOX)
-    el("line", { x1: -12.5, y1: 85, x2: 112.5, y2: 85, class: "base" }, grid);   // the baseline of the font (svg y 85)
+    el("rect", { x: -12.5, y: -12.5, width: 125, height: 125, class: "window" }, grid);   // the font cell (VIEWBOX)
+    el("line", { x1: -12.5, y1: 97.5, x2: 112.5, y2: 97.5, class: "base" }, grid);   // the baseline of the font (svg y 97.5)
     for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
-    for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 105, class: "gline" }, canvas);
+    for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 115, class: "gline" }, canvas);
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
     for (const c of ctxIds) el("path", { "data-id": c, d: outlineOf(c), class: "ctx" }, canvas);
     if (viewOpt.orig) for (const c of [id, ...sym.marks.map((m, i) => markIds(id, i))].concat(ctxIds)) {

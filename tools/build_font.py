@@ -33,13 +33,13 @@ BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
-# The glyph cell is the symbol viewBox of qatt.js, "-12.5 -25 125 125" (x -12.5..112.5, y -25..100), mapped onto the em square:
+# The glyph cell is the symbol viewBox of qatt.js, "-12.5 -12.5 125 125" (x and y -12.5..112.5), mapped onto the em square:
 # x 0..1000 (advance), y 880..-120 (ascent 880, descent -120). 8 font units per svg unit in both directions.
-CELL = (-12.5, -25, 125, 125)  # qatt.js viewBox
+CELL = (-12.5, -12.5, 125, 125)  # qatt.js viewBox
 SY = float(os.environ.get('QATT_SY', 8))      # font units per svg unit (vertical): the cell height 125 fills the em (1000)
 SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 125 x 125)
 TONE_X = 1.0                   # the tones have the same scale as the letters
-X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 85
+X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 97.5
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair

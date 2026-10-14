@@ -790,7 +790,7 @@ class Qatt {
       this._useG(g, rhymePrefix + vStr);
     }
 
-    svg.setAttribute("viewBox", "-12.5 -25 125 125");
+    svg.setAttribute("viewBox", "-12.5 -12.5 125 125");
     svg.style.aspectRatio = "13 / 15";
     svg.style.verticalAlign = "bottom";
     svg.style.overflow = "visible";
