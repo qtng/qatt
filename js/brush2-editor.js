@@ -15,10 +15,10 @@
   const ICF_T = 4.2, ICF_H = 91.6;   // the ICF box of Noto Sans CJK: top and height in svg units
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
-  const PLACE = { x: 0.4, y: 6.1, s: 99.3 };   // global placement of the drawing in the cell: offset x, y (svg units) and scale (%); 0..100 -> the ICF box of Noto Sans CJK
+  const PLACE = { x: -1.1, y: 7.9, s: 95.3 };   // global placement of the drawing in the cell: offset x, y (svg units) and scale (%); 0..100 -> the ICF box of Noto Sans CJK
   const migrate = st => {
     st.place = Object.assign({}, PLACE, st.place);
-    if ((st.place.x === 4.2 && st.place.y === 4.2 && st.place.s === 91.6) || (st.place.x === -1.7 && st.place.y === -3 && st.place.s === 103.4)) st.place = Object.assign({}, PLACE);   // the first default (the whole 0..100 window into the ICF box)
+    if ((st.place.x === 4.2 && st.place.y === 4.2 && st.place.s === 91.6) || (st.place.x === -1.7 && st.place.y === -3 && st.place.s === 103.4) || (st.place.x === 0.4 && st.place.y === 6.1 && st.place.s === 99.3)) st.place = Object.assign({}, PLACE);   // earlier defaults
     for (const k of ["h", "v"]) { const g = (st.guides = st.guides || {})[k] || []; while (g.length < 6) g.push(null); g.length = 6; st.guides[k] = g; }
     if (st.offsets) return st;
     for (const e of Object.values(st.lib || {})) {
@@ -490,6 +490,20 @@
   // ---- brush settings, context, storage -----------------------------------------------------------------------------------------
   const PARAM_FIELDS = [["weight", "Weight", 3, 12, 0.1], ["flatWidth", "Flat end: width", 0.3, 1.6, 0.01], ["flatAngle", "Flat end: angle", -60, 60, 1],
     ["pointRadius", "Pointed end: radius", 0, 0.3, 0.005], ["kihitsuSize", "Kihitsu: size", 0.5, 3, 0.01], ["kihitsuAngle", "Kihitsu: angle", -60, 60, 1]];
+  // the placement that puts the ink of a syllable (the onset forms on the left, the rhyme forms on the right, both as drawn) into the ICF box, centred, as large as it can be
+  function fitPlace() {
+    const tmp = el("svg", { width: 0, height: 0, style: "position:absolute" }, document.body), path = el("path", {}, tmp);
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const f of [FORMS.onset, FORMS.rhyme]) for (const sh of SHAPES) {
+      path.setAttribute("d", outlineOf(f.id(sh)));
+      const b = path.getBBox(); if (!b.height) continue;
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
+    }
+    tmp.remove();
+    if (!(x1 > x0 && y1 > y0)) return null;
+    const sc = Math.min(ICF_H / (x1 - x0), ICF_H / (y1 - y0)), r = v => Math.round(v * 10) / 10, mid = ICF_T + ICF_H / 2;
+    return { x: r(mid - sc * (x0 + x1) / 2), y: r(mid - sc * (y0 + y1) / 2), s: r(sc * 100) };
+  }
   function drawParams() {
     const box = document.getElementById("params"); box.innerHTML = "";
     for (const [k, name, min, max, step] of PARAM_FIELDS) slider(box, name, state.params[k], min, max, step, v => state.params[k] = v);
@@ -515,19 +529,8 @@
     const reset = document.createElement("button"); reset.type = "button"; reset.className = "btn btn-link btn-sm p-0"; reset.textContent = "Reset placement";
     reset.addEventListener("click", () => { begin(); state.place = clone(PLACE); end(); renderAll(); });
     const fit = document.createElement("button"); fit.type = "button"; fit.className = "btn btn-outline-secondary btn-sm mt-2 me-2"; fit.textContent = "Fit to ICF box";
-    fit.title = "Measures the ink of all symbols (rhyme, onset and centred forms) and scales the drawing so that the highest top and the lowest bottom touch the ICF box; the middle stays at x = 50";
-    fit.addEventListener("click", () => {
-      const tmp = el("svg", { width: 0, height: 0, style: "position:absolute" }, document.body), path = el("path", {}, tmp);
-      let y0 = Infinity, y1 = -Infinity;
-      for (const f of Object.values(FORMS)) for (const sh of SHAPES) {
-        path.setAttribute("d", outlineOf(f.id(sh)));
-        const b = path.getBBox(); if (b.height) { y0 = Math.min(y0, b.y); y1 = Math.max(y1, b.y + b.height); }
-      }
-      tmp.remove();
-      if (!(y1 > y0)) return;
-      const sc = ICF_H / (y1 - y0), r = v => Math.round(v * 10) / 10;
-      begin(); state.place = { x: r((1 - sc) * 50), y: r(ICF_T - sc * y0), s: r(sc * 100) }; end(); renderAll();
-    });
+    fit.title = "Measures the ink of a syllable (all onset forms and all rhyme forms side by side) and scales and moves the drawing so that it is centred in the ICF box and touches its edges";
+    fit.addEventListener("click", () => { const f = fitPlace(); if (!f) return; begin(); state.place = f; end(); renderAll(); });
     box.append(prow, fit, reset);
   }
   document.getElementById("params-reset").addEventListener("click", () => { begin(); state.params = fresh().params; state.guides = fresh().guides; end(); drawParams(); changed(); });
