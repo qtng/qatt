@@ -55,7 +55,7 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">QATT Check</h1>
-    <p class="lead mx-auto mb-0">Which symbols spell this word? Tap a shape to see where it occurs.</p>
+    <p class="lead mx-auto mb-0">Which symbols spell this word?</p>
   </div>
 </header>
 
@@ -72,12 +72,12 @@
   <div id="variants" hidden><div class="pad" id="variantPad"></div></div>
   <div id="bases"><div class="pad grid8" id="basePad"></div></div>
   <div id="tones" hidden><div class="pad grid8" id="tonePad"></div></div>
-
   <div class="done" id="done" hidden>
     <div class="full" id="full"></div>
     <div class="reading mb-3" id="reading"></div>
     <button type="button" class="btn btn-cinnabar btn-pill" id="next">Next word</button>
   </div>
+
 </main>
 
 <script>
@@ -199,6 +199,7 @@
       renderCells();
       $('full').textContent = QattText.syllable(code);
       $('reading').textContent = answer;
+      $('tones').hidden = true;   // the success message takes the place of the tone buttons
       $('done').hidden = false;
     }
 
