@@ -4,7 +4,7 @@
 // Load it early in <head> as a normal (not defer) script, so that Lang translates the page while it is parsed.
 
 // ---------- Lang: the translation of a page ----------
-// The language is localStorage.lang ("en" or "vi") if it was chosen (license.html, or ?lang=vi in the address), else the first of English and
+// The language is localStorage.lang ("en" or "vi") if it was chosen (the switch in the menu bar, license.html, or ?lang=vi in the address), else the first of English and
 // Vietnamese in the languages of the browser (vi only if it comes before en). It is not stored until somebody chooses it.
 // In vi every tag that has data-vi and no tags inside gets the text of data-vi as its text content; the English text is kept and comes back in en.
 // A MutationObserver does it for the tags of the page while it is parsed and for every tag that JavaScript adds or changes later.
@@ -106,7 +106,7 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-qatt",
         site: onChunom ? QATT_SITE : "",
         links: [
-            { name: "Quốc Âm Tân Tự", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
+            { name: "Home", vi: "Trang chủ", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
             { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barOrder: 2, barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
@@ -187,6 +187,26 @@ window.Lang = window.Lang || (function() {
               background: rgba(33, 37, 41, 0.95);
               backdrop-filter: blur(15px);
             }
+            /* desktop: the links of the own block in the bar, the other site in a dropdown; below 992px the offcanvas menu and the bottom bar do it */
+            .desk-links, .desk-other { display: none; }
+            @media (min-width: 992px) {
+                #navTogglerCustom { display: none; }
+                .desk-links { display: flex; align-items: stretch; gap: .15rem; align-self: stretch; margin: 0 auto 0 .5rem; padding: 0; list-style: none; }
+                .desk-other { display: block; position: relative; margin-right: 1rem; }
+            }
+            .desk-links a, .desk-other > button { display: flex; align-items: center; gap: .4rem; height: 100%; padding: 0 .6rem; color: rgba(255, 255, 255, .65); text-decoration: none; background: none; border: 0; border-bottom: 3px solid transparent; font-size: .92rem; white-space: nowrap; }
+            .desk-links a:hover, .desk-other > button:hover { color: #fff; }
+            .desk-links a.active { color: #fff; border-bottom-color: var(--bar-accent); }
+            .desk-other > button { height: 36px; border: 1px solid rgba(255, 255, 255, .25); border-radius: .4rem; }
+            .desk-other .desk-menu { display: none; position: absolute; right: 0; top: calc(100% + .6rem); min-width: 14rem; padding: .4rem 0; background: rgba(33, 37, 41, .98); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .4); }
+            .desk-other.open .desk-menu { display: block; }
+            .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
+            .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+            @media (max-width: 1199.98px) { .desk-links .dl-text { display: none; } .desk-links a { padding: 0 .75rem; } .desk-links i { font-size: 1.15rem; } }
+            .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
+            .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
+            .lang-switch button:hover { color: #fff; }
+            .lang-switch button.active { color: #fff; text-decoration: underline; text-underline-offset: .3em; }
             .navmenu-backdrop{
               background: rgba(33, 37, 41, 0.5);
               backdrop-filter: blur(10px);
@@ -286,14 +306,33 @@ window.Lang = window.Lang || (function() {
         const currentPath = window.location.pathname;
         const navId = "siteOffcanvas";
 
+        // desktop bar: the links of the own block, the other site in a dropdown
+        const ownSection = sections.find(sec => sec.linkClass === navConfig.own) || sections[0];
+        const otherSection = sections.find(sec => sec !== ownSection);
+        const isActive = (sec, link) => !sec.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
+        const deskLinks = ownSection.links.map(link =>
+            `<li><a href="${ownSection.site || ''}${link.url}" title="${link.name}" class="${isActive(ownSection, link) ? 'active' : ''}"><i class="bi ${link.icon}"></i><span class="dl-text${link.vi ? '" data-vi="' + link.vi : ''}">${link.name}</span></a></li>`).join('');
+        const otherLabel = onChunom ? 'QATT' : 'Chữ Nôm';
+        const otherLinks = otherSection.links.map(link =>
+            `<a href="${otherSection.site || ''}${link.url}"><i class="bi ${link.icon}"></i><span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span></a>`).join('');
+
         const header = document.createElement('nav');
         header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
+        header.style.setProperty('--bar-accent', navConfig.accent);
         header.innerHTML = `
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="${home}">
                     ${navConfig.brand(logo, brandTitle, false)}
                 </a>
+                <ul class="desk-links">${deskLinks}</ul>
+                <div class="desk-other">
+                    <button type="button" aria-haspopup="true" aria-expanded="false">${otherLabel} <i class="bi bi-chevron-down small"></i></button>
+                    <div class="desk-menu">${otherLinks}</div>
+                </div>
                 <div class="ms-auto d-flex align-items-center">
+                    <div class="lang-switch" role="group" aria-label="Language">
+                        <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
+                    </div>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -362,6 +401,21 @@ window.Lang = window.Lang || (function() {
             const viewport = document.querySelector('meta[name="viewport"]');
             if (viewport && !/viewport-fit/.test(viewport.content)) viewport.content += ', viewport-fit=cover';
         }
+
+        // dropdown of the other site: click opens, a click elsewhere or Escape closes
+        const other = header.querySelector('.desk-other');
+        const otherButton = other.querySelector('button');
+        const closeOther = () => { other.classList.remove('open'); otherButton.setAttribute('aria-expanded', 'false'); };
+        otherButton.addEventListener('click', () => { const open = other.classList.toggle('open'); otherButton.setAttribute('aria-expanded', open); });
+        document.addEventListener('click', e => { if (!other.contains(e.target)) closeOther(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOther(); });
+
+        // language switch EN | VI next to the menu button; the choice is remembered (Lang.set)
+        const langButtons = header.querySelectorAll('.lang-switch button');
+        const markLang = () => langButtons.forEach(b => { const on = b.dataset.lang === Lang.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+        langButtons.forEach(b => b.addEventListener('click', () => Lang.set(b.dataset.lang)));
+        document.addEventListener('langchange', markLang);
+        markLang();
 
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
