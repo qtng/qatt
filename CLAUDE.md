@@ -1,6 +1,6 @@
 # qtng/qatt
 
-The QATT site (Quốc Âm Tân Tự, a script for Vietnamese): `index.html`, `symbols.html`, `editor.html`, `check.html` (spell a word: onset/rhyme shapes, then the tone), `decodings.html`, `unicode.html`, `wiki.html`, `practice/`, `vandao/`, `admin/`, with `js/`, `vendor/` (Bootstrap, Bootstrap Icons, Supabase, shared by both sites), `fonts/`, `img/`.
+The QATT site (Quốc Âm Tân Tự, a script for Vietnamese): `index.html`, `symbols.html`, `editor.html`, `check.html` (spell a word: onset/rhyme shapes, then the tone; the words are the one-syllable ranked entries of `chunom/dict.csv`, loaded from the Chunom site), `decodings.html`, `unicode.html`, `wiki.html`, `practice/`, `vandao/`, `admin/`, with `js/`, `vendor/` (Bootstrap, Bootstrap Icons, Supabase, shared by both sites), `fonts/`, `img/`.
 Served at the **root** of `qatt.org`. `js/navigation.js` is the menu of this site only. `404.html` forwards old `/qatt/…` addresses to the same path without the prefix and old `/chunom/`, `/chunom-assets/`, `/pages/` addresses to the Chunom site (prefix kept); the countdown is 2 seconds.
 Docs of the tools: `tools/README.md`.
 

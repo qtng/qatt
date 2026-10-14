@@ -24,7 +24,9 @@
     .btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
     .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
     .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
-    .word { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; line-height: 1.1; color: var(--ink); text-align: center; margin: 1rem 0 .8rem; }
+    .head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .5rem; margin-bottom: .8rem; }
+    .word { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; line-height: 1.1; color: var(--ink); text-align: left; overflow-wrap: anywhere; }
+    .nom { justify-self: end; width: 32px; height: 32px; display: block; }
     .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; }
     .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
     .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
@@ -64,12 +66,17 @@
     .gbtn.fresh { animation: rise .3s ease-out backwards; animation-delay: calc(var(--i, 0) * 35ms); }
     @keyframes rise { from { opacity: 0; transform: translateY(.5rem) scale(.9); } }
     .done.card { animation: glow 1.2s ease-out; }
-    @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
+    @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
-        .card { max-width: 24rem; margin-top: .8rem; }
-    .card .cells { margin-bottom: .2rem; }
+    /* the cards like a retro game: tinted, a thick outline and a hard shadow */
+    .card { max-width: 24rem; margin-top: .8rem; }
+    .card.task, .card.done { border: 3px solid var(--ink); border-radius: .9rem; box-shadow: 5px 5px 0 var(--ink), inset 0 3px 0 rgba(255, 255, 255, .65), inset 0 -4px 0 rgba(43, 33, 24, .08); }
+    .card.task { background: linear-gradient(180deg, #fff1c9 0%, #fbe3a6 100%); }
+    .task .cells { border-color: var(--ink); box-shadow: 3px 3px 0 rgba(43, 33, 24, .35); }
+    .task .cell + .cell { border-left-color: var(--ink); }
+    .card .cells { margin-bottom: .4rem; }
     .done { text-align: center; }
-    .done.card { border-color: var(--bs-success-border-subtle); background: var(--bs-success-bg-subtle); }
+    .done.card { background: linear-gradient(180deg, #d9f2e3 0%, #b9e4cc 100%); box-shadow: 5px 5px 0 #146c43, inset 0 3px 0 rgba(255, 255, 255, .65); border-color: #146c43; }
     .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
     .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
     @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
@@ -91,8 +98,11 @@
   </div>
   <div class="card task mx-auto" id="task">
     <div class="card-body">
-      <div class="mood" id="mood" aria-live="polite">🙂</div>
-      <div class="word" id="word" lang="vi"></div>
+      <div class="head">
+        <div class="word" id="word" lang="vi"></div>
+        <div class="mood" id="mood" aria-live="polite">🙂</div>
+        <img class="nom" id="nom" alt="" hidden>
+      </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
     </div>
   </div>
@@ -113,8 +123,11 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const parser = new VietnameseParser();
-    // the words: the name of the script first, then common syllables (?word=... checks any other word)
-    const WORDS = ['Quốc', 'Âm', 'Tân', 'Tự', 'người', 'nước', 'việt', 'nam', 'nhà', 'tôi', 'bạn', 'đẹp', 'trời', 'gió', 'hoa', 'sách',
+    // the words: the entries of the dictionary of the Chunom site that have a rank and are one syllable (word + Nôm character);
+    // until it is loaded (or if it fails) a short list of common syllables serves
+    const CHUNOM_SITE = 'https://v2.chunom.org/';
+    let DICT = [];
+    const FALLBACK = ['Quốc', 'Âm', 'Tân', 'Tự', 'người', 'nước', 'việt', 'nam', 'nhà', 'tôi', 'bạn', 'đẹp', 'trời', 'gió', 'hoa', 'sách',
       'chữ', 'nôm', 'thơ', 'lòng', 'thương', 'xuân', 'hạ', 'thu', 'đông', 'sáng', 'chiều', 'đêm', 'sông', 'núi', 'biển', 'cá', 'gà', 'mèo'];
     // the shapes as buttons
     const SHAPES = 'l _ ng h g c tr d n t th nh ch dz x kh s r m b v ph'.split(' ');   // the order of symbols.html (l first)
@@ -166,10 +179,49 @@
       return { cells, tone: +t || 0, code: c };
     }
 
-    function start(word) {
+    // one line of the CSV, with quoted fields
+    const csvRow = line => {
+      const out = []; let i = 0;
+      while (i <= line.length) {
+        if (line[i] === '"') {
+          let v = ''; i++;
+          while (i < line.length && !(line[i] === '"' && line[i + 1] !== '"')) { v += line[i] === '"' ? '"' : line[i]; i += line[i] === '"' ? 2 : 1; }
+          out.push(v); i += 2;   // the closing quote and the comma
+        } else { const j = line.indexOf(',', i); const e = j < 0 ? line.length : j; out.push(line.slice(i, e)); i = e + 1; }
+      }
+      return out;
+    };
+    const loadDict = () => fetch(CHUNOM_SITE + 'chunom/dict.csv').then(r => r.ok ? r.text() : Promise.reject(r.status)).then(text => {
+      const seen = new Set();
+      for (const line of text.split('\n')) {
+        const r = csvRow(line.replace(/\r$/, ''));
+        const w = (r[0] || '').trim();
+        if (!w || /\s/.test(w) || !parseInt(r[5]) || !r[1]) continue;   // one syllable, with a rank
+        if (!seen.has(w + r[1])) { seen.add(w + r[1]); DICT.push({ w, nom: r[1] }); }
+      }
+    });
+    const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
+    // a random entry that the parser can spell, not the one just shown
+    const draw = () => {
+      const list = pool();
+      for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (e.w !== answer && analyse(e.w)) return e; }
+      return { w: FALLBACK.find(w => analyse(w)) };
+    };
+
+    let nomOf = '';
+    function start(word, nom) {
       let a = analyse(word);
-      if (!a) { word = WORDS.find(w => analyse(w)); a = analyse(word); }
-      answer = word;
+      if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
+      answer = word; nomOf = nom || '';
+      const img = $('nom');
+      img.hidden = true;
+      const ch = nom && [...nom][0];   // the first character of the Nôm form as a 32px image, as in the Chunom site
+      if (ch) {
+        img.alt = nom;
+        img.onload = () => { img.hidden = false; };
+        img.onerror = () => { img.hidden = true; };
+        img.src = `${CHUNOM_SITE}chunom-assets/generated/32/${ch.codePointAt(0).toString(16).toUpperCase()}.webp`;
+      }
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       tone = a.tone; code = a.code;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
@@ -272,17 +324,16 @@
       setTimeout(() => show($('task'), false).then(() => show($('done'), true)), 450);
     }
 
-    const another = () => {
-      let w;
-      do { w = WORDS[Math.floor(Math.random() * WORDS.length)]; } while (w === answer && WORDS.length > 1);
-      start(w);
-    };
+    const another = () => { const e = draw(); start(e.w, e.nom); };
     $('next').addEventListener('click', another);
     $('reload').addEventListener('click', another);
-    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); start(answer); });   // the same word after the other decoding
+    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); start(answer, nomOf); });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
-    start(wanted || WORDS[Math.floor(Math.random() * WORDS.length)]);
+    loadDict().catch(() => {}).then(() => {   // without the dictionary the short list is used
+      if (wanted) start(wanted, (DICT.find(e => e.w === wanted.trim().toLowerCase()) || {}).nom);
+      else another();
+    });
   });
 </script>
 </body>
