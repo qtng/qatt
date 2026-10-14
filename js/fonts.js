@@ -1,7 +1,8 @@
 /*
 The QATT fonts (fonts/*.woff2) and the sizes offered by font.html and editor.html.
 
-  <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>
+  <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>;
+                                                data-qatt-default="QATT Brush" preselects another font than the default of the list
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of font.html)
 
 The script defines the @font-face rules itself and fills these selects when it runs, so load it after them.
@@ -31,7 +32,7 @@ const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], 
     group.label = "Choose font";
     group.append(...select.options);
     select.append(group);
-    select.value = QATT_FONTS.find(f => f.default).family;   // moving the options has lost the selection
+    select.value = select.dataset.qattDefault || QATT_FONTS.find(f => f.default).family;   // moving the options has lost the selection
     const apply = () => document.documentElement.style.setProperty("--qfont", `"${select.value}"`);
     apply();
     select.addEventListener("change", apply);
