@@ -87,8 +87,8 @@ window.Lang = window.Lang || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Quốc Âm Tân Tự", bar: "Home", barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "QATT Symbols", bar: "Symbols", barVi: "Ký hiệu", url: "/symbols.html", icon: "bi-book" },
-            { name: "QATT Writer", bar: "Write", barVi: "Viết", url: "/editor.html", icon: "bi-pencil-square" },
+            { name: "QATT Symbols", bar: "Symbols", barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
+            { name: "QATT Writer", bar: "Write", barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", bar: "Practice", barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
             { name: "QATT Decodings", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "QATT Unicode", url: "/unicode.html", icon: "bi-fonts" },
@@ -103,7 +103,7 @@ window.Lang = window.Lang || (function() {
         links: [
             { name: "Character Search", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
             { name: "Practice / Decks", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
-            { name: "Chữ Nôm Writer", bar: "Write", barVi: "Viết", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
+            { name: "Chữ Nôm Writer", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
             { name: "Dictionary: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
         ]
