@@ -250,12 +250,14 @@ window.Lang = window.Lang || (function() {
     // footnote "powered by chunom.org": links to license.html, the hash lists the scripts, styles and fonts this page has loaded
     // (taken when the link is used, so also the files loaded later are in it)
     function injectFooter(licenseUrl) {
+        // paths are relative to the site of license.html; files of the other site need the full address
+        const licenseOrigin = new URL(licenseUrl, location.href).origin;
         const sources = () => {
             const seen = new Set();
             performance.getEntriesByType('resource').forEach(e => {
                 const url = new URL(e.name, location.href);
                 if (!/^https?:$/.test(url.protocol) || /license\.html$/.test(url.pathname) || !/\.(js|css|woff2?|ttf|otf)$/i.test(url.pathname)) return;
-                seen.add(url.origin === location.origin ? url.pathname : url.origin + url.pathname);
+                seen.add(url.origin === licenseOrigin ? url.pathname : url.origin + url.pathname);
             });
             return [...seen];
         };
