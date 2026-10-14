@@ -86,10 +86,10 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-qatt",
         site: onChunom ? QATT_SITE : "",
         links: [
-            { name: "Quốc Âm Tân Tự", bar: "Home", url: "/index.html", icon: "bi-house" },
-            { name: "QATT Symbols", bar: "Symbols", url: "/symbols.html", icon: "bi-book" },
-            { name: "QATT Writer", bar: "Write", url: "/editor.html", icon: "bi-pencil-square" },
-            { name: "Practice", bar: "Practice", url: "/soundcheck.html", icon: "bi-mortarboard" },
+            { name: "Quốc Âm Tân Tự", bar: "Home", barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
+            { name: "QATT Symbols", bar: "Symbols", barVi: "Ký hiệu", url: "/symbols.html", icon: "bi-book" },
+            { name: "QATT Writer", bar: "Write", barVi: "Viết", url: "/editor.html", icon: "bi-pencil-square" },
+            { name: "Practice", bar: "Practice", barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
             { name: "QATT Decodings", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "QATT Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "QATT Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
@@ -101,10 +101,10 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-nom",
         site: onChunom ? "" : CHUNOM_SITE,
         links: [
-            { name: "Character Search", bar: "Search", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
-            { name: "Practice / Decks", bar: "Practice", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
-            { name: "Chữ Nôm Writer", bar: "Write", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
-            { name: "Dictionary: Génibrel 1898", bar: "Dictionaries", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
+            { name: "Character Search", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
+            { name: "Practice / Decks", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
+            { name: "Chữ Nôm Writer", bar: "Write", barVi: "Viết", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
+            { name: "Dictionary: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
         ]
     };
@@ -310,7 +310,7 @@ window.Lang = window.Lang || (function() {
             const own = sections.find(sec => sec.linkClass === navConfig.own) || block;
             const barLinks = own.links.filter(l => l.bar).sort((a, b) => (a.barOrder ?? 0) - (b.barOrder ?? 0)).map(link => {
                 const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
-                return `<a href="${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i>${link.bar}</a>`;
+                return `<a href="${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></a>`;
             }).join('');
             const bar = document.createElement('nav');
             bar.className = 'bottom-bar';
