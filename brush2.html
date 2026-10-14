@@ -50,6 +50,7 @@
     #canvas { aspect-ratio: 130 / 135; }
     #lib-canvas { aspect-ratio: 1; max-width: 26rem; }
     .edit-canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
+    .edit-canvas .grid .window { fill: rgba(123, 75, 183, .06); stroke: #7b4bb7; stroke-width: .5; }
     .edit-canvas .grid .box { fill: none; stroke: #7a1f17; stroke-width: .5; }
     .edit-canvas .ctx { fill: #b9ab8f; }
     .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
@@ -144,7 +145,7 @@
         </div>
         <label class="small d-flex align-items-center gap-2 mb-1">Size of the comparison <input type="range" class="cmp-size flex-grow-1" min="16" max="300"></label>
         <div id="combos"></div>
-        <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 140" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label><input type="checkbox" id="view-orig"> Original lines</label>
           <label><input type="checkbox" id="view-snap"> Snap to other end points and guides</label>
