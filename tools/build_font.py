@@ -33,16 +33,19 @@ BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
-SY = float(os.environ.get('QATT_SY', 10.6))   # font units per svg unit (vertical): the glyph body (about 820 high, with GROW) lies inside the em square (-120 to 880)
-SX = SY * float(os.environ.get('QATT_SXF', 1.2))   # in x: SY times this factor, so that the glyph body is square (the shapes of qatt.js are a little taller than wide)
-TONE_X = (13 / 15 * 125 / 120) / float(os.environ.get('QATT_SXF', 1.2))   # the tones are narrower than the letters by this factor: the x/y scale of qatt.js (box 13:15 around a 120x125 viewBox) instead of SXF
-X0, Y0 = 500 - 49.27 * SX, float(os.environ.get('QATT_Y0', 866))  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
+# The glyph cell is the symbol viewBox of qatt.js, "-12.5 -25 125 125" (x -12.5..112.5, y -25..100), mapped onto the em square:
+# x 0..1000 (advance), y 880..-120 (ascent 880, descent -120). 8 font units per svg unit in both directions.
+CELL = (-12.5, -25, 125, 125)  # qatt.js viewBox
+SY = float(os.environ.get('QATT_SY', 8))      # font units per svg unit (vertical): the cell height 125 fills the em (1000)
+SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 125 x 125)
+TONE_X = 1.0                   # the tones have the same scale as the letters
+X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 85
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
-PAIR_GROW = 1.18               # size of a pair (the Can/Chi forms are GROW)
+PAIR_GROW = 1.0               # size of a pair (the Can/Chi forms are GROW)
 PAIR_M, PAIR_G = 100, 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
 PAIR_W = 1000 * WIDE           # width of a joined pair
 HALF = int(PAIR_W // 2)        # advance of each half
@@ -59,7 +62,7 @@ if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
     BRUSH_WEIGHT *= LIGHT
 if BOLD != 1.0: STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
-GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
+GROW, GROW_Y = 1.0, 60         # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
 BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
@@ -87,7 +90,7 @@ def onset_map(shape):
     sx, sy = (c1 - c0) / (a1 - a0), (d1 - d0) / (b1 - b0)
     return sx, sy, c0 - a0 * sx, d0 - b0 * sy
 
-def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.27, fit=None, ink=False):
+def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, fit=None, ink=False):
     """Stroke the paths (qatt.js ids) into one outline; k squeezes horizontally, centre is the x the svg x `cx` goes to,
     grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`. KAGE fonts only: fit=(left, right)
     in font units fits the outline into that box (the strokes are scaled and moved in x, the stroke widths stay); ink=True answers the

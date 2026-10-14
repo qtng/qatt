@@ -32,7 +32,7 @@
     .tabs .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
     #views .btn { border-radius: 2rem; padding: .35rem 1.2rem; }
 
-    svg.glyph { width: 100%; height: auto; aspect-ratio: 128 / 136; fill: var(--ink); }
+    svg.glyph { width: 100%; height: auto; aspect-ratio: 1; fill: var(--ink); }
     svg.glyph path.faint { fill: #cbbd9f; }
 
     #sym-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr)); gap: .3rem; }
@@ -47,10 +47,11 @@
     .lib-cell small { display: block; color: var(--muted); }
 
     .edit-canvas { width: 100%; max-width: 32rem; display: block; margin: 0 auto; touch-action: none; user-select: none; background: #fffdf8; border: 1px solid #e8dcc0; border-radius: .4rem; }
-    #canvas { aspect-ratio: 130 / 135; }
+    #canvas { aspect-ratio: 1; }
     #lib-canvas { aspect-ratio: 1; max-width: 26rem; }
     .edit-canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
     .edit-canvas .grid .window { fill: rgba(123, 75, 183, .06); stroke: #7b4bb7; stroke-width: .5; }
+    .edit-canvas .grid .base { stroke: #7b4bb7; stroke-width: .5; stroke-dasharray: 3 2; }
     .edit-canvas .grid .box { fill: none; stroke: #7a1f17; stroke-width: .5; }
     .edit-canvas .ctx { fill: #b9ab8f; }
     .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
@@ -145,7 +146,7 @@
         </div>
         <label class="small d-flex align-items-center gap-2 mb-1">Size of the comparison <input type="range" class="cmp-size flex-grow-1" min="16" max="300"></label>
         <div id="combos"></div>
-        <svg id="canvas" class="edit-canvas" viewBox="-14 -28 128 136" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="canvas" class="edit-canvas" viewBox="-12.5 -25 125 125" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label><input type="checkbox" id="view-orig"> Original lines</label>
           <label><input type="checkbox" id="view-snap"> Snap to other end points and guides</label>

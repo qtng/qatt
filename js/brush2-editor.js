@@ -11,7 +11,7 @@
   const SHAPES = VietnameseParser.SHAPES.map(s => s === "z" ? "_" : s);
   const TABLE = VietnameseParser.DECODINGS.qatt;
   const TONES = ["", "sắc", "huyền", "hỏi", "ngã", "nặng", "sắc (nhập)", "nặng (nhập)", "ngang"];
-  const VIEWBOX = "-14 -28 128 136";   // the glyph box of qatt.js with room for the tone marks in the corners
+  const VIEWBOX = "-12.5 -25 125 125";   // the symbol viewBox of qatt.js = the cell of a glyph in the font (125 x 125 svg units -> 1000 x 1000 font units)
   const clone = o => JSON.parse(JSON.stringify(o));
   // older states: mirrored kihitsu was a flag, the angle of a form was an absolute value instead of an offset
   const migrate = st => {
@@ -170,7 +170,8 @@
     const grid = el("g", { class: "grid" }, canvas);
     for (let v = 0; v <= 100; v += 10) { el("line", { x1: v, y1: -20, x2: v, y2: 105 }, grid); el("line", { x1: -5, y1: v, x2: 105, y2: v }, grid); }
     el("rect", { x: -9, y: -9, width: 118, height: 118, class: "box" }, grid);
-    el("rect", { x: -14, y: -28, width: 128, height: 136, class: "window" }, grid);   // what the small glyphs show (VIEWBOX)
+    el("rect", { x: -12.5, y: -25, width: 125, height: 125, class: "window" }, grid);   // the font cell (VIEWBOX)
+    el("line", { x1: -12.5, y1: 85, x2: 112.5, y2: 85, class: "base" }, grid);   // the baseline of the font (svg y 85)
     for (const y of state.guides.h) if (y !== null) el("line", { x1: -15, y1: y, x2: 115, y2: y, class: "gline" }, canvas);
     for (const x of state.guides.v) if (x !== null) el("line", { x1: x, y1: -30, x2: x, y2: 105, class: "gline" }, canvas);
     const id = symId(), sym = symbolOf(id), ctxIds = contextIds();
