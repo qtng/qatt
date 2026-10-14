@@ -54,28 +54,24 @@
     .btn-quiet:hover { background: #f1e8d2; color: var(--ink); border-color: #b9a982; }
     /* the list of all characters below the editor */
     #characters { margin-top: 2rem; }
-    #characters h2 { font-size: 1.25rem; margin: 0 0 .2rem; }
-    .listbar { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center; margin: .5rem 0 0; font-size: .78rem; }
-    .listbar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; }
-    .listbar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
     .scroll-x { overflow-x: auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 3.8rem), 1fr)); gap: .35rem; margin-top: .6rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 51px), 1fr)); gap: .35rem; margin-top: .6rem; }
     .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
     .cell:hover { border-color: var(--accent); }
-    .cell .f { font-family: var(--qfont, "QATT Serif"); font-size: var(--size, 4rem); line-height: 1.15; display: block; padding-bottom: .16em; }
+    .cell .f { font-family: var(--qfont, "QATT Serif"); font-size: var(--size, 34px); line-height: 1.15; display: block; padding-bottom: .16em; }
     .cell .s { display: block; height: 1.8rem; line-height: 1.8rem; font-size: .8rem; color: var(--muted); }
     .cell .s svg { stroke: currentColor; }
     .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
     .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
     .hide-svg .s { display: none; }
     .fmt-row { display: flex; align-items: center; gap: .9rem; margin-top: .6rem; }
-    .fmt-row .cell { flex: 0 0 var(--cell, 3.8rem); width: var(--cell, 3.8rem); }
+    .fmt-row .cell { flex: 0 0 var(--cell, 51px); width: var(--cell, 51px); }
     .fmt-text { font-size: .9rem; color: var(--muted); }
     .fmt-text strong { color: var(--ink); }
-    #grid { grid-template-columns: repeat(7, var(--cell, 3.8rem)); }   /* one base per row: the unmarked form, the marked Cán, the five Chi */
+    #grid { grid-template-columns: repeat(7, var(--cell, 51px)); }   /* one base per row: the unmarked form, the marked Cán, the five Chi */
     .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
-    h2.sub { font-size: 1rem; margin: 1.2rem 0 0; color: var(--ink); }
-    #info { margin-top: .3rem; font-size: .8rem; color: var(--muted); min-height: 1.2rem; }
+    #characters h2 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; color: var(--ink); }
+    #characters h2:first-child { margin-top: 0; }
   </style>
   <script defer src="js/navigation.js"></script>
   <script src="js/parser.js"></script>
@@ -116,20 +112,12 @@
   </div>
 
   <section id="characters">
-    <h2>All characters</h2>
-    <p class="mb-0 text-secondary small">Click a character to insert it into the text at the cursor. A letter that can be an onset gets the component joiner after it, unless it follows one.</p>
-    <div class="listbar">
-      <label><select id="gsize" data-qatt-sizes autocomplete="off" class="form-select form-select-sm d-inline-block w-auto" aria-label="Size of the characters"></select></label>
-      <label><input type="checkbox" id="guides" autocomplete="off" checked> Guides</label>
-      <label><input type="checkbox" id="svg" autocomplete="off"> SVG</label>
-    </div>
-    <div id="info"></div>
-    <h2 class="sub">Format characters</h2>
-    <div class="formats" id="grid-format"></div>
-    <h2 class="sub">Tone marks</h2>
-    <div class="scroll-x"><div class="grid" id="grid-marks"></div></div>
-    <h2 class="sub">Letters</h2>
-    <div class="scroll-x"><div class="grid" id="grid"></div></div>
+    <h2>Format characters</h2>
+    <div class="formats guides hide-svg" id="grid-format"></div>
+    <h2>Tone marks</h2>
+    <div class="scroll-x"><div class="grid guides hide-svg" id="grid-marks"></div></div>
+    <h2>Letters</h2>
+    <div class="scroll-x"><div class="grid guides hide-svg" id="grid"></div></div>
   </section>
 </main>
 
@@ -317,7 +305,7 @@
     });
 
     // ---------- the list of all characters (font/glyphs.json) ----------
-    const BASE = 0xF0000, info = $('info'), grids = [$('grid-format'), $('grid-marks'), $('grid')];
+    const BASE = 0xF0000;
     const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
     const qatt = new Qatt(); qatt.observe('TT');
     // text is inserted at the cursor (or over the selection); the keyboard of a phone stays closed
@@ -346,27 +334,15 @@
         if (g.q) { const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt); } else s.hidden = true;
         const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
         cell.append(f, s, cp);
-        cell.addEventListener('click', () => { insertLetter(g.o); info.textContent = g.n + ' — U+' + hex(BASE + g.o) + (g.q ? ' — ' + g.q : ''); });
+        cell.addEventListener('click', () => { insertLetter(g.o); });
         if (EXPLAIN[g.t]) {   // a row of its own: the tile, then the name and what it does
           const row = document.createElement('div'); row.className = 'fmt-row';
           const text = document.createElement('div'); text.className = 'fmt-text';
           text.innerHTML = '<strong>' + EXPLAIN[g.t][0] + '</strong> <code>U+' + hex(BASE + g.o) + '</code><br>' + EXPLAIN[g.t][1];
-          row.append(cell, text); grids[0].append(row);
-        } else grids[g.t === 'tone' ? 1 : 2].append(cell);
+          row.append(cell, text); $('grid-format').append(row);
+        } else $(g.t === 'tone' ? 'grid-marks' : 'grid').append(cell);
       }
-      applyGrid();
     });
-    const applyGrid = () => {
-      const px = +$('gsize').value;
-      for (const grid of grids) {
-        grid.style.setProperty('--size', px + 'px');
-        grid.style.setProperty('--cell', Math.max(px * 1.5, 46) + 'px');
-        grid.classList.toggle('hide-svg', !$('svg').checked);
-        grid.classList.toggle('guides', $('guides').checked);
-      }
-    };
-    for (const id of ['gsize', 'svg', 'guides']) $(id).addEventListener('input', applyGrid);
-    applyGrid();
   });
 </script>
 </body>
