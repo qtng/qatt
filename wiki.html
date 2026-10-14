@@ -9,7 +9,7 @@
 
     <script src="js/parser.js"></script>
     <script src="js/qatt-text.js"></script>
-    <script defer src="js/navigation.js"></script>
+    <script src="js/navigation.js"></script>
 
     <style>
         :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Gothic"; }
@@ -63,7 +63,7 @@
     <header class="hero pt-5 pb-4">
         <div class="container text-center">
             <div class="han mb-2">國音新字</div>
-            <h1 class="mb-3">QATT Wikipedia</h1>
+            <h1 class="mb-3" data-vi="Wikipedia QATT">QATT Wikipedia</h1>
             <p class="lead mx-auto mb-0">Read Vietnamese Wikipedia in Quốc Âm Tân Tự, with the reading above every character.</p>
         </div>
     </header>
@@ -91,12 +91,12 @@
             </div>
             <div class="options d-flex flex-wrap justify-content-center align-items-center gap-3">
                 <select id="decoding" class="form-select w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)">
-                    <optgroup label="Choose decoding">
+                    <optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã">
                         <option value="qatt" selected>qatt.org</option>
                         <option value="omniglot">omniglot</option>
                     </optgroup>
                 </select>
-                <select id="font" data-qatt-fonts class="form-select w-auto" aria-label="Font"></select>
+                <select id="font" data-qatt-fonts class="form-select w-auto" aria-label="Font" data-vi-aria-label="Phông chữ"></select>
             </div>
         </div>
     </div>
