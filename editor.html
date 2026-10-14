@@ -111,8 +111,6 @@
       <button type="button" class="btn btn-quiet" id="example"><i class="bi bi-magic"></i> Example</button>
       <button type="button" class="btn btn-quiet" id="convert" title="Convert every Quốc Ngữ word in the field, e.g. after pasting"><i class="bi bi-arrow-repeat"></i> Convert all</button>
       <button type="button" class="btn btn-quiet" id="reading" title="Read the QATT characters of the field as Quốc Ngữ"><i class="bi bi-book"></i> Reading</button>
-      <button type="button" class="btn btn-quiet" id="joiner" title="Insert the component joiner U+F009B: A⿰B shows two letters in one square">A⿰B</button>
-      <button type="button" class="btn btn-quiet" id="stack" title="Insert the Tham Thư combiner U+F009A: B⿱C writes C above B">B⿱C</button>
       <button type="button" class="btn btn-quiet" id="clear"><i class="bi bi-x-lg"></i> Clear</button>
     </div>
   </div>
@@ -368,8 +366,6 @@
       }
     };
     for (const id of ['gsize', 'svg', 'guides']) $(id).addEventListener('input', applyGrid);
-    $('joiner').addEventListener('click', () => { insert(String.fromCodePoint(JOINER)); info.textContent = 'component joiner'; });
-    $('stack').addEventListener('click', () => { insert(String.fromCodePoint(COMBINER)); info.textContent = 'Tham Thư combiner'; });
     applyGrid();
   });
 </script>
