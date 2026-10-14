@@ -84,13 +84,15 @@
     .ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
     .ctx-grid label { font-size: .8rem; color: var(--muted); }
 
-    #sample-out, #lib-uses { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
+    #sample-out { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
     #combos { display: flex; flex-wrap: nowrap; gap: 0; margin: 0 0 .25rem; }
     #combos svg { flex: 1 1 0; min-width: 0; width: 0; height: auto; }
     .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .9rem); }
     .combo svg { width: var(--combo); }
     .combo span { font-size: .75rem; color: var(--muted); line-height: 1.2; text-align: center; }
-    #lib-uses .combo { cursor: pointer; }
+    #lib-uses { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 .25rem; }
+    #lib-uses svg { flex: 0 0 calc(100% / 18); width: calc(100% / 18); height: auto; cursor: pointer; }
+    #lib-uses svg:hover { background: rgba(168, 54, 42, .08); }
     #sample-out svg { width: calc(var(--combo) * 1.1); }
     .hint { font-size: .82rem; color: var(--muted); }
     [hidden] { display: none !important; }
@@ -170,6 +172,7 @@
           <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-reset">Reset</button>
           <button type="button" class="btn btn-sm btn-outline-danger" id="lib-delete" title="Only unused strokes can be deleted">Delete</button>
         </div>
+        <div id="lib-uses"></div>
         <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label class="d-flex align-items-center gap-2">Handles and lines visible <input type="range" id="handle-opacity" min="0" max="1" step="0.05" value="0.5"></label>
@@ -210,12 +213,6 @@
       <div class="panel">
         <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
         <div id="sample-out"></div>
-      </div>
-    </div>
-    <div class="col-12" data-only="library">
-      <div class="panel">
-        <h2 id="lib-uses-title"></h2>
-        <div id="lib-uses"></div>
       </div>
     </div>
   </div>

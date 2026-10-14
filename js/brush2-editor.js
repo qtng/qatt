@@ -412,22 +412,20 @@
     if ((e.s === "point") !== (e.e === "point"))
       slider(box, "Gradient", e.g || 0, -1, 1, 0.01, v => e.g = v, v => v < -0.005 ? "full " + (-v).toFixed(2) : v > 0.005 ? "slim " + v.toFixed(2) : "linear");
   }
+  // every symbol that holds the stroke, as glyphs without labels (a click opens the symbol)
   function drawLibUses() {
     const box = document.getElementById("lib-uses"); box.innerHTML = "";
     const seen = new Set();
     for (const [id, i] of usages(libSel)) {
-      const c = document.createElement("div"); c.className = "combo";
-      const t = typeof i === "string" ? markIds(id, +i.slice(1)) : id;
-      const s = id.match(/^v2c?-(.+?)(-small)?$/)[1];
-      c.append(glyph(typeof i === "string" ? [t] : [id], typeof i === "string" ? [id] : []));
-      const lab = document.createElement("span");
-      lab.textContent = (id.startsWith("v2c-") ? "centred " : id.endsWith("-small") ? "onset " : "rhyme ") + shapeName(s) + (typeof i === "string" ? " · " + (id.endsWith("-small") ? "medial" : "mark " + (+i.slice(1) + 1)) : "");
-      c.append(lab);
-      c.title = "Open this symbol";
-      c.addEventListener("click", () => { form = id.startsWith("v2c-") ? "centred" : id.endsWith("-small") ? "onset" : "rhyme"; shape = s; active = typeof i === "string" ? { type: "mark", i: +i.slice(1) } : { type: "stroke", i }; setView("symbols"); });
-      if (!seen.has(t)) { seen.add(t); box.append(c); }
+      const mark = typeof i === "string", t = mark ? markIds(id, +i.slice(1)) : id;
+      if (seen.has(t)) continue;
+      seen.add(t);
+      const s = id.match(/^v2c?-(.+?)(-small)?$/)[1], g = glyph(mark ? [t] : [id], mark ? [id] : []);
+      g.setAttribute("role", "button");
+      g.setAttribute("aria-label", "Open this symbol");
+      g.addEventListener("click", () => { form = id.startsWith("v2c-") ? "centred" : id.endsWith("-small") ? "onset" : "rhyme"; shape = s; active = mark ? { type: "mark", i: +i.slice(1) } : { type: "stroke", i }; setView("symbols"); });
+      box.append(g);
     }
-    document.getElementById("lib-uses-title").textContent = box.children.length ? `Used in ${usages(libSel).length} places` : "Not used yet";
   }
   function drawLibView() {
     libRef = null;
