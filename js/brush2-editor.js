@@ -18,7 +18,7 @@
     if (st.offsets) return st;
     for (const e of Object.values(st.lib || {})) {
       for (const [k, own, inv] of [["s", "sa", "si"], ["e", "ea", "ei"]]) {
-        if (e[inv] && e[k] === "kihitsu") e[k] = "kihitsu-inv";
+        if (e[k] === "kihitsu-inv") e[k] = "kihitsu";
         delete e[inv];
         if (typeof e[own] === "number") { const d = e[own] - ((st.params || {}).kihitsuAngle ?? 20); if (d) e[own] = d; else delete e[own]; }
       }
