@@ -25,7 +25,7 @@
     .btn-cinnabar { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff; }
     .btn-cinnabar:hover { background: #8c2c22; border-color: #8c2c22; color: #fff; }
     .word { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; line-height: 1.1; color: var(--ink); text-align: center; margin: 1rem 0 .8rem; }
-    .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; margin-top: .6rem; }
+    .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; }
     .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
     .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
     .cell + .cell { border-left: 2px solid #cdbd9a; }
@@ -36,6 +36,9 @@
     .cells.two .cell { width: 5.25rem; }   /* two cells: the box is squeezed to 75% of its width, like the glyphs */
     .cells.two .g { transform: scale(.75, 1); }
     #variants, #bases, #tones { margin-top: .8rem; }
+    .tones { display: flex; justify-content: center; gap: 1.6rem; }
+    .tones .block { display: grid; grid-template-columns: repeat(2, 1fr); gap: .3rem; }
+    .tones .gbtn { width: 4.2rem; height: 4.2rem; }
     .pad.grid8 { gap: .3rem; max-width: 34rem; }   /* 8 buttons per row, the last row centred */
     .grid8 .gbtn { width: calc((100% - 7 * .3rem) / 8); height: auto; aspect-ratio: 1; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
@@ -44,10 +47,13 @@
     .gbtn:hover:not(:disabled) { border-color: var(--cinnabar); }
     .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; color: #0f5132; opacity: 1; }
     .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; color: #842029; opacity: 1; }
-        .done { text-align: center; margin-top: 1.6rem; }
+        .card { max-width: 24rem; margin-top: .8rem; }
+    .card .cells { margin-bottom: .2rem; }
+    .done { text-align: center; }
+    .done.card { border-color: var(--bs-success-border-subtle); background: var(--bs-success-bg-subtle); }
     .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
     .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
-    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } }
+    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
   </style>
 </head>
 <body>
@@ -65,17 +71,23 @@
     <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="reload" aria-label="New word" title="New word"><i class="bi bi-arrow-clockwise"></i></button>
   </div>
-  <div class="mood" id="mood" aria-live="polite">🙂</div>
-  <div class="word" id="word" lang="vi"></div>
-  <div class="cells" id="cells" aria-label="The symbols of the word"></div>
+  <div class="card task mx-auto" id="task">
+    <div class="card-body">
+      <div class="mood" id="mood" aria-live="polite">🙂</div>
+      <div class="word" id="word" lang="vi"></div>
+      <div class="cells" id="cells" aria-label="The symbols of the word"></div>
+    </div>
+  </div>
 
   <div id="variants" hidden><div class="pad" id="variantPad"></div></div>
   <div id="bases"><div class="pad grid8" id="basePad"></div></div>
-  <div id="tones" hidden><div class="pad grid8" id="tonePad"></div></div>
-  <div class="done" id="done" hidden>
-    <div class="full" id="full"></div>
-    <div class="reading mb-3" id="reading"></div>
-    <button type="button" class="btn btn-cinnabar btn-pill" id="next">Next word</button>
+  <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
+  <div class="card done mx-auto" id="done" hidden>
+    <div class="card-body">
+      <div class="full" id="full"></div>
+      <div class="reading mb-3" id="reading"></div>
+      <button type="button" class="btn btn-cinnabar btn-pill" id="next">Next word</button>
+    </div>
   </div>
 
 </main>
@@ -91,14 +103,18 @@
     const MARKS = [2, 3, 4, 5, 6];
     const $ = id => document.getElementById(id);
     const glyph = (shape, mark = 0) => QattText.syllable(shape + (mark || '') + ',,,0');   // one letter of the font
-    const toneGlyph = n => Array.from(QattText.syllable('_,,,' + n))[1];                          // the tone mark alone (n = 8: ngang)
+    // the tone marks in code point order 1..8 (U+F009C..U+F00A3): ngang, huyền, hỏi, ngã, sắc, nặng, sắc nhập, nặng nhập; the tone code of the syllable for each
+    const toneGlyph = n => String.fromCodePoint(0xF0000 + 155 + n);
+    const TONE_CODE = { 1: 0, 2: 2, 3: 3, 4: 4, 5: 1, 6: 5, 7: 6, 8: 7 };
+    // two blocks of four:  3 5 | 4 6  /  1 7 | 2 8
+    const TONE_BLOCKS = [[3, 5, 1, 7], [4, 6, 2, 8]];
     const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
 
-    let slots, tone, code, answer, hits, misses;
-    const GOOD = ['😍', '🥰', '🤩', '🥳', '🎯', '🎉', '🎊'], BAD = ['🤡', '👻', '🤯', '😱', '😵‍💫', '😩', '👾'];
+    let slots, tone, code, answer;
+    const GOOD = ['😃', '🤗', '😊', '🙃'], BAD = ['😧', '😩', '😵', '😒', '😣', '🤨', '😱', '🤯', '😖'];
     const pick = a => a[Math.floor(Math.random() * a.length)];
-    // the mood: 🙂 at the start, the first hit 😃, later hits a random cheerful one; the first miss 😧, later misses a random upset one
-    const mood = ok => { $('mood').textContent = ok ? (++hits === 1 ? '😃' : pick(GOOD)) : (++misses === 1 ? '😧' : pick(BAD)); };
+    // the mood: 🙂 at the start, a random cheerful one after a hit, a random upset one after a miss
+    const mood = ok => { $('mood').textContent = pick(ok ? GOOD : BAD); };
 
     // the cells of the word: [{ shape, mark }] and the tone, from the code of the parser
     function analyse(word) {
@@ -119,10 +135,11 @@
       if (!a) { word = WORDS.find(w => analyse(w)); a = analyse(word); }
       answer = word;
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
-      tone = a.tone; code = a.code; hits = misses = 0;
+      tone = a.tone; code = a.code;
       $('mood').textContent = '🙂'; $('bases').hidden = false;
       $('word').textContent = word;
       $('done').hidden = $('tones').hidden = $('variants').hidden = true;
+      $('task').hidden = false;
       $('variantPad').replaceChildren();
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
@@ -178,18 +195,23 @@
       update();
     }
 
-    // all cells filled (also the faint ones): the shapes go and the tones appear; all cells exact: the marked forms go too
+    // all cells filled (also the faint ones): the shapes go; all cells exact (no faint one left): the marked forms go and the tones appear
     function update() {
       if (slots.some(s => s.state === 'empty')) return;
       $('bases').hidden = true;
-      if (slots.every(s => s.state === 'full')) $('variants').hidden = true;
-      if (!$('tones').hidden) return;
+      if (slots.some(s => s.state === 'near') || !$('tones').hidden) return;
+      $('variants').hidden = true;
       $('tones').hidden = false;
-      $('tonePad').replaceChildren(...[1, 2, 3, 4, 5, 6, 7, 8].map(n => button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b))));
+      $('tonePad').replaceChildren(...TONE_BLOCKS.map(block => {
+        const d = document.createElement('div');
+        d.className = 'block';
+        d.append(...block.map(n => button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b))));
+        return d;
+      }));
     }
 
     function pickTone(n, b) {
-      const ok = (n === 8 ? 0 : n) === tone;
+      const ok = TONE_CODE[n] === tone;
       verdict(b, ok);
       mood(ok);
       if (!ok) return;
@@ -199,7 +221,7 @@
       renderCells();
       $('full').textContent = QattText.syllable(code);
       $('reading').textContent = answer;
-      $('tones').hidden = true;   // the success message takes the place of the tone buttons
+      $('task').hidden = $('tones').hidden = true;   // the success card takes the place of the task
       $('done').hidden = false;
     }
 
