@@ -56,11 +56,15 @@
     .grid8 .gbtn { width: calc((100% - 7 * .3rem) / 8); height: auto; aspect-ratio: 1; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
-    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: #fffdf8; border: 1px solid #d9ccb0; border-radius: .5rem; color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s; }
-    .gbtn:hover:not(:disabled) { border-color: var(--cinnabar); transform: translateY(-1px); }
-    .gbtn:active:not(:disabled) { transform: scale(.94); }
-    .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; color: #0f5132; opacity: 1; }
-    .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; color: #842029; opacity: 1; animation: shake .4s ease-in-out; }
+    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: var(--b, #fffdf8); border: 2px solid var(--bc, #d9ccb0); border-radius: .55rem; box-shadow: 0 2px 0 var(--bc, #d9ccb0); color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s, box-shadow .12s; }
+    /* the kinds of buttons in their own colours: shapes cream, marked forms terracotta, tones blue */
+    #basePad { --b: #fff8e6; --bc: #cdb98a; }
+    #variantPad { --b: #fbe6dc; --bc: #d9a58f; }
+    #tonePad { --b: #e3eef8; --bc: #92b4d3; }
+    .gbtn:hover:not(:disabled) { border-color: var(--ink); transform: translateY(-1px); }
+    .gbtn:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+    .gbtn.ok:disabled { background: #d1e7dd; border-color: #198754; box-shadow: 0 2px 0 #198754; color: #0f5132; opacity: 1; }
+    .gbtn.bad:disabled { background: #f8d7da; border-color: #dc3545; box-shadow: 0 2px 0 #dc3545; color: #842029; opacity: 1; animation: shake .4s ease-in-out; }
     .gbtn.ok:disabled { animation: okpop .35s ease-out; }
     @keyframes okpop { 0% { transform: scale(.9); } 50% { transform: scale(1.12); } 100% { transform: none; } }
     .gbtn.fresh { animation: rise .3s ease-out backwards; animation-delay: calc(var(--i, 0) * 35ms); }
