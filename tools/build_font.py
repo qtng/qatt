@@ -33,16 +33,21 @@ BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
-SY = float(os.environ.get('QATT_SY', 10.6))   # font units per svg unit (vertical): the glyph body (about 820 high, with GROW) lies inside the em square (-120 to 880)
-SX = SY * float(os.environ.get('QATT_SXF', 1.2))   # in x: SY times this factor, so that the glyph body is square (the shapes of qatt.js are a little taller than wide)
-TONE_X = (13 / 15 * 125 / 120) / float(os.environ.get('QATT_SXF', 1.2))   # the tones are narrower than the letters by this factor: the x/y scale of qatt.js (box 13:15 around a 120x125 viewBox) instead of SXF
-X0, Y0 = 500 - 49.27 * SX, float(os.environ.get('QATT_Y0', 866))  # svg (0,0) -> font: glyph content centred in the advance, bottoms of the lower glyphs near the baseline
+# The glyph cell is the symbol viewBox of qatt.js, "-12.5 -12.5 125 125" (x and y -12.5..112.5), mapped onto the em square:
+# x 0..1000 (advance), y 880..-120 (ascent 880, descent -120). 8 font units per svg unit in both directions.
+CELL = (-12.5, -12.5, 125, 125)  # qatt.js viewBox
+SY = float(os.environ.get('QATT_SY', 8))      # font units per svg unit (vertical): the cell height 125 fills the em (1000)
+SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 125 x 125)
+TONE_X = 1.0                   # the tones have the same scale as the letters
+# Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
+ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y -7.25 .. 107.25
+X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 97.5
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
-PAIR_GROW = 1.18               # size of a pair (the Can/Chi forms are GROW)
+PAIR_GROW = 1.0               # size of a pair (the Can/Chi forms are GROW)
 PAIR_M, PAIR_G = 100, 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
 PAIR_W = 1000 * WIDE           # width of a joined pair
 HALF = int(PAIR_W // 2)        # advance of each half
@@ -59,7 +64,7 @@ if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
     BRUSH_WEIGHT *= LIGHT
 if BOLD != 1.0: STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
-GROW, GROW_Y = 1.18, 60        # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
+GROW, GROW_Y = 1.0, 60         # the Can/Chi glyphs are enlarged by GROW around the point (middle, svg y = GROW_Y); tones keep their size and corner positions
 
 data = json.load(open(SRC))  # font/glyphs.json
 BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
@@ -87,7 +92,7 @@ def onset_map(shape):
     sx, sy = (c1 - c0) / (a1 - a0), (d1 - d0) / (b1 - b0)
     return sx, sy, c0 - a0 * sx, d0 - b0 * sy
 
-def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=49.27, fit=None, ink=False):
+def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, fit=None, ink=False):
     """Stroke the paths (qatt.js ids) into one outline; k squeezes horizontally, centre is the x the svg x `cx` goes to,
     grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`. KAGE fonts only: fit=(left, right)
     in font units fits the outline into that box (the strokes are scaled and moved in x, the stroke widths stay); ink=True answers the
@@ -256,7 +261,7 @@ def lsb(n):
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
 fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 else '') + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
-fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, usWinAscent=880, usWinDescent=120)
+fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 # KAGE fonts: the letters in three classes by the width of their single form (thirds); a narrow letter on the left of a wide one gets a
@@ -329,6 +334,22 @@ feature ccmp {{
 }} ccmp;
 ''')
 
+# BASE table as in Noto Sans CJK: the baselines of the cell (horizontal text): romn 0, ideo -120 (bottom of the em box), icfb/icft the ideographic character face box
+from fontTools.ttLib import newTable
+from fontTools.ttLib.tables import otTables as ot
+BASELINES = {'icfb': ICF_B, 'icft': ICF_T, 'ideo': -120, 'romn': 0}
+_ax = ot.Axis(); _ax.BaseTagList = ot.BaseTagList(); _ax.BaseTagList.BaselineTag = sorted(BASELINES); _ax.BaseTagList.BaseTagCount = 4
+_ax.BaseScriptList = ot.BaseScriptList(); _ax.BaseScriptList.BaseScriptRecord = []
+for _tag, _def in (('DFLT', 'ideo'), ('hani', 'ideo'), ('kana', 'ideo'), ('latn', 'romn')):
+    _r = ot.BaseScriptRecord(); _r.BaseScriptTag = _tag; _r.BaseScript = ot.BaseScript(); _bv = _r.BaseScript.BaseValues = ot.BaseValues()
+    _bv.DefaultIndex = sorted(BASELINES).index(_def); _bv.BaseCoord = []
+    for _t in sorted(BASELINES):
+        _c = ot.BaseCoord(); _c.Format = 1; _c.Coordinate = BASELINES[_t]; _bv.BaseCoord.append(_c)
+    _bv.BaseCoordCount = 4; _r.BaseScript.BaseLangSysRecord = []; _r.BaseScript.BaseLangSysCount = 0; _r.BaseScript.DefaultMinMax = None
+    _ax.BaseScriptList.BaseScriptRecord.append(_r)
+_ax.BaseScriptList.BaseScriptCount = 4; _ax.MinMax = None if hasattr(_ax, 'MinMax') else None
+_base = newTable('BASE'); _base.table = ot.BASE(); _base.table.Version = 0x00010000; _base.table.HorizAxis = _ax; _base.table.VertAxis = None
+fb.font['BASE'] = _base
 
 fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont
