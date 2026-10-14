@@ -33,15 +33,15 @@ BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
 SRC, OUT = sys.argv[1], sys.argv[2]
 BASE = 0xF0000
 UPM = 1000
-# The glyph cell is the symbol viewBox of qatt.js, "-12.5 -12.5 125 125" (x and y -12.5..112.5), mapped onto the em square:
-# x 0..1000 (advance), y 880..-120 (ascent 880, descent -120). 8 font units per svg unit in both directions.
-CELL = (-12.5, -12.5, 125, 125)  # qatt.js viewBox
-SY = float(os.environ.get('QATT_SY', 8))      # font units per svg unit (vertical): the cell height 125 fills the em (1000)
-SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 125 x 125)
+# The glyph cell is 100 x 100 svg units (x and y 0..100) = the em square:
+# x 0..1000 (advance), y 880..-120 (ascent 880, descent -120). 10 font units per svg unit in both directions.
+CELL = (0, 0, 100, 100)
+SY = float(os.environ.get('QATT_SY', 10))      # font units per svg unit (vertical): the cell height 100 fills the em (1000)
+SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 100 x 100)
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
-ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y -7.25 .. 107.25
-X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 97.5
+ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y 4.2 .. 95.8
+X0, Y0 = -CELL[0] * SX, 880 + CELL[1] * SY   # svg (0,0) -> font; the baseline is at svg y = 88
 STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK = 58, 43, 58, 30   # font units (glyph, standalone tone, joiner half, combining tone)
 ADV = 1000
 PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhyme forms (right) of a joined pair
