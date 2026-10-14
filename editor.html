@@ -26,7 +26,7 @@
     @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
     main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 1.5rem; }
     a { color: var(--accent); }
-    .card-box { position: sticky; top: 68px; z-index: 5; margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+    .card-box { margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
     /* all controls centred in one row, the slider gives way on a narrow screen */
     .bar { display: flex; flex-wrap: nowrap; justify-content: center; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
     .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; flex: 0 1 auto; min-width: 0; }
@@ -38,7 +38,6 @@
     #sizeLabel { min-width: 2.6em; color: var(--muted); }
     #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
       font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
-    @media (max-width: 575.98px) { #field { min-height: 6.5rem; } }   /* the editor stays on screen while the list scrolls */
     #field:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     #pending { margin-top: .1rem; height: 1.2rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
     #pending .glyph { font-family: var(--qfont); font-size: 1.8rem; line-height: 1; color: var(--ink); }
@@ -53,33 +52,10 @@
     .btn-accent:hover, .btn-accent:focus-visible { background: #8c2c22; border-color: #8c2c22; color: #fff; }
     .btn-quiet { border-color: #cdbf9f; color: #5b4d3d; background: #fff; }
     .btn-quiet:hover { background: #f1e8d2; color: var(--ink); border-color: #b9a982; }
-    /* the list of all characters below the editor */
-    #characters { margin-top: 2rem; }
-    /* the tables use the full width: one base (7 forms) per row for the letters, the 8 tone marks in one row; the glyphs scale with the cells */
-    .grid { --cols: 8; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: .35rem; margin-top: .6rem; container-type: inline-size; }
-    .cell { border: 1px solid var(--line); border-radius: .4rem; background: #fffdf8; padding: .2rem .1rem .25rem; text-align: center; cursor: pointer; position: relative; }
-    .cell:hover { border-color: var(--accent); }
-    .cell .f { font-family: var(--qfont, "QATT Serif"); font-size: calc((100cqw - (var(--cols) - 1) * .35rem) / var(--cols) * .66); line-height: 1.15; display: block; padding-bottom: .16em; }
-    .cell .s { display: block; height: 1.8rem; line-height: 1.8rem; font-size: .8rem; color: var(--muted); }
-    .cell .s svg { stroke: currentColor; }
-    .cell .cp { display: block; font: .62rem ui-monospace, Menlo, monospace; color: var(--muted); }
-    .cell.tone .f { color: var(--accent); padding-bottom: .32em; }
-    .hide-svg .s { display: none; }
-    .fmt-row { display: flex; align-items: center; gap: .9rem; margin-top: .6rem; }
-    .fmt-row .cell { flex: 0 0 var(--cell, 51px); width: var(--cell, 51px); }
-    .fmt-text { font-size: .9rem; color: var(--muted); }
-    .fmt-text strong { color: var(--ink); }
-    .fmt-row .cell .f { font-size: 34px; }
-    @media (max-width: 575.98px) { #grid-marks { --cols: 4; } .cell .cp { font-size: .5rem; } }
-    #grid { --cols: 7; }   /* one base per row: the unmarked form, the marked Cán, the five Chi */
-    .guides .f { background: linear-gradient(to bottom, transparent calc(12% - 1px), #e8b4ac calc(12% - 1px) 12%, transparent 12%, transparent calc(87% - 1px), #e8b4ac calc(87% - 1px) 87%, transparent 87%), linear-gradient(to right, transparent calc(50% - .375em - .5px), #f0ddd9 calc(50% - .375em - .5px) calc(50% - .375em + .5px), transparent calc(50% - .375em + .5px), transparent calc(50% - .5px), #f0ddd9 calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px), transparent calc(50% + .375em - .5px), #f0ddd9 calc(50% + .375em - .5px) calc(50% + .375em + .5px), transparent calc(50% + .375em + .5px)); }   /* the lines at 12.5 %, 50 % and 87.5 % of the 1 em wide character cell */
-    #characters h2 { font-size: 1.1rem; margin: 1.6rem 0 .5rem; color: var(--ink); }
-    #characters h2:first-child { margin-top: 0; }
   </style>
   <script defer src="js/navigation.js"></script>
   <script src="js/parser.js"></script>
   <script src="js/qatt-text.js"></script>
-  <script src="js/qatt.js"></script>
   <script defer src="../chunom/js/ime.js"></script>
 </head>
 <body>
@@ -87,10 +63,9 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">Type QATT</h1>
-    <p class="lead mx-auto mb-4">Type Vietnamese (Quốc Ngữ). Every finished word turns into text for the QATT fonts. Below the editor are all characters of the <a href="unicode.html">QATT Unicode proposal</a>, to click into the text.</p>
+    <p class="lead mx-auto mb-4">Type Vietnamese (Quốc Ngữ). Every finished word turns into text for the <a href="font.html">QATT fonts</a>.</p>
     <a class="btn btn-cinnabar btn-pill" href="symbols.html">Open the symbols</a>
     <a class="btn btn-cinnabar btn-pill" href="decodings.html">Open the decodings</a>
-    <a class="btn btn-cinnabar btn-pill" href="font-editor.html">Open the glyph editor</a>
   </div>
 </header>
 <main>
@@ -114,15 +89,6 @@
       <button type="button" class="btn btn-quiet" id="clear"><i class="bi bi-x-lg"></i> Clear</button>
     </div>
   </div>
-
-  <section id="characters">
-    <h2>Letters</h2>
-    <div class="grid guides" id="grid"></div>
-    <h2>Format characters</h2>
-    <div class="formats guides" id="grid-format"></div>
-    <h2>Tone marks</h2>
-    <div class="grid guides" id="grid-marks"></div>
-  </section>
 </main>
 
 <script src="js/fonts.js"></script>
@@ -138,7 +104,7 @@
     // a heading inside each dropdown
     const group = (select, label) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.append(...select.options); select.append(g); select.value = value; };
     group($('decoding'), 'Choose decoding');
-    $('font').value = 'QATT Gothic';   // the default font
+    $('font').value = 'QATT Gothic';   // the default of the Writer (font.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
     // a new decoding: every QATT cell is read with the old decoding and written with the new one, other text stays as it is
     $('decoding').addEventListener('change', () => {
@@ -306,46 +272,6 @@
       try { await navigator.clipboard.writeText(field.value); btn.textContent = 'Copied'; }
       catch { field.select(); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
       setTimeout(() => { btn.innerHTML = label; }, 1500);
-    });
-
-    // ---------- the list of all characters (font/glyphs.json) ----------
-    const BASE = 0xF0000;
-    const hex = n => n.toString(16).toUpperCase().padStart(5, '0');
-    const qatt = new Qatt(); qatt.observe('TT');
-    // text is inserted at the cursor (or over the selection); the keyboard of a phone stays closed
-    const insert = text => {
-      field.setRangeText(text, field.selectionStart, field.selectionEnd, 'end');
-      if (!/[\u{F009A}\u{F009B}]$/u.test(text)) tidy();   // a joiner or combiner waits for the letter after it
-      lastPos = field.selectionStart; showPending();
-      if (matchMedia('(pointer: fine)').matches) field.focus({ preventScroll: true });   // the list stays where it is
-    };
-    // one of the 22 unmarked letters (U+F0000 + 7 * n) is the onset of a pair: the component joiner follows it, unless it already follows a joiner (then it is the rhyme)
-    const insertLetter = o => {
-      const prev = Array.from(field.value.slice(0, field.selectionStart)).pop();
-      insert(String.fromCodePoint(BASE + o) + (o < 154 && o % 7 === 0 && prev !== String.fromCodePoint(JOINER) ? String.fromCodePoint(JOINER) : ''));
-    };
-    const EXPLAIN = {   // what the two format characters do
-      combiner: ['Tham Thư combiner', '<em>A</em> <code>U+F009A</code> <em>B</em> writes <em>B</em> above <em>A</em>; <em>A</em> may be a joined pair.'],
-      joiner: ['Component joiner', '<em>A</em> <code>U+F009B</code> <em>B</em> is shown as one square, <em>A</em> in the left and <em>B</em> in the right half.'],
-    };
-    fetch('font/glyphs.json').then(r => r.json()).then(glyphs => {
-      for (const g of glyphs) {
-        const cell = document.createElement('div');
-        cell.className = 'cell ' + g.t;
-        cell.title = g.n.toLowerCase();
-        const f = document.createElement('span'); f.className = 'f'; f.textContent = String.fromCodePoint(BASE + g.o);
-        const s = document.createElement('span'); s.className = 's';
-        if (g.q) { const tt = document.createElement('tt'); tt.textContent = g.q; s.append(tt); } else s.hidden = true;
-        const cp = document.createElement('span'); cp.className = 'cp'; cp.textContent = 'U+' + hex(BASE + g.o);
-        cell.append(f, s, cp);
-        cell.addEventListener('click', () => { insertLetter(g.o); });
-        if (EXPLAIN[g.t]) {   // a row of its own: the tile, then the name and what it does
-          const row = document.createElement('div'); row.className = 'fmt-row';
-          const text = document.createElement('div'); text.className = 'fmt-text';
-          text.innerHTML = '<strong>' + EXPLAIN[g.t][0] + '</strong> <code>U+' + hex(BASE + g.o) + '</code><br>' + EXPLAIN[g.t][1];
-          row.append(cell, text); $('grid-format').append(row);
-        } else $(g.t === 'tone' ? 'grid-marks' : 'grid').append(cell);
-      }
     });
   });
 </script>
