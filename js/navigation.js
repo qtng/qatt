@@ -1,26 +1,30 @@
+// Menu bar of qatt.org (the repository qtng/qatt, served at the root of qatt.org). The Chunom site has its own copy in qtng/chunom (js/navigation.js).
+// The two sites are separate: the links to the other site are absolute (CHUNOM_SITE), the links of this site start at the root.
 (function() {
+    const CHUNOM_SITE = "https://v2.chunom.org"; // https://chunom.org when the site is live
     const navConfig = {
         title: "Qatt.org",
+        home: "/index.html",
+        own: "link-qatt",
         sections: [
             {
                 header: "Quốc Âm Tân Tự (QATT)",
                 themeClass: "text-info",
                 linkClass: "link-qatt",
                 links: [
-                    { name: "Quốc Âm Tân Tự", bar: "Home", url: "/qatt/index.html", icon: "bi-house" },
-                    { name: "QATT Symbols", bar: "Symbols", url: "/qatt/symbols.html", icon: "bi-book" },
-                    { name: "QATT Writer", bar: "Write", url: "/qatt/editor.html", icon: "bi-pencil-square" },
-                    { name: "QATT Decodings", bar: "Decodings", url: "/qatt/decodings.html", icon: "bi-puzzle" },
-                    { name: "QATT Unicode", url: "/qatt/unicode.html", icon: "bi-fonts" },
-                    { name: "QATT Wiki", url: "/qatt/wiki.html", icon: "bi-wikipedia" },
-                    //{ name: "QATT Tutorial", url: "/qatt/tutorial.html", icon: "bi-journal-text" },
-                    //{ name: "QATT Logo Creator", url: "/qatt/logo-creator.html", icon: "bi-palette" },
+                    { name: "Quốc Âm Tân Tự", bar: "Home", url: "/index.html", icon: "bi-house" },
+                    { name: "QATT Symbols", bar: "Symbols", url: "/symbols.html", icon: "bi-book" },
+                    { name: "QATT Writer", bar: "Write", url: "/editor.html", icon: "bi-pencil-square" },
+                    { name: "QATT Decodings", bar: "Decodings", url: "/decodings.html", icon: "bi-puzzle" },
+                    { name: "QATT Unicode", url: "/unicode.html", icon: "bi-fonts" },
+                    { name: "QATT Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
                 ]
             },
             {
                 header: "Chữ Nôm",
                 themeClass: "text-warning",
                 linkClass: "link-nom",
+                site: CHUNOM_SITE,
                 links: [
                     { name: "Character Search", bar: "Search", url: "/chunom/index.html", icon: "bi-search" },
                     { name: "Practice / Decks", bar: "Practice", url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
@@ -127,7 +131,7 @@
 
     // footnote "powered by chunom.org": links to license.html, the hash lists the scripts, styles and fonts this page has loaded
     // (taken when the link is used, so also the files loaded later are in it)
-    function injectFooter(prefix) {
+    function injectFooter(licenseUrl) {
         const sources = () => {
             const seen = new Set();
             performance.getEntriesByType('resource').forEach(e => {
@@ -142,7 +146,7 @@
         const link = document.createElement('a');
         link.textContent = 'powered by chunom.org';
         link.title = 'Licenses and the files this page uses';
-        const update = () => { link.href = `${prefix}/qatt/license.html#${sources().map(encodeURIComponent).join(',')}`; };
+        const update = () => { link.href = `${licenseUrl}#${sources().map(encodeURIComponent).join(',')}`; };
         update();
         ['pointerdown', 'focus', 'touchstart', 'contextmenu'].forEach(t => link.addEventListener(t, update));
         window.addEventListener('load', update);
@@ -151,29 +155,13 @@
     }
 
     function injectNav() {
-        // Turn links into relative links, for local development.
-        let relativeLinkPrefix = ".";
-        const urlParts = location.href.split("/");
-        for (let i = urlParts.length - 1; i >= 0; i--) {
-            const part = urlParts[i].replace(/[\/#?].*$/, ""); // remove any trailing slashes or query/hash
-            if (!part.endsWith(".html")) relativeLinkPrefix += "/..";
-            if (part == "chunom" || part == "qatt") {
-                break;
-            }
-        }
-        // Pages under /chunom and /pages (and the domain chunom.org) carry the Chunom.org brand, all others Qatt.org
-        const isChunom = /^\/(chunom|pages)(\/|$)/.test(location.pathname) || /(^|\.)chunom\.org$/.test(location.hostname);
-        const home = isChunom ? '/chunom' : '/qatt';
-
-        // logo (also the page icon, unless the page sets its own)
-        const logo = isChunom ? `${relativeLinkPrefix}/qatt/img/chunom-logo.gif` : `${relativeLinkPrefix}/qatt/img/logo.svg`;
-        const brandTitle = isChunom ? "Chunom.org" : navConfig.title;
-        const sections = isChunom ? navConfig.sections.slice().reverse() : navConfig.sections; // the Chữ Nôm block first on Chunom.org
+        const home = navConfig.home;
+        const logo = "/img/logo.svg";
+        const brandTitle = navConfig.title;
+        const sections = navConfig.sections;
         if (!document.querySelector('link[rel~="icon"]')) {
-            const icons = isChunom ? "chunom-favicon" : "favicon";
-            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="${relativeLinkPrefix}/qatt/img/${icons}.svg">
-                ${isChunom ? `<link rel="icon" type="image/png" sizes="32x32" href="${relativeLinkPrefix}/qatt/img/chunom-favicon-32.png">` : ''}
-                <link rel="apple-touch-icon" href="${relativeLinkPrefix}/qatt/img/${isChunom ? "chunom-apple-touch-icon" : "apple-touch-icon"}.png">`);
+            document.head.insertAdjacentHTML('beforeend', `<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+                <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">`);
         }
 
         const currentPath = window.location.pathname;
@@ -184,9 +172,7 @@
         header.innerHTML = `
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="${home}">
-                    ${isChunom
-                        ? `<img src="${logo}" alt="${brandTitle}" height="42" style="width:auto;border-radius:4px">`
-                        : `<img src="${logo}" alt="" width="32" height="32">${brandTitle}`}
+                    <img src="${logo}" alt="" width="32" height="32">${brandTitle}
                 </a>
                 <div class="ms-auto d-flex align-items-center">
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
@@ -203,8 +189,8 @@
 
         const sectionsHtml = sections.map(section => {
             const linksHtml = section.links.map(link => {
-                const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
-                return `<a href="${relativeLinkPrefix}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
+                const isActive = !section.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
+                return `<a href="${section.site || ''}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
                             <i class="bi ${link.icon}"></i> ${link.name}
                         </a>`;
             }).join('');
@@ -214,9 +200,7 @@
 
         offcanvas.innerHTML = `
             <div class="offcanvas-header border-bottom border-secondary">
-                <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2">${isChunom
-                    ? `<img src="${logo}" alt="${brandTitle}" height="34" style="width:auto;border-radius:4px">`
-                    : `<img src="${logo}" alt="" width="28" height="28">${brandTitle}`}</h5>
+                <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2"><img src="${logo}" alt="" width="28" height="28">${brandTitle}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
@@ -226,15 +210,15 @@
         const ownBottomBar = /\/immersive\.html$/.test(currentPath);
         if (!ownBottomBar) {
             const block = sections.find(sec => sec.links.some(l => l.bar));
-            const own = sections.find(sec => sec.linkClass === (isChunom ? 'link-nom' : 'link-qatt')) || block;
+            const own = sections.find(sec => sec.linkClass === navConfig.own) || block;
             const barLinks = own.links.filter(l => l.bar).map(link => {
                 const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
-                return `<a href="${relativeLinkPrefix}${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i>${link.bar}</a>`;
+                return `<a href="${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i>${link.bar}</a>`;
             }).join('');
             const bar = document.createElement('nav');
             bar.className = 'bottom-bar';
             bar.setAttribute('aria-label', 'Main');
-            bar.style.setProperty('--bar-accent', isChunom ? 'var(--bs-warning)' : 'var(--bs-info)');
+            bar.style.setProperty('--bar-accent', 'var(--bs-info)');
             bar.innerHTML = `${barLinks}<button type="button" id="barMenu"><i class="bi bi-list"></i>Menu</button>`;
             document.body.appendChild(bar);
             document.body.classList.add('has-bottom-bar');
@@ -263,7 +247,7 @@
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
         document.body.appendChild(offcanvas);
-        if (!ownBottomBar) injectFooter(relativeLinkPrefix);
+        if (!ownBottomBar) injectFooter("/license.html");
 
         const initOffcanvas = () => {
             const toggler = document.getElementById('navTogglerCustom');
