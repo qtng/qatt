@@ -44,7 +44,7 @@ function QattBrush2Model(B, B2, SHAPES, ORIG, base) {
   // the strokes of a list of items {lib, a, b}
   const placed = (state, items) => items.filter(Boolean).map(it => {
     const e = state.lib[it.lib] || state.lib.mark || DEF.lib.mark || {};
-    return B2.stroke({ a: it.a, b: it.b, bend: e.bend, s: e.s, e: e.e, g: e.g, sa: e.sa, ea: e.ea, si: e.si, ei: e.ei });
+    return B2.stroke({ a: it.a, b: it.b, bend: e.bend, s: e.s, e: e.e, g: e.g, sa: e.sa, ea: e.ea });
   });
   // the centre lines of a path: the placed library strokes for the symbols, the original paths for tones and codas
   function strokesOf(state, id) {
