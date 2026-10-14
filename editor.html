@@ -26,7 +26,7 @@
     @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
     main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 1.5rem; }
     a { color: var(--accent); }
-    .card-box { margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+    .card-box { position: sticky; top: 68px; z-index: 5; margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
     /* all controls centred in one row, the slider gives way on a narrow screen */
     .bar { display: flex; flex-wrap: nowrap; justify-content: center; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
     .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; flex: 0 1 auto; min-width: 0; }
@@ -38,6 +38,7 @@
     #sizeLabel { min-width: 2.6em; color: var(--muted); }
     #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
       font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
+    @media (max-width: 575.98px) { #field { min-height: 6.5rem; } }   /* the editor stays on screen while the list scrolls */
     #field:focus { outline: 2px solid rgba(168, 54, 42, .35); }
     #pending { margin-top: .1rem; height: 1.2rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
     #pending .glyph { font-family: var(--qfont); font-size: 1.8rem; line-height: 1; color: var(--ink); }
