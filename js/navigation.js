@@ -87,10 +87,10 @@ window.Lang = window.Lang || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Quốc Âm Tân Tự", bar: "Home", barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "Symbols", bar: "Symbols", barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
-            { name: "QATT Writer", bar: "Write", barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
-            { name: "Practice", bar: "Practice", barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
-            { name: "Decodings", url: "/decodings.html", icon: "bi-puzzle" },
+            { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
+            { name: "QATT Writer", vi: "Gõ chữ QATT", bar: "Write", barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
+            { name: "Practice", vi: "Luyện tập", bar: "Practice", barVi: "Luyện tập", url: "/soundcheck.html", icon: "bi-mortarboard" },
+            { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
@@ -101,11 +101,11 @@ window.Lang = window.Lang || (function() {
         linkClass: "link-nom",
         site: onChunom ? "" : CHUNOM_SITE,
         links: [
-            { name: "Character Search", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
-            { name: "Practice / Decks", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
-            { name: "Chữ Nôm Writer", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
-            { name: "Dictionary: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
-            { name: "Dictionary: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
+            { name: "Character Search", vi: "Tra cứu chữ", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
+            { name: "Practice / Decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
+            { name: "Chữ Nôm Writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
+            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
+            { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
         ]
     };
     // what differs between the sites: brand, logo, icons, the colour of the bottom bar; own block first
@@ -288,7 +288,7 @@ window.Lang = window.Lang || (function() {
             const linksHtml = section.links.map(link => {
                 const isActive = !section.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
                 return `<a href="${section.site || ''}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
-                            <i class="bi ${link.icon}"></i> ${link.name}
+                            <i class="bi ${link.icon}"></i> <span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span>
                         </a>`;
             }).join('');
             return `<div class="nav-section-header ${section.themeClass}">${section.header}</div>
