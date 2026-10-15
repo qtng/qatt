@@ -46,6 +46,16 @@
     .reading-out { margin: 0 0 1.2rem; padding: .4rem .7rem; border: 1px dashed var(--field); border-radius: .5rem; color: var(--ink); font-size: 1.05rem; white-space: pre-wrap; word-break: break-word; }
     .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin-top: .2rem; }
     .keys .btn { border-radius: 2rem; font-size: .85rem; padding: .25rem .85rem; }
+    /* on a phone the card is not a card: one section edge to edge, directly below the header, the field too */
+    @media (max-width: 575.98px) {
+      body { background: #fffdf8; }
+      .hero.mb-4 { margin-bottom: 0 !important; }
+      main { padding: 0; }
+      .card-box { margin: 0; padding: .6rem 0 .9rem; border: 0; border-radius: 0; box-shadow: none; }
+      .card-box > :not(#field) { margin-left: .75rem; margin-right: .75rem; }
+      #field { border-width: 1px 0; border-color: var(--line); border-radius: 0; padding-inline: .75rem; }
+      #field:focus { outline-offset: -2px; }
+    }
   </style>
   <script defer src="js/navigation.js"></script>
   <script src="js/parser.js"></script>
