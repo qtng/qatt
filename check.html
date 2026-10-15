@@ -105,7 +105,7 @@
     .task.solved .cells, .task.solved .cell + .cell { border-color: #146c43; }
     .card.task.win { animation: glow 1.2s ease-out; }
     @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
-    .cloud { position: fixed; z-index: 1100; pointer-events: none; font-weight: 600; text-shadow: 0 0 .3rem #fffdf8, 0 0 .3rem #fffdf8; font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; color: var(--ink); white-space: nowrap; opacity: 0; animation: cloud 1.6s ease-out forwards; }
+    .cloud { position: absolute; left: 50%; bottom: .9rem; z-index: 2; pointer-events: none; font-weight: 600; font-family: Georgia, "Times New Roman", serif; font-size: 1.4rem; color: #fff; text-shadow: 0 0 .35rem rgba(43, 33, 24, .7), 0 1px 2px rgba(43, 33, 24, .6); white-space: nowrap; opacity: 0; animation: cloud 1.6s ease-out forwards; }
     @keyframes cloud { 0% { opacity: 0; transform: translate(-50%, 0) scale(.8); } 20% { opacity: 1; transform: translate(-50%, -.9rem) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -3.4rem) scale(1.05); } }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
     #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
@@ -127,7 +127,7 @@
     <select id="font" data-qatt-fonts data-qatt-default="QATT Brush" class="form-select form-select-sm w-auto tool" aria-label="Font"></select>
     <button type="button" class="btn btn-sm tool-btn" id="reload" data-vi="Bỏ qua">Skip</button>
   </div>
-  <div class="card task mx-auto" id="task">
+  <div class="card task mx-auto mb-4" id="task">
     <div class="card-body">
       <div class="head">
         <div class="word" id="word" lang="vi"></div>
@@ -281,13 +281,12 @@
     showSound();
     if (sound) withSpeaker(() => {});   // load the speech early
     // the onset is read with the rhyme ông (mông, nhông, …); the tone with the whole word in that tone
-    // the reading rises from the clicked button like a little cloud and fades (also for wrong buttons: so the learner hears and sees how they sound)
+    // the reading rises in the card like a little cloud and fades (also for wrong buttons: so the learner hears and sees how they sound)
     const cloud = (b, text) => {
       if (!text) return;
-      const r = b.getBoundingClientRect(), c = document.createElement('span');
+      const c = document.createElement('span');
       c.className = 'cloud'; c.textContent = text;
-      c.style.left = r.left + r.width / 2 + 'px'; c.style.top = r.top + 'px';
-      document.body.append(c);
+      $('task').append(c);   // in the card, at the bottom in the middle
       setTimeout(() => c.remove(), 1700);
     };
     const sayOnset = (shape, b) => { const text = parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }); say(text); cloud(b, text); };
