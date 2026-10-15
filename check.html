@@ -292,22 +292,9 @@
       setTimeout(() => c.remove(), 1700);
     };
     const sayOnset = (shape, b) => { const text = parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }); say(text); cloud(b, text); };
-    // a marked form: the word as the cells show it now, the clicked form on the cells of its shape, a missing cell filled with the plain clicked shape
+    // a marked form: only the reading of the rhyme character itself (as on symbols.html), not the unfinished word
     const sayMarked = (shape, mark, b) => {
-      if (hop) return;   // the Hợp Thư writing (one shape for onset and rhyme) is not spelled
-      const cell = s => {
-        if (s.state === 'empty') return { shape, mark: 0, role: s.role };
-        return { shape: s.shape, mark: s.shape === shape && s.mark ? mark : s.state === 'full' ? s.mark : 0, role: s.role };
-      };
-      const cells = slots.map(cell);
-      const code = c => c.shape + (c.mark || '');
-      let onset, rhyme;
-      for (const c of cells) {
-        if (c.role === 'both') { onset = c.shape; rhyme = code(c); }
-        else if (c.role === 'onset') { onset = c.shape; rhyme = ''; }
-        else rhyme = code(c);
-      }
-      const text = parser.toQuocNgu({ onset, rhyme, tone: 0 });
+      const text = parser.toQuocNgu({ onset: '_', rhyme: shape + mark, tone: 0 });
       say(text); cloud(b, text);
     };
     const TONE_NAME = { 1: null, 2: 'huyen', 3: 'hoi', 4: 'nga', 5: 'sac', 6: 'nang', 7: 'sac', 8: 'nang' };
@@ -402,7 +389,7 @@
     }
 
     function pickMark(shape, mark, b) {
-      sayMarked(shape, mark, b);   // before the cells change
+      sayMarked(shape, mark, b);
       const found = slots.filter(s => s.shape === shape && s.mark === mark);
       verdict(b, found.length > 0);
       mood(found.length > 0);
