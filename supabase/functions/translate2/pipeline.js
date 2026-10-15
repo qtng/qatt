@@ -26,6 +26,7 @@ export const DEFAULT_PROMPTS = {
     'Its syllables as [index, syllable]: {{syllables}}',
     'For spans of syllables (at = index of the first syllable, len = number of syllables) the dictionaries list these characters for exactly that reading (all have the correct reading, in no particular order, no meanings given; use your own knowledge of Chữ Nôm and of the context to decide). Options: {{spans}}',
     'Task: cover the syllables from the first to the last with consecutive words (a word is one span: at and len; every syllable belongs to exactly one word, in order, none missing, none twice). Use a compound span (len > 1) where the compound is the word meant in this sentence, else single syllables.',
+    'A * behind an option marks the character that the dictionary of the site gives as the usual one for this reading; choose it unless the sentence calls for another word.',
     'For each word choose the option that is the right Chữ Nôm for it in the context of the whole sentence (word class, sense, the other words): the usual character of the word, not a variant or a character with another meaning. Prefer a listed option.',
     'If you know that the right character of the word is not listed, or none of the options is the word, give the character you know as your own: set "own": true. Never invent characters; if you know none, write "?" and "own": true.',
     'Besides the chosen option give up to two more options of the same span that would fit next best, best first ("alt"); leave "alt" out for a character of your own.',
@@ -71,7 +72,7 @@ export function cleanSpans(raw, syllableCount) {
     for (const o of s.options.slice(0, MAX_OPTIONS)) {
       if (!o || typeof o.c !== 'string' || !HAN.test(o.c) || o.c.length > 16 || chars.has(o.c)) continue;
       chars.add(o.c);
-      options.push({ c: o.c, m: String(o.m || '').slice(0, 80) });
+      options.push({ c: o.c, m: String(o.m || '').slice(0, 80), s: o.s ? 1 : 0 });
     }
     total += options.length;
     if (options.length) spans.push({ at: s.at, len: s.len, options });
@@ -109,7 +110,7 @@ export async function translate2(text, rawSpans, { callModel, progress = () => {
   const user = render(prompts, 'main', {
     text: JSON.stringify(text.trim()),
     syllables: JSON.stringify(syl.map((s, i) => [i, s])),
-    spans: JSON.stringify(spans.map(s => ({ at: s.at, len: s.len, qn: syllables.slice(s.at, s.at + s.len).join(' '), options: s.options.map(o => o.c).join(' ') }))),
+    spans: JSON.stringify(spans.map(s => ({ at: s.at, len: s.len, qn: syllables.slice(s.at, s.at + s.len).join(' '), options: s.options.map(o => o.c + (o.s ? '*' : '')).join(' ') }))),
   });
 
   progress(1);
