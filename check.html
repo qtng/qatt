@@ -100,6 +100,11 @@
     .solution { display: flex; align-items: center; justify-content: center; min-height: calc(7rem + 4px); margin: 0 auto .4rem; }
     .solution .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); animation: pop .35s ease-out; }
     #nextRow { margin-top: .8rem; }
+    /* solved: the card turns green like the former success card */
+    .card.task.solved { background: linear-gradient(180deg, #d9f2e3 0%, #b9e4cc 100%); border-color: #146c43; box-shadow: 5px 5px 0 #146c43, inset 0 3px 0 rgba(255, 255, 255, .65); transition: background-color .3s; }
+    .task.solved .cells, .task.solved .cell + .cell { border-color: #146c43; }
+    #next { background: #146c43; border-color: #146c43; color: #fff; }
+    #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
     @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .solution { min-height: calc(5.5rem + 4px); } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
   </style>
 </head>
@@ -327,6 +332,7 @@
       $('cells').replaceChildren();
       renderCells();
       show($('bases'), true);
+      $('task').classList.remove('solved');
       for (const id of ['solution', 'nextRow']) show($(id), false);
       show($('cells'), true);
       show($('task'), true);
@@ -419,6 +425,7 @@
       $('full').textContent = QattText.syllable(code);
       // after a moment to see the last cell the solution takes the place of the cells, the button for the next word the place of the tones
       show($('tones'), false);
+      $('task').classList.add('solved');
       setTimeout(() => show($('cells'), false).then(() => { show($('solution'), true); show($('nextRow'), true); }), 1000);
     }
 
