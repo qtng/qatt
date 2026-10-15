@@ -52,16 +52,6 @@
     .btn-accent:hover, .btn-accent:focus-visible { background: #8c2c22; border-color: #8c2c22; color: #fff; }
     .btn-quiet { border-color: #cdbf9f; color: #5b4d3d; background: #fff; }
     .btn-quiet:hover { background: #f1e8d2; color: var(--ink); border-color: #b9a982; }
-    #field { cursor: text; }
-    dialog#variants { border: 1px solid var(--field); border-radius: .7rem; background: #fffdf8; color: var(--ink); padding: .8rem 1rem 1rem; max-width: min(34rem, 94vw); box-shadow: 0 .6rem 2rem rgba(60, 40, 20, .3); }
-    dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
-    #variants .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; font-size: .85rem; color: var(--muted); }
-    #variants .row-title { font-size: .75rem; color: var(--muted); margin: .5rem 0 .2rem; }
-    #variants .vars { display: flex; flex-wrap: wrap; gap: .4rem; }
-    #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 1px solid var(--line); border-radius: .5rem; }
-    #variants .var .g { display: block; font-family: var(--qfont), system-ui, sans-serif; font-size: 2.6rem; line-height: 1.2; }
-    #variants .var .r { display: block; font-size: .9rem; }
-    #variants .var.hit { border-color: var(--accent); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
   </style>
   <script defer src="js/navigation.js"></script>
   <script src="js/parser.js"></script>
@@ -100,11 +90,6 @@
     </div>
   </div>
 </main>
-
-<dialog id="variants" aria-label="Variants">
-  <div class="head"><span data-vi="Biến thể">Variants</span><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></div>
-  <div id="variantsBody"></div>
-</dialog>
 
 <script src="js/fonts.js"></script>
 <script>
@@ -279,57 +264,6 @@
       if (!box.hidden) { box.hidden = true; return; }   // a second click hides it again
       box.textContent = out || '(nothing to read)';
       box.hidden = false;
-    });
-    // ---------- variants of a clicked character ----------
-    // The letters of the block come in groups of 7: the shape (U+F0000 + 7 * i) and its six variants with a marking stroke, in the order of the code points.
-    const dlg = $('variants');
-    $('variantsClose').addEventListener('click', () => dlg.close());
-    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // a click outside the box
-    // the cell under a click: a hidden copy of the field (same text, same layout) tells where the cells are
-    const cellAtPoint = (x, y) => {
-      const css = getComputedStyle(field), box = field.getBoundingClientRect();
-      const mirror = document.createElement('div');
-      for (const k of ['fontFamily', 'fontSize', 'lineHeight', 'letterSpacing', 'wordSpacing', 'textTransform', 'textIndent', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'borderTopWidth', 'borderLeftWidth', 'borderRightWidth', 'tabSize']) mirror.style[k] = css[k];
-      Object.assign(mirror.style, { position: 'fixed', left: box.left + 'px', top: box.top + 'px', width: box.width + 'px', height: box.height + 'px', overflow: 'hidden', visibility: 'hidden', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', boxSizing: 'border-box', borderStyle: 'solid', borderColor: 'transparent' });
-      const text = document.createTextNode(field.value);
-      mirror.append(text);
-      document.body.append(mirror);
-      mirror.scrollTop = field.scrollTop;
-      let hit = null;
-      const range = document.createRange();
-      for (const m of field.value.matchAll(QattText.CELL)) {
-        range.setStart(text, m.index); range.setEnd(text, m.index + m[0].length);
-        if (Array.from(range.getClientRects()).some(r => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom)) { hit = m[0]; break; }
-      }
-      mirror.remove();
-      return hit;
-    };
-    const showVariants = cell => {
-      const cps = Array.from(cell, ch => ch.codePointAt(0)), body = $('variantsBody');
-      body.replaceChildren();
-      // the letters of the cell (not the joiner and tone marks): one row of seven for each
-      const letters = cps.filter(c => c >= 0xF0000 && c <= 0xF0099);
-      const rows = letters.length === 1 ? [[letters[0], false]] : [[letters[0], false], [letters[1], true]];
-      for (const [cp, asRhyme] of rows) {
-        const first = 0xF0000 + Math.floor((cp - 0xF0000) / 7) * 7;
-        if (letters.length > 1) body.append(Object.assign(document.createElement('div'), { className: 'row-title', textContent: asRhyme ? 'Rhyme' : 'Onset' }));
-        const vars = Object.assign(document.createElement('div'), { className: 'vars' });
-        for (let c = first; c < first + 7; c++) {
-          const g = String.fromCodePoint(c);
-          // the rhyme row is read after an empty onset (the shape then stands for the rhyme), the others as they stand alone
-          const read = QattText.reading(asRhyme ? String.fromCodePoint(0xF0000, 0xF009B, c) : g, parser);
-          const v = Object.assign(document.createElement('div'), { className: 'var' + (c === cp ? ' hit' : '') });
-          v.append(Object.assign(document.createElement('span'), { className: 'g', textContent: g }), Object.assign(document.createElement('span'), { className: 'r', textContent: read }));
-          vars.append(v);
-        }
-        body.append(vars);
-      }
-      dlg.showModal();
-    };
-    field.addEventListener('click', e => {
-      if (field.selectionStart !== field.selectionEnd) return;   // selecting text
-      const cell = cellAtPoint(e.clientX, e.clientY);
-      if (cell) showVariants(cell);
     });
     $('clear').addEventListener('click', () => { $('readingOut').hidden = true; field.value = ''; showPending(); field.focus(); });
     $('copy').addEventListener('click', async () => {
