@@ -40,7 +40,7 @@ async function callGemini(system: string, user: string) {
         generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
     });
     if (r.status === 429 || r.status >= 500) { if (attempt === 0) { await new Promise(res => setTimeout(res, 2500)); continue; } throw Object.assign(new Error('busy'), { code: 'busy' }); }
-    if (!r.ok) throw Object.assign(new Error('model ' + r.status), { code: 'model' });
+    if (!r.ok) { console.error('gemini', MODEL, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || '';
     try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { return {}; }
@@ -78,6 +78,7 @@ Deno.serve(async (req) => {
         const result = await translate(text, { callModel: callGemini, dict: await dictionary(), progress: (step: number) => send({ step }) });
         send({ result });
       } catch (e) {
+        console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
       }
       controller.close();
