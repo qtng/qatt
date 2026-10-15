@@ -59,6 +59,7 @@
     #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 1px solid #e4d9c0; border-radius: .5rem; }
     #variants .var .g { display: block; font-family: var(--qfont), sans-serif; font-size: 2.6rem; line-height: 1.2; }
     #variants .var .r { display: block; font-size: .9rem; }
+    #variants .var.muted { opacity: .4; }
     #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
   </style>
 </head>
@@ -296,7 +297,7 @@
         // these rhymes are shown without a reading
         const lone = n && parser.toQuocNgu({ onset: '_', rhyme: shape + n });
         const read = NO_READING.has(lone) ? '' : parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
-        const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') });
+        const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') + (NO_READING.has(lone) ? ' muted' : '') });
         v.append(Object.assign(document.createElement('span'), { className: 'g', textContent: QattText.syllable(code) || '' }), Object.assign(document.createElement('span'), { className: 'r', textContent: read || '' }));
         body.append(v);
       }
