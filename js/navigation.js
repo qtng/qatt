@@ -382,10 +382,11 @@ window.Lang = window.Lang || (function() {
             document.body.classList.add('has-bottom-bar');
             bar.querySelector('#barMenu').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
             // hide it while the on-screen keyboard is open (the visual viewport is much shorter than the window)
-            // or while the user has put the cursor in a text field (a field focused by the page itself does not count)
+            // or while the user has put the cursor in a text field and the window is lower than wide (a field focused by the page itself does not count)
             let keyboard = false, field = false, lastTouch = 0;
             const update = () => {
-                const hide = keyboard || field;
+                // a focused field hides it only while the window is lower than wide (the keyboard is up); with the keyboard closed and the cursor still in the field it comes back
+                const hide = keyboard || (field && window.innerHeight < window.innerWidth);
                 bar.classList.toggle('typing', hide);
                 document.body.classList.toggle('bar-typing', hide);
             };
@@ -393,6 +394,7 @@ window.Lang = window.Lang || (function() {
             ['pointerdown', 'touchstart', 'keydown'].forEach(t => document.addEventListener(t, () => { lastTouch = Date.now(); }, true));
             document.addEventListener('focusin', e => { if (isField(e.target) && Date.now() - lastTouch < 800) { field = true; update(); } });
             document.addEventListener('focusout', () => { field = false; update(); });
+            window.addEventListener('resize', update);
             if (window.visualViewport) {
                 const vv = window.visualViewport;
                 vv.addEventListener('resize', () => { keyboard = window.innerHeight - vv.height > 150; update(); });
