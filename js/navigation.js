@@ -96,9 +96,9 @@ window.Lang = window.Lang || (function() {
 
 // ---------- the menu ----------
 (function() {
-    const CHUNOM_SITE = "https://v2.chunom.org"; // https://chunom.org when the site is live
+    const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
-    // the site of this page: the Chunom site (chunom.org, v2.chunom.org, the folders /chunom/, /pages/, /chunom-assets/) or qatt.org
+    // the site of this page: the Chunom site (chunom.org, the folders /chunom/, /pages/, /chunom-assets/) or qatt.org
     const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     const qattBlock = {
         header: "Quốc Âm Tân Tự (QATT)",
