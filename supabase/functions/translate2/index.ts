@@ -108,8 +108,8 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return fail(405, 'method');
   const c = claims(req);
   if (!c || !c.sub || c.is_anonymous === true || c.role !== 'authenticated') return fail(401, 'sign_in');
-  let text = '', spans: unknown = [];
-  try { const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; } catch { return fail(400, 'bad_request'); }
+  let text = '', spans: unknown = [], lang = '';
+  try { const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || ''); } catch { return fail(400, 'bad_request'); }
   if (!text) return fail(400, 'empty');
   if (text.length > MAX_CHARS) return fail(413, 'too_long');
   if (!(await allowed(c.sub))) return fail(429, 'limit');
@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
     async start(controller) {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       try {
-        const result = await translate2(text, spans, { callModel: callGemini, prompts: cfg.prompts, progress: (step: number) => send({ step }) });
+        const result = await translate2(text, spans, { callModel: callGemini, prompts: cfg.prompts, lang, progress: (step: number) => send({ step }) });
         console.log('result', cfg.version, JSON.stringify(result.words.map((w: { qn: string; chosen: string; own: boolean }) => [w.qn, w.chosen, w.own ? 'own' : 'list'])));
         send({ result: { ...result, version: cfg.version } });
       } catch (e) {
