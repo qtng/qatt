@@ -1,5 +1,6 @@
-// Quốc Ngữ -> Chữ Nôm in three automatic steps (the protocol of chunom/translate-chatbot.html), each checked by code:
-//   1. candidates for every syllable/word   2. one choice per unit   3. back-reading of the result, one repair round
+// Quốc Ngữ -> Chữ Nôm: two steps of the model (the protocol of chunom/translate-chatbot.html), then the check by code:
+//   1. candidates for every syllable/word   2. one choice per unit   3. (no model) does every character read as its syllable, according to
+//   the dictionaries of the site (dict.csv, js/base_chars.json, js/generated_chars.json)? A choice that does not is replaced by a candidate that does
 // The model is only called through `callModel(system, user)` -> parsed JSON, so the logic runs (and is tested) without Gemini.
 
 const HAN = /^\p{Script=Han}+$/u;
@@ -52,20 +53,12 @@ export const DEFAULT_PROMPTS = {
     'STEP 2. Choose exactly one candidate per unit, only from its list; if none fits, use "?".',
     'The whole sentence: {{text}}',
     'Make sure the choices are coherent in context (word class, meaning, identical words spelled identically); use the meaning given with a candidate.',
-    '{{note}}',
     'Units: {{units}}',
     'Answer: {"choices": [{"id": 1, "char": "..."}]}',
   ],
-  step2repair: 'These units failed the back-reading check. Choose a different candidate (or "?") for exactly these units: {{bad}}',
-  step3: [
-    'STEP 3, back-reading check. You see only Chữ Nôm characters, no original text. Ignore anything you may have thought before.',
-    'Read each unit in Quốc Ngữ based on the characters alone. Do not guess to force a match; write "?" if a reading is unclear. A unit with several characters has several syllables.',
-    'Units: {{units}}',
-    'Answer: {"readings": [{"id": 1, "reading": "..."}]}',
-  ],
 };
 // what every prompt must contain, else the file is rejected
-const NEEDS = { step1: ['text', 'syllables'], hintsLine: ['hints'], step1retry: ['error'], step2: ['text', 'units'], step2repair: ['bad'], step3: ['units'] };
+const NEEDS = { step1: ['text', 'syllables'], hintsLine: ['hints'], step1retry: ['error'], step2: ['text', 'units'] };
 const joined = v => (Array.isArray(v) ? v.join('\n') : v);
 
 // the file of the website: {"version": "...", "models": ["..."], "prompts": {...}}; returns {prompts, models, version} or throws
@@ -95,13 +88,9 @@ function step1Prompt(P, text, syllables, hints) {
     hintsLine: hints.length ? render(P, 'hintsLine', { hints: JSON.stringify(hints) }) : '' });
 }
 
-function step2Prompt(P, text, units, note) {
-  return render(P, 'step2', { text: JSON.stringify(text), note: note || '',
+function step2Prompt(P, text, units) {
+  return render(P, 'step2', { text: JSON.stringify(text),
     units: JSON.stringify(units.map(u => ({ id: u.id, qn: u.qn, candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, meaning: (c.source === 'dictionary' ? c.gloss : c.reason) || undefined })) }))) });
-}
-
-function step3Prompt(P, chars) {
-  return render(P, 'step3', { units: JSON.stringify(chars) });
 }
 
 const asArray = x => (Array.isArray(x) ? x : []);
@@ -143,24 +132,64 @@ function applyChoices(units, raw) {
   }
 }
 
-const sameReading = (read, unit) => norm(read).replace(/\s+/g, ' ') === unit.qn;
-// the model and the dictionary of the site name the same character for this reading: two sources agree
-const agrees = u => u.chosen !== '?' && u.dict.some(e => e.han === u.chosen);
-const CHECK_UNTIL = 80000;   // ms after the start: later than this the optional step 3 is skipped
-
-// state of a word: sure (model and dictionary agree, or the back-reading matches), differs (the dictionary lists other characters for this
-// reading), uncertain (no character, or read back differently), unchecked (step 3 did not run)
-function stateOf(u, pending = false) {
-  if (u.chosen === '?') return { state: 'uncertain', why: 'nochar' };
-  if (agrees(u)) return { state: 'sure', why: 'dictionary' };
-  if (u.dict.length) return { state: 'differs', why: 'differs' };
-  if (u.ok === true) return { state: 'sure', why: 'backreading' };
-  if (u.ok === false) return { state: 'uncertain', why: 'readas' };
-  return { state: 'unchecked', why: pending ? 'pending' : 'none' };   // pending: step 3 is still running
+// ---- the check of the pronunciation: which readings do the dictionaries of the site list for a character?
+// files: the parsed JSON files of js/ime.js ({dict: "reading:glyph,glyph|..."}), dict: the Map of parseDict. Returns {chars, words}:
+// chars: character -> set of syllables it is listed with (a word with as many characters as syllables gives one syllable per character),
+// words: "reading|glyphs" of all entries (also words with other numbers of characters)
+export function buildReadings(files, dict) {
+  const chars = new Map(), words = new Set();
+  const add = (reading, glyph) => {
+    if (!reading || !glyph) return;
+    words.add(reading + '|' + glyph);
+    const syl = reading.split(' '), cs = [...glyph];
+    if (syl.length !== cs.length) return;
+    cs.forEach((c, i) => { if (!chars.has(c)) chars.set(c, new Set()); chars.get(c).add(syl[i]); });
+  };
+  for (const f of files) {
+    for (const entry of String(f && f.dict || '').replace(/[\r\n]/g, '').split('|')) {
+      const sep = entry.indexOf(':', 1);
+      if (sep < 0) continue;
+      const key = entry.slice(0, sep);
+      if (!/^[\p{L}\p{M}]+$/u.test(key)) continue;   // symbols such as "-_ideographicHyphen"
+      const reading = norm(key.replace(/(\p{Lu})/gu, ' $1'));
+      for (const glyph of entry.slice(sep + 1).split(',')) add(reading, glyph.trim());
+    }
+  }
+  for (const [reading, entries] of dict) for (const e of entries) add(reading, e.han);
+  return { chars, words };
 }
 
-// the result: the text with its punctuation, the units with their state. pending: step 3 is still running, the result is not final
-function assemble(text, tokens, units, checked, pending) {
+// does the chosen text read as the syllables of the unit? {ok: true}, {ok: false, read: "the readings listed for the characters"} or {ok: undefined} (not decidable)
+function verify(u, R, glyphs = u.chosen) {
+  const cs = [...glyphs];
+  if (R.words.has(u.qn + '|' + glyphs)) return { ok: true };
+  if (cs.length !== u.syllables.length) return { ok: undefined };   // another number of characters than syllables: only a listed word can be confirmed
+  const bad = []; let unknown = false;
+  cs.forEach((c, i) => {
+    const set = R.chars.get(c);
+    if (!set) unknown = true;
+    else if (!set.has(u.syllables[i])) bad.push([...set].slice(0, 3).join(', '));
+  });
+  if (bad.length) return { ok: false, read: bad.join(' / ') };
+  return { ok: unknown ? undefined : true };
+}
+
+// the model and the dictionary of the site name the same character for this reading: two sources agree
+const agrees = u => u.chosen !== '?' && u.dict.some(e => e.han === u.chosen);
+
+// state of a word: sure (model and dictionary agree, or the dictionaries list the reading), differs (dict.csv lists other characters for this
+// reading), uncertain (no character, or the character does not read like that), unchecked (not decidable)
+function stateOf(u) {
+  if (u.chosen === '?') return { state: 'uncertain', why: 'nochar' };
+  if (u.ok === false) return { state: 'uncertain', why: 'readas' };
+  if (agrees(u)) return { state: 'sure', why: 'dictionary' };
+  if (u.dict.length) return { state: 'differs', why: 'differs' };
+  if (u.ok === true) return { state: 'sure', why: 'dictionaries' };
+  return { state: 'unchecked', why: 'unknown' };
+}
+
+// the result: the text with its punctuation, the units with their state. checked: the readings could be checked
+function assemble(text, tokens, units, checked) {
   const out = [];
   let k = 0;   // index of the syllable
   const byFirst = new Map();
@@ -172,7 +201,7 @@ function assemble(text, tokens, units, checked, pending) {
     if (byFirst.has(k)) out.push(shown(byFirst.get(k)));
     k++;
   }
-  const states = units.map(u => stateOf(u, pending));
+  const states = units.map(stateOf);
   const uncertain = units.filter((u, i) => states[i].state === 'uncertain' || states[i].state === 'differs').map(u => u.id);
   return {
     nom: out.join('').replace(/\s+/g, ''),
@@ -185,13 +214,11 @@ function assemble(text, tokens, units, checked, pending) {
       candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, inDict: c.inDict, meaning: c.gloss || c.reason || '' })),
     })),
     uncertain,
-    checked,   // false: step 3 was skipped or failed (or is still running), the words it should rate are "unchecked"
-    pending,   // true: a first result, step 3 is still running and a final result follows
+    checked,   // false: the dictionaries of the readings were not available, nothing could be checked
   };
 }
 
-export async function translate(text, { callModel, dict = new Map(), progress = () => {}, partial = null, prompts = DEFAULT_PROMPTS }) {
-  const started = Date.now();
+export async function translate(text, { callModel, dict = new Map(), readings = null, progress = () => {}, prompts = DEFAULT_PROMPTS }) {
   const SYSTEM = render(prompts, 'system');
   const tokens = tokenize(text);
   const syllables = tokens.filter(t => t.type === 'syl').map(t => t.text);
@@ -211,42 +238,18 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
   progress(2);
   applyChoices(units, await callModel(SYSTEM, step2Prompt(prompts, text.trim(), units)));
 
-  // ---- step 3 (optional): read back the characters that the dictionary does not confirm (only the characters, no text), compare with the
-  // units, repair once. It only rates the result; when it fails or takes too long the text is returned without these ratings.
-  const toCheck = () => units.filter(u => u.chosen !== '?' && !agrees(u));
-  let checked = false;
-  if (!toCheck().length) checked = true;   // nothing left to check
-  else if (Date.now() - started < CHECK_UNTIL) {
-    if (partial) partial(assemble(text, tokens, units, false, true));   // the result of steps 1 and 2 can be shown while step 3 runs
-    progress(3);
-    const readBack = async () => {
-      const todo = toCheck();
-      if (!todo.length) return;
-      const raw = await callModel(SYSTEM, step3Prompt(prompts, todo.map(u => ({ id: u.id, chars: u.chosen }))), { attempts: 2 });
-      const got = new Map(asArray(raw && raw.readings).map(r => [Number(r && r.id), String(r && r.reading || '')]));
-      for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u); }
-    };
-    try {
-      await readBack();
-      const bad = toCheck().filter(u => !u.ok);
-      if (bad.length && Date.now() - started < CHECK_UNTIL) {
-        const note = render(prompts, 'step2repair', { bad: JSON.stringify(bad.map(u => ({ id: u.id, expected: u.qn, read_as: u.read, rejected: u.chosen }))) });
-        const before = new Map(bad.map(u => [u.id, u.chosen]));
-        const raw = await callModel(SYSTEM, step2Prompt(prompts, text.trim(), bad, note), { attempts: 2 });
-        const given = new Map(asArray(raw && raw.choices).map(c => [Number(c && c.id), c && c.char]));
-        for (const u of bad) {
-          const c = given.get(u.id);
-          const next = c === '?' ? '?' : (u.candidates.find(x => x.char === c && x.char !== before.get(u.id)) || {}).char;
-          if (next) { u.chosen = next; delete u.ok; delete u.read; }
-        }
-        await readBack();
+  // ---- the check by code: does every chosen text read as its syllables? A choice that does not is replaced by the first candidate that does
+  if (readings) {
+    for (const u of units) {
+      if (u.chosen === '?') continue;
+      let v = verify(u, readings);
+      if (v.ok === false) {
+        const other = u.candidates.find(c => c.char !== u.chosen && verify(u, readings, c.char).ok === true);
+        if (other) { u.replaced = u.chosen; u.chosen = other.char; v = { ok: true }; }
       }
-      checked = true;
-    } catch (e) {
-      console.error('step 3 skipped', e && e.message);
-      for (const u of units) { delete u.read; delete u.ok; }
+      u.ok = v.ok; if (v.read) u.read = v.read;
     }
   }
 
-  return assemble(text, tokens, units, checked, false);
+  return assemble(text, tokens, units, !!readings);
 }
