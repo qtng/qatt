@@ -92,13 +92,13 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
   throw Object.assign(new Error(last), { code: last });
 }
 
-// counts the use of today; false when the limit is reached
-async function allowed(userId: string) {
+// counts the use of today and returns the number of uses today (null if the counter fails)
+async function hit(userId: string): Promise<number | null> {
   const base = Deno.env.get('SUPABASE_URL')!, key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const r = await fetch(`${base}/rest/v1/rpc/translate_hit`, { method: 'POST',
     headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_user: userId }) });
-  if (!r.ok) return true;   // a failing counter must not block the page
-  return Number(await r.json()) <= LIMIT;
+  if (!r.ok) return null;   // a failing counter must not block the page
+  return Number(await r.json());
 }
 
 Deno.serve(async (req) => {
@@ -112,7 +112,9 @@ Deno.serve(async (req) => {
   try { const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || ''); } catch { return fail(400, 'bad_request'); }
   if (!text) return fail(400, 'empty');
   if (text.length > MAX_CHARS) return fail(413, 'too_long');
-  if (!(await allowed(c.sub))) return fail(429, 'limit');
+  const used = await hit(c.sub);
+  if (used !== null && used > LIMIT) return fail(429, 'limit');
+  const left = used === null ? null : Math.max(0, LIMIT - used);   // shown by the page ("n requests left today")
   const cfg = await loadConfig();
   MODELS = ENV_MODELS.length ? ENV_MODELS : (cfg.models || DEFAULT_MODELS);
 
@@ -124,7 +126,7 @@ Deno.serve(async (req) => {
       try {
         const result = await translate2(text, spans, { callModel: callGemini, prompts: cfg.prompts, lang, progress: (step: number) => send({ step }) });
         console.log('result', cfg.version, JSON.stringify(result.words.map((w: { qn: string; chosen: string; own: boolean }) => [w.qn, w.chosen, w.own ? 'own' : 'list'])));
-        send({ result: { ...result, version: cfg.version } });
+        send({ result: { ...result, version: cfg.version, left, limit: LIMIT } });
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
