@@ -6,9 +6,9 @@
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
 import { translate, parsePrompts, DEFAULT_PROMPTS } from './pipeline.js';
 
-const ORIGINS = ['https://qatt.org', 'https://v2.chunom.org', 'https://chunom.org'];
+const ORIGINS = ['https://qatt.org', 'https://chunom.org', 'https://v2.chunom.org'];
 const MAX_CHARS = 400;
-const PROMPTS_URL = Deno.env.get('PROMPTS_URL') || 'https://v2.chunom.org/chunom/js/translate_prompts.json';
+const PROMPTS_URL = Deno.env.get('PROMPTS_URL') || 'https://chunom.org/chunom/js/translate_prompts.json';
 // model names, tried in turn when one is overloaded or gone: secret GEMINI_MODEL (comma separated), else the file of the website, else these
 const DEFAULT_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
 const ENV_MODELS = (Deno.env.get('GEMINI_MODEL') || '').split(',').map(m => m.trim()).filter(Boolean);

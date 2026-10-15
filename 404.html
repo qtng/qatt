@@ -49,7 +49,7 @@
   // The old address of this site had a folder /qatt/ in front of every path (qatt.org/qatt/editor.html is now qatt.org/editor.html)
   if (location.pathname.startsWith("/qatt/")) REDIRECTS[key] = location.pathname.slice(5);
   // The Chunom site is a site of its own: the same path (prefix kept) on its domain
-  const CHUNOM_SITE = "https://v2.chunom.org"; // https://chunom.org when the site is live
+  const CHUNOM_SITE = "https://chunom.org";
   if (/^\/(chunom|chunom-assets|pages)(\/|$)/.test(location.pathname)) REDIRECTS[key] = CHUNOM_SITE + location.pathname;
   const target = REDIRECTS[key];
   if (target) {
