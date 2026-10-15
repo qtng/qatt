@@ -44,7 +44,7 @@
     .glyph-strip .g[data-code] { display: flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; border: 1px solid var(--bc); border-radius: 50%; background: var(--b); cursor: pointer; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
     .glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { border-color: var(--bc); box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); outline: none; }
     .glyph-strip .g[data-code]:active { box-shadow: none; filter: brightness(.96); }
-    .glyph-strip { --b: #e3eef8; --bc: #b7cde2; }   /* the colours of the buttons in soundcheck.html: light blue for the marked forms, beige for the shapes */
+    .glyph-strip { --b: #e3eef8; --bc: #b7cde2; }   /* the colours of the buttons in check.html: light blue for the marked forms, beige for the shapes */
     section.set:first-of-type .glyph-strip { --b: #fff8e6; --bc: #dccb9f; }
     .glyph-strip .item { gap: .25rem; }
     .glyph-strip .item.muted { opacity: .4; }
@@ -75,7 +75,7 @@
 </header>
 
 <main class="container py-4" id="content">
-  <div class="choose"><select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot</option></optgroup></select><select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select></div>
+  <div class="choose"><select id="decoding" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select><select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select></div>
   <section class="set">
     <div class="rule" aria-hidden="true" data-vi="22 Cán">22 base shapes</div>
     <div class="glyph-strip" aria-label="22 base shapes">
