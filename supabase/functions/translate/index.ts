@@ -6,13 +6,16 @@ import { translate, parseDict } from './pipeline.js';
 const ORIGINS = ['https://qatt.org', 'https://v2.chunom.org', 'https://chunom.org'];
 const MAX_CHARS = 400;
 const DICT_URL = Deno.env.get('DICT_URL') || 'https://v2.chunom.org/chunom/dict.csv';
-const MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-2.5-flash';
+// GEMINI_MODEL may hold several names separated by commas: they are tried in turn when one is overloaded or gone
+const MODELS = (Deno.env.get('GEMINI_MODEL') || 'gemini-3.5-flash,gemini-3.1-flash-lite,gemini-3.8-flash').split(',').map(m => m.trim()).filter(Boolean);
 const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 40);
 
-let dictCache: Map<string, string[]> | null = null;
+let dictCache: Map<string, { han: string; gloss: string }[]> | null = null;
 async function dictionary() {
   if (dictCache) return dictCache;
-  try { dictCache = parseDict(await (await fetch(DICT_URL)).text()); } catch { dictCache = new Map(); }
+  const t0 = Date.now();
+  try { dictCache = parseDict(await (await fetch(DICT_URL, { signal: AbortSignal.timeout(8000) })).text()); } catch (e) { console.error('dictionary', e); dictCache = new Map(); }
+  console.log('dictionary', dictCache.size, 'readings,', Date.now() - t0, 'ms');
   return dictCache;
 }
 
@@ -30,21 +33,44 @@ function claims(req: Request) {
   } catch { return null; }
 }
 
+let modelsLogged = false;
+async function logModels(key: string) {   // once per instance: which models this key may use (for the log only)
+  if (modelsLogged) return; modelsLogged = true;
+  try {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { headers: { 'x-goog-api-key': key }, signal: AbortSignal.timeout(8000) });
+    const d = await r.json();
+    console.log('available models:', (d.models || []).filter((m: { supportedGenerationMethods?: string[] }) => (m.supportedGenerationMethods || []).includes('generateContent')).map((m: { name: string }) => m.name.replace('models/', '')).join(', '));
+  } catch (e) { console.error('list models', e); }
+}
+
 async function callGemini(system: string, user: string) {
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) throw Object.assign(new Error('no key'), { code: 'config' });
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
-    });
-    if (r.status === 429 || r.status >= 500) { if (attempt === 0) { await new Promise(res => setTimeout(res, 2500)); continue; } throw Object.assign(new Error('busy'), { code: 'busy' }); }
-    if (!r.ok) throw Object.assign(new Error('model ' + r.status), { code: 'model' });
+  const body = JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
+    generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } });
+  let last = 'busy';
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const model = MODELS[attempt % MODELS.length];
+    const t0 = Date.now();
+    let r: Response;
+    try {
+      r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        signal: AbortSignal.timeout(40000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
+    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; continue; }
+    if (r.status === 429 || r.status >= 500 || r.status === 404) {
+      console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
+      last = r.status === 404 ? 'model' : 'busy';
+      if (attempt === 1) await logModels(key);
+      await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
+      continue;
+    }
+    if (!r.ok) { console.error('gemini', model, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
+    console.log('gemini', model, r.status, Date.now() - t0, 'ms');
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || '';
     try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { return {}; }
   }
+  throw Object.assign(new Error(last), { code: last });
 }
 
 // counts the use of today; false when the limit is reached
@@ -76,8 +102,10 @@ Deno.serve(async (req) => {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       try {
         const result = await translate(text, { callModel: callGemini, dict: await dictionary(), progress: (step: number) => send({ step }) });
+        console.log('result', JSON.stringify(result.units.map((u: { qn: string; chosen: string; read: string; ok: boolean }) => [u.qn, u.chosen, u.read, u.ok])));
         send({ result });
       } catch (e) {
+        console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
       }
       controller.close();
