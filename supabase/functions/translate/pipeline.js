@@ -42,9 +42,9 @@ export const DEFAULT_PROMPTS = {
     'Group them into words where appropriate (a unit has one or more consecutive syllables; every syllable belongs to exactly one unit, none missing, none added). Give each unit a sequential id starting at 1.',
     'For each unit give 2 to 4 candidates sorted by confidence. Choose candidates that fit the meaning of the unit in this sentence (word class, sense in context); where a word is ambiguous, include a second reading. Prefer phono-semantic characters if available and confidence is sufficient.',
     'Each candidate: {"char": "...", "codepoint": "U+...", "reading": "Quốc Ngữ reading", "type": "Sino-Vietnamese" | "purely Nôm" | "phono-semantic", "reason": "at most 10 words"}.',
-    '{{hintsLine}}',
     'Answer: {"units": [{"id": 1, "qn": "the syllables of the unit separated by a space", "candidates": [ ... ]}]}',
   ],
+  // not used by the default step1 (the model answers from its own knowledge, the dictionary only checks the result); add {{hintsLine}} to step1 to give it the dictionary entries of the words
   hintsLine: 'Dictionary entries of this site that may help (reading: characters with meaning; use them when the meaning fits the sentence): {{hints}}',
   step1retry: 'Your previous answer was rejected: {{error}}. Follow the syllable list exactly.',
   step2: [
@@ -96,7 +96,7 @@ function step1Prompt(P, text, syllables, hints) {
 
 function step2Prompt(P, text, units, note) {
   return render(P, 'step2', { text: JSON.stringify(text), note: note || '',
-    units: JSON.stringify(units.map(u => ({ id: u.id, qn: u.qn, candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, meaning: c.meaning || undefined })) }))) });
+    units: JSON.stringify(units.map(u => ({ id: u.id, qn: u.qn, candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, meaning: (c.source === 'dictionary' ? c.gloss : c.reason) || undefined })) }))) });
 }
 
 function step3Prompt(P, chars) {
@@ -105,7 +105,9 @@ function step3Prompt(P, chars) {
 
 const asArray = x => (Array.isArray(x) ? x : []);
 
-// the units of step 1 must cover the syllables exactly; returns the clean units or an error text
+// the units of step 1 must cover the syllables exactly; returns the clean units or an error text.
+// The candidates are those of the model. The dictionary of the site is only kept next to them (`dict`, to compare with the choice);
+// it supplies candidates only for a unit for which the model proposed none.
 function checkUnits(raw, syllables, dict) {
   const units = [];
   let pos = 0;
@@ -116,42 +118,45 @@ function checkUnits(raw, syllables, dict) {
       if (s !== norm(syllables[pos])) return { error: `unit ${u.id} ("${u.qn}") does not match the syllable "${syllables[pos] || '(end of text)'}" at position ${pos + 1}` };
       pos++;
     }
+    const key = norm(syl.join(' ')), entries = (dict.get(key) || []).slice(0, 6);
     const seen = new Set();
     const candidates = asArray(u.candidates).filter(c => c && HAN.test(String(c.char)) && !seen.has(c.char) && seen.add(c.char)).slice(0, 4)
-      .map(c => ({ char: c.char, reading: String(c.reading || ''), type: String(c.type || ''), reason: String(c.reason || ''), inDict: false }));
-    // the dictionary of the site is authoritative: its characters for this reading are always candidates, and come first
-    const key = norm(syl.join(' ')), known = (dict.get(key) || []).slice(0, 3);
-    for (const e of known) {
-      const have = candidates.find(c => c.char === e.han);
-      if (have) { have.inDict = true; have.meaning = e.gloss; }
-      else candidates.push({ char: e.han, reading: syl.join(' '), type: 'dictionary', reason: '', inDict: true, meaning: e.gloss });
-    }
-    for (const c of candidates) if (!c.meaning && c.reason) c.meaning = c.reason;
-    candidates.sort((a, b) => Number(b.inDict) - Number(a.inDict));
-    units.push({ id: units.length + 1, qn: key, syllables: syl, candidates: candidates.slice(0, 6) });
+      .map(c => ({ char: c.char, reading: String(c.reading || ''), type: String(c.type || ''), reason: String(c.reason || ''), source: 'model', inDict: false, gloss: '' }));
+    for (const c of candidates) { const e = entries.find(e => e.han === c.char); if (e) { c.inDict = true; c.gloss = e.gloss; } }
+    if (!candidates.length) for (const e of entries.slice(0, 3)) candidates.push({ char: e.han, reading: key, type: 'dictionary', reason: '', source: 'dictionary', inDict: true, gloss: e.gloss });
+    units.push({ id: units.length + 1, qn: key, syllables: syl, candidates, dict: entries });
   }
   if (pos !== syllables.length) return { error: `the units cover ${pos} of ${syllables.length} syllables` };
   return { units };
 }
 
-// a choice must come from the list of the unit, else the first candidate of the dictionary or of the list, else "?"
+// a choice must come from the list of the unit, else its first candidate, else "?"
 function applyChoices(units, raw) {
   const given = new Map(asArray(raw && raw.choices).map(c => [Number(c && c.id), c && c.char]));
   for (const u of units) {
     const c = given.get(u.id);
     if (c === '?') { u.chosen = '?'; continue; }
     const found = u.candidates.find(x => x.char === c);
-    if (found) { u.chosen = found.char; continue; }
-    const fallback = u.candidates.find(x => x.inDict) || u.candidates[0];
-    u.chosen = fallback ? fallback.char : '?';
-    if (c !== undefined && fallback) u.corrected = true;   // the model chose something outside the list
+    u.chosen = found ? found.char : (u.candidates[0] ? u.candidates[0].char : '?');
+    if (c !== undefined && !found && u.candidates[0]) u.corrected = true;   // the model chose something outside the list
   }
 }
 
 const sameReading = (read, unit) => norm(read).replace(/\s+/g, ' ') === unit.qn;
-// a character the dictionary of the site lists for exactly this reading counts as verified: reading it back without context is unreliable for Nôm
-const known = u => (u.candidates.find(c => c.char === u.chosen) || {}).inDict === true;
+// the model and the dictionary of the site name the same character for this reading: two sources agree
+const agrees = u => u.chosen !== '?' && u.dict.some(e => e.han === u.chosen);
 const CHECK_UNTIL = 80000;   // ms after the start: later than this the optional step 3 is skipped
+
+// state of a word: sure (model and dictionary agree, or the back-reading matches), differs (the dictionary lists other characters for this
+// reading), uncertain (no character, or read back differently), unchecked (step 3 did not run)
+function stateOf(u) {
+  if (u.chosen === '?') return { state: 'uncertain', why: 'nochar' };
+  if (agrees(u)) return { state: 'sure', why: 'dictionary' };
+  if (u.dict.length) return { state: 'differs', why: 'differs' };
+  if (u.ok === true) return { state: 'sure', why: 'backreading' };
+  if (u.ok === false) return { state: 'uncertain', why: 'readas' };
+  return { state: 'unchecked', why: 'none' };
+}
 
 export async function translate(text, { callModel, dict = new Map(), progress = () => {}, prompts = DEFAULT_PROMPTS }) {
   const started = Date.now();
@@ -174,21 +179,23 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
   progress(2);
   applyChoices(units, await callModel(SYSTEM, step2Prompt(prompts, text.trim(), units)));
 
-  // ---- step 3 (optional): read back what was chosen (only the characters), compare with the units, repair once.
-  // It only rates the result; when it fails or takes too long the text is returned without these ratings.
-  for (const u of units) if (u.chosen !== '?' && known(u)) u.ok = true;
+  // ---- step 3 (optional): read back the characters that the dictionary does not confirm (only the characters, no text), compare with the
+  // units, repair once. It only rates the result; when it fails or takes too long the text is returned without these ratings.
+  const toCheck = () => units.filter(u => u.chosen !== '?' && !agrees(u));
   let checked = false;
-  if (Date.now() - started < CHECK_UNTIL) {
+  if (!toCheck().length) checked = true;   // nothing left to check
+  else if (Date.now() - started < CHECK_UNTIL) {
     progress(3);
     const readBack = async () => {
-      const todo = units.filter(u => u.chosen !== '?');
+      const todo = toCheck();
+      if (!todo.length) return;
       const raw = await callModel(SYSTEM, step3Prompt(prompts, todo.map(u => ({ id: u.id, chars: u.chosen }))), { attempts: 2 });
       const got = new Map(asArray(raw && raw.readings).map(r => [Number(r && r.id), String(r && r.reading || '')]));
-      for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u) || known(u); }
+      for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u); }
     };
     try {
       await readBack();
-      const bad = units.filter(u => u.chosen !== '?' && !u.ok);
+      const bad = toCheck().filter(u => !u.ok);
       if (bad.length && Date.now() - started < CHECK_UNTIL) {
         const note = render(prompts, 'step2repair', { bad: JSON.stringify(bad.map(u => ({ id: u.id, expected: u.qn, read_as: u.read, rejected: u.chosen }))) });
         const before = new Map(bad.map(u => [u.id, u.chosen]));
@@ -197,35 +204,42 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
         for (const u of bad) {
           const c = given.get(u.id);
           const next = c === '?' ? '?' : (u.candidates.find(x => x.char === c && x.char !== before.get(u.id)) || {}).char;
-          if (next) u.chosen = next;
+          if (next) { u.chosen = next; delete u.ok; delete u.read; }
         }
         await readBack();
       }
       checked = true;
     } catch (e) {
       console.error('step 3 skipped', e && e.message);
-      for (const u of units) { delete u.read; if (u.chosen !== '?' && !known(u)) delete u.ok; }
+      for (const u of units) { delete u.read; delete u.ok; }
     }
   }
 
   // ---- result: the text with its punctuation, the units with their state
   const out = [];
   let k = 0;   // index of the syllable
-  const byFirst = new Map(), byLast = new Map();
+  const byFirst = new Map();
   let p = 0;
-  for (const u of units) { byFirst.set(p, u); p += u.syllables.length; byLast.set(p - 1, u); }
+  for (const u of units) { byFirst.set(p, u); p += u.syllables.length; }
   const shown = u => u.chosen === '?' ? `[${u.qn}]` : u.chosen;
   for (const t of tokens) {
     if (t.type === 'other') { if (/\S/.test(t.text)) out.push(t.text.trim()); continue; }
     if (byFirst.has(k)) out.push(shown(byFirst.get(k)));
     k++;
   }
-  const uncertain = units.filter(u => u.chosen === '?' || u.ok === false).map(u => u.id);
+  const states = units.map(stateOf);
+  const uncertain = units.filter((u, i) => states[i].state === 'uncertain' || states[i].state === 'differs').map(u => u.id);
   return {
     nom: out.join('').replace(/\s+/g, ''),
     qn: text.trim(),
-    units: units.map(u => ({ id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '', ok: u.chosen === '?' ? false : (u.ok === undefined ? null : u.ok), candidates: u.candidates })),
+    units: units.map((u, i) => ({
+      id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '',
+      state: states[i].state, why: states[i].why,
+      ok: states[i].state === 'sure' ? true : states[i].state === 'uncertain' ? false : null,   // for older pages
+      dict: u.dict,
+      candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, inDict: c.inDict, meaning: c.gloss || c.reason || '' })),
+    })),
     uncertain,
-    checked,   // false: step 3 was skipped or failed, `ok` is null where it could not be rated
+    checked,   // false: step 3 was skipped or failed, the words it should rate are "unchecked"
   };
 }
