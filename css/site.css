@@ -43,3 +43,15 @@
   --bs-btn-hover-bg: var(--retro-hover); --bs-btn-hover-color: var(--ink);
   --bs-btn-active-bg: var(--retro-active); --bs-btn-active-color: var(--ink);
 }
+
+/* dropdowns: the same outline, corners and hard shadow as the buttons */
+.form-select {
+  --bs-border-width: 2px;
+  --bs-border-color: var(--ink);
+  --bs-border-radius: .55rem;
+  background-color: #fffdf8;
+  color: var(--ink);
+  box-shadow: 0 2px 0 var(--ink);
+}
+.form-select:focus { border-color: var(--ink); box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+.form-select:disabled { box-shadow: none; }
