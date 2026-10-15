@@ -122,9 +122,10 @@ window.Lang = window.Lang || (function() {
         site: onChunom ? "" : CHUNOM_SITE,
         links: [
             { name: "Character search", vi: "Tra cứu chữ", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
+            { name: "Converter: Quốc Ngữ → Chữ Nôm", vi: "Bộ chuyển đổi: Quốc Ngữ → Chữ Nôm", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
             { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
             { name: "Chữ Nôm writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
-            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
+            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
         ]
     };
