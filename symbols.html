@@ -55,7 +55,7 @@
     #variants .speak { border: 1px solid #e4d9c0; border-radius: 50%; width: 2rem; height: 2rem; background: #fff; color: #5b4d3d; line-height: 1; }
     #variants .speak:hover { background: #f1e8d2; }
     #variants .speak.on { color: var(--cinnabar); border-color: var(--cinnabar); }
-    #variants .vars { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; }
+    #variants .vars { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }   /* 3 characters per row */
     #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 1px solid #e4d9c0; border-radius: .5rem; }
     #variants .var .g { display: block; font-family: var(--qfont), sans-serif; font-size: 2.6rem; line-height: 1.2; }
     #variants .var .r { display: block; font-size: .9rem; }
