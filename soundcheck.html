@@ -192,7 +192,7 @@
     const GOOD = ['😃', '🤗', '😊', '🙃'], BAD = ['😧', '😩', '😵', '😒', '😣', '🤨', '😱', '🤯', '😖'];
     const pick = a => a[Math.floor(Math.random() * a.length)];
     // the mood: 🙂 at the start, a random cheerful one after a hit, a random upset one after a miss
-    const mood = ok => { $('mood').textContent = pick(ok ? GOOD : BAD); react(ok ? 'bounce' : 'shake'); };
+    const mood = ok => { $('mood').textContent = $('task').classList.contains('late') ? '💔' : pick(ok ? GOOD : BAD); react(ok ? 'bounce' : 'shake'); };   // after the time is up it is always 💔, the animation stays
 
     // the cells of the word: [{ shape, mark }] and the tone, from the code of the parser
     function analyse(word) {
