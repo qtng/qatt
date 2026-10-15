@@ -40,6 +40,15 @@
     section.set { padding-block: 1.6rem; }
     h2.tones-h { font-family: Georgia, "Times New Roman", serif; font-weight: 400; text-align: center; margin: 1rem 0 1.6rem; }
     @media (max-width: 575.98px) { .glyph-strip .g { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
+    .glyph-strip .g[data-code] { cursor: pointer; }
+    dialog#variants { border: 1px solid #cdbf9f; border-radius: .7rem; background: #fffdf8; color: var(--ink); padding: .8rem 1rem 1rem; max-width: min(34rem, 94vw); box-shadow: 0 .6rem 2rem rgba(60, 40, 20, .3); }
+    dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
+    #variants .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; font-size: .85rem; color: #7b6c58; }
+    #variants .vars { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; }
+    #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 1px solid #e4d9c0; border-radius: .5rem; }
+    #variants .var .g { display: block; font-family: var(--qfont), sans-serif; font-size: 2.6rem; line-height: 1.2; }
+    #variants .var .r { display: block; font-size: .9rem; }
+    #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
   </style>
 </head>
 <body>
@@ -231,6 +240,11 @@
   </section>
 </main>
 
+<dialog id="variants" aria-label="Variants">
+  <div class="head"><span data-vi="Biến thể">Variants</span><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></div>
+  <div class="vars" id="variantsBody"></div>
+</dialog>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const parser = new VietnameseParser();
@@ -240,6 +254,23 @@
     const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.toQuocNgu({ onset: '_', rhyme: el.dataset.rhyme }) || ''; });
     document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
     label();
+    // a click on a shape or marked form: the seven characters of its group (U+F0000 + 7 * i, the shape and its six marked forms) in code point order
+    const dlg = document.getElementById('variants'), body = document.getElementById('variantsBody');
+    document.getElementById('variantsClose').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // a click outside the box
+    document.querySelectorAll('.g[data-code]').forEach(el => el.addEventListener('click', () => {
+      const [, shape, mark] = /^(_|[a-z]+?)([1-6]?),/.exec(el.dataset.code), clicked = +mark;
+      body.replaceChildren();
+      for (let n = 0; n <= 6; n++) {
+        const code = shape + (n || '') + ',,,0';
+        // the shape is read as an onset, a marked form as a rhyme without onset (as on this page)
+        const read = n ? parser.toQuocNgu({ onset: '_', rhyme: shape + n }) : document.querySelector(`.g[data-code="${shape},,,0"] + .lab`)?.textContent;
+        const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') });
+        v.append(Object.assign(document.createElement('span'), { className: 'g', textContent: QattText.syllable(code) || '' }), Object.assign(document.createElement('span'), { className: 'r', textContent: read || '' }));
+        body.append(v);
+      }
+      dlg.showModal();
+    }));
     const font = document.getElementById('font');   // the page starts in Gothic bold
     font.value = 'QATT Gothic Bold';
     font.dispatchEvent(new Event('change'));
