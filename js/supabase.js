@@ -25,8 +25,8 @@ link turns this user into a permanent one with the same id, so nothing is lost. 
 class SupabaseService {
   
   constructor() {
-    this.url = 'https://fteusrnytslaylfgemye.supabase.co';
-    this.key = 'sb_publishable_2meEMOnLkAPYby7xd7Uy_w_kmHQw7dq';
+    this.url = 'https://kfgqhhmdzboszpwsqkxt.supabase.co';
+    this.key = 'sb_publishable_99iUsu3_BQ6mp1TbZUEWlw_iVhDJhPi';
     this.client = null;
     this.user = null;
   }
