@@ -1,9 +1,9 @@
-// Edge Function "translate": Quốc Ngữ -> Chữ Nôm with Gemini in two steps, then the pronunciation of every character is checked by code (see pipeline.js).
+// Edge Function "translate": Quốc Ngữ -> Chữ Nôm with Gemini in two steps (see pipeline.js); the page checks the pronunciation of the characters.
 // Secrets: GEMINI_API_KEY (required), GEMINI_MODEL (optional), TRANSLATE_DAILY_LIMIT (optional, default 40 per user and day).
 // The prompts (and, if listed there, the model names) are loaded from the website, see PROMPTS_URL: they are changed in the
 // git repository qtng/chunom (js/translate_prompts.json), without deploying this function. The built-in defaults are the fallback.
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
-import { translate, parseDict, parsePrompts, buildReadings, DEFAULT_PROMPTS } from './pipeline.js';
+import { translate, parseDict, parsePrompts, DEFAULT_PROMPTS } from './pipeline.js';
 
 const ORIGINS = ['https://qatt.org', 'https://v2.chunom.org', 'https://chunom.org'];
 const MAX_CHARS = 400;
@@ -22,26 +22,6 @@ async function dictionary() {
   try { dictCache = parseDict(await (await fetch(DICT_URL, { signal: AbortSignal.timeout(8000) })).text()); } catch (e) { console.error('dictionary', e); dictCache = new Map(); }
   console.log('dictionary', dictCache.size, 'readings,', Date.now() - t0, 'ms');
   return dictCache;
-}
-
-// the readings of the characters (the dictionaries of js/ime.js, with dict.csv): loaded once; if that fails the translation runs without this check
-const JS_URL = DICT_URL.replace(/[^/]*$/, 'js/');
-let readingsCache: ReturnType<typeof buildReadings> | null = null, readingsTried = 0;
-async function readings() {
-  if (readingsCache) return readingsCache;
-  if (Date.now() - readingsTried < 60 * 1000) return null;
-  readingsTried = Date.now();
-  try {
-    const t0 = Date.now();
-    const files = await Promise.all(['base_chars.json', 'generated_chars.json'].map(async f => {
-      const r = await fetch(JS_URL + f, { signal: AbortSignal.timeout(10000) });
-      if (!r.ok) throw new Error(f + ' HTTP ' + r.status);
-      return r.json();
-    }));
-    readingsCache = buildReadings(files, await dictionary());
-    console.log('readings', readingsCache.chars.size, 'characters,', Date.now() - t0, 'ms');
-  } catch (e) { console.error('readings not loaded', String(e)); }
-  return readingsCache;
 }
 
 // the prompts of the website, kept for 5 minutes; if the file cannot be loaded or is invalid the last good version (or the defaults) stays
@@ -151,8 +131,8 @@ Deno.serve(async (req) => {
     async start(controller) {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       try {
-        const result = await translate(text, { callModel: callGemini, dict: await dictionary(), readings: await readings(), prompts: cfg.prompts, progress: (step: number) => send({ step }) });
-        console.log('result', cfg.version, JSON.stringify(result.units.map((u: { qn: string; chosen: string; read: string; state: string }) => [u.qn, u.chosen, u.read, u.state])));
+        const result = await translate(text, { callModel: callGemini, dict: await dictionary(), prompts: cfg.prompts, progress: (step: number) => send({ step }) });
+        console.log('result', cfg.version, JSON.stringify(result.units.map((u: { qn: string; chosen: string }) => [u.qn, u.chosen])));
         send({ result });
       } catch (e) {
         console.error('translate failed', e);
