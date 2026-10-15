@@ -48,6 +48,7 @@
     section.set:first-of-type .glyph-strip { --b: #fff8e6; --bc: #dccb9f; }
     .glyph-strip .item { gap: .25rem; }
     dialog#variants { border: 1px solid #cdbf9f; border-radius: .7rem; background: #fffdf8; color: var(--ink); padding: .8rem 1rem 1rem; max-width: min(34rem, 94vw); box-shadow: 0 .6rem 2rem rgba(60, 40, 20, .3); }
+    dialog#variants:focus { outline: none; }
     dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
     #variants .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; font-size: .85rem; color: #7b6c58; }
     #variants .head .tools { display: flex; align-items: center; gap: .4rem; }
@@ -58,6 +59,7 @@
     #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 1px solid #e4d9c0; border-radius: .5rem; }
     #variants .var .g { display: block; font-family: var(--qfont), sans-serif; font-size: 2.6rem; line-height: 1.2; }
     #variants .var .r { display: block; font-size: .9rem; }
+    #variants .var.muted { opacity: .4; }
     #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
   </style>
 </head>
@@ -250,7 +252,7 @@
   </section>
 </main>
 
-<dialog id="variants" aria-label="Variants">
+<dialog id="variants" aria-label="Variants" tabindex="-1">
   <div class="head"><span data-vi="Biến thể">Variants</span><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></div>
   <div class="vars" id="variantsBody"></div>
   <div class="text-center mt-2"><button type="button" class="speak" id="variantsSpeak" aria-label="Read aloud" data-vi-aria-label="Đọc to" title="Read aloud" data-vi-title="Đọc to"><i class="bi bi-volume-up"></i></button></div>
@@ -266,6 +268,7 @@
     document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
     label();
     // a click on a shape or marked form: the seven characters of its group (U+F0000 + 7 * i, the shape and its six marked forms) in code point order
+    const NO_READING = new Set(['ơng', 'ương', 'êng', 'uêng', 'ing', 'uyng']);
     const dlg = document.getElementById('variants'), body = document.getElementById('variantsBody');
     document.getElementById('variantsClose').addEventListener('click', () => dlg.close());
     // read all readings of the popup aloud, one after the other (the voice of the browser for Vietnamese)
@@ -274,7 +277,7 @@
     speak.hidden = !('speechSynthesis' in window);
     speak.addEventListener('click', () => {
       if (speak.classList.contains('on')) return stopSpeaking();
-      const u = new SpeechSynthesisUtterance(Array.from(body.querySelectorAll('.r'), r => r.textContent).join(', '));
+      const u = new SpeechSynthesisUtterance(Array.from(body.querySelectorAll('.r'), r => r.textContent).filter(Boolean).join(', '));
       u.lang = 'vi-VN';
       u.onend = u.onerror = () => speak.classList.remove('on');
       speechSynthesis.cancel();
@@ -291,12 +294,15 @@
         if (n === 1) continue;   // the first marked form is left out
         const code = shape + (n || '') + ',,,0';
         // the shape alone is the onset with ông, a marked form is a rhyme after the onset of the group (the shape)
-        const read = parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
-        const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') });
+        // these rhymes are shown without a reading
+        const lone = n && parser.toQuocNgu({ onset: '_', rhyme: shape + n });
+        const read = NO_READING.has(lone) ? '' : parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
+        const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') + (NO_READING.has(lone) ? ' muted' : '') });
         v.append(Object.assign(document.createElement('span'), { className: 'g', textContent: QattText.syllable(code) || '' }), Object.assign(document.createElement('span'), { className: 'r', textContent: read || '' }));
         body.append(v);
       }
       dlg.showModal();
+      dlg.focus();   // not the close button (it would show a focus ring)
     }));
     const font = document.getElementById('font');   // the page starts in Gothic bold
     font.value = 'QATT Gothic Bold';
