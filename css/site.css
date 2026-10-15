@@ -1,0 +1,44 @@
+/* The look that all pages of QATT (and later Chunom) share: for now the retro buttons as in check.html.
+   Load it after Bootstrap: <link rel="stylesheet" href="css/site.css"> (the path as for vendor/). Pages do not repeat these rules. */
+:root { --ink: #2b2118; --cinnabar: #a8362a; --retro-hover: #fff1c9; --retro-active: #ffe39a; }
+
+/* every Bootstrap button: a 2px dark outline and a hard 2px shadow that the button presses into when it is clicked.
+   Bootstrap draws its buttons from --bs-btn-* variables, so only these are set (the colours of btn-primary, btn-danger, … stay). */
+.btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-width: 2px;
+  --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-border-color: var(--ink);
+  --bs-btn-active-border-color: var(--ink);
+  --bs-btn-disabled-border-color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 2px 0 var(--ink);
+  transition: transform .12s, box-shadow .12s, background-color .15s, color .15s;
+}
+.btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled) { transform: translateY(-1px); }
+.btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
+.btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+.btn:not(.btn-close):not(.btn-link):disabled, .btn:not(.btn-close):not(.btn-link).disabled { box-shadow: none; }
+
+/* the outline buttons are cream with a yellow hover (Bootstrap would fill them grey) */
+.btn[class*="btn-outline-"] {
+  --bs-btn-bg: #fffdf8;
+  --bs-btn-hover-bg: var(--retro-hover);
+  --bs-btn-active-bg: var(--retro-active);
+  --bs-btn-hover-color: var(--bs-btn-color);
+  --bs-btn-active-color: var(--bs-btn-color);
+}
+.btn-outline-secondary, .btn-outline-dark { --bs-btn-color: var(--ink); }
+
+/* buttons of the site */
+.btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+.btn-cinnabar, .btn-accent {
+  --bs-btn-bg: var(--cinnabar); --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #7a261d; --bs-btn-active-color: #fff;
+}
+.btn-quiet, .btn-ink {
+  --bs-btn-bg: #fffdf8; --bs-btn-color: var(--ink);
+  --bs-btn-hover-bg: var(--retro-hover); --bs-btn-hover-color: var(--ink);
+  --bs-btn-active-bg: var(--retro-active); --bs-btn-active-color: var(--ink);
+}
