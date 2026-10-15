@@ -12,7 +12,9 @@ const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 40);
 let dictCache: Map<string, string[]> | null = null;
 async function dictionary() {
   if (dictCache) return dictCache;
-  try { dictCache = parseDict(await (await fetch(DICT_URL)).text()); } catch { dictCache = new Map(); }
+  const t0 = Date.now();
+  try { dictCache = parseDict(await (await fetch(DICT_URL, { signal: AbortSignal.timeout(8000) })).text()); } catch (e) { console.error('dictionary', e); dictCache = new Map(); }
+  console.log('dictionary', dictCache.size, 'readings,', Date.now() - t0, 'ms');
   return dictCache;
 }
 
@@ -34,14 +36,16 @@ async function callGemini(system: string, user: string) {
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) throw Object.assign(new Error('no key'), { code: 'config' });
   for (let attempt = 0; attempt < 2; attempt++) {
+    const t0 = Date.now();
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      signal: AbortSignal.timeout(40000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
         generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
     });
     if (r.status === 429 || r.status >= 500) { if (attempt === 0) { await new Promise(res => setTimeout(res, 2500)); continue; } throw Object.assign(new Error('busy'), { code: 'busy' }); }
     if (!r.ok) { console.error('gemini', MODEL, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
+    console.log('gemini', MODEL, r.status, Date.now() - t0, 'ms');
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || '';
     try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { return {}; }
   }
