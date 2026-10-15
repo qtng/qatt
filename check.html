@@ -105,8 +105,8 @@
     .task.solved .cells, .task.solved .cell + .cell { border-color: #146c43; }
     .card.task.win { animation: glow 1.2s ease-out; }
     @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
-    .cloud { position: absolute; left: 50%; bottom: .9rem; z-index: 2; pointer-events: none; font-weight: 600; font-family: Georgia, "Times New Roman", serif; font-size: 1.4rem; color: var(--ink); white-space: nowrap; opacity: 0; animation: cloud 1.6s ease-out forwards; }
-    @keyframes cloud { 0% { opacity: 0; transform: translate(-50%, 1em) scale(.8); } 20% { opacity: 1; transform: translate(-50%, -.9rem) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -3.4rem) scale(1.05); } }
+    .cloud { position: absolute; left: 50%; bottom: 0; z-index: 2; pointer-events: none; font-weight: 600; font-family: Georgia, "Times New Roman", serif; font-size: 1rem; color: var(--ink); white-space: nowrap; opacity: 0; animation: cloud 1.6s ease-out forwards; }
+    @keyframes cloud { 0% { opacity: 0; transform: translate(-50%, 0) scale(.8); } 20% { opacity: 1; transform: translate(-50%, -.5rem) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -1.5rem) scale(1.05); } }
     .gbtn.hint { animation: wiggle .8s ease-in-out 2; }
     @keyframes wiggle { 0%, 100% { transform: none; } 15% { transform: rotate(-10deg) scale(1.1); } 35% { transform: rotate(9deg) scale(1.1); } 55% { transform: rotate(-6deg) scale(1.05); } 75% { transform: rotate(4deg); } }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
