@@ -1,12 +1,13 @@
-// Quốc Ngữ -> Chữ Nôm: two steps of the model (the protocol of chunom/translate-chatbot.html):
-//   1. candidates for every syllable/word   2. one choice per unit
-// The check of the pronunciation (does every character read as its syllable?) is done by the page translate.html with the dictionaries of js/ime.js.
+// Quốc Ngữ -> Chữ Nôm. The page builds the candidate lists from its dictionaries (the characters listed for the readings of the
+// syllables and of compounds) and sends them; the model only chooses, in the context of the whole sentence, from these lists
+// (so the reading of a chosen character is right by construction). Only where a span has no suitable option it may name a character of its own.
 // The model is only called through `callModel(system, user)` -> parsed JSON, so the logic runs (and is tested) without Gemini.
 
 const HAN = /^\p{Script=Han}+$/u;
 const norm = s => String(s || '').normalize('NFC').toLowerCase().trim();
 
-// the text as syllables ("syl") and everything between them ("other": punctuation, digits, spaces)
+export const MAX_SPAN = 4, MAX_OPTIONS = 15, MAX_OPTIONS_TOTAL = 2500;
+
 export function tokenize(text) {
   const tokens = [];
   for (const m of String(text).matchAll(/[\p{L}\p{M}]+|\s+|[^\p{L}\p{M}\s]+/gu)) {
@@ -15,53 +16,34 @@ export function tokenize(text) {
   return tokens;
 }
 
-// the dictionary of the site (dict.csv: reading, characters, gloss, ...) as a map reading -> [{han, gloss}]
-export function parseDict(csv) {
-  const map = new Map();
-  for (const line of String(csv).split('\n')) {
-    const m = /^"((?:[^"]|"")*)","((?:[^"]|"")*)"(?:,"((?:[^"]|"")*)")?/.exec(line);
-    if (!m) continue;
-    const key = norm(m[1].replace(/""/g, '"')), han = m[2].replace(/""/g, '"'), gloss = (m[3] || '').replace(/""/g, '"');
-    if (!key || !han) continue;
-    if (!map.has(key)) map.set(key, []);
-    if (!map.get(key).some(e => e.han === han)) map.get(key).push({ han, gloss });
-  }
-  return map;
-}
-
-// ---- prompts. A prompt is a list of lines (joined with a line break); {{name}} is replaced by a value and lines that stay
-// empty are dropped. These defaults are used when the file of the website (chunom/js/translate_prompts.json) cannot be loaded.
+// ---- prompts: a list of lines, {{name}} is replaced, lines that stay empty are dropped
 export const DEFAULT_PROMPTS = {
   system: [
-    'You transcribe Vietnamese (Quốc Ngữ) into Chữ Nôm. Answer with JSON only, exactly in the requested shape, no comments.',
-    'Rules: never invent characters; if you do not know a reliable character, write none. Only Chữ Nôm / Han characters, no Chinese rewording: every unit stands for exactly the syllables given, in the same order, nothing added, nothing left out. For purely Vietnamese words (pronouns, particles, function words) never use a Sino-Vietnamese character with a different reading, e.g. never 我 for "tôi" (that is read "ngã"). The reading of a candidate must match the syllable.',
+    'You choose Chữ Nôm characters for Vietnamese (Quốc Ngữ) text. Answer with JSON only, exactly in the requested shape, no comments.',
   ],
-  step1: [
-    'STEP 1. Do not transcribe yet, only prepare candidates.',
-    'The whole sentence (for context): {{text}}',
-    'Syllables of the text (in order): {{syllables}}',
-    'Group them into words where appropriate (a unit has one or more consecutive syllables; every syllable belongs to exactly one unit, none missing, none added). Give each unit a sequential id starting at 1.',
-    'For each unit give 2 to 4 candidates sorted by confidence. Choose candidates that fit the meaning of the unit in this sentence (word class, sense in context); where a word is ambiguous, include a second reading. Prefer phono-semantic characters if available and confidence is sufficient.',
-    'Each candidate: {"char": "...", "codepoint": "U+...", "reading": "Quốc Ngữ reading", "type": "Sino-Vietnamese" | "purely Nôm" | "phono-semantic", "reason": "at most 10 words"}.',
-    '{{hintsLine}}',
-    'Answer: {"units": [{"id": 1, "qn": "the syllables of the unit separated by a space", "candidates": [ ... ]}]}',
+  main: [
+    'The sentence: {{text}}',
+    'Its syllables as [index, syllable]: {{syllables}}',
+    'For spans of syllables (at = index of the first syllable, len = number of syllables) the dictionaries list these characters for exactly that reading (all have the correct reading, in no particular order, no meanings given; use your own knowledge of Chữ Nôm and of the context to decide). Options: {{spans}}',
+    'Task: cover the syllables from the first to the last with consecutive words (a word is one span: at and len; every syllable belongs to exactly one word, in order, none missing, none twice). Use a compound span (len > 1) where the compound is the word meant in this sentence, else single syllables.',
+    'A * behind an option marks the character that the dictionary of the site gives as the usual one for this reading; choose it unless the sentence calls for another word.',
+    'For each word choose the option that is the right Chữ Nôm for it in the context of the whole sentence (word class, sense, the other words): the usual character of the word, not a variant or a character with another meaning. Prefer a listed option.',
+    'If you know that the right character of the word is not listed, or none of the options is the word, give the character you know as your own: set "own": true. Never invent characters; if you know none, write "?" and "own": true.',
+    'Besides the chosen option give up to two more options of the same span that would fit next best, best first ("alt"); leave "alt" out for a character of your own.',
+    'Also give a free, natural English translation of the whole sentence ("translation").',
+    'Answer: {"translation": "...", "words": [{"at": 0, "len": 1, "char": "...", "alt": ["...", "..."], "own": false}]}',
   ],
-  // the dictionary entries of the words, as a hint for the model (the line {{hintsLine}} of step1; without it the answers were clearly worse)
-  hintsLine: 'Dictionary entries of this site that may help (reading: characters with meaning; use them when the meaning fits the sentence): {{hints}}',
-  step1retry: 'Your previous answer was rejected: {{error}}. Follow the syllable list exactly.',
-  step2: [
-    'STEP 2. Choose exactly one candidate per unit, only from its list; if none fits, use "?".',
-    'The whole sentence: {{text}}',
-    'Make sure the choices are coherent in context (word class, meaning, identical words spelled identically); use the meaning given with a candidate.',
-    'Units: {{units}}',
-    'Answer: {"choices": [{"id": 1, "char": "..."}]}',
+  // appended only when the page asks for a translation; {{language}} is the name of the language
+  translation: [
+    'Also give a free, natural translation of the whole sentence into {{language}}.',
+    'Add it to the answer as "translation": "..." next to "words".',
   ],
+  retry: 'Your previous answer was rejected: {{error}}. Follow the rules exactly.',
 };
-// what every prompt must contain, else the file is rejected
-const NEEDS = { step1: ['text', 'syllables'], hintsLine: ['hints'], step1retry: ['error'], step2: ['text', 'units'] };
+const NEEDS = { main: ['text', 'syllables', 'spans'], retry: ['error'], translation: ['language'] };
 const joined = v => (Array.isArray(v) ? v.join('\n') : v);
 
-// the file of the website: {"version": "...", "models": ["..."], "prompts": {...}}; returns {prompts, models, version} or throws
+// the file of the website ({"version", "models", "prompts"}); returns {prompts, models, version} or throws
 export function parsePrompts(raw) {
   if (!raw || typeof raw !== 'object') throw new Error('not an object');
   const prompts = { ...DEFAULT_PROMPTS };
@@ -79,105 +61,97 @@ export function parsePrompts(raw) {
   }
   return { prompts, models, version: String(raw.version || '') };
 }
+const render = (P, key, vars = {}) => joined(P[key]).replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k] === undefined ? '' : vars[k])).split('\n').filter(l => l.trim()).join('\n');
 
-const render = (P, key, vars = {}) => joined(P[key]).replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k] === undefined ? '' : vars[k]))
-  .split('\n').filter(l => l.trim()).join('\n');
-
-function step1Prompt(P, text, syllables, hints) {
-  return render(P, 'step1', { text: JSON.stringify(text), syllables: JSON.stringify(syllables),
-    hintsLine: hints.length ? render(P, 'hintsLine', { hints: JSON.stringify(hints) }) : '' });
-}
-
-function step2Prompt(P, text, units) {
-  return render(P, 'step2', { text: JSON.stringify(text),
-    units: JSON.stringify(units.map(u => ({ id: u.id, qn: u.qn, candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, meaning: (c.source === 'dictionary' ? c.gloss : c.reason) || undefined })) }))) });
-}
-
-const asArray = x => (Array.isArray(x) ? x : []);
-
-// the units of step 1 must cover the syllables exactly; returns the clean units or an error text.
-// The candidates are those of the model. The dictionary of the site is only kept next to them (`dict`, to compare with the choice);
-// it supplies candidates only for a unit for which the model proposed none.
-function checkUnits(raw, syllables, dict) {
-  const units = [];
-  let pos = 0;
-  for (const u of asArray(raw && raw.units)) {
-    const syl = String(u && u.qn || '').split(/\s+/).filter(Boolean).map(norm);
-    if (!syl.length) return { error: 'a unit without syllables' };
-    for (const s of syl) {
-      if (s !== norm(syllables[pos])) return { error: `unit ${u.id} ("${u.qn}") does not match the syllable "${syllables[pos] || '(end of text)'}" at position ${pos + 1}` };
-      pos++;
+// ---- the lists of the page: [{at, len, options: [{c: "字", m: "meaning"}]}]; checked and cleaned, throws {code: 'bad_request'}
+export function cleanSpans(raw, syllableCount) {
+  const bad = () => Object.assign(new Error('bad spans'), { code: 'bad_request' });
+  if (!Array.isArray(raw) || raw.length > 1200) throw bad();
+  const seen = new Set(), spans = [];
+  let total = 0;
+  for (const s of raw) {
+    if (!s || !Number.isInteger(s.at) || !Number.isInteger(s.len) || s.len < 1 || s.len > MAX_SPAN || s.at < 0 || s.at + s.len > syllableCount) throw bad();
+    const key = s.at + '+' + s.len;
+    if (seen.has(key) || !Array.isArray(s.options)) throw bad();
+    seen.add(key);
+    const options = [], chars = new Set();
+    for (const o of s.options.slice(0, MAX_OPTIONS)) {
+      if (!o || typeof o.c !== 'string' || !HAN.test(o.c) || o.c.length > 16 || chars.has(o.c)) continue;
+      chars.add(o.c);
+      options.push({ c: o.c, m: String(o.m || '').slice(0, 80), s: o.s ? 1 : 0 });
     }
-    const key = norm(syl.join(' ')), entries = (dict.get(key) || []).slice(0, 6);
-    const seen = new Set();
-    const candidates = asArray(u.candidates).filter(c => c && HAN.test(String(c.char)) && !seen.has(c.char) && seen.add(c.char)).slice(0, 4)
-      .map(c => ({ char: c.char, reading: String(c.reading || ''), type: String(c.type || ''), reason: String(c.reason || ''), source: 'model', inDict: false, gloss: '' }));
-    for (const c of candidates) { const e = entries.find(e => e.han === c.char); if (e) { c.inDict = true; c.gloss = e.gloss; } }
-    if (!candidates.length) for (const e of entries.slice(0, 3)) candidates.push({ char: e.han, reading: key, type: 'dictionary', reason: '', source: 'dictionary', inDict: true, gloss: e.gloss });
-    units.push({ id: units.length + 1, qn: key, syllables: syl, candidates, dict: entries });
+    total += options.length;
+    if (options.length) spans.push({ at: s.at, len: s.len, options });
   }
-  if (pos !== syllables.length) return { error: `the units cover ${pos} of ${syllables.length} syllables` };
-  return { units };
+  if (total > MAX_OPTIONS_TOTAL) throw bad();
+  return spans;
 }
 
-// a choice must come from the list of the unit, else its first candidate, else "?"
-function applyChoices(units, raw) {
-  const given = new Map(asArray(raw && raw.choices).map(c => [Number(c && c.id), c && c.char]));
-  for (const u of units) {
-    const c = given.get(u.id);
-    if (c === '?') { u.chosen = '?'; continue; }
-    const found = u.candidates.find(x => x.char === c);
-    u.chosen = found ? found.char : (u.candidates[0] ? u.candidates[0].char : '?');
-    if (c !== undefined && !found && u.candidates[0]) u.corrected = true;   // the model chose something outside the list
+// the answer must cover the syllables exactly with consecutive words; returns the words or an error text
+function checkWords(raw, syllables, spans) {
+  const list = Array.isArray(raw && raw.words) ? raw.words : null;
+  if (!list || !list.length) return { error: 'no "words" list' };
+  const byKey = new Map(spans.map(s => [s.at + '+' + s.len, s]));
+  const words = [];
+  let pos = 0;
+  for (const w of list.slice().sort((a, b) => Number(a && a.at) - Number(b && b.at))) {
+    if (!w || w.at !== pos || !Number.isInteger(w.len) || w.len < 1 || pos + w.len > syllables.length) return { error: `the words must follow each other without gap or overlap: expected a word at ${pos}, got ${JSON.stringify(w)}` };
+    const span = byKey.get(w.at + '+' + w.len) || null;
+    if (w.len > 1 && !span && !(typeof w.char === 'string' && w.own === true)) return { error: `there is no span at ${w.at} with len ${w.len}` };
+    const char = typeof w.char === 'string' ? w.char.trim() : '';
+    words.push({ at: w.at, len: w.len, char, own: w.own === true, span, alt: Array.isArray(w.alt) ? w.alt.filter(x => typeof x === 'string') : [] });
+    pos += w.len;
   }
+  if (pos !== syllables.length) return { error: `the words cover ${pos} of ${syllables.length} syllables` };
+  return { words, translation: typeof raw.translation === 'string' ? raw.translation.trim().slice(0, 1000) : '' };
 }
 
-// the result: the choice, the candidates and the entries of dict.csv for every unit, and the order of units and punctuation (parts);
-// the page rates the words and checks the readings
-function assemble(text, tokens, units) {
+export const LANGUAGES = { en: 'English', vi: 'Vietnamese', de: 'German', fr: 'French', es: 'Spanish', it: 'Italian', pt: 'Portuguese', ru: 'Russian', zh: 'Chinese', ja: 'Japanese', ko: 'Korean' };
+
+// `lang`: a key of LANGUAGES, or empty for no translation
+export async function translate(text, rawSpans, { callModel, progress = () => {}, prompts = DEFAULT_PROMPTS, lang = '' }) {
+  const tokens = tokenize(text);
+  const syl = tokens.filter(t => t.type === 'syl').map(t => t.text);
+  if (!syl.length) throw Object.assign(new Error('no text'), { code: 'empty' });
+  const syllables = syl.map(norm);
+  const spans = cleanSpans(rawSpans, syllables.length);
+  const SYSTEM = render(prompts, 'system');
+  const user = render(prompts, 'main', {
+    text: JSON.stringify(text.trim()),
+    syllables: JSON.stringify(syl.map((s, i) => [i, s])),
+    spans: JSON.stringify(spans.map(s => ({ at: s.at, len: s.len, qn: syllables.slice(s.at, s.at + s.len).join(' '), options: s.options.map(o => o.c + (o.s ? '*' : '')).join(' ') }))),
+  }) + (Object.hasOwn(LANGUAGES, lang) ? '\n' + render(prompts, 'translation', { language: LANGUAGES[lang] }) : '');
+
+  progress(1);
+  let step = checkWords(await callModel(SYSTEM, user), syllables, spans);
+  if (step.error) step = checkWords(await callModel(SYSTEM, user + '\n' + render(prompts, 'retry', { error: step.error })), syllables, spans);
+  let words = step.words;
+  if (!words) {   // the model did not manage it: single syllables, the first option of each
+    const bySingle = new Map(spans.filter(s => s.len === 1).map(s => [s.at, s]));
+    words = syllables.map((_, at) => { const s = bySingle.get(at); return { at, len: 1, char: s ? s.options[0].c : '?', own: !s, span: s || null, fallback: true }; });
+  }
+
+  // the result: the words with their options; a character that is not in the options of its span counts as the model's own
   const parts = [];
-  let k = 0;   // index of the syllable
-  const byFirst = new Map();
-  let p = 0;
-  for (const u of units) { byFirst.set(p, u); p += u.syllables.length; }
-  const shown = u => u.chosen === '?' ? `[${u.qn}]` : u.chosen;
+  const byFirst = new Map(words.map((w, id) => [w.at, id + 1]));
+  let k = 0;
   for (const t of tokens) {
     if (t.type === 'other') { if (/\S/.test(t.text)) parts.push({ text: t.text.trim() }); continue; }
-    if (byFirst.has(k)) parts.push({ unit: byFirst.get(k).id });
+    if (byFirst.has(k)) parts.push({ word: byFirst.get(k) });
     k++;
   }
-  const byId = new Map(units.map(u => [u.id, u]));
   return {
-    nom: parts.map(x => (x.unit ? shown(byId.get(x.unit)) : x.text)).join('').replace(/\s+/g, ''),
     qn: text.trim(),
     parts,
-    units: units.map(u => ({
-      id: u.id, qn: u.qn, chosen: u.chosen,
-      dict: u.dict,
-      candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, inDict: c.inDict, meaning: c.gloss || c.reason || '' })),
-    })),
+    fallback: !step.words,
+    translation: step.translation || '',
+    words: words.map((w, i) => {
+      const options = w.span ? w.span.options : [];
+      const chosen = w.char && w.char !== '?' && HAN.test(w.char) ? w.char : '?';
+      const own = chosen === '?' || w.own || !options.some(o => o.c === chosen);
+      // the other options are known to the page (it sent them); only the model's next best ones are returned, best first
+      const alt = own ? [] : (w.alt || []).filter((c, j, a) => c !== chosen && options.some(o => o.c === c) && a.indexOf(c) === j).slice(0, 2);
+      return { id: i + 1, at: w.at, len: w.len, qn: syllables.slice(w.at, w.at + w.len).join(' '), chosen, own, alt };
+    }),
   };
-}
-
-export async function translate(text, { callModel, dict = new Map(), progress = () => {}, prompts = DEFAULT_PROMPTS }) {
-  const SYSTEM = render(prompts, 'system');
-  const tokens = tokenize(text);
-  const syllables = tokens.filter(t => t.type === 'syl').map(t => t.text);
-  if (!syllables.length) throw Object.assign(new Error('no text'), { code: 'empty' });
-  const hints = [...new Set(syllables.map(norm))].filter(s => dict.has(s)).slice(0, 80).map(s => [s, dict.get(s).slice(0, 4).map(e => e.han + (e.gloss ? ' = ' + e.gloss.slice(0, 40) : '')).join('; ')]);
-
-  // ---- step 1
-  progress(1);
-  let step = checkUnits(await callModel(SYSTEM, step1Prompt(prompts, text.trim(), syllables, hints)), syllables, dict);
-  if (step.error) {   // one more try with the error named
-    step = checkUnits(await callModel(SYSTEM, step1Prompt(prompts, text.trim(), syllables, hints) + '\n' + render(prompts, 'step1retry', { error: step.error })), syllables, dict);
-    if (step.error) throw Object.assign(new Error(step.error), { code: 'step1' });
-  }
-  const units = step.units;
-
-  // ---- step 2
-  progress(2);
-  applyChoices(units, await callModel(SYSTEM, step2Prompt(prompts, text.trim(), units)));
-
-  return assemble(text, tokens, units);
 }
