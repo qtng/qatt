@@ -14,16 +14,16 @@ export function tokenize(text) {
   return tokens;
 }
 
-// the dictionary of the site (dict.csv: reading, characters, gloss, ...) as a map reading -> [characters]
+// the dictionary of the site (dict.csv: reading, characters, gloss, ...) as a map reading -> [{han, gloss}]
 export function parseDict(csv) {
   const map = new Map();
   for (const line of String(csv).split('\n')) {
-    const m = /^"((?:[^"]|"")*)","((?:[^"]|"")*)"/.exec(line);
+    const m = /^"((?:[^"]|"")*)","((?:[^"]|"")*)"(?:,"((?:[^"]|"")*)")?/.exec(line);
     if (!m) continue;
-    const key = norm(m[1].replace(/""/g, '"')), han = m[2].replace(/""/g, '"');
+    const key = norm(m[1].replace(/""/g, '"')), han = m[2].replace(/""/g, '"'), gloss = (m[3] || '').replace(/""/g, '"');
     if (!key || !han) continue;
     if (!map.has(key)) map.set(key, []);
-    if (!map.get(key).includes(han)) map.get(key).push(han);
+    if (!map.get(key).some(e => e.han === han)) map.get(key).push({ han, gloss });
   }
   return map;
 }
@@ -31,19 +31,21 @@ export function parseDict(csv) {
 const SYSTEM = `You transcribe Vietnamese (Quốc Ngữ) into Chữ Nôm. Answer with JSON only, exactly in the requested shape, no comments.
 Rules: never invent characters; if you do not know a reliable character, write none. Only Chữ Nôm / Han characters, no Chinese rewording: every unit stands for exactly the syllables given, in the same order, nothing added, nothing left out. For purely Vietnamese words (pronouns, particles, function words) never use a Sino-Vietnamese character with a different reading, e.g. never 我 for "tôi" (that is read "ngã"). The reading of a candidate must match the syllable.`;
 
-function step1Prompt(syllables, hints) {
+function step1Prompt(text, syllables, hints) {
   return `STEP 1. Do not transcribe yet, only prepare candidates.
+The whole sentence (for context): ${JSON.stringify(text)}
 Syllables of the text (in order): ${JSON.stringify(syllables)}
 Group them into words where appropriate (a unit has one or more consecutive syllables; every syllable belongs to exactly one unit, none missing, none added). Give each unit a sequential id starting at 1.
-For each unit give 2 to 4 candidates sorted by confidence. Prefer phono-semantic characters if available and confidence is sufficient.
+For each unit give 2 to 4 candidates sorted by confidence. Choose candidates that fit the meaning of the unit in this sentence (word class, sense in context); where a word is ambiguous, include a second reading. Prefer phono-semantic characters if available and confidence is sufficient.
 Each candidate: {"char": "...", "codepoint": "U+...", "reading": "Quốc Ngữ reading", "type": "Sino-Vietnamese" | "purely Nôm" | "phono-semantic", "reason": "at most 10 words"}.
-${hints.length ? 'Dictionary entries of this site that may help (reading: characters): ' + JSON.stringify(hints) + '\n' : ''}Answer: {"units": [{"id": 1, "qn": "the syllables of the unit separated by a space", "candidates": [ ... ]}]}`;
+${hints.length ? 'Dictionary entries of this site that may help (reading: characters with meaning; use them when the meaning fits the sentence): ' + JSON.stringify(hints) + '\n' : ''}Answer: {"units": [{"id": 1, "qn": "the syllables of the unit separated by a space", "candidates": [ ... ]}]}`;
 }
 
-function step2Prompt(units, note) {
+function step2Prompt(text, units, note) {
   return `STEP 2. Choose exactly one candidate per unit, only from its list; if none fits, use "?".
-Make sure the choices are coherent in context (word class, meaning, identical words spelled identically).
-${note ? note + '\n' : ''}Units: ${JSON.stringify(units.map(u => ({ id: u.id, qn: u.qn, candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type })) })))}
+The whole sentence: ${JSON.stringify(text)}
+Make sure the choices are coherent in context (word class, meaning, identical words spelled identically); use the meaning given with a candidate.
+${note ? note + '\n' : ''}Units: ${JSON.stringify(units.map(u => ({ id: u.id, qn: u.qn, candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, meaning: c.meaning || undefined })) })))}
 Answer: {"choices": [{"id": 1, "char": "..."}]}`;
 }
 
@@ -69,10 +71,15 @@ function checkUnits(raw, syllables, dict) {
     }
     const seen = new Set();
     const candidates = asArray(u.candidates).filter(c => c && HAN.test(String(c.char)) && !seen.has(c.char) && seen.add(c.char)).slice(0, 4)
-      .map(c => ({ char: c.char, reading: String(c.reading || ''), type: String(c.type || ''), reason: String(c.reason || ''), inDict: (dict.get(norm(syl.join(' '))) || []).includes(c.char) }));
+      .map(c => ({ char: c.char, reading: String(c.reading || ''), type: String(c.type || ''), reason: String(c.reason || ''), inDict: false }));
     // the dictionary of the site is authoritative: its characters for this reading are always candidates, and come first
     const key = norm(syl.join(' ')), known = (dict.get(key) || []).slice(0, 3);
-    for (const han of known) if (!candidates.some(c => c.char === han)) candidates.push({ char: han, reading: syl.join(' '), type: 'dictionary', reason: '', inDict: true });
+    for (const e of known) {
+      const have = candidates.find(c => c.char === e.han);
+      if (have) { have.inDict = true; have.meaning = e.gloss; }
+      else candidates.push({ char: e.han, reading: syl.join(' '), type: 'dictionary', reason: '', inDict: true, meaning: e.gloss });
+    }
+    for (const c of candidates) if (!c.meaning && c.reason) c.meaning = c.reason;
     candidates.sort((a, b) => Number(b.inDict) - Number(a.inDict));
     units.push({ id: units.length + 1, qn: key, syllables: syl, candidates: candidates.slice(0, 6) });
   }
@@ -100,20 +107,20 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
   const tokens = tokenize(text);
   const syllables = tokens.filter(t => t.type === 'syl').map(t => t.text);
   if (!syllables.length) throw Object.assign(new Error('no text'), { code: 'empty' });
-  const hints = [...new Set(syllables.map(norm))].filter(s => dict.has(s)).slice(0, 80).map(s => [s, dict.get(s).slice(0, 4).join(' ')]);
+  const hints = [...new Set(syllables.map(norm))].filter(s => dict.has(s)).slice(0, 80).map(s => [s, dict.get(s).slice(0, 4).map(e => e.han + (e.gloss ? ' = ' + e.gloss.slice(0, 40) : '')).join('; ')]);
 
   // ---- step 1
   progress(1);
-  let step = checkUnits(await callModel(SYSTEM, step1Prompt(syllables, hints)), syllables, dict);
+  let step = checkUnits(await callModel(SYSTEM, step1Prompt(text.trim(), syllables, hints)), syllables, dict);
   if (step.error) {   // one more try with the error named
-    step = checkUnits(await callModel(SYSTEM, step1Prompt(syllables, hints) + `\nYour previous answer was rejected: ${step.error}. Follow the syllable list exactly.`), syllables, dict);
+    step = checkUnits(await callModel(SYSTEM, step1Prompt(text.trim(), syllables, hints) + `\nYour previous answer was rejected: ${step.error}. Follow the syllable list exactly.`), syllables, dict);
     if (step.error) throw Object.assign(new Error(step.error), { code: 'step1' });
   }
   const units = step.units;
 
   // ---- step 2
   progress(2);
-  applyChoices(units, await callModel(SYSTEM, step2Prompt(units)));
+  applyChoices(units, await callModel(SYSTEM, step2Prompt(text.trim(), units)));
 
   // ---- step 3: read back what was chosen (only the characters), compare with the units, repair once
   progress(3);
@@ -128,7 +135,7 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
   if (bad.length) {
     const note = 'These units failed the back-reading check. Choose a different candidate (or "?") for exactly these units: ' + JSON.stringify(bad.map(u => ({ id: u.id, expected: u.qn, read_as: u.read, rejected: u.chosen })));
     const before = new Map(bad.map(u => [u.id, u.chosen]));
-    const raw = await callModel(SYSTEM, step2Prompt(bad, note));
+    const raw = await callModel(SYSTEM, step2Prompt(text.trim(), bad, note));
     const given = new Map(asArray(raw && raw.choices).map(c => [Number(c && c.id), c && c.char]));
     for (const u of bad) {
       const c = given.get(u.id);

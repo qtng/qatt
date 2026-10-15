@@ -10,7 +10,7 @@ const DICT_URL = Deno.env.get('DICT_URL') || 'https://v2.chunom.org/chunom/dict.
 const MODELS = (Deno.env.get('GEMINI_MODEL') || 'gemini-3.5-flash,gemini-3.1-flash-lite,gemini-3.8-flash').split(',').map(m => m.trim()).filter(Boolean);
 const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 40);
 
-let dictCache: Map<string, string[]> | null = null;
+let dictCache: Map<string, { han: string; gloss: string }[]> | null = null;
 async function dictionary() {
   if (dictCache) return dictCache;
   const t0 = Date.now();
