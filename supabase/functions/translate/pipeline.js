@@ -70,7 +70,11 @@ function checkUnits(raw, syllables, dict) {
     const seen = new Set();
     const candidates = asArray(u.candidates).filter(c => c && HAN.test(String(c.char)) && !seen.has(c.char) && seen.add(c.char)).slice(0, 4)
       .map(c => ({ char: c.char, reading: String(c.reading || ''), type: String(c.type || ''), reason: String(c.reason || ''), inDict: (dict.get(norm(syl.join(' '))) || []).includes(c.char) }));
-    units.push({ id: units.length + 1, qn: syl.join(' '), syllables: syl, candidates });
+    // the dictionary of the site is authoritative: its characters for this reading are always candidates, and come first
+    const key = norm(syl.join(' ')), known = (dict.get(key) || []).slice(0, 3);
+    for (const han of known) if (!candidates.some(c => c.char === han)) candidates.push({ char: han, reading: syl.join(' '), type: 'dictionary', reason: '', inDict: true });
+    candidates.sort((a, b) => Number(b.inDict) - Number(a.inDict));
+    units.push({ id: units.length + 1, qn: key, syllables: syl, candidates: candidates.slice(0, 6) });
   }
   if (pos !== syllables.length) return { error: `the units cover ${pos} of ${syllables.length} syllables` };
   return { units };
