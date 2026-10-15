@@ -33,9 +33,14 @@ export const DEFAULT_PROMPTS = {
     'Also give a free, natural English translation of the whole sentence ("translation").',
     'Answer: {"translation": "...", "words": [{"at": 0, "len": 1, "char": "...", "alt": ["...", "..."], "own": false}]}',
   ],
+  // appended only when the page asks for a translation; {{language}} is the name of the language
+  translation: [
+    'Also give a free, natural translation of the whole sentence into {{language}}.',
+    'Add it to the answer as "translation": "..." next to "words".',
+  ],
   retry: 'Your previous answer was rejected: {{error}}. Follow the rules exactly.',
 };
-const NEEDS = { main: ['text', 'syllables', 'spans'], retry: ['error'] };
+const NEEDS = { main: ['text', 'syllables', 'spans'], retry: ['error'], translation: ['language'] };
 const joined = v => (Array.isArray(v) ? v.join('\n') : v);
 
 // the file of the website ({"version", "models", "prompts"}); returns {prompts, models, version} or throws
@@ -101,7 +106,10 @@ function checkWords(raw, syllables, spans) {
   return { words, translation: typeof raw.translation === 'string' ? raw.translation.trim().slice(0, 1000) : '' };
 }
 
-export async function translate2(text, rawSpans, { callModel, progress = () => {}, prompts = DEFAULT_PROMPTS }) {
+export const LANGUAGES = { en: 'English', vi: 'Vietnamese', de: 'German', fr: 'French', es: 'Spanish', it: 'Italian', pt: 'Portuguese', ru: 'Russian', zh: 'Chinese', ja: 'Japanese', ko: 'Korean' };
+
+// `lang`: a key of LANGUAGES, or empty for no translation
+export async function translate2(text, rawSpans, { callModel, progress = () => {}, prompts = DEFAULT_PROMPTS, lang = '' }) {
   const tokens = tokenize(text);
   const syl = tokens.filter(t => t.type === 'syl').map(t => t.text);
   if (!syl.length) throw Object.assign(new Error('no text'), { code: 'empty' });
@@ -112,7 +120,7 @@ export async function translate2(text, rawSpans, { callModel, progress = () => {
     text: JSON.stringify(text.trim()),
     syllables: JSON.stringify(syl.map((s, i) => [i, s])),
     spans: JSON.stringify(spans.map(s => ({ at: s.at, len: s.len, qn: syllables.slice(s.at, s.at + s.len).join(' '), options: s.options.map(o => o.c + (o.s ? '*' : '')).join(' ') }))),
-  });
+  }) + (Object.hasOwn(LANGUAGES, lang) ? '\n' + render(prompts, 'translation', { language: LANGUAGES[lang] }) : '');
 
   progress(1);
   let step = checkWords(await callModel(SYSTEM, user), syllables, spans);
