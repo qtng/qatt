@@ -47,6 +47,7 @@
     .glyph-strip { --b: #e3eef8; --bc: #b7cde2; }   /* the colours of the buttons in soundcheck.html: light blue for the marked forms, beige for the shapes */
     section.set:first-of-type .glyph-strip { --b: #fff8e6; --bc: #dccb9f; }
     .glyph-strip .item { gap: .25rem; }
+    .glyph-strip .item.muted { opacity: .4; }
     dialog#variants { border: 1px solid #cdbf9f; border-radius: .7rem; background: #fffdf8; color: var(--ink); padding: .8rem 1rem 1rem; max-width: min(34rem, 94vw); box-shadow: 0 .6rem 2rem rgba(60, 40, 20, .3); }
     dialog#variants:focus { outline: none; }
     dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
@@ -264,11 +265,14 @@
     // the shapes and marked forms are written from their codes, so they follow the code points of qatt-text.js (and the fonts)
     document.querySelectorAll('.g[data-code]').forEach(el => { el.textContent = QattText.syllable(el.dataset.code) || ''; });
     // the readings of the marked forms: how the parser reads the glyph (as a rhyme without onset) after the decoding
-    const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => { el.textContent = parser.toQuocNgu({ onset: '_', rhyme: el.dataset.rhyme }) || ''; });
+    const NO_READING = new Set(['ơng', 'ương', 'êng', 'uêng', 'ing', 'uyng']);   // shown muted, without a reading in the popup
+    const label = () => document.querySelectorAll('[data-rhyme]').forEach(el => {
+      el.textContent = parser.toQuocNgu({ onset: '_', rhyme: el.dataset.rhyme }) || '';
+      el.closest('.item').classList.toggle('muted', NO_READING.has(el.textContent));
+    });
     document.getElementById('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); label(); });
     label();
     // a click on a shape or marked form: the seven characters of its group (U+F0000 + 7 * i, the shape and its six marked forms) in code point order
-    const NO_READING = new Set(['ơng', 'ương', 'êng', 'uêng', 'ing', 'uyng']);
     const dlg = document.getElementById('variants'), body = document.getElementById('variantsBody');
     document.getElementById('variantsClose').addEventListener('click', () => dlg.close());
     // read all readings of the popup aloud, one after the other (the voice of the browser for Vietnamese)
