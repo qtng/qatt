@@ -42,7 +42,7 @@ async function callGemini(system: string, user: string) {
       body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
         generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
     });
-    if (r.status === 429 || r.status >= 500) { if (attempt === 0) { await new Promise(res => setTimeout(res, 2500)); continue; } throw Object.assign(new Error('busy'), { code: 'busy' }); }
+    if (r.status === 429 || r.status >= 500) { console.error('gemini', MODEL, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 500)); if (attempt === 0) { await new Promise(res => setTimeout(res, 2500)); continue; } throw Object.assign(new Error('busy'), { code: 'busy' }); }
     if (!r.ok) { console.error('gemini', MODEL, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
     console.log('gemini', MODEL, r.status, Date.now() - t0, 'ms');
