@@ -1,6 +1,6 @@
-// Quốc Ngữ -> Chữ Nôm: two steps of the model (the protocol of chunom/translate-chatbot.html), then the check by code:
-//   1. candidates for every syllable/word   2. one choice per unit   3. (no model) does every character read as its syllable, according to
-//   the dictionaries of the site (dict.csv, js/base_chars.json, js/generated_chars.json)? A choice that does not is replaced by a candidate that does
+// Quốc Ngữ -> Chữ Nôm: two steps of the model (the protocol of chunom/translate-chatbot.html):
+//   1. candidates for every syllable/word   2. one choice per unit
+// The check of the pronunciation (does every character read as its syllable?) is done by the page translate.html with the dictionaries of js/ime.js.
 // The model is only called through `callModel(system, user)` -> parsed JSON, so the logic runs (and is tested) without Gemini.
 
 const HAN = /^\p{Script=Han}+$/u;
@@ -132,93 +132,34 @@ function applyChoices(units, raw) {
   }
 }
 
-// ---- the check of the pronunciation: which readings do the dictionaries of the site list for a character?
-// files: the parsed JSON files of js/ime.js ({dict: "reading:glyph,glyph|..."}), dict: the Map of parseDict. Returns {chars, words}:
-// chars: character -> set of syllables it is listed with (a word with as many characters as syllables gives one syllable per character),
-// words: "reading|glyphs" of all entries (also words with other numbers of characters)
-export function buildReadings(files, dict) {
-  const chars = new Map(), words = new Set();
-  const add = (reading, glyph) => {
-    if (!reading || !glyph) return;
-    words.add(reading + '|' + glyph);
-    const syl = reading.split(' '), cs = [...glyph];
-    if (syl.length !== cs.length) return;
-    cs.forEach((c, i) => { if (!chars.has(c)) chars.set(c, new Set()); chars.get(c).add(syl[i]); });
-  };
-  for (const f of files) {
-    for (const entry of String(f && f.dict || '').replace(/[\r\n]/g, '').split('|')) {
-      const sep = entry.indexOf(':', 1);
-      if (sep < 0) continue;
-      const key = entry.slice(0, sep);
-      if (!/^[\p{L}\p{M}]+$/u.test(key)) continue;   // symbols such as "-_ideographicHyphen"
-      const reading = norm(key.replace(/(\p{Lu})/gu, ' $1'));
-      for (const glyph of entry.slice(sep + 1).split(',')) add(reading, glyph.trim());
-    }
-  }
-  for (const [reading, entries] of dict) for (const e of entries) add(reading, e.han);
-  return { chars, words };
-}
-
-// does the chosen text read as the syllables of the unit? {ok: true}, {ok: false, read: "the readings listed for the characters"} or {ok: undefined} (not decidable)
-function verify(u, R, glyphs = u.chosen) {
-  const cs = [...glyphs];
-  if (R.words.has(u.qn + '|' + glyphs)) return { ok: true };
-  if (cs.length !== u.syllables.length) return { ok: undefined };   // another number of characters than syllables: only a listed word can be confirmed
-  const bad = []; let unknown = false;
-  cs.forEach((c, i) => {
-    const set = R.chars.get(c);
-    if (!set) unknown = true;
-    else if (!set.has(u.syllables[i])) bad.push([...set].slice(0, 3).join(', '));
-  });
-  if (bad.length) return { ok: false, read: bad.join(' / ') };
-  return { ok: unknown ? undefined : true };
-}
-
-// the model and the dictionary of the site name the same character for this reading: two sources agree
-const agrees = u => u.chosen !== '?' && u.dict.some(e => e.han === u.chosen);
-
-// state of a word: sure (model and dictionary agree, or the dictionaries list the reading), differs (dict.csv lists other characters for this
-// reading), uncertain (no character, or the character does not read like that), unchecked (not decidable)
-function stateOf(u) {
-  if (u.chosen === '?') return { state: 'uncertain', why: 'nochar' };
-  if (u.ok === false) return { state: 'uncertain', why: 'readas' };
-  if (agrees(u)) return { state: 'sure', why: 'dictionary' };
-  if (u.dict.length) return { state: 'differs', why: 'differs' };
-  if (u.ok === true) return { state: 'sure', why: 'dictionaries' };
-  return { state: 'unchecked', why: 'unknown' };
-}
-
-// the result: the text with its punctuation, the units with their state. checked: the readings could be checked
-function assemble(text, tokens, units, checked) {
-  const out = [];
+// the result: the choice, the candidates and the entries of dict.csv for every unit, and the order of units and punctuation (parts);
+// the page rates the words and checks the readings
+function assemble(text, tokens, units) {
+  const parts = [];
   let k = 0;   // index of the syllable
   const byFirst = new Map();
   let p = 0;
   for (const u of units) { byFirst.set(p, u); p += u.syllables.length; }
   const shown = u => u.chosen === '?' ? `[${u.qn}]` : u.chosen;
   for (const t of tokens) {
-    if (t.type === 'other') { if (/\S/.test(t.text)) out.push(t.text.trim()); continue; }
-    if (byFirst.has(k)) out.push(shown(byFirst.get(k)));
+    if (t.type === 'other') { if (/\S/.test(t.text)) parts.push({ text: t.text.trim() }); continue; }
+    if (byFirst.has(k)) parts.push({ unit: byFirst.get(k).id });
     k++;
   }
-  const states = units.map(stateOf);
-  const uncertain = units.filter((u, i) => states[i].state === 'uncertain' || states[i].state === 'differs').map(u => u.id);
+  const byId = new Map(units.map(u => [u.id, u]));
   return {
-    nom: out.join('').replace(/\s+/g, ''),
+    nom: parts.map(x => (x.unit ? shown(byId.get(x.unit)) : x.text)).join('').replace(/\s+/g, ''),
     qn: text.trim(),
-    units: units.map((u, i) => ({
-      id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '',
-      state: states[i].state, why: states[i].why,
-      ok: states[i].state === 'sure' ? true : states[i].state === 'uncertain' ? false : null,   // for older pages
+    parts,
+    units: units.map(u => ({
+      id: u.id, qn: u.qn, chosen: u.chosen,
       dict: u.dict,
       candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, inDict: c.inDict, meaning: c.gloss || c.reason || '' })),
     })),
-    uncertain,
-    checked,   // false: the dictionaries of the readings were not available, nothing could be checked
   };
 }
 
-export async function translate(text, { callModel, dict = new Map(), readings = null, progress = () => {}, prompts = DEFAULT_PROMPTS }) {
+export async function translate(text, { callModel, dict = new Map(), progress = () => {}, prompts = DEFAULT_PROMPTS }) {
   const SYSTEM = render(prompts, 'system');
   const tokens = tokenize(text);
   const syllables = tokens.filter(t => t.type === 'syl').map(t => t.text);
@@ -238,18 +179,5 @@ export async function translate(text, { callModel, dict = new Map(), readings = 
   progress(2);
   applyChoices(units, await callModel(SYSTEM, step2Prompt(prompts, text.trim(), units)));
 
-  // ---- the check by code: does every chosen text read as its syllables? A choice that does not is replaced by the first candidate that does
-  if (readings) {
-    for (const u of units) {
-      if (u.chosen === '?') continue;
-      let v = verify(u, readings);
-      if (v.ok === false) {
-        const other = u.candidates.find(c => c.char !== u.chosen && verify(u, readings, c.char).ok === true);
-        if (other) { u.replaced = u.chosen; u.chosen = other.char; v = { ok: true }; }
-      }
-      u.ok = v.ok; if (v.read) u.read = v.read;
-    }
-  }
-
-  return assemble(text, tokens, units, !!readings);
+  return assemble(text, tokens, units);
 }
