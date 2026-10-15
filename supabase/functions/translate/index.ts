@@ -7,7 +7,7 @@ const ORIGINS = ['https://qatt.org', 'https://v2.chunom.org', 'https://chunom.or
 const MAX_CHARS = 400;
 const DICT_URL = Deno.env.get('DICT_URL') || 'https://v2.chunom.org/chunom/dict.csv';
 // GEMINI_MODEL may hold several names separated by commas: they are tried in turn when one is overloaded or gone
-const MODELS = (Deno.env.get('GEMINI_MODEL') || 'gemini-3.5-flash,gemini-3.1-flash-lite,gemini-3.8-flash').split(',').map(m => m.trim()).filter(Boolean);
+const MODELS = (Deno.env.get('GEMINI_MODEL') || 'gemini-3.1-pro-preview,gemini-3.5-flash,gemini-pro-latest').split(',').map(m => m.trim()).filter(Boolean);
 const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 40);
 
 let dictCache: Map<string, { han: string; gloss: string }[]> | null = null;
@@ -55,7 +55,7 @@ async function callGemini(system: string, user: string) {
     let r: Response;
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        signal: AbortSignal.timeout(40000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
+        signal: AbortSignal.timeout(60000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
     } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; continue; }
     if (r.status === 429 || r.status >= 500 || r.status === 404) {
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
