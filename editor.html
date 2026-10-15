@@ -52,6 +52,13 @@
     .btn-accent:hover, .btn-accent:focus-visible { background: #8c2c22; border-color: #8c2c22; color: #fff; }
     .btn-quiet { border-color: #cdbf9f; color: #5b4d3d; background: #fff; }
     .btn-quiet:hover { background: #f1e8d2; color: var(--ink); border-color: #b9a982; }
+    /* retro style as in check.html: a dark outline and a hard shadow that the button presses into */
+    .btn-pill, .keys .btn { border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); font-weight: 600; transition: transform .12s, box-shadow .12s, background-color .15s; }
+    .btn-quiet { background: #fffdf8; color: var(--ink); }
+    .btn-quiet:hover { background: #fff1c9; border-color: var(--ink); }
+    .btn-pill:hover, .keys .btn:hover { transform: translateY(-1px); }
+    .btn-pill:active, .keys .btn:active { transform: translateY(2px); box-shadow: none; }
+    .btn-pill:focus-visible, .keys .btn:focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
   </style>
   <script defer src="js/navigation.js"></script>
   <script src="js/parser.js"></script>
