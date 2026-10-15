@@ -24,10 +24,10 @@ export const DEFAULT_PROMPTS = {
   main: [
     'The sentence: {{text}}',
     'Its syllables as [index, syllable]: {{syllables}}',
-    'For spans of syllables (at = index of the first syllable, len = number of syllables) the dictionaries list Chữ Nôm options, all with the correct reading, most usual first, with a short meaning where known. Options: {{spans}}',
+    'For spans of syllables (at = index of the first syllable, len = number of syllables) the dictionaries list these characters for exactly that reading (all have the correct reading, in no particular order, no meanings given; use your own knowledge of Chữ Nôm and of the context to decide). Options: {{spans}}',
     'Task: cover the syllables from the first to the last with consecutive words (a word is one span: at and len; every syllable belongs to exactly one word, in order, none missing, none twice). Use a compound span (len > 1) where the compound is the word meant in this sentence, else single syllables.',
-    'For each word choose the option that fits its meaning in the context of the whole sentence (word class, sense, the other words). Use only the options listed for exactly that span.',
-    'If a span has no suitable option you may give a character of your own if you know a reliable one: set "own": true. Never invent characters; if you know none, write "?" and "own": true.',
+    'For each word choose the option that is the right Chữ Nôm for it in the context of the whole sentence (word class, sense, the other words): the usual character of the word, not a variant or a character with another meaning. Prefer a listed option.',
+    'If you know that the right character of the word is not listed, or none of the options is the word, give the character you know as your own: set "own": true. Never invent characters; if you know none, write "?" and "own": true.',
     'Besides the chosen option give up to two more options of the same span that would fit next best, best first ("alt"); leave "alt" out for a character of your own.',
     'Answer: {"words": [{"at": 0, "len": 1, "char": "...", "alt": ["...", "..."], "own": false}]}',
   ],
@@ -109,7 +109,7 @@ export async function translate2(text, rawSpans, { callModel, progress = () => {
   const user = render(prompts, 'main', {
     text: JSON.stringify(text.trim()),
     syllables: JSON.stringify(syl.map((s, i) => [i, s])),
-    spans: JSON.stringify(spans.map(s => ({ at: s.at, len: s.len, qn: syllables.slice(s.at, s.at + s.len).join(' '), options: s.options.map(o => (o.m ? { char: o.c, meaning: o.m } : { char: o.c })) }))),
+    spans: JSON.stringify(spans.map(s => ({ at: s.at, len: s.len, qn: syllables.slice(s.at, s.at + s.len).join(' '), options: s.options.map(o => o.c).join(' ') }))),
   });
 
   progress(1);
