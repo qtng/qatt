@@ -41,9 +41,11 @@
     h2.tones-h { font-family: Georgia, "Times New Roman", serif; font-weight: 400; text-align: center; margin: 1rem 0 1.6rem; }
     @media (max-width: 575.98px) { .glyph-strip .g { font-size: 2rem; } .glyph-strip .g[data-code] { width: 3.2rem; height: 3.2rem; } .hero .han { letter-spacing: .3em; } }
     /* every character of the overview is a round button with a faint outline */
-    .glyph-strip .g[data-code] { display: flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; border: 1px solid #e4d9c0; border-radius: 50%; background: #fffdf8; cursor: pointer; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
-    .glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { border-color: #cdbf9f; box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); outline: none; }
-    .glyph-strip .g[data-code]:active { box-shadow: none; background: #f6efdc; }
+    .glyph-strip .g[data-code] { display: flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; border: 1px solid var(--bc); border-radius: 50%; background: var(--b); cursor: pointer; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
+    .glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { border-color: var(--bc); box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); outline: none; }
+    .glyph-strip .g[data-code]:active { box-shadow: none; filter: brightness(.96); }
+    .glyph-strip { --b: #e3eef8; --bc: #b7cde2; }   /* the colours of the buttons in soundcheck.html: light blue for the marked forms, beige for the shapes */
+    section.set:first-of-type .glyph-strip { --b: #fff8e6; --bc: #dccb9f; }
     .glyph-strip .item { gap: .25rem; }
     dialog#variants { border: 1px solid #cdbf9f; border-radius: .7rem; background: #fffdf8; color: var(--ink); padding: .8rem 1rem 1rem; max-width: min(34rem, 94vw); box-shadow: 0 .6rem 2rem rgba(60, 40, 20, .3); }
     dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
@@ -249,8 +251,9 @@
 </main>
 
 <dialog id="variants" aria-label="Variants">
-  <div class="head"><span data-vi="Biến thể">Variants</span><span class="tools"><button type="button" class="speak" id="variantsSpeak" aria-label="Read aloud" data-vi-aria-label="Đọc to" title="Read aloud" data-vi-title="Đọc to"><i class="bi bi-volume-up"></i></button><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></span></div>
+  <div class="head"><span data-vi="Biến thể">Variants</span><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></div>
   <div class="vars" id="variantsBody"></div>
+  <div class="text-center mt-2"><button type="button" class="speak" id="variantsSpeak" aria-label="Read aloud" data-vi-aria-label="Đọc to" title="Read aloud" data-vi-title="Đọc to"><i class="bi bi-volume-up"></i></button></div>
 </dialog>
 
 <script>
