@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     async start(controller) {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       try {
-        const result = await translate(text, { callModel: callGemini, dict: await dictionary(), prompts: cfg.prompts, progress: (step: number) => send({ step }) });
+        const result = await translate(text, { callModel: callGemini, dict: await dictionary(), prompts: cfg.prompts, progress: (step: number) => send({ step }), partial: (r: unknown) => send({ result: r }) });
         console.log('result', cfg.version, JSON.stringify(result.units.map((u: { qn: string; chosen: string; read: string; state: string }) => [u.qn, u.chosen, u.read, u.state])));
         send({ result });
       } catch (e) {
