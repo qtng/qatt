@@ -1,13 +1,18 @@
 // Edge Function "translate": Quốc Ngữ -> Chữ Nôm with Gemini in three automatic steps (see pipeline.js).
 // Secrets: GEMINI_API_KEY (required), GEMINI_MODEL (optional), TRANSLATE_DAILY_LIMIT (optional, default 40 per user and day).
+// The prompts (and, if listed there, the model names) are loaded from the website, see PROMPTS_URL: they are changed in the
+// git repository qtng/chunom (js/translate_prompts.json), without deploying this function. The built-in defaults are the fallback.
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
-import { translate, parseDict } from './pipeline.js';
+import { translate, parseDict, parsePrompts, DEFAULT_PROMPTS } from './pipeline.js';
 
 const ORIGINS = ['https://qatt.org', 'https://v2.chunom.org', 'https://chunom.org'];
 const MAX_CHARS = 400;
 const DICT_URL = Deno.env.get('DICT_URL') || 'https://v2.chunom.org/chunom/dict.csv';
-// GEMINI_MODEL may hold several names separated by commas: they are tried in turn when one is overloaded or gone
-const MODELS = (Deno.env.get('GEMINI_MODEL') || 'gemini-3.5-flash,gemini-3.1-flash-lite,gemini-3.8-flash').split(',').map(m => m.trim()).filter(Boolean);
+const PROMPTS_URL = Deno.env.get('PROMPTS_URL') || 'https://v2.chunom.org/chunom/js/translate_prompts.json';
+// model names, tried in turn when one is overloaded or gone: secret GEMINI_MODEL (comma separated), else the file of the website, else these
+const DEFAULT_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+const ENV_MODELS = (Deno.env.get('GEMINI_MODEL') || '').split(',').map(m => m.trim()).filter(Boolean);
+let MODELS = ENV_MODELS.length ? ENV_MODELS : DEFAULT_MODELS;
 const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 40);
 
 let dictCache: Map<string, { han: string; gloss: string }[]> | null = null;
@@ -17,6 +22,24 @@ async function dictionary() {
   try { dictCache = parseDict(await (await fetch(DICT_URL, { signal: AbortSignal.timeout(8000) })).text()); } catch (e) { console.error('dictionary', e); dictCache = new Map(); }
   console.log('dictionary', dictCache.size, 'readings,', Date.now() - t0, 'ms');
   return dictCache;
+}
+
+// the prompts of the website, kept for 5 minutes; if the file cannot be loaded or is invalid the last good version (or the defaults) stays
+type Config = { at: number; prompts: typeof DEFAULT_PROMPTS; models: string[] | null; version: string };
+let config: Config = { at: 0, prompts: DEFAULT_PROMPTS, models: null, version: 'built-in' };
+async function loadConfig() {
+  if (Date.now() - config.at < 5 * 60 * 1000) return config;
+  try {
+    const r = await fetch(PROMPTS_URL, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const p = parsePrompts(await r.json());
+    config = { at: Date.now(), prompts: p.prompts, models: p.models, version: p.version || 'unnamed' };
+    console.log('prompts loaded, version', config.version);
+  } catch (e) {
+    console.error('prompts not loaded, keeping version', config.version, String(e));
+    config = { ...config, at: Date.now() - 4 * 60 * 1000 };   // try again in a minute
+  }
+  return config;
 }
 
 const cors = (req: Request) => {
@@ -43,23 +66,28 @@ async function logModels(key: string) {   // once per instance: which models thi
   } catch (e) { console.error('list models', e); }
 }
 
-async function callGemini(system: string, user: string) {
+// a model that answered 429 (quota) is skipped for a minute, so the next call does not lose time on it
+const coolDown = new Map<string, number>();
+
+async function callGemini(system: string, user: string, opts: { attempts?: number } = {}) {
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) throw Object.assign(new Error('no key'), { code: 'config' });
   const body = JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
     generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } });
   let last = 'busy';
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const model = MODELS[attempt % MODELS.length];
+  for (let attempt = 0; attempt < (opts.attempts || 5); attempt++) {
+    const live = MODELS.filter(m => (coolDown.get(m) || 0) < Date.now());
+    const model = (live.length ? live : MODELS)[attempt % (live.length || MODELS.length)];
     const t0 = Date.now();
     let r: Response;
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        signal: AbortSignal.timeout(40000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
+        signal: AbortSignal.timeout(60000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
     } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; continue; }
     if (r.status === 429 || r.status >= 500 || r.status === 404) {
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
       last = r.status === 404 ? 'model' : 'busy';
+      if (r.status === 429 || r.status === 404) coolDown.set(model, Date.now() + 60000);
       if (attempt === 1) await logModels(key);
       await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
       continue;
@@ -94,6 +122,8 @@ Deno.serve(async (req) => {
   if (!text) return fail(400, 'empty');
   if (text.length > MAX_CHARS) return fail(413, 'too_long');
   if (!(await allowed(c.sub))) return fail(429, 'limit');
+  const cfg = await loadConfig();
+  MODELS = ENV_MODELS.length ? ENV_MODELS : (cfg.models || DEFAULT_MODELS);
 
   // the answer is a stream of lines (JSON): progress of the steps, then the result or an error
   const enc = new TextEncoder();
@@ -101,8 +131,8 @@ Deno.serve(async (req) => {
     async start(controller) {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       try {
-        const result = await translate(text, { callModel: callGemini, dict: await dictionary(), progress: (step: number) => send({ step }) });
-        console.log('result', JSON.stringify(result.units.map((u: { qn: string; chosen: string; read: string; ok: boolean }) => [u.qn, u.chosen, u.read, u.ok])));
+        const result = await translate(text, { callModel: callGemini, dict: await dictionary(), prompts: cfg.prompts, progress: (step: number) => send({ step }) });
+        console.log('result', cfg.version, JSON.stringify(result.units.map((u: { qn: string; chosen: string; read: string; ok: boolean }) => [u.qn, u.chosen, u.read, u.ok])));
         send({ result });
       } catch (e) {
         console.error('translate failed', e);
