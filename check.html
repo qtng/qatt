@@ -70,8 +70,6 @@
     @keyframes okpop { 0% { transform: scale(.9); } 50% { transform: scale(1.12); } 100% { transform: none; } }
     .gbtn.fresh { animation: rise .3s ease-out backwards; animation-delay: calc(var(--i, 0) * 35ms); }
     @keyframes rise { from { opacity: 0; transform: translateY(.5rem) scale(.9); } }
-    .done.card { animation: glow 1.2s ease-out; }
-    @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
     /* the cards like a retro game: tinted, a thick outline and a hard shadow */
     .game { max-width: 34rem; }
@@ -82,7 +80,7 @@
     .game .tool-btn:active { transform: translateY(2px); box-shadow: none; }
     .game .tool:focus { border-color: var(--ink); box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
     .card { max-width: 24rem; margin-top: .8rem; }
-    .card.task, .card.done { border: 3px solid var(--ink); border-radius: .9rem; box-shadow: 5px 5px 0 var(--ink), inset 0 3px 0 rgba(255, 255, 255, .65), inset 0 -4px 0 rgba(43, 33, 24, .08); }
+    .card.task { border: 3px solid var(--ink); border-radius: .9rem; box-shadow: 5px 5px 0 var(--ink), inset 0 3px 0 rgba(255, 255, 255, .65), inset 0 -4px 0 rgba(43, 33, 24, .08); }
     .card.task { background: linear-gradient(180deg, #fff1c9 0%, #fbe3a6 100%); }
     .card.task { position: relative; }
     .card.task::after { content: ""; position: absolute; inset: 0; border-radius: .6rem; background: #e5483a; opacity: 0; mix-blend-mode: multiply; pointer-events: none; transition: opacity 1s ease; }
@@ -98,11 +96,16 @@
     .task .cells { border-color: var(--ink); box-shadow: 3px 3px 0 rgba(43, 33, 24, .35); }
     .task .cell + .cell { border-left-color: var(--ink); }
     .card .cells { margin-bottom: .4rem; }
-    .done { text-align: center; }
-    .done.card { background: linear-gradient(180deg, #d9f2e3 0%, #b9e4cc 100%); box-shadow: 5px 5px 0 #146c43, inset 0 3px 0 rgba(255, 255, 255, .65); border-color: #146c43; }
-    .done .reading { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; color: #146c43; }
-    .done .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); }
-    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
+    /* the solved word: the character takes the place of the cells */
+    .solution { display: flex; align-items: center; justify-content: center; min-height: calc(7rem + 4px); margin: 0 auto .4rem; }
+    .solution .full { font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1.1; color: var(--ink); animation: pop .35s ease-out; }
+    #nextRow { margin-top: .8rem; }
+    /* solved: the card turns green like the former success card */
+    .card.task.solved { background: linear-gradient(180deg, #d9f2e3 0%, #b9e4cc 100%); border-color: #146c43; box-shadow: 5px 5px 0 #146c43, inset 0 3px 0 rgba(255, 255, 255, .65); transition: background-color .3s; }
+    .task.solved .cells, .task.solved .cell + .cell { border-color: #146c43; }
+    #next { background: #146c43; border-color: #146c43; color: #fff; }
+    #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
+    @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .solution { min-height: calc(5.5rem + 4px); } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
   </style>
 </head>
 <body>
@@ -128,6 +131,7 @@
         <a class="nom" id="nomLink" target="_blank" rel="noopener" title="Details in the dictionary" hidden><img id="nom" alt="" width="32" height="32"></a>
       </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
+      <div class="solution" id="solution" hidden><div class="full" id="full"></div></div>
       <div class="foot">
         <span class="timer" id="timer" title="One minute per word"><i class="bi bi-stopwatch"></i><span id="time">1:00</span></span>
         <button type="button" class="speak" id="speak" aria-label="Sound on or off" aria-pressed="true"><i class="bi bi-volume-up-fill"></i></button>
@@ -138,13 +142,7 @@
   <div id="variants" hidden><div class="pad" id="variantPad"></div></div>
   <div id="bases"><div class="pad grid8" id="basePad"></div></div>
   <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
-  <div class="card done mx-auto" id="done" hidden>
-    <div class="card-body">
-      <div class="full" id="full"></div>
-      <div class="reading mb-3" id="reading"></div>
-      <button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button>
-    </div>
-  </div>
+  <div id="nextRow" class="text-center" hidden><button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button></div>
 
 </div>
 </main>
@@ -334,7 +332,10 @@
       $('cells').replaceChildren();
       renderCells();
       show($('bases'), true);
-      show($('done'), false).then(() => show($('task'), true));
+      $('task').classList.remove('solved');
+      for (const id of ['solution', 'nextRow']) show($(id), false);
+      show($('cells'), true);
+      show($('task'), true);
     }
 
     function button(text, cls, onclick) {
@@ -422,10 +423,10 @@
       show($('variants'), false);
       renderCells();
       $('full').textContent = QattText.syllable(code);
-      $('reading').textContent = answer;
-      // the success card takes the place of the task, after a moment to see the last cell
+      // after a moment to see the last cell the solution takes the place of the cells, the button for the next word the place of the tones
       show($('tones'), false);
-      setTimeout(() => show($('task'), false).then(() => show($('done'), true)), 1000);
+      $('task').classList.add('solved');
+      setTimeout(() => show($('cells'), false).then(() => { show($('solution'), true); show($('nextRow'), true); }), 1000);
     }
 
     const another = () => { const e = draw(); start(e.w, e.nom); };
