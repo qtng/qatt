@@ -6,6 +6,7 @@
    Bootstrap draws its buttons from --bs-btn-* variables, so only these are set (the colours of btn-primary, btn-danger, … stay). */
 .btn:not(.btn-close):not(.btn-link) {
   --bs-btn-border-width: 2px;
+  --bs-btn-border-radius: .55rem;   /* square with softly rounded corners, like the Skip button of check.html */
   --bs-btn-border-color: var(--ink);
   --bs-btn-hover-border-color: var(--ink);
   --bs-btn-active-border-color: var(--ink);
@@ -31,7 +32,7 @@
 .btn-outline-secondary, .btn-outline-dark { --bs-btn-color: var(--ink); }
 
 /* buttons of the site */
-.btn-pill { border-radius: 2rem; padding: .5rem 1.3rem; }
+.btn-pill { padding: .5rem 1.3rem; }   /* the name stays, the shape is the one of every button */
 .btn-cinnabar, .btn-accent {
   --bs-btn-bg: var(--cinnabar); --bs-btn-color: #fff;
   --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff;
