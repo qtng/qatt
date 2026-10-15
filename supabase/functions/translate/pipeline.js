@@ -102,8 +102,12 @@ function applyChoices(units, raw) {
 }
 
 const sameReading = (read, unit) => norm(read).replace(/\s+/g, ' ') === unit.qn;
+// a character the dictionary of the site lists for exactly this reading counts as verified: reading it back without context is unreliable for Nôm
+const known = u => (u.candidates.find(c => c.char === u.chosen) || {}).inDict === true;
+const CHECK_UNTIL = 80000;   // ms after the start: later than this the optional step 3 is skipped
 
 export async function translate(text, { callModel, dict = new Map(), progress = () => {} }) {
+  const started = Date.now();
   const tokens = tokenize(text);
   const syllables = tokens.filter(t => t.type === 'syl').map(t => t.text);
   if (!syllables.length) throw Object.assign(new Error('no text'), { code: 'empty' });
@@ -122,29 +126,38 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
   progress(2);
   applyChoices(units, await callModel(SYSTEM, step2Prompt(text.trim(), units)));
 
-  // ---- step 3: read back what was chosen (only the characters), compare with the units, repair once
-  progress(3);
-  const readBack = async () => {
-    const todo = units.filter(u => u.chosen !== '?');
-    const raw = await callModel(SYSTEM, step3Prompt(todo.map(u => ({ id: u.id, chars: u.chosen }))));
-    const got = new Map(asArray(raw && raw.readings).map(r => [Number(r && r.id), String(r && r.reading || '')]));
-    // a character the dictionary of the site lists for exactly this reading counts as verified: reading it back without context is unreliable for Nôm
-    const known = u => (u.candidates.find(c => c.char === u.chosen) || {}).inDict === true;
-    for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u) || known(u); }
-  };
-  await readBack();
-  const bad = units.filter(u => u.chosen !== '?' && !u.ok);
-  if (bad.length) {
-    const note = 'These units failed the back-reading check. Choose a different candidate (or "?") for exactly these units: ' + JSON.stringify(bad.map(u => ({ id: u.id, expected: u.qn, read_as: u.read, rejected: u.chosen })));
-    const before = new Map(bad.map(u => [u.id, u.chosen]));
-    const raw = await callModel(SYSTEM, step2Prompt(text.trim(), bad, note));
-    const given = new Map(asArray(raw && raw.choices).map(c => [Number(c && c.id), c && c.char]));
-    for (const u of bad) {
-      const c = given.get(u.id);
-      const next = c === '?' ? '?' : (u.candidates.find(x => x.char === c && x.char !== before.get(u.id)) || {}).char;
-      if (next) u.chosen = next;
+  // ---- step 3 (optional): read back what was chosen (only the characters), compare with the units, repair once.
+  // It only rates the result; when it fails or takes too long the text is returned without these ratings.
+  for (const u of units) if (u.chosen !== '?' && known(u)) u.ok = true;
+  let checked = false;
+  if (Date.now() - started < CHECK_UNTIL) {
+    progress(3);
+    const readBack = async () => {
+      const todo = units.filter(u => u.chosen !== '?');
+      const raw = await callModel(SYSTEM, step3Prompt(todo.map(u => ({ id: u.id, chars: u.chosen }))), { attempts: 2 });
+      const got = new Map(asArray(raw && raw.readings).map(r => [Number(r && r.id), String(r && r.reading || '')]));
+      for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u) || known(u); }
+    };
+    try {
+      await readBack();
+      const bad = units.filter(u => u.chosen !== '?' && !u.ok);
+      if (bad.length && Date.now() - started < CHECK_UNTIL) {
+        const note = 'These units failed the back-reading check. Choose a different candidate (or "?") for exactly these units: ' + JSON.stringify(bad.map(u => ({ id: u.id, expected: u.qn, read_as: u.read, rejected: u.chosen })));
+        const before = new Map(bad.map(u => [u.id, u.chosen]));
+        const raw = await callModel(SYSTEM, step2Prompt(text.trim(), bad, note), { attempts: 2 });
+        const given = new Map(asArray(raw && raw.choices).map(c => [Number(c && c.id), c && c.char]));
+        for (const u of bad) {
+          const c = given.get(u.id);
+          const next = c === '?' ? '?' : (u.candidates.find(x => x.char === c && x.char !== before.get(u.id)) || {}).char;
+          if (next) u.chosen = next;
+        }
+        await readBack();
+      }
+      checked = true;
+    } catch (e) {
+      console.error('step 3 skipped', e && e.message);
+      for (const u of units) { delete u.read; if (u.chosen !== '?' && !known(u)) delete u.ok; }
     }
-    await readBack();
   }
 
   // ---- result: the text with its punctuation, the units with their state
@@ -159,11 +172,12 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
     if (byFirst.has(k)) out.push(shown(byFirst.get(k)));
     k++;
   }
-  const uncertain = units.filter(u => u.chosen === '?' || !u.ok).map(u => u.id);
+  const uncertain = units.filter(u => u.chosen === '?' || u.ok === false).map(u => u.id);
   return {
     nom: out.join('').replace(/\s+/g, ''),
     qn: text.trim(),
-    units: units.map(u => ({ id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '', ok: u.chosen !== '?' && u.ok, candidates: u.candidates })),
+    units: units.map(u => ({ id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '', ok: u.chosen === '?' ? false : (u.ok === undefined ? null : u.ok), candidates: u.candidates })),
     uncertain,
+    checked,   // false: step 3 was skipped or failed, `ok` is null where it could not be rated
   };
 }

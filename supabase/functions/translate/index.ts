@@ -43,14 +43,18 @@ async function logModels(key: string) {   // once per instance: which models thi
   } catch (e) { console.error('list models', e); }
 }
 
-async function callGemini(system: string, user: string) {
+// a model that answered 429 (quota) is skipped for a minute, so the next call does not lose time on it
+const coolDown = new Map<string, number>();
+
+async function callGemini(system: string, user: string, opts: { attempts?: number } = {}) {
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) throw Object.assign(new Error('no key'), { code: 'config' });
   const body = JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
     generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } });
   let last = 'busy';
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const model = MODELS[attempt % MODELS.length];
+  for (let attempt = 0; attempt < (opts.attempts || 5); attempt++) {
+    const live = MODELS.filter(m => (coolDown.get(m) || 0) < Date.now());
+    const model = (live.length ? live : MODELS)[attempt % (live.length || MODELS.length)];
     const t0 = Date.now();
     let r: Response;
     try {
@@ -60,6 +64,7 @@ async function callGemini(system: string, user: string) {
     if (r.status === 429 || r.status >= 500 || r.status === 404) {
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
       last = r.status === 404 ? 'model' : 'busy';
+      if (r.status === 429 || r.status === 404) coolDown.set(model, Date.now() + 60000);
       if (attempt === 1) await logModels(key);
       await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
       continue;
