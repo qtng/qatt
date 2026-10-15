@@ -124,8 +124,7 @@ window.Lang = window.Lang || (function() {
             { name: "Character search", vi: "Tra cứu chữ", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
             { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
             { name: "Chữ Nôm writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
-            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book",
-              sub: [{ name: "Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-book" }, { name: "Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" }] }, // "sub": the bar item opens a popup with these
+            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", bar: "Dictionaries", barVi: "Từ điển", barOrder: 2, url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
         ]
     };
@@ -259,13 +258,6 @@ window.Lang = window.Lang || (function() {
                 .bottom-bar i { font-size: 1.35rem; line-height: 1; }
                 .bottom-bar .active { color: #fff; border-top-color: var(--bar-accent); }
                 .bottom-bar .active i { color: var(--bar-accent); }
-                .bar-item { flex: 1 1 0; min-width: 0; position: relative; display: flex; }
-                .bar-item > button { flex: 1 1 auto; }
-                .bar-pop { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); min-width: 11rem; padding: .3rem 0; background: rgba(33, 37, 41, .98); border: 1px solid #495057; border-radius: .6rem; box-shadow: 0 -4px 20px rgba(0, 0, 0, .45); }
-                .bar-item.open .bar-pop { display: block; }
-                .bar-pop a { flex-direction: row; justify-content: flex-start; gap: .6rem; height: auto; padding: .7rem 1rem; border-top: 0; font-size: .9rem; color: #dee2e6; }
-                .bar-pop a i { font-size: 1.1rem; }
-                .bar-pop a.active { color: #fff; }
             }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
             .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
@@ -379,11 +371,6 @@ window.Lang = window.Lang || (function() {
             const own = sections.find(sec => sec.linkClass === navConfig.own) || block;
             const barLinks = own.links.filter(l => l.bar).sort((a, b) => (a.barOrder ?? 0) - (b.barOrder ?? 0)).map(link => {
                 const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
-                if (link.sub) { // a popup opening upwards: the bar item is a button
-                    const anySub = link.sub.some(sub => currentPath === sub.url);
-                    return `<div class="bar-item"><button type="button" class="${anySub ? 'active' : ''}" aria-haspopup="true" aria-expanded="false"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></button>
-                        <div class="bar-pop">${link.sub.map(sub => `<a href="${sub.url}" class="${currentPath === sub.url ? 'active' : ''}"><i class="bi ${sub.icon}"></i><span>${sub.name}</span></a>`).join('')}</div></div>`;
-                }
                 return `<a href="${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></a>`;
             }).join('');
             const bar = document.createElement('nav');
@@ -393,14 +380,6 @@ window.Lang = window.Lang || (function() {
             bar.innerHTML = `${barLinks}<button type="button" id="barMenu"><i class="bi bi-list"></i>Menu</button>`;
             document.body.appendChild(bar);
             document.body.classList.add('has-bottom-bar');
-            bar.querySelectorAll('.bar-item').forEach(item => {
-                const button = item.querySelector('button');
-                button.addEventListener('click', () => {
-                    bar.querySelectorAll('.bar-item.open').forEach(o => { if (o !== item) o.classList.remove('open'); });
-                    button.setAttribute('aria-expanded', item.classList.toggle('open'));
-                });
-            });
-            document.addEventListener('click', e => bar.querySelectorAll('.bar-item.open').forEach(o => { if (!o.contains(e.target)) { o.classList.remove('open'); o.querySelector('button').setAttribute('aria-expanded', 'false'); } }));
             bar.querySelector('#barMenu').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
             // hide it while the on-screen keyboard is open (the visual viewport is much shorter than the window)
             // or while the user has put the cursor in a text field (a field focused by the page itself does not count)
