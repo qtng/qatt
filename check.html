@@ -107,6 +107,8 @@
     @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
     .cloud { position: absolute; left: 50%; bottom: .9rem; z-index: 2; pointer-events: none; font-weight: 600; font-family: Georgia, "Times New Roman", serif; font-size: 1.4rem; color: var(--ink); white-space: nowrap; opacity: 0; animation: cloud 1.6s ease-out forwards; }
     @keyframes cloud { 0% { opacity: 0; transform: translate(-50%, 1em) scale(.8); } 20% { opacity: 1; transform: translate(-50%, -.9rem) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -3.4rem) scale(1.05); } }
+    .gbtn.hint { animation: wiggle .8s ease-in-out 2; }
+    @keyframes wiggle { 0%, 100% { transform: none; } 15% { transform: rotate(-10deg) scale(1.1); } 35% { transform: rotate(9deg) scale(1.1); } 55% { transform: rotate(-6deg) scale(1.05); } 75% { transform: rotate(4deg); } }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
     #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
     @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .solution { min-height: calc(5.5rem + 4px); } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
@@ -341,7 +343,7 @@
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
       const pad = $('basePad');
-      pad.replaceChildren(...SHAPES.map(s => button(glyph(s), 'gbtn', b => pickShape(s, b))));
+      pad.replaceChildren(...SHAPES.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
       $('cells').replaceChildren();
       renderCells();
       show($('bases'), true);
@@ -351,6 +353,7 @@
       show($('task'), true);
     }
 
+    const withData = (b, data) => { Object.assign(b.dataset, data); return b; };   // marks a button for the hint
     function button(text, cls, onclick) {
       const b = document.createElement('button');
       b.type = 'button'; b.className = cls + ' fresh'; b.textContent = text;
@@ -390,10 +393,9 @@
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
         const group = document.createElement('div');
         group.className = 'group';
-        group.append(...MARKS.map(m => button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb))));
+        group.append(...MARKS.map(m => withData(button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb)), { shape, mark: m })));
         group.querySelectorAll('button').forEach((x, i) => x.style.setProperty('--i', i));
-        $('variantPad').append(group);
-        show($('variants'), true);
+        $('variantPad').append(group);   // shown by update() once the consonant buttons are gone
       }
       renderCells();
       update();
@@ -412,14 +414,15 @@
     // all cells filled (also the faint ones): the shapes go; all cells exact (no faint one left): the marked forms go and the tones appear
     function update() {
       if (slots.some(s => s.state === 'empty')) return;
-      show($('bases'), false);
-      if (slots.some(s => s.state === 'near') || !$('tones').hidden) return;
+      const gone = show($('bases'), false);
+      if (slots.some(s => s.state === 'near')) { gone.then(() => show($('variants'), true)); return; }   // the rhyme buttons come after the consonant buttons
+      if (!$('tones').hidden) return;
       show($('variants'), false);
       show($('tones'), true);
       $('tonePad').replaceChildren(...TONE_BLOCKS.map(block => {
         const d = document.createElement('div');
         d.className = 'block';
-        d.append(...block.map((n, i) => { const b = button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b)); b.style.setProperty('--i', i); return b; }));
+        d.append(...block.map((n, i) => { const b = withData(button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b)), { tone: n }); b.style.setProperty('--i', i); return b; }));
         return d;
       }));
     }
@@ -444,6 +447,32 @@
         $('task').classList.add('win');
       }, 1000);
     }
+
+    // after 5 seconds without a click the right button wiggles as a hint (and again every 5 seconds)
+    let hintTimer;
+    const hintButton = () => {
+      if (!$('nextRow').hidden) return null;   // solved
+      if (!$('tones').hidden) return [...$('tonePad').querySelectorAll('button')].find(b => !b.disabled && TONE_CODE[b.dataset.tone] === tone);
+      if (!$('variants').hidden) {
+        const s = slots.find(x => x.state === 'near');
+        return s && [...$('variantPad').querySelectorAll('button')].find(b => !b.disabled && b.dataset.shape === s.shape && +b.dataset.mark === s.mark);
+      }
+      if (!$('bases').hidden) {
+        const s = slots.find(x => x.state === 'empty');
+        return s && [...$('basePad').querySelectorAll('button')].find(b => !b.disabled && b.dataset.shape === s.shape);
+      }
+      return null;
+    };
+    const armHint = () => {
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => {
+        const b = hintButton();
+        if (b) { b.classList.remove('hint'); void b.offsetWidth; b.classList.add('hint'); b.addEventListener('animationend', () => b.classList.remove('hint'), { once: true }); }
+        armHint();
+      }, 5000);
+    };
+    ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, armHint, true));
+    armHint();
 
     const another = () => { const e = draw(); start(e.w, e.nom); };
     $('next').addEventListener('click', another);
