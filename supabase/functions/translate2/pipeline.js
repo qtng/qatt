@@ -28,7 +28,8 @@ export const DEFAULT_PROMPTS = {
     'Task: cover the syllables from the first to the last with consecutive words (a word is one span: at and len; every syllable belongs to exactly one word, in order, none missing, none twice). Use a compound span (len > 1) where the compound is the word meant in this sentence, else single syllables.',
     'For each word choose the option that fits its meaning in the context of the whole sentence (word class, sense, the other words). Use only the options listed for exactly that span.',
     'If a span has no suitable option you may give a character of your own if you know a reliable one: set "own": true. Never invent characters; if you know none, write "?" and "own": true.',
-    'Answer: {"words": [{"at": 0, "len": 1, "char": "...", "own": false}]}',
+    'Besides the chosen option give up to two more options of the same span that would fit next best, best first ("alt"); leave "alt" out for a character of your own.',
+    'Answer: {"words": [{"at": 0, "len": 1, "char": "...", "alt": ["...", "..."], "own": false}]}',
   ],
   retry: 'Your previous answer was rejected: {{error}}. Follow the rules exactly.',
 };
@@ -91,7 +92,7 @@ function checkWords(raw, syllables, spans) {
     const span = byKey.get(w.at + '+' + w.len) || null;
     if (w.len > 1 && !span && !(typeof w.char === 'string' && w.own === true)) return { error: `there is no span at ${w.at} with len ${w.len}` };
     const char = typeof w.char === 'string' ? w.char.trim() : '';
-    words.push({ at: w.at, len: w.len, char, own: w.own === true, span });
+    words.push({ at: w.at, len: w.len, char, own: w.own === true, span, alt: Array.isArray(w.alt) ? w.alt.filter(x => typeof x === 'string') : [] });
     pos += w.len;
   }
   if (pos !== syllables.length) return { error: `the words cover ${pos} of ${syllables.length} syllables` };
@@ -137,7 +138,9 @@ export async function translate2(text, rawSpans, { callModel, progress = () => {
       const options = w.span ? w.span.options : [];
       const chosen = w.char && w.char !== '?' && HAN.test(w.char) ? w.char : '?';
       const own = chosen === '?' || w.own || !options.some(o => o.c === chosen);
-      return { id: i + 1, at: w.at, len: w.len, qn: syllables.slice(w.at, w.at + w.len).join(' '), chosen, own, options: options.map(o => ({ char: o.c, meaning: o.m })) };
+      // the other options are known to the page (it sent them); only the model's next best ones are returned, best first
+      const alt = own ? [] : (w.alt || []).filter((c, j, a) => c !== chosen && options.some(o => o.c === c) && a.indexOf(c) === j).slice(0, 2);
+      return { id: i + 1, at: w.at, len: w.len, qn: syllables.slice(w.at, w.at + w.len).join(' '), chosen, own, alt };
     }),
   };
 }
