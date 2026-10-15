@@ -105,6 +105,8 @@
     .task.solved .cells, .task.solved .cell + .cell { border-color: #146c43; }
     .card.task.win { animation: glow 1.2s ease-out; }
     @keyframes glow { 0% { box-shadow: 5px 5px 0 #146c43, 0 0 0 0 rgba(25, 135, 84, .55); } 100% { box-shadow: 5px 5px 0 #146c43, 0 0 0 1.6rem rgba(25, 135, 84, 0); } }
+    .cloud { position: fixed; z-index: 1100; pointer-events: none; padding: .1rem .6rem; border-radius: 1rem; background: rgba(255, 253, 248, .95); border: 1px solid #cdbf9f; box-shadow: 0 .2rem .6rem rgba(60, 40, 20, .18); font-family: Georgia, "Times New Roman", serif; font-size: 1.1rem; color: var(--ink); white-space: nowrap; opacity: 0; animation: cloud 1.6s ease-out forwards; }
+    @keyframes cloud { 0% { opacity: 0; transform: translate(-50%, 0) scale(.8); } 20% { opacity: 1; transform: translate(-50%, -.9rem) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -3.4rem) scale(1.05); } }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
     #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
     @media (max-width: 575.98px) { .cell { width: 5.5rem; height: 5.5rem; font-size: 4.2rem; } .solution { min-height: calc(5.5rem + 4px); } .cells.two .cell { width: 4.125rem; } .gbtn { width: 3rem; height: 3rem; font-size: 1.9rem; } .tones { gap: 1rem; } .tones .gbtn { width: 3.6rem; height: 3.6rem; } }
@@ -279,9 +281,18 @@
     showSound();
     if (sound) withSpeaker(() => {});   // load the speech early
     // the onset is read with the rhyme ông (mông, nhông, …); the tone with the whole word in that tone
-    const sayOnset = shape => say(parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }));
+    // the reading rises from the clicked button like a little cloud and fades (also for wrong buttons: so the learner hears and sees how they sound)
+    const cloud = (b, text) => {
+      if (!text) return;
+      const r = b.getBoundingClientRect(), c = document.createElement('span');
+      c.className = 'cloud'; c.textContent = text;
+      c.style.left = r.left + r.width / 2 + 'px'; c.style.top = r.top + 'px';
+      document.body.append(c);
+      setTimeout(() => c.remove(), 1700);
+    };
+    const sayOnset = (shape, b) => { const text = parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }); say(text); cloud(b, text); };
     // a marked form: the word as the cells show it now, the clicked form on the cells of its shape, a missing cell filled with the plain clicked shape
-    const sayMarked = (shape, mark) => {
+    const sayMarked = (shape, mark, b) => {
       if (hop) return;   // the Hợp Thư writing (one shape for onset and rhyme) is not spelled
       const cell = s => {
         if (s.state === 'empty') return { shape, mark: 0, role: s.role };
@@ -295,7 +306,8 @@
         else if (c.role === 'onset') { onset = c.shape; rhyme = ''; }
         else rhyme = code(c);
       }
-      say(parser.toQuocNgu({ onset, rhyme, tone: 0 }));
+      const text = parser.toQuocNgu({ onset, rhyme, tone: 0 });
+      say(text); cloud(b, text);
     };
     const TONE_NAME = { 1: null, 2: 'huyen', 3: 'hoi', 4: 'nga', 5: 'sac', 6: 'nang', 7: 'sac', 8: 'nang' };
     const wordInTone = (word, n) => {
@@ -373,7 +385,7 @@
       const found = slots.filter(s => s.shape === shape);
       verdict(b, found.length > 0);
       mood(found.length > 0);
-      sayOnset(shape);   // right or wrong
+      sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
@@ -389,7 +401,7 @@
     }
 
     function pickMark(shape, mark, b) {
-      sayMarked(shape, mark);   // before the cells change
+      sayMarked(shape, mark, b);   // before the cells change
       const found = slots.filter(s => s.shape === shape && s.mark === mark);
       verdict(b, found.length > 0);
       mood(found.length > 0);
