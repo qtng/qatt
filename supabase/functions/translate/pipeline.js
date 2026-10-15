@@ -42,9 +42,10 @@ export const DEFAULT_PROMPTS = {
     'Group them into words where appropriate (a unit has one or more consecutive syllables; every syllable belongs to exactly one unit, none missing, none added). Give each unit a sequential id starting at 1.',
     'For each unit give 2 to 4 candidates sorted by confidence. Choose candidates that fit the meaning of the unit in this sentence (word class, sense in context); where a word is ambiguous, include a second reading. Prefer phono-semantic characters if available and confidence is sufficient.',
     'Each candidate: {"char": "...", "codepoint": "U+...", "reading": "Quốc Ngữ reading", "type": "Sino-Vietnamese" | "purely Nôm" | "phono-semantic", "reason": "at most 10 words"}.',
+    '{{hintsLine}}',
     'Answer: {"units": [{"id": 1, "qn": "the syllables of the unit separated by a space", "candidates": [ ... ]}]}',
   ],
-  // not used by the default step1 (the model answers from its own knowledge, the dictionary only checks the result); add {{hintsLine}} to step1 to give it the dictionary entries of the words
+  // the dictionary entries of the words, as a hint for the model (the line {{hintsLine}} of step1; without it the answers were clearly worse)
   hintsLine: 'Dictionary entries of this site that may help (reading: characters with meaning; use them when the meaning fits the sentence): {{hints}}',
   step1retry: 'Your previous answer was rejected: {{error}}. Follow the syllable list exactly.',
   step2: [
