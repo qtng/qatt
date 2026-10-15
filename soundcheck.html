@@ -414,9 +414,8 @@
       const ok = TONE_CODE[n] === tone;
       verdict(b, ok);
       mood(ok);
-      // right or wrong: the word in the tone of the button; a word ending in p, t, c or ch only takes the entering tones 7 and 8
-      if (n > 6 || !/(p|t|c|ch)$/i.test(answer)) say(wordInTone(answer, n));
       if (!ok) return;
+      say(wordInTone(answer, n));   // only a right choice is spoken
       stopTimer();
       for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
       for (const x of slots) x.state = 'full';   // the faint cells show their marked forms
