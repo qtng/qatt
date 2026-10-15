@@ -39,11 +39,19 @@
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.set { padding-block: 1.6rem; }
     h2.tones-h { font-family: Georgia, "Times New Roman", serif; font-weight: 400; text-align: center; margin: 1rem 0 1.6rem; }
-    @media (max-width: 575.98px) { .glyph-strip .g { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
-    .glyph-strip .g[data-code] { cursor: pointer; }
+    @media (max-width: 575.98px) { .glyph-strip .g { font-size: 2rem; } .glyph-strip .g[data-code] { width: 3.2rem; height: 3.2rem; } .hero .han { letter-spacing: .3em; } }
+    /* every character of the overview is a round button with a faint outline */
+    .glyph-strip .g[data-code] { display: flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; border: 1px solid #e4d9c0; border-radius: 50%; background: #fffdf8; cursor: pointer; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
+    .glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { border-color: #cdbf9f; box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); outline: none; }
+    .glyph-strip .g[data-code]:active { box-shadow: none; background: #f6efdc; }
+    .glyph-strip .item { gap: .25rem; }
     dialog#variants { border: 1px solid #cdbf9f; border-radius: .7rem; background: #fffdf8; color: var(--ink); padding: .8rem 1rem 1rem; max-width: min(34rem, 94vw); box-shadow: 0 .6rem 2rem rgba(60, 40, 20, .3); }
     dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
     #variants .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; font-size: .85rem; color: #7b6c58; }
+    #variants .head .tools { display: flex; align-items: center; gap: .4rem; }
+    #variants .speak { border: 1px solid #e4d9c0; border-radius: 50%; width: 2rem; height: 2rem; background: #fff; color: #5b4d3d; line-height: 1; }
+    #variants .speak:hover { background: #f1e8d2; }
+    #variants .speak.on { color: var(--cinnabar); border-color: var(--cinnabar); }
     #variants .vars { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; }
     #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 1px solid #e4d9c0; border-radius: .5rem; }
     #variants .var .g { display: block; font-family: var(--qfont), sans-serif; font-size: 2.6rem; line-height: 1.2; }
@@ -241,7 +249,7 @@
 </main>
 
 <dialog id="variants" aria-label="Variants">
-  <div class="head"><span data-vi="Biến thể">Variants</span><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></div>
+  <div class="head"><span data-vi="Biến thể">Variants</span><span class="tools"><button type="button" class="speak" id="variantsSpeak" aria-label="Read aloud" data-vi-aria-label="Đọc to" title="Read aloud" data-vi-title="Đọc to"><i class="bi bi-volume-up"></i></button><button type="button" class="btn-close" id="variantsClose" aria-label="Close" data-vi-aria-label="Đóng"></button></span></div>
   <div class="vars" id="variantsBody"></div>
 </dialog>
 
@@ -257,7 +265,22 @@
     // a click on a shape or marked form: the seven characters of its group (U+F0000 + 7 * i, the shape and its six marked forms) in code point order
     const dlg = document.getElementById('variants'), body = document.getElementById('variantsBody');
     document.getElementById('variantsClose').addEventListener('click', () => dlg.close());
+    // read all readings of the popup aloud, one after the other (the voice of the browser for Vietnamese)
+    const speak = document.getElementById('variantsSpeak');
+    const stopSpeaking = () => { speechSynthesis?.cancel(); speak.classList.remove('on'); };
+    speak.hidden = !('speechSynthesis' in window);
+    speak.addEventListener('click', () => {
+      if (speak.classList.contains('on')) return stopSpeaking();
+      const u = new SpeechSynthesisUtterance(Array.from(body.querySelectorAll('.r'), r => r.textContent).join(', '));
+      u.lang = 'vi-VN';
+      u.onend = u.onerror = () => speak.classList.remove('on');
+      speechSynthesis.cancel();
+      speak.classList.add('on');
+      speechSynthesis.speak(u);
+    });
+    dlg.addEventListener('close', stopSpeaking);
     dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // a click outside the box
+    document.querySelectorAll('.g[data-code]').forEach(el => { el.setAttribute('role', 'button'); el.tabIndex = 0; el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); } }); });
     document.querySelectorAll('.g[data-code]').forEach(el => el.addEventListener('click', () => {
       const [, shape, mark] = /^(_|[a-z]+?)([1-6]?),/.exec(el.dataset.code), clicked = +mark;
       body.replaceChildren();
