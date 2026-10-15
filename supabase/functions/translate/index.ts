@@ -102,6 +102,7 @@ Deno.serve(async (req) => {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
       try {
         const result = await translate(text, { callModel: callGemini, dict: await dictionary(), progress: (step: number) => send({ step }) });
+        console.log('result', JSON.stringify(result.units.map((u: { qn: string; chosen: string; read: string; ok: boolean }) => [u.qn, u.chosen, u.read, u.ok])));
         send({ result });
       } catch (e) {
         console.error('translate failed', e);

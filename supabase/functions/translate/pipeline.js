@@ -128,7 +128,9 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
     const todo = units.filter(u => u.chosen !== '?');
     const raw = await callModel(SYSTEM, step3Prompt(todo.map(u => ({ id: u.id, chars: u.chosen }))));
     const got = new Map(asArray(raw && raw.readings).map(r => [Number(r && r.id), String(r && r.reading || '')]));
-    for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u); }
+    // a character the dictionary of the site lists for exactly this reading counts as verified: reading it back without context is unreliable for Nôm
+    const known = u => (u.candidates.find(c => c.char === u.chosen) || {}).inDict === true;
+    for (const u of todo) { u.read = got.get(u.id) || '?'; u.ok = sameReading(u.read, u) || known(u); }
   };
   await readBack();
   const bad = units.filter(u => u.chosen !== '?' && !u.ok);
