@@ -150,16 +150,47 @@ const CHECK_UNTIL = 80000;   // ms after the start: later than this the optional
 
 // state of a word: sure (model and dictionary agree, or the back-reading matches), differs (the dictionary lists other characters for this
 // reading), uncertain (no character, or read back differently), unchecked (step 3 did not run)
-function stateOf(u) {
+function stateOf(u, pending = false) {
   if (u.chosen === '?') return { state: 'uncertain', why: 'nochar' };
   if (agrees(u)) return { state: 'sure', why: 'dictionary' };
   if (u.dict.length) return { state: 'differs', why: 'differs' };
   if (u.ok === true) return { state: 'sure', why: 'backreading' };
   if (u.ok === false) return { state: 'uncertain', why: 'readas' };
-  return { state: 'unchecked', why: 'none' };
+  return { state: 'unchecked', why: pending ? 'pending' : 'none' };   // pending: step 3 is still running
 }
 
-export async function translate(text, { callModel, dict = new Map(), progress = () => {}, prompts = DEFAULT_PROMPTS }) {
+// the result: the text with its punctuation, the units with their state. pending: step 3 is still running, the result is not final
+function assemble(text, tokens, units, checked, pending) {
+  const out = [];
+  let k = 0;   // index of the syllable
+  const byFirst = new Map();
+  let p = 0;
+  for (const u of units) { byFirst.set(p, u); p += u.syllables.length; }
+  const shown = u => u.chosen === '?' ? `[${u.qn}]` : u.chosen;
+  for (const t of tokens) {
+    if (t.type === 'other') { if (/\S/.test(t.text)) out.push(t.text.trim()); continue; }
+    if (byFirst.has(k)) out.push(shown(byFirst.get(k)));
+    k++;
+  }
+  const states = units.map(u => stateOf(u, pending));
+  const uncertain = units.filter((u, i) => states[i].state === 'uncertain' || states[i].state === 'differs').map(u => u.id);
+  return {
+    nom: out.join('').replace(/\s+/g, ''),
+    qn: text.trim(),
+    units: units.map((u, i) => ({
+      id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '',
+      state: states[i].state, why: states[i].why,
+      ok: states[i].state === 'sure' ? true : states[i].state === 'uncertain' ? false : null,   // for older pages
+      dict: u.dict,
+      candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, inDict: c.inDict, meaning: c.gloss || c.reason || '' })),
+    })),
+    uncertain,
+    checked,   // false: step 3 was skipped or failed (or is still running), the words it should rate are "unchecked"
+    pending,   // true: a first result, step 3 is still running and a final result follows
+  };
+}
+
+export async function translate(text, { callModel, dict = new Map(), progress = () => {}, partial = null, prompts = DEFAULT_PROMPTS }) {
   const started = Date.now();
   const SYSTEM = render(prompts, 'system');
   const tokens = tokenize(text);
@@ -186,6 +217,7 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
   let checked = false;
   if (!toCheck().length) checked = true;   // nothing left to check
   else if (Date.now() - started < CHECK_UNTIL) {
+    if (partial) partial(assemble(text, tokens, units, false, true));   // the result of steps 1 and 2 can be shown while step 3 runs
     progress(3);
     const readBack = async () => {
       const todo = toCheck();
@@ -216,31 +248,5 @@ export async function translate(text, { callModel, dict = new Map(), progress = 
     }
   }
 
-  // ---- result: the text with its punctuation, the units with their state
-  const out = [];
-  let k = 0;   // index of the syllable
-  const byFirst = new Map();
-  let p = 0;
-  for (const u of units) { byFirst.set(p, u); p += u.syllables.length; }
-  const shown = u => u.chosen === '?' ? `[${u.qn}]` : u.chosen;
-  for (const t of tokens) {
-    if (t.type === 'other') { if (/\S/.test(t.text)) out.push(t.text.trim()); continue; }
-    if (byFirst.has(k)) out.push(shown(byFirst.get(k)));
-    k++;
-  }
-  const states = units.map(stateOf);
-  const uncertain = units.filter((u, i) => states[i].state === 'uncertain' || states[i].state === 'differs').map(u => u.id);
-  return {
-    nom: out.join('').replace(/\s+/g, ''),
-    qn: text.trim(),
-    units: units.map((u, i) => ({
-      id: u.id, qn: u.qn, chosen: u.chosen, read: u.read || '',
-      state: states[i].state, why: states[i].why,
-      ok: states[i].state === 'sure' ? true : states[i].state === 'uncertain' ? false : null,   // for older pages
-      dict: u.dict,
-      candidates: u.candidates.map(c => ({ char: c.char, reading: c.reading, type: c.type, inDict: c.inDict, meaning: c.gloss || c.reason || '' })),
-    })),
-    uncertain,
-    checked,   // false: step 3 was skipped or failed, the words it should rate are "unchecked"
-  };
+  return assemble(text, tokens, units, checked, false);
 }
