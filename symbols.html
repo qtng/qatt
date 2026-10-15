@@ -300,7 +300,8 @@
         // the shape alone is the onset with ông, a marked form is a rhyme after the onset of the group (the shape)
         // these rhymes are shown without a reading
         const lone = n && parser.toQuocNgu({ onset: '_', rhyme: shape + n });
-        const read = NO_READING.has(lone) ? '' : parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
+        let read = NO_READING.has(lone) ? '' : parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
+        if (!n) read = (read || '').toUpperCase();   // the shape alone: everything that rhymes on ÔNG
         const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') + (NO_READING.has(lone) ? ' muted' : '') });
         v.append(Object.assign(document.createElement('span'), { className: 'g', textContent: QattText.syllable(code) || '' }), Object.assign(document.createElement('span'), { className: 'r', textContent: read || '' }));
         body.append(v);
