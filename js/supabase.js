@@ -349,15 +349,15 @@ class SupabaseService {
   }
 
   /**
-   * Fetches all decks for the current user.
+   * Fetches all decks for the current user. With { words: true } the words of the decks come along (for the progress).
    */
-  async getDecks() {
+  async getDecks({ words = false } = {}) {
     if (!this.user) await this.init();
     if (!this.user) return [];
 
     const { data, error } = await this.client
       .from('decks')
-      .select('id, user_id, title, count, is_public, is_official, image_path')
+      .select('id, user_id, title, count, is_public, is_official, image_path' + (words ? ', words' : ''))
       .eq('user_id', this.user.id)
       .order('updated_at', { ascending: false });
 
@@ -399,12 +399,12 @@ class SupabaseService {
   /**
    * Public decks the user took over into "My decks" (no copy, just a link). Newest first.
    */
-  async getSavedDecks() {
+  async getSavedDecks({ words = false } = {}) {
     if (!this.user) await this.init();
     if (!this.user) return [];
     const { data, error } = await this.client
       .from('deck_saves')
-      .select('created_at, decks!inner(id, user_id, title, count, is_public, is_official, image_path)')
+      .select('created_at, decks!inner(id, user_id, title, count, is_public, is_official, image_path' + (words ? ', words' : '') + ')')
       .eq('user_id', this.user.id)
       .eq('decks.is_public', true)
       .order('created_at', { ascending: false });
