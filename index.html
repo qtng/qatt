@@ -7,7 +7,6 @@
   <meta name="description" content="Quốc Âm Tân Tự (QATT), a Vietnamese script from Hán Nôm texts: introduction, Unicode proposal and decodings.">
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <script src="js/navigation.js"></script>
-  <script src="js/qatt.js"></script>
   <style>
     :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
@@ -27,7 +26,8 @@
     .hero .btn-ink:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
     .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
     @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
-    .glyph-strip tt { font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
+    @font-face { font-family: "QATT Prototype Light"; src: url(fonts/qatt-prototype-light.woff2) format("woff2"), url(fonts/qatt-prototype-light.ttf) format("truetype"); }
+    .glyph-strip tt { font-family: "QATT Prototype Light", sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
     .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
@@ -41,9 +41,9 @@
 <body>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    new Qatt().observe('tt');
     const strip = document.getElementById('glyph-strip');
-    '_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph'.split(' ').forEach(o => { const t = document.createElement('tt'); t.textContent = ',' + o; strip.append(t); });
+    // the 22 base shapes: shape i is U+F0000 + 7 * i (see js/qatt-text.js)
+    for (let i = 0; i < 22; i++) { const t = document.createElement('tt'); t.textContent = String.fromCodePoint(0xF0000 + 7 * i); strip.append(t); }
   });
 </script>
 
