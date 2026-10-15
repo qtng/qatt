@@ -30,7 +30,8 @@ export const DEFAULT_PROMPTS = {
     'For each word choose the option that is the right Chữ Nôm for it in the context of the whole sentence (word class, sense, the other words): the usual character of the word, not a variant or a character with another meaning. Prefer a listed option.',
     'If you know that the right character of the word is not listed, or none of the options is the word, give the character you know as your own: set "own": true. Never invent characters; if you know none, write "?" and "own": true.',
     'Besides the chosen option give up to two more options of the same span that would fit next best, best first ("alt"); leave "alt" out for a character of your own.',
-    'Answer: {"words": [{"at": 0, "len": 1, "char": "...", "alt": ["...", "..."], "own": false}]}',
+    'Also give a free, natural English translation of the whole sentence ("translation").',
+    'Answer: {"translation": "...", "words": [{"at": 0, "len": 1, "char": "...", "alt": ["...", "..."], "own": false}]}',
   ],
   retry: 'Your previous answer was rejected: {{error}}. Follow the rules exactly.',
 };
@@ -97,7 +98,7 @@ function checkWords(raw, syllables, spans) {
     pos += w.len;
   }
   if (pos !== syllables.length) return { error: `the words cover ${pos} of ${syllables.length} syllables` };
-  return { words };
+  return { words, translation: typeof raw.translation === 'string' ? raw.translation.trim().slice(0, 1000) : '' };
 }
 
 export async function translate2(text, rawSpans, { callModel, progress = () => {}, prompts = DEFAULT_PROMPTS }) {
@@ -135,6 +136,7 @@ export async function translate2(text, rawSpans, { callModel, progress = () => {
     qn: text.trim(),
     parts,
     fallback: !step.words,
+    translation: step.translation || '',
     words: words.map((w, i) => {
       const options = w.span ? w.span.options : [];
       const chosen = w.char && w.char !== '?' && HAN.test(w.char) ? w.char : '?';
