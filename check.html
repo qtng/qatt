@@ -292,9 +292,12 @@
       setTimeout(() => c.remove(), 1700);
     };
     const sayOnset = (shape, b) => { const text = parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }); say(text); cloud(b, text); };
-    // a marked form: only the reading of the rhyme character itself (as on symbols.html), not the unfinished word
+    // a marked form: the reading of the rhyme character itself with the consonant of its base shape (ngam for the group of ng), as in the popup of symbols.html;
+    // not the asked word. The rhymes that have no reading there (ơng, ương, êng, uêng, ing, uyng) have none here either.
+    const NO_READING = new Set(['ơng', 'ương', 'êng', 'uêng', 'ing', 'uyng']);
     const sayMarked = (shape, mark, b) => {
-      const text = parser.toQuocNgu({ onset: '_', rhyme: shape + mark, tone: 0 });
+      if (NO_READING.has(parser.toQuocNgu({ onset: '_', rhyme: shape + mark }))) return;
+      const text = parser.toQuocNgu({ onset: shape, rhyme: shape + mark, tone: 0 });
       say(text); cloud(b, text);
     };
     const TONE_NAME = { 1: null, 2: 'huyen', 3: 'hoi', 4: 'nga', 5: 'sac', 6: 'nang', 7: 'sac', 8: 'nang' };
