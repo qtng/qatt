@@ -106,7 +106,8 @@ window.Lang = window.Lang || (function() {
 window.Theme = window.Theme || (function() {
     const KEY = "theme";
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
-        glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"] };
+        glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
+        neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"] };
     const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     let current = "classic";
     try { const s = localStorage.getItem(KEY); if (Object.prototype.hasOwnProperty.call(list, s)) current = s; } catch (e) {}
