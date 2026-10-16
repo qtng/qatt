@@ -96,7 +96,7 @@ window.Lang = window.Lang || (function() {
 
 // ---------- the menu ----------
 // ---------- Theme: the look of the pages ----------
-// localStorage.theme (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, or in license.html) says which file
+// localStorage.theme (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, in license.html, or ?theme=<name>) says which file
 // css/theme-<name>.css of qatt.org is part of the page. Every theme is a complete file of its own, none builds on or overrides another; the pages only have their layout
 // (css/site.css has what all themes share). The file is written into the <head> while the page is parsed (document.write, so that the page is not drawn without it)
 // and data-theme is set on <html> (the themes other than classic need it to be more specific than the pages).
@@ -118,7 +118,16 @@ window.Theme = window.Theme || (function() {
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
     let current = "classic";
-    if (choosable) try { const s = localStorage.getItem(KEY); if (Object.prototype.hasOwnProperty.call(list, s)) current = s; } catch (e) {}
+    const valid = s => Object.prototype.hasOwnProperty.call(list, s);
+    if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) current = s; } catch (e) {}
+    // ?theme=<name> in the address (license.html sends a visitor back with it): chosen and remembered where themes can be chosen, else only shown on this page
+    // (a preview, e.g. on the Chunom site before CHUNOM_THEMES); the parameter is taken out of the address
+    const params = new URLSearchParams(location.search), asked = params.get("theme");
+    if (asked !== null) {
+        if (themed && valid(asked)) { current = asked; if (choosable) try { localStorage.setItem(KEY, asked); } catch (e) {} }
+        params.delete("theme");
+        try { history.replaceState(history.state, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); } catch (e) {}
+    }
     const href = () => base + "/css/theme-" + current + ".css";
     const apply = () => {
         if (!themed) return;
@@ -346,7 +355,8 @@ window.Theme = window.Theme || (function() {
         const link = document.createElement('a');
         link.textContent = 'powered by chunom.org';
         link.title = 'Licenses and the files this page uses';
-        const update = () => { link.href = `${licenseUrl}#${sources().map(encodeURIComponent).join(',')}`; };
+        // ?back= the page itself, so that license.html can send the visitor back (with the theme chosen there)
+        const update = () => { link.href = `${licenseUrl}?back=${encodeURIComponent(location.origin + location.pathname + location.search)}#${sources().map(encodeURIComponent).join(',')}`; };
         update();
         ['pointerdown', 'focus', 'touchstart', 'contextmenu'].forEach(t => link.addEventListener(t, update));
         window.addEventListener('load', update);
