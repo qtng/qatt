@@ -62,8 +62,9 @@ async function logModels(key: string) {   // once per instance: which models thi
 const coolDown = new Map<string, number>();
 
 // what a call of the page cost: collected over the calls of Gemini of one translation, written to translate_log
-type Meter = { tries: number; failed: number; models: string[]; tokensIn: number; tokensOut: number; geminiMs: number };
-const newMeter = (): Meter => ({ tries: 0, failed: 0, models: [], tokensIn: 0, tokensOut: 0, geminiMs: 0 });
+type Attempt = { model: string; status: number; ms: number; tokens_in?: number; tokens_out?: number };   // status: the HTTP status, 0 = no answer
+type Meter = { tries: number; failed: number; models: string[]; tokensIn: number; tokensOut: number; geminiMs: number; attempts: Attempt[] };
+const newMeter = (): Meter => ({ tries: 0, failed: 0, models: [], tokensIn: 0, tokensOut: 0, geminiMs: 0, attempts: [] });
 
 async function callGemini(system: string, user: string, opts: { attempts?: number; meter?: Meter } = {}) {
   const key = Deno.env.get('GEMINI_API_KEY');
@@ -80,9 +81,9 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         signal: AbortSignal.timeout(60000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
-    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; if (opts.meter) opts.meter.failed++; continue; }
+    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; if (opts.meter) { opts.meter.failed++; opts.meter.attempts.push({ model, status: 0, ms: Date.now() - t0 }); } continue; }
     if (r.status === 429 || r.status >= 500 || r.status === 404) {
-      if (opts.meter) opts.meter.failed++;
+      if (opts.meter) { opts.meter.failed++; opts.meter.attempts.push({ model, status: r.status, ms: Date.now() - t0 }); }
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
       last = r.status === 404 ? 'model' : 'busy';
       if (r.status === 429 || r.status === 404) coolDown.set(model, Date.now() + 60000);
@@ -90,13 +91,14 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
       await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
       continue;
     }
-    if (!r.ok) { console.error('gemini', model, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
+    if (!r.ok) { if (opts.meter) opts.meter.attempts.push({ model, status: r.status, ms: Date.now() - t0 }); console.error('gemini', model, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
     console.log('gemini', model, r.status, Date.now() - t0, 'ms');
     if (opts.meter) {
       opts.meter.models.push(model); opts.meter.geminiMs += Date.now() - t0;
-      opts.meter.tokensIn += Number(data?.usageMetadata?.promptTokenCount) || 0;
-      opts.meter.tokensOut += (Number(data?.usageMetadata?.candidatesTokenCount) || 0) + (Number(data?.usageMetadata?.thoughtsTokenCount) || 0);
+      const tin = Number(data?.usageMetadata?.promptTokenCount) || 0, tout = (Number(data?.usageMetadata?.candidatesTokenCount) || 0) + (Number(data?.usageMetadata?.thoughtsTokenCount) || 0);
+      opts.meter.tokensIn += tin; opts.meter.tokensOut += tout;
+      opts.meter.attempts.push({ model, status: 200, ms: Date.now() - t0, tokens_in: tin, tokens_out: tout });
     }
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || '';
     try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { return {}; }
@@ -113,14 +115,18 @@ async function hit(userId: string): Promise<number | null> {
   return Number(await r.json());
 }
 
-// one row of numbers per call; a failing log must never break the translation
-async function logCall(row: Record<string, unknown>) {
+// one row of numbers per call and one per try of a model (translate_attempts); a failing log must never break the translation
+async function logCall(row: Record<string, unknown>, attempts: Attempt[] = []) {
+  await logRows('translate_log', row);
+  if (attempts.length) await logRows('translate_attempts', attempts);
+}
+async function logRows(table: string, row: Record<string, unknown> | Attempt[]) {
   try {
     const base = Deno.env.get('SUPABASE_URL')!, key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const r = await fetch(`${base}/rest/v1/translate_log`, { method: 'POST', signal: AbortSignal.timeout(4000),
+    const r = await fetch(`${base}/rest/v1/${table}`, { method: 'POST', signal: AbortSignal.timeout(4000),
       headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(row) });
-    if (!r.ok) console.error('translate_log', r.status, (await r.text()).slice(0, 200));
-  } catch (e) { console.error('translate_log', String(e)); }
+    if (!r.ok) console.error(table, r.status, (await r.text()).slice(0, 200));
+  } catch (e) { console.error(table, String(e)); }
 }
 
 Deno.serve(async (req) => {
@@ -153,12 +159,12 @@ Deno.serve(async (req) => {
         const ws = result.words as { own: boolean }[];
         await logCall({ status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
           model: meter.models[meter.models.length - 1] || null, lang: lang || null, syllables: result.words.reduce((n: number, w: { len: number }) => n + w.len, 0),
-          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length });
+          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts);
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
         await logCall({ status: (e as { code?: string }).code || 'failed', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
-          model: meter.models[meter.models.length - 1] || null, lang: lang || null, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length });
+          model: meter.models[meter.models.length - 1] || null, lang: lang || null, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts);
       }
       controller.close();
     },

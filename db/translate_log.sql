@@ -66,3 +66,67 @@ end;
 $$;
 revoke all on function public.admin_translate(integer) from public, anon;
 grant execute on function public.admin_translate(integer) to authenticated;
+
+-- One row per try of a model of Gemini (a call of the page can need several: a model that is overloaded or over its quota is followed by the next).
+-- status = the HTTP status of the answer (200 ok, 429 quota, 503 overloaded, 404 model unknown, ...), 0 = no answer at all (time out, network).
+create table if not exists public.translate_attempts (
+  id bigint generated always as identity primary key,
+  at timestamptz not null default now(),
+  model text not null,
+  status integer not null,
+  ms integer,
+  tokens_in integer,
+  tokens_out integer
+);
+create index if not exists translate_attempts_at on public.translate_attempts (at);
+alter table public.translate_attempts enable row level security;
+revoke all on public.translate_attempts from anon, authenticated;
+grant insert on public.translate_attempts to service_role;
+
+-- the evaluation of the models of the last p_days days (admin/models.html; admins only)
+create or replace function public.admin_models(p_days integer default 7)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  d integer := greatest(1, least(coalesce(p_days, 7), 90));
+begin
+  if coalesce((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean, false) is not true then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+  return jsonb_build_object(
+    'days', d,
+    -- every try of a model: how often it worked, was over its quota, was overloaded, and how long a working try took
+    'tries', (select coalesce(jsonb_agg(to_jsonb(x) order by x.tries desc), '[]'::jsonb) from (
+      select model, count(*) as tries,
+        count(*) filter (where status = 200) as ok,
+        count(*) filter (where status = 429) as quota,
+        count(*) filter (where status = 503) as overloaded,
+        count(*) filter (where status not in (200, 429, 503)) as other,
+        round(avg(ms) filter (where status = 200)) as avg_ms,
+        round((percentile_cont(0.5) within group (order by ms) filter (where status = 200))::numeric) as p50_ms,
+        round((percentile_cont(0.95) within group (order by ms) filter (where status = 200))::numeric) as p95_ms,
+        round(avg(tokens_in) filter (where status = 200)) as avg_tokens_in,
+        round(avg(tokens_out) filter (where status = 200)) as avg_tokens_out,
+        max(at) as last_at
+      from public.translate_attempts where at > now() - make_interval(days => d) group by model) x),
+    -- the calls that this model answered: the quality (own characters, fallback) and the time of the whole call
+    'answers', (select coalesce(jsonb_agg(to_jsonb(x) order by x.calls desc), '[]'::jsonb) from (
+      select coalesce(model, '-') as model, count(*) as calls,
+        count(*) filter (where status = 'fallback') as fallback,
+        coalesce(sum(words), 0) as words, coalesce(sum(own_words), 0) as own_words,
+        round(avg(ms)) as avg_call_ms
+      from public.translate_log where at > now() - make_interval(days => d) group by 1) x),
+    -- per day and model
+    'daily', (select coalesce(jsonb_agg(to_jsonb(x) order by x.day, x.model), '[]'::jsonb) from (
+      select (at at time zone 'utc')::date as day, model, count(*) as tries,
+        count(*) filter (where status = 200) as ok,
+        round(avg(ms) filter (where status = 200)) as avg_ms
+      from public.translate_attempts where at > now() - make_interval(days => d) group by 1, 2) x)
+  );
+end;
+$$;
+revoke all on function public.admin_models(integer) from public, anon;
+grant execute on function public.admin_models(integer) to authenticated;
