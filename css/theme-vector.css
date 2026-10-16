@@ -1,0 +1,48 @@
+/* Theme "vector": vector art: a flat illustration. Bold flat colours (teal, coral, sunflower, navy) without gradients or textures, big geometric shapes in the header, rounded friendly corners, clean geometric sans.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="vector"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="vector"] { --ink: #26355d; --accent: #ff6b6b; --cinnabar: #ff6b6b; --paper: #f7fbfc; --line: #dce8ee; --field: #b9cfd8; --muted: #5a6b8c;
+  --vx-teal: #00b3a4; --vx-yellow: #ffd93d; --vx-coral: #ff6b6b; --vx-navy: #26355d; --vx-sky: #8fd3fe;
+  --vx-font: "Poppins", "Montserrat", "Futura", "Century Gothic", system-ui, sans-serif; }
+html[data-theme="vector"] body { background: var(--paper); color: var(--ink); font-family: var(--vx-font); }
+html[data-theme="vector"] .nav-backdrop, html[data-theme="vector"] .bottom-bar { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+html[data-theme="vector"] h1, html[data-theme="vector"] h2, html[data-theme="vector"] h3 { font-family: var(--vx-font); font-weight: 800; color: var(--ink); }
+html[data-theme="vector"] h2 { border-bottom: 0; }
+html[data-theme="vector"] h2::after { content: ""; display: block; width: 3rem; height: .3rem; margin-top: .3rem; border-radius: .3rem; background: var(--vx-teal); }
+html[data-theme="vector"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--vx-teal); font-weight: 600; }
+html[data-theme="vector"] .text-secondary, html[data-theme="vector"] .text-muted, html[data-theme="vector"] .note { color: var(--muted) !important; }
+html[data-theme="vector"] .hero, html[data-theme="vector"] .editor-head { color: var(--ink); border-bottom: 0; background-color: var(--vx-sky);
+  background-image: radial-gradient(circle at 12% 30%, var(--vx-yellow) 0 4.5rem, transparent 4.6rem), radial-gradient(circle at 92% 85%, var(--vx-coral) 0 6rem, transparent 6.1rem),
+    linear-gradient(160deg, transparent 0 70%, var(--vx-teal) 70.2% 100%); }
+html[data-theme="vector"] .hero h1, html[data-theme="vector"] .editor-head h1 { font-family: var(--vx-font); font-weight: 900; color: var(--vx-navy); }
+html[data-theme="vector"] .hero .han, html[data-theme="vector"] .editor-head .han { display: inline-block; color: #fff; background: var(--vx-navy); border-radius: 2rem; padding: .2rem .8rem .2rem 1.3rem; }
+html[data-theme="vector"] .hero .lead { color: var(--vx-navy); font-weight: 500; }
+html[data-theme="vector"] .hero a:not(.btn) { color: var(--vx-navy); }
+html[data-theme="vector"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: .8rem; --bs-btn-border-width: 0; font-family: var(--vx-font); font-weight: 700; box-shadow: none; transition: transform .15s, background-color .15s; }
+html[data-theme="vector"] .btn:not(.btn-close):not(.btn-link):hover:not(:disabled) { transform: translateY(-2px); }
+html[data-theme="vector"] .btn-cinnabar, html[data-theme="vector"] .btn-accent { --bs-btn-bg: var(--vx-coral); --bs-btn-color: #fff; --bs-btn-hover-bg: #f25555; --bs-btn-hover-color: #fff; --bs-btn-active-bg: #e04848; --bs-btn-active-color: #fff; }
+html[data-theme="vector"] .btn-quiet, html[data-theme="vector"] .btn-ink, html[data-theme="vector"] .btn-pill, html[data-theme="vector"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fff; --bs-btn-color: var(--ink); --bs-btn-border-width: 2px; --bs-btn-border-color: var(--ink); --bs-btn-hover-bg: var(--vx-yellow); --bs-btn-hover-color: var(--ink); --bs-btn-hover-border-color: var(--ink); --bs-btn-active-bg: var(--vx-yellow); --bs-btn-active-color: var(--ink); --bs-btn-active-border-color: var(--ink); }
+html[data-theme="vector"] .btn-cinnabar.btn-pill, html[data-theme="vector"] .btn-accent.btn-pill { --bs-btn-bg: var(--vx-coral); --bs-btn-color: #fff; --bs-btn-border-width: 0; }
+html[data-theme="vector"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: var(--vx-navy); --bs-btn-hover-bg: #1b2747; }
+html[data-theme="vector"] .form-select { --bs-border-radius: .8rem; --bs-border-width: 2px; --bs-border-color: var(--ink); background-color: #fff; color: var(--ink); font-weight: 600; }
+html[data-theme="vector"] .form-control, html[data-theme="vector"] textarea { border: 2px solid var(--field); border-radius: .8rem; background-color: #fff; color: var(--ink); }
+html[data-theme="vector"] .form-control:focus, html[data-theme="vector"] textarea:focus, html[data-theme="vector"] .form-select:focus { border-color: var(--vx-teal); box-shadow: 0 0 0 .25rem rgba(0, 179, 164, .2); outline: none; }
+html[data-theme="vector"] .form-check-input:checked { background-color: var(--vx-teal); border-color: var(--vx-teal); }
+html[data-theme="vector"] input[type="range"] { accent-color: var(--vx-teal); }
+html[data-theme="vector"] .card, html[data-theme="vector"] .card-box, html[data-theme="vector"] .alert, html[data-theme="vector"] .editor, html[data-theme="vector"] .content-container, html[data-theme="vector"] .sticky-card, html[data-theme="vector"] .panel { background: #fff; border: 2px solid var(--line); border-radius: 1.2rem; box-shadow: none; }
+html[data-theme="vector"] .dropdown-menu, html[data-theme="vector"] .modal-content, html[data-theme="vector"] dialog#variants { border: 2px solid var(--ink); border-radius: 1rem; }
+html[data-theme="vector"] .table { --bs-table-bg: #fff; border-radius: .8rem; overflow: hidden; }
+html[data-theme="vector"] .rule, html[data-theme="vector"] .pane-title, html[data-theme="vector"] .powered-by, html[data-theme="vector"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="vector"] .hero .rule { color: var(--vx-navy) !important; }
+html[data-theme="vector"] .rule::before, html[data-theme="vector"] .rule::after { border-top: 3px solid var(--vx-teal); border-radius: 3px; }
+html[data-theme="vector"] hr { border-top: 3px solid var(--line); opacity: 1; }
+html[data-theme="vector"] .glyph-strip .g[data-code] { border: 2px solid var(--ink); border-radius: 1rem; transition: transform .15s; }
+html[data-theme="vector"] .glyph-strip .g[data-code]:hover, html[data-theme="vector"] .glyph-strip .g[data-code]:focus-visible { transform: translateY(-3px) rotate(-3deg); outline: none; }
+html[data-theme="vector"] #variants .speak { border: 2px solid var(--ink); }
+html[data-theme="vector"] #variants .var { border: 2px solid var(--line); border-radius: .8rem; background: #fff; }
+html[data-theme="vector"] #variants .var.hit { border-color: var(--vx-coral); background: #ffe5e5; }
+html[data-theme="vector"] .search-bar .input-group { border-radius: .8rem; box-shadow: none; }
+html[data-theme="vector"] .search-bar .input-group-text, html[data-theme="vector"] .search-bar .form-control { border: 2px solid var(--ink); background: #fff; }
+html[data-theme="vector"] .search-bar .input-group-text { border-radius: .8rem 0 0 .8rem; border-right: 0; }
+html[data-theme="vector"] .search-bar .btn { border-radius: 0 .8rem .8rem 0; }
+html[data-theme="vector"] .controls { border: 2px solid var(--line); border-radius: 1rem; background: #fff; }

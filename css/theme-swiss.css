@@ -1,0 +1,78 @@
+/* Theme "swiss": the International Typographic Style. A grotesque sans, black on white, one red, flush-left headers on a grid, heavy black rules instead of
+   boxes, square corners, no shadows. A complete theme of its own: it does not build on another theme and no other theme builds on it.
+   Every rule starts with html[data-theme="swiss"] so that it is more specific than the colour variables and rules of the pages' own <style>.
+   Loaded by js/navigation.js (Theme). */
+html[data-theme="swiss"] {
+  --ink: #000; --accent: #e30613; --cinnabar: #e30613; --paper: #fff; --line: #000; --field: #000; --muted: #444;
+  --sw-font: "Helvetica Neue", Helvetica, Arial, "Nimbus Sans", "Liberation Sans", sans-serif;
+}
+html[data-theme="swiss"] body { background: #fff; color: #000; font-family: var(--sw-font); }
+html[data-theme="swiss"] h1, html[data-theme="swiss"] h2, html[data-theme="swiss"] h3 { font-family: var(--sw-font); font-weight: 700; letter-spacing: -.02em; color: #000; }
+html[data-theme="swiss"] h2 { border-top: 4px solid #000; border-bottom: 0; padding-top: .45rem; }
+html[data-theme="swiss"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--accent); text-decoration: none; }
+html[data-theme="swiss"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]):hover { text-decoration: underline; }
+html[data-theme="swiss"] .text-secondary, html[data-theme="swiss"] .text-muted, html[data-theme="swiss"] .note { color: var(--muted) !important; }
+
+/* the header: flush left on the grid, a huge tight title, a red bar above it */
+html[data-theme="swiss"] .hero { background: #fff; border-bottom: 4px solid #000; color: #000; }
+html[data-theme="swiss"] .hero .text-center { text-align: left !important; }
+html[data-theme="swiss"] .hero .justify-content-center { justify-content: flex-start !important; }
+html[data-theme="swiss"] .hero .glyph-strip { margin-left: 0; justify-content: flex-start; }
+html[data-theme="swiss"] .hero .rule { margin-left: 0; }
+html[data-theme="swiss"] .hero .rule::before { display: none; }
+html[data-theme="swiss"] .hero .lead { margin-left: 0 !important; max-width: 34rem; color: #000; font-size: 1.15rem; }
+html[data-theme="swiss"] .hero h1 { font-size: clamp(2.8rem, 11vw, 5.5rem); line-height: .95; letter-spacing: -.045em; }
+html[data-theme="swiss"] .hero .han { display: inline-block; color: #fff; background: var(--accent); padding: .2rem .5rem .2rem .7rem; letter-spacing: .3em; font-weight: 700; }
+html[data-theme="swiss"] .hero a:not(.btn) { color: var(--accent); }
+html[data-theme="swiss"] .editor-head { text-align: left !important; }
+html[data-theme="swiss"] .editor-head h1 { font-family: var(--sw-font); font-weight: 700; letter-spacing: -.04em; }
+html[data-theme="swiss"] .editor-head .han { color: var(--accent); padding-left: 0; }
+html[data-theme="swiss"] .editor-head p { margin-left: 0; color: #000; }
+
+/* buttons: square blocks, bold, red for the main action, black outline for the others */
+html[data-theme="swiss"] .btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-radius: 0; --bs-btn-border-width: 2px; font-family: var(--sw-font); font-weight: 700; box-shadow: none;
+}
+html[data-theme="swiss"] .btn-cinnabar, html[data-theme="swiss"] .btn-accent {
+  --bs-btn-bg: var(--accent); --bs-btn-color: #fff; --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: #000; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #000;
+  --bs-btn-active-bg: #000; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #000;
+}
+html[data-theme="swiss"] .btn-quiet, html[data-theme="swiss"] .btn-ink, html[data-theme="swiss"] .btn-pill, html[data-theme="swiss"] .btn[class*="btn-outline-"] {
+  --bs-btn-bg: #fff; --bs-btn-color: #000; --bs-btn-border-color: #000;
+  --bs-btn-hover-bg: #000; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #000;
+  --bs-btn-active-bg: #000; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #000;
+}
+html[data-theme="swiss"] .btn-cinnabar.btn-pill, html[data-theme="swiss"] .btn-accent.btn-pill { --bs-btn-bg: var(--accent); --bs-btn-color: #fff; --bs-btn-border-color: var(--accent); }
+
+/* fields and dropdowns: square, a 2px black outline */
+html[data-theme="swiss"] .form-select { --bs-border-radius: 0; --bs-border-width: 2px; border-color: #000; background-color: #fff; color: #000; font-weight: 700; box-shadow: none; }
+html[data-theme="swiss"] .form-select:focus { border-color: var(--accent); box-shadow: none; }
+html[data-theme="swiss"] .form-control, html[data-theme="swiss"] textarea { border-radius: 0; border: 2px solid #000; background-color: #fff; }
+html[data-theme="swiss"] .form-control:focus, html[data-theme="swiss"] textarea:focus { border-color: var(--accent); box-shadow: none; outline: none; }
+html[data-theme="swiss"] .form-check-input { border: 2px solid #000; }
+html[data-theme="swiss"] .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+html[data-theme="swiss"] input[type="range"] { accent-color: var(--accent); }
+
+/* panels: no boxes and shadows, a heavy black rule above */
+html[data-theme="swiss"] .card, html[data-theme="swiss"] .card-box, html[data-theme="swiss"] .alert, html[data-theme="swiss"] .editor {
+  border-radius: 0; box-shadow: none; border: 0; border-top: 4px solid #000; background: #fff;
+}
+html[data-theme="swiss"] .dropdown-menu, html[data-theme="swiss"] .modal-content { border-radius: 0; border: 2px solid #000; box-shadow: none; }
+html[data-theme="swiss"] .table { --bs-table-bg: #fff; border-top: 4px solid #000; }
+html[data-theme="swiss"] .rule { color: #000 !important; font-weight: 700; }
+html[data-theme="swiss"] .rule::before, html[data-theme="swiss"] .rule::after { border-top: 2px solid #000; }
+html[data-theme="swiss"] .hero .rule { color: #000 !important; }
+html[data-theme="swiss"] .pane-title, html[data-theme="swiss"] .powered-by, html[data-theme="swiss"] .powered-by a { color: #000 !important; }
+html[data-theme="swiss"] hr { border-top: 2px solid #000; opacity: 1; }
+
+/* symbol buttons (symbols.html), the boxes of its variants, the search bar (wiki.html), the controls (decodings.html) */
+html[data-theme="swiss"] .glyph-strip .g[data-code] { border: 2px solid #000; border-radius: 0; transition: background-color .12s, color .12s; }
+html[data-theme="swiss"] .glyph-strip .g[data-code]:hover, html[data-theme="swiss"] .glyph-strip .g[data-code]:focus-visible { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 0; }
+html[data-theme="swiss"] #variants .speak { border: 2px solid #000; }
+html[data-theme="swiss"] #variants .var { border: 2px solid #000; border-radius: 0; }
+html[data-theme="swiss"] #variants .var.hit { border-color: var(--accent); background: #fde7e9; }
+html[data-theme="swiss"] .search-bar .input-group { border-radius: 0; box-shadow: none; }
+html[data-theme="swiss"] .search-bar .input-group-text, html[data-theme="swiss"] .search-bar .form-control { border-radius: 0; border: 2px solid #000; }
+html[data-theme="swiss"] .search-bar .btn { border-radius: 0; }
+html[data-theme="swiss"] .controls { border-radius: 0; border: 2px solid #000; background: #fff; }

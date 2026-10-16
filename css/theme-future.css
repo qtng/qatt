@@ -1,0 +1,66 @@
+/* Theme "future": futuristic: a dark sci-fi interface. Deep night background with a faint grid, neon cyan and magenta, glowing thin outlines, buttons with cut corners, wide spaced capitals. The panels of the pages turn dark too; what a page draws light of its own keeps its dark text, so it stays readable.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="future"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="future"] { --ink: #d7f6ff; --accent: #00e5ff; --cinnabar: #ff2bd6; --paper: #050816; --line: rgba(0, 229, 255, .35); --field: rgba(0, 229, 255, .5); --muted: #8fb3c9;
+  --fx-text: #d7f6ff; --fx-cyan: #00e5ff; --fx-magenta: #ff2bd6; --fx-panel: rgba(9, 18, 40, .85);
+  --fx-glow: 0 0 .5rem rgba(0, 229, 255, .45), inset 0 0 .6rem rgba(0, 229, 255, .12);
+  --fx-font: "Orbitron", "Rajdhani", "Eurostile", "Bank Gothic", system-ui, sans-serif;
+  --fx-cut: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+html[data-theme="future"] body { background-color: var(--paper); color: var(--fx-text);
+  background-image: linear-gradient(rgba(0, 229, 255, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, .06) 1px, transparent 1px), radial-gradient(60rem 30rem at 50% -10%, rgba(255, 43, 214, .18), transparent 70%);
+  background-size: 32px 32px, 32px 32px, auto; background-attachment: fixed; }
+html[data-theme="future"] h1, html[data-theme="future"] h2, html[data-theme="future"] h3 { font-family: var(--fx-font); text-transform: uppercase; letter-spacing: .12em; color: var(--fx-text); font-weight: 700; }
+html[data-theme="future"] h2 { border-bottom: 1px solid var(--line); text-shadow: 0 0 .6rem rgba(0, 229, 255, .5); }
+html[data-theme="future"] p, html[data-theme="future"] li, html[data-theme="future"] label, html[data-theme="future"] .form-check-label { color: var(--fx-text); }
+html[data-theme="future"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--fx-cyan); text-shadow: 0 0 .4rem rgba(0, 229, 255, .5); }
+html[data-theme="future"] .text-secondary, html[data-theme="future"] .text-muted, html[data-theme="future"] .note { color: var(--muted) !important; }
+html[data-theme="future"] .hero, html[data-theme="future"] .editor-head { background: transparent; border-bottom: 1px solid var(--line); color: var(--fx-text); box-shadow: 0 1px 1rem rgba(0, 229, 255, .25); }
+html[data-theme="future"] .hero h1, html[data-theme="future"] .editor-head h1 { font-family: var(--fx-font); text-transform: uppercase; letter-spacing: .14em; color: #fff; text-shadow: 0 0 .5rem var(--fx-cyan), 0 0 1.5rem rgba(0, 229, 255, .6), 0 0 3rem rgba(255, 43, 214, .4); }
+html[data-theme="future"] .hero .han, html[data-theme="future"] .editor-head .han { color: var(--fx-magenta); text-shadow: 0 0 .6rem rgba(255, 43, 214, .8); }
+html[data-theme="future"] .hero .lead, html[data-theme="future"] .editor-head p { color: var(--muted); }
+html[data-theme="future"] .hero a:not(.btn) { color: var(--fx-cyan); }
+html[data-theme="future"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 0; --bs-btn-border-width: 1px; font-family: var(--fx-font); text-transform: uppercase; letter-spacing: .14em; font-size: .85rem; font-weight: 700; clip-path: var(--fx-cut); box-shadow: var(--fx-glow); transition: background-color .15s, color .15s, box-shadow .15s; }
+html[data-theme="future"] .btn-cinnabar, html[data-theme="future"] .btn-accent { --bs-btn-bg: rgba(255, 43, 214, .18); --bs-btn-color: #fff; --bs-btn-border-color: var(--fx-magenta); --bs-btn-hover-bg: var(--fx-magenta); --bs-btn-hover-color: #050816; --bs-btn-hover-border-color: var(--fx-magenta); --bs-btn-active-bg: var(--fx-magenta); --bs-btn-active-color: #050816; --bs-btn-active-border-color: var(--fx-magenta); box-shadow: 0 0 .6rem rgba(255, 43, 214, .5); }
+html[data-theme="future"] .btn-quiet, html[data-theme="future"] .btn-ink, html[data-theme="future"] .btn-pill, html[data-theme="future"] .btn[class*="btn-outline-"] { --bs-btn-bg: rgba(0, 229, 255, .08); --bs-btn-color: var(--fx-cyan); --bs-btn-border-color: var(--fx-cyan); --bs-btn-hover-bg: var(--fx-cyan); --bs-btn-hover-color: #050816; --bs-btn-hover-border-color: var(--fx-cyan); --bs-btn-active-bg: var(--fx-cyan); --bs-btn-active-color: #050816; --bs-btn-active-border-color: var(--fx-cyan); }
+html[data-theme="future"] .btn-cinnabar.btn-pill, html[data-theme="future"] .btn-accent.btn-pill { --bs-btn-bg: rgba(255, 43, 214, .18); --bs-btn-color: #fff; --bs-btn-border-color: var(--fx-magenta); }
+html[data-theme="future"] .form-select { --bs-border-radius: 0; --bs-border-color: var(--field); background-color: #0a1530; color: var(--fx-text); box-shadow: var(--fx-glow); --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2300e5ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+html[data-theme="future"] .form-select option, html[data-theme="future"] .form-select optgroup { background: #0a1530; color: var(--fx-text); }
+html[data-theme="future"] .form-control, html[data-theme="future"] textarea, html[data-theme="future"] #field, html[data-theme="future"] .sample { border: 1px solid var(--field); border-radius: 0; background-color: #081126; color: var(--fx-text); }
+html[data-theme="future"] .form-control::placeholder, html[data-theme="future"] textarea::placeholder { color: rgba(143, 179, 201, .7); }
+html[data-theme="future"] .form-control:focus, html[data-theme="future"] textarea:focus, html[data-theme="future"] .form-select:focus { border-color: var(--fx-cyan); box-shadow: 0 0 .8rem rgba(0, 229, 255, .6); outline: none; background-color: #0a1530; color: var(--fx-text); }
+html[data-theme="future"] .form-check-input { background-color: #0a1530; border: 1px solid var(--fx-cyan); }
+html[data-theme="future"] .form-check-input:checked { background-color: var(--fx-cyan); border-color: var(--fx-cyan); box-shadow: 0 0 .5rem rgba(0, 229, 255, .7); }
+html[data-theme="future"] input[type="range"] { accent-color: var(--fx-cyan); }
+html[data-theme="future"] .card, html[data-theme="future"] .card-box, html[data-theme="future"] .alert, html[data-theme="future"] .editor, html[data-theme="future"] .content-container, html[data-theme="future"] .sticky-card, html[data-theme="future"] .panel, html[data-theme="future"] .output-pane { background: var(--fx-panel); color: var(--fx-text); border: 1px solid var(--line); border-radius: 0; box-shadow: var(--fx-glow); }
+html[data-theme="future"] .dropdown-menu, html[data-theme="future"] .modal-content, html[data-theme="future"] dialog#variants { background: #0a1530; color: var(--fx-text); border: 1px solid var(--fx-cyan); border-radius: 0; box-shadow: 0 0 1rem rgba(0, 229, 255, .4); }
+html[data-theme="future"] #pending, html[data-theme="future"] #pending .glyph, html[data-theme="future"] .pane-title { color: var(--fx-text) !important; }
+html[data-theme="future"] .table { --bs-table-bg: rgba(9, 18, 40, .85); --bs-table-color: var(--fx-text); --bs-table-border-color: var(--line); color: var(--fx-text); }
+html[data-theme="future"] .rule, html[data-theme="future"] .powered-by, html[data-theme="future"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="future"] .rule::before, html[data-theme="future"] .rule::after { border-top: 1px solid var(--line); box-shadow: 0 0 .4rem rgba(0, 229, 255, .5); }
+html[data-theme="future"] .glyph-strip tt { color: var(--fx-cyan); text-shadow: 0 0 .4rem rgba(0, 229, 255, .6); }
+html[data-theme="future"] hr { border-top: 1px solid var(--line); opacity: 1; }
+html[data-theme="future"] .glyph-strip { color: var(--fx-text); }
+html[data-theme="future"] .glyph-strip .g[data-code] { border: 1px solid var(--fx-cyan); border-radius: 0; clip-path: var(--fx-cut); box-shadow: var(--fx-glow); transition: box-shadow .15s; background: color-mix(in srgb, var(--b, #0a1530) 22%, #0a1530); color: var(--fx-text); }
+html[data-theme="future"] .glyph-strip .g[data-code]:hover, html[data-theme="future"] .glyph-strip .g[data-code]:focus-visible { box-shadow: 0 0 1rem rgba(0, 229, 255, .8); outline: none; }
+html[data-theme="future"] #variants .speak { border: 1px solid var(--fx-cyan); background: #0a1530; color: var(--fx-cyan); }
+html[data-theme="future"] #variants .var { border: 1px solid var(--line); border-radius: 0; background: #0a1530; color: var(--fx-text); }
+html[data-theme="future"] #variants .var.hit { border-color: var(--fx-magenta); background: rgba(255, 43, 214, .15); box-shadow: 0 0 .6rem rgba(255, 43, 214, .5); }
+html[data-theme="future"] .search-bar { background: rgba(5, 8, 22, .9); border-bottom-color: var(--line); }
+html[data-theme="future"] .search-bar .input-group { border-radius: 0; box-shadow: var(--fx-glow); }
+html[data-theme="future"] .search-bar .input-group-text, html[data-theme="future"] .search-bar .form-control { border-color: var(--field); border-radius: 0; background: #081126; color: var(--fx-text); }
+html[data-theme="future"] .search-bar .btn { border-radius: 0; clip-path: none; }
+html[data-theme="future"] .controls { border: 1px solid var(--line); border-radius: 0; background: var(--fx-panel); box-shadow: var(--fx-glow); }
+html[data-theme="future"] .controls label { color: var(--fx-text); }
+/* the pages draw some boxes light of their own (cells, game buttons, cards of Sound Check, notes): they turn dark here, their text light */
+html[data-theme="future"] .cell, html[data-theme="future"] .gbtn, html[data-theme="future"] .game .tool, html[data-theme="future"] .game .tool-btn, html[data-theme="future"] .speak, html[data-theme="future"] .tone-box, html[data-theme="future"] .no-page .suggest, html[data-theme="future"] .no-page .hit, html[data-theme="future"] .chip, html[data-theme="future"] .detail .box, html[data-theme="future"] .bar, html[data-theme="future"] .card.task, html[data-theme="future"] .card.task.solved {
+  background: #0a1530; background-image: none; color: var(--fx-text); border-color: var(--line); }
+html[data-theme="future"] .gbtn { background: color-mix(in srgb, var(--b, #0a1530) 22%, #0a1530); border-color: var(--fx-cyan); box-shadow: var(--fx-glow); }
+html[data-theme="future"] .gbtn.ok:disabled { background: rgba(0, 228, 120, .2); color: #7dffb9; border-color: #00e478; }
+html[data-theme="future"] .gbtn.bad:disabled { background: rgba(255, 43, 214, .2); color: #ff9be9; border-color: var(--fx-magenta); }
+html[data-theme="future"] .cell.near { background: rgba(0, 229, 255, .12); color: rgba(215, 246, 255, .5); }
+html[data-theme="future"] .cell.solved { background: rgba(0, 228, 120, .2); color: #7dffb9; }
+html[data-theme="future"] .card.task { border-color: var(--fx-cyan); box-shadow: var(--fx-glow); }
+html[data-theme="future"] .task .cells, html[data-theme="future"] .task .cell + .cell { border-color: var(--fx-cyan); }
+html[data-theme="future"] .glyph-strip .lab, html[data-theme="future"] #variants .head, html[data-theme="future"] .bar .form-check-label, html[data-theme="future"] .bar label, html[data-theme="future"] .notes, html[data-theme="future"] .notes em, html[data-theme="future"] .fmt-text, html[data-theme="future"] #output .empty, html[data-theme="future"] #output .reading, html[data-theme="future"] .editor-head p { color: var(--muted) !important; }
+html[data-theme="future"] .notes h4, html[data-theme="future"] .notes b, html[data-theme="future"] .fmt-text strong, html[data-theme="future"] h2.sub { color: var(--fx-text); }
+html[data-theme="future"] .hero .lead { color: var(--muted); }
