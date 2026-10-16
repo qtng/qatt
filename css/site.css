@@ -58,9 +58,42 @@
 
 /* ---------------------------------------------------------------------------------------------------------------------
    Themes (js/navigation.js sets data-theme on <html> from localStorage.theme; the choice is in license.html).
-   "classic" has no rules here: it is the look above and of the pages. A theme overrides the colour variables that the pages use
+   "retro" has no rules here: it is the look above and of the pages. A theme overrides the colour variables that the pages use
    (their own :root is less specific than html[data-theme]) and the shapes of the shared elements.
    --------------------------------------------------------------------------------------------------------------------- */
+
+/* ---- chunom: the look before the retro redesign (the one the Chunom site has): pill buttons with a thin soft outline, no shadows, round symbol buttons.
+   The pages of Sound Check (check.html) keep their retro buttons: they had that look before. ---- */
+html[data-theme="chunom"] .btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-width: 1px; --bs-btn-border-radius: 2rem;
+  font-weight: 400; box-shadow: none; transition: background-color .15s, border-color .15s, color .15s;
+}
+html[data-theme="chunom"] .btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled),
+html[data-theme="chunom"] .btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
+html[data-theme="chunom"] .btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: none; box-shadow: none; }
+html[data-theme="chunom"] .btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .25); }
+html[data-theme="chunom"] .btn-cinnabar, html[data-theme="chunom"] .btn-accent {
+  --bs-btn-border-color: var(--cinnabar); --bs-btn-hover-border-color: #8c2c22; --bs-btn-active-border-color: #7a261d;
+}
+html[data-theme="chunom"] .btn-quiet, html[data-theme="chunom"] .btn-ink {
+  --bs-btn-color: #5b4d3d; --bs-btn-border-color: #cdbf9f; --bs-btn-hover-bg: #f1e8d2; --bs-btn-hover-border-color: #b9a982; --bs-btn-active-bg: #f1e8d2; --bs-btn-active-border-color: #b9a982;
+}
+html[data-theme="chunom"] .hero .btn-ink { --bs-btn-bg: transparent; --bs-btn-color: var(--ink); --bs-btn-border-color: #8a7660; --bs-btn-hover-bg: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--ink); }
+html[data-theme="chunom"] .btn[class*="btn-outline-"] { --bs-btn-bg: transparent; --bs-btn-hover-bg: var(--bs-btn-color); --bs-btn-active-bg: var(--bs-btn-color); --bs-btn-hover-color: #fff; --bs-btn-active-color: #fff; --bs-btn-border-color: var(--bs-btn-color); --bs-btn-hover-border-color: var(--bs-btn-color); }
+html[data-theme="chunom"] .btn-outline-secondary { --bs-btn-color: #6c757d; }
+html[data-theme="chunom"] .form-select { --bs-border-width: 1px; --bs-border-color: #cdbf9f; --bs-border-radius: 2rem; background-color: #fff; box-shadow: none; }
+html[data-theme="chunom"] .form-select:focus { border-color: #cdbf9f; box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .25); }
+/* page rules that came with the retro redesign */
+html[data-theme="chunom"] .glyph-strip .g[data-code] { border: 1px solid var(--bc); border-radius: 50%; box-shadow: none; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
+html[data-theme="chunom"] .glyph-strip .g[data-code]:hover, html[data-theme="chunom"] .glyph-strip .g[data-code]:focus-visible { transform: none; box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); }
+html[data-theme="chunom"] .glyph-strip .g[data-code]:active { transform: none; box-shadow: none; filter: brightness(.96); }
+html[data-theme="chunom"] #variants .speak { border: 1px solid #e4d9c0; box-shadow: none; }
+html[data-theme="chunom"] #variants .var { border: 1px solid #e4d9c0; border-radius: .5rem; box-shadow: none; background: #fff; }
+html[data-theme="chunom"] #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
+html[data-theme="chunom"] .controls { border-radius: 2rem; }
+html[data-theme="chunom"] .search-bar .input-group { border-radius: 2rem; }
+html[data-theme="chunom"] .search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
+html[data-theme="chunom"] .search-bar .btn { border-radius: 0 2rem 2rem 0; }
 
 /* ---- pop art: flat Lichtenstein colours, thick black outlines, hard offset shadows, Ben-Day dots ---- */
 html[data-theme="popart"] {
