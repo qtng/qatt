@@ -3,33 +3,54 @@ The QATT fonts (fonts/*.woff2) and the sizes offered by font.html and editor.htm
 
   <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>;
                                                 data-qatt-default="QATT Brush" preselects another font than the default of the list
+                                                (the fonts marked admin: true are only offered to admins, see isAdmin below)
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of font.html)
 
 The script defines the @font-face rules itself and fills these selects when it runs, so load it after them.
 */
 const QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif", default: true },
-  { family: "QATT Gothic",          label: "Gothic",          file: "qatt-gothic" },
-  { family: "QATT Gothic Bold",     label: "Gothic bold",     file: "qatt-gothic-bold" },
-  { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide" },
-  { family: "QATT Pen Medium",      label: "Pen medium",      file: "qatt-pen-medium" },
-  { family: "QATT Pen Cut Bold",    label: "Pen cut bold",    file: "qatt-pencut-bold" },
-  { family: "QATT Prototype",       label: "Prototype",       file: "qatt-prototype" },
-  { family: "QATT Prototype Light", label: "Prototype light", file: "qatt-prototype-light" },
-  { family: "QATT Brush",           label: "Brush-like",      file: "qatt-brush" },
+  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic" },
+  { family: "QATT Gothic Bold",      label: "Gothic bold",         file: "qatt-gothic-bold" },
+  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
+  { family: "QATT Pen ExtraLight",   label: "Pen extra light",     file: "qatt-pen-extralight", admin: true },
+  { family: "QATT Pen Light",        label: "Pen light",           file: "qatt-pen-light", admin: true },
+  { family: "QATT Pen",              label: "Pen",                 file: "qatt-pen", admin: true },
+  { family: "QATT Pen Medium",       label: "Pen medium",          file: "qatt-pen-medium" },
+  { family: "QATT Pen Bold",         label: "Pen bold",            file: "qatt-pen-bold", admin: true },
+  { family: "QATT Pen Heavy",        label: "Pen heavy",           file: "qatt-pen-heavy", admin: true },
+  { family: "QATT Pen Cut ExtraLight", label: "Pen cut extra light", file: "qatt-pencut-extralight", admin: true },
+  { family: "QATT Pen Cut Light",    label: "Pen cut light",       file: "qatt-pencut-light", admin: true },
+  { family: "QATT Pen Cut",          label: "Pen cut",             file: "qatt-pencut", admin: true },
+  { family: "QATT Pen Cut Medium",   label: "Pen cut medium",      file: "qatt-pencut-medium", admin: true },
+  { family: "QATT Pen Cut Bold",     label: "Pen cut bold",        file: "qatt-pencut-bold" },
+  { family: "QATT Pen Cut Heavy",    label: "Pen cut heavy",       file: "qatt-pencut-heavy", admin: true },
+  { family: "QATT Prototype",        label: "Prototype",           file: "qatt-prototype" },
+  { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light" },
+  { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush" },
 ];
 const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], [51, "150%"], [68, "200%"], [102, "300%"], [136, "400%"]];
 
+// an admin: the session of this browser has app_metadata.is_admin (as the palette button of navigation.js), or localStorage.qv_off is set (the admin area sets it,
+// js/navigation.js leaves such a browser out of the visit counter). Only what is offered: the font files are public.
+const isAdmin = () => {
+  try {
+    const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user;
+    return !!localStorage.getItem("qv_off") || !!(u && u.app_metadata && u.app_metadata.is_admin === true);
+  } catch (e) { return false; }
+};
+
 (() => {
+  const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());
   const style = document.createElement("style");
-  style.textContent = QATT_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2) format("woff2"), url(fonts/${f.file}.ttf) format("truetype"); }`).join("\n");
+  style.textContent = FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2) format("woff2"), url(fonts/${f.file}.ttf) format("truetype"); }`).join("\n");
   document.head.append(style);
 
   const fill = (select, items) => {
     for (const [value, label, selected] of items) select.append(new Option(label, value, selected, selected));
   };
   document.querySelectorAll("select[data-qatt-fonts]").forEach(select => {
-    fill(select, QATT_FONTS.map(f => [f.family, f.label, f.default]));
+    fill(select, FONTS.map(f => [f.family, f.label, f.default]));
     const group = document.createElement("optgroup");   // a heading inside the dropdown
     group.label = "Choose font";
     group.setAttribute("data-vi-label", "Lựa chọn phông chữ");   // see Lang in navigation.js
