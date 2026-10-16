@@ -85,6 +85,7 @@
         <tbody id="recent"></tbody>
       </table>
     </div>
+    <p class="d-flex flex-wrap gap-2 align-items-center mt-2"><button type="button" class="btn btn-sm btn-quiet" id="moreRecent">Show 50 more</button> <span class="note" id="recentCount"></span></p>
 
     <hr class="mt-4">
     <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
@@ -142,8 +143,8 @@
     async function load() {
       if (!allowed) return;
       const days = Number($('days').value);
-      const [lang, gaps] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gaps', { p_days: days })]);
-      const error = lang.error || gaps.error;
+      const [lang, gaps, list] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gaps', { p_days: days }), sp.client.rpc('admin_gap_export', { p_days: days })]);
+      const error = lang.error || gaps.error || list.error;
       if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
       $('denied').hidden = true; $('content').hidden = false;
       $('at').textContent = 'as of ' + new Date().toLocaleTimeString();
@@ -159,28 +160,33 @@
       for (const r of G.top) for (const c of (r.chars || [])) rows.push({ word: r.word_qn, ch: c.c, n: c.n, options: r.n_options });
       rows.sort((a, b) => b.n - a.n);
       fill('gaps', rows.map(r => [r.word, { v: r.ch, cls: 'l han' }, r.n, { v: dict(r.options), cls: 'l' }]));
-      recentRows = G.recent;
+      recentRows = list.data;   // all rows of the time (at most 5000), newest first: the list below shows them 50 at a time, the CSV has all
+      shown = PAGE;
       showRecent();
     }
-    let recentRows = [];
+    const PAGE = 50;
+    let recentRows = [], shown = PAGE;
     function showRecent() {   // the newest list; the calls of admins are marked in the data, here they are hidden if the box is checked
-      $('recent').replaceChildren(...recentRows.filter(r => !($('noAdmin').checked && r.is_admin)).map(r => {
+      const rows = recentRows.filter(r => !($('noAdmin').checked && r.is_admin));
+      $('recent').replaceChildren(...rows.slice(0, shown).map(r => {
         const tr = el('tr');
         const around = (list, idx) => [list.slice(0, idx - 1).join(' '), list[idx - 1], list.slice(idx).join(' ')];   // before, the word of the gap, after
         tr.append(el('td', 'l', new Date(r.at).toLocaleString() + (r.is_admin ? ' (admin)' : '')), sentence(...around(r.ctx_qn, r.idx)), sentence(...around(r.ctx_chars, r.idx)));
         tr.lastChild.classList.add('han');
         return tr;
       }));
+      $('moreRecent').hidden = shown >= rows.length;
+      $('recentCount').textContent = rows.length ? 'showing ' + Math.min(shown, rows.length) + ' of ' + rows.length + (recentRows.length >= 5000 ? ' (the newest 5000 are loaded)' : '') : 'none in this time';
     }
 
     $('csvRows').addEventListener('click', async () => {
-      const { data, error } = await sp.client.rpc('admin_gap_export', { p_days: Number($('days').value) });
-      if (error) return denied('Could not load: ' + error.message);
+      const data = recentRows;
       csvDownload('missing-words.csv', ['time', 'word', 'character_chosen', 'characters_in_dictionary', 'context_words', 'context_characters', 'index_of_the_word_in_the_context', 'position_in_sentence', 'words_in_sentence', 'model', 'admin'],
         data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, (r.ctx_qn || []).join(' | '), (r.ctx_chars || []).join(' | '), r.idx, r.pos, r.n_words, r.model, r.is_admin ? 'yes' : '']));
     });
     $('days').addEventListener('change', load);
-    $('noAdmin').addEventListener('change', showRecent);
+    $('noAdmin').addEventListener('change', () => { shown = PAGE; showRecent(); });
+    $('moreRecent').addEventListener('click', () => { shown += PAGE; showRecent(); });
     $('reload').addEventListener('click', load);
     const state = await Admin.check(sp);
     if (state === 'admin') { allowed = true; load(); }

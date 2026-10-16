@@ -162,7 +162,7 @@ revoke all on public.translate_gaps from anon, authenticated;
 grant insert on public.translate_gaps to service_role;
 alter table public.translate_gaps add column if not exists is_admin boolean not null default false;   -- tables from before get the mark too (rows already there count as not admin)
 
--- the gaps of the last p_days days: per word how often and which characters the model chose, and the newest rows
+-- the gaps of the last p_days days: per word how often and which characters the model chose (the single rows come from admin_gap_export)
 create or replace function public.admin_gaps(p_days integer default 30)
 returns jsonb
 language plpgsql
@@ -186,10 +186,7 @@ begin
            from (select word_char, count(*) as n from public.translate_gaps g2
                  where g2.word_qn = g.word_qn and g2.at > now() - make_interval(days => d) group by word_char) c) as chars
       from public.translate_gaps g where g.at > now() - make_interval(days => d)
-      group by g.word_qn order by count(*) desc, max(g.at) desc limit 200) x),
-    'recent', (select coalesce(jsonb_agg(to_jsonb(x) order by x.at desc), '[]'::jsonb) from (
-      select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model, is_admin
-      from public.translate_gaps where at > now() - make_interval(days => d) order by at desc limit 50) x)
+      group by g.word_qn order by count(*) desc, max(g.at) desc limit 200) x)
   );
 end;
 $$;
