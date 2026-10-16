@@ -59,7 +59,7 @@ async function logModels(key: string) {   // once per instance: which models thi
   } catch (e) { console.error('list models', e); }
 }
 
-// a model that answered 429 (quota) is skipped for a minute, so the next call does not lose time on it
+// a model that answered 429 (quota) or 503 (overloaded) or 404 (gone) is skipped for a minute, so the next call does not lose time on it
 const coolDown = new Map<string, number>();
 
 // what a call of the page cost: collected over the calls of Gemini of one translation, written to translate_log
@@ -87,7 +87,7 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
       if (opts.meter) { opts.meter.failed++; opts.meter.attempts.push({ model, status: r.status, ms: Date.now() - t0 }); }
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
       last = r.status === 404 ? 'model' : 'busy';
-      if (r.status === 429 || r.status === 404) coolDown.set(model, Date.now() + 60000);
+      if (r.status === 429 || r.status === 503 || r.status === 404) coolDown.set(model, Date.now() + 60000);
       if (attempt === 1) await logModels(key);
       await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
       continue;
@@ -137,7 +137,8 @@ function gapRows(words: { at: number; len: number; qn: string; chosen: string; o
 // one row of numbers per call, one per try of a model (translate_attempts), the gaps of the dictionary (translate_gaps); a failing log must never break the translation
 async function logCall(row: Record<string, unknown>, attempts: Attempt[] = [], gaps: Gap[] = []) {
   await logRows('translate_log', row);
-  if (attempts.length) await logRows('translate_attempts', attempts);
+  // PostgREST wants the same keys in every object of a bulk insert: the tries that failed have no tokens, so they get null
+  if (attempts.length) await logRows('translate_attempts', attempts.map(a => ({ model: a.model, status: a.status, ms: a.ms, tokens_in: a.tokens_in ?? null, tokens_out: a.tokens_out ?? null })));
   if (gaps.length) await logRows('translate_gaps', gaps);
 }
 async function logRows(table: string, row: Record<string, unknown> | Attempt[] | Gap[]) {
