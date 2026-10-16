@@ -21,7 +21,7 @@ as $$
   returning n;
 $$;
 
--- numbers for the last p_hours hours (1 to 2160) and for the last 14 days; people, not clicks
+-- numbers for the last p_hours hours (1 to 4320 = 6 months) and for the last 14 days; people, not clicks
 create or replace function public.admin_stats(p_hours integer default 4)
 returns jsonb
 language plpgsql
@@ -29,7 +29,7 @@ security definer
 set search_path = ''
 as $$
 declare
-  hours integer := greatest(1, least(coalesce(p_hours, 4), 2160));
+  hours integer := greatest(1, least(coalesce(p_hours, 4), 4320));
   w interval;
   result jsonb;
 begin
