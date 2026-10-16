@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QATT fonts</title>
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/site.css">
+  <style>
+    :root { --accent: #a8362a; --paper: #f7efdc; --card: #fffdf8; }
+    * { box-sizing: border-box; }
+    .hero { background: radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%), linear-gradient(180deg, var(--paper) 0%, var(--card) 100%); border-bottom: 1px solid #e8dcc0; }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; margin: 0; }
+    .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
+
+    .wrap { max-width: 64rem; margin: 0 auto; padding: 0 1rem 3rem; }
+    .muted { opacity: .62; }
+
+    /* the text of all samples */
+    .bar { padding: 1.6rem 0 .6rem; }
+    .bar label { display: flex; align-items: center; gap: .7rem; margin: 0; font-size: .85rem; }
+    .bar input { flex: 1 1 auto; }
+
+    /* one entry per font: the samples on the left, the facts on the right */
+    .font { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: .4rem 2.5rem; padding: 2.2rem 0; border-top: 1px solid rgba(127, 127, 127, .25); }
+    .font:first-child { border-top: 0; }
+    .font h2 { grid-column: 1 / -1; font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.35rem; margin: 0 0 .4rem; }
+    .samples { min-width: 0; display: grid; gap: .3rem; align-content: start; overflow-x: auto; padding-bottom: .4rem; }   /* the lines are not cut: the block scrolls sideways */
+    .line { display: flex; align-items: baseline; gap: .8rem; width: max-content; }
+    .line .px { flex: 0 0 2.2rem; font-size: .7rem; text-align: right; font-variant-numeric: tabular-nums; }
+    .line .q { white-space: nowrap; line-height: 1.5; }   /* room for the tone marks above and below */
+    .info { font-size: .82rem; line-height: 1.45; }
+    .info p { margin: 0 0 .7rem; }
+    .info dl { display: grid; grid-template-columns: auto 1fr; gap: .15rem .8rem; margin: 0 0 1rem; }
+    .info dt { font-weight: 400; opacity: .62; }
+    .info dd { margin: 0; }
+    @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+  <script src="js/navigation.js"></script>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">QATT fonts</h1>
+    <p class="lead mx-auto mb-4">All fonts of the QATT block, each from small to large. Type your own text in Quốc Ngữ.</p>
+    <a class="btn btn-cinnabar btn-pill" href="font.html">Reference font</a>
+    <a class="btn btn-outline-secondary btn-pill" href="editor.html">Type QATT</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="bar">
+    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen." autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+  </div>
+  <div id="fonts"></div>
+</main>
+
+<script src="js/parser.js"></script>
+<script src="js/qatt-text.js"></script>
+<script src="js/fonts.js"></script>
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const parser = new VietnameseParser();
+  const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());   // the fonts of the list of this visitor (fonts.js)
+  // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
+  const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
+  const SIZES = [14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56];   // from small to large
+  const ABOUT = [   // the first entry whose name starts the family
+    ["QATT Serif", "Thin horizontals, heavy verticals, small triangles at the ends."],
+    ["QATT Gothic Bold", "The Gothic font with strokes 1.7 times as heavy."],
+    ["QATT Gothic Wide", "The Gothic font; a joined pair takes 1.25 cells, so its halves are less squeezed."],
+    ["QATT Gothic", "Strokes of one width."],
+    ["QATT Pen Cut", "The Pen strokes with flat ends cut at a slant, as in Song: thin horizontals, heavy verticals."],
+    ["QATT Pen", "Strokes of a felt-tip pen: round ends, slightly bowed horizontals, a hint of clerical script."],
+    ["QATT Prototype Light", "The strokes of qatt.js, thinner."],
+    ["QATT Prototype", "The strokes of qatt.js as lines of one width: the first font of the proposal."],
+    ["QATT Brush", "Brush strokes made with the brush editor."],
+  ];
+  const about = family => (ABOUT.find(([name]) => family.startsWith(name)) || [, ''])[1];
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  // one entry per font
+  const list = $('#fonts'), samples = [];
+  for (const f of FONTS) {
+    const box = el('article', 'font');
+    box.append(el('h2', '', f.label));
+    const left = el('div', 'samples');
+    for (const px of SIZES) {
+      const line = el('div', 'line'), q = el('div', 'q');
+      q.style.cssText = `font-family: "${f.family}"; font-size: ${px * (FIT[f.family] || 1)}px`;
+      line.append(el('span', 'px muted', px), q);
+      left.append(line); samples.push(q);
+    }
+    const info = el('div', 'info');
+    info.append(el('p', '', about(f.family)));
+    const dl = el('dl');
+    const fact = (k, v) => dl.append(el('dt', '', k), el('dd', '', v));
+    fact('Family', f.family);
+    fact('Characters', '164');
+    info.append(dl);
+    box.append(left, info);
+    list.append(box);
+  }
+
+  const render = () => {
+    const qatt = QattText.convert($('#text').value.trim() || 'Quốc âm tân tự', parser);
+    for (const q of samples) q.textContent = qatt;
+  };
+  $('#text').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>
