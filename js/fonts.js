@@ -1,10 +1,10 @@
 /*
-The QATT fonts (fonts/*.woff2) and the sizes offered by font.html and editor.html.
+The QATT fonts (fonts/*.woff2) and the sizes offered by codetable.html and editor.html.
 
   <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>;
                                                 data-qatt-default="QATT Brush" preselects another font than the default of the list
                                                 (the fonts marked admin: true are only offered to admins, see isAdmin below)
-  <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of font.html)
+  <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of codetable.html)
 
 The script defines the @font-face rules itself and fills these selects when it runs, so load it after them.
 */

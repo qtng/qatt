@@ -1,5 +1,5 @@
 /*
-QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html and font.html)
+QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html and codetable.html)
 
   QattText.syllable("t,c5,,5")   // code of VietnameseParser.parse(...).qatt -> onset U+F009B rhyme tone, one cell
   QattText.syllable("v,,,0")     // no rhyme (Hợp Thư ông): the shape alone
