@@ -98,7 +98,7 @@
       <div class="chart"><h3>New people per day</h3><div><canvas id="chNew"></canvas></div></div>
       <div class="chart"><h3>Active people per day</h3><div><canvas id="chActive"></canvas></div></div>
       <div class="chart"><h3>Practice per day</h3><div><canvas id="chPractice"></canvas></div></div>
-      <div class="chart"><h3>Visits per day</h3><div><canvas id="chVisits"></canvas></div></div>
+      <div class="chart"><h3>Visitors per site and visits per day</h3><div><canvas id="chVisits"></canvas></div></div>
     </div>
   </div>
 </main>
@@ -140,10 +140,18 @@
         { label: 'Answers', data: change({ a: 'answers_correct', b: 'answers_wrong' }), backgroundColor: COLORS.green + 'aa', borderColor: COLORS.green, borderWidth: 2, yAxisID: 'y' },
         line('Words learned', change({ a: 'words_known' }), COLORS.red, { type: 'line', yAxisID: 'y1' })] },
         scales: { y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { precision: 0 } } } });
-      const perDay = new Map();   // visits per day: all sites and kinds together
-      for (const v of visits) { const e = perDay.get(v.day) || { visitors: 0, visits: 0 }; e.visitors += v.visitors; e.visits += v.visits; perDay.set(v.day, e); }
+      // visitors per day and site (stacked areas, the stack is the total) and the visits of all sites as the red line
+      const SITES = [['qatt.org', COLORS.blue], ['chunom.org', COLORS.orange]];
+      const perDay = new Map();
+      for (const v of visits) {
+        const e = perDay.get(v.day) || { visits: 0, sites: {} };
+        e.visits += v.visits; e.sites[v.site] = (e.sites[v.site] || 0) + v.visitors; perDay.set(v.day, e);
+      }
       const vdays = [...perDay.keys()].sort(), vlabels = vdays.map(d => d.slice(5));
-      make('chVisits', { type: 'line', data: { labels: vlabels, datasets: [line('Visits', vdays.map(d => perDay.get(d).visits), COLORS.red), line('Visitors', vdays.map(d => perDay.get(d).visitors), COLORS.blue)] } });
+      make('chVisits', { type: 'line', data: { labels: vlabels, datasets: [
+        ...SITES.map(([site, color]) => line('Visitors ' + site, vdays.map(d => perDay.get(d).sites[site] || 0), color, { fill: true, backgroundColor: color + '88', stack: 'visitors', pointRadius: 2 })),
+        line('Visits (all)', vdays.map(d => perDay.get(d).visits), COLORS.red, { stack: 'visits' })] },
+        scales: { y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } });
     }
 
     let allowed = false;
