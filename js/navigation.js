@@ -391,6 +391,12 @@ window.Theme = window.Theme || (function() {
         const otherLinks = otherSection.links.map(link =>
             `<a href="${otherSection.site || ''}${link.url}"><i class="bi ${link.icon}"></i><span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span></a>`).join('');
 
+        // the palette button only for admins (app_metadata.is_admin in the session of this browser; the session is per site); the others keep the theme they have
+        // (license.html can still choose one). Only what is shown: nothing depends on it.
+        function isAdmin() {
+            try { const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user; return !!(u && u.app_metadata && u.app_metadata.is_admin === true); }
+            catch (e) { return false; }
+        }
         const header = document.createElement('nav');
         header.className = "nav-backdrop navbar navbar-dark fixed-top shadow-sm";
         header.style.setProperty('--bar-accent', navConfig.accent);
@@ -408,7 +414,7 @@ window.Theme = window.Theme || (function() {
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
                     </div>
-                    <div class="theme-switch"${Theme.choosable ? '' : ' hidden'}>
+                    <div class="theme-switch"${Theme.choosable && isAdmin() ? '' : ' hidden'}>
                         <button type="button" aria-haspopup="true" aria-expanded="false" title="Theme" data-vi-title="Giao diện" aria-label="Theme" data-vi-aria-label="Giao diện"><i class="bi bi-palette"></i></button>
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
