@@ -1,6 +1,6 @@
 // Edge Function "translate": Quốc Ngữ -> Chữ Nôm. The page sends the candidate lists of its dictionaries, Gemini only chooses from them
 // in the context of the sentence (see pipeline.js).
-// Secrets: GEMINI_API_KEY (required), GEMINI_MODEL (optional), TRANSLATE_DAILY_LIMIT (optional, default 40 per user and day).
+// Secrets: GEMINI_API_KEY (required), GEMINI_MODEL (optional), TRANSLATE_DAILY_LIMIT (optional, default 10 per user and day).
 // The prompts (and, if listed there, the model names) are loaded from the website, see PROMPTS_URL: they are changed in the
 // git repository qtng/chunom (js/translate_prompts.json), without deploying this function. The built-in defaults are the fallback.
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
@@ -15,7 +15,8 @@ const PROMPTS_URL = Deno.env.get('PROMPTS_URL') || 'https://chunom.org/chunom/js
 const DEFAULT_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
 const ENV_MODELS = (Deno.env.get('GEMINI_MODEL') || '').split(',').map(m => m.trim()).filter(Boolean);
 let MODELS = ENV_MODELS.length ? ENV_MODELS : DEFAULT_MODELS;
-const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 40);
+const LIMIT = Number(Deno.env.get('TRANSLATE_DAILY_LIMIT') || 10);
+console.log('daily limit', LIMIT, Deno.env.get('TRANSLATE_DAILY_LIMIT') ? '(secret TRANSLATE_DAILY_LIMIT)' : '(default)');
 
 // the prompts of the website, kept for 1 minute (a changed file is used soon; the query string avoids the cache of the CDN); if the file cannot be loaded or is invalid the last good version (or the defaults) stays
 type Config = { at: number; prompts: typeof DEFAULT_PROMPTS; models: string[] | null; version: string };
