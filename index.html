@@ -29,7 +29,7 @@
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.block { padding-block: 2rem; }
-    section.block + section.block { border-top: 1px solid var(--rule, var(--bs-border-color)); }   /* --rule: a theme can give the lines its own colour */
+    section.block + section.block { border-top: var(--rule-width, 1px) solid var(--rule, var(--bs-border-color)); }   /* --rule, --rule-width: a theme can give the lines its own colour and weight */
     .facts { font-size: .95rem; }
     .facts dt { font-weight: 600; }
     /* the weights of the Pen font as a grid of characters (made of text, no image): the weight falls from the left to the right column, the number of strokes grows from the top to the bottom row */
@@ -115,7 +115,7 @@
     <div class="row g-4">
       <div class="col-lg-7">
         <p data-vi="Unicode giúp mọi chữ viết hiển thị được trên mọi thiết bị. QATT chưa có trong Unicode. Một bản đề xuất dự thảo bổ sung 164 ký tự: các hình làm khối dựng chữ và một ký tự nối ghép chúng thành một chữ.">Unicode lets every script be shown on every device. QATT is not part of it yet. A draft proposal adds 164 characters: the shapes as building blocks and a joining character that puts them together.</p>
-        <p class="mb-0"><a class="btn btn-outline-secondary btn-pill" href="unicode.html" data-vi="Xem bản dự thảo">View the draft</a></p>
+        <p class="mb-0"><a class="btn btn-primary btn-pill" href="unicode.html" data-vi="Xem bản dự thảo">View the draft</a></p>
       </div>
       <div class="col-lg-5">
         <div class="card h-100">
