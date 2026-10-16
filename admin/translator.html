@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Translator data</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body { background: #f7efdc; color: #2b2118; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h2 { margin-top: 2rem; font-size: 1.3rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    .note { color: #7b6c58; font-size: .85rem; }
+    table { background: #fffdf8; font-size: .9rem; }
+    th { font-weight: 600; color: #5b4d3d; }
+    td, th { text-align: right; white-space: nowrap; } td:first-child, th:first-child { text-align: left; }
+    td.l, th.l { text-align: left; }
+    td.han { font-size: 1.15rem; }
+    td.l b { background: #fff1c9; border-radius: .25rem; padding: 0 .2rem; }   /* the word of the gap inside its sentence */
+    .chart { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem .4rem; }
+    .chart h3 { font-size: .95rem; font-weight: 600; margin: 0 0 .3rem; }
+    .chart div { position: relative; height: 15rem; }
+  </style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 56rem">
+  <h1>Translator data</h1>
+  <p class="note"><a href="index.html">Admin</a> · <a href="stats.html">Statistics</a> · <a href="models.html">Gemini models</a></p>
+  <p class="note" id="account"></p>
+  <div id="denied" class="alert alert-warning" hidden></div>
+
+  <div id="content" hidden>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <label for="days" class="me-1">Last</label>
+      <select id="days" class="form-select form-select-sm w-auto">
+        <option value="1">24 hours</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">1 year</option>
+      </select>
+      <button type="button" class="btn btn-sm btn-quiet" id="reload">Reload</button>
+      <span class="note ms-2" id="at"></span>
+    </div>
+
+    <h2>Languages of the free translation</h2>
+    <p class="note">"-" = no translation was asked for.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Language</th><th>Translations</th><th>Share</th><th>OK</th><th>Fallback</th><th>Errors</th><th>Errors %</th><th>Average s</th><th>Own characters</th></tr></thead>
+        <tbody id="langs"></tbody>
+      </table>
+    </div>
+    <div class="chart mt-3"><h3>Translations per day and language</h3><div><canvas id="chLang"></canvas></div></div>
+
+    <h2>Language and model</h2>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Language</th><th class="l">Model that answered</th><th>Translations</th><th>Errors</th><th>Fallback</th><th>Whole call average s</th></tr></thead>
+        <tbody id="langModel"></tbody>
+      </table>
+    </div>
+
+    <h2>Words that are missing in the dictionary</h2>
+    <p class="note">For these words the model had to use a character of its own, because the dictionary had none or none that fitted. <span id="gapSummary"></span></p>
+    <p><button type="button" class="btn btn-sm btn-quiet" id="csvRows">Download as CSV</button></p>
+
+    <h3 class="h6">Most frequent</h3>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Word</th><th class="l">Character the model chose</th><th>Times</th><th class="l">The dictionary has</th></tr></thead>
+        <tbody id="gaps"></tbody>
+      </table>
+    </div>
+
+    <h3 class="h6 mt-4">Newest, with the words around</h3>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th class="l">Time</th><th class="l">In the sentence</th><th class="l">As characters</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+
+    <hr class="mt-4">
+    <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
+    <p class="note mb-1"><b>Missing word:</b> a word for which the model gave a character of its own (or "?" when it knew none) because the list of the page had no suitable character. "The dictionary has: nothing" = no character at all for this word, "n characters" = it has some, but none fitted. In the newest list the word is marked, with the words before and after it (5 if the user has the switch "Help improve the model" on, else 1; fewer or nothing there = the word is near the start or end of the sentence). Only these words are stored, not the whole sentence.</p>
+    <p class="note mb-1"><b>Language:</b> the language of the free translation that was asked for. <b>Errors</b> = no answer (busy, over quota, ...). <b>Fallback</b> = the model's answer was unusable twice. <b>Own characters</b> = share of the words that are missing in the dictionary. Recorded since 16 Oct 2026.</p>
+  </div>
+</main>
+
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const $ = id => document.getElementById(id);
+    const sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'));
+    const denied = text => { $('content').hidden = true; $('denied').hidden = false; $('denied').textContent = text; };
+    const sec = ms => ms === null || ms === undefined ? '' : (ms / 1000).toFixed(1);
+    const pct = (a, b) => b ? Math.round(100 * a / b) + ' %' : '';
+    // cells: values, or { v, cls } for a class
+    const fill = (id, rows) => $(id).replaceChildren(...rows.map(cells => {
+      const tr = document.createElement('tr');
+      cells.forEach(c => { const td = document.createElement('td'); const o = c !== null && typeof c === 'object' ? c : { v: c }; td.textContent = o.v === null || o.v === undefined ? '' : o.v; if (o.cls) td.className = o.cls; tr.append(td); });
+      return tr;
+    }));
+    const COLORS = ['#a8362a', '#3b6ea5', '#2e7d4f', '#d08a2e', '#7b6c58', '#8a5ba8', '#2b8a8a', '#c0638f', '#6b7b2a', '#4a4a8a', '#a86b2a', '#999999'];
+    let chart = null;
+    function drawLang(daily) {
+      if (typeof Chart === 'undefined') return;
+      Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif'; Chart.defaults.color = '#2b2118';
+      const days = [...new Set(daily.map(d => d.day))].sort(), langs = [...new Set(daily.map(d => d.lang))];
+      if (chart) chart.destroy();
+      chart = new Chart($('chLang'), { type: 'bar', data: { labels: days.map(d => d.slice(5)), datasets: langs.map((l, i) => ({ label: l, stack: 'l', backgroundColor: COLORS[i % COLORS.length] + 'cc', borderColor: COLORS[i % COLORS.length], borderWidth: 2,
+        data: days.map(d => { const r = daily.find(x => x.day === d && x.lang === l); return r ? r.calls : 0; }) })) },
+        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
+          scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } } });
+    }
+
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+    const dict = n => n === 0 ? 'nothing' : n + (n === 1 ? ' character' : ' characters');
+    // the sentence part: word before, the word (marked), word after
+    function sentence(before, word, after) {
+      const td = el('td', 'l');
+      if (before) td.append(before + ' ');
+      td.append(el('b', '', word));
+      if (after) td.append(' ' + after);
+      return td;
+    }
+    const csvDownload = (name, header, rows) => {
+      const q = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['\ufeff' + [header.join(',')].concat(rows.map(r => r.map(q).join(','))).join('\n')], { type: 'text/csv;charset=utf-8' }));
+      a.download = name; a.click(); URL.revokeObjectURL(a.href);
+    };
+
+    let allowed = false;
+    async function load() {
+      if (!allowed) return;
+      const days = Number($('days').value);
+      const [lang, gaps] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gaps', { p_days: days })]);
+      const error = lang.error || gaps.error;
+      if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
+      $('denied').hidden = true; $('content').hidden = false;
+      $('at').textContent = 'as of ' + new Date().toLocaleTimeString();
+
+      const L = lang.data, total = L.by_lang.reduce((n, r) => n + r.calls, 0);
+      fill('langs', L.by_lang.map(r => [r.lang, r.calls, pct(r.calls, total), r.ok, r.fallback, r.errors, pct(r.errors, r.calls), sec(r.avg_ms), pct(r.own_words, r.words)]));
+      fill('langModel', L.by_lang_model.map(r => [r.lang, { v: r.model, cls: 'l' }, r.calls, r.errors, r.fallback, sec(r.avg_ms)]));
+      drawLang(L.daily);
+
+      const G = gaps.data;
+      $('gapSummary').textContent = G.rows ? G.rows + ' times in this time, ' + G.words + ' different words.' : 'None in this time.';
+      const rows = [];
+      for (const r of G.top) for (const c of (r.chars || [])) rows.push({ word: r.word_qn, ch: c.c, n: c.n, options: r.n_options });
+      rows.sort((a, b) => b.n - a.n);
+      fill('gaps', rows.map(r => [r.word, { v: r.ch, cls: 'l han' }, r.n, { v: dict(r.options), cls: 'l' }]));
+      $('recent').replaceChildren(...G.recent.map(r => {
+        const tr = el('tr');
+        const around = (list, idx) => [list.slice(0, idx - 1).join(' '), list[idx - 1], list.slice(idx).join(' ')];   // before, the word of the gap, after
+        tr.append(el('td', 'l', new Date(r.at).toLocaleString()), sentence(...around(r.ctx_qn, r.idx)), sentence(...around(r.ctx_chars, r.idx)));
+        tr.lastChild.classList.add('han');
+        return tr;
+      }));
+    }
+
+    $('csvRows').addEventListener('click', async () => {
+      const { data, error } = await sp.client.rpc('admin_gap_export', { p_days: Number($('days').value) });
+      if (error) return denied('Could not load: ' + error.message);
+      csvDownload('missing-words.csv', ['time', 'word', 'character_chosen', 'characters_in_dictionary', 'context_words', 'context_characters', 'index_of_the_word_in_the_context', 'position_in_sentence', 'words_in_sentence', 'model'],
+        data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, (r.ctx_qn || []).join(' | '), (r.ctx_chars || []).join(' | '), r.idx, r.pos, r.n_words, r.model]));
+    });
+    $('days').addEventListener('change', load);
+    $('reload').addEventListener('click', load);
+    const state = await Admin.check(sp);
+    if (state === 'admin') { allowed = true; load(); }
+    else denied(state === 'signin' ? 'Sign in with your admin account to see the translator data.' : 'This account is not an admin.');
+  });
+</script>
+</body>
+</html>

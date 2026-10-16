@@ -4,7 +4,8 @@
 // The prompts (and, if listed there, the model names) are loaded from the website, see PROMPTS_URL: they are changed in the
 // git repository qtng/chunom (js/translate_prompts.json), without deploying this function. The built-in defaults are the fallback.
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
-// Every call is logged as one row of numbers in public.translate_log (time, models, tokens, counts; no text and no user), see db/translate_log.sql.
+// Every call is logged as one row of numbers in public.translate_log (time, models, tokens, counts; no text and no user), see db/translate_log.sql;
+// the words for which the model gave a character of its own are also stored with the words around them (public.translate_gaps), to find the gaps of the dictionary.
 import { translate, parsePrompts, DEFAULT_PROMPTS } from './pipeline.js';
 
 const ORIGINS = ['https://qatt.org', 'https://chunom.org', 'https://v2.chunom.org'];
@@ -62,8 +63,9 @@ async function logModels(key: string) {   // once per instance: which models thi
 const coolDown = new Map<string, number>();
 
 // what a call of the page cost: collected over the calls of Gemini of one translation, written to translate_log
-type Meter = { tries: number; failed: number; models: string[]; tokensIn: number; tokensOut: number; geminiMs: number };
-const newMeter = (): Meter => ({ tries: 0, failed: 0, models: [], tokensIn: 0, tokensOut: 0, geminiMs: 0 });
+type Attempt = { model: string; status: number; ms: number; tokens_in?: number; tokens_out?: number };   // status: the HTTP status, 0 = no answer
+type Meter = { tries: number; failed: number; models: string[]; tokensIn: number; tokensOut: number; geminiMs: number; attempts: Attempt[] };
+const newMeter = (): Meter => ({ tries: 0, failed: 0, models: [], tokensIn: 0, tokensOut: 0, geminiMs: 0, attempts: [] });
 
 async function callGemini(system: string, user: string, opts: { attempts?: number; meter?: Meter } = {}) {
   const key = Deno.env.get('GEMINI_API_KEY');
@@ -80,9 +82,9 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         signal: AbortSignal.timeout(60000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
-    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; if (opts.meter) opts.meter.failed++; continue; }
+    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; if (opts.meter) { opts.meter.failed++; opts.meter.attempts.push({ model, status: 0, ms: Date.now() - t0 }); } continue; }
     if (r.status === 429 || r.status >= 500 || r.status === 404) {
-      if (opts.meter) opts.meter.failed++;
+      if (opts.meter) { opts.meter.failed++; opts.meter.attempts.push({ model, status: r.status, ms: Date.now() - t0 }); }
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
       last = r.status === 404 ? 'model' : 'busy';
       if (r.status === 429 || r.status === 404) coolDown.set(model, Date.now() + 60000);
@@ -90,13 +92,14 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
       await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
       continue;
     }
-    if (!r.ok) { console.error('gemini', model, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
+    if (!r.ok) { if (opts.meter) opts.meter.attempts.push({ model, status: r.status, ms: Date.now() - t0 }); console.error('gemini', model, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
     console.log('gemini', model, r.status, Date.now() - t0, 'ms');
     if (opts.meter) {
       opts.meter.models.push(model); opts.meter.geminiMs += Date.now() - t0;
-      opts.meter.tokensIn += Number(data?.usageMetadata?.promptTokenCount) || 0;
-      opts.meter.tokensOut += (Number(data?.usageMetadata?.candidatesTokenCount) || 0) + (Number(data?.usageMetadata?.thoughtsTokenCount) || 0);
+      const tin = Number(data?.usageMetadata?.promptTokenCount) || 0, tout = (Number(data?.usageMetadata?.candidatesTokenCount) || 0) + (Number(data?.usageMetadata?.thoughtsTokenCount) || 0);
+      opts.meter.tokensIn += tin; opts.meter.tokensOut += tout;
+      opts.meter.attempts.push({ model, status: 200, ms: Date.now() - t0, tokens_in: tin, tokens_out: tout });
     }
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || '';
     try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { return {}; }
@@ -113,14 +116,37 @@ async function hit(userId: string): Promise<number | null> {
   return Number(await r.json());
 }
 
-// one row of numbers per call; a failing log must never break the translation
-async function logCall(row: Record<string, unknown>) {
+// the words with a character of the model's own (or "?"). Each is stored with its context: the words around it (`context` on each side, fewer at the start or end
+// of the sentence) in Quốc Ngữ and the characters chosen for them, as arrays, and idx = the place of the word in these arrays (from 1). The page sets `context`
+// in its request (MIN_CONTEXT to MAX_CONTEXT, default DEFAULT_CONTEXT; one word on each side is always stored), so the window can change without a change of the table or of this function. Also its position and the
+// length of the sentence in words; n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
+const MIN_CONTEXT = 1, DEFAULT_CONTEXT = 3, MAX_CONTEXT = 5;
+type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: string[]; ctx_chars: string[]; idx: number; pos: number; n_words: number; model: string | null };
+function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null, context: number): Gap[] {
+  const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
+  const rows: Gap[] = [];
+  words.forEach((w, i) => {
+    if (!w.own) return;
+    const from = Math.max(0, i - context), around = words.slice(from, i + context + 1), span = sent.find(s => s && s.at === w.at && s.len === w.len);
+    rows.push({ word_qn: w.qn, word_char: w.chosen, n_options: span && Array.isArray(span.options) ? span.options.length : 0,
+      ctx_qn: around.map(x => x.qn), ctx_chars: around.map(x => x.chosen), idx: i - from + 1, pos: i + 1, n_words: words.length, model });
+  });
+  return rows.slice(0, 30);
+}
+
+// one row of numbers per call, one per try of a model (translate_attempts), the gaps of the dictionary (translate_gaps); a failing log must never break the translation
+async function logCall(row: Record<string, unknown>, attempts: Attempt[] = [], gaps: Gap[] = []) {
+  await logRows('translate_log', row);
+  if (attempts.length) await logRows('translate_attempts', attempts);
+  if (gaps.length) await logRows('translate_gaps', gaps);
+}
+async function logRows(table: string, row: Record<string, unknown> | Attempt[] | Gap[]) {
   try {
     const base = Deno.env.get('SUPABASE_URL')!, key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const r = await fetch(`${base}/rest/v1/translate_log`, { method: 'POST', signal: AbortSignal.timeout(4000),
+    const r = await fetch(`${base}/rest/v1/${table}`, { method: 'POST', signal: AbortSignal.timeout(4000),
       headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(row) });
-    if (!r.ok) console.error('translate_log', r.status, (await r.text()).slice(0, 200));
-  } catch (e) { console.error('translate_log', String(e)); }
+    if (!r.ok) console.error(table, r.status, (await r.text()).slice(0, 200));
+  } catch (e) { console.error(table, String(e)); }
 }
 
 Deno.serve(async (req) => {
@@ -130,8 +156,11 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return fail(405, 'method');
   const c = claims(req);
   if (!c || !c.sub || c.is_anonymous === true || c.role !== 'authenticated') return fail(401, 'sign_in');
-  let text = '', spans: unknown = [], lang = '';
-  try { const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || ''); } catch { return fail(400, 'bad_request'); }
+  let text = '', spans: unknown = [], lang = '', context = DEFAULT_CONTEXT;
+  try {
+    const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || '');
+    if (Number.isInteger(body.context)) context = Math.min(MAX_CONTEXT, Math.max(MIN_CONTEXT, body.context));   // the words around a gap that are stored, set by the page
+  } catch { return fail(400, 'bad_request'); }
   if (!text) return fail(400, 'empty');
   if (text.length > MAX_CHARS) return fail(413, 'too_long');
   const used = await hit(c.sub);
@@ -150,15 +179,16 @@ Deno.serve(async (req) => {
         const result = await translate(text, spans, { callModel: (sys: string, usr: string) => callGemini(sys, usr, { meter }), prompts: cfg.prompts, lang, progress: (step: number) => send({ step }) });
         console.log('result', cfg.version, JSON.stringify(result.words.map((w: { qn: string; chosen: string; own: boolean }) => [w.qn, w.chosen, w.own ? 'own' : 'list'])));
         send({ result: { ...result, version: cfg.version, left, limit: LIMIT } });
-        const ws = result.words as { own: boolean }[];
+        const ws = result.words as { at: number; len: number; qn: string; chosen: string; own: boolean }[];
+        const answered = meter.models[meter.models.length - 1] || null;
         await logCall({ status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
           model: meter.models[meter.models.length - 1] || null, lang: lang || null, syllables: result.words.reduce((n: number, w: { len: number }) => n + w.len, 0),
-          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length });
+          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts, gapRows(ws, spans, answered, context));
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
         await logCall({ status: (e as { code?: string }).code || 'failed', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
-          model: meter.models[meter.models.length - 1] || null, lang: lang || null, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length });
+          model: meter.models[meter.models.length - 1] || null, lang: lang || null, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts);
       }
       controller.close();
     },
