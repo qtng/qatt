@@ -1,0 +1,45 @@
+/* Theme "boho": bohemian: warm earth colours (terracotta, ochre, olive, sand), a woven pattern in the header, an elegant italic serif for headings, ornaments on the rules, soft rounded shapes.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="boho"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="boho"] { --ink: #3b2a20; --accent: #b85c38; --cinnabar: #b85c38; --paper: #f5ead8; --line: #e0cdb0; --field: #c9ad87; --muted: #7a5f4a;
+  --boho-ochre: #d99a3e; --boho-olive: #7a7d45; --boho-rose: #c98a7a; --boho-serif: "Cormorant Garamond", "Playfair Display", "Iowan Old Style", Georgia, serif; }
+html[data-theme="boho"] body { background-color: var(--paper); color: var(--ink);
+  background-image: radial-gradient(circle at 1px 1px, rgba(185, 92, 56, .10) 1px, transparent 1.5px); background-size: 22px 22px; }
+html[data-theme="boho"] h1, html[data-theme="boho"] h2, html[data-theme="boho"] h3 { font-family: var(--boho-serif); font-style: italic; font-weight: 600; color: var(--ink); }
+html[data-theme="boho"] h2 { border-bottom: 1px dashed var(--field); }
+html[data-theme="boho"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--accent); text-decoration-style: wavy; text-underline-offset: 3px; }
+html[data-theme="boho"] .text-secondary, html[data-theme="boho"] .text-muted, html[data-theme="boho"] .note { color: var(--muted) !important; }
+html[data-theme="boho"] .hero, html[data-theme="boho"] .editor-head { color: var(--ink); border-bottom: 8px solid var(--accent);
+  border-image: repeating-linear-gradient(90deg, var(--accent) 0 18px, var(--boho-ochre) 18px 36px, var(--boho-olive) 36px 54px, var(--boho-rose) 54px 72px) 8;
+  background-color: #efe0c8; background-image: repeating-linear-gradient(45deg, rgba(185, 92, 56, .07) 0 10px, transparent 10px 20px), repeating-linear-gradient(-45deg, rgba(122, 125, 69, .07) 0 10px, transparent 10px 20px); }
+html[data-theme="boho"] .hero h1, html[data-theme="boho"] .editor-head h1 { font-family: var(--boho-serif); font-style: italic; font-weight: 600; font-size: clamp(2.6rem, 9vw, 4.4rem); color: var(--accent); }
+html[data-theme="boho"] .hero .han, html[data-theme="boho"] .editor-head .han { color: var(--boho-olive); }
+html[data-theme="boho"] .hero .han::before, html[data-theme="boho"] .hero .han::after { content: " ✦ "; color: var(--boho-ochre); letter-spacing: 0; }
+html[data-theme="boho"] .hero .lead { color: var(--muted); font-family: var(--boho-serif); font-size: 1.3rem; font-style: italic; }
+html[data-theme="boho"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 2rem .6rem 2rem .6rem; --bs-btn-border-width: 1px; font-family: var(--boho-serif); font-size: 1.05rem; font-weight: 700; font-style: italic; box-shadow: 0 3px 0 rgba(59, 42, 32, .15); }
+html[data-theme="boho"] .btn-cinnabar, html[data-theme="boho"] .btn-accent { --bs-btn-bg: var(--accent); --bs-btn-color: #fff8ee; --bs-btn-border-color: #8f4429; --bs-btn-hover-bg: #9e4d2e; --bs-btn-hover-color: #fff8ee; --bs-btn-hover-border-color: #7a3a22; --bs-btn-active-bg: #8f4429; --bs-btn-active-color: #fff8ee; --bs-btn-active-border-color: #7a3a22; }
+html[data-theme="boho"] .btn-quiet, html[data-theme="boho"] .btn-ink, html[data-theme="boho"] .btn-pill, html[data-theme="boho"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fbf3e6; --bs-btn-color: var(--ink); --bs-btn-border-color: var(--field); --bs-btn-hover-bg: #f2e1c6; --bs-btn-hover-color: var(--ink); --bs-btn-hover-border-color: var(--accent); --bs-btn-active-bg: #ead3ae; --bs-btn-active-color: var(--ink); --bs-btn-active-border-color: var(--accent); }
+html[data-theme="boho"] .btn-cinnabar.btn-pill, html[data-theme="boho"] .btn-accent.btn-pill { --bs-btn-bg: var(--accent); --bs-btn-color: #fff8ee; --bs-btn-border-color: #8f4429; }
+html[data-theme="boho"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: var(--boho-olive); --bs-btn-border-color: #5c5f31; --bs-btn-hover-bg: #64672f; }
+html[data-theme="boho"] .form-select { --bs-border-radius: 1.2rem; --bs-border-color: var(--field); background-color: #fbf3e6; color: var(--ink); }
+html[data-theme="boho"] .form-control, html[data-theme="boho"] textarea { border: 1px solid var(--field); border-radius: 1rem; background-color: #fffaf1; color: var(--ink); }
+html[data-theme="boho"] .form-control:focus, html[data-theme="boho"] textarea:focus, html[data-theme="boho"] .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 .2rem rgba(184, 92, 56, .2); outline: none; }
+html[data-theme="boho"] .form-check-input:checked { background-color: var(--boho-olive); border-color: var(--boho-olive); }
+html[data-theme="boho"] input[type="range"] { accent-color: var(--accent); }
+html[data-theme="boho"] .card, html[data-theme="boho"] .card-box, html[data-theme="boho"] .alert, html[data-theme="boho"] .editor, html[data-theme="boho"] .content-container, html[data-theme="boho"] .sticky-card, html[data-theme="boho"] .panel { background: #fffaf1; border: 1px solid var(--line); border-radius: 1.6rem .5rem 1.6rem .5rem; box-shadow: 0 .4rem 1.2rem rgba(120, 70, 30, .12); }
+html[data-theme="boho"] .dropdown-menu, html[data-theme="boho"] .modal-content, html[data-theme="boho"] dialog#variants { background: #fffaf1; border: 1px solid var(--field); border-radius: 1.2rem; }
+html[data-theme="boho"] .table { --bs-table-bg: #fffaf1; border-top: 2px solid var(--accent); }
+html[data-theme="boho"] .rule, html[data-theme="boho"] .pane-title, html[data-theme="boho"] .powered-by, html[data-theme="boho"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="boho"] .rule { font-family: var(--boho-serif); font-style: italic; font-size: 1rem; letter-spacing: .15em; }
+html[data-theme="boho"] .rule::before, html[data-theme="boho"] .rule::after { border-top: 1px dashed var(--accent); }
+html[data-theme="boho"] hr { border-top: 1px dashed var(--accent); opacity: 1; }
+html[data-theme="boho"] .glyph-strip .g[data-code] { border: 1px solid var(--field); border-radius: 50% 50% 46% 54% / 54% 46% 54% 46%; transition: transform .2s, box-shadow .2s; }
+html[data-theme="boho"] .glyph-strip .g[data-code]:hover, html[data-theme="boho"] .glyph-strip .g[data-code]:focus-visible { transform: rotate(-4deg); box-shadow: 0 .3rem .8rem rgba(120, 70, 30, .2); outline: none; }
+html[data-theme="boho"] #variants .speak { border: 1px solid var(--field); }
+html[data-theme="boho"] #variants .var { border: 1px solid var(--field); border-radius: 1rem .4rem 1rem .4rem; background: #fffaf1; }
+html[data-theme="boho"] #variants .var.hit { border-color: var(--accent); background: #f6dccd; }
+html[data-theme="boho"] .search-bar .input-group { border-radius: 2rem; }
+html[data-theme="boho"] .search-bar .input-group-text, html[data-theme="boho"] .search-bar .form-control { border-color: var(--field); background: #fffaf1; }
+html[data-theme="boho"] .search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
+html[data-theme="boho"] .search-bar .btn { border-radius: 0 2rem 2rem 0; }
+html[data-theme="boho"] .controls { border: 1px solid var(--line); border-radius: 2rem .6rem 2rem .6rem; background: #fffaf1; }

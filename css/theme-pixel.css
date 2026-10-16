@@ -1,0 +1,53 @@
+/* Theme "pixel": pixel art: an 8-bit game screen. A monospace type, the colours of the PICO-8 palette, square buttons and panels with notched pixel corners (outlines drawn with hard shadows), a faint checker pattern.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="pixel"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="pixel"] { --ink: #1d2b53; --accent: #ff004d; --cinnabar: #ff004d; --paper: #fff1e8; --line: #1d2b53; --field: #1d2b53; --muted: #5f574f;
+  --px-yellow: #ffec27; --px-blue: #29adff; --px-green: #00e436; --px-orange: #ffa300;
+  --px-font: "Press Start 2P", "VT323", "Silkscreen", ui-monospace, "Courier New", monospace;
+  --px-edge: 0 -4px 0 0 var(--ink), 0 4px 0 0 var(--ink), -4px 0 0 0 var(--ink), 4px 0 0 0 var(--ink); }
+html[data-theme="pixel"] body { background-color: var(--paper); color: var(--ink);
+  background-image: linear-gradient(45deg, rgba(29, 43, 83, .035) 25%, transparent 25%, transparent 75%, rgba(29, 43, 83, .035) 75%), linear-gradient(45deg, rgba(29, 43, 83, .035) 25%, transparent 25%, transparent 75%, rgba(29, 43, 83, .035) 75%);
+  background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+html[data-theme="pixel"] h1, html[data-theme="pixel"] h2, html[data-theme="pixel"] h3 { font-family: var(--px-font); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ink); }
+html[data-theme="pixel"] h2 { border-bottom: 4px solid var(--ink); }
+html[data-theme="pixel"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: #7e2553; }
+html[data-theme="pixel"] .text-secondary, html[data-theme="pixel"] .text-muted, html[data-theme="pixel"] .note { color: var(--muted) !important; }
+html[data-theme="pixel"] .hero, html[data-theme="pixel"] .editor-head { background-color: var(--ink); color: #fff1e8; border-bottom: 8px solid #000;
+  background-image: radial-gradient(#fff1e8 1px, transparent 1.5px), radial-gradient(rgba(255, 241, 232, .5) 1px, transparent 1.5px); background-size: 48px 48px, 31px 31px; background-position: 0 0, 13px 21px; }
+html[data-theme="pixel"] .editor-head p { color: #fff1e8; }
+html[data-theme="pixel"] .hero h1, html[data-theme="pixel"] .editor-head h1 { font-family: var(--px-font); font-size: clamp(1.8rem, 7vw, 3.2rem); color: var(--px-yellow); text-shadow: 4px 4px 0 var(--accent), 8px 8px 0 #000; letter-spacing: .06em; }
+html[data-theme="pixel"] .hero .han, html[data-theme="pixel"] .editor-head .han { display: inline-block; color: #fff; background: var(--accent); padding: .2rem .6rem .2rem 1rem; box-shadow: var(--px-edge); margin-bottom: .8rem !important; }
+html[data-theme="pixel"] .hero .lead { color: #fff1e8; font-family: var(--px-font); font-size: .95rem; }
+html[data-theme="pixel"] .hero a:not(.btn) { color: var(--px-yellow); }
+html[data-theme="pixel"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 0; --bs-btn-border-width: 0; font-family: var(--px-font); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; box-shadow: var(--px-edge), inset -4px -4px 0 0 rgba(0, 0, 0, .25); transition: none; }
+html[data-theme="pixel"] .btn:not(.btn-close):not(.btn-link):active:not(:disabled) { box-shadow: var(--px-edge), inset 4px 4px 0 0 rgba(0, 0, 0, .25); }
+html[data-theme="pixel"] .btn-sm, html[data-theme="pixel"] .game .tool, html[data-theme="pixel"] .game .tool-btn { font-size: .7rem; letter-spacing: 0; }
+html[data-theme="pixel"] .game :has(> .tool-btn) { flex-wrap: wrap; }   /* the controls of Sound Check may take two lines with the wide type */
+html[data-theme="pixel"] .btn-cinnabar, html[data-theme="pixel"] .btn-accent { --bs-btn-bg: var(--accent); --bs-btn-color: #fff; --bs-btn-hover-bg: #ff3370; --bs-btn-hover-color: #fff; --bs-btn-active-bg: var(--accent); --bs-btn-active-color: #fff; }
+html[data-theme="pixel"] .btn-quiet, html[data-theme="pixel"] .btn-ink, html[data-theme="pixel"] .btn-pill, html[data-theme="pixel"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fff1e8; --bs-btn-color: var(--ink); --bs-btn-hover-bg: var(--px-yellow); --bs-btn-hover-color: var(--ink); --bs-btn-active-bg: var(--px-yellow); --bs-btn-active-color: var(--ink); }
+html[data-theme="pixel"] .btn-cinnabar.btn-pill, html[data-theme="pixel"] .btn-accent.btn-pill { --bs-btn-bg: var(--accent); --bs-btn-color: #fff; }
+html[data-theme="pixel"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: var(--px-green); --bs-btn-color: var(--ink); --bs-btn-hover-bg: #5cff7c; --bs-btn-hover-color: var(--ink); }
+html[data-theme="pixel"] .form-select { --bs-border-radius: 0; --bs-border-width: 0; background-color: #fff1e8; color: var(--ink); font-family: var(--px-font); font-size: .7rem; padding-left: .5rem; box-shadow: var(--px-edge); }   /* the monospace type is wide: smaller, so that a row of dropdowns fits on a phone */
+html[data-theme="pixel"] .form-control, html[data-theme="pixel"] textarea { border: 0; border-radius: 0; background-color: #fff; color: var(--ink); box-shadow: var(--px-edge); }
+html[data-theme="pixel"] .form-control:focus, html[data-theme="pixel"] textarea:focus, html[data-theme="pixel"] .form-select:focus { outline: none; box-shadow: 0 -4px 0 0 var(--px-blue), 0 4px 0 0 var(--px-blue), -4px 0 0 0 var(--px-blue), 4px 0 0 0 var(--px-blue); }
+html[data-theme="pixel"] .form-check-input { border-radius: 0 !important; border: 3px solid var(--ink); }
+html[data-theme="pixel"] .form-check-input:checked { background-color: var(--px-green); border-color: var(--ink); }
+html[data-theme="pixel"] input[type="range"] { accent-color: var(--accent); }
+html[data-theme="pixel"] .card, html[data-theme="pixel"] .card-box, html[data-theme="pixel"] .alert, html[data-theme="pixel"] .editor, html[data-theme="pixel"] .content-container, html[data-theme="pixel"] .sticky-card, html[data-theme="pixel"] .panel { background: #fff; border: 0; border-radius: 0; box-shadow: var(--px-edge), 8px 8px 0 4px rgba(29, 43, 83, .25); }
+html[data-theme="pixel"] .dropdown-menu, html[data-theme="pixel"] .modal-content, html[data-theme="pixel"] dialog#variants { border: 0; border-radius: 0; box-shadow: var(--px-edge); }
+html[data-theme="pixel"] .table { --bs-table-bg: #fff; border: 4px solid var(--ink); font-family: var(--px-font); }
+html[data-theme="pixel"] .rule, html[data-theme="pixel"] .pane-title, html[data-theme="pixel"] .powered-by, html[data-theme="pixel"] .powered-by a { color: var(--ink) !important; font-family: var(--px-font); }
+html[data-theme="pixel"] .hero .rule { color: var(--px-yellow) !important; }
+html[data-theme="pixel"] .rule::before, html[data-theme="pixel"] .rule::after { border-top: 4px dashed var(--ink); }
+html[data-theme="pixel"] .hero .rule::before, html[data-theme="pixel"] .hero .rule::after { border-top-color: #fff1e8; }
+html[data-theme="pixel"] .glyph-strip tt { color: #fff1e8; }
+html[data-theme="pixel"] hr { border-top: 4px dashed var(--ink); opacity: 1; }
+html[data-theme="pixel"] .glyph-strip .g[data-code] { border: 0; border-radius: 0; margin: 4px; box-shadow: var(--px-edge), inset -4px -4px 0 0 rgba(0, 0, 0, .12); transition: none; }
+html[data-theme="pixel"] .glyph-strip .g[data-code]:hover, html[data-theme="pixel"] .glyph-strip .g[data-code]:focus-visible { background-color: var(--px-yellow); outline: none; }
+html[data-theme="pixel"] #variants .speak { border: 0; border-radius: 0; box-shadow: var(--px-edge); }
+html[data-theme="pixel"] #variants .var { border: 0; border-radius: 0; margin: 4px; box-shadow: var(--px-edge); background: #fff; }
+html[data-theme="pixel"] #variants .var.hit { background: var(--px-yellow); }
+html[data-theme="pixel"] .search-bar .input-group { border-radius: 0; box-shadow: var(--px-edge); }
+html[data-theme="pixel"] .search-bar .input-group-text, html[data-theme="pixel"] .search-bar .form-control { border: 0; border-radius: 0; box-shadow: none; margin: 0; }
+html[data-theme="pixel"] .search-bar .btn { border-radius: 0; margin: 0; box-shadow: none; }
+html[data-theme="pixel"] .controls { border: 0; border-radius: 0; background: #fff; box-shadow: var(--px-edge); }

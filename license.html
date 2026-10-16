@@ -39,7 +39,7 @@
 
     <h2 class="h4 mt-4" data-vi="Giao diện">Theme</h2>
     <p class="text-secondary small">The look of qatt.org. It is remembered in this browser; chunom.org does not use it.</p>
-    <div class="btn-group btn-group-sm mb-2" role="group" id="theme" aria-label="Theme"></div>
+    <div class="d-flex flex-wrap gap-2 mb-2" role="group" id="theme" aria-label="Theme"></div>
 
     <h2 class="h4 mt-4" data-vi="Nguồn đã dùng">Sources used</h2>
     <p class="text-secondary small">The scripts, styles and fonts of the page you came from. Click a file to see it; reload it there to get the newest version.</p>
@@ -58,7 +58,7 @@
       // the theme switch (Theme is defined by js/navigation.js)
       const box = document.getElementById('theme');
       for (const [name, [en, vi]] of Object.entries(Theme.list)) {
-        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-outline-secondary'; b.dataset.theme = name;
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-sm btn-outline-secondary'; b.dataset.theme = name;
         b.textContent = en; if (vi !== en) b.setAttribute('data-vi', vi);
         box.append(b);
       }
