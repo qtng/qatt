@@ -6,7 +6,8 @@ The QATT fonts (fonts/*.woff2) and the sizes offered by codetable.html and edito
                                                 (the fonts marked admin: true are only offered to admins, see isAdmin below)
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of codetable.html)
 
-The script defines the @font-face rules itself and fills these selects when it runs, so load it after them.
+The script defines the @font-face rules itself and fills these selects when it runs, so load it after them (or with defer).
+The font files are found next to the script (../fonts/), so other sites can load it too (the Writer of chunom.org: https://qatt.org/js/fonts.js).
 */
 const QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif", default: true },
@@ -40,10 +41,12 @@ const isAdmin = () => {
   } catch (e) { return false; }
 };
 
+const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.currentScript.src : location.href).href;   // the folder fonts/ of qatt.org
+
 (() => {
   const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());
   const style = document.createElement("style");
-  style.textContent = FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2) format("woff2"), url(fonts/${f.file}.ttf) format("truetype"); }`).join("\n");
+  style.textContent = FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(${QATT_FONT_DIR}${f.file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${f.file}.ttf) format("truetype"); }`).join("\n");
   document.head.append(style);
 
   const fill = (select, items) => {
