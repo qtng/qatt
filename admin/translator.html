@@ -96,7 +96,7 @@
     const $ = id => document.getElementById(id);
     const sp = new SupabaseService();
     await sp.init();
-    QattLogin.status(sp, $('account'));
+    QattLogin.status(sp, $('account'), 'with your admin account');
     const denied = text => { $('content').hidden = true; $('denied').hidden = false; $('denied').textContent = text; };
     const sec = ms => ms === null || ms === undefined ? '' : (ms / 1000).toFixed(1);
     const pct = (a, b) => b ? Math.round(100 * a / b) + ' %' : '';

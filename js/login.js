@@ -2,7 +2,7 @@
 Login dialog and account line for the pages that use SupabaseService (js/supabase.js).
 
 await QattLogin.require(db, 'Sign in to create decks.')   // true if signed in; else opens the dialog and gives false
-QattLogin.status(db, element)                             // "Signed in as …" with a sign-out link, or a sign-in link
+QattLogin.status(db, element, hint)                       // "Signed in as …" with a sign-out link, or "Not signed in. Sign in <hint>." (the hint of the page, e.g. 'to keep your progress on every device'; without it a general one)
 QattLogin.open(db, message)                               // the dialog
 await QattLogin.chooseName(db, { required, current })     // the name for the leaderboard: the new name, null if the dialog was closed
 */
@@ -59,7 +59,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 			const send = el('button', { type: 'submit', className: 'main', textContent: 'Send me a link' });
 			const form = el('form', { method: 'dialog' },
 				el('h2', { textContent: 'Sign in' }),
-				el('p', { textContent: message || 'Sign in to keep your decks on every device. What you have so far stays with your account.' }),
+				el('p', { textContent: message || 'Sign in to keep your work on every device. What you have so far stays with your account.' }),
 				google,
 				el('div', { className: 'or', textContent: 'or' }),
 				email, send, note);
@@ -145,7 +145,10 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 		return false;
 	}
 
-	function status(db, element) {
+	// what the sign-in link says when the page gives no hint of its own
+	const KEEP_HINT = 'to keep your work on every device';
+
+	function status(db, element, hint) {
 		addStyle();
 		element.classList.add('qatt-account');
 		element.replaceChildren();
@@ -157,7 +160,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 		} else {
 			const inn = el('a', { textContent: 'Sign in' });
 			inn.addEventListener('click', () => open(db));
-			element.append('Not signed in. ', inn, ' to keep your decks on every device.');
+			element.append('Not signed in. ', inn, ' ' + (hint || KEEP_HINT) + '.');
 		}
 	}
 
