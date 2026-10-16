@@ -86,7 +86,7 @@
 
     <hr class="mt-4">
     <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
-    <p class="note mb-1"><b>Missing word:</b> a word for which the model gave a character of its own (or "?" when it knew none) because the list of the page had no suitable character. "The dictionary has: nothing" = no character at all for this word, "n characters" = it has some, but none fitted. In the newest list the word is marked, with the word before and after it (nothing there = the word starts or ends the sentence). Only these words are stored, not the whole sentence.</p>
+    <p class="note mb-1"><b>Missing word:</b> a word for which the model gave a character of its own (or "?" when it knew none) because the list of the page had no suitable character. "The dictionary has: nothing" = no character at all for this word, "n characters" = it has some, but none fitted. In the newest list the word is marked, with the two words before and after it (fewer or nothing there = the word is near the start or end of the sentence). Only these words are stored, not the whole sentence.</p>
     <p class="note mb-1"><b>Language:</b> the language of the free translation that was asked for. <b>Errors</b> = no answer (busy, over quota, ...). <b>Fallback</b> = the model's answer was unusable twice. <b>Own characters</b> = share of the words that are missing in the dictionary. Recorded since 16 Oct 2026.</p>
   </div>
 </main>
@@ -159,7 +159,8 @@
       fill('gaps', rows.map(r => [r.word, { v: r.ch, cls: 'l han' }, r.n, { v: dict(r.options), cls: 'l' }]));
       $('recent').replaceChildren(...G.recent.map(r => {
         const tr = el('tr');
-        tr.append(el('td', 'l', new Date(r.at).toLocaleString()), sentence(r.prev_qn, r.word_qn, r.next_qn), sentence(r.prev_char, r.word_char, r.next_char));
+        const around = (list, idx) => [list.slice(0, idx - 1).join(' '), list[idx - 1], list.slice(idx).join(' ')];   // before, the word of the gap, after
+        tr.append(el('td', 'l', new Date(r.at).toLocaleString()), sentence(...around(r.ctx_qn, r.idx)), sentence(...around(r.ctx_chars, r.idx)));
         tr.lastChild.classList.add('han');
         return tr;
       }));
@@ -168,8 +169,8 @@
     $('csvRows').addEventListener('click', async () => {
       const { data, error } = await sp.client.rpc('admin_gap_export', { p_days: Number($('days').value) });
       if (error) return denied('Could not load: ' + error.message);
-      csvDownload('missing-words.csv', ['time', 'word', 'character_chosen', 'characters_in_dictionary', 'word_before', 'character_before', 'word_after', 'character_after', 'position', 'words_in_sentence', 'model'],
-        data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, r.prev_qn, r.prev_char, r.next_qn, r.next_char, r.pos, r.n_words, r.model]));
+      csvDownload('missing-words.csv', ['time', 'word', 'character_chosen', 'characters_in_dictionary', 'context_words', 'context_characters', 'index_of_the_word_in_the_context', 'position_in_sentence', 'words_in_sentence', 'model'],
+        data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, (r.ctx_qn || []).join(' | '), (r.ctx_chars || []).join(' | '), r.idx, r.pos, r.n_words, r.model]));
     });
     $('days').addEventListener('change', load);
     $('reload').addEventListener('click', load);

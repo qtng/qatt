@@ -132,29 +132,31 @@ revoke all on function public.admin_models(integer) from public, anon;
 grant execute on function public.admin_models(integer) to authenticated;
 
 -- Gaps of the dictionary: every word for which the model gave a character of its own (or "?" = it knew none), because the list of the page had no
--- suitable option. Stored with the word before and after (Quốc Ngữ and the character chosen for it; NULL where there is none: start or end of the
--- sentence), its position and the length of the sentence in words. Only these words, not the sentence; the context is one word on each side.
--- (The live table was first made with two text columns context_qn and context_chars; they are unused now and can be dropped:
---  alter table public.translate_gaps drop column context_qn, drop column context_chars;)
+-- suitable option. The context is stored as arrays: the words around the gap (2 on each side, fewer at the start or end of the sentence; the window is
+-- the constant CONTEXT of the Edge Function, so it can change without a change of the table) in Quốc Ngữ and the characters chosen for them, and idx = the
+-- place of the gap word in the arrays, from 1: ctx_qn[idx] is the word. Only these words, not the sentence.
 create table if not exists public.translate_gaps (
   id bigint generated always as identity primary key,
   at timestamptz not null default now(),
   word_qn text not null,          -- the word (one or more syllables), as sent by the page, lower case
   word_char text not null,        -- the character(s) the model chose, "?" if it knew none
   n_options integer,              -- how many options the page had for this word (0 = the dictionary has nothing for it)
-  prev_qn text, prev_char text,   -- the word before and the characters chosen for it (NULL = the word is the first)
-  next_qn text, next_char text,   -- the word after (NULL = the word is the last)
+  ctx_qn text[],                  -- the words around, e.g. {tôi, ở, "cao nguyên", rộng}
+  ctx_chars text[],               -- the characters chosen for them, the same order
+  idx integer,                    -- the place of the gap word in ctx_qn and ctx_chars (from 1)
   pos integer,                    -- the number of the word in the sentence, 1 = first
   n_words integer,                -- the number of words of the sentence
   model text
 );
+-- (The live table was made in two earlier versions and still has the unused, empty columns context_qn, context_chars, prev_qn, prev_char, next_qn, next_char;
+--  they can be dropped: alter table public.translate_gaps drop column context_qn, drop column context_chars, drop column prev_qn, drop column prev_char, drop column next_qn, drop column next_char;)
 create index if not exists translate_gaps_at on public.translate_gaps (at);
 create index if not exists translate_gaps_word on public.translate_gaps (word_qn);
 alter table public.translate_gaps enable row level security;
 revoke all on public.translate_gaps from anon, authenticated;
 grant insert on public.translate_gaps to service_role;
 
--- the gaps of the last p_days days: per word how often, which characters the model chose, how often at the start or end of a sentence, and the newest rows
+-- the gaps of the last p_days days: per word how often and which characters the model chose, and the newest rows
 create or replace function public.admin_gaps(p_days integer default 30)
 returns jsonb
 language plpgsql
@@ -174,15 +176,13 @@ begin
     'nothing_in_dictionary', (select count(*) from public.translate_gaps where at > now() - make_interval(days => d) and n_options = 0),
     'top', (select coalesce(jsonb_agg(to_jsonb(x) order by x.n desc, x.last_at desc), '[]'::jsonb) from (
       select g.word_qn, count(*) as n, max(g.n_options) as n_options, max(g.at) as last_at,
-        count(*) filter (where g.prev_qn is null) as at_start, count(*) filter (where g.next_qn is null) as at_end,
-        count(distinct (g.prev_qn, g.next_qn)) as contexts,
         (select jsonb_agg(jsonb_build_object('c', c.word_char, 'n', c.n) order by c.n desc)
            from (select word_char, count(*) as n from public.translate_gaps g2
                  where g2.word_qn = g.word_qn and g2.at > now() - make_interval(days => d) group by word_char) c) as chars
       from public.translate_gaps g where g.at > now() - make_interval(days => d)
       group by g.word_qn order by count(*) desc, max(g.at) desc limit 200) x),
     'recent', (select coalesce(jsonb_agg(to_jsonb(x) order by x.at desc), '[]'::jsonb) from (
-      select at, word_qn, word_char, n_options, prev_qn, prev_char, next_qn, next_char, pos, n_words, model
+      select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model
       from public.translate_gaps where at > now() - make_interval(days => d) order by at desc limit 50) x)
   );
 end;
@@ -190,7 +190,7 @@ $$;
 revoke all on function public.admin_gaps(integer) from public, anon;
 grant execute on function public.admin_gaps(integer) to authenticated;
 
--- the contexts of one word (admin/translator.html, click on a word): each combination of characters and neighbours with how often
+-- the contexts of one word, each combination with how often (for the SQL editor; admins only)
 create or replace function public.admin_gap_contexts(p_word text, p_days integer default 30)
 returns jsonb
 language plpgsql
@@ -204,10 +204,9 @@ begin
     raise exception 'not allowed' using errcode = '42501';
   end if;
   return (select coalesce(jsonb_agg(to_jsonb(x) order by x.n desc, x.last_at desc), '[]'::jsonb) from (
-    select word_char, prev_qn, prev_char, next_qn, next_char, count(*) as n, max(at) as last_at, max(n_options) as n_options,
-      round(avg(pos::numeric / nullif(n_words, 0)) * 100) as avg_pos_percent
+    select word_char, ctx_qn, ctx_chars, idx, count(*) as n, max(at) as last_at, max(n_options) as n_options
     from public.translate_gaps where word_qn = p_word and at > now() - make_interval(days => d)
-    group by word_char, prev_qn, prev_char, next_qn, next_char order by count(*) desc, max(at) desc limit 100) x);
+    group by word_char, ctx_qn, ctx_chars, idx order by count(*) desc, max(at) desc limit 100) x);
 end;
 $$;
 revoke all on function public.admin_gap_contexts(text, integer) from public, anon;
@@ -265,7 +264,7 @@ begin
     raise exception 'not allowed' using errcode = '42501';
   end if;
   return (select coalesce(jsonb_agg(to_jsonb(x) order by x.at desc), '[]'::jsonb) from (
-    select at, word_qn, word_char, n_options, prev_qn, prev_char, next_qn, next_char, pos, n_words, model
+    select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model
     from public.translate_gaps where at > now() - make_interval(days => d) order by at desc limit 5000) x);
 end;
 $$;
