@@ -7,66 +7,70 @@
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/site.css">
   <style>
-    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --card: #fffdf8; --line: #e4d9c0; --muted: #7b6c58; --scale: 1; }
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --card: #fffdf8; --line: #e4d9c0; --muted: #7b6c58; --scale: 1; --fit: 1; --qw: 400; }
+    /* the specimens keep their own colours in every theme: dark on light and light on dark */
+    :root { --sp-ink: #2b2118; --sp-paper: #f7efdc; --sp-line: rgba(43, 33, 24, .18); --sp-muted: #7b6c58; --sp-muted-dark: #b9a98f; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--card); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
     .hero { background: radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%), linear-gradient(180deg, var(--paper) 0%, var(--card) 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
     .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; margin: 0; }
     .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: #4a3d30; }
     @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
 
-    /* the controls: the font (fonts.js fills the select and sets --qfont), the weight the browser makes, the size, the text */
-    .bar { position: sticky; top: 50px; z-index: 5; background: rgba(255, 253, 248, .94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
-    .bar .in { max-width: 74rem; margin: 0 auto; padding: .5rem 1rem; display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; font-size: .8rem; }
-    .bar label { display: flex; align-items: center; gap: .4rem; margin: 0; white-space: nowrap; color: var(--muted); }
-    .bar select, .bar input[type=text] { font-size: .8rem; padding-top: .15rem; padding-bottom: .15rem; }
-    .bar input[type=range] { width: 7rem; }
-    .bar .grow { flex: 1 1 12rem; min-width: 0; }
+    /* one width, one kind of label for the whole page */
+    .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1rem; }
+    .lab { font-size: .72rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; opacity: .7; white-space: nowrap; }
+    .q { font-family: var(--qfont, "QATT Serif"); font-weight: var(--qw); line-height: 1.15; }
+
+    /* the controls: the font (fonts.js fills the select and sets --qfont), the weight, the size, the text */
+    .bar { position: sticky; top: 60px; z-index: 5; background: rgba(255, 253, 248, .95); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+    .bar .wrap { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; align-items: center; padding-top: .55rem; padding-bottom: .55rem; }
+    .bar label { display: flex; align-items: center; gap: .5rem; margin: 0; }
+    .bar select, .bar input[type=text] { font-size: .85rem; letter-spacing: 0; text-transform: none; }
+    .bar input[type=range] { width: 7rem; accent-color: var(--accent); }
+    .bar .grow { flex: 1 1 14rem; min-width: 0; }
     .bar .grow input { width: 100%; }
+    @media (max-width: 767.98px) { .bar { position: static; } }   /* on a phone the controls would cover a third of the screen */
 
-    /* every band is a specimen: dark on light, light on dark, light on the cinnabar red */
-    .band { padding: 3rem 1rem; }
-    .band .in { max-width: 74rem; margin: 0 auto; }
-    .light { background: var(--card); color: var(--ink); }
-    .dark { background: var(--ink); color: var(--paper); }
-    .red { background: var(--accent); color: var(--card); }
-    .paper { background: var(--paper); color: var(--ink); }
-    .tag { display: flex; align-items: center; gap: 1rem; margin: 0 0 1.6rem; font-size: .72rem; letter-spacing: .25em; text-transform: uppercase; opacity: .65; }
-    .tag::after { content: ""; flex: 1; border-top: 1px solid currentColor; opacity: .5; }
-    .q { font-family: var(--qfont, "QATT Serif"); font-weight: var(--qw, 400); line-height: 1.12; word-break: break-word; }
+    /* sections: a title, then the specimen */
+    section.spec { padding: 3rem 0; border-top: 1px solid var(--sp-line); }
+    section.spec:first-child { border-top: 0; }
+    .spec h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.5rem; margin: 0 0 1.4rem; }
+    .spec h2 small { font: .85rem system-ui, -apple-system, sans-serif; opacity: .7; margin-left: .6rem; text-transform: none; letter-spacing: 0; }
 
-    /* the opening: the same line twice, dark on light and light on dark */
-    .split { display: grid; grid-template-columns: 1fr 1fr; }
-    @media (max-width: 767.98px) { .split { grid-template-columns: 1fr; } }
-    .split > div { padding: clamp(2rem, 6vw, 4.5rem) clamp(1rem, 4vw, 3rem); display: flex; align-items: center; justify-content: center; min-height: 20rem; text-align: center; }
-    .split .q { font-size: calc(clamp(3.4rem, 9vw, 7.5rem) * var(--scale)); }
+    /* tiles: dark on light and light on dark, the same size side by side */
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 767.98px) { .pair { grid-template-columns: 1fr; } }
+    .tile { border-radius: .9rem; padding: 1.1rem 1.4rem 1.4rem; overflow: hidden; min-width: 0; }
+    .tile.light { background: var(--sp-paper); color: var(--sp-ink); }
+    .tile.dark { background: var(--sp-ink); color: var(--sp-paper); }
+    .tile > .lab { display: block; margin-bottom: 1rem; }
+    .big .q { font-size: calc(clamp(3rem, 7vw, 5.6rem) * var(--scale) * var(--fit)); text-wrap: balance; min-height: 2.4em; display: flex; align-items: center; }
+    .verse .q { font-size: calc(1.7rem * var(--scale) * var(--fit)); line-height: 1.5; }
 
-    /* the weights: what the browser makes of the one file of a font */
-    .rows .row { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; align-items: baseline; padding: .7rem 0; border-top: 1px solid rgba(127, 127, 127, .3); }
-    .rows .row:first-child { border-top: 0; }
-    .rows .lab { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; opacity: .65; line-height: 1.3; }
-    @media (max-width: 575.98px) { .rows .row { grid-template-columns: 1fr; gap: .1rem; } }
-    .weights .q { font-size: calc(3.6rem * var(--scale)); }
-    .sizes .q { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+    /* rows: a label, then the sample on one line */
+    .rows > div { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 1rem; align-items: center; padding: .8rem 0; border-top: 1px solid var(--sp-line); }
+    .rows.dark > div { border-top-color: rgba(247, 239, 220, .15); }
+    .tile.rows { padding-top: .5rem; padding-bottom: .5rem; }
+    .rows > div:first-child { border-top: 0; }
+    .rows .q { white-space: nowrap; overflow: hidden; }
+    .weights .q { font-size: calc(3.2rem * var(--scale) * var(--fit)); }
+    .note { font-size: .8rem; opacity: .7; margin: .8rem 0 0; }
+    @media (max-width: 575.98px) { .rows > div { grid-template-columns: minmax(0, 1fr); gap: .2rem; } }
 
-    /* the character set: the 22 shapes in their seven forms */
-    .set { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, auto); grid-template-columns: repeat(11, 1fr); gap: .15rem .3rem; max-width: 46rem; margin: 0 auto 1.6rem; text-align: center; }   /* a column per shape, a row per form */
-    .set .q { font-size: calc(clamp(1.7rem, 5vw, 2.6rem) * var(--scale)); }
-    .tones { display: grid; grid-template-columns: repeat(8, 1fr); gap: .3rem; max-width: 34rem; margin: 2.2rem auto 0; text-align: center; }
-    .tones .q { font-size: calc(2.6rem * var(--scale)); }
+    /* the character set: one square cell per character */
+    .cells { --n: 11; container-type: inline-size; display: grid; grid-template-columns: repeat(var(--n), 1fr); background: var(--sp-paper); color: var(--sp-ink); border-radius: .9rem; overflow: hidden; }
+    .cells + .cells { margin-top: 1rem; }
+    .cells > div { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; box-shadow: inset -1px -1px 0 var(--sp-line); font-size: calc(100cqw / var(--n) * .55 * var(--scale) * var(--fit)); }
+    .cells.tones { --n: 8; width: calc(8 / 11 * 100%); background: var(--sp-ink); color: var(--sp-paper); }
+    .cells.tones > div { box-shadow: inset -1px -1px 0 rgba(247, 239, 220, .15); }
 
-    /* all fonts one below the other: a type tester */
-    .tester .row { grid-template-columns: 11rem 1fr; }
-    .tester .q { font-size: calc(clamp(2.2rem, 6vw, 4.2rem) * var(--scale)); font-weight: 400; }
-    .tester .lab b { display: block; font-size: .8rem; letter-spacing: 0; text-transform: none; opacity: 1; }
-    @media (max-width: 575.98px) { .tester .row { grid-template-columns: 1fr; } }
-
-    /* running text in two columns */
-    .cols { columns: 2 18rem; column-gap: 2.5rem; }
-    .cols .q { font-size: calc(1.5rem * var(--scale)); line-height: 1.5; }
-    .cols .q + .q { margin-top: 1rem; }
-    .foot { padding: 2rem 1rem 3rem; text-align: center; font-size: .85rem; color: var(--muted); }
-    .foot a { color: var(--accent); }
+    /* all fonts: the name, then the sample dark on light and light on dark */
+    .fonts > div { display: grid; grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; padding: .5rem 0; }
+    .fonts .lab { align-self: center; white-space: normal; }
+    .fonts .tile { padding: .7rem 1rem; display: flex; align-items: center; }
+    .fonts .q { white-space: nowrap; overflow: hidden; }
+    @media (max-width: 767.98px) { .fonts > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .5rem; } .fonts .lab { grid-column: 1 / -1; margin-top: .5rem; } }
   </style>
   <script src="js/navigation.js"></script>
 </head>
@@ -75,77 +79,66 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">QATT type specimens</h1>
-    <p class="lead mx-auto mb-4" style="max-width: 38rem; color: #4a3d30">The QATT fonts in different sizes and weights, dark on light and light on dark.</p>
+    <p class="lead mx-auto mb-4">The QATT fonts in different sizes and weights, dark on light and light on dark.</p>
     <a class="btn btn-cinnabar btn-pill" href="font.html">Reference font</a>
     <a class="btn btn-outline-secondary btn-pill" href="editor.html">Type QATT</a>
   </div>
 </header>
 
 <div class="bar">
-  <div class="in">
-    <label>Font <select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select></label>
-    <label>Weight <select id="weight" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Weight">
-      <option value="400">Normal</option><option value="700">Bold (browser)</option><option value="900">Black (browser)</option>
+  <div class="wrap">
+    <label class="lab">Font <select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select></label>
+    <label class="lab">Weight <select id="weight" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Weight">
+      <option value="400">400 Normal</option><option value="700">700 Bold *</option><option value="900">900 Black *</option>
     </select></label>
-    <label>Size <input type="range" id="scale" min="60" max="140" value="100" autocomplete="off" aria-label="Size"></label>
-    <label class="grow">Text <input type="text" id="text" class="form-control form-control-sm" value="Quốc âm tân tự" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <label class="lab">Size <input type="range" id="scale" min="60" max="140" value="100" autocomplete="off" aria-label="Size"></label>
+    <label class="lab grow">Text <input type="text" id="text" class="form-control form-control-sm" value="Quốc âm tân tự" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
   </div>
 </div>
 
-<section class="split" aria-label="Dark on light and light on dark">
-  <div class="light"><div class="q s" id="hero1"></div></div>
-  <div class="dark"><div class="q s" id="hero2"></div></div>
-</section>
-
-<section class="band paper weights">
-  <div class="in">
-    <div class="tag">Weights</div>
-    <div class="rows">
-      <div class="row"><div class="lab">Normal<br>400</div><div class="q s" style="font-weight: 400"></div></div>
-      <div class="row"><div class="lab">Bold<br>700, made by the browser</div><div class="q s" style="font-weight: 700"></div></div>
-      <div class="row"><div class="lab">Black<br>900, made by the browser</div><div class="q s" style="font-weight: 900"></div></div>
+<main class="wrap">
+  <section class="spec">
+    <div class="pair big">
+      <div class="tile light"><span class="lab">Dark on light</span><div class="q s"></div></div>
+      <div class="tile dark"><span class="lab">Light on dark</span><div class="q s"></div></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="band dark sizes">
-  <div class="in">
-    <div class="tag">Sizes</div>
-    <div class="rows" id="sizes"></div>
-  </div>
-</section>
+  <section class="spec">
+    <h2>Weights</h2>
+    <div class="tile light rows weights">
+      <div><span class="lab">400 Normal</span><div class="q s" style="font-weight: 400"></div></div>
+      <div><span class="lab">700 Bold *</span><div class="q s" style="font-weight: 700"></div></div>
+      <div><span class="lab">900 Black *</span><div class="q s" style="font-weight: 900"></div></div>
+    </div>
+    <p class="note">* Each font is one file: the browser makes the bold and black weights by itself.</p>
+  </section>
 
-<section class="band light">
-  <div class="in">
-    <div class="tag">Characters</div>
-    <div class="set" aria-label="The first 11 shapes in seven forms"></div>
-    <div class="set" aria-label="The other 11 shapes in seven forms"></div>
-    <div class="tones" id="tones" aria-label="The eight tone marks"></div>
-  </div>
-</section>
+  <section class="spec">
+    <h2>Sizes</h2>
+    <div class="tile dark rows" id="sizes"></div>
+  </section>
 
-<section class="band red">
-  <div class="in">
-    <div class="tag">Text</div>
-    <div class="cols" id="cols"></div>
-  </div>
-</section>
+  <section class="spec">
+    <h2>Characters <small>22 shapes in seven forms, eight tones</small></h2>
+    <div class="cells q" id="set1"></div>
+    <div class="cells q" id="set2"></div>
+    <div class="cells tones q" id="tones"></div>
+  </section>
 
-<section class="band light tester">
-  <div class="in">
-    <div class="tag">All fonts</div>
-    <div class="rows" id="tester"></div>
-  </div>
-</section>
+  <section class="spec">
+    <h2>Text <small>Truyện Kiều, lines 1 to 4</small></h2>
+    <div class="pair verse">
+      <div class="tile light"><div class="q" data-verse></div></div>
+      <div class="tile dark"><div class="q" data-verse></div></div>
+    </div>
+  </section>
 
-<section class="band dark tester">
-  <div class="in">
-    <div class="tag">All fonts, light on dark</div>
-    <div class="rows" id="tester-dark"></div>
-  </div>
-</section>
-
-<p class="foot">The sample text is written in Quốc Ngữ and converted to QATT with the decoding of this site. <a href="editor.html">Type QATT</a></p>
+  <section class="spec">
+    <h2>All fonts</h2>
+    <div class="fonts" id="fonts"></div>
+  </section>
+</main>
 
 <script src="js/parser.js"></script>
 <script src="js/qatt-text.js"></script>
@@ -153,38 +146,49 @@
 <script>
 (() => {
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const root = document.documentElement.style;
   const parser = new VietnameseParser();
-  const BASE = 0xF0000, chr = o => String.fromCodePoint(BASE + o);
+  const chr = o => String.fromCodePoint(0xF0000 + o);
   const VERSE = ['Trăm năm trong cõi người ta', 'Chữ tài chữ mệnh khéo là ghét nhau', 'Trải qua một cuộc bể dâu', 'Những điều trông thấy mà đau đớn lòng'];
   const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());   // the fonts of the list of this visitor (fonts.js)
-  const make = (tag, cls, text, style) => { const e = Object.assign(document.createElement(tag), { className: cls || '' }); if (text != null) e.textContent = text; if (style) e.style.cssText = style; return e; };
-  const row = (lab, q) => { const r = make('div', 'row'); r.append(lab, q); return r; };
+  // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
+  const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
+  const el = (tag, cls, text, style) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (style) e.style.cssText = style; return e; };
 
-  // the parts that do not depend on the text: the characters and the fonts
-  $$('.set').forEach((set, half) => { for (let i = 11 * half; i < 11 * half + 11; i++) for (let f = 0; f < 7; f++) set.append(make('div', 'q', chr(7 * i + f))); });
-  const tones = $('#tones');
-  for (const o of [160, 157, 158, 159, 161, 162, 163, 156]) tones.append(make('div', 'q', chr(7 * 2) + chr(o)));   // one shape with each tone mark
+  // the character set: a column per shape, a row per form, in two blocks of 11 shapes
+  const cellsOf = (box, list) => list.forEach(t => box.append(el('div', '', t)));
+  for (const [id, from] of [['#set1', 0], ['#set2', 11]]) {
+    const list = [];
+    for (let f = 0; f < 7; f++) for (let i = from; i < from + 11; i++) list.push(chr(7 * i + f));
+    cellsOf($(id), list);
+  }
+  cellsOf($('#tones'), [160, 157, 158, 159, 161, 162, 163, 156].map(o => chr(7) + chr(o)));   // the shape ng with each tone mark
+  $$('[data-verse]').forEach(v => VERSE.forEach(line => v.append(el('div', '', QattText.convert(line, parser)))));
 
-  // the parts made of the text
   function render() {
     const qatt = QattText.convert($('#text').value.trim() || 'Quốc âm tân tự', parser);
     $$('.s').forEach(e => { e.textContent = qatt; });
     const sizes = $('#sizes'); sizes.replaceChildren();
-    for (const px of [14, 20, 28, 40, 56, 80]) sizes.append(row(make('div', 'lab', px + ' px'), make('div', 'q', qatt, 'font-size:' + px * (+$('#scale').value / 100) + 'px')));
-    for (const id of ['tester', 'tester-dark']) {
-      const t = $('#' + id); t.replaceChildren();
-      for (const f of FONTS) {
-        const lab = make('div', 'lab'); lab.append(make('b', '', f.label));
-        t.append(row(lab, make('div', 'q', qatt, 'font-family: "' + f.family + '"; font-weight: 400')));
-      }
+    for (const px of [16, 24, 32, 48, 64, 96]) {
+      const r = el('div'); r.append(el('span', 'lab', px + ' px'), el('div', 'q', qatt, `font-size: calc(${px}px * var(--scale) * var(--fit))`));
+      sizes.append(r);
     }
-    const cols = $('#cols'); cols.replaceChildren();
-    for (const v of VERSE) cols.append(make('div', 'q', QattText.convert(v, parser)));
+    const fonts = $('#fonts'); fonts.replaceChildren();
+    for (const f of FONTS) {
+      const r = el('div'), style = `font-family: "${f.family}"; font-size: calc(clamp(1.8rem, 3.6vw, 2.8rem) * var(--scale) * ${FIT[f.family] || 1})`;
+      const light = el('div', 'tile light'), dark = el('div', 'tile dark');
+      light.append(el('div', 'q', qatt, style)); dark.append(el('div', 'q', qatt, style));
+      r.append(el('span', 'lab', f.label), light, dark);
+      fonts.append(r);
+    }
   }
 
-  $('#weight').addEventListener('change', e => document.documentElement.style.setProperty('--qw', e.target.value));
-  $('#scale').addEventListener('input', e => { document.documentElement.style.setProperty('--scale', e.target.value / 100); render(); });
+  const fit = () => root.setProperty('--fit', FIT[$('#font').value] || 1);
+  $('#font').addEventListener('change', fit);
+  $('#weight').addEventListener('change', e => root.setProperty('--qw', e.target.value));
+  $('#scale').addEventListener('input', e => root.setProperty('--scale', e.target.value / 100));
   $('#text').addEventListener('input', render);
+  fit();
   render();
 })();
 </script>
