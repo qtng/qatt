@@ -55,3 +55,120 @@
 }
 .form-select:focus { border-color: var(--ink); box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
 .form-select:disabled { box-shadow: none; }
+
+/* ---------------------------------------------------------------------------------------------------------------------
+   Themes (js/navigation.js sets data-theme on <html> from localStorage.theme; the choice is in license.html).
+   The default (classic, no attribute) is the block "classic" below; the theme "retro" has no rules of its own, it is the retro look above and of the pages.
+   A theme overrides the colour variables that the pages use (their own :root is less specific than html[data-theme]) and the shapes of the shared elements.
+   --------------------------------------------------------------------------------------------------------------------- */
+
+/* ---- classic = the default (no data-theme): the look before the retro redesign, the one the Chunom site has: pill buttons with a thin soft outline, no shadows,
+   round symbol buttons. It takes the retro rules above back, only where no theme is chosen; the theme "retro" is these rules as they are. Sound Check (check.html)
+   keeps its retro buttons in every theme: it had them before. ---- */
+html:not([data-theme]) .btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-width: 1px; --bs-btn-border-radius: 2rem;
+  font-weight: 400; box-shadow: none; transition: background-color .15s, border-color .15s, color .15s;
+}
+html:not([data-theme]) .btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled),
+html:not([data-theme]) .btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
+html:not([data-theme]) .btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: none; box-shadow: none; }
+html:not([data-theme]) .btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .25); }
+html:not([data-theme]) .btn-cinnabar, html:not([data-theme]) .btn-accent {
+  --bs-btn-border-color: var(--cinnabar); --bs-btn-hover-border-color: #8c2c22; --bs-btn-active-border-color: #7a261d;
+}
+html:not([data-theme]) .btn-quiet, html:not([data-theme]) .btn-ink {
+  --bs-btn-color: #5b4d3d; --bs-btn-border-color: #cdbf9f; --bs-btn-hover-bg: #f1e8d2; --bs-btn-hover-border-color: #b9a982; --bs-btn-active-bg: #f1e8d2; --bs-btn-active-border-color: #b9a982;
+}
+html:not([data-theme]) .hero .btn-ink { --bs-btn-bg: transparent; --bs-btn-color: var(--ink); --bs-btn-border-color: #8a7660; --bs-btn-hover-bg: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--ink); }
+html:not([data-theme]) .btn[class*="btn-outline-"] { --bs-btn-bg: transparent; --bs-btn-hover-bg: var(--bs-btn-color); --bs-btn-active-bg: var(--bs-btn-color); --bs-btn-hover-color: #fff; --bs-btn-active-color: #fff; --bs-btn-border-color: var(--bs-btn-color); --bs-btn-hover-border-color: var(--bs-btn-color); }
+html:not([data-theme]) .btn-outline-secondary { --bs-btn-color: #6c757d; }
+html:not([data-theme]) .form-select { --bs-border-width: 1px; --bs-border-color: #cdbf9f; --bs-border-radius: 2rem; background-color: #fff; box-shadow: none; }
+html:not([data-theme]) .form-select:focus { border-color: #cdbf9f; box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .25); }
+/* page rules that came with the retro redesign */
+html:not([data-theme]) .glyph-strip .g[data-code] { border: 1px solid var(--bc); border-radius: 50%; box-shadow: none; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
+html:not([data-theme]) .glyph-strip .g[data-code]:hover, html:not([data-theme]) .glyph-strip .g[data-code]:focus-visible { transform: none; box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); }
+html:not([data-theme]) .glyph-strip .g[data-code]:active { transform: none; box-shadow: none; filter: brightness(.96); }
+html:not([data-theme]) #variants .speak { border: 1px solid #e4d9c0; box-shadow: none; }
+html:not([data-theme]) #variants .var { border: 1px solid #e4d9c0; border-radius: .5rem; box-shadow: none; background: #fff; }
+html:not([data-theme]) #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
+html:not([data-theme]) .controls { border-radius: 2rem; }
+html:not([data-theme]) .search-bar .input-group { border-radius: 2rem; }
+html:not([data-theme]) .search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
+html:not([data-theme]) .search-bar .btn { border-radius: 0 2rem 2rem 0; }
+
+/* ---- pop art: flat Lichtenstein colours, thick black outlines, hard offset shadows, Ben-Day dots ---- */
+html[data-theme="popart"] {
+  --ink: #111; --accent: #e8212b; --cinnabar: #e8212b; --paper: #ffd500; --line: #111; --field: #111; --muted: #222;
+  --retro-hover: #fff; --retro-active: #ffd500;
+  --pop-yellow: #ffd500; --pop-red: #e8212b; --pop-blue: #1e5bd8; --pop-cyan: #2cc4f0; --pop-pink: #ff5fa8;
+  --pop-title: Impact, "Arial Black", sans-serif;
+}
+html[data-theme="popart"] body {
+  background-color: var(--pop-yellow);
+  background-image: radial-gradient(circle, rgba(232, 33, 43, .55) 22%, transparent 24%);
+  background-size: 16px 16px;
+  color: var(--ink);
+  font-weight: 700;
+}
+html[data-theme="popart"] h1, html[data-theme="popart"] h2, html[data-theme="popart"] h3 { font-family: var(--pop-title); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; }
+html[data-theme="popart"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--pop-blue); }
+html[data-theme="popart"] .text-secondary, html[data-theme="popart"] .text-muted, html[data-theme="popart"] .note { color: var(--ink) !important; }
+/* the header of a page: a blue panel with cyan dots, the title like a comic cover */
+html[data-theme="popart"] .hero {
+  background-color: var(--pop-blue);
+  background-image: radial-gradient(circle, rgba(44, 196, 240, .85) 22%, transparent 24%);
+  background-size: 14px 14px;
+  border-bottom: 5px solid var(--ink);
+  color: #fff;
+}
+html[data-theme="popart"] .hero h1 {
+  font-size: clamp(2.2rem, 8vw, 3.8rem);
+  color: var(--pop-yellow); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill;
+  text-shadow: 5px 5px 0 var(--ink), 8px 8px 0 var(--pop-red);
+  display: inline-block; transform: rotate(-2deg); margin-top: .4rem;
+}
+html[data-theme="popart"] .hero .han { color: #fff; background: var(--pop-red); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); display: inline-block; padding: .1rem .9rem .1rem 1.4rem; transform: rotate(1.5deg); }
+html[data-theme="popart"] .hero .lead { color: #fff; background: var(--ink); display: block; width: fit-content; max-width: 34rem; margin-left: auto !important; margin-right: auto !important; padding: .4rem .9rem; font-weight: 700; font-size: 1rem; box-shadow: 5px 5px 0 var(--pop-red); }
+html[data-theme="popart"] .hero a:not(.btn) { color: var(--pop-yellow); }
+/* small grey labels of the pages (hard-coded colours there) */
+html[data-theme="popart"] .rule, html[data-theme="popart"] .pane-title, html[data-theme="popart"] .powered-by, html[data-theme="popart"] .powered-by a { color: var(--ink) !important; }
+html[data-theme="popart"] .hero .rule { color: #fff !important; }
+html[data-theme="popart"] .rule::before, html[data-theme="popart"] .rule::after { border-top: 3px solid var(--ink); }
+html[data-theme="popart"] .hero .rule::before, html[data-theme="popart"] .hero .rule::after { border-top-color: #fff; }
+html[data-theme="popart"] ::placeholder { color: #333 !important; opacity: .65; }
+/* the head and the two panes of type.html */
+html[data-theme="popart"] .editor-head h1 { font-size: clamp(2rem, 7vw, 3rem); color: var(--pop-blue); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 4px 4px 0 var(--ink), 7px 7px 0 var(--pop-red); display: inline-block; transform: rotate(-2deg); }
+html[data-theme="popart"] .editor-head .han { color: #fff; background: var(--pop-red); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); display: inline-block; padding: .1rem .9rem .1rem 1.4rem; transform: rotate(1.5deg); }
+html[data-theme="popart"] .editor-head p { color: var(--ink); }
+html[data-theme="popart"] .editor { background: #fff; border: 5px solid var(--ink); border-radius: 0; box-shadow: 10px 10px 0 var(--ink); }
+/* buttons: flat colour, black outline, hard shadow; they jump up on hover and are pressed into the shadow on a click */
+html[data-theme="popart"] .btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-width: 3px; --bs-btn-border-radius: 0;
+  font-family: var(--pop-title); font-weight: 400; text-transform: uppercase; letter-spacing: .06em;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+html[data-theme="popart"] .btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+html[data-theme="popart"] .btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled), html[data-theme="popart"] .btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink); }
+html[data-theme="popart"] .btn:not(.btn-close):not(.btn-link):disabled, html[data-theme="popart"] .btn:not(.btn-close):not(.btn-link).disabled { box-shadow: none; opacity: .5; }
+html[data-theme="popart"] .btn-cinnabar, html[data-theme="popart"] .btn-accent { --bs-btn-bg: var(--pop-red); --bs-btn-color: #fff; --bs-btn-hover-bg: var(--pop-pink); --bs-btn-hover-color: var(--ink); --bs-btn-active-bg: var(--pop-red); --bs-btn-active-color: #fff; }
+html[data-theme="popart"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: var(--pop-cyan); --bs-btn-color: var(--ink); --bs-btn-hover-bg: #fff; --bs-btn-active-bg: var(--pop-cyan); --bs-btn-active-color: var(--ink); }
+html[data-theme="popart"] .btn-quiet, html[data-theme="popart"] .btn-ink { --bs-btn-bg: #fff; --bs-btn-hover-bg: var(--pop-yellow); --bs-btn-active-bg: var(--pop-cyan); }
+html[data-theme="popart"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fff; --bs-btn-hover-bg: var(--pop-yellow); --bs-btn-active-bg: var(--pop-cyan); --bs-btn-active-color: var(--ink); --bs-btn-color: var(--ink); }
+/* panels and fields */
+html[data-theme="popart"] .card, html[data-theme="popart"] .card-box, html[data-theme="popart"] .modal-content, html[data-theme="popart"] .dropdown-menu, html[data-theme="popart"] .alert {
+  background: #fff; border: 4px solid var(--ink); border-radius: 0; box-shadow: 8px 8px 0 var(--ink);
+}
+html[data-theme="popart"] .alert { color: var(--ink); }
+html[data-theme="popart"] .table { --bs-table-bg: #fff; --bs-table-border-color: var(--ink); color: var(--ink); border: 3px solid var(--ink); }
+html[data-theme="popart"] .form-select { --bs-border-width: 3px; --bs-border-radius: 0; background-color: var(--pop-yellow); box-shadow: 3px 3px 0 var(--ink); font-weight: 700; }
+html[data-theme="popart"] .form-select:focus { box-shadow: 3px 3px 0 var(--ink), 0 0 0 .2rem rgba(232, 33, 43, .45); }
+html[data-theme="popart"] .form-control, html[data-theme="popart"] textarea, html[data-theme="popart"] input[type="text"] { border: 3px solid var(--ink); border-radius: 0; background-color: #fff; }
+html[data-theme="popart"] textarea:focus, html[data-theme="popart"] .form-control:focus { outline: 4px solid var(--pop-red); outline-offset: 2px; box-shadow: none; }
+html[data-theme="popart"] input[type="range"] { accent-color: var(--pop-red); }
+html[data-theme="popart"] .form-check-input { border: 3px solid var(--ink); }
+html[data-theme="popart"] .form-check-input:checked { background-color: var(--pop-red); border-color: var(--ink); }
+html[data-theme="popart"] .form-check-label { font-weight: 900; }
+html[data-theme="popart"] hr { border-top: 4px solid var(--ink); opacity: 1; }
+@media (max-width: 575.98px) {
+  html[data-theme="popart"] .card-box { border-width: 4px 0; box-shadow: none; }
+}
