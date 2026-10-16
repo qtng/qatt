@@ -1,0 +1,49 @@
+/* Theme "vietnam": modern Vietnam: lacquer red and gold as in sơn mài, lotus pink, the warm paper of giấy dó, a lattice of traditional wooden windows as a quiet pattern, an elegant serif for titles and a clean sans for the text, gold rules, buttons like lacquered tiles.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="vietnam"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="vietnam"] { --ink: #2a1a14; --accent: #b3261e; --cinnabar: #b3261e; --paper: #faf4e8; --line: #e6d6b8; --field: #cdb48a; --muted: #6b5546;
+  --vn-red: #b3261e; --vn-red-dark: #7d1712; --vn-gold: #d4a52c; --vn-gold-soft: #f0d58c; --vn-lotus: #e88aa5; --vn-jade: #2f6b55;
+  --vn-serif: "Playfair Display", "Noto Serif", "Iowan Old Style", Georgia, serif; --vn-sans: "Be Vietnam Pro", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; }
+html[data-theme="vietnam"] body { background-color: var(--paper); color: var(--ink); font-family: var(--vn-sans); }
+html[data-theme="vietnam"] h1, html[data-theme="vietnam"] h2, html[data-theme="vietnam"] h3 { font-family: var(--vn-serif); font-weight: 700; color: var(--vn-red-dark); }
+html[data-theme="vietnam"] h2 { border-bottom: 2px solid var(--vn-gold); padding-bottom: .2rem; }
+html[data-theme="vietnam"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--vn-red); text-decoration-color: var(--vn-gold); text-underline-offset: 3px; }
+html[data-theme="vietnam"] .text-secondary, html[data-theme="vietnam"] .text-muted, html[data-theme="vietnam"] .note { color: var(--muted) !important; }
+/* the header: a panel of red lacquer with the lattice of old wooden windows in gold, a gold band below */
+html[data-theme="vietnam"] .hero, html[data-theme="vietnam"] .editor-head { color: #fff6e6; border-bottom: 5px solid var(--vn-gold); background-color: var(--vn-red);
+  background-image: linear-gradient(45deg, rgba(212, 165, 44, .16) 25%, transparent 25%, transparent 75%, rgba(212, 165, 44, .16) 75%), linear-gradient(-45deg, rgba(212, 165, 44, .16) 25%, transparent 25%, transparent 75%, rgba(212, 165, 44, .16) 75%),
+    radial-gradient(70rem 26rem at 50% -8rem, rgba(255, 255, 255, .14), transparent 70%);
+  background-size: 28px 28px, 28px 28px, auto; }
+html[data-theme="vietnam"] .editor-head p, html[data-theme="vietnam"] .hero .lead { color: #fbe9cf; }
+html[data-theme="vietnam"] .hero h1, html[data-theme="vietnam"] .editor-head h1 { font-family: var(--vn-serif); font-weight: 700; font-size: clamp(2.5rem, 9vw, 4.2rem); color: #fff6e6; text-shadow: 0 2px 0 var(--vn-red-dark); }
+html[data-theme="vietnam"] .hero .han, html[data-theme="vietnam"] .editor-head .han { display: inline-block; color: var(--vn-red-dark); background: var(--vn-gold-soft); border: 1px solid var(--vn-gold); border-radius: 2rem; padding: .2rem .9rem .2rem 1.4rem; }
+html[data-theme="vietnam"] .hero a:not(.btn) { color: var(--vn-gold-soft); text-decoration-color: var(--vn-gold); }
+html[data-theme="vietnam"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: .45rem; --bs-btn-border-width: 1px; font-weight: 600; letter-spacing: .02em; box-shadow: 0 2px 0 rgba(125, 23, 18, .25); transition: background-color .15s, color .15s, box-shadow .15s; }
+html[data-theme="vietnam"] .btn-cinnabar, html[data-theme="vietnam"] .btn-accent { --bs-btn-bg: var(--vn-red); --bs-btn-color: #fff6e6; --bs-btn-border-color: var(--vn-gold); --bs-btn-hover-bg: var(--vn-red-dark); --bs-btn-hover-color: #fff6e6; --bs-btn-hover-border-color: var(--vn-gold); --bs-btn-active-bg: var(--vn-red-dark); --bs-btn-active-color: #fff6e6; --bs-btn-active-border-color: var(--vn-gold); }
+html[data-theme="vietnam"] .btn-quiet, html[data-theme="vietnam"] .btn-ink, html[data-theme="vietnam"] .btn-pill, html[data-theme="vietnam"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fffaf0; --bs-btn-color: var(--vn-red-dark); --bs-btn-border-color: var(--vn-gold); --bs-btn-hover-bg: var(--vn-gold-soft); --bs-btn-hover-color: var(--vn-red-dark); --bs-btn-hover-border-color: var(--vn-gold); --bs-btn-active-bg: var(--vn-gold-soft); --bs-btn-active-color: var(--vn-red-dark); --bs-btn-active-border-color: var(--vn-gold); }
+html[data-theme="vietnam"] .btn-cinnabar.btn-pill, html[data-theme="vietnam"] .btn-accent.btn-pill { --bs-btn-bg: var(--vn-red); --bs-btn-color: #fff6e6; }
+html[data-theme="vietnam"] .hero .btn-cinnabar, html[data-theme="vietnam"] .editor-head .btn-cinnabar { --bs-btn-bg: var(--vn-gold); --bs-btn-color: var(--vn-red-dark); --bs-btn-border-color: var(--vn-gold-soft); --bs-btn-hover-bg: var(--vn-gold-soft); --bs-btn-hover-color: var(--vn-red-dark); }
+html[data-theme="vietnam"] .hero .btn-outline-secondary, html[data-theme="vietnam"] .hero .btn-ink, html[data-theme="vietnam"] .editor-head .btn-outline-secondary { --bs-btn-bg: transparent; --bs-btn-color: #fff6e6; --bs-btn-border-color: var(--vn-gold-soft); --bs-btn-hover-bg: rgba(255, 246, 230, .15); --bs-btn-hover-color: #fff; }
+html[data-theme="vietnam"] .form-select { --bs-border-radius: .45rem; --bs-border-color: var(--field); background-color: #fffaf0; color: var(--ink); }
+html[data-theme="vietnam"] .form-control, html[data-theme="vietnam"] textarea { border: 1px solid var(--field); border-radius: .45rem; background-color: #fffdf8; color: var(--ink); }
+html[data-theme="vietnam"] .form-control:focus, html[data-theme="vietnam"] textarea:focus, html[data-theme="vietnam"] .form-select:focus { border-color: var(--vn-gold); box-shadow: 0 0 0 .2rem rgba(212, 165, 44, .3); outline: none; }
+html[data-theme="vietnam"] .form-check-input:checked { background-color: var(--vn-red); border-color: var(--vn-red); }
+html[data-theme="vietnam"] input[type="range"] { accent-color: var(--vn-red); }
+html[data-theme="vietnam"] .card, html[data-theme="vietnam"] .card-box, html[data-theme="vietnam"] .alert, html[data-theme="vietnam"] .editor, html[data-theme="vietnam"] .content-container, html[data-theme="vietnam"] .sticky-card, html[data-theme="vietnam"] .panel { background: #fffdf8; border: 1px solid var(--line); border-top: 3px solid var(--vn-gold); border-radius: .6rem; box-shadow: 0 .5rem 1.4rem rgba(125, 23, 18, .1); }
+html[data-theme="vietnam"] .dropdown-menu, html[data-theme="vietnam"] .modal-content, html[data-theme="vietnam"] dialog#variants { background: #fffdf8; border: 1px solid var(--vn-gold); border-radius: .6rem; }
+html[data-theme="vietnam"] .table { --bs-table-bg: #fffdf8; border-top: 3px solid var(--vn-red); }
+html[data-theme="vietnam"] .rule, html[data-theme="vietnam"] .pane-title, html[data-theme="vietnam"] .powered-by, html[data-theme="vietnam"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="vietnam"] .hero .rule { color: var(--vn-gold-soft) !important; }
+html[data-theme="vietnam"] .rule::before, html[data-theme="vietnam"] .rule::after { border-top: 1px solid var(--vn-gold); }
+html[data-theme="vietnam"] .hero .glyph-strip { color: #fff6e6; }
+html[data-theme="vietnam"] hr { border-top: 1px solid var(--vn-gold); opacity: 1; }
+html[data-theme="vietnam"] .glyph-strip .g[data-code] { border: 1px solid var(--vn-gold); border-radius: .5rem; box-shadow: 0 2px 0 rgba(125, 23, 18, .15); transition: transform .15s, box-shadow .15s; }
+html[data-theme="vietnam"] .glyph-strip .g[data-code]:hover, html[data-theme="vietnam"] .glyph-strip .g[data-code]:focus-visible { transform: translateY(-2px); box-shadow: 0 .4rem .8rem rgba(125, 23, 18, .2); border-color: var(--vn-red); outline: none; }
+html[data-theme="vietnam"] #variants .speak { border: 1px solid var(--vn-gold); }
+html[data-theme="vietnam"] #variants .var { border: 1px solid var(--line); border-radius: .5rem; background: #fffdf8; }
+html[data-theme="vietnam"] #variants .var.hit { border-color: var(--vn-lotus); background: #fde7ee; box-shadow: 0 0 0 2px rgba(232, 138, 165, .4); }
+html[data-theme="vietnam"] .search-bar .input-group { border-radius: .45rem; }
+html[data-theme="vietnam"] .search-bar .input-group-text, html[data-theme="vietnam"] .search-bar .form-control { border-color: var(--vn-gold); background: #fffdf8; }
+html[data-theme="vietnam"] .search-bar .input-group-text { border-radius: .45rem 0 0 .45rem; }
+html[data-theme="vietnam"] .search-bar .btn { border-radius: 0 .45rem .45rem 0; }
+html[data-theme="vietnam"] .controls { border: 1px solid var(--vn-gold); border-radius: .6rem; background: #fffdf8; }
