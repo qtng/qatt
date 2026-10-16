@@ -66,6 +66,7 @@
     </div>
 
     <h2>Words that are missing in the dictionary</h2>
+    <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="noAdmin" checked><label class="form-check-label" for="noAdmin">Without admins (your own tests): for both tables and the number</label></div>
     <p class="note">For these words the model had to use a character of its own, because the dictionary had none or none that fitted. <span id="gapSummary"></span></p>
     <p class="d-flex flex-wrap gap-2"><button type="button" class="btn btn-sm btn-quiet" id="csvRows">Download as CSV</button> <a class="btn btn-sm btn-quiet" href="https://chunom.org/chunom/translate.html">Open the translator</a></p>
 
@@ -78,7 +79,6 @@
     </div>
 
     <h3 class="h6 mt-4">Newest, with the words around</h3>
-    <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="noAdmin" checked><label class="form-check-label" for="noAdmin">Without admins (your own tests)</label></div>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
         <thead><tr><th class="l">Time</th><th class="l">In the sentence</th><th class="l">As characters</th></tr></thead>
@@ -143,8 +143,8 @@
     async function load() {
       if (!allowed) return;
       const days = Number($('days').value);
-      const [lang, gaps, list] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gaps', { p_days: days }), sp.client.rpc('admin_gap_export', { p_days: days })]);
-      const error = lang.error || gaps.error || list.error;
+      const [lang, list] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gap_export', { p_days: days })]);
+      const error = lang.error || list.error;
       if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
       $('denied').hidden = true; $('content').hidden = false;
       $('at').textContent = 'as of ' + new Date().toLocaleTimeString();
@@ -154,18 +154,26 @@
       fill('langModel', L.by_lang_model.map(r => [r.lang, { v: r.model, cls: 'l' }, r.calls, r.errors, r.fallback, sec(r.avg_ms)]));
       drawLang(L.daily);
 
-      const G = gaps.data;
-      $('gapSummary').textContent = G.rows ? G.rows + ' times in this time, ' + G.words + ' different words.' : 'None in this time.';
-      const rows = [];
-      for (const r of G.top) for (const c of (r.chars || [])) rows.push({ word: r.word_qn, ch: c.c, n: c.n, options: r.n_options });
-      rows.sort((a, b) => b.n - a.n);
-      fill('gaps', rows.map(r => [r.word, { v: r.ch, cls: 'l han' }, r.n, { v: dict(r.options), cls: 'l' }]));
       recentRows = list.data;   // all rows of the time (at most 5000), newest first: the list below shows them 50 at a time, the CSV has all
       shown = PAGE;
+      showGaps();
       showRecent();
     }
     const PAGE = 50;
     let recentRows = [], shown = PAGE;
+    function showGaps() {   // the number and the table of the most frequent words, made in the browser from the rows (the box leaves the admins out)
+      const rows = recentRows.filter(r => !($('noAdmin').checked && r.is_admin)), byWord = new Map();
+      for (const r of rows) {
+        const w = byWord.get(r.word_qn) || { word: r.word_qn, n: 0, options: 0, chars: new Map() };
+        w.n++; w.options = Math.max(w.options, r.n_options || 0); w.chars.set(r.word_char, (w.chars.get(r.word_char) || 0) + 1);
+        byWord.set(r.word_qn, w);
+      }
+      $('gapSummary').textContent = rows.length ? rows.length + ' times in this time, ' + byWord.size + ' different words.' + (recentRows.length >= 5000 ? ' (of the newest 5000)' : '') : 'None in this time.';
+      const table = [];
+      for (const w of [...byWord.values()].sort((a, b) => b.n - a.n).slice(0, 200)) for (const [c, n] of w.chars) table.push({ word: w.word, ch: c, n, options: w.options });
+      table.sort((a, b) => b.n - a.n);
+      fill('gaps', table.map(r => [r.word, { v: r.ch, cls: 'l han' }, r.n, { v: dict(r.options), cls: 'l' }]));
+    }
     function showRecent() {   // the newest list; the calls of admins are marked in the data, here they are hidden if the box is checked
       const rows = recentRows.filter(r => !($('noAdmin').checked && r.is_admin));
       $('recent').replaceChildren(...rows.slice(0, shown).map(r => {
@@ -185,7 +193,7 @@
         data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, (r.ctx_qn || []).join(' | '), (r.ctx_chars || []).join(' | '), r.idx, r.pos, r.n_words, r.model, r.is_admin ? 'yes' : '']));
     });
     $('days').addEventListener('change', load);
-    $('noAdmin').addEventListener('change', () => { shown = PAGE; showRecent(); });
+    $('noAdmin').addEventListener('change', () => { shown = PAGE; showGaps(); showRecent(); });
     $('moreRecent').addEventListener('click', () => { shown += PAGE; showRecent(); });
     $('reload').addEventListener('click', load);
     const state = await Admin.check(sp);
