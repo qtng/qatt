@@ -1,6 +1,6 @@
 -- Counter of the visits (run once in the SQL Editor of Supabase): one row per day, site and kind, only numbers (no cookie, no id, no address).
 -- js/navigation.js (on every page of both sites) calls count_visit() when somebody uses the page (scrolls, taps, types), not for bots.
---   visitors = browsers that came on that day (once per browser and day), visits = a new visit of a browser (more than 30 minutes since the last).
+--   visitors = browsers that came on that day (once per browser and day), visits = sessions (a new session of a browser: more than 30 minutes since the last).
 --   kind: 'account' = signed in with Google or e-mail, 'anonymous' = everybody else (also the first visit without a session).
 -- Anybody may call count_visit(); it counts at most 200 per minute for the whole site, so the numbers can not be inflated by hand by more than that.
 -- Only admins read the numbers, through admin_visits(). Admins are not counted (the script does not send them).

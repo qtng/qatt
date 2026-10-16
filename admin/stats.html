@@ -12,6 +12,7 @@
   <script src="../js/supabase.js"></script>
   <script src="../js/login.js"></script>
   <script src="admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     body { background: #f7efdc; color: #2b2118; }
     h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
@@ -23,6 +24,10 @@
     .tile span { font-size: .85rem; color: #5b4d3d; }
     table { background: #fffdf8; font-size: .9rem; }
     th { font-weight: 600; color: #5b4d3d; }
+    .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; }
+    .chart { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem .4rem; }
+    .chart h3 { font-size: .95rem; font-weight: 600; margin: 0 0 .3rem; }
+    .chart div { position: relative; height: 15rem; }
     td, th { text-align: right; } td:first-child, th:first-child { text-align: left; white-space: nowrap; }
   </style>
 </head>
@@ -50,11 +55,11 @@
     <h2>Total</h2>
     <div class="tiles" id="totalTiles"></div>
 
-    <h2>Visits</h2>
-    <p class="note">Counted by js/navigation.js when somebody uses a page (tap, key, mouse wheel); not for bots that name themselves. Visitors = browsers per day, visits = new visits (a pause of more than 30 minutes). "Account" = signed in, "anonymous" = everybody else. Counting started on 16 Oct 2026. Admins are not counted while signed in; at most 200 counts per minute are accepted (against spam).</p>
+    <h2>Sessions</h2>
+    <p class="note">Visitors and sessions per day, site and kind (definitions in the footnote at the bottom). Counting started on 16 Oct 2026.</p>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
-        <thead><tr><th>Day</th><th>Site</th><th>Visitors anonymous</th><th>Visitors account</th><th>Visits anonymous</th><th>Visits account</th></tr></thead>
+        <thead><tr><th>Day</th><th>Site</th><th>Visitors anonymous</th><th>Visitors account</th><th>Sessions anonymous</th><th>Sessions account</th></tr></thead>
         <tbody id="visits"></tbody>
       </table>
     </div>
@@ -80,10 +85,27 @@
 
     <h2>Last 14 days</h2>
     <p class="note">From the tables themselves (also before the history started): new visitors and accounts, translator.</p>
-    <table class="table table-sm mb-0">
-      <thead><tr><th>Day (UTC)</th><th>New anonymous</th><th>New with account</th><th>Translator people</th><th>Translator calls</th></tr></thead>
-      <tbody id="daily"></tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Day (UTC)</th><th>New anonymous</th><th>New with account</th><th>Translator people</th><th>Translator calls</th></tr></thead>
+        <tbody id="daily"></tbody>
+      </table>
+    </div>
+
+    <h2>Over time</h2>
+    <p class="note">From the daily rows (written from 16 Oct 2026) and the session counter. Practice numbers are the change since the day before.</p>
+    <div class="charts">
+      <div class="chart"><h3>New people per day</h3><div><canvas id="chNew"></canvas></div></div>
+      <div class="chart"><h3>Active people per day</h3><div><canvas id="chActive"></canvas></div></div>
+      <div class="chart"><h3>Practice per day</h3><div><canvas id="chPractice"></canvas></div></div>
+      <div class="chart"><h3>Visitors per site and sessions per day</h3><div><canvas id="chVisits"></canvas></div></div>
+    </div>
+
+    <hr class="mt-4">
+    <p class="note mb-1"><b>Definitions</b> (the sessions and visitors come from the counter in js/navigation.js, db/visits.sql)</p>
+    <p class="note mb-1"><b>Session</b> (= "visits" in the database and in the code)<b>:</b> a period of use of one browser on one site that ends after more than 30 minutes without activity, like a session in Google Analytics. It is counted on the first tap, key or mouse wheel, so it is closer to an "engaged session" there; bots that name themselves, admins and browsers with <code>qv_off</code> are left out, at most 200 counts per minute are accepted.</p>
+    <p class="note mb-1"><b>Visitor:</b> a browser that used a site on that UTC day, counted once per day. The same person on three days is three visitors, so do not add the days; the same person on two devices is two visitors.</p>
+    <p class="note mb-1"><b>Kind:</b> "account" = the browser is signed in with Google or e-mail, "anonymous" = everybody else, also the first session before the visitor has one. The other numbers (new visitors, accounts, practice, translator) count people with an account of the database and come from the daily rows; "new visitors" there are new anonymous users of the database, not browsers of the counter.</p>
   </div>
 </main>
 
@@ -103,6 +125,41 @@
       t.append(b, s); box.append(t);
     };
 
+    // the time charts (Chart.js from the CDN; without it the tables are enough)
+    const charts = {};
+    const INK = '#2b2118', COLORS = { blue: '#3b6ea5', red: '#a8362a', green: '#2e7d4f', orange: '#d08a2e', grey: '#7b6c58' };
+    function drawCharts(rows, visits) {
+      if (typeof Chart === 'undefined') return;
+      Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif'; Chart.defaults.color = INK;
+      const asc = rows.slice().reverse(), labels = asc.map(r => r.day.slice(5));   // oldest first, as MM-DD
+      const change = f => asc.map((r, i) => i ? r[f.a] + (f.b ? r[f.b] : 0) - (asc[i - 1][f.a] + (f.b ? asc[i - 1][f.b] : 0)) : null);
+      const line = (label, data, color, extra = {}) => ({ label, data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 3, tension: .2, spanGaps: true, ...extra });
+      const make = (id, config) => {
+        if (charts[id]) charts[id].destroy();
+        charts[id] = new Chart(document.getElementById(id), { ...config, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } }, ...(config.scales || {}) } } });
+      };
+      make('chNew', { type: 'line', data: { labels, datasets: [line('New visitors (anonymous)', asc.map(r => r.new_anonymous), COLORS.blue), line('New accounts', asc.map(r => r.new_accounts), COLORS.red)] } });
+      make('chActive', { type: 'line', data: { labels, datasets: [line('Signed in', asc.map(r => r.signed_in_accounts), COLORS.red), line('Practised', asc.map(r => r.practised_users), COLORS.green),
+        line('Translator', asc.map(r => r.translate_users), COLORS.blue), line('Took over a deck', asc.map(r => r.deck_takeovers), COLORS.orange)] } });
+      make('chPractice', { type: 'bar', data: { labels, datasets: [
+        { label: 'Answers', data: change({ a: 'answers_correct', b: 'answers_wrong' }), backgroundColor: COLORS.green + 'aa', borderColor: COLORS.green, borderWidth: 2, yAxisID: 'y' },
+        line('Words learned', change({ a: 'words_known' }), COLORS.red, { type: 'line', yAxisID: 'y1' })] },
+        scales: { y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { precision: 0 } } } });
+      // visitors per day and site (stacked bars, the stack is the total) and the sessions of all sites as the red line
+      const SITES = [['qatt.org', COLORS.blue], ['chunom.org', COLORS.orange]];
+      const perDay = new Map();
+      for (const v of visits) {
+        const e = perDay.get(v.day) || { visits: 0, sites: {} };
+        e.visits += v.visits; e.sites[v.site] = (e.sites[v.site] || 0) + v.visitors; perDay.set(v.day, e);
+      }
+      const vdays = [...perDay.keys()].sort(), vlabels = vdays.map(d => d.slice(5));
+      make('chVisits', { type: 'bar', data: { labels: vlabels, datasets: [
+        ...SITES.map(([site, color]) => ({ label: 'Visitors ' + site, data: vdays.map(d => perDay.get(d).sites[site] || 0), backgroundColor: color + 'cc', borderColor: color, borderWidth: 2, stack: 'visitors' })),
+        line('Sessions (all)', vdays.map(d => perDay.get(d).visits), COLORS.red, { type: 'line', stack: 'visits' })] },
+        scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } });
+    }
+
     let allowed = false;
     async function load() {
       if (!allowed) return;
@@ -117,9 +174,10 @@
         .forEach(([v, l]) => tile($('windowTiles'), v, l));
       [[t.with_account, 'accounts'], [t.anonymous, 'anonymous visitors'], [t.practising, 'people who practised'], [t.decks, 'decks'], [t.public_decks, 'public decks']]
         .forEach(([v, l]) => tile($('totalTiles'), v, l));
-      const vis = await sp.client.rpc('admin_visits', { p_days: 14 });
+      const vis = await sp.client.rpc('admin_visits', { p_days: 60 });
+      const cutoff = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
       const byDay = new Map();
-      for (const r of (vis.data || [])) {   // one row per day and site, the two kinds side by side
+      for (const r of (vis.data || []).filter(r => r.day > cutoff)) {   // one row per day and site, the two kinds side by side
         const key = r.day + ' ' + r.site, e = byDay.get(key) || { day: r.day, site: r.site, anonymous: { visitors: 0, visits: 0 }, account: { visitors: 0, visits: 0 } };
         e[r.kind] = { visitors: r.visitors, visits: r.visits }; byDay.set(key, e);
       }
@@ -153,6 +211,7 @@
         $('tmore').textContent = 'Models: ' + list(t.by_model.map(m => ({ k: m.model, n: m.calls }))) + '. Languages: ' + list(t.by_lang.map(l => ({ k: l.lang, n: l.calls })))
           + '. Results: ' + list(t.by_status.map(x => ({ k: x.status, n: x.calls }))) + '.';
       }
+      drawCharts(rows, vis.data || []);
       $('daily').replaceChildren(...data.daily.map(d => {
         const tr = document.createElement('tr');
         [d.day, d.new_anonymous, d.new_with_account, d.translate_users, d.translate_calls].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
