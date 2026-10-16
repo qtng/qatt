@@ -117,6 +117,10 @@ python3 tools/build_font.py --kage fonts/kage.json --kai --weight 1.6 --label Me
 python3 tools/build_font.py --kage fonts/kage.json --kai --weight 2.4 --label Bold   fonts/glyphs.json fonts/qatt-kai-bold
 ```
 
+**Lishu font.** `--lishu` (instead of `--kai`, same `--weight` and `--label`) draws the clerical script variant of the same strokes (`tools/kai_strokes.js`, style "lishu"):
+the horizontals are wavy with a round "silkworm head" at the start and a flared "swallow tail" at the end, the verticals are thinner and blunt, the falling strokes widen
+towards a flared end. The weights are named like those of Kai (`fonts/qatt-lishu[-light|-medium|-bold]`).
+
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
