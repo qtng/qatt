@@ -39,10 +39,7 @@
     h2.tones-h { font-family: Georgia, "Times New Roman", serif; font-weight: 400; text-align: center; margin: 1rem 0 1.6rem; }
     @media (max-width: 575.98px) { .glyph-strip .g { font-size: 2rem; } .glyph-strip .g[data-code] { width: 3.2rem; height: 3.2rem; } .hero .han { letter-spacing: .3em; } }
     /* every character of the overview is a round button with a faint outline */
-    .glyph-strip .g[data-code] { display: flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; border: 2px solid var(--ink); border-radius: .55rem; background: var(--b); box-shadow: 0 2px 0 var(--ink); cursor: pointer; transition: opacity .15s, color .15s, background-color .15s, transform .12s, box-shadow .12s; }
-    .glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { transform: translateY(-1px); outline: none; }
-    .glyph-strip .g[data-code]:focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
-    .glyph-strip .g[data-code]:active { transform: translateY(2px); box-shadow: none; }
+    .glyph-strip .g[data-code] { display: flex; align-items: center; justify-content: center; width: 3.8rem; height: 3.8rem; background: var(--b); cursor: pointer; }   /* the border, the corners and the shadow come from the theme */
     .glyph-strip { --b: #e3eef8; --bc: #b7cde2; }   /* the colours of the buttons in check.html: light blue for the marked forms, beige for the shapes */
     section.set:first-of-type .glyph-strip { --b: #fff8e6; --bc: #dccb9f; }
     .glyph-strip .item { gap: .25rem; }
@@ -52,15 +49,15 @@
     dialog#variants::backdrop { background: rgba(43, 33, 24, .35); }
     #variants .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; font-size: .85rem; color: #7b6c58; }
     #variants .head .tools { display: flex; align-items: center; gap: .4rem; }
-    #variants .speak { border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); border-radius: 50%; width: 2rem; height: 2rem; background: #fff; color: #5b4d3d; line-height: 1; }
+    #variants .speak { border-radius: 50%; width: 2rem; height: 2rem; background: #fff; color: #5b4d3d; line-height: 1; }
     #variants .speak:hover { background: #f1e8d2; }
     #variants .speak.on { color: var(--cinnabar); border-color: var(--cinnabar); }
     #variants .vars { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }   /* 3 characters per row */
-    #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); background: #fffdf8; }
+    #variants .var { min-width: 4.2rem; text-align: center; padding: .25rem .4rem; }
     #variants .var .g { display: block; font-family: var(--qfont), sans-serif; font-size: 2.6rem; line-height: 1.2; }
     #variants .var .r { display: block; font-size: .9rem; }
     #variants .var.muted { opacity: .4; }
-    #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 2px 0 var(--cinnabar), 0 0 0 2px rgba(168, 54, 42, .35); }
+    #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; }
   </style>
 </head>
 <body>
