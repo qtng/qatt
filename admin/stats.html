@@ -103,7 +103,7 @@
 
     <hr class="mt-4">
     <p class="note mb-1"><b>Definitions</b> (the sessions and visitors come from the counter in js/navigation.js, db/visits.sql)</p>
-    <p class="note mb-1"><b>Session:</b> a period of use of one browser on one site that ends after more than 30 minutes without activity, like a session in Google Analytics. It is counted on the first tap, key or mouse wheel, so it is closer to an "engaged session" there; bots that name themselves, admins and browsers with <code>qv_off</code> are left out, at most 200 counts per minute are accepted.</p>
+    <p class="note mb-1"><b>Session</b> (= "visits" in the database and in the code)<b>:</b> a period of use of one browser on one site that ends after more than 30 minutes without activity, like a session in Google Analytics. It is counted on the first tap, key or mouse wheel, so it is closer to an "engaged session" there; bots that name themselves, admins and browsers with <code>qv_off</code> are left out, at most 200 counts per minute are accepted.</p>
     <p class="note mb-1"><b>Visitor:</b> a browser that used a site on that UTC day, counted once per day. The same person on three days is three visitors, so do not add the days; the same person on two devices is two visitors.</p>
     <p class="note mb-1"><b>Kind:</b> "account" = the browser is signed in with Google or e-mail, "anonymous" = everybody else, also the first session before the visitor has one. The other numbers (new visitors, accounts, practice, translator) count people with an account of the database and come from the daily rows; "new visitors" there are new anonymous users of the database, not browsers of the counter.</p>
   </div>
