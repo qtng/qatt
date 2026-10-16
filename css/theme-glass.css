@@ -44,3 +44,5 @@ html[data-theme="glass"] .search-bar .input-group-text, html[data-theme="glass"]
 html[data-theme="glass"] .search-bar .input-group-text { border-radius: 1rem 0 0 1rem; }
 html[data-theme="glass"] .search-bar .btn { border-radius: 0 1rem 1rem 0; }
 html[data-theme="glass"] .controls { border-radius: 1.2rem; border: 1px solid var(--glass-line); background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: dark violet, more see-through */
+html[data-theme="glass"] { --nav-bg: #2b2350; --nav-alpha: 80%; --nav-line: rgba(255, 255, 255, .25); }

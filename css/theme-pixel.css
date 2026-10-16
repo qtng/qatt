@@ -51,3 +51,5 @@ html[data-theme="pixel"] .search-bar .input-group { border-radius: 0; box-shadow
 html[data-theme="pixel"] .search-bar .input-group-text, html[data-theme="pixel"] .search-bar .form-control { border: 0; border-radius: 0; box-shadow: none; margin: 0; }
 html[data-theme="pixel"] .search-bar .btn { border-radius: 0; margin: 0; box-shadow: none; }
 html[data-theme="pixel"] .controls { border: 0; border-radius: 0; background: #fff; box-shadow: var(--px-edge); }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: deep night blue, like its sky */
+html[data-theme="pixel"] { --nav-bg: #141b42; }

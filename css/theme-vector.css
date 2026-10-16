@@ -46,3 +46,5 @@ html[data-theme="vector"] .search-bar .input-group-text, html[data-theme="vector
 html[data-theme="vector"] .search-bar .input-group-text { border-radius: .8rem 0 0 .8rem; border-right: 0; }
 html[data-theme="vector"] .search-bar .btn { border-radius: 0 .8rem .8rem 0; }
 html[data-theme="vector"] .controls { border: 2px solid var(--line); border-radius: 1rem; background: #fff; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: dark petrol on top, dark coral at the bottom */
+html[data-theme="vector"] { --nav-bg: #0f3d44; --nav-bottom-bg: #542824; }

@@ -43,3 +43,5 @@ html[data-theme="boho"] .search-bar .input-group-text, html[data-theme="boho"] .
 html[data-theme="boho"] .search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
 html[data-theme="boho"] .search-bar .btn { border-radius: 0 2rem 2rem 0; }
 html[data-theme="boho"] .controls { border: 1px solid var(--line); border-radius: 2rem .6rem 2rem .6rem; background: #fffaf1; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: dark terracotta */
+html[data-theme="boho"] { --nav-bg: #3e271c; }
