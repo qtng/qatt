@@ -12,6 +12,7 @@ const QATT_FONTS = [
   { family: "QATT Gothic",          label: "Gothic",          file: "qatt-gothic" },
   { family: "QATT Gothic Bold",     label: "Gothic bold",     file: "qatt-gothic-bold" },
   { family: "QATT Gothic Wide",     label: "Gothic wide",     file: "qatt-gothic-wide" },
+  { family: "QATT Kai",             label: "Kai (regular script)", file: "qatt-kai" },
   { family: "QATT Prototype",       label: "Prototype",       file: "qatt-prototype" },
   { family: "QATT Prototype Light", label: "Prototype light", file: "qatt-prototype-light" },
   { family: "QATT Brush",           label: "Brush-like",      file: "qatt-brush" },

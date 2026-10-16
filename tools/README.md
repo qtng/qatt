@@ -104,6 +104,14 @@ their stroke widths. The tones stay stroked circles (drawn narrower than the let
 python3 tools/build_font.py --kage fonts/kage.json fonts/glyphs.json fonts/qatt-serif     # writes fonts/qatt-serif.ttf / .woff2
 ```
 
+**Kai font.** `--kage fonts/kage.json --kai` draws the same KAGE lines as brush strokes of a regular script (Kaishu) instead of with the KAGE engine
+(`tools/kai_strokes.js`, called by `kage_outlines.js`): horizontals are bowed a little and have a slanted press at the start and a round bulge where they stop,
+verticals a press and a round "dewdrop" end, falling curves taper to a point. Where a stroke ends on another one (a junction) it has no press or bulge.
+
+```
+python3 tools/build_font.py --kage fonts/kage.json --kai fonts/glyphs.json fonts/qatt-kai     # writes fonts/qatt-kai.ttf / .woff2
+```
+
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
