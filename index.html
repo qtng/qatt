@@ -32,24 +32,24 @@
     section.block + section.block { border-top: 1px solid var(--bs-border-color); }
     .facts { font-size: .95rem; }
     .facts dt { font-weight: 600; }
-    /* the fonts as a grid of characters (made of text, no image): each font twice (font-weight 900, which the browser makes by itself, and normal), the number of strokes grows from the top to the bottom row */
+    /* the weights of the Pen font as a grid of characters (made of text, no image): the weight falls from the left to the right column, the number of strokes grows from the top to the bottom row */
+    @font-face { font-family: "QATT Pen Heavy"; src: url(fonts/qatt-pen-heavy.woff2) format("woff2"), url(fonts/qatt-pen-heavy.ttf) format("truetype"); }
+    @font-face { font-family: "QATT Pen Bold"; src: url(fonts/qatt-pen-bold.woff2) format("woff2"), url(fonts/qatt-pen-bold.ttf) format("truetype"); }
+    @font-face { font-family: "QATT Pen Medium"; src: url(fonts/qatt-pen-medium.woff2) format("woff2"), url(fonts/qatt-pen-medium.ttf) format("truetype"); }
+    @font-face { font-family: "QATT Pen Light"; src: url(fonts/qatt-pen-light.woff2) format("woff2"), url(fonts/qatt-pen-light.ttf) format("truetype"); }
+    @font-face { font-family: "QATT Pen ExtraLight"; src: url(fonts/qatt-pen-extralight.woff2) format("woff2"), url(fonts/qatt-pen-extralight.ttf) format("truetype"); }
     @font-face { font-family: "QATT Serif"; src: url(fonts/qatt-serif.woff2) format("woff2"), url(fonts/qatt-serif.ttf) format("truetype"); }
-    @font-face { font-family: "QATT Pen Cut"; src: url(fonts/qatt-pencut.woff2) format("woff2"), url(fonts/qatt-pencut.ttf) format("truetype"); }
-    @font-face { font-family: "QATT Gothic"; src: url(fonts/qatt-gothic.woff2) format("woff2"), url(fonts/qatt-gothic.ttf) format("truetype"); }
-    @font-face { font-family: "QATT Brush"; src: url(fonts/qatt-brush.woff2) format("woff2"), url(fonts/qatt-brush.ttf) format("truetype"); }
     section.block#specimen { border-top: 0; padding-block: 1rem 2rem; }
-    .weights { display: grid; grid-template-columns: repeat(10, 1fr); max-width: 44rem; margin-inline: auto; text-align: center; font-size: clamp(1.6rem, 6.4vw, 3.3rem); line-height: 1.12; color: var(--ink); user-select: none; }
-    .weights span:nth-child(10n + 1), .weights span:nth-child(10n + 2) { font-family: "QATT Serif"; }
-    .weights span:nth-child(10n + 1) { font-weight: 900; }
-    .weights span:nth-child(10n + 3), .weights span:nth-child(10n + 4) { font-family: "QATT Pen Cut"; }
-    .weights span:nth-child(10n + 3) { font-weight: 900; }
-    .weights span:nth-child(10n + 5), .weights span:nth-child(10n + 6) { font-family: "QATT Pen"; }
-    .weights span:nth-child(10n + 5) { font-weight: 900; }
-    .weights span:nth-child(10n + 7), .weights span:nth-child(10n + 8) { font-family: "QATT Gothic"; }
-    .weights span:nth-child(10n + 7) { font-weight: 900; }
-    .weights span:nth-child(10n + 9), .weights span:nth-child(10n) { font-family: "QATT Brush"; }
-    .weights span:nth-child(10n + 9) { font-weight: 900; }
-    .weights span:nth-child(10n + 1), .weights span:nth-child(10n + 2), .weights span:nth-child(10n + 7), .weights span:nth-child(10n + 8) { font-size: .8em; }   /* Serif and Gothic glyphs fill their cell more than the others */
+    .weights { display: grid; grid-template-columns: repeat(8, 1fr); max-width: 38rem; margin-inline: auto; text-align: center; font-size: clamp(2.3rem, 9vw, 3.6rem); line-height: 1.12; color: var(--ink); user-select: none; }
+    .weights span:nth-child(8n + 1) { font-family: "QATT Serif"; }
+    .weights span:nth-child(8n + 2) { font-family: "QATT Serif"; font-weight: 900; }   /* no bold file: the browser makes it bolder */
+    .weights span:nth-child(8n + 3) { font-family: "QATT Pen Heavy"; }
+    .weights span:nth-child(8n + 4) { font-family: "QATT Pen Bold"; }
+    .weights span:nth-child(8n + 5) { font-family: "QATT Pen Medium"; }
+    .weights span:nth-child(8n + 6) { font-family: "QATT Pen"; }
+    .weights span:nth-child(8n + 7) { font-family: "QATT Pen Light"; }
+    .weights span:nth-child(8n) { font-family: "QATT Pen ExtraLight"; }
+    .weights span:nth-child(8n + 1), .weights span:nth-child(8n + 2) { font-size: .84em; }   /* the Serif glyphs fill their cell more than the Pen glyphs */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
@@ -59,9 +59,9 @@
     const strip = document.getElementById('glyph-strip');
     // the 22 base shapes: shape i is U+F0000 + 7 * i (see js/qatt-text.js)
     for (let i = 0; i < 22; i++) { const a = document.createElement('a'), t = document.createElement('tt'); a.href = 'symbols.html'; a.title = 'Symbol table'; a.setAttribute('data-vi-title', 'Bảng chữ'); t.textContent = String.fromCodePoint(0xF0000 + 7 * i); a.append(t); strip.append(a); }
-    // the fonts: row r shows the form r of the letters (0 unmarked, 1 marked, 2 to 6 the five Chi forms: more and more strokes), the columns are Serif, Pen Cut, Pen, Gothic and Brush-like, each bold (900) and normal
+    // the weights: row r shows the form r of the letters (0 unmarked, 1 marked, 2 to 6 the five Chi forms: more and more strokes), column c one weight (two Serif columns first, then Pen from heavy to extra light)
     const weights = document.getElementById('weights');
-    for (let r = 0; r < 7; r++) for (let c = 0; c < 10; c++) weights.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * ((r * 10 + c) * 5 % 22) + r) }));
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 8; c++) weights.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * ((r * 8 + c) * 5 % 22) + r) }));
   });
 </script>
 
@@ -87,7 +87,7 @@
     <p>Everything is built from 22 basic shapes, each made of three strokes. Add a small stroke at one of six places and a shape turns into six more variants. Two shapes side by side form one character: the left one stands for the beginning of a syllable, the right one for its ending. Small circles and half circles in the corners mark the eight tones.</p>
   </section>
 
-  <section class="block" id="specimen" role="img" aria-label="The script in five fonts">
+  <section class="block" id="specimen" role="img" aria-label="The script in Serif and in six weights of Pen">
     <div class="weights" id="weights" aria-hidden="true"></div>
   </section>
 
