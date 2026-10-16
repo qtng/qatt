@@ -23,7 +23,7 @@
     .tile span { font-size: .85rem; color: #5b4d3d; }
     table { background: #fffdf8; font-size: .9rem; }
     th { font-weight: 600; color: #5b4d3d; }
-    td, th { text-align: right; } td:first-child, th:first-child { text-align: left; }
+    td, th { text-align: right; } td:first-child, th:first-child { text-align: left; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -50,7 +50,17 @@
     <h2>Total</h2>
     <div class="tiles" id="totalTiles"></div>
 
+    <h2>History</h2>
+    <p class="note">One row per UTC day, written at 23:55 UTC (from 16 Oct 2026). Answers and words learned are the change since the day before.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Day</th><th>New visitors</th><th>New accounts</th><th>Signed in</th><th>Practised</th><th>Answers</th><th>Correct</th><th>Words learned</th><th>Deck takeovers</th><th>Translator people</th><th>Translator calls</th></tr></thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+
     <h2>Last 14 days</h2>
+    <p class="note">From the tables themselves (also before the history started): new visitors and accounts, translator.</p>
     <table class="table table-sm mb-0">
       <thead><tr><th>Day (UTC)</th><th>New anonymous</th><th>New with account</th><th>Translator people</th><th>Translator calls</th></tr></thead>
       <tbody id="daily"></tbody>
@@ -88,6 +98,18 @@
         .forEach(([v, l]) => tile($('windowTiles'), v, l));
       [[t.with_account, 'accounts'], [t.anonymous, 'anonymous visitors'], [t.practising, 'people who practised'], [t.decks, 'decks'], [t.public_decks, 'public decks']]
         .forEach(([v, l]) => tile($('totalTiles'), v, l));
+      const hist = await sp.client.rpc('admin_history', { p_days: 60 });
+      const rows = (hist.data || []);   // newest first; one row more than the 60 shown, for the change of the totals of the oldest
+      $('history').replaceChildren(...(rows.length > 60 ? rows.slice(0, 60) : rows).map((r, i) => {
+        const prev = rows[i + 1];
+        const answers = prev ? (r.answers_correct + r.answers_wrong) - (prev.answers_correct + prev.answers_wrong) : null;
+        const right = prev ? r.answers_correct - prev.answers_correct : null;
+        const learned = prev ? r.words_known - prev.words_known : null;
+        const tr = document.createElement('tr');
+        [r.day, r.new_anonymous, r.new_accounts, r.signed_in_accounts, r.practised_users, answers, answers ? Math.round(100 * right / answers) + ' %' : '', learned,
+         r.deck_takeovers, r.translate_users, r.translate_calls].forEach(v => { const td = document.createElement('td'); td.textContent = v === null || v === undefined ? '' : v; tr.append(td); });
+        return tr;
+      }));
       $('daily').replaceChildren(...data.daily.map(d => {
         const tr = document.createElement('tr');
         [d.day, d.new_anonymous, d.new_with_account, d.translate_users, d.translate_calls].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
