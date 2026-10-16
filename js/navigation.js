@@ -452,3 +452,42 @@ window.Lang = window.Lang || (function() {
         injectNav();
     }
 })();
+
+// ---------- Visit counter ----------
+// Counts the visits in Supabase (db/visits.sql): only numbers, no cookie, no id, no address of the page. It counts only on qatt.org and chunom.org,
+// only when somebody uses the page (tap, key, mouse wheel or button; so most bots do not count) and not for browsers that name themselves as bots.
+// localStorage "qv" = { d: the UTC day of the last count, t: the time of the last activity }: once per browser and day = a visitor, a pause of more
+// than 30 minutes = a new visit. kind: "account" if the session of the browser is a signed-in user, else "anonymous".
+// localStorage.qv_off = "1" switches it off in this browser (for the admin).
+(function() {
+    try {
+        const SITE = location.hostname === "qatt.org" ? "qatt.org" : location.hostname === "chunom.org" ? "chunom.org" : null;
+        const BOT = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|python|curl|wget|httpclient|java\//i;
+        if (!SITE || navigator.webdriver || BOT.test(navigator.userAgent) || localStorage.getItem("qv_off")) return;
+        const SUPABASE = "https://kfgqhhmdzboszpwsqkxt.supabase.co", KEY = "sb_publishable_99iUsu3_BQ6mp1TbZUEWlw_iVhDJhPi";
+        const PAUSE = 30 * 60 * 1000, EVENTS = ["pointerdown", "keydown", "touchstart", "wheel"];   // no "scroll": a page that restores or sets its position fires it without anybody
+        const read = () => { try { return JSON.parse(localStorage.getItem("qv")) || {}; } catch (e) { return {}; } };
+        const write = s => { try { localStorage.setItem("qv", JSON.stringify(s)); } catch (e) {} };
+        const kind = () => {
+            try { const s = JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")); return s && s.user && s.user.is_anonymous === false ? "account" : "anonymous"; }
+            catch (e) { return "anonymous"; }
+        };
+        const count = e => {
+            if (e && e.isTrusted === false) return;   // events made by a script
+            EVENTS.forEach(ev => removeEventListener(ev, count));
+            const s = read(), now = Date.now(), today = new Date().toISOString().slice(0, 10);
+            const newVisitor = s.d !== today, newVisit = newVisitor || !s.t || now - s.t > PAUSE;
+            write({ d: today, t: now });
+            if (!newVisit) return;
+            fetch(SUPABASE + "/rest/v1/rpc/count_visit", { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
+                body: JSON.stringify({ p_site: SITE, p_kind: kind(), p_new_visitor: newVisitor }) }).catch(() => {});
+        };
+        EVENTS.forEach(e => addEventListener(e, count, { passive: true }));
+        // when the page is left the time of the last activity is stored, so a pause is measured from there
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState !== "hidden") return;
+            const s = read();
+            if (s.d) { s.t = Date.now(); write(s); }
+        });
+    } catch (e) { /* the counter must never disturb a page */ }
+})();

@@ -50,6 +50,15 @@
     <h2>Total</h2>
     <div class="tiles" id="totalTiles"></div>
 
+    <h2>Visits</h2>
+    <p class="note">Counted by js/navigation.js when somebody uses a page (tap, key, mouse wheel); not for bots that name themselves. Visitors = browsers per day, visits = new visits (a pause of more than 30 minutes). "Account" = signed in, "anonymous" = everybody else. Counting started on 16 Oct 2026. Set <code>localStorage.qv_off = "1"</code> in your own browser to leave yourself out.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Day</th><th>Site</th><th>Visitors anonymous</th><th>Visitors account</th><th>Visits anonymous</th><th>Visits account</th></tr></thead>
+        <tbody id="visits"></tbody>
+      </table>
+    </div>
+
     <h2>History</h2>
     <p class="note">One row per UTC day, written at 23:55 UTC (from 16 Oct 2026). Answers and words learned are the change since the day before.</p>
     <div class="table-responsive">
@@ -108,6 +117,17 @@
         .forEach(([v, l]) => tile($('windowTiles'), v, l));
       [[t.with_account, 'accounts'], [t.anonymous, 'anonymous visitors'], [t.practising, 'people who practised'], [t.decks, 'decks'], [t.public_decks, 'public decks']]
         .forEach(([v, l]) => tile($('totalTiles'), v, l));
+      const vis = await sp.client.rpc('admin_visits', { p_days: 14 });
+      const byDay = new Map();
+      for (const r of (vis.data || [])) {   // one row per day and site, the two kinds side by side
+        const key = r.day + ' ' + r.site, e = byDay.get(key) || { day: r.day, site: r.site, anonymous: { visitors: 0, visits: 0 }, account: { visitors: 0, visits: 0 } };
+        e[r.kind] = { visitors: r.visitors, visits: r.visits }; byDay.set(key, e);
+      }
+      $('visits').replaceChildren(...[...byDay.values()].map(e => {
+        const tr = document.createElement('tr');
+        [e.day, e.site, e.anonymous.visitors, e.account.visitors, e.anonymous.visits, e.account.visits].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+        return tr;
+      }));
       const hist = await sp.client.rpc('admin_history', { p_days: 60 });
       const rows = (hist.data || []);   // newest first; one row more than the 60 shown, for the change of the totals of the oldest
       $('history').replaceChildren(...(rows.length > 60 ? rows.slice(0, 60) : rows).map((r, i) => {
