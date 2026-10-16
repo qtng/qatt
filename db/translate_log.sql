@@ -19,12 +19,14 @@ create table if not exists public.translate_log (
   own_words integer,             -- words where the model gave its own character (not from the list)
   tokens_in integer,
   tokens_out integer,
-  prompts_version text
+  prompts_version text,
+  is_admin boolean not null default false   -- the call came from an admin (the tests of the owner), so the statistics can leave them out
 );
 create index if not exists translate_log_at on public.translate_log (at);
 alter table public.translate_log enable row level security;
 revoke all on public.translate_log from anon, authenticated;
 grant insert on public.translate_log to service_role;   -- the function writes with the service key (it only inserts)
+alter table public.translate_log add column if not exists is_admin boolean not null default false;   -- tables from before get the mark too (rows already there count as not admin)
 
 -- numbers of the last p_days days for the statistics page (admins only, as admin_stats())
 create or replace function public.admin_translate(p_days integer default 14)
@@ -76,12 +78,14 @@ create table if not exists public.translate_attempts (
   status integer not null,
   ms integer,
   tokens_in integer,
-  tokens_out integer
+  tokens_out integer,
+  is_admin boolean not null default false   -- as in translate_log
 );
 create index if not exists translate_attempts_at on public.translate_attempts (at);
 alter table public.translate_attempts enable row level security;
 revoke all on public.translate_attempts from anon, authenticated;
 grant insert on public.translate_attempts to service_role;
+alter table public.translate_attempts add column if not exists is_admin boolean not null default false;   -- tables from before get the mark too (rows already there count as not admin)
 
 -- the evaluation of the models of the last p_days days (admin/models.html; admins only)
 create or replace function public.admin_models(p_days integer default 7)
@@ -146,7 +150,8 @@ create table if not exists public.translate_gaps (
   idx integer,                    -- the place of the gap word in ctx_qn and ctx_chars (from 1)
   pos integer,                    -- the number of the word in the sentence, 1 = first
   n_words integer,                -- the number of words of the sentence
-  model text
+  model text,
+  is_admin boolean not null default false   -- as in translate_log
 );
 -- (The live table was made in two earlier versions and still has the unused, empty columns context_qn, context_chars, prev_qn, prev_char, next_qn, next_char;
 --  they can be dropped: alter table public.translate_gaps drop column context_qn, drop column context_chars, drop column prev_qn, drop column prev_char, drop column next_qn, drop column next_char;)
@@ -155,9 +160,26 @@ create index if not exists translate_gaps_word on public.translate_gaps (word_qn
 alter table public.translate_gaps enable row level security;
 revoke all on public.translate_gaps from anon, authenticated;
 grant insert on public.translate_gaps to service_role;
+alter table public.translate_gaps add column if not exists is_admin boolean not null default false;   -- tables from before get the mark too (rows already there count as not admin)
+
+-- The functions got the parameter p_who: the old versions (without it) must go, or the call by name would be ambiguous.
+drop function if exists public.admin_gaps(integer);
+drop function if exists public.admin_gap_contexts(text, integer);
+drop function if exists public.admin_gap_export(integer);
+drop function if exists public.admin_languages(integer);
+
+-- Which calls the statistics count (the parameter p_who of the admin functions below): 'all' (default), 'users' (leave the admins out: their own tests),
+-- 'admins' (only them). The mark is_admin is set by the function "translate" from app_metadata.is_admin of the token of the call.
+create or replace function public.admin_who_ok(p_who text, p_is_admin boolean)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$ select case p_who when 'users' then not p_is_admin when 'admins' then p_is_admin else true end $$;
+revoke all on function public.admin_who_ok(text, boolean) from public, anon, authenticated;
 
 -- the gaps of the last p_days days: per word how often and which characters the model chose, and the newest rows
-create or replace function public.admin_gaps(p_days integer default 30)
+create or replace function public.admin_gaps(p_days integer default 30, p_who text default 'all')
 returns jsonb
 language plpgsql
 security definer
@@ -171,27 +193,27 @@ begin
   end if;
   return jsonb_build_object(
     'days', d,
-    'rows', (select count(*) from public.translate_gaps where at > now() - make_interval(days => d)),
-    'words', (select count(distinct word_qn) from public.translate_gaps where at > now() - make_interval(days => d)),
-    'nothing_in_dictionary', (select count(*) from public.translate_gaps where at > now() - make_interval(days => d) and n_options = 0),
+    'rows', (select count(*) from public.translate_gaps where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin)),
+    'words', (select count(distinct word_qn) from public.translate_gaps where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin)),
+    'nothing_in_dictionary', (select count(*) from public.translate_gaps where at > now() - make_interval(days => d) and n_options = 0 and public.admin_who_ok(p_who, is_admin)),
     'top', (select coalesce(jsonb_agg(to_jsonb(x) order by x.n desc, x.last_at desc), '[]'::jsonb) from (
       select g.word_qn, count(*) as n, max(g.n_options) as n_options, max(g.at) as last_at,
         (select jsonb_agg(jsonb_build_object('c', c.word_char, 'n', c.n) order by c.n desc)
            from (select word_char, count(*) as n from public.translate_gaps g2
-                 where g2.word_qn = g.word_qn and g2.at > now() - make_interval(days => d) group by word_char) c) as chars
-      from public.translate_gaps g where g.at > now() - make_interval(days => d)
+                 where g2.word_qn = g.word_qn and g2.at > now() - make_interval(days => d) and public.admin_who_ok(p_who, g2.is_admin) group by word_char) c) as chars
+      from public.translate_gaps g where g.at > now() - make_interval(days => d) and public.admin_who_ok(p_who, g.is_admin)
       group by g.word_qn order by count(*) desc, max(g.at) desc limit 200) x),
     'recent', (select coalesce(jsonb_agg(to_jsonb(x) order by x.at desc), '[]'::jsonb) from (
-      select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model
-      from public.translate_gaps where at > now() - make_interval(days => d) order by at desc limit 50) x)
+      select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model, is_admin
+      from public.translate_gaps where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin) order by at desc limit 50) x)
   );
 end;
 $$;
-revoke all on function public.admin_gaps(integer) from public, anon;
-grant execute on function public.admin_gaps(integer) to authenticated;
+revoke all on function public.admin_gaps(integer, text) from public, anon;
+grant execute on function public.admin_gaps(integer, text) to authenticated;
 
 -- the contexts of one word, each combination with how often (for the SQL editor; admins only)
-create or replace function public.admin_gap_contexts(p_word text, p_days integer default 30)
+create or replace function public.admin_gap_contexts(p_word text, p_days integer default 30, p_who text default 'all')
 returns jsonb
 language plpgsql
 security definer
@@ -205,15 +227,15 @@ begin
   end if;
   return (select coalesce(jsonb_agg(to_jsonb(x) order by x.n desc, x.last_at desc), '[]'::jsonb) from (
     select word_char, ctx_qn, ctx_chars, idx, count(*) as n, max(at) as last_at, max(n_options) as n_options
-    from public.translate_gaps where word_qn = p_word and at > now() - make_interval(days => d)
+    from public.translate_gaps where word_qn = p_word and at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin)
     group by word_char, ctx_qn, ctx_chars, idx order by count(*) desc, max(at) desc limit 100) x);
 end;
 $$;
-revoke all on function public.admin_gap_contexts(text, integer) from public, anon;
-grant execute on function public.admin_gap_contexts(text, integer) to authenticated;
+revoke all on function public.admin_gap_contexts(text, integer, text) from public, anon;
+grant execute on function public.admin_gap_contexts(text, integer, text) to authenticated;
 
 -- the languages of the free translation: per language and per day, and the results per language and model
-create or replace function public.admin_languages(p_days integer default 30)
+create or replace function public.admin_languages(p_days integer default 30, p_who text default 'all')
 returns jsonb
 language plpgsql
 security definer
@@ -234,24 +256,24 @@ begin
         count(*) filter (where status not in ('ok', 'fallback')) as errors,
         round(avg(ms) filter (where status in ('ok', 'fallback'))) as avg_ms,
         coalesce(sum(words), 0) as words, coalesce(sum(own_words), 0) as own_words
-      from public.translate_log where at > now() - make_interval(days => d) group by 1) x),
+      from public.translate_log where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin) group by 1) x),
     'by_lang_model', (select coalesce(jsonb_agg(to_jsonb(x) order by x.lang, x.calls desc), '[]'::jsonb) from (
       select coalesce(nullif(lang, ''), '-') as lang, coalesce(model, '-') as model, count(*) as calls,
         count(*) filter (where status not in ('ok', 'fallback')) as errors,
         count(*) filter (where status = 'fallback') as fallback,
         round(avg(ms)) as avg_ms
-      from public.translate_log where at > now() - make_interval(days => d) group by 1, 2) x),
+      from public.translate_log where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin) group by 1, 2) x),
     'daily', (select coalesce(jsonb_agg(to_jsonb(x) order by x.day, x.lang), '[]'::jsonb) from (
       select (at at time zone 'utc')::date as day, coalesce(nullif(lang, ''), '-') as lang, count(*) as calls
-      from public.translate_log where at > now() - make_interval(days => d) group by 1, 2) x)
+      from public.translate_log where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin) group by 1, 2) x)
   );
 end;
 $$;
-revoke all on function public.admin_languages(integer) from public, anon;
-grant execute on function public.admin_languages(integer) to authenticated;
+revoke all on function public.admin_languages(integer, text) from public, anon;
+grant execute on function public.admin_languages(integer, text) to authenticated;
 
 -- all gap rows of the last p_days days (at most 5000, newest first) for the CSV download of admin/translator.html
-create or replace function public.admin_gap_export(p_days integer default 30)
+create or replace function public.admin_gap_export(p_days integer default 30, p_who text default 'all')
 returns jsonb
 language plpgsql
 security definer
@@ -264,9 +286,9 @@ begin
     raise exception 'not allowed' using errcode = '42501';
   end if;
   return (select coalesce(jsonb_agg(to_jsonb(x) order by x.at desc), '[]'::jsonb) from (
-    select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model
-    from public.translate_gaps where at > now() - make_interval(days => d) order by at desc limit 5000) x);
+    select at, word_qn, word_char, n_options, ctx_qn, ctx_chars, idx, pos, n_words, model, is_admin
+    from public.translate_gaps where at > now() - make_interval(days => d) and public.admin_who_ok(p_who, is_admin) order by at desc limit 5000) x);
 end;
 $$;
-revoke all on function public.admin_gap_export(integer) from public, anon;
-grant execute on function public.admin_gap_export(integer) to authenticated;
+revoke all on function public.admin_gap_export(integer, text) from public, anon;
+grant execute on function public.admin_gap_export(integer, text) to authenticated;
