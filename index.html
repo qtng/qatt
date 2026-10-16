@@ -57,8 +57,8 @@
     .specimen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     @media (max-width: 575.98px) { .specimen { grid-template-columns: 1fr; } }
     .specimen .card-font { border-radius: 1rem; padding: 1.2rem 1rem 1rem; text-align: center; overflow: hidden; user-select: none; }
-    .specimen .big { font-size: calc(clamp(6rem, 17vw, 10rem) * var(--k, 1)); line-height: 1.05; }
-    .specimen .small { display: grid; grid-template-columns: repeat(8, 1fr); font-size: calc(clamp(1.1rem, 2.6vw, 1.7rem) * var(--k, 1)); line-height: 1.3; margin-top: .6rem; opacity: .85; }
+    .specimen .big { font-size: calc(clamp(6rem, 17vw, 10rem) * var(--k, 1)); line-height: 1.05; padding-top: .18em; }   /* room for the tone mark above */
+    .specimen .small { display: grid; grid-template-columns: repeat(6, 1fr); font-size: calc(clamp(1.1rem, 2.6vw, 1.7rem) * var(--k, 1)); line-height: 1.3; margin-top: .6rem; opacity: .85; }
     .specimen .f-serif { background: #f7efdc; color: #2b2118; font-family: "QATT Serif"; }
     .specimen .f-pen { background: #a8362a; color: #fffdf8; font-family: "QATT Pen Bold"; --k: 1.2; }   /* the Pen glyphs are drawn smaller in their cell: 1.2 times to look as big as the others */
     .specimen .f-gothic { background: #2b2118; color: #f7efdc; font-family: "QATT Gothic"; }
@@ -74,9 +74,9 @@
     // the weights: row r shows the form r of the letters (0 unmarked, 1 marked, 2 to 6 the five Chi forms: more and more strokes), column c one weight (two Serif columns first, then Pen from heavy, also made bolder by the browser, to extra light)
     const weights = document.getElementById('weights');
     for (let r = 0; r < 7; r++) for (let c = 0; c < 9; c++) weights.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * ((r * 9 + c) * 5 % 22) + r) }));
-    // the font comparison: the same big shape and the 22 base shapes in each font
+    // the font comparison: the same big syllable and the 22 base shapes in each font
     document.querySelectorAll('.specimen .card-font').forEach(card => {
-      card.querySelector('.big').textContent = String.fromCodePoint(0xF0000 + 7 * 17);
+      card.querySelector('.big').textContent = String.fromCodePoint(0xF003F, 0xF009B, 0xF0021, 0xF00A1);   // the syllable tự (QattText.word('tự'))
       const small = card.querySelector('.small');
       for (let i = 0; i < 22; i++) small.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * i) }));
     });
