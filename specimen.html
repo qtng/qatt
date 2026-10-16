@@ -53,7 +53,7 @@
 
 <main class="wrap">
   <div class="bar">
-    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen." autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
   </div>
   <div id="fonts"></div>
 </main>
@@ -68,12 +68,12 @@
   const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());   // the fonts of the list of this visitor (fonts.js)
   // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
   const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
-  const SIZES = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64];   // from small to large
+  const SIZES = [14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56];   // from small to large
   const ABOUT = [   // the first entry whose name starts the family
-    ["QATT Serif", "Drawn by the KAGE engine in its Mincho style: thin horizontals, heavy verticals, small triangles at the ends."],
+    ["QATT Serif", "Thin horizontals, heavy verticals, small triangles at the ends."],
     ["QATT Gothic Bold", "The Gothic font with strokes 1.7 times as heavy."],
     ["QATT Gothic Wide", "The Gothic font; a joined pair takes 1.25 cells, so its halves are less squeezed."],
-    ["QATT Gothic", "Drawn by the KAGE engine in its Gothic style: strokes of one width."],
+    ["QATT Gothic", "Strokes of one width."],
     ["QATT Pen Cut", "The Pen strokes with flat ends cut at a slant, as in Song: thin horizontals, heavy verticals."],
     ["QATT Pen", "Strokes of a felt-tip pen: round ends, slightly bowed horizontals, a hint of clerical script."],
     ["QATT Prototype Light", "The strokes of qatt.js, thinner."],
