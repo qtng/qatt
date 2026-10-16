@@ -3,6 +3,8 @@ Login dialog and account line for the pages that use SupabaseService (js/supabas
 
 await QattLogin.require(db, 'Sign in to create decks.')   // true if signed in; else opens the dialog and gives false
 QattLogin.status(db, element, hint)                       // "Signed in as …" with a sign-out link, or "Not signed in. Sign in <hint>." (the hint of the page, e.g. 'to keep your progress on every device'; without it a general one)
+QattLogin.t(en, vi)                                       // the text in the language of the page (Lang of navigation.js), English where Lang is not loaded
+// Every text is English and Vietnamese (the Vietnamese ones were written by Claude: drafts). A message or a hint can be a text or { en, vi }. The account line follows a switch of the language.
 QattLogin.open(db, message)                               // the dialog
 await QattLogin.chooseName(db, { required, current })     // the name for the leaderboard: the new name, null if the dialog was closed
 */
@@ -54,17 +56,17 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 			const dialog = el('dialog', { className: 'qatt-login' });
 			const note = el('p', { className: 'note', hidden: true });
 			const show = (text, error) => { note.textContent = text; note.className = 'note' + (error ? ' error' : ''); note.hidden = !text; };
-			const google = el('button', { type: 'button', className: 'google', textContent: 'Continue with Google' });
-			const email = el('input', { type: 'email', placeholder: 'Email address', autocomplete: 'email', required: true });
-			const send = el('button', { type: 'submit', className: 'main', textContent: 'Send me a link' });
+			const google = el('button', { type: 'button', className: 'google', textContent: T('Continue with Google', 'Tiếp tục với Google') });
+			const email = el('input', { type: 'email', placeholder: T('Email address', 'Địa chỉ email'), autocomplete: 'email', required: true });
+			const send = el('button', { type: 'submit', className: 'main', textContent: T('Send me a link', 'Gửi liên kết cho tôi') });
 			const form = el('form', { method: 'dialog' },
-				el('h2', { textContent: 'Sign in' }),
-				el('p', { textContent: message || 'Sign in to keep your work on every device. What you have so far stays with your account.' }),
+				el('h2', { textContent: T('Sign in', 'Đăng nhập') }),
+				el('p', { textContent: pick(message) || T('Sign in to keep your work on every device. What you have so far stays with your account.', 'Đăng nhập để lưu công việc của bạn trên mọi thiết bị. Những gì bạn đã có sẽ được giữ trong tài khoản của bạn.') }),
 				google,
-				el('div', { className: 'or', textContent: 'or' }),
+				el('div', { className: 'or', textContent: T('or', 'hoặc') }),
 				email, send, note);
-			const close = el('button', { type: 'button', className: 'qatt-login-close', textContent: '×', title: 'Close' });
-			close.setAttribute('aria-label', 'Close');
+			const close = el('button', { type: 'button', className: 'qatt-login-close', textContent: '×', title: T('Close', 'Đóng') });
+			close.setAttribute('aria-label', T('Close', 'Đóng'));
 			dialog.append(close, form);
 			document.body.append(dialog);
 
@@ -73,7 +75,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 				busy(true);
 				show('');
 				const { error } = await db.signInWithGoogle();
-				if (error) { show('Could not start the sign-in: ' + error.message, true); busy(false); }
+				if (error) { show(T('Could not start the sign-in: ', 'Không thể bắt đầu đăng nhập: ') + error.message, true); busy(false); }
 			});
 			form.addEventListener('submit', async e => {
 				e.preventDefault();
@@ -81,8 +83,8 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 				busy(true);
 				show('');
 				const { error, sent } = await db.signInWithEmail(email.value);
-				if (error) { show('Could not send the link: ' + error.message, true); busy(false); return; }
-				if (sent) { show(`We sent a link to ${email.value.trim()}. Open it on this device to finish.`); send.textContent = 'Link sent'; }
+				if (error) { show(T('Could not send the link: ', 'Không thể gửi liên kết: ') + error.message, true); busy(false); return; }
+				if (sent) { show(T(`We sent a link to ${email.value.trim()}. Open it on this device to finish.`, `Chúng tôi đã gửi liên kết tới ${email.value.trim()}. Hãy mở nó trên thiết bị này để hoàn tất.`)); send.textContent = T('Link sent', 'Đã gửi liên kết'); }
 			});
 			close.addEventListener('click', () => dialog.close());
 			dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
@@ -100,14 +102,14 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 			const dialog = el('dialog', { className: 'qatt-login' });
 			const note = el('p', { className: 'note', hidden: true });
 			const input = el('input', { type: 'text', value: current || db.suggestedName(), autocomplete: 'nickname', required: true });
-			input.setAttribute('aria-label', 'Name');
-			const save = el('button', { type: 'submit', className: 'main', textContent: 'Save' });
+			input.setAttribute('aria-label', T('Name', 'Tên'));
+			const save = el('button', { type: 'submit', className: 'main', textContent: T('Save', 'Lưu') });
 			const form = el('form', { method: 'dialog' },
-				el('h2', { textContent: required ? 'What should we call you?' : 'Your name' }),
+				el('h2', { textContent: required ? T('What should we call you?', 'Chúng tôi nên gọi bạn là gì?') : T('Your name', 'Tên của bạn') }),
 				input, save, note);
 			dialog.append(form);
 			if (!required) {
-				const close = el('button', { type: 'button', className: 'qatt-login-close', textContent: '×', title: 'Close' });
+				const close = el('button', { type: 'button', className: 'qatt-login-close', textContent: '×', title: T('Close', 'Đóng') });
 				close.addEventListener('click', () => dialog.close());
 				dialog.prepend(close);
 			} else {
@@ -145,24 +147,35 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 		return false;
 	}
 
-	// what the sign-in link says when the page gives no hint of its own
-	const KEEP_HINT = 'to keep your work on every device';
+	// the text in the language of the page; without Lang (navigation.js) English
+	const T = (en, vi) => (window.Lang && typeof Lang.t === 'function' ? Lang.t(en, vi) : en);
+	// a message or hint of a page: a text, or { en, vi }
+	const pick = x => (x && typeof x === 'object' ? T(x.en, x.vi) : x);
 
+	// what the sign-in link says when the page gives no hint of its own
+	const KEEP_HINT = { en: 'to keep your work on every device', vi: 'để lưu công việc của bạn trên mọi thiết bị' };
+
+	const accountLines = new Set();   // the lines that follow a change of the language
 	function status(db, element, hint) {
 		addStyle();
 		element.classList.add('qatt-account');
+		accountLines.add({ db, element, hint });
+		renderStatus(db, element, hint);
+	}
+	function renderStatus(db, element, hint) {
 		element.replaceChildren();
 		if (!db || !db.user) return;
 		if (signedIn(db)) {
-			const out = el('a', { textContent: 'Sign out' });
+			const out = el('a', { textContent: T('Sign out', 'Đăng xuất') });
 			out.addEventListener('click', async () => { await db.signOut(); location.reload(); });
-			element.append(`Signed in as ${db.user.email || 'you'} · `, out);
+			element.append(`${T('Signed in as', 'Đã đăng nhập:')} ${db.user.email || T('you', 'bạn')} · `, out);
 		} else {
-			const inn = el('a', { textContent: 'Sign in' });
+			const inn = el('a', { textContent: T('Sign in', 'Đăng nhập') });
 			inn.addEventListener('click', () => open(db));
-			element.append('Not signed in. ', inn, ' ' + (hint || KEEP_HINT) + '.');
+			element.append(T('Not signed in.', 'Chưa đăng nhập.') + ' ', inn, ' ' + (pick(hint) || pick(KEEP_HINT)) + '.');
 		}
 	}
+	document.addEventListener('langchange', () => accountLines.forEach(l => { if (l.element.isConnected) renderStatus(l.db, l.element, l.hint); else accountLines.delete(l); }));
 
-	window.QattLogin = { open, require, status, chooseName };
+	window.QattLogin = { open, require, status, chooseName, t: T };
 })();
