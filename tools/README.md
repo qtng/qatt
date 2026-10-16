@@ -123,6 +123,10 @@ The bold Serif font is not published any more (`--bold` without `--gothic` still
 python3 tools/build_font.py --kage fonts/kage.json --gothic --wide fonts/glyphs.json fonts/qatt-gothic-wide
 ```
 
+## Usage numbers: `stats.sql`
+
+How many people signed up, used the translator, changed or took over decks and practised in the last hours (default 4, set it in the first line). Paste it into the Supabase dashboard → SQL Editor (project ChunomApp). Anonymous accounts are every visitor of a page with a login; "with account" are the people who signed in. The translator counter knows the day only, so its numbers are "since 00:00 UTC".
+
 ## Shared pieces of the pages
 
 - `js/fonts.js`: the list of fonts (family, file) and the sizes. `font.html` takes its `<select data-qatt-fonts>` / `<select data-qatt-sizes>`, `editor.html` the fonts and the `@font-face` rules from it.html`).
