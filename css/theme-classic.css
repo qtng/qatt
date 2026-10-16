@@ -1,0 +1,28 @@
+/* Theme "classic" (the default): the look before the retro redesign, the one the Chunom site has: pill buttons with a thin soft outline, no shadows, round symbol
+   buttons. A complete theme of its own: it does not build on another theme and no other theme builds on it. Loaded by js/navigation.js (Theme). */
+.btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 2rem; }
+.controls .btn-pill { --bs-btn-border-color: #b9a982; --bs-btn-hover-border-color: var(--cinnabar); }
+.btn-cinnabar, .btn-accent {
+  --bs-btn-bg: var(--cinnabar); --bs-btn-color: #fff; --bs-btn-border-color: var(--cinnabar);
+  --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #8c2c22;
+  --bs-btn-active-bg: #7a261d; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #7a261d;
+}
+.btn-quiet, .btn-ink {
+  --bs-btn-bg: #fffdf8; --bs-btn-color: #5b4d3d; --bs-btn-border-color: #cdbf9f;
+  --bs-btn-hover-bg: #f1e8d2; --bs-btn-hover-color: var(--ink); --bs-btn-hover-border-color: #b9a982;
+  --bs-btn-active-bg: #f1e8d2; --bs-btn-active-color: var(--ink); --bs-btn-active-border-color: #b9a982;
+}
+.hero .btn-ink { --bs-btn-bg: transparent; --bs-btn-color: var(--ink); --bs-btn-border-color: #8a7660; --bs-btn-hover-bg: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--ink); }
+
+/* round symbol buttons (symbols.html), the boxes of its variants, the pill search bar (wiki.html), the pill box of the controls and its dropdown (decodings.html) */
+.glyph-strip .g[data-code] { border: 1px solid var(--bc); border-radius: 50%; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
+.glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { border-color: var(--bc); box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); outline: none; }
+.glyph-strip .g[data-code]:active { box-shadow: none; filter: brightness(.96); }
+#variants .speak { border: 1px solid #e4d9c0; }
+#variants .var { border: 1px solid #e4d9c0; border-radius: .5rem; }
+#variants .var.hit { box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
+.search-bar .input-group { border-radius: 2rem; }
+.search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
+.search-bar .btn { border-radius: 0 2rem 2rem 0; }
+.controls { border-radius: 2rem; }
+.controls .form-select { border-radius: 2rem; border-color: #cdbf9f; background-color: #fff; }

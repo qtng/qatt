@@ -96,8 +96,10 @@ window.Lang = window.Lang || (function() {
 
 // ---------- the menu ----------
 // ---------- Theme: the look of qatt.org ----------
-// localStorage.theme ("classic", "retro" or "popart", chosen in license.html) sets data-theme on <html> as early as the script runs; css/site.css has the rules for every theme
-// ("classic", the default, has no attribute: the pages show their own rules and the base of css/site.css; the themes override them). Only qatt.org has themes, the pages of the Chunom site do not use site.css.
+// localStorage.theme ("classic", "retro" or "popart", chosen in license.html) says which file css/theme-<name>.css is part of the page. Every theme is a complete file of its
+// own, none builds on or overrides another; the pages only have their layout (css/site.css has what all themes share). The file is written into the <head> while the page
+// is parsed (document.write, so that the page is not drawn without it) and data-theme is set on <html> (popart needs it to be more specific than the pages).
+// Only qatt.org has themes: the pages of the Chunom site do not use css/site.css and load no theme.
 //   Theme.list          {name: [English, Tiếng Việt]}
 //   Theme.current       the name of the theme
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
@@ -107,8 +109,18 @@ window.Theme = window.Theme || (function() {
     const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     let current = "classic";
     try { const s = localStorage.getItem(KEY); if (Object.prototype.hasOwnProperty.call(list, s)) current = s; } catch (e) {}
-    const apply = () => { if (onChunom) return; if (current === "classic") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", current); };
-    apply();
+    const href = () => "/css/theme-" + current + ".css";
+    const apply = () => {
+        if (onChunom) return;
+        if (current === "classic") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", current);
+        const link = document.getElementById("theme-css");
+        if (link) link.setAttribute("href", href());
+    };
+    if (!onChunom) {
+        if (document.readyState === "loading") document.write('<link rel="stylesheet" id="theme-css" href="' + href() + '">');
+        else { const l = document.createElement("link"); l.rel = "stylesheet"; l.id = "theme-css"; l.href = href(); document.head.append(l); }
+        apply();
+    }
     return {
         list,
         get current() { return current; },
