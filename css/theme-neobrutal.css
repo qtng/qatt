@@ -1,0 +1,54 @@
+/* Theme "neobrutal": neobrutalism, colourful: raw blocky shapes with thick black outlines and hard offset shadows, bright flat colours (yellow, pink, lime, periwinkle) on cream, a heavy grotesque, slightly rounded corners, labels like stickers.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="neobrutal"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="neobrutal"] { --ink: #111; --accent: #ff5fa2; --cinnabar: #ff5fa2; --paper: #fdf6e3; --line: #111; --field: #111; --muted: #333;
+  --nb-yellow: #ffd23f; --nb-pink: #ff5fa2; --nb-lime: #b8f15a; --nb-blue: #8fa8ff; --nb-orange: #ff9f45;
+  --nb-font: "Space Grotesk", "Archivo", "Inter", "Helvetica Neue", Arial, sans-serif; --nb-heavy: "Archivo Black", "Arial Black", Impact, sans-serif;
+  --nb-shadow: 5px 5px 0 #111; }
+html[data-theme="neobrutal"] body { background: var(--paper); color: var(--ink); font-family: var(--nb-font); }
+html[data-theme="neobrutal"] .nav-backdrop, html[data-theme="neobrutal"] .bottom-bar { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+html[data-theme="neobrutal"] h1, html[data-theme="neobrutal"] h2, html[data-theme="neobrutal"] h3 { font-family: var(--nb-heavy); font-weight: 900; color: var(--ink); letter-spacing: -.01em; }
+html[data-theme="neobrutal"] h2 { display: inline-block; background: var(--nb-yellow); border: 3px solid #111; box-shadow: 4px 4px 0 #111; padding: .1rem .6rem; border-radius: .4rem; }
+html[data-theme="neobrutal"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--ink); background: linear-gradient(transparent 60%, var(--nb-lime) 60%); text-decoration: none; font-weight: 700; }
+html[data-theme="neobrutal"] .text-secondary, html[data-theme="neobrutal"] .text-muted, html[data-theme="neobrutal"] .note { color: var(--muted) !important; }
+html[data-theme="neobrutal"] .hero, html[data-theme="neobrutal"] .editor-head { background: var(--nb-blue); border-bottom: 4px solid #111; color: var(--ink); }
+html[data-theme="neobrutal"] .editor-head { border: 4px solid #111; border-radius: .8rem; box-shadow: var(--nb-shadow); margin: 1rem .5rem; }
+html[data-theme="neobrutal"] .hero h1, html[data-theme="neobrutal"] .editor-head h1 { font-family: var(--nb-heavy); font-size: clamp(2.4rem, 9vw, 4.2rem); color: #fff; -webkit-text-stroke: 2px #111; paint-order: stroke fill; text-shadow: 4px 4px 0 #111; }
+html[data-theme="neobrutal"] .hero .han, html[data-theme="neobrutal"] .editor-head .han { display: inline-block; color: #111; background: var(--nb-yellow); border: 3px solid #111; border-radius: .5rem; box-shadow: 3px 3px 0 #111; padding: .15rem .7rem .15rem 1.2rem; transform: rotate(-3deg); }
+html[data-theme="neobrutal"] .hero .lead, html[data-theme="neobrutal"] .editor-head p { color: #111; background: #fff; border: 3px solid #111; border-radius: .6rem; box-shadow: 4px 4px 0 #111; display: block; width: fit-content; max-width: 34rem; margin-left: auto !important; margin-right: auto !important; padding: .4rem .9rem; font-weight: 600; }
+html[data-theme="neobrutal"] .hero a:not(.btn) { color: #111; }
+html[data-theme="neobrutal"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: .5rem; --bs-btn-border-width: 3px; --bs-btn-border-color: #111; --bs-btn-hover-border-color: #111; --bs-btn-active-border-color: #111; font-family: var(--nb-font); font-weight: 800; box-shadow: 4px 4px 0 #111; transition: transform .1s, box-shadow .1s; }
+html[data-theme="neobrutal"] .btn:not(.btn-close):not(.btn-link):hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #111; }
+html[data-theme="neobrutal"] .btn:not(.btn-close):not(.btn-link):active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 #111; }
+html[data-theme="neobrutal"] .btn-cinnabar, html[data-theme="neobrutal"] .btn-accent { --bs-btn-bg: var(--nb-pink); --bs-btn-color: #111; --bs-btn-hover-bg: #ff7db4; --bs-btn-hover-color: #111; --bs-btn-active-bg: var(--nb-pink); --bs-btn-active-color: #111; }
+html[data-theme="neobrutal"] .btn-quiet, html[data-theme="neobrutal"] .btn-ink, html[data-theme="neobrutal"] .btn-pill, html[data-theme="neobrutal"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fff; --bs-btn-color: #111; --bs-btn-hover-bg: var(--nb-lime); --bs-btn-hover-color: #111; --bs-btn-active-bg: var(--nb-lime); --bs-btn-active-color: #111; }
+html[data-theme="neobrutal"] .btn-cinnabar.btn-pill, html[data-theme="neobrutal"] .btn-accent.btn-pill { --bs-btn-bg: var(--nb-pink); }
+html[data-theme="neobrutal"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: var(--nb-yellow); --bs-btn-hover-bg: #ffdd6b; }
+html[data-theme="neobrutal"] #example { --bs-btn-bg: var(--nb-yellow); }
+html[data-theme="neobrutal"] #convert { --bs-btn-bg: var(--nb-lime); }
+html[data-theme="neobrutal"] #reading { --bs-btn-bg: var(--nb-blue); }
+html[data-theme="neobrutal"] .form-select { --bs-border-radius: .5rem; --bs-border-width: 3px; --bs-border-color: #111; background-color: #fff; color: #111; font-weight: 700; box-shadow: 3px 3px 0 #111; }
+html[data-theme="neobrutal"] .form-control, html[data-theme="neobrutal"] textarea { border: 3px solid #111; border-radius: .6rem; background-color: #fff; color: #111; }
+html[data-theme="neobrutal"] .form-control:focus, html[data-theme="neobrutal"] textarea:focus, html[data-theme="neobrutal"] .form-select:focus { border-color: #111; box-shadow: 4px 4px 0 var(--nb-pink); outline: none; }
+html[data-theme="neobrutal"] .form-check-input { border: 3px solid #111; }
+html[data-theme="neobrutal"] .form-check-input:checked { background-color: var(--nb-pink); border-color: #111; }
+html[data-theme="neobrutal"] input[type="range"] { accent-color: var(--nb-pink); }
+html[data-theme="neobrutal"] .card, html[data-theme="neobrutal"] .card-box, html[data-theme="neobrutal"] .alert, html[data-theme="neobrutal"] .editor, html[data-theme="neobrutal"] .content-container, html[data-theme="neobrutal"] .sticky-card, html[data-theme="neobrutal"] .panel { background: #fff; border: 4px solid #111; border-radius: .8rem; box-shadow: 8px 8px 0 #111; }
+html[data-theme="neobrutal"] .card-box { background: var(--nb-lime); }
+html[data-theme="neobrutal"] .card-box #field, html[data-theme="neobrutal"] .card-box textarea { background-color: #fff; }
+html[data-theme="neobrutal"] .dropdown-menu, html[data-theme="neobrutal"] .modal-content, html[data-theme="neobrutal"] dialog#variants { border: 3px solid #111; border-radius: .6rem; box-shadow: var(--nb-shadow); }
+html[data-theme="neobrutal"] .table { --bs-table-bg: #fff; border: 3px solid #111; }
+html[data-theme="neobrutal"] .rule, html[data-theme="neobrutal"] .pane-title, html[data-theme="neobrutal"] .powered-by, html[data-theme="neobrutal"] .powered-by a { color: #111 !important; font-weight: 800; }
+html[data-theme="neobrutal"] .rule::before, html[data-theme="neobrutal"] .rule::after { border-top: 3px solid #111; }
+html[data-theme="neobrutal"] hr { border-top: 3px solid #111; opacity: 1; }
+html[data-theme="neobrutal"] .glyph-strip .g[data-code] { border: 3px solid #111; border-radius: .6rem; box-shadow: 3px 3px 0 #111; transition: transform .1s, box-shadow .1s; }
+html[data-theme="neobrutal"] .glyph-strip .g[data-code]:hover, html[data-theme="neobrutal"] .glyph-strip .g[data-code]:focus-visible { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #111; outline: none; }
+html[data-theme="neobrutal"] .glyph-strip .g[data-code]:active { transform: translate(3px, 3px); box-shadow: none; }
+html[data-theme="neobrutal"] #variants .speak { border: 3px solid #111; box-shadow: 2px 2px 0 #111; }
+html[data-theme="neobrutal"] #variants .var { border: 3px solid #111; border-radius: .5rem; box-shadow: 3px 3px 0 #111; background: #fff; }
+html[data-theme="neobrutal"] #variants .var.hit { background: var(--nb-yellow); }
+html[data-theme="neobrutal"] .search-bar .input-group { border-radius: .6rem; box-shadow: 4px 4px 0 #111; }
+html[data-theme="neobrutal"] .search-bar .input-group-text, html[data-theme="neobrutal"] .search-bar .form-control { border: 3px solid #111; background: #fff; }
+html[data-theme="neobrutal"] .search-bar .input-group-text { border-radius: .6rem 0 0 .6rem; border-right: 0; }
+html[data-theme="neobrutal"] .search-bar .btn { border-radius: 0 .6rem .6rem 0; box-shadow: none; }
+html[data-theme="neobrutal"] .controls { border: 3px solid #111; border-radius: .7rem; background: var(--nb-yellow); box-shadow: 4px 4px 0 #111; }
