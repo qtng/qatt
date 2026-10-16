@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Translator data</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body { background: #f7efdc; color: #2b2118; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h2 { margin-top: 2rem; font-size: 1.3rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    .note { color: #7b6c58; font-size: .85rem; }
+    table { background: #fffdf8; font-size: .9rem; }
+    th { font-weight: 600; color: #5b4d3d; }
+    td, th { text-align: right; white-space: nowrap; } td:first-child, th:first-child { text-align: left; }
+    td.l, th.l { text-align: left; }
+    td.han { font-size: 1.15rem; }
+    .chart { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem .4rem; }
+    .chart h3 { font-size: .95rem; font-weight: 600; margin: 0 0 .3rem; }
+    .chart div { position: relative; height: 15rem; }
+  </style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 56rem">
+  <h1>Translator data</h1>
+  <p class="note"><a href="index.html">Admin</a> · <a href="stats.html">Statistics</a> · <a href="models.html">Gemini models</a></p>
+  <p class="note" id="account"></p>
+  <div id="denied" class="alert alert-warning" hidden></div>
+
+  <div id="content" hidden>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <label for="days" class="me-1">Last</label>
+      <select id="days" class="form-select form-select-sm w-auto">
+        <option value="1">24 hours</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">1 year</option>
+      </select>
+      <button type="button" class="btn btn-sm btn-quiet" id="reload">Reload</button>
+      <span class="note ms-2" id="at"></span>
+    </div>
+
+    <h2>Languages of the free translation</h2>
+    <p class="note">"-" = no translation was asked for.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Language</th><th>Translations</th><th>Share</th><th>OK</th><th>Fallback</th><th>Errors</th><th>Errors %</th><th>Average s</th><th>Own characters</th></tr></thead>
+        <tbody id="langs"></tbody>
+      </table>
+    </div>
+    <div class="chart mt-3"><h3>Translations per day and language</h3><div><canvas id="chLang"></canvas></div></div>
+
+    <h2>Language and model</h2>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Language</th><th class="l">Model that answered</th><th>Translations</th><th>Errors</th><th>Fallback</th><th>Whole call average s</th></tr></thead>
+        <tbody id="langModel"></tbody>
+      </table>
+    </div>
+
+    <h2>Gaps of the dictionary</h2>
+    <p class="note" id="gapNote"></p>
+    <div class="d-flex gap-2 mb-2"><button type="button" class="btn btn-sm btn-quiet" id="csv">Download the list as CSV</button></div>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Word</th><th class="l">Characters</th><th>Times</th><th>Options on the page</th><th class="l">Last context</th><th class="l">Characters of the context</th></tr></thead>
+        <tbody id="gaps"></tbody>
+      </table>
+    </div>
+
+    <h3 class="h6 mt-4">Newest rows</h3>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Time</th><th class="l">Context</th><th class="l">Characters</th><th>Options</th><th class="l">Model</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+
+    <hr class="mt-4">
+    <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
+    <p class="note mb-1"><b>Gap:</b> a word for which the model gave a character of its own (or "?" = it knew none) because the list of the page had no suitable option. Stored with the word before and after, "before | word | after", "-" where there is none, in Quốc Ngữ and as the characters chosen for the three. Only these words, not the sentence. <b>Options on the page</b> = how many characters the dictionary offered for the word: 0 means the dictionary has nothing, more than 0 means none of them fitted.</p>
+    <p class="note mb-1"><b>Language:</b> the language of the free translation that was asked for. <b>Errors</b> = no answer (busy, over quota, ...). <b>Fallback</b> = the model's answer was unusable twice. <b>Own characters</b> = share of the words that are gaps. Recorded since 16 Oct 2026.</p>
+  </div>
+</main>
+
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const $ = id => document.getElementById(id);
+    const sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'));
+    const denied = text => { $('content').hidden = true; $('denied').hidden = false; $('denied').textContent = text; };
+    const sec = ms => ms === null || ms === undefined ? '' : (ms / 1000).toFixed(1);
+    const pct = (a, b) => b ? Math.round(100 * a / b) + ' %' : '';
+    // cells: values, or { v, cls } for a class
+    const fill = (id, rows) => $(id).replaceChildren(...rows.map(cells => {
+      const tr = document.createElement('tr');
+      cells.forEach(c => { const td = document.createElement('td'); const o = c !== null && typeof c === 'object' ? c : { v: c }; td.textContent = o.v === null || o.v === undefined ? '' : o.v; if (o.cls) td.className = o.cls; tr.append(td); });
+      return tr;
+    }));
+    const COLORS = ['#a8362a', '#3b6ea5', '#2e7d4f', '#d08a2e', '#7b6c58', '#8a5ba8', '#2b8a8a', '#c0638f', '#6b7b2a', '#4a4a8a', '#a86b2a', '#999999'];
+    let chart = null, gapsTop = [];
+    function drawLang(daily) {
+      if (typeof Chart === 'undefined') return;
+      Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif'; Chart.defaults.color = '#2b2118';
+      const days = [...new Set(daily.map(d => d.day))].sort(), langs = [...new Set(daily.map(d => d.lang))];
+      if (chart) chart.destroy();
+      chart = new Chart($('chLang'), { type: 'bar', data: { labels: days.map(d => d.slice(5)), datasets: langs.map((l, i) => ({ label: l, stack: 'l', backgroundColor: COLORS[i % COLORS.length] + 'cc', borderColor: COLORS[i % COLORS.length], borderWidth: 2,
+        data: days.map(d => { const r = daily.find(x => x.day === d && x.lang === l); return r ? r.calls : 0; }) })) },
+        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
+          scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } } });
+    }
+
+    let allowed = false;
+    async function load() {
+      if (!allowed) return;
+      const days = Number($('days').value);
+      const [lang, gaps] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gaps', { p_days: days })]);
+      const error = lang.error || gaps.error;
+      if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
+      $('denied').hidden = true; $('content').hidden = false;
+      $('at').textContent = 'as of ' + new Date().toLocaleTimeString();
+
+      const L = lang.data, total = L.by_lang.reduce((n, r) => n + r.calls, 0);
+      fill('langs', L.by_lang.map(r => [r.lang, r.calls, pct(r.calls, total), r.ok, r.fallback, r.errors, pct(r.errors, r.calls), sec(r.avg_ms), pct(r.own_words, r.words)]));
+      fill('langModel', L.by_lang_model.map(r => [r.lang, { v: r.model, cls: 'l' }, r.calls, r.errors, r.fallback, sec(r.avg_ms)]));
+      drawLang(L.daily);
+
+      const G = gaps.data;
+      gapsTop = G.top;
+      $('gapNote').textContent = G.rows + ' gap rows in this time, ' + G.top.length + ' different word and character combinations' + (G.top.length >= 200 ? ' (the 200 most frequent are shown)' : '') + '.';
+      fill('gaps', G.top.map(r => [r.word_qn, { v: r.word_char, cls: 'l han' }, r.n, r.n_options, { v: r.example_qn, cls: 'l' }, { v: r.example_chars, cls: 'l han' }]));
+      fill('recent', G.recent.map(r => [new Date(r.at).toLocaleString(), { v: r.context_qn, cls: 'l' }, { v: r.context_chars, cls: 'l han' }, r.n_options, { v: r.model || '', cls: 'l' }]));
+    }
+
+    $('csv').addEventListener('click', () => {
+      const q = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+      const lines = [['word_qn', 'word_char', 'times', 'options_on_the_page', 'last_at', 'context_qn', 'context_chars'].join(',')]
+        .concat(gapsTop.map(r => [r.word_qn, r.word_char, r.n, r.n_options, r.last_at, r.example_qn, r.example_chars].map(q).join(',')));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
+      a.download = 'dictionary-gaps.csv'; a.click(); URL.revokeObjectURL(a.href);
+    });
+    $('days').addEventListener('change', load);
+    $('reload').addEventListener('click', load);
+    const state = await Admin.check(sp);
+    if (state === 'admin') { allowed = true; load(); }
+    else denied(state === 'signin' ? 'Sign in with your admin account to see the translator data.' : 'This account is not an admin.');
+  });
+</script>
+</body>
+</html>

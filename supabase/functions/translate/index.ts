@@ -4,7 +4,8 @@
 // The prompts (and, if listed there, the model names) are loaded from the website, see PROMPTS_URL: they are changed in the
 // git repository qtng/chunom (js/translate_prompts.json), without deploying this function. The built-in defaults are the fallback.
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
-// Every call is logged as one row of numbers in public.translate_log (time, models, tokens, counts; no text and no user), see db/translate_log.sql.
+// Every call is logged as one row of numbers in public.translate_log (time, models, tokens, counts; no text and no user), see db/translate_log.sql;
+// the words for which the model gave a character of its own are also stored with the word before and after (public.translate_gaps), to find the gaps of the dictionary.
 import { translate, parsePrompts, DEFAULT_PROMPTS } from './pipeline.js';
 
 const ORIGINS = ['https://qatt.org', 'https://chunom.org', 'https://v2.chunom.org'];
@@ -115,12 +116,28 @@ async function hit(userId: string): Promise<number | null> {
   return Number(await r.json());
 }
 
-// one row of numbers per call and one per try of a model (translate_attempts); a failing log must never break the translation
-async function logCall(row: Record<string, unknown>, attempts: Attempt[] = []) {
+// the words with a character of the model's own (or "?"), each with the word before and after as "before | word | after" ("-" where there is none), in Quốc Ngữ and as characters;
+// n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The sentence itself is not stored.
+type Gap = { word_qn: string; word_char: string; n_options: number; context_qn: string; context_chars: string; model: string | null };
+function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null): Gap[] {
+  const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
+  const rows: Gap[] = [];
+  words.forEach((w, i) => {
+    if (!w.own) return;
+    const prev = words[i - 1], next = words[i + 1], span = sent.find(s => s && s.at === w.at && s.len === w.len);
+    rows.push({ word_qn: w.qn, word_char: w.chosen, n_options: span && Array.isArray(span.options) ? span.options.length : 0,
+      context_qn: [prev ? prev.qn : '-', w.qn, next ? next.qn : '-'].join(' | '), context_chars: [prev ? prev.chosen : '-', w.chosen, next ? next.chosen : '-'].join(' | '), model });
+  });
+  return rows.slice(0, 30);
+}
+
+// one row of numbers per call, one per try of a model (translate_attempts), the gaps of the dictionary (translate_gaps); a failing log must never break the translation
+async function logCall(row: Record<string, unknown>, attempts: Attempt[] = [], gaps: Gap[] = []) {
   await logRows('translate_log', row);
   if (attempts.length) await logRows('translate_attempts', attempts);
+  if (gaps.length) await logRows('translate_gaps', gaps);
 }
-async function logRows(table: string, row: Record<string, unknown> | Attempt[]) {
+async function logRows(table: string, row: Record<string, unknown> | Attempt[] | Gap[]) {
   try {
     const base = Deno.env.get('SUPABASE_URL')!, key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const r = await fetch(`${base}/rest/v1/${table}`, { method: 'POST', signal: AbortSignal.timeout(4000),
@@ -156,10 +173,11 @@ Deno.serve(async (req) => {
         const result = await translate(text, spans, { callModel: (sys: string, usr: string) => callGemini(sys, usr, { meter }), prompts: cfg.prompts, lang, progress: (step: number) => send({ step }) });
         console.log('result', cfg.version, JSON.stringify(result.words.map((w: { qn: string; chosen: string; own: boolean }) => [w.qn, w.chosen, w.own ? 'own' : 'list'])));
         send({ result: { ...result, version: cfg.version, left, limit: LIMIT } });
-        const ws = result.words as { own: boolean }[];
+        const ws = result.words as { at: number; len: number; qn: string; chosen: string; own: boolean }[];
+        const answered = meter.models[meter.models.length - 1] || null;
         await logCall({ status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
           model: meter.models[meter.models.length - 1] || null, lang: lang || null, syllables: result.words.reduce((n: number, w: { len: number }) => n + w.len, 0),
-          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts);
+          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts, gapRows(ws, spans, answered));
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
