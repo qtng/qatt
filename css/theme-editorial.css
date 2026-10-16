@@ -69,3 +69,5 @@ html[data-theme="editorial"] .search-bar .input-group { border-radius: 0; box-sh
 html[data-theme="editorial"] .search-bar .input-group-text, html[data-theme="editorial"] .search-bar .form-control { border-radius: 0; border-color: var(--ink); }
 html[data-theme="editorial"] .search-bar .btn { border-radius: 0; }
 html[data-theme="editorial"] .controls { border-radius: 0; border: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); background: transparent; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: almost black, a little warm, like printing ink */
+html[data-theme="editorial"] { --nav-bg: #221e1a; }

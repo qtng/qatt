@@ -76,3 +76,5 @@ html[data-theme="swiss"] .search-bar .input-group { border-radius: 0; box-shadow
 html[data-theme="swiss"] .search-bar .input-group-text, html[data-theme="swiss"] .search-bar .form-control { border-radius: 0; border: 2px solid #000; }
 html[data-theme="swiss"] .search-bar .btn { border-radius: 0; }
 html[data-theme="swiss"] .controls { border-radius: 0; border: 2px solid #000; background: #fff; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: black, with the red of the theme at the edge */
+html[data-theme="swiss"] { --nav-bg: #111111; --nav-line: #e30613; }

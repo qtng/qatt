@@ -47,3 +47,5 @@ html[data-theme="vietnam"] .search-bar .input-group-text, html[data-theme="vietn
 html[data-theme="vietnam"] .search-bar .input-group-text { border-radius: .45rem 0 0 .45rem; }
 html[data-theme="vietnam"] .search-bar .btn { border-radius: 0 .45rem .45rem 0; }
 html[data-theme="vietnam"] .controls { border: 1px solid var(--vn-gold); border-radius: .6rem; background: #fffdf8; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: dark lacquer red with a gold edge */
+html[data-theme="vietnam"] { --nav-bg: #4a1416; --nav-line: rgba(212, 175, 55, .45); }

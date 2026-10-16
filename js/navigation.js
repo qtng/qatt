@@ -195,7 +195,7 @@ window.Theme = window.Theme || (function() {
         own: "link-nom",
         accent: "var(--bs-warning)",
         license: QATT_SITE + "/license.html",
-        logo: "/chunom/img/chunom-logo.gif",
+        logo: "/chunom/img/chunom-logo.png", // without a background of its own: the bar shows through (its tint in a theme)
         icons: `<link rel="icon" type="image/svg+xml" href="/chunom/img/chunom-favicon.svg">
                 <link rel="icon" type="image/png" sizes="32x32" href="/chunom/img/chunom-favicon-32.png">
                 <link rel="apple-touch-icon" href="/chunom/img/chunom-apple-touch-icon.png">`,
@@ -242,10 +242,15 @@ window.Theme = window.Theme || (function() {
               stroke-linecap: square;
               stroke-linejoin: square;
             }
+            /* the colours of the bars: dark grey; a theme gives them a dark tint of its own (css/theme-*.css: html[data-theme="…"] { --nav-bg: …; }):
+               --nav-bg the menu bar and its menus, --nav-bottom-bg the bottom bar of the phone (the same unless a theme sets it), --nav-alpha how opaque they are,
+               --nav-line the line at their edge (a lighter shade of the bar unless a theme sets it) */
+            :root { --nav-bg: #212529; --nav-bottom-bg: var(--nav-bg); --nav-alpha: 95%; }
             .nav-backdrop{
               height: 60px; /* the page content starts below it, see the body padding */
-              background: rgba(33, 37, 41, 0.95);
+              background: color-mix(in srgb, var(--nav-bg) var(--nav-alpha), transparent);
               backdrop-filter: blur(15px);
+              border-bottom: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bg) 72%, #fff));
             }
             /* desktop: the links of the own block in the bar, the other site in a dropdown; below 992px the offcanvas menu and the bottom bar do it */
             .desk-links, .desk-other { display: none; }
@@ -258,7 +263,7 @@ window.Theme = window.Theme || (function() {
             .desk-links a:hover, .desk-other > button:hover { color: #fff; }
             .desk-links a.active { color: #fff; border-bottom-color: var(--bar-accent); }
             .desk-other > button { height: 36px; border: 1px solid rgba(255, 255, 255, .25); border-radius: .4rem; }
-            .desk-other .desk-menu { display: none; position: absolute; right: 0; top: calc(100% + .6rem); min-width: 14rem; padding: .4rem 0; background: rgba(33, 37, 41, .98); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .4); }
+            .desk-other .desk-menu { display: none; position: absolute; right: 0; top: calc(100% + .6rem); min-width: 14rem; padding: .4rem 0; background: color-mix(in srgb, var(--nav-bg) 98%, transparent); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .4); }
             .desk-other.open .desk-menu { display: block; }
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
@@ -271,13 +276,13 @@ window.Theme = window.Theme || (function() {
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
             .theme-switch > button:hover, .theme-switch > button[aria-expanded="true"] { color: #fff; }
-            .theme-menu { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 1080; min-width: 11rem; max-height: 70vh; overflow: auto; padding: .3rem; background: #212529; border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .35); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+            .theme-menu { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 1080; min-width: 11rem; max-height: 70vh; overflow: auto; padding: .3rem; background: var(--nav-bg); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .35); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
             .theme-menu button { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: .35rem; padding: .3rem .6rem; color: rgba(255, 255, 255, .8); font-size: .9rem; }
             .theme-menu button:hover { background: rgba(255, 255, 255, .1); color: #fff; }
             .theme-menu button.active { color: #fff; font-weight: 600; }
             .theme-menu button.active::before { content: "✓ "; }
             .navmenu-backdrop{
-              background: rgba(33, 37, 41, 0.5);
+              background: color-mix(in srgb, var(--nav-bg) 85%, transparent);   /* the text stays readable over bright pages */
               backdrop-filter: blur(10px);
             }
             .nav-section-header {
@@ -314,8 +319,8 @@ window.Theme = window.Theme || (function() {
                 .bottom-bar {
                     display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030;
                     padding-bottom: env(safe-area-inset-bottom);
-                    background: rgba(33, 37, 41, 0.95); backdrop-filter: blur(15px);
-                    border-top: 1px solid #495057;
+                    background: color-mix(in srgb, var(--nav-bottom-bg) var(--nav-alpha), transparent); backdrop-filter: blur(15px);
+                    border-top: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bottom-bg) 72%, #fff));
                 }
                 .bottom-bar.typing { display: none; } /* while the on-screen keyboard is open */
                 body.bar-typing { padding-bottom: 0; }
@@ -387,7 +392,7 @@ window.Theme = window.Theme || (function() {
             `<a href="${otherSection.site || ''}${link.url}"><i class="bi ${link.icon}"></i><span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span></a>`).join('');
 
         const header = document.createElement('nav');
-        header.className = "nav-backdrop navbar navbar-dark fixed-top border-bottom border-secondary shadow-sm";
+        header.className = "nav-backdrop navbar navbar-dark fixed-top shadow-sm";
         header.style.setProperty('--bar-accent', navConfig.accent);
         header.innerHTML = `
             <div class="container-fluid">
