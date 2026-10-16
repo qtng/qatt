@@ -139,7 +139,7 @@ grant execute on function public.admin_models(integer) to authenticated;
 -- suitable option. The context is stored as arrays: the words around the gap (3 on each side if the page sends nothing, fewer at the start or end of the sentence; the window is
 -- set by the translator page in its request as "context", 1 to 3: 3 if the user helps to improve the model, else 1; so it can change without a change of the table or of the function) in Quốc Ngữ and the characters chosen for them, and idx = the
 -- place of the gap word in the arrays, from 1: ctx_qn[idx] is the word. Only these words, not the sentence.
--- A gap is stored only when the word and all the words around it can be Quốc Ngữ (see vietnamese() in the function: consonants, vowels, consonants per syllable,
+-- A gap is stored only when the word and the 3 words on each side of it (also when fewer are stored) can be Quốc Ngữ (see vietnamese() in the function: consonants, vowels, consonants per syllable,
 -- Vietnamese letters only): English or mangled text leaves nothing.
 create table if not exists public.translate_gaps (
   id bigint generated always as identity primary key,
