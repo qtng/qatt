@@ -1,0 +1,71 @@
+/* Theme "editorial": the look of a printed magazine. Serif type on warm paper, thin black rules instead of boxes and shadows, square corners, buttons as
+   small spaced capitals, one deep red as the only colour. A complete theme of its own: it does not build on another theme and no other theme builds on it.
+   Every rule starts with html[data-theme="editorial"] so that it is more specific than the colour variables and rules of the pages' own <style>.
+   Loaded by js/navigation.js (Theme). */
+html[data-theme="editorial"] {
+  --ink: #1a1a1a; --accent: #9b1c1c; --cinnabar: #9b1c1c; --paper: #f8f5ef; --line: #d8d2c4; --field: #1a1a1a; --muted: #555;
+  --ed-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+  --ed-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html[data-theme="editorial"] body { background: var(--paper); color: var(--ink); font-family: var(--ed-serif); }
+html[data-theme="editorial"] .nav-backdrop, html[data-theme="editorial"] .bottom-bar { font-family: var(--ed-sans); }   /* the menu keeps the type of the other themes */
+html[data-theme="editorial"] h1, html[data-theme="editorial"] h2, html[data-theme="editorial"] h3 { font-family: var(--ed-serif); color: var(--ink); letter-spacing: -.01em; }
+html[data-theme="editorial"] h2 { font-weight: 700; border-top: 1px solid var(--ink); border-bottom: 0; padding-top: .45rem; }
+html[data-theme="editorial"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+html[data-theme="editorial"] .text-secondary, html[data-theme="editorial"] .text-muted, html[data-theme="editorial"] .note { color: var(--muted) !important; }
+
+/* the header: the masthead of a magazine, a big serif title between rules, the lead in italics */
+html[data-theme="editorial"] .hero { background: var(--paper); border-bottom: 3px double var(--ink); color: var(--ink); }
+html[data-theme="editorial"] .hero h1 { font-weight: 700; font-size: clamp(2.6rem, 9vw, 4.4rem); letter-spacing: -.02em; line-height: 1.05; }
+html[data-theme="editorial"] .hero .han { color: var(--accent); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); display: inline-block; padding: .15rem .3rem .15rem .8rem; }
+html[data-theme="editorial"] .hero .lead { font-style: italic; color: #333; font-size: 1.2rem; }
+html[data-theme="editorial"] .hero a:not(.btn) { color: var(--ink); text-decoration-color: var(--accent); }
+html[data-theme="editorial"] .editor-head h1 { font-family: var(--ed-serif); font-weight: 700; }
+html[data-theme="editorial"] .editor-head .han { color: var(--accent); }
+
+/* buttons: square, a thin black outline, small spaced capitals in a plain sans for contrast with the serif text */
+html[data-theme="editorial"] .btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-radius: 0; --bs-btn-border-width: 1px;
+  font-family: var(--ed-sans); font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; box-shadow: none;
+}
+html[data-theme="editorial"] .btn-cinnabar, html[data-theme="editorial"] .btn-accent {
+  --bs-btn-bg: var(--ink); --bs-btn-color: #fff; --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-bg: var(--accent); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--accent);
+  --bs-btn-active-bg: var(--accent); --bs-btn-active-color: #fff; --bs-btn-active-border-color: var(--accent);
+}
+html[data-theme="editorial"] .btn-quiet, html[data-theme="editorial"] .btn-ink, html[data-theme="editorial"] .btn-pill, html[data-theme="editorial"] .btn[class*="btn-outline-"] {
+  --bs-btn-bg: transparent; --bs-btn-color: var(--ink); --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-bg: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--ink);
+  --bs-btn-active-bg: var(--ink); --bs-btn-active-color: #fff; --bs-btn-active-border-color: var(--ink);
+}
+html[data-theme="editorial"] .btn-cinnabar.btn-pill, html[data-theme="editorial"] .btn-accent.btn-pill { --bs-btn-bg: var(--ink); --bs-btn-color: #fff; }
+
+/* fields and dropdowns: no boxes, a rule below */
+html[data-theme="editorial"] .form-select { --bs-border-radius: 0; border-width: 0 0 1px; border-color: var(--ink); background-color: transparent; color: var(--ink); font-family: var(--ed-serif); box-shadow: none; }
+html[data-theme="editorial"] .form-select:focus { border-color: var(--accent); box-shadow: none; }
+html[data-theme="editorial"] .form-control, html[data-theme="editorial"] textarea { border-radius: 0; border: 1px solid #b8b0a0; background-color: #fffdfa; }
+html[data-theme="editorial"] .form-control:focus, html[data-theme="editorial"] textarea:focus { border-color: var(--ink); box-shadow: none; outline: 1px solid var(--ink); }
+html[data-theme="editorial"] .form-check-input:checked { background-color: var(--ink); border-color: var(--ink); }
+html[data-theme="editorial"] input[type="range"] { accent-color: var(--ink); }
+
+/* panels: no shadows, no rounded corners, a rule above */
+html[data-theme="editorial"] .card, html[data-theme="editorial"] .card-box, html[data-theme="editorial"] .alert, html[data-theme="editorial"] .editor {
+  border-radius: 0; box-shadow: none; border: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); background: #fffdfa;
+}
+html[data-theme="editorial"] .dropdown-menu, html[data-theme="editorial"] .modal-content { border-radius: 0; border: 1px solid var(--ink); box-shadow: none; }
+html[data-theme="editorial"] .table { --bs-table-bg: transparent; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); }
+html[data-theme="editorial"] .rule { color: var(--ink) !important; font-family: var(--ed-sans); }
+html[data-theme="editorial"] .rule::before, html[data-theme="editorial"] .rule::after { border-top: 1px solid var(--ink); }
+html[data-theme="editorial"] .pane-title, html[data-theme="editorial"] .powered-by, html[data-theme="editorial"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="editorial"] hr { border-top: 1px solid var(--ink); opacity: 1; }
+
+/* symbol buttons (symbols.html), the boxes of its variants, the search bar (wiki.html), the controls (decodings.html) */
+html[data-theme="editorial"] .glyph-strip .g[data-code] { border: 1px solid var(--ink); border-radius: 0; transition: background-color .15s; }
+html[data-theme="editorial"] .glyph-strip .g[data-code]:hover, html[data-theme="editorial"] .glyph-strip .g[data-code]:focus-visible { background-color: #fff; outline: 1px solid var(--accent); outline-offset: 2px; }
+html[data-theme="editorial"] #variants .speak { border: 1px solid var(--ink); }
+html[data-theme="editorial"] #variants .var { border: 1px solid #b8b0a0; border-radius: 0; }
+html[data-theme="editorial"] #variants .var.hit { box-shadow: inset 0 0 0 1px var(--accent); }
+html[data-theme="editorial"] .search-bar .input-group { border-radius: 0; box-shadow: none; }
+html[data-theme="editorial"] .search-bar .input-group-text, html[data-theme="editorial"] .search-bar .form-control { border-radius: 0; border-color: var(--ink); }
+html[data-theme="editorial"] .search-bar .btn { border-radius: 0; }
+html[data-theme="editorial"] .controls { border-radius: 0; border: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); background: transparent; }
