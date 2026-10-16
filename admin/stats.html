@@ -55,11 +55,11 @@
     <h2>Total</h2>
     <div class="tiles" id="totalTiles"></div>
 
-    <h2>Visits</h2>
-    <p class="note">Counted by js/navigation.js when somebody uses a page (tap, key, mouse wheel); not for bots that name themselves. Visitors = browsers per day, visits = new visits (a pause of more than 30 minutes). "Account" = signed in, "anonymous" = everybody else. Counting started on 16 Oct 2026. Admins are not counted while signed in, and not in a browser where the admin area was opened (it sets <code>localStorage.qv_off</code>; this works per site, so on chunom.org sign in there or set it in the console). At most 200 counts per minute are accepted (against spam).</p>
+    <h2>Sessions</h2>
+    <p class="note">Visitors and sessions per day, site and kind (definitions in the footnote at the bottom). Counting started on 16 Oct 2026.</p>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
-        <thead><tr><th>Day</th><th>Site</th><th>Visitors anonymous</th><th>Visitors account</th><th>Visits anonymous</th><th>Visits account</th></tr></thead>
+        <thead><tr><th>Day</th><th>Site</th><th>Visitors anonymous</th><th>Visitors account</th><th>Sessions anonymous</th><th>Sessions account</th></tr></thead>
         <tbody id="visits"></tbody>
       </table>
     </div>
@@ -93,13 +93,19 @@
     </div>
 
     <h2>Over time</h2>
-    <p class="note">From the daily rows (written from 16 Oct 2026) and the visit counter. Practice numbers are the change since the day before.</p>
+    <p class="note">From the daily rows (written from 16 Oct 2026) and the session counter. Practice numbers are the change since the day before.</p>
     <div class="charts">
       <div class="chart"><h3>New people per day</h3><div><canvas id="chNew"></canvas></div></div>
       <div class="chart"><h3>Active people per day</h3><div><canvas id="chActive"></canvas></div></div>
       <div class="chart"><h3>Practice per day</h3><div><canvas id="chPractice"></canvas></div></div>
-      <div class="chart"><h3>Visitors per site and visits per day</h3><div><canvas id="chVisits"></canvas></div></div>
+      <div class="chart"><h3>Visitors per site and sessions per day</h3><div><canvas id="chVisits"></canvas></div></div>
     </div>
+
+    <hr class="mt-4">
+    <p class="note mb-1"><b>Definitions</b> (the sessions and visitors come from the counter in js/navigation.js, db/visits.sql)</p>
+    <p class="note mb-1"><b>Session:</b> a period of use of one browser on one site that ends after more than 30 minutes without activity, like a session in Google Analytics. It is counted on the first tap, key or mouse wheel, so it is closer to an "engaged session" there; bots that name themselves, admins and browsers with <code>qv_off</code> are left out, at most 200 counts per minute are accepted.</p>
+    <p class="note mb-1"><b>Visitor:</b> a browser that used a site on that UTC day, counted once per day. The same person on three days is three visitors, so do not add the days; the same person on two devices is two visitors.</p>
+    <p class="note mb-1"><b>Kind:</b> "account" = the browser is signed in with Google or e-mail, "anonymous" = everybody else, also the first session before the visitor has one. The other numbers (new visitors, accounts, practice, translator) count people with an account of the database and come from the daily rows; "new visitors" there are new anonymous users of the database, not browsers of the counter.</p>
   </div>
 </main>
 
@@ -140,7 +146,7 @@
         { label: 'Answers', data: change({ a: 'answers_correct', b: 'answers_wrong' }), backgroundColor: COLORS.green + 'aa', borderColor: COLORS.green, borderWidth: 2, yAxisID: 'y' },
         line('Words learned', change({ a: 'words_known' }), COLORS.red, { type: 'line', yAxisID: 'y1' })] },
         scales: { y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { precision: 0 } } } });
-      // visitors per day and site (stacked bars, the stack is the total) and the visits of all sites as the red line
+      // visitors per day and site (stacked bars, the stack is the total) and the sessions of all sites as the red line
       const SITES = [['qatt.org', COLORS.blue], ['chunom.org', COLORS.orange]];
       const perDay = new Map();
       for (const v of visits) {
@@ -150,7 +156,7 @@
       const vdays = [...perDay.keys()].sort(), vlabels = vdays.map(d => d.slice(5));
       make('chVisits', { type: 'bar', data: { labels: vlabels, datasets: [
         ...SITES.map(([site, color]) => ({ label: 'Visitors ' + site, data: vdays.map(d => perDay.get(d).sites[site] || 0), backgroundColor: color + 'cc', borderColor: color, borderWidth: 2, stack: 'visitors' })),
-        line('Visits (all)', vdays.map(d => perDay.get(d).visits), COLORS.red, { type: 'line', stack: 'visits' })] },
+        line('Sessions (all)', vdays.map(d => perDay.get(d).visits), COLORS.red, { type: 'line', stack: 'visits' })] },
         scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } });
     }
 
