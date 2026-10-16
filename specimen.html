@@ -27,7 +27,8 @@
     .font { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: .4rem 2.5rem; padding: 2.2rem 0; border-top: 1px solid rgba(127, 127, 127, .25); }
     .font:first-child { border-top: 0; }
     .font h2 { grid-column: 1 / -1; font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.35rem; margin: 0 0 .4rem; }
-    .samples { min-width: 0; display: grid; gap: .3rem; align-content: start; overflow-x: auto; padding-bottom: .4rem; }   /* the lines are not cut: the block scrolls sideways */
+    .samples { min-width: 0; display: grid; gap: .3rem; align-content: start; overflow-x: auto; padding: 1rem 1.2rem 1.1rem .6rem; background: #fff; color: #2b2118; border-radius: .8rem; box-shadow: 0 1px 3px rgba(43, 33, 24, .12); }   /* a white card; the lines are not cut: it scrolls sideways */
+    @media (max-width: 767.98px) { .samples { margin: 0 -1rem; border-radius: 0; box-shadow: none; } }   /* on a phone from edge to edge */
     .line { display: flex; align-items: baseline; gap: .8rem; width: max-content; }
     .line .px { flex: 0 0 2.2rem; font-size: .7rem; text-align: right; font-variant-numeric: tabular-nums; }
     .line .q { white-space: nowrap; line-height: 1.5; }   /* room for the tone marks above and below */
@@ -65,7 +66,12 @@
 (() => {
   const $ = s => document.querySelector(s);
   const parser = new VietnameseParser();
-  const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());   // the fonts of the list of this visitor (fonts.js)
+  const FONTS = QATT_FONTS;   // all fonts, also those that the font lists offer only to admins (fonts.js defines the @font-face rules of the others only for admins)
+  if (!isAdmin()) {
+    const style = document.createElement('style');
+    style.textContent = FONTS.filter(f => f.admin).map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2) format("woff2"), url(fonts/${f.file}.ttf) format("truetype"); }`).join('\n');
+    document.head.append(style);
+  }
   // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
   const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
   const SIZES = [14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56];   // from small to large
