@@ -97,7 +97,7 @@ window.Lang = window.Lang || (function() {
 // ---------- the menu ----------
 // ---------- Theme: the look of qatt.org ----------
 // localStorage.theme ("classic", "retro" or "popart", chosen in license.html) sets data-theme on <html> as early as the script runs; css/site.css has the rules for every theme
-// ("classic", the default, has no attribute: the pages show their own rules, css/site.css takes the retro ones back). Only qatt.org has themes, the pages of the Chunom site do not use site.css.
+// ("classic", the default, has no attribute: the pages show their own rules and the base of css/site.css; the themes override them). Only qatt.org has themes, the pages of the Chunom site do not use site.css.
 //   Theme.list          {name: [English, Tiếng Việt]}
 //   Theme.current       the name of the theme
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document

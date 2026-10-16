@@ -1,10 +1,37 @@
-/* The look that all pages of QATT (and later Chunom) share: for now the retro buttons as in check.html.
-   Load it after Bootstrap: <link rel="stylesheet" href="css/site.css"> (the path as for vendor/). Pages do not repeat these rules. */
+/* The look that all pages of QATT share. The base is the classic look (pill buttons with a thin soft outline, as on the Chunom site); the themes
+   (js/navigation.js sets data-theme on <html> from localStorage.theme, chosen in license.html) override it:
+     classic  no attribute, the default: the rules just below, nothing more
+     retro    a 2px dark outline, a hard shadow, softly rounded corners (buttons, dropdowns, symbol buttons, the boxes of the variants, the search bar)
+     popart   builds on retro: flat colours, thick outlines, Ben-Day dots
+   Load it after Bootstrap: <link rel="stylesheet" href="css/site.css"> (the path as for vendor/). Pages do not repeat these rules; what a page has of its own (its
+   inline <style>) is the classic look, a theme overrides it with a more specific selector html[data-theme]. Bootstrap draws its buttons from --bs-btn-* variables,
+   so set those (not border-color) to change the colours of a button. */
 :root { --ink: #2b2118; --cinnabar: #a8362a; --retro-hover: #fff1c9; --retro-active: #ffe39a; }
 
+/* ---- classic: every button a pill; the buttons of the site ---- */
+.btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 2rem; }
+.btn-pill { padding: .5rem 1.3rem; }
+.btn-cinnabar, .btn-accent {
+  --bs-btn-bg: var(--cinnabar); --bs-btn-color: #fff; --bs-btn-border-color: var(--cinnabar);
+  --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #8c2c22;
+  --bs-btn-active-bg: #7a261d; --bs-btn-active-color: #fff; --bs-btn-active-border-color: #7a261d;
+}
+.btn-quiet, .btn-ink {
+  --bs-btn-bg: #fffdf8; --bs-btn-color: #5b4d3d; --bs-btn-border-color: #cdbf9f;
+  --bs-btn-hover-bg: #f1e8d2; --bs-btn-hover-color: var(--ink); --bs-btn-hover-border-color: #b9a982;
+  --bs-btn-active-bg: #f1e8d2; --bs-btn-active-color: var(--ink); --bs-btn-active-border-color: #b9a982;
+}
+.hero .btn-ink { --bs-btn-bg: transparent; --bs-btn-color: var(--ink); --bs-btn-border-color: #8a7660; --bs-btn-hover-bg: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--ink); }
+
+/* ---------------------------------------------------------------------------------------------------------------------
+   Themes. A theme overrides the colour variables that the pages use (their own :root is less specific than html[data-theme]) and the shapes of the
+   shared elements. "retro" and "popart" share the rules of the next block.
+   --------------------------------------------------------------------------------------------------------------------- */
+
+/* ---- retro (also the base of popart): the retro buttons as in check.html, as everything that came with the retro redesign ---- */
 /* every Bootstrap button: a 2px dark outline and a hard 2px shadow that the button presses into when it is clicked.
    Bootstrap draws its buttons from --bs-btn-* variables, so only these are set (the colours of btn-primary, btn-danger, … stay). */
-.btn:not(.btn-close):not(.btn-link) {
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link) {
   --bs-btn-border-width: 2px;
   --bs-btn-border-radius: .55rem;   /* square with softly rounded corners, like the Skip button of check.html */
   --bs-btn-border-color: var(--ink);
@@ -15,37 +42,40 @@
   box-shadow: 0 2px 0 var(--ink);
   transition: transform .12s, box-shadow .12s, background-color .15s, color .15s;
 }
-.btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled) { transform: translateY(-1px); }
-.btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
-.btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
-.btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
-.btn:not(.btn-close):not(.btn-link):disabled, .btn:not(.btn-close):not(.btn-link).disabled { box-shadow: none; }
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled) { transform: translateY(-1px); }
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link):disabled,
+html:is([data-theme="retro"], [data-theme="popart"]) .btn:not(.btn-close):not(.btn-link).disabled { box-shadow: none; }
 
 /* the outline buttons are cream with a yellow hover (Bootstrap would fill them grey) */
-.btn[class*="btn-outline-"] {
+html:is([data-theme="retro"], [data-theme="popart"]) .btn[class*="btn-outline-"] {
   --bs-btn-bg: #fffdf8;
   --bs-btn-hover-bg: var(--retro-hover);
   --bs-btn-active-bg: var(--retro-active);
   --bs-btn-hover-color: var(--bs-btn-color);
   --bs-btn-active-color: var(--bs-btn-color);
 }
-.btn-outline-secondary, .btn-outline-dark { --bs-btn-color: var(--ink); }
+html:is([data-theme="retro"], [data-theme="popart"]) .btn-outline-secondary,
+html:is([data-theme="retro"], [data-theme="popart"]) .btn-outline-dark { --bs-btn-color: var(--ink); }
 
 /* buttons of the site */
-.btn-pill { padding: .5rem 1.3rem; }   /* the name stays, the shape is the one of every button */
-.btn-cinnabar, .btn-accent {
+html:is([data-theme="retro"], [data-theme="popart"]) .btn-cinnabar,
+html:is([data-theme="retro"], [data-theme="popart"]) .btn-accent {
   --bs-btn-bg: var(--cinnabar); --bs-btn-color: #fff;
   --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff;
   --bs-btn-active-bg: #7a261d; --bs-btn-active-color: #fff;
 }
-.btn-quiet, .btn-ink {
+html:is([data-theme="retro"], [data-theme="popart"]) .btn-quiet,
+html:is([data-theme="retro"], [data-theme="popart"]) .btn-ink {
   --bs-btn-bg: #fffdf8; --bs-btn-color: var(--ink);
   --bs-btn-hover-bg: var(--retro-hover); --bs-btn-hover-color: var(--ink);
   --bs-btn-active-bg: var(--retro-active); --bs-btn-active-color: var(--ink);
 }
 
 /* dropdowns: the same outline, corners and hard shadow as the buttons */
-.form-select {
+html:is([data-theme="retro"], [data-theme="popart"]) .form-select {
   --bs-border-width: 2px;
   --bs-border-color: var(--ink);
   --bs-border-radius: .55rem;
@@ -53,48 +83,23 @@
   color: var(--ink);
   box-shadow: 0 2px 0 var(--ink);
 }
-.form-select:focus { border-color: var(--ink); box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
-.form-select:disabled { box-shadow: none; }
+html:is([data-theme="retro"], [data-theme="popart"]) .form-select:focus { border-color: var(--ink); box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+html:is([data-theme="retro"], [data-theme="popart"]) .form-select:disabled { box-shadow: none; }
 
-/* ---------------------------------------------------------------------------------------------------------------------
-   Themes (js/navigation.js sets data-theme on <html> from localStorage.theme; the choice is in license.html).
-   The default (classic, no attribute) is the block "classic" below; the theme "retro" has no rules of its own, it is the retro look above and of the pages.
-   A theme overrides the colour variables that the pages use (their own :root is less specific than html[data-theme]) and the shapes of the shared elements.
-   --------------------------------------------------------------------------------------------------------------------- */
-
-/* ---- classic = the default (no data-theme): the look before the retro redesign, the one the Chunom site has: pill buttons with a thin soft outline, no shadows,
-   round symbol buttons. It takes the retro rules above back, only where no theme is chosen; the theme "retro" is these rules as they are. Sound Check (check.html)
-   keeps its retro buttons in every theme: it had them before. ---- */
-html:not([data-theme]) .btn:not(.btn-close):not(.btn-link) {
-  --bs-btn-border-width: 1px; --bs-btn-border-radius: 2rem;
-  font-weight: 400; box-shadow: none; transition: background-color .15s, border-color .15s, color .15s;
-}
-html:not([data-theme]) .btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled),
-html:not([data-theme]) .btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
-html:not([data-theme]) .btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: none; box-shadow: none; }
-html:not([data-theme]) .btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .25); }
-html:not([data-theme]) .btn-cinnabar, html:not([data-theme]) .btn-accent {
-  --bs-btn-border-color: var(--cinnabar); --bs-btn-hover-border-color: #8c2c22; --bs-btn-active-border-color: #7a261d;
-}
-html:not([data-theme]) .btn-quiet, html:not([data-theme]) .btn-ink {
-  --bs-btn-color: #5b4d3d; --bs-btn-border-color: #cdbf9f; --bs-btn-hover-bg: #f1e8d2; --bs-btn-hover-border-color: #b9a982; --bs-btn-active-bg: #f1e8d2; --bs-btn-active-border-color: #b9a982;
-}
-html:not([data-theme]) .hero .btn-ink { --bs-btn-bg: transparent; --bs-btn-color: var(--ink); --bs-btn-border-color: #8a7660; --bs-btn-hover-bg: var(--ink); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--ink); }
-html:not([data-theme]) .btn[class*="btn-outline-"] { --bs-btn-bg: transparent; --bs-btn-hover-bg: var(--bs-btn-color); --bs-btn-active-bg: var(--bs-btn-color); --bs-btn-hover-color: #fff; --bs-btn-active-color: #fff; --bs-btn-border-color: var(--bs-btn-color); --bs-btn-hover-border-color: var(--bs-btn-color); }
-html:not([data-theme]) .btn-outline-secondary { --bs-btn-color: #6c757d; }
-html:not([data-theme]) .form-select { --bs-border-width: 1px; --bs-border-color: #cdbf9f; --bs-border-radius: 2rem; background-color: #fff; box-shadow: none; }
-html:not([data-theme]) .form-select:focus { border-color: #cdbf9f; box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .25); }
-/* page rules that came with the retro redesign */
-html:not([data-theme]) .glyph-strip .g[data-code] { border: 1px solid var(--bc); border-radius: 50%; box-shadow: none; transition: opacity .15s, color .15s, border-color .15s, box-shadow .15s; }
-html:not([data-theme]) .glyph-strip .g[data-code]:hover, html:not([data-theme]) .glyph-strip .g[data-code]:focus-visible { transform: none; box-shadow: 0 .15rem .5rem rgba(60, 40, 20, .14); }
-html:not([data-theme]) .glyph-strip .g[data-code]:active { transform: none; box-shadow: none; filter: brightness(.96); }
-html:not([data-theme]) #variants .speak { border: 1px solid #e4d9c0; box-shadow: none; }
-html:not([data-theme]) #variants .var { border: 1px solid #e4d9c0; border-radius: .5rem; box-shadow: none; background: #fff; }
-html:not([data-theme]) #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 0 0 2px rgba(168, 54, 42, .35); }
-html:not([data-theme]) .controls { border-radius: 2rem; }
-html:not([data-theme]) .search-bar .input-group { border-radius: 2rem; }
-html:not([data-theme]) .search-bar .input-group-text { border-radius: 2rem 0 0 2rem; }
-html:not([data-theme]) .search-bar .btn { border-radius: 0 2rem 2rem 0; }
+/* the symbol buttons of symbols.html and the boxes of its variants: squares with the outline and the shadow of the buttons */
+html:is([data-theme="retro"], [data-theme="popart"]) .glyph-strip .g[data-code] { border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); transition: opacity .15s, color .15s, background-color .15s, transform .12s, box-shadow .12s; }
+html:is([data-theme="retro"], [data-theme="popart"]) .glyph-strip .g[data-code]:hover, html:is([data-theme="retro"], [data-theme="popart"]) .glyph-strip .g[data-code]:focus-visible { transform: translateY(-1px); }
+html:is([data-theme="retro"], [data-theme="popart"]) .glyph-strip .g[data-code]:focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+html:is([data-theme="retro"], [data-theme="popart"]) .glyph-strip .g[data-code]:active { transform: translateY(2px); box-shadow: none; filter: none; }
+html:is([data-theme="retro"], [data-theme="popart"]) #variants .speak { border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); }
+html:is([data-theme="retro"], [data-theme="popart"]) #variants .var { border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); background: #fffdf8; }
+html:is([data-theme="retro"], [data-theme="popart"]) #variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 2px 0 var(--cinnabar), 0 0 0 2px rgba(168, 54, 42, .35); }
+/* the search bar of wiki.html, the box of the controls of decodings.html: soft corners instead of pills */
+html:is([data-theme="retro"], [data-theme="popart"]) .search-bar .input-group { border-radius: .55rem; }
+html:is([data-theme="retro"], [data-theme="popart"]) .search-bar .input-group-text { border-radius: .55rem 0 0 .55rem; }
+html:is([data-theme="retro"], [data-theme="popart"]) .search-bar .btn { border-radius: 0 .55rem .55rem 0; }
+html:is([data-theme="retro"], [data-theme="popart"]) .controls { border-radius: .55rem; }
+html:is([data-theme="retro"], [data-theme="popart"]) .controls .form-select { border-radius: var(--bs-border-radius); border-color: var(--bs-border-color); }
 
 /* ---- pop art: flat Lichtenstein colours, thick black outlines, hard offset shadows, Ben-Day dots ---- */
 html[data-theme="popart"] {
