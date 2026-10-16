@@ -95,7 +95,7 @@ security definer
 set search_path = ''
 as $$
 declare
-  d integer := greatest(1, least(coalesce(p_days, 7), 90));
+  d integer := greatest(1, least(coalesce(p_days, 7), 365));
 begin
   if coalesce((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean, false) is not true then
     raise exception 'not allowed' using errcode = '42501';
