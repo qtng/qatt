@@ -1,7 +1,8 @@
 /* Theme "future": futuristic: a dark sci-fi interface. Deep night background with a faint grid, neon cyan and magenta, glowing thin outlines, buttons with cut corners, wide spaced capitals. The panels of the pages turn dark too; what a page draws light of its own keeps its dark text, so it stays readable.
    A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="future"] so that it is
    more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
-html[data-theme="future"] { --ink: #d7f6ff; --accent: #00e5ff; --cinnabar: #ff2bd6; --paper: #050816; --line: rgba(0, 229, 255, .35); --field: rgba(0, 229, 255, .5); --muted: #8fb3c9;
+html[data-theme="future"] { color-scheme: dark;   /* Canvas/CanvasText and the form controls of the browser in dark */
+  --ink: #d7f6ff; --accent: #00e5ff; --cinnabar: #ff2bd6; --paper: #050816; --line: rgba(0, 229, 255, .35); --field: rgba(0, 229, 255, .5); --muted: #8fb3c9;
   --fx-text: #d7f6ff; --fx-cyan: #00e5ff; --fx-magenta: #ff2bd6; --fx-panel: rgba(9, 18, 40, .85);
   --fx-glow: 0 0 .5rem rgba(0, 229, 255, .45), inset 0 0 .6rem rgba(0, 229, 255, .12);
   --fx-font: "Orbitron", "Rajdhani", "Eurostile", "Bank Gothic", system-ui, sans-serif;
