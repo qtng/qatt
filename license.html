@@ -37,6 +37,10 @@
       <button type="button" class="btn btn-outline-secondary" data-lang="vi">Tiếng Việt</button>
     </div>
 
+    <h2 class="h4 mt-4" data-vi="Giao diện">Theme</h2>
+    <p class="text-secondary small">The look of qatt.org. It is remembered in this browser; chunom.org does not use it.</p>
+    <div class="btn-group btn-group-sm mb-2" role="group" id="theme" aria-label="Theme"></div>
+
     <h2 class="h4 mt-4" data-vi="Nguồn đã dùng">Sources used</h2>
     <p class="text-secondary small">The scripts, styles and fonts of the page you came from. Click a file to see it; reload it there to get the newest version.</p>
     <ul id="sources"></ul>
@@ -48,6 +52,18 @@
       const buttons = document.querySelectorAll('#lang button');
       const mark = () => buttons.forEach(b => { const on = b.dataset.lang === Lang.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
       buttons.forEach(b => b.addEventListener('click', () => { Lang.set(b.dataset.lang); mark(); }));
+      mark();
+    })();
+    (() => {
+      // the theme switch (Theme is defined by js/navigation.js)
+      const box = document.getElementById('theme');
+      for (const [name, [en, vi]] of Object.entries(Theme.list)) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-outline-secondary'; b.dataset.theme = name;
+        b.textContent = en; if (vi !== en) b.setAttribute('data-vi', vi);
+        box.append(b);
+      }
+      const mark = () => box.querySelectorAll('button').forEach(b => { const on = b.dataset.theme === Theme.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+      box.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { Theme.set(b.dataset.theme); mark(); } });
       mark();
     })();
     (() => {
