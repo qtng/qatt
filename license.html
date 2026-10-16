@@ -38,7 +38,7 @@
     </div>
 
     <h2 class="h4 mt-4" data-vi="Giao diện">Theme</h2>
-    <p class="text-secondary small">The look of qatt.org. It is remembered in this browser; chunom.org does not use it.</p>
+    <p class="text-secondary small">The look of the pages. It is remembered in this browser, for each site on its own. <span id="theme-back" hidden>Choosing one takes you back to <a href="#" id="theme-back-link">the page you came from</a>, which then uses it.</span></p>
     <div class="d-flex flex-wrap gap-2 mb-2" role="group" id="theme" aria-label="Theme"></div>
 
     <h2 class="h4 mt-4" data-vi="Nguồn đã dùng">Sources used</h2>
@@ -63,7 +63,21 @@
         box.append(b);
       }
       const mark = () => box.querySelectorAll('button').forEach(b => { const on = b.dataset.theme === Theme.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-      box.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { Theme.set(b.dataset.theme); mark(); } });
+      // ?back=<address> (the footnote of every page sends it): after the choice the visitor goes back there with ?theme=<name>, which js/navigation.js of that page takes up
+      // (so the Chunom site gets the theme too, although its storage is its own); only addresses of qatt.org, chunom.org or this site
+      const back = (() => {
+        try {
+          const u = new URL(new URLSearchParams(location.search).get('back') || '', location.href);
+          return ['https://qatt.org', 'https://chunom.org', location.origin].includes(u.origin) && u.href !== location.href.split('#')[0] ? u : null;
+        } catch (e) { return null; }
+      })();
+      if (back) { document.getElementById('theme-back').hidden = false; document.getElementById('theme-back-link').href = back.href; }
+      box.addEventListener('click', e => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        Theme.set(b.dataset.theme); mark();
+        if (back) { back.searchParams.set('theme', b.dataset.theme); location.href = back.href; }
+      });
       mark();
     })();
     (() => {
