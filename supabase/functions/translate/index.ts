@@ -122,11 +122,18 @@ async function hit(userId: string): Promise<number | null> {
 // length of the sentence in words; n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
 const MIN_CONTEXT = 1, DEFAULT_CONTEXT = 3, MAX_CONTEXT = 5;
 type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: string[]; ctx_chars: string[]; idx: number; pos: number; n_words: number; model: string | null };
+// A cheap check that a word can be Quốc Ngữ at all, so that English words, names, URLs, Chinese text and typos do not fill the table of gaps: every syllable
+// is consonants, then vowels, then consonants (C* V+ C*). That needs a vowel in every syllable and allows no consonant between two vowels (a consonant stands at
+// the start or the end of a Vietnamese syllable only), and only the letters of the Vietnamese alphabet: no f j w z, no digits, no other script. (The tokenizer of
+// pipeline.js already cuts the words at digits and special characters, so those never are part of a word.) It does not catch every foreign word ("tool", "you" pass).
+const VOWELS = 'aăâeêioôơuưyàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ';
+const SYLLABLE = new RegExp(`^[bcdđghklmnpqrstvx]*[${VOWELS}]+[bcdđghklmnpqrstvx]*$`);
+const vietnamese = (qn: string) => qn.normalize('NFC').split(' ').every(s => SYLLABLE.test(s));
 function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null, context: number): Gap[] {
   const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
   const rows: Gap[] = [];
   words.forEach((w, i) => {
-    if (!w.own) return;
+    if (!w.own || !vietnamese(w.qn)) return;
     const from = Math.max(0, i - context), around = words.slice(from, i + context + 1), span = sent.find(s => s && s.at === w.at && s.len === w.len);
     rows.push({ word_qn: w.qn, word_char: w.chosen, n_options: span && Array.isArray(span.options) ? span.options.length : 0,
       ctx_qn: around.map(x => x.qn), ctx_chars: around.map(x => x.chosen), idx: i - from + 1, pos: i + 1, n_words: words.length, model });
