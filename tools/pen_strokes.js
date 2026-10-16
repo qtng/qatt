@@ -1,9 +1,9 @@
-// The Kai (regular script) stroke drawing for the font build (kage_outlines.js, style "kai"): the KAGE lines of fonts/kage.json (straight 1 and
-// quadratic 2 strokes) are drawn as brush strokes of varying width instead of by the KAGE engine, which only knows Mincho and Gothic.
+// The Pen stroke drawing (a felt-tip or ballpoint pen with a touch of clerical script) for the font build (kage_outlines.js, style "pen"): the KAGE lines of fonts/kage.json (straight 1 and
+// quadratic 2 strokes) are drawn as pen strokes of varying width instead of by the KAGE engine, which only knows Mincho and Gothic.
 //   horizontal: slightly bowed upwards, a press at the start (a cut slanted like the brush entering), a rounded bulge where it stops, thinner than the verticals
 //   vertical:   a press at the start, round "dewdrop" end (垂露)
 //   falling curve (and slanted line): a press at the start, round end, the same width throughout (no taper)
-// kaiPolygons(lines, W) -> polygons [[x, y], ...] in the KAGE units of the input; W is the standard stroke width in these units.
+// penPolygons(lines, W) -> polygons [[x, y], ...] in the KAGE units of the input; W is the standard stroke width in these units.
 "use strict";
 const nums = l => l.split(":").map(Number);
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -85,5 +85,5 @@ function stroke(line, W, others) {
   return poly;
 }
 
-function kaiPolygons(lines, W) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i))); }
-module.exports = { kaiPolygons };
+function penPolygons(lines, W) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i))); }
+module.exports = { penPolygons };
