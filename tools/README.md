@@ -111,15 +111,13 @@ verticals a press and a round "dewdrop" end, falling curves have a press and kee
 `--weight F` sets the stroke width (F times the standard) and `--label Name` is added to the family name:
 
 ```
-python3 tools/build_font.py --kage fonts/kage.json --kai fonts/glyphs.json fonts/qatt-kai     # writes fonts/qatt-kai.ttf / .woff2
-python3 tools/build_font.py --kage fonts/kage.json --kai --weight 0.6 --label Light  fonts/glyphs.json fonts/qatt-kai-light
-python3 tools/build_font.py --kage fonts/kage.json --kai --weight 1.6 --label Medium fonts/glyphs.json fonts/qatt-kai-medium
-python3 tools/build_font.py --kage fonts/kage.json --kai --weight 2.4 --label Bold   fonts/glyphs.json fonts/qatt-kai-bold
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 0.6 --label ExtraLight fonts/glyphs.json fonts/qatt-kai-extralight
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 1.0 --label Light      fonts/glyphs.json fonts/qatt-kai-light
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 1.6 fonts/glyphs.json fonts/qatt-kai                       # Regular
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 2.4 --label Medium     fonts/glyphs.json fonts/qatt-kai-medium
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 3.2 --label Bold       fonts/glyphs.json fonts/qatt-kai-bold
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 4.0 --label Heavy      fonts/glyphs.json fonts/qatt-kai-heavy
 ```
-
-**Lishu font.** `--lishu` (instead of `--kai`, same `--weight` and `--label`) draws the clerical script variant of the same strokes (`tools/kai_strokes.js`, style "lishu"):
-the horizontals are wavy with a round "silkworm head" at the start and a flared "swallow tail" at the end, the verticals are thinner and blunt, the falling strokes widen
-towards a flared end. The weights are named like those of Kai (`fonts/qatt-lishu[-light|-medium|-bold]`).
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same

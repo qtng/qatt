@@ -3,14 +3,12 @@
 //   horizontal: slightly bowed upwards, a press at the start (a cut slanted like the brush entering), a rounded bulge where it stops, thinner than the verticals
 //   vertical:   a press at the start, round "dewdrop" end (垂露)
 //   falling curve (and slanted line): a press at the start, round end, the same width throughout (no taper)
-//   style "lishu" (clerical script): the horizontals are the main strokes, wavy, with a round "silkworm head" at the start and a flared "swallow tail" at the end; verticals thinner, plain and blunt;
-//   falling strokes widen to a flared end
-// kaiPolygons(lines, W, style = "kai") -> polygons [[x, y], ...] in the KAGE units of the input; W is the standard stroke width in these units.
+// kaiPolygons(lines, W) -> polygons [[x, y], ...] in the KAGE units of the input; W is the standard stroke width in these units.
 "use strict";
 const nums = l => l.split(":").map(Number);
 const lerp = (a, b, t) => a + (b - a) * t;
 
-function centreline(f, bow, wave) {                  // the points of a stroke, sampled, with the bow added to a horizontal
+function centreline(f, bow) {                  // the points of a stroke, sampled, with the bow added to a horizontal
   const p = []; for (let i = 3; i + 1 < f.length; i += 2) p.push([f[i], f[i + 1]]);
   const len = Math.hypot(p[p.length - 1][0] - p[0][0], p[p.length - 1][1] - p[0][1]);
   const n = Math.max(10, Math.min(40, Math.ceil(len / 2)));
@@ -20,7 +18,7 @@ function centreline(f, bow, wave) {                  // the points of a stroke, 
     let x, y;
     if (f[0] === 2 && p.length === 3) { const u = 1 - t; x = u * u * p[0][0] + 2 * u * t * p[1][0] + t * t * p[2][0]; y = u * u * p[0][1] + 2 * u * t * p[1][1] + t * t * p[2][1]; }
     else { x = lerp(p[0][0], p[p.length - 1][0], t); y = lerp(p[0][1], p[p.length - 1][1], t); }
-    out.push([x, y - bow * 4 * t * (1 - t) - wave * Math.sin(2 * Math.PI * t), t]);
+    out.push([x, y - bow * 4 * t * (1 - t), t]);
   }
   return { pts: out, len };
 }
@@ -41,8 +39,7 @@ function touches(pt, others, W) {
   return false;
 }
 
-function stroke(line, W, others, style) {
-  const li = style === "lishu";
+function stroke(line, W, others) {
   const f = nums(line), p0 = [f[3], f[4]], p1 = [f[f.length - 2], f[f.length - 1]];
   const dx = p1[0] - p0[0], dy = p1[1] - p0[1], ax = Math.abs(dx), ay = Math.abs(dy);
   let kind;
@@ -50,17 +47,11 @@ function stroke(line, W, others, style) {
   else kind = f[1] === 7 ? "arc" : "fall";
   const len0 = Math.hypot(dx, dy);
   const free0 = !touches(p0, others, W), free1 = !touches(p1, others, W);
-  const bow = kind === "h" && !li ? Math.min(len0 * 0.035, 2.6) : 0, wave = kind === "h" && li ? Math.min(len0 * 0.045, 3) : 0;
-  const { pts, len } = centreline(f, bow, wave);
+  const bow = kind === "h" ? Math.min(len0 * 0.035, 2.6) : 0;
+  const { pts, len } = centreline(f, bow);
   // full width at distance d from the start
   const width = (d, t) => {
     const e = len - d, press = Math.min(3 * W, len * 0.3);
-    if (li) switch (kind) {
-      case "h": return 0.95 * W * (1 + (free0 ? 0.75 : 0) * ease(1 - d / press) + (free1 ? 0.95 : 0) * ease(1 - e / press));   // head and tail
-      case "v": return 0.8 * W;
-      case "d": case "fall": return W * (0.85 + (free1 ? 0.8 : 0) * ease(1 - e / press) + 0.15 * ease(1 - d / press));
-      default: return 0.9 * W;
-    }
     switch (kind) {
       case "h": return 0.82 * W * (1 + (free0 ? 0.55 : 0) * ease(1 - d / press) + (free1 ? 0.45 : 0) * ease(1 - e / press));
       case "v": return 1.08 * W * (1 + (free0 ? 0.3 : 0) * ease(1 - d / press) + (free1 ? 0.25 : 0) * ease(1 - e / press));
@@ -85,14 +76,14 @@ function stroke(line, W, others, style) {
     else if (slant) o.push([c[0] + tx * slant * hw, c[1] + ty * slant * hw]);   // a cut slanted by moving the middle of the end outwards
     return o;
   };
-  const roundEnd = free1 && !(li && kind === "v");
-  if (!li && free0 && (kind === "h" || kind === "v")) {   // the brush enters at an angle: one corner of the start is drawn further out
+  const roundEnd = free1;
+  if (free0 && (kind === "h" || kind === "v")) {   // the brush enters at an angle: one corner of the start is drawn further out
     const T = [pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]], tl = Math.hypot(T[0], T[1]) || 1, o = 0.45 * Math.hypot(L[0][0] - pts[0][0], L[0][1] - pts[0][1]);
     const c = kind === "h" ? R : L; c[0] = [c[0][0] + T[0] / tl * o, c[0][1] + T[1] / tl * o];
   }
-  const poly = [...L, ...cap(N - 1, 1, roundEnd, 0), ...R.slice().reverse(), ...cap(0, -1, kind === "arc" || (li && kind === "h" && free0), 0).reverse()];
+  const poly = [...L, ...cap(N - 1, 1, roundEnd, 0), ...R.slice().reverse(), ...cap(0, -1, kind === "arc", 0).reverse()];
   return poly;
 }
 
-function kaiPolygons(lines, W, style = "kai") { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i), style)); }
+function kaiPolygons(lines, W) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i))); }
 module.exports = { kaiPolygons };
