@@ -116,18 +116,18 @@ async function hit(userId: string): Promise<number | null> {
   return Number(await r.json());
 }
 
-// the words with a character of the model's own (or "?"). Each is stored with its context: the words around it (CONTEXT on each side, fewer at the start or end
-// of the sentence) in Quốc Ngữ and the characters chosen for them, as arrays, and idx = the place of the word in these arrays (from 1); the window can be
-// changed here without a change of the table. Also its position and the length of the sentence in words; n_options = how many options the page sent for the
-// word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
-const CONTEXT = 3;
+// the words with a character of the model's own (or "?"). Each is stored with its context: the words around it (`context` on each side, fewer at the start or end
+// of the sentence) in Quốc Ngữ and the characters chosen for them, as arrays, and idx = the place of the word in these arrays (from 1). The page sets `context`
+// in its request (0 to MAX_CONTEXT, default DEFAULT_CONTEXT), so the window can change without a change of the table or of this function. Also its position and the
+// length of the sentence in words; n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
+const DEFAULT_CONTEXT = 3, MAX_CONTEXT = 5;
 type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: string[]; ctx_chars: string[]; idx: number; pos: number; n_words: number; model: string | null };
-function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null): Gap[] {
+function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null, context: number): Gap[] {
   const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
   const rows: Gap[] = [];
   words.forEach((w, i) => {
     if (!w.own) return;
-    const from = Math.max(0, i - CONTEXT), around = words.slice(from, i + CONTEXT + 1), span = sent.find(s => s && s.at === w.at && s.len === w.len);
+    const from = Math.max(0, i - context), around = words.slice(from, i + context + 1), span = sent.find(s => s && s.at === w.at && s.len === w.len);
     rows.push({ word_qn: w.qn, word_char: w.chosen, n_options: span && Array.isArray(span.options) ? span.options.length : 0,
       ctx_qn: around.map(x => x.qn), ctx_chars: around.map(x => x.chosen), idx: i - from + 1, pos: i + 1, n_words: words.length, model });
   });
@@ -156,8 +156,11 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return fail(405, 'method');
   const c = claims(req);
   if (!c || !c.sub || c.is_anonymous === true || c.role !== 'authenticated') return fail(401, 'sign_in');
-  let text = '', spans: unknown = [], lang = '';
-  try { const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || ''); } catch { return fail(400, 'bad_request'); }
+  let text = '', spans: unknown = [], lang = '', context = DEFAULT_CONTEXT;
+  try {
+    const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || '');
+    if (Number.isInteger(body.context)) context = Math.min(MAX_CONTEXT, Math.max(0, body.context));   // the words around a gap that are stored, set by the page
+  } catch { return fail(400, 'bad_request'); }
   if (!text) return fail(400, 'empty');
   if (text.length > MAX_CHARS) return fail(413, 'too_long');
   const used = await hit(c.sub);
@@ -180,7 +183,7 @@ Deno.serve(async (req) => {
         const answered = meter.models[meter.models.length - 1] || null;
         await logCall({ status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
           model: meter.models[meter.models.length - 1] || null, lang: lang || null, syllables: result.words.reduce((n: number, w: { len: number }) => n + w.len, 0),
-          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts, gapRows(ws, spans, answered));
+          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts, gapRows(ws, spans, answered, context));
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
