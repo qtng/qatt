@@ -57,7 +57,7 @@
 <main class="wrap">
   <div class="sheet">
   <div class="bar">
-    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen." autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
   </div>
   <div id="fonts"></div>
   </div>
@@ -78,6 +78,7 @@
   }
   // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
   const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
+  const SAMPLE = 'Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen.';   // Truyện Kiều, lines 1 to 6
   const SIZES = [14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56];   // from small to large
   const ABOUT = [   // the first entry whose name starts the family
     ["QATT Serif", "Thin horizontals, heavy verticals, small triangles at the ends."],
@@ -117,7 +118,7 @@
   }
 
   const render = () => {
-    const qatt = QattText.convert($('#text').value.trim() || 'Quốc âm tân tự', parser);
+    const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
     for (const q of samples) q.textContent = qatt;
   };
   $('#text').addEventListener('input', render);
