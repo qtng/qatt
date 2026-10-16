@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Statistics</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <style>
+    body { background: #f7efdc; color: #2b2118; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h2 { margin-top: 2rem; font-size: 1.3rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    .note { color: #7b6c58; font-size: .85rem; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .8rem; }
+    .tile { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem; }
+    .tile b { display: block; font: 400 2rem/1.1 Georgia, "Times New Roman", serif; }
+    .tile span { font-size: .85rem; color: #5b4d3d; }
+    table { background: #fffdf8; font-size: .9rem; }
+    th { font-weight: 600; color: #5b4d3d; }
+    td, th { text-align: right; } td:first-child, th:first-child { text-align: left; }
+  </style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 48rem">
+  <h1>Statistics</h1>
+  <p class="note" id="account"></p>
+  <div id="denied" class="alert alert-warning" hidden></div>
+
+  <div id="content" hidden>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <label for="hours" class="me-1">Last</label>
+      <select id="hours" class="form-select form-select-sm w-auto">
+        <option value="1">1 hour</option><option value="4" selected>4 hours</option><option value="24">24 hours</option>
+        <option value="168">7 days</option><option value="720">30 days</option>
+      </select>
+      <button type="button" class="btn btn-sm btn-quiet" id="reload">Reload</button>
+      <span class="note ms-2" id="at"></span>
+    </div>
+
+    <h2>In the selected time</h2>
+    <div class="tiles" id="windowTiles"></div>
+    <p class="note mt-2">People, not clicks. "Anonymous" are visitors of a page with a login, "with account" signed in with Google or e-mail. The translator counts only since the time of its last use was stored (16 Oct 2026), earlier use is only in the daily table.</p>
+
+    <h2>Total</h2>
+    <div class="tiles" id="totalTiles"></div>
+
+    <h2>Last 14 days</h2>
+    <table class="table table-sm mb-0">
+      <thead><tr><th>Day (UTC)</th><th>New anonymous</th><th>New with account</th><th>Translator people</th><th>Translator calls</th></tr></thead>
+      <tbody id="daily"></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const $ = id => document.getElementById(id);
+    const sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'));
+
+    const denied = text => { $('content').hidden = true; $('denied').hidden = false; $('denied').textContent = text; };
+
+    const tile = (box, value, label) => {
+      const t = document.createElement('div'); t.className = 'tile';
+      const b = document.createElement('b'); b.textContent = value;
+      const s = document.createElement('span'); s.textContent = label;
+      t.append(b, s); box.append(t);
+    };
+
+    async function load() {
+      if (!sp.user || sp.isAnonymous) return denied('Sign in with your admin account to see the statistics.');
+      const { data, error } = await sp.client.rpc('admin_stats', { p_hours: Number($('hours').value) });
+      if (error) return denied(error.code === '42501' ? 'This account is not an admin.' : 'Could not load the numbers: ' + error.message);
+      $('denied').hidden = true; $('content').hidden = false;
+      $('at').textContent = 'as of ' + new Date(data.at).toLocaleTimeString();
+      const w = data.window, t = data.total;
+      $('windowTiles').replaceChildren(); $('totalTiles').replaceChildren();
+      [[w.new_anonymous, 'new anonymous visitors'], [w.new_with_account, 'new accounts'], [w.signed_in_with_account, 'signed in with an account'],
+       [w.translated, 'used the translator'], [w.practised, 'practised'], [w.changed_a_deck, 'created or changed a deck'], [w.took_over_a_deck, 'took over a public deck']]
+        .forEach(([v, l]) => tile($('windowTiles'), v, l));
+      [[t.with_account, 'accounts'], [t.anonymous, 'anonymous visitors'], [t.practising, 'people who practised'], [t.decks, 'decks'], [t.public_decks, 'public decks']]
+        .forEach(([v, l]) => tile($('totalTiles'), v, l));
+      $('daily').replaceChildren(...data.daily.map(d => {
+        const tr = document.createElement('tr');
+        [d.day, d.new_anonymous, d.new_with_account, d.translate_users, d.translate_calls].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+        return tr;
+      }));
+    }
+
+    $('hours').addEventListener('change', load);
+    $('reload').addEventListener('click', load);
+    load();
+  });
+</script>
+</body>
+</html>
