@@ -135,13 +135,14 @@ function gapRows(words: { at: number; len: number; qn: string; chosen: string; o
 }
 
 // one row of numbers per call, one per try of a model (translate_attempts), the gaps of the dictionary (translate_gaps); a failing log must never break the translation
-async function logCall(row: Record<string, unknown>, attempts: Attempt[] = [], gaps: Gap[] = []) {
-  await logRows('translate_log', row);
+// admin = the call came from an admin (app_metadata.is_admin of the token): all rows get the mark, so the statistics can leave the tests of the owner out
+async function logCall(admin: boolean, row: Record<string, unknown>, attempts: Attempt[] = [], gaps: Gap[] = []) {
+  await logRows('translate_log', { ...row, is_admin: admin });
   // PostgREST wants the same keys in every object of a bulk insert: the tries that failed have no tokens, so they get null
-  if (attempts.length) await logRows('translate_attempts', attempts.map(a => ({ model: a.model, status: a.status, ms: a.ms, tokens_in: a.tokens_in ?? null, tokens_out: a.tokens_out ?? null })));
-  if (gaps.length) await logRows('translate_gaps', gaps);
+  if (attempts.length) await logRows('translate_attempts', attempts.map(a => ({ model: a.model, status: a.status, ms: a.ms, tokens_in: a.tokens_in ?? null, tokens_out: a.tokens_out ?? null, is_admin: admin })));
+  if (gaps.length) await logRows('translate_gaps', gaps.map(g => ({ ...g, is_admin: admin })));
 }
-async function logRows(table: string, row: Record<string, unknown> | Attempt[] | Gap[]) {
+async function logRows(table: string, row: Record<string, unknown> | Record<string, unknown>[]) {
   try {
     const base = Deno.env.get('SUPABASE_URL')!, key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const r = await fetch(`${base}/rest/v1/${table}`, { method: 'POST', signal: AbortSignal.timeout(4000),
@@ -157,6 +158,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return fail(405, 'method');
   const c = claims(req);
   if (!c || !c.sub || c.is_anonymous === true || c.role !== 'authenticated') return fail(401, 'sign_in');
+  const admin = String(c.app_metadata?.is_admin) === 'true';   // only to mark the log rows; an admin is treated like everybody else
   let text = '', spans: unknown = [], lang = '', context = DEFAULT_CONTEXT;
   try {
     const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || '');
@@ -182,13 +184,13 @@ Deno.serve(async (req) => {
         send({ result: { ...result, version: cfg.version, left, limit: LIMIT } });
         const ws = result.words as { at: number; len: number; qn: string; chosen: string; own: boolean }[];
         const answered = meter.models[meter.models.length - 1] || null;
-        await logCall({ status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
+        await logCall(admin, { status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
           model: meter.models[meter.models.length - 1] || null, lang: lang || null, syllables: result.words.reduce((n: number, w: { len: number }) => n + w.len, 0),
           words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts, gapRows(ws, spans, answered, context));
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
-        await logCall({ status: (e as { code?: string }).code || 'failed', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
+        await logCall(admin, { status: (e as { code?: string }).code || 'failed', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
           model: meter.models[meter.models.length - 1] || null, lang: lang || null, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length }, meter.attempts);
       }
       controller.close();
