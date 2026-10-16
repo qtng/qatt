@@ -18,13 +18,17 @@
     .wrap { max-width: 64rem; margin: 0 auto; padding: 1.6rem 1rem 3rem; }
     /* everything in one white card; on a phone from edge to edge */
     .sheet { background: #fff; color: #2b2118; border-radius: .9rem; box-shadow: 0 1px 3px rgba(43, 33, 24, .12); padding: 0 1.6rem; }
-    @media (max-width: 767.98px) { .sheet { margin: 0 -1rem; border-radius: 0; box-shadow: none; padding: 0 1rem; } }
+    @media (max-width: 767.98px) { .wrap { padding-top: 0; } .sheet { margin: 0 -1rem; border-radius: 0; box-shadow: none; padding: 0 1rem; } }   /* on a phone from edge to edge, right below the header */
     .muted { opacity: .62; }
 
     /* the text of all samples */
     .bar { padding: 1.6rem 0 .6rem; }
-    .bar label { display: flex; align-items: center; gap: .7rem; margin: 0; font-size: .85rem; }
-    .bar input { flex: 1 1 auto; }
+    .bar { display: flex; align-items: center; gap: 1rem; }
+    .bar .text { flex: 1 1 auto; display: flex; align-items: center; gap: .7rem; margin: 0; font-size: .85rem; min-width: 0; }
+    .bar .text input { flex: 1 1 auto; min-width: 0; }
+    .telex { display: flex; align-items: center; gap: .45rem; margin: 0; padding: 0; min-height: 0; font-size: .85rem; white-space: nowrap; }   /* typing Vietnamese on a keyboard without a Vietnamese layout */
+    .telex .form-check-input { float: none; margin: 0; }
+    .telex .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
 
     /* one entry per font: the samples on the left, the facts on the right */
     .font { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: .4rem 2.5rem; padding: 2.2rem 0; border-top: 1px solid rgba(127, 127, 127, .25); }
@@ -43,6 +47,7 @@
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
   <script src="js/navigation.js"></script>
+  <script defer src="https://chunom.org/chunom/js/ime.js"></script>
 </head>
 <body>
 <header class="hero pt-5 pb-4">
@@ -58,7 +63,8 @@
 <main class="wrap">
   <div class="sheet">
   <div class="bar">
-    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <label class="text"><span class="muted">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off" checked><label class="form-check-label" for="telex">Telex</label></div>
   </div>
   <div id="fonts"></div>
   </div>
@@ -125,6 +131,12 @@
   };
   $('#text').addEventListener('input', render);
   render();
+  // Telex (VietIme of the Chunom site, loaded with defer: ready at DOMContentLoaded); without it the switch is hidden
+  addEventListener('DOMContentLoaded', () => {
+    const telex = $('#telex'), ime = window.VietIme ? new VietIme($('#text'), { telex: telex.checked, candidates: false }) : null;
+    if (!ime) { telex.closest('.telex').hidden = true; return; }
+    telex.addEventListener('change', () => { ime.update({ telex: telex.checked }); $('#text').focus(); });
+  });
 })();
 </script>
 </body>
