@@ -100,8 +100,8 @@ window.Lang = window.Lang || (function() {
 // css/theme-<name>.css of qatt.org is part of the page. Every theme is a complete file of its own, none builds on or overrides another; the pages only have their layout
 // (css/site.css has what all themes share). The file is written into the <head> while the page is parsed (document.write, so that the page is not drawn without it)
 // and data-theme is set on <html> (the themes other than classic need it to be more specific than the pages).
-// qatt.org: every page. The Chunom site: the pages under /chunom/ load the theme from qatt.org (they link https://qatt.org/css/site.css themselves), but for now always
-// "classic": CHUNOM_THEMES becomes true when its pages have the skeleton of qatt.org, then a theme can be chosen there too (stored per site, like the login).
+// qatt.org: every page. The Chunom site: the pages under /chunom/ load the theme from qatt.org (they link https://qatt.org/css/site.css themselves) and have the
+// skeleton of qatt.org, so a theme can be chosen there too (stored per site, like the login: localStorage is per origin); CHUNOM_THEMES = false would keep them "classic".
 // The landing pages (/pages/) and the assets have no theme.
 //   Theme.list          {name: [English, Tiếng Việt]}
 //   Theme.current       the name of the theme
@@ -113,7 +113,7 @@ window.Theme = window.Theme || (function() {
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
         neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"] };
     const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
-    const CHUNOM_THEMES = false;
+    const CHUNOM_THEMES = true;
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
@@ -121,7 +121,7 @@ window.Theme = window.Theme || (function() {
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) current = s; } catch (e) {}
     // ?theme=<name> in the address (license.html sends a visitor back with it): chosen and remembered where themes can be chosen, else only shown on this page
-    // (a preview, e.g. on the Chunom site before CHUNOM_THEMES); the parameter is taken out of the address
+    // (a preview); the parameter is taken out of the address
     const params = new URLSearchParams(location.search), asked = params.get("theme");
     if (asked !== null) {
         if (themed && valid(asked)) { current = asked; if (choosable) try { localStorage.setItem(KEY, asked); } catch (e) {} }
