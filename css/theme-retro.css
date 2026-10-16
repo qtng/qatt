@@ -1,0 +1,72 @@
+/* Theme "retro": the retro buttons of check.html: a 2px dark outline, a hard 2px shadow that the button presses into when it is clicked, softly rounded corners;
+   dropdowns, symbol buttons, the boxes of the variants and the search bar the same. A complete theme of its own. Loaded by js/navigation.js (Theme). */
+/* every Bootstrap button: a 2px dark outline and a hard 2px shadow that the button presses into when it is clicked.
+   Bootstrap draws its buttons from --bs-btn-* variables, so only these are set (the colours of btn-primary, btn-danger, … stay). */
+.btn:not(.btn-close):not(.btn-link) {
+  --bs-btn-border-width: 2px;
+  --bs-btn-border-radius: .55rem;   /* square with softly rounded corners, like the Skip button of check.html */
+  --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-border-color: var(--ink);
+  --bs-btn-active-border-color: var(--ink);
+  --bs-btn-disabled-border-color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 2px 0 var(--ink);
+  transition: transform .12s, box-shadow .12s, background-color .15s, color .15s;
+}
+.btn:not(.btn-close):not(.btn-link):hover:not(:disabled):not(.disabled) { transform: translateY(-1px); }
+.btn:not(.btn-close):not(.btn-link):active:not(:disabled):not(.disabled),
+.btn:not(.btn-close):not(.btn-link).active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.btn:not(.btn-close):not(.btn-link):focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+.btn:not(.btn-close):not(.btn-link):disabled,
+.btn:not(.btn-close):not(.btn-link).disabled { box-shadow: none; }
+
+/* the outline buttons are cream with a yellow hover (Bootstrap would fill them grey) */
+.btn[class*="btn-outline-"] {
+  --bs-btn-bg: #fffdf8;
+  --bs-btn-hover-bg: var(--retro-hover);
+  --bs-btn-active-bg: var(--retro-active);
+  --bs-btn-hover-color: var(--bs-btn-color);
+  --bs-btn-active-color: var(--bs-btn-color);
+}
+.btn-outline-secondary,
+.btn-outline-dark { --bs-btn-color: var(--ink); }
+
+/* buttons of the site */
+.btn-cinnabar,
+.btn-accent {
+  --bs-btn-bg: var(--cinnabar); --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #7a261d; --bs-btn-active-color: #fff;
+}
+.btn-quiet,
+.btn-ink {
+  --bs-btn-bg: #fffdf8; --bs-btn-color: var(--ink);
+  --bs-btn-hover-bg: var(--retro-hover); --bs-btn-hover-color: var(--ink);
+  --bs-btn-active-bg: var(--retro-active); --bs-btn-active-color: var(--ink);
+}
+
+/* dropdowns: the same outline, corners and hard shadow as the buttons */
+.form-select {
+  --bs-border-width: 2px;
+  --bs-border-color: var(--ink);
+  --bs-border-radius: .55rem;
+  background-color: #fffdf8;
+  color: var(--ink);
+  box-shadow: 0 2px 0 var(--ink);
+}
+.form-select:focus { border-color: var(--ink); box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+.form-select:disabled { box-shadow: none; }
+
+/* the symbol buttons of symbols.html and the boxes of its variants: squares with the outline and the shadow of the buttons */
+.glyph-strip .g[data-code] { border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); transition: opacity .15s, color .15s, background-color .15s, transform .12s, box-shadow .12s; }
+.glyph-strip .g[data-code]:hover, .glyph-strip .g[data-code]:focus-visible { transform: translateY(-1px); outline: none; }
+.glyph-strip .g[data-code]:focus-visible { box-shadow: 0 2px 0 var(--ink), 0 0 0 .2rem rgba(168, 54, 42, .25); }
+.glyph-strip .g[data-code]:active { transform: translateY(2px); box-shadow: none; filter: none; }
+#variants .speak { border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); }
+#variants .var { border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); background: #fffdf8; }
+#variants .var.hit { border-color: var(--cinnabar); background: #f6e3de; box-shadow: 0 2px 0 var(--cinnabar), 0 0 0 2px rgba(168, 54, 42, .35); }
+/* the search bar of wiki.html, the box of the controls of decodings.html: soft corners instead of pills */
+.search-bar .input-group { border-radius: .55rem; }
+.search-bar .input-group-text { border-radius: .55rem 0 0 .55rem; }
+.search-bar .btn { border-radius: 0 .55rem .55rem 0; }
+.controls { border-radius: .55rem; }
