@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/site.css">
   <style>
-    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Serif"; }
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Pen"; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
     .hero {
@@ -67,7 +67,7 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3" data-vi="Gõ chữ QATT">Type QATT</h1>
-    <p class="lead mx-auto mb-4">Type Vietnamese (Quốc Ngữ). Every finished word turns into text for the <a href="fonts.html">QATT fonts</a>.</p>
+    <p class="lead mx-auto mb-4" data-vi="Gõ tiếng Việt (Quốc Ngữ). Mỗi từ gõ xong sẽ thành chữ QATT.">Type Vietnamese (Quốc Ngữ). Every finished word becomes QATT text.</p>
     <a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Bảng chữ">Symbol table</a>
     <a class="btn btn-cinnabar btn-pill" href="decodings.html" data-vi="Giải mã">Decodings</a>
   </div>
@@ -108,7 +108,7 @@
     // a heading inside each dropdown
     const group = (select, label, vi) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.setAttribute('data-vi-label', vi); g.append(...select.options); select.append(g); select.value = value; };
     group($('decoding'), 'Choose decoding', 'Lựa chọn cách giải mã');
-    $('font').value = 'QATT Gothic';   // the default of the Writer (codetable.html keeps Serif)
+    $('font').value = 'QATT Pen';   // the default of the Writer (codetable.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
     // a new decoding: every QATT cell is read with the old decoding and written with the new one, other text stays as it is
     $('decoding').addEventListener('change', () => {
@@ -125,7 +125,7 @@
     // Telex (typing Vietnamese on a keyboard without a Vietnamese layout)
     $('telex').checked = true;
     const ime = window.VietIme ? new VietIme(field, { telex: $('telex').checked, candidates: false }) : null;
-    if (!ime) $('telex').closest('label').hidden = true;
+    if (!ime) $('telex').closest('.telex').hidden = true;
     $('telex').addEventListener('change', () => { ime?.update({ telex: $('telex').checked }); field.focus(); });
 
     // the word that ends right before position `end` is replaced by its QATT characters (if there are any)
