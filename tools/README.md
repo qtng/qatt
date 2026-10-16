@@ -106,10 +106,15 @@ python3 tools/build_font.py --kage fonts/kage.json fonts/glyphs.json fonts/qatt-
 
 **Kai font.** `--kage fonts/kage.json --kai` draws the same KAGE lines as brush strokes of a regular script (Kaishu) instead of with the KAGE engine
 (`tools/kai_strokes.js`, called by `kage_outlines.js`): horizontals are bowed a little and have a slanted press at the start and a round bulge where they stop,
-verticals a press and a round "dewdrop" end, falling curves taper to a point. Where a stroke ends on another one (a junction) it has no press or bulge.
+verticals a press and a round "dewdrop" end, falling curves have a press and keep their width (no taper). Where a stroke ends on another one (a junction) it has no press or bulge.
+
+`--weight F` sets the stroke width (F times the standard) and `--label Name` is added to the family name:
 
 ```
 python3 tools/build_font.py --kage fonts/kage.json --kai fonts/glyphs.json fonts/qatt-kai     # writes fonts/qatt-kai.ttf / .woff2
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 0.6 --label Light  fonts/glyphs.json fonts/qatt-kai-light
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 1.6 --label Medium fonts/glyphs.json fonts/qatt-kai-medium
+python3 tools/build_font.py --kage fonts/kage.json --kai --weight 2.4 --label Bold   fonts/glyphs.json fonts/qatt-kai-bold
 ```
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look

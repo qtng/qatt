@@ -2,7 +2,7 @@
 // quadratic 2 strokes) are drawn as brush strokes of varying width instead of by the KAGE engine, which only knows Mincho and Gothic.
 //   horizontal: slightly bowed upwards, a press at the start (a cut slanted like the brush entering), a rounded bulge where it stops, thinner than the verticals
 //   vertical:   a press at the start, round "dewdrop" end (垂露)
-//   falling curve (and slanted line): heavy at the start, tapering to a point
+//   falling curve (and slanted line): a press at the start, round end, the same width throughout (no taper)
 // kaiPolygons(lines, W) -> polygons [[x, y], ...] in the KAGE units of the input; W is the standard stroke width in these units.
 "use strict";
 const nums = l => l.split(":").map(Number);
@@ -55,8 +55,8 @@ function stroke(line, W, others) {
     switch (kind) {
       case "h": return 0.82 * W * (1 + (free0 ? 0.55 : 0) * ease(1 - d / press) + (free1 ? 0.45 : 0) * ease(1 - e / press));
       case "v": return 1.08 * W * (1 + (free0 ? 0.3 : 0) * ease(1 - d / press) + (free1 ? 0.25 : 0) * ease(1 - e / press));
-      case "d": return W * lerp(1.1, 0.55, ease(t));
-      case "fall": return W * Math.max(0.12, lerp(1.2, 0.12, Math.pow(t, 0.8)));
+      case "d": return W * (1 + 0.15 * ease(1 - d / press));
+      case "fall": return W * (1 + 0.3 * ease(1 - d / press) + (free1 ? 0.15 : 0) * ease(1 - e / press));
       default: return W * 0.95;                // arc
     }
   };
@@ -76,7 +76,7 @@ function stroke(line, W, others) {
     else if (slant) o.push([c[0] + tx * slant * hw, c[1] + ty * slant * hw]);   // a cut slanted by moving the middle of the end outwards
     return o;
   };
-  const roundEnd = free1 && (kind === "h" || kind === "v" || kind === "arc");
+  const roundEnd = free1;
   if (free0 && (kind === "h" || kind === "v")) {   // the brush enters at an angle: one corner of the start is drawn further out
     const T = [pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]], tl = Math.hypot(T[0], T[1]) || 1, o = 0.45 * Math.hypot(L[0][0] - pts[0][0], L[0][1] - pts[0][1]);
     const c = kind === "h" ? R : L; c[0] = [c[0][0] + T[0] / tl * o, c[0][1] + T[1] / tl * o];

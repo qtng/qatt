@@ -64,7 +64,7 @@ function linesOf(id) {
 function draw({ lines, w }, m) {
   const f = ([x, y]) => { const X = m[0] * (x / S) + m[2], Y = m[1] * (y / S) + m[3]; return [X * S, Y * S]; };
   const moved = lines.map(l => withPts(l, ptsOf(l).map(f).map(p => p.map(v => Math.round(v * 1000) / 1000))));
-  if (style === "kai") return outlineOf(kaiPolygons(moved, 5 * w * 0.76 * 2 * bold * 1.1));
+  if (style === "kai") return outlineOf(kaiPolygons(moved, 5 * Math.max(w, 0.8) * 0.76 * bold * 1.15));
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
