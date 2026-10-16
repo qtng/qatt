@@ -11,6 +11,7 @@
   <script src="../vendor/supabase/supabase.min.js"></script>
   <script src="../js/supabase.js"></script>
   <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
   <style>
     body { background: #f7efdc; color: #2b2118; }
     h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
@@ -73,10 +74,11 @@
       t.append(b, s); box.append(t);
     };
 
+    let allowed = false;
     async function load() {
-      if (!sp.user || sp.isAnonymous) return denied('Sign in with your admin account to see the statistics.');
+      if (!allowed) return;
       const { data, error } = await sp.client.rpc('admin_stats', { p_hours: Number($('hours').value) });
-      if (error) return denied(error.code === '42501' ? 'This account is not an admin.' : 'Could not load the numbers: ' + error.message);
+      if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
       $('denied').hidden = true; $('content').hidden = false;
       $('at').textContent = 'as of ' + new Date(data.at).toLocaleTimeString();
       const w = data.window, t = data.total;
@@ -95,7 +97,9 @@
 
     $('hours').addEventListener('change', load);
     $('reload').addEventListener('click', load);
-    load();
+    const state = await Admin.check(sp);
+    if (state === 'admin') { allowed = true; load(); }
+    else denied(state === 'signin' ? 'Sign in with your admin account to see the statistics.' : 'This account is not an admin.');
   });
 </script>
 </body>

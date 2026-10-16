@@ -1,15 +1,11 @@
--- Statistics for the admin (run once in the SQL Editor of Supabase). Only the users in the table "admins" may call admin_stats().
--- The check is done here in the database, not in the page: whoever calls the function without being in the table gets an error.
+-- Statistics for the admin (run once in the SQL Editor of Supabase). Only admins may call admin_stats().
+-- Who is an admin is a claim of the login token: app_metadata.is_admin. Only the server can change app_metadata (a user can change
+-- user_metadata, not app_metadata), so the function reads the flag from the token of the call and needs no table to look up.
+-- The check is done here in the database, not in the page: whoever calls the function without the flag gets an error.
 --
--- Make a user an admin (their id is in Authentication -> Users):
---   insert into public.admins (user_id) values ('<user id>');
-
-create table if not exists public.admins (
-  user_id uuid primary key references auth.users (id) on delete cascade
-);
-alter table public.admins enable row level security;
--- no policy and no privileges: the API can neither read nor change the table (only the functions below read it)
-revoke all on public.admins from anon, authenticated;
+-- Make a user an admin (their id is in Authentication -> Users); the flag reaches the token when it is renewed (at most an hour, or at the next sign-in):
+--   update auth.users set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"is_admin": true}'::jsonb where id = '<user id>';
+-- Take it away: ... - 'is_admin' (the token that is already issued stays valid until it expires).
 
 -- the translator counter also knows the time of the last use (older rows have none)
 alter table public.translate_usage add column if not exists updated_at timestamptz;
@@ -33,12 +29,11 @@ security definer
 set search_path = ''
 as $$
 declare
-  uid uuid := auth.uid();
   hours integer := greatest(1, least(coalesce(p_hours, 4), 2160));
   w interval;
   result jsonb;
 begin
-  if uid is null or not exists (select 1 from public.admins where user_id = uid) then
+  if coalesce((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean, false) is not true then
     raise exception 'not allowed' using errcode = '42501';
   end if;
   w := make_interval(hours => hours);

@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
   <style>
     body { background: #f7efdc; color: #2b2118; }
     h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
@@ -21,13 +25,17 @@
 <body>
 <main class="container py-4" style="max-width: 48rem">
   <h1>Admin</h1>
+  <p class="note" id="account"></p>
+  <div id="denied" class="alert alert-warning">Checking...</div>
+
+  <div id="area" hidden>
   <p class="note">Tools and pages that no other page links to. For reviewing what can be removed.</p>
 
   <h2>qatt.org</h2>
   <h3>Tools</h3>
   <ul>
     <li><a href="rhymes.html">rhymes.html</a> <small>QATT Sprites Overview (uses Supabase)</small></li>
-    <li><a href="stats.html">stats.html</a> <small>Statistics: sign-ups, translator, decks, practice (admins only, checked in the database)</small></li>
+    <li><a href="stats.html"><b>Statistics</b></a> <small>sign-ups, translator, decks, practice</small></li>
     <li><a href="admin-slides.html">admin-slides.html</a> <small>Manage Slides</small></li>
   </ul>
   <h3>Not linked anywhere else</h3>
@@ -95,6 +103,19 @@
     <li><a href="../vendor/bootstrap/css/bootstrap.min.css">bootstrap.min.css</a></li>
     <li><a href="../vendor/bootstrap-icons/bootstrap-icons.min.css">bootstrap-icons.min.css</a></li>
   </ul>
+  </div>
 </main>
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, document.getElementById('account'));
+    const state = await Admin.check(sp);
+    document.getElementById('area').hidden = state !== 'admin';
+    const box = document.getElementById('denied');
+    box.hidden = state === 'admin';
+    box.textContent = state === 'signin' ? 'Sign in with your admin account.' : 'This account is not an admin.';
+  });
+</script>
 </body>
 </html>
