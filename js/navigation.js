@@ -95,13 +95,17 @@ window.Lang = window.Lang || (function() {
 })();
 
 // ---------- the menu ----------
-// ---------- Theme: the look of qatt.org ----------
-// localStorage.theme (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen in license.html) says which file css/theme-<name>.css is part of the page. Every theme is a complete file of its
-// own, none builds on or overrides another; the pages only have their layout (css/site.css has what all themes share). The file is written into the <head> while the page
-// is parsed (document.write, so that the page is not drawn without it) and data-theme is set on <html> (popart needs it to be more specific than the pages).
-// Only qatt.org has themes: the pages of the Chunom site do not use css/site.css and load no theme.
+// ---------- Theme: the look of the pages ----------
+// localStorage.theme (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, in license.html, or ?theme=<name>) says which file
+// css/theme-<name>.css of qatt.org is part of the page. Every theme is a complete file of its own, none builds on or overrides another; the pages only have their layout
+// (css/site.css has what all themes share). The file is written into the <head> while the page is parsed (document.write, so that the page is not drawn without it)
+// and data-theme is set on <html> (the themes other than classic need it to be more specific than the pages).
+// qatt.org: every page. The Chunom site: the pages under /chunom/ load the theme from qatt.org (they link https://qatt.org/css/site.css themselves), but for now always
+// "classic": CHUNOM_THEMES becomes true when its pages have the skeleton of qatt.org, then a theme can be chosen there too (stored per site, like the login).
+// The landing pages (/pages/) and the assets have no theme.
 //   Theme.list          {name: [English, Tiếng Việt]}
 //   Theme.current       the name of the theme
+//   Theme.choosable     whether a theme can be chosen on this page
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
 window.Theme = window.Theme || (function() {
     const KEY = "theme";
@@ -109,16 +113,29 @@ window.Theme = window.Theme || (function() {
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
         neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"] };
     const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
+    const CHUNOM_THEMES = false;
+    const themed = !onChunom || /^\/chunom\//.test(location.pathname);
+    const choosable = themed && (!onChunom || CHUNOM_THEMES);
+    const base = onChunom ? "https://qatt.org" : "";
     let current = "classic";
-    try { const s = localStorage.getItem(KEY); if (Object.prototype.hasOwnProperty.call(list, s)) current = s; } catch (e) {}
-    const href = () => "/css/theme-" + current + ".css";
+    const valid = s => Object.prototype.hasOwnProperty.call(list, s);
+    if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) current = s; } catch (e) {}
+    // ?theme=<name> in the address (license.html sends a visitor back with it): chosen and remembered where themes can be chosen, else only shown on this page
+    // (a preview, e.g. on the Chunom site before CHUNOM_THEMES); the parameter is taken out of the address
+    const params = new URLSearchParams(location.search), asked = params.get("theme");
+    if (asked !== null) {
+        if (themed && valid(asked)) { current = asked; if (choosable) try { localStorage.setItem(KEY, asked); } catch (e) {} }
+        params.delete("theme");
+        try { history.replaceState(history.state, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); } catch (e) {}
+    }
+    const href = () => base + "/css/theme-" + current + ".css";
     const apply = () => {
-        if (onChunom) return;
+        if (!themed) return;
         if (current === "classic") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", current);
         const link = document.getElementById("theme-css");
         if (link) link.setAttribute("href", href());
     };
-    if (!onChunom) {
+    if (themed) {
         if (document.readyState === "loading") document.write('<link rel="stylesheet" id="theme-css" href="' + href() + '">');
         else { const l = document.createElement("link"); l.rel = "stylesheet"; l.id = "theme-css"; l.href = href(); document.head.append(l); }
         apply();
@@ -126,8 +143,9 @@ window.Theme = window.Theme || (function() {
     return {
         list,
         get current() { return current; },
+        get choosable() { return choosable; },
         set(name) {
-            if (!Object.prototype.hasOwnProperty.call(list, name)) return;
+            if (!choosable || !Object.prototype.hasOwnProperty.call(list, name)) return;
             current = name;
             try { localStorage.setItem(KEY, name); } catch (e) {}
             apply();
@@ -249,6 +267,15 @@ window.Theme = window.Theme || (function() {
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
             .lang-switch button.active { color: #fff; text-decoration: underline; text-underline-offset: .3em; }
+            /* the theme: a palette button next to EN | VI with a small list of the themes */
+            .theme-switch { position: relative; margin-right: .4rem; }
+            .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
+            .theme-switch > button:hover, .theme-switch > button[aria-expanded="true"] { color: #fff; }
+            .theme-menu { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 1080; min-width: 11rem; max-height: 70vh; overflow: auto; padding: .3rem; background: #212529; border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .35); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+            .theme-menu button { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: .35rem; padding: .3rem .6rem; color: rgba(255, 255, 255, .8); font-size: .9rem; }
+            .theme-menu button:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+            .theme-menu button.active { color: #fff; font-weight: 600; }
+            .theme-menu button.active::before { content: "✓ "; }
             .navmenu-backdrop{
               background: rgba(33, 37, 41, 0.5);
               backdrop-filter: blur(10px);
@@ -328,7 +355,8 @@ window.Theme = window.Theme || (function() {
         const link = document.createElement('a');
         link.textContent = 'powered by chunom.org';
         link.title = 'Licenses and the files this page uses';
-        const update = () => { link.href = `${licenseUrl}#${sources().map(encodeURIComponent).join(',')}`; };
+        // ?back= the page itself, so that license.html can send the visitor back (with the theme chosen there)
+        const update = () => { link.href = `${licenseUrl}?back=${encodeURIComponent(location.origin + location.pathname + location.search)}#${sources().map(encodeURIComponent).join(',')}`; };
         update();
         ['pointerdown', 'focus', 'touchstart', 'contextmenu'].forEach(t => link.addEventListener(t, update));
         window.addEventListener('load', update);
@@ -374,6 +402,10 @@ window.Theme = window.Theme || (function() {
                 <div class="ms-auto d-flex align-items-center">
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
+                    </div>
+                    <div class="theme-switch"${Theme.choosable ? '' : ' hidden'}>
+                        <button type="button" aria-haspopup="true" aria-expanded="false" title="Theme" data-vi-title="Giao diện" aria-label="Theme" data-vi-aria-label="Giao diện"><i class="bi bi-palette"></i></button>
+                        <div class="theme-menu" role="menu" hidden></div>
                     </div>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
@@ -460,6 +492,22 @@ window.Theme = window.Theme || (function() {
         langButtons.forEach(b => b.addEventListener('click', () => Lang.set(b.dataset.lang)));
         document.addEventListener('langchange', markLang);
         markLang();
+
+        // theme: the palette button opens the list of Theme.list; a choice is remembered (Theme.set), a click outside or Esc closes the list
+        const themeBtn = header.querySelector('.theme-switch > button'), themeMenu = header.querySelector('.theme-menu');
+        for (const [name, [en, vi]] of Object.entries(Theme.list)) {
+            const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'menuitem'); b.dataset.theme = name;
+            const s = document.createElement('span'); s.textContent = en; if (vi !== en) s.setAttribute('data-vi', vi);
+            b.append(s); themeMenu.append(b);
+        }
+        const markTheme = () => themeMenu.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.theme === Theme.current));
+        const closeTheme = () => { themeMenu.hidden = true; themeBtn.setAttribute('aria-expanded', 'false'); };
+        themeBtn.addEventListener('click', e => { e.stopPropagation(); const open = themeMenu.hidden; themeMenu.hidden = !open; themeBtn.setAttribute('aria-expanded', String(open)); });
+        themeMenu.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { Theme.set(b.dataset.theme); closeTheme(); } });
+        document.addEventListener('click', e => { if (!themeMenu.hidden && !e.target.closest('.theme-switch')) closeTheme(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTheme(); });
+        document.addEventListener('themechange', markTheme);
+        markTheme();
 
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
