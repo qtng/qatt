@@ -132,8 +132,8 @@ revoke all on function public.admin_models(integer) from public, anon;
 grant execute on function public.admin_models(integer) to authenticated;
 
 -- Gaps of the dictionary: every word for which the model gave a character of its own (or "?" = it knew none), because the list of the page had no
--- suitable option. The context is stored as arrays: the words around the gap (3 on each side by default, fewer at the start or end of the sentence; the window is
--- set by the translator page in its request as "context", 1 to 5: 3 if the user helps to improve the model, else 1; so it can change without a change of the table or of the function) in Quốc Ngữ and the characters chosen for them, and idx = the
+-- suitable option. The context is stored as arrays: the words around the gap (3 on each side if the page sends nothing, fewer at the start or end of the sentence; the window is
+-- set by the translator page in its request as "context", 1 to 5: 5 if the user helps to improve the model, else 1; so it can change without a change of the table or of the function) in Quốc Ngữ and the characters chosen for them, and idx = the
 -- place of the gap word in the arrays, from 1: ctx_qn[idx] is the word. Only these words, not the sentence.
 create table if not exists public.translate_gaps (
   id bigint generated always as identity primary key,
