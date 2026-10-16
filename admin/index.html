@@ -111,7 +111,7 @@
   window.addEventListener('DOMContentLoaded', async () => {
     const sp = new SupabaseService();
     await sp.init();
-    QattLogin.status(sp, document.getElementById('account'));
+    QattLogin.status(sp, document.getElementById('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
     const state = await Admin.check(sp);
     document.getElementById('area').hidden = state !== 'admin';
     const box = document.getElementById('denied');
