@@ -117,7 +117,7 @@ window.Theme = window.Theme || (function() {
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
-    let current = "classic";
+    let current = onChunom ? "classic" : "popart";   // the theme of a visitor who has not chosen one: qatt.org pop art, the Chunom site classic
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) current = s; } catch (e) {}
     // ?theme=<name> in the address (license.html sends a visitor back with it): chosen and remembered where themes can be chosen, else only shown on this page
