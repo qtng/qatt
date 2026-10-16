@@ -15,7 +15,10 @@
     .hero .lead { max-width: 38rem; }
     @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
 
-    .wrap { max-width: 64rem; margin: 0 auto; padding: 0 1rem 3rem; }
+    .wrap { max-width: 64rem; margin: 0 auto; padding: 1.6rem 1rem 3rem; }
+    /* everything in one white card; on a phone from edge to edge */
+    .sheet { background: #fff; color: #2b2118; border-radius: .9rem; box-shadow: 0 1px 3px rgba(43, 33, 24, .12); padding: 0 1.6rem; }
+    @media (max-width: 767.98px) { .sheet { margin: 0 -1rem; border-radius: 0; box-shadow: none; padding: 0 1rem; } }
     .muted { opacity: .62; }
 
     /* the text of all samples */
@@ -27,8 +30,7 @@
     .font { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: .4rem 2.5rem; padding: 2.2rem 0; border-top: 1px solid rgba(127, 127, 127, .25); }
     .font:first-child { border-top: 0; }
     .font h2 { grid-column: 1 / -1; font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.35rem; margin: 0 0 .4rem; }
-    .samples { min-width: 0; display: grid; gap: .3rem; align-content: start; overflow-x: auto; padding: 1rem 1.2rem 1.1rem .6rem; background: #fff; color: #2b2118; border-radius: .8rem; box-shadow: 0 1px 3px rgba(43, 33, 24, .12); }   /* a white card; the lines are not cut: it scrolls sideways */
-    @media (max-width: 767.98px) { .samples { margin: 0 -1rem; border-radius: 0; box-shadow: none; } }   /* on a phone from edge to edge */
+    .samples { min-width: 0; display: grid; gap: .3rem; align-content: start; overflow-x: auto; padding-bottom: .4rem; }   /* the lines are not cut: the block scrolls sideways */
     .line { display: flex; align-items: baseline; gap: .8rem; width: max-content; }
     .line .px { flex: 0 0 2.2rem; font-size: .7rem; text-align: right; font-variant-numeric: tabular-nums; }
     .line .q { white-space: nowrap; line-height: 1.5; }   /* room for the tone marks above and below */
@@ -53,10 +55,12 @@
 </header>
 
 <main class="wrap">
+  <div class="sheet">
   <div class="bar">
-    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen." autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <label><span class="muted">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
   </div>
   <div id="fonts"></div>
+  </div>
 </main>
 
 <script src="js/parser.js"></script>
@@ -74,6 +78,7 @@
   }
   // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
   const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
+  const SAMPLE = 'Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen.';   // Truyện Kiều, lines 1 to 6
   const SIZES = [14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56];   // from small to large
   const ABOUT = [   // the first entry whose name starts the family
     ["QATT Serif", "Thin horizontals, heavy verticals, small triangles at the ends."],
@@ -113,7 +118,7 @@
   }
 
   const render = () => {
-    const qatt = QattText.convert($('#text').value.trim() || 'Quốc âm tân tự', parser);
+    const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
     for (const q of samples) q.textContent = qatt;
   };
   $('#text').addEventListener('input', render);
