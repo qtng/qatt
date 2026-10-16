@@ -27,7 +27,9 @@
     @media (min-width: 768px) { .glyph-strip { grid-template-columns: repeat(11, 1fr); } }
     .glyph-strip.tones { grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); max-width: 46rem; }
     .glyph-strip .item { display: flex; flex-direction: column; align-items: center; }
-    .glyph-strip .g { font-family: var(--qfont), sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .85; transition: opacity .15s, color .15s; }
+    @font-face { font-family: "QATT Pen"; src: url(fonts/qatt-pen.woff2) format("woff2"), url(fonts/qatt-pen.ttf) format("truetype"); }
+    .glyph-strip .g { font-family: "QATT Pen", sans-serif;   /* the buttons: always Pen (the font list only chooses the font of the dialog) */
+       font-size: 2.4rem; line-height: 1.15; opacity: .85; transition: opacity .15s, color .15s; }
     .glyph-strip .g:hover { opacity: 1; color: var(--cinnabar); }
     .glyph-strip .lab { font-size: .85rem; color: #6a5a48; line-height: 1.2; }
     .choose { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin: 1.2rem 0 2.2rem; }
