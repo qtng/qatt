@@ -104,6 +104,21 @@ their stroke widths. The tones stay stroked circles (drawn narrower than the let
 python3 tools/build_font.py --kage fonts/kage.json fonts/glyphs.json fonts/qatt-serif     # writes fonts/qatt-serif.ttf / .woff2
 ```
 
+**Pen font.** `--kage fonts/kage.json --pen` draws the same KAGE lines as strokes of a felt-tip or ballpoint pen instead of with the KAGE engine
+(`tools/pen_strokes.js`, called by `kage_outlines.js`): horizontals are bowed a little and have a slanted press at the start and a round bulge where they stop,
+verticals a press and a round "dewdrop" end, falling curves have a press and keep their width (no taper). Where a stroke ends on another one (a junction) it has no press or bulge.
+
+`--weight F` sets the stroke width (F times the standard) and `--label Name` is added to the family name:
+
+```
+python3 tools/build_font.py --kage fonts/kage.json --pen --weight 0.6 --label ExtraLight fonts/glyphs.json fonts/qatt-pen-extralight
+python3 tools/build_font.py --kage fonts/kage.json --pen --weight 1.0 --label Light      fonts/glyphs.json fonts/qatt-pen-light
+python3 tools/build_font.py --kage fonts/kage.json --pen --weight 1.6 fonts/glyphs.json fonts/qatt-pen                       # Regular
+python3 tools/build_font.py --kage fonts/kage.json --pen --weight 2.4 --label Medium     fonts/glyphs.json fonts/qatt-pen-medium
+python3 tools/build_font.py --kage fonts/kage.json --pen --weight 3.2 --label Bold       fonts/glyphs.json fonts/qatt-pen-bold
+python3 tools/build_font.py --kage fonts/kage.json --pen --weight 4.0 --label Heavy      fonts/glyphs.json fonts/qatt-pen-heavy
+```
+
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make

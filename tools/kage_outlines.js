@@ -11,7 +11,7 @@ const root = path.join(__dirname, "..");
 const ctx = {}; vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "js/parser.js"), "utf8") + ";this.SHAPES = VietnameseParser.SHAPES;", ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "js/kage-engine.min.js"), "utf8") + ";this.Kage = Kage;", ctx);
-const Kage = ctx.Kage;
+const Kage = ctx.Kage, { penPolygons } = require("./pen_strokes.js");
 const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 
 const [kageFile, jobsFile, outFile, style = "mincho", boldArg = "1"] = process.argv.slice(2);
@@ -64,6 +64,7 @@ function linesOf(id) {
 function draw({ lines, w }, m) {
   const f = ([x, y]) => { const X = m[0] * (x / S) + m[2], Y = m[1] * (y / S) + m[3]; return [X * S, Y * S]; };
   const moved = lines.map(l => withPts(l, ptsOf(l).map(f).map(p => p.map(v => Math.round(v * 1000) / 1000))));
+  if (style === "pen") return outlineOf(penPolygons(moved, 5 * Math.max(w, 0.8) * 0.76 * bold * 1.15));
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
@@ -71,9 +72,13 @@ function draw({ lines, w }, m) {
   else { F.kMinWidthY *= w * 0.75; F.kMinWidthT *= w * 0.85 * bold; F.kWidth *= w * 0.85 * bold; F.kMinWidthU = 3.5 * w; }   // kMinWidthU: the triangles at the open ends of the horizontals
   k.kBuhin.push("g", moved.join("$"));
   const polys = new Kage.Polygons(); k.makeGlyph(polys, "g");
+  return outlineOf(polys.array.map(poly => poly.array.map(q => [q.x, q.y])));
+}
+// SVG path data and the extent in x of polygons given in KAGE units
+function outlineOf(polygons) {
   let d = "", a = Infinity, b = -Infinity;
-  for (const poly of polys.array) {
-    const p = poly.array.map(q => [q.x / S, q.y / S]);
+  for (const poly of polygons) {
+    const p = poly.map(q => [q[0] / S, q[1] / S]);
     let area = 0; for (let i = 0; i < p.length; i++) { const u = p[i], v = p[(i + 1) % p.length]; area += u[0] * v[1] - v[0] * u[1]; a = Math.min(a, u[0]); b = Math.max(b, u[0]); }
     if (area < 0) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
     d += "M" + p.map(q => q[0].toFixed(3) + " " + q[1].toFixed(3)).join("L") + "Z";
