@@ -56,7 +56,9 @@
     section.block#compare { padding-block: 2rem 2.5rem; }
     .specimen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     @media (max-width: 575.98px) { .specimen { grid-template-columns: 1fr; } }
-    .specimen .card-font { border-radius: 1rem; padding: 1.2rem 1rem 1rem; text-align: center; overflow: hidden; user-select: none; }
+    .specimen figure { margin: 0; }
+    .specimen figcaption { margin-top: .5rem; text-align: center; font-size: .9rem; }   /* the name of the font */
+    .specimen .card-font { height: calc(100% - 2rem); border-radius: 1rem; padding: 1.2rem 1rem 1rem; text-align: center; overflow: hidden; user-select: none; }
     .specimen .big { font-size: calc(clamp(6rem, 17vw, 10rem) * var(--k, 1)); line-height: 1.05; }
     .specimen .small { display: grid; grid-template-columns: repeat(6, 1fr); font-size: calc(clamp(1.1rem, 2.6vw, 1.7rem) * var(--k, 1)); line-height: 1.3; margin-top: .6rem; opacity: .85; }
     .specimen .f-serif { background: #f7efdc; color: #2b2118; font-family: "QATT Serif"; }
@@ -138,9 +140,9 @@
 
   <section class="block" id="compare" role="img" aria-label="The script in three fonts: Serif, Pen and Gothic">
     <div class="specimen" aria-hidden="true">
-      <div class="card-font f-serif"><div class="big"></div><div class="small"></div></div>
-      <div class="card-font f-pen"><div class="big"></div><div class="small"></div></div>
-      <div class="card-font f-gothic"><div class="big"></div><div class="small"></div></div>
+      <figure><div class="card-font f-serif"><div class="big"></div><div class="small"></div></div><figcaption>QATT Serif</figcaption></figure>
+      <figure><div class="card-font f-pen"><div class="big"></div><div class="small"></div></div><figcaption>QATT Pen Light</figcaption></figure>
+      <figure><div class="card-font f-gothic"><div class="big"></div><div class="small"></div></div><figcaption>QATT Gothic</figcaption></figure>
     </div>
   </section>
 </main>
