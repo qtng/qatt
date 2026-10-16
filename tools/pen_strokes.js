@@ -39,7 +39,7 @@ function touches(pt, others, W) {
   return false;
 }
 
-function stroke(line, W, others) {
+function stroke(line, W, others, cut) {
   const f = nums(line), p0 = [f[3], f[4]], p1 = [f[f.length - 2], f[f.length - 1]];
   const dx = p1[0] - p0[0], dy = p1[1] - p0[1], ax = Math.abs(dx), ay = Math.abs(dy);
   let kind;
@@ -52,6 +52,15 @@ function stroke(line, W, others) {
   // full width at distance d from the start
   const width = (d, t) => {
     const e = len - d, press = Math.min(3 * W, len * 0.3);
+    if (cut) {                                 // cut ends: thin horizontals with a small triangle-like flare where they stop (as in Song), heavy verticals
+      const q = Math.min(1.7 * W, len * 0.25);
+      switch (kind) {
+        case "h": return 0.58 * W * (1 + (free0 ? 0.25 : 0) * ease(1 - d / q) + (free1 ? 1.3 : 0) * Math.pow(Math.max(0, 1 - e / q), 1.6));
+        case "v": return 1.2 * W;
+        case "arc": return 0.95 * W;
+        default: return 1.05 * W;
+      }
+    }
     switch (kind) {
       case "h": return 0.82 * W * (1 + (free0 ? 0.55 : 0) * ease(1 - d / press) + (free1 ? 0.45 : 0) * ease(1 - e / press));
       case "v": return 1.08 * W * (1 + (free0 ? 0.3 : 0) * ease(1 - d / press) + (free1 ? 0.25 : 0) * ease(1 - e / press));
@@ -76,14 +85,19 @@ function stroke(line, W, others) {
     else if (slant) o.push([c[0] + tx * slant * hw, c[1] + ty * slant * hw]);   // a cut slanted by moving the middle of the end outwards
     return o;
   };
-  const roundEnd = free1;
+  const roundEnd = free1 && !cut;
   if (free0 && (kind === "h" || kind === "v")) {   // the brush enters at an angle: one corner of the start is drawn further out
     const T = [pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]], tl = Math.hypot(T[0], T[1]) || 1, o = 0.45 * Math.hypot(L[0][0] - pts[0][0], L[0][1] - pts[0][1]);
     const c = kind === "h" ? R : L; c[0] = [c[0][0] + T[0] / tl * o, c[0][1] + T[1] / tl * o];
+  }
+  if (cut) {                                   // flat ends, cut at a slant: one corner of each end is drawn further out
+    const slant = (i, j, side, dir) => { const T = [pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]], tl = Math.hypot(T[0], T[1]) || 1, o = 0.45 * Math.hypot(L[i][0] - pts[i][0], L[i][1] - pts[i][1]); side[i] = [side[i][0] + T[0] / tl * o, side[i][1] + T[1] / tl * o]; };
+    if (free0 && kind !== "arc") slant(0, 1, kind === "h" ? R : L);
+    if (free1 && kind !== "arc") slant(N - 1, N - 2, kind === "h" ? L : R);
   }
   const poly = [...L, ...cap(N - 1, 1, roundEnd, 0), ...R.slice().reverse(), ...cap(0, -1, kind === "arc", 0).reverse()];
   return poly;
 }
 
-function penPolygons(lines, W) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i))); }
+function penPolygons(lines, W, cut = false) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i), cut)); }
 module.exports = { penPolygons };

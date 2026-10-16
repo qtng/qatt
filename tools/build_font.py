@@ -28,6 +28,8 @@ if '--kage' in sys.argv:
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'pen' if '--pen' in sys.argv else 'mincho'
     if '--pen' in sys.argv: sys.argv.remove('--pen')
     if '--gothic' in sys.argv: sys.argv.remove('--gothic')
+CUT = '--cut' in sys.argv      # --cut (with --pen): flat, slanted stroke ends like Song, family "QATT Pen Cut"
+if CUT: sys.argv.remove('--cut')
 WIDE = 1.25 if '--wide' in sys.argv else 1.0    # --wide (with --kage): a joined pair is 1.25 cells wide, so its halves are squeezed less
 if '--wide' in sys.argv: sys.argv.remove('--wide')
 BOLD = (1.8 if KAGE_STYLE == 'mincho' else 1.7) if BOLD_ON else 1.0
@@ -258,7 +260,7 @@ if BRUSH or KAGE:   # the outlines requested by the first run, then the glyphs a
         jobs, out = os.path.join(tmp, 'jobs.json'), os.path.join(tmp, 'out.json')
         json.dump(list(JOBS.values()), open(jobs, 'w'))
         here = os.path.dirname(os.path.abspath(__file__))
-        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE, str(BOLD)] if KAGE else ['node', os.path.join(here, 'brush_outlines.js'), BRUSH, jobs, out], check=True)
+        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE + ('-cut' if CUT else ''), str(BOLD)] if KAGE else ['node', os.path.join(here, 'brush_outlines.js'), BRUSH, jobs, out], check=True)
         RESULTS.update(zip(JOBS.keys(), json.load(open(out))))
     make_glyphs()
 jname = 'u%05X' % (BASE + JOINER)
@@ -278,7 +280,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE != 'pen' else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE != 'pen' else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
