@@ -65,8 +65,9 @@ html[data-theme="future"] .task .cells, html[data-theme="future"] .task .cell + 
 html[data-theme="future"] .glyph-strip .lab, html[data-theme="future"] #variants .head, html[data-theme="future"] .bar .form-check-label, html[data-theme="future"] .bar label, html[data-theme="future"] .notes, html[data-theme="future"] .notes em, html[data-theme="future"] .fmt-text, html[data-theme="future"] #output .empty, html[data-theme="future"] #output .reading, html[data-theme="future"] .editor-head p { color: var(--muted) !important; }
 html[data-theme="future"] .notes h4, html[data-theme="future"] .notes b, html[data-theme="future"] .fmt-text strong, html[data-theme="future"] h2.sub { color: var(--fx-text); }
 html[data-theme="future"] .hero .lead { color: var(--muted); }
-/* the images of Nôm characters of the Chunom site (/chunom-assets/generated/…) are black on transparent: light on the dark background */
-html[data-theme="future"] img[src*="/chunom-assets/generated/"] { filter: invert(1) hue-rotate(180deg); }
+/* the images of Nôm characters of the Chunom site (/chunom-assets/generated/…, the stroke animations and glyph SVGs of the detail popup) are dark on white
+   or transparent: light on the dark background */
+html[data-theme="future"] :is(img[src*="/chunom-assets/generated/"], img[src*="/chunom-assets/animations/"], img[src*="/chunom-assets/glyph-composer/"]) { filter: invert(1) hue-rotate(180deg); mix-blend-mode: lighten; }   /* lighten: the black of an inverted white background lets the panel show through */
 /* dropdown entries, the close button of dialogs and the help texts of forms: light on the dark panels */
 html[data-theme="future"] .dropdown-menu { --bs-dropdown-link-color: var(--fx-text); --bs-dropdown-link-hover-color: #fff; --bs-dropdown-link-hover-bg: rgba(0, 229, 255, .14); --bs-dropdown-link-active-bg: rgba(0, 229, 255, .25); --bs-dropdown-divider-bg: var(--line); }
 html[data-theme="future"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
