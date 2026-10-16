@@ -95,6 +95,33 @@ window.Lang = window.Lang || (function() {
 })();
 
 // ---------- the menu ----------
+// ---------- Theme: the look of qatt.org ----------
+// localStorage.theme ("classic", "retro" or "popart", chosen in license.html) sets data-theme on <html> as early as the script runs; css/site.css has the rules for every theme
+// ("classic", the default, has no attribute: the pages show their own rules, css/site.css takes the retro ones back). Only qatt.org has themes, the pages of the Chunom site do not use site.css.
+//   Theme.list          {name: [English, Tiếng Việt]}
+//   Theme.current       the name of the theme
+//   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
+window.Theme = window.Theme || (function() {
+    const KEY = "theme";
+    const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"] };
+    const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
+    let current = "classic";
+    try { const s = localStorage.getItem(KEY); if (Object.prototype.hasOwnProperty.call(list, s)) current = s; } catch (e) {}
+    const apply = () => { if (onChunom) return; if (current === "classic") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", current); };
+    apply();
+    return {
+        list,
+        get current() { return current; },
+        set(name) {
+            if (!Object.prototype.hasOwnProperty.call(list, name)) return;
+            current = name;
+            try { localStorage.setItem(KEY, name); } catch (e) {}
+            apply();
+            document.dispatchEvent(new Event("themechange"));
+        }
+    };
+})();
+
 (function() {
     const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
