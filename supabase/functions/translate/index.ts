@@ -137,7 +137,8 @@ function gapRows(words: { at: number; len: number; qn: string; chosen: string; o
 // one row of numbers per call, one per try of a model (translate_attempts), the gaps of the dictionary (translate_gaps); a failing log must never break the translation
 async function logCall(row: Record<string, unknown>, attempts: Attempt[] = [], gaps: Gap[] = []) {
   await logRows('translate_log', row);
-  if (attempts.length) await logRows('translate_attempts', attempts);
+  // PostgREST wants the same keys in every object of a bulk insert: the tries that failed have no tokens, so they get null
+  if (attempts.length) await logRows('translate_attempts', attempts.map(a => ({ model: a.model, status: a.status, ms: a.ms, tokens_in: a.tokens_in ?? null, tokens_out: a.tokens_out ?? null })));
   if (gaps.length) await logRows('translate_gaps', gaps);
 }
 async function logRows(table: string, row: Record<string, unknown> | Attempt[] | Gap[]) {
