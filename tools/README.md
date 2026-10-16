@@ -119,6 +119,10 @@ python3 tools/build_font.py --kage fonts/kage.json --pen --weight 3.2 --label Bo
 python3 tools/build_font.py --kage fonts/kage.json --pen --weight 4.0 --label Heavy      fonts/glyphs.json fonts/qatt-pen-heavy
 ```
 
+**Pen Cut.** `--pen --cut` is a variant of the Pen font with flat stroke ends cut at a slant, as in Song: thin horizontals with a small flare where they stop, heavy verticals
+(`style "pen-cut"` in `tools/pen_strokes.js`). The same six weights, files `fonts/qatt-pencut[-extralight|-light|-medium|-bold|-heavy]`, family `QATT Pen Cut ...`
+(`python3 tools/build_font.py --kage fonts/kage.json --pen --cut --weight 1.6 fonts/glyphs.json fonts/qatt-pencut`).
+
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
