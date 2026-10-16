@@ -23,6 +23,22 @@
     td, th { text-align: right; white-space: nowrap; } td:first-child, th:first-child { text-align: left; }
     td.l, th.l { text-align: left; }
     td.han { font-size: 1.15rem; }
+    /* a gap with its neighbours: before, the word (marked), after; below the same as characters */
+    .ctx { display: inline-grid; grid-template-columns: repeat(3, max-content); justify-content: start; gap: .1rem .6rem; align-items: baseline; text-align: left; }
+    .ctx .w { font-weight: 700; background: #fff1c9; border-radius: .3rem; padding: 0 .35rem; }
+    .ctx .none { color: #b9a982; font-style: italic; font-size: .8rem; }
+    .ctx .han { font-size: 1.15rem; }
+    .chip { display: inline-block; background: #f6ecd2; border: 1px solid #dccfb2; border-radius: .4rem; padding: 0 .4rem; margin: 0 .15rem .1rem 0; font-size: 1.05rem; }
+    .chip small { color: #7b6c58; margin-left: .15rem; }
+    tr.clickable { cursor: pointer; } tr.clickable:hover td { background: #fff7e0; }
+    tr.open td { background: #fff1c9; }
+    .detail td { white-space: normal; text-align: left; background: #fffaf0; padding: .6rem .8rem; }
+    .detail .row { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem 1.2rem; padding: .35rem 0; border-top: 1px dashed #dccfb2; }
+    .detail .row:first-child { border-top: 0; }
+    .tile { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem; }
+    .tile b { display: block; font: 400 2rem/1.1 Georgia, "Times New Roman", serif; }
+    .tile span { font-size: .85rem; color: #5b4d3d; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .8rem; }
     .chart { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem .4rem; }
     .chart h3 { font-size: .95rem; font-weight: 600; margin: 0 0 .3rem; }
     .chart div { position: relative; height: 15rem; }
@@ -64,26 +80,35 @@
     </div>
 
     <h2>Gaps of the dictionary</h2>
-    <p class="note" id="gapNote"></p>
-    <div class="d-flex gap-2 mb-2"><button type="button" class="btn btn-sm btn-quiet" id="csv">Download the list as CSV</button></div>
+    <p class="note">Words for which the model gave a character of its own, with the word before and after. Click a word to see where it occurs.</p>
+    <div class="tiles mb-3" id="gapTiles"></div>
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+      <select id="gapFilter" class="form-select form-select-sm w-auto">
+        <option value="all">All gaps</option>
+        <option value="nothing">The dictionary has nothing for the word</option>
+        <option value="options">The dictionary has options, none fitted</option>
+      </select>
+      <button type="button" class="btn btn-sm btn-quiet" id="csvWords">Words as CSV</button>
+      <button type="button" class="btn btn-sm btn-quiet" id="csvRows">All rows as CSV</button>
+    </div>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
-        <thead><tr><th>Word</th><th class="l">Characters</th><th>Times</th><th>Options on the page</th><th class="l">Last context</th><th class="l">Characters of the context</th></tr></thead>
+        <thead><tr><th>Word</th><th class="l">Characters chosen</th><th>Times</th><th>Contexts</th><th>At start</th><th>At end</th><th>Dictionary</th><th>Last</th></tr></thead>
         <tbody id="gaps"></tbody>
       </table>
     </div>
 
-    <h3 class="h6 mt-4">Newest rows</h3>
+    <h3 class="h6 mt-4">Newest gaps</h3>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
-        <thead><tr><th>Time</th><th class="l">Context</th><th class="l">Characters</th><th>Options</th><th class="l">Model</th></tr></thead>
+        <thead><tr><th class="l">Time</th><th class="l">Context</th><th>Position</th><th>Dictionary</th><th class="l">Model</th></tr></thead>
         <tbody id="recent"></tbody>
       </table>
     </div>
 
     <hr class="mt-4">
     <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
-    <p class="note mb-1"><b>Gap:</b> a word for which the model gave a character of its own (or "?" = it knew none) because the list of the page had no suitable option. Stored with the word before and after, "before | word | after", "-" where there is none, in Quốc Ngữ and as the characters chosen for the three. Only these words, not the sentence. <b>Options on the page</b> = how many characters the dictionary offered for the word: 0 means the dictionary has nothing, more than 0 means none of them fitted.</p>
+    <p class="note mb-1"><b>Gap:</b> a word for which the model gave a character of its own (or "?" = it knew none) because the list of the page had no suitable option. Stored with the word before and after (Quốc Ngữ and the character chosen for each; "none" where the word is the first or last), its position and the length of the sentence in words. Only these words, not the sentence. <b>Dictionary</b> = how many characters the dictionary offered for the word: "nothing" means it has none, a number means these did not fit. <b>Contexts</b> = different combinations of the word before and after. <b>At start / at end</b> = how often the word was the first or last of its sentence.</p>
     <p class="note mb-1"><b>Language:</b> the language of the free translation that was asked for. <b>Errors</b> = no answer (busy, over quota, ...). <b>Fallback</b> = the model's answer was unusable twice. <b>Own characters</b> = share of the words that are gaps. Recorded since 16 Oct 2026.</p>
   </div>
 </main>
@@ -104,7 +129,7 @@
       return tr;
     }));
     const COLORS = ['#a8362a', '#3b6ea5', '#2e7d4f', '#d08a2e', '#7b6c58', '#8a5ba8', '#2b8a8a', '#c0638f', '#6b7b2a', '#4a4a8a', '#a86b2a', '#999999'];
-    let chart = null, gapsTop = [];
+    let chart = null, gapsTop = [], filterMode = 'all', openWord = null;
     function drawLang(daily) {
       if (typeof Chart === 'undefined') return;
       Chart.defaults.font.family = 'system-ui, -apple-system, sans-serif'; Chart.defaults.color = '#2b2118';
@@ -114,6 +139,57 @@
         data: days.map(d => { const r = daily.find(x => x.day === d && x.lang === l); return r ? r.calls : 0; }) })) },
         options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
           scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } } });
+    }
+
+    // before | word | after, in Quốc Ngữ and below as characters; "none" where there is no neighbour
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+    function context(prevQn, prevChar, wordQn, wordChar, nextQn, nextChar) {
+      const box = el('span', 'ctx');
+      const cell = (v, cls) => box.append(v === null || v === undefined ? el('span', 'none', 'none') : el('span', cls, v));
+      cell(prevQn, ''); cell(wordQn, 'w'); cell(nextQn, '');
+      const hcell = (v, cls) => box.append(v === null || v === undefined ? el('span', 'none', '') : el('span', 'han ' + cls, v));
+      hcell(prevChar, ''); hcell(wordChar, 'w'); hcell(nextChar, '');
+      return box;
+    }
+    const dict = n => n === 0 ? 'nothing' : n + (n === 1 ? ' option' : ' options');
+    const cellOf = (v, cls) => { const td = el('td', cls || ''); if (v instanceof Node) td.append(v); else td.textContent = v === null || v === undefined ? '' : v; return td; };
+    const csvDownload = (name, header, rows) => {
+      const q = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob(['\ufeff' + [header.join(',')].concat(rows.map(r => r.map(q).join(','))).join('\n')], { type: 'text/csv;charset=utf-8' }));
+      a.download = name; a.click(); URL.revokeObjectURL(a.href);
+    };
+
+    function drawGaps() {
+      const list = gapsTop.filter(r => filterMode === 'all' || (filterMode === 'nothing' ? r.n_options === 0 : r.n_options > 0));
+      const rows = [];
+      for (const r of list) {
+        const tr = el('tr', 'clickable' + (openWord === r.word_qn ? ' open' : ''));
+        tr.append(cellOf(r.word_qn));
+        const chars = el('td', 'l han');
+        (r.chars || []).forEach(c => { const chip = el('span', 'chip', c.c); chip.append(el('small', '', '×' + c.n)); chars.append(chip); });
+        tr.append(chars, cellOf(r.n), cellOf(r.contexts), cellOf(pct(r.at_start, r.n)), cellOf(pct(r.at_end, r.n)), cellOf(dict(r.n_options)), cellOf(new Date(r.last_at).toLocaleDateString()));
+        tr.addEventListener('click', () => toggle(r.word_qn));
+        rows.push(tr);
+        if (openWord === r.word_qn) { const d = el('tr', 'detail'); const td = el('td'); td.colSpan = 8; td.id = 'detailCell'; td.textContent = 'Loading...'; d.append(td); rows.push(d); }
+      }
+      if (!rows.length) { const tr = el('tr'); const td = el('td', 'l', 'No gaps in this time.'); td.colSpan = 8; tr.append(td); rows.push(tr); }
+      $('gaps').replaceChildren(...rows);
+    }
+    async function toggle(word) {
+      openWord = openWord === word ? null : word;
+      drawGaps();
+      if (!openWord) return;
+      const { data, error } = await sp.client.rpc('admin_gap_contexts', { p_word: word, p_days: Number($('days').value) });
+      const cell = $('detailCell');
+      if (!cell || openWord !== word) return;
+      if (error) { cell.textContent = 'Could not load: ' + error.message; return; }
+      cell.replaceChildren(...data.map(c => {
+        const row = el('div', 'row');
+        row.append(el('b', '', '×' + c.n), context(c.prev_qn, c.prev_char, word, c.word_char, c.next_qn, c.next_char),
+          el('span', 'note', (c.avg_pos_percent === null ? '' : 'at ' + c.avg_pos_percent + ' % of the sentence · ') + 'last ' + new Date(c.last_at).toLocaleDateString()));
+        return row;
+      }));
     }
 
     let allowed = false;
@@ -133,19 +209,28 @@
 
       const G = gaps.data;
       gapsTop = G.top;
-      $('gapNote').textContent = G.rows + ' gap rows in this time, ' + G.top.length + ' different word and character combinations' + (G.top.length >= 200 ? ' (the 200 most frequent are shown)' : '') + '.';
-      fill('gaps', G.top.map(r => [r.word_qn, { v: r.word_char, cls: 'l han' }, r.n, r.n_options, { v: r.example_qn, cls: 'l' }, { v: r.example_chars, cls: 'l han' }]));
-      fill('recent', G.recent.map(r => [new Date(r.at).toLocaleString(), { v: r.context_qn, cls: 'l' }, { v: r.context_chars, cls: 'l han' }, r.n_options, { v: r.model || '', cls: 'l' }]));
+      const tiles = [[G.rows, 'gap rows'], [G.words, 'different words'], [pct(G.nothing_in_dictionary, G.rows) || '-', 'of them: the dictionary has nothing'],
+        [pct(L.by_lang.reduce((n, r) => n + r.own_words, 0), L.by_lang.reduce((n, r) => n + r.words, 0)) || '-', 'of all words are gaps']];
+      $('gapTiles').replaceChildren(...tiles.map(([v, l]) => { const t = el('div', 'tile'); t.append(el('b', '', v), el('span', '', l)); return t; }));
+      drawGaps();
+      $('recent').replaceChildren(...G.recent.map(r => {
+        const tr = el('tr');
+        tr.append(cellOf(new Date(r.at).toLocaleString(), 'l'), cellOf(context(r.prev_qn, r.prev_char, r.word_qn, r.word_char, r.next_qn, r.next_char), 'l'),
+          cellOf(r.pos && r.n_words ? r.pos + ' / ' + r.n_words : ''), cellOf(dict(r.n_options)), cellOf(r.model || '', 'l'));
+        return tr;
+      }));
     }
 
-    $('csv').addEventListener('click', () => {
-      const q = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
-      const lines = [['word_qn', 'word_char', 'times', 'options_on_the_page', 'last_at', 'context_qn', 'context_chars'].join(',')]
-        .concat(gapsTop.map(r => [r.word_qn, r.word_char, r.n, r.n_options, r.last_at, r.example_qn, r.example_chars].map(q).join(',')));
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
-      a.download = 'dictionary-gaps.csv'; a.click(); URL.revokeObjectURL(a.href);
+    $('csvWords').addEventListener('click', () => csvDownload('dictionary-gaps-words.csv',
+      ['word_qn', 'characters_chosen', 'times', 'contexts', 'at_start', 'at_end', 'options_on_the_page', 'last_at'],
+      gapsTop.map(r => [r.word_qn, (r.chars || []).map(c => c.c + ' x' + c.n).join('; '), r.n, r.contexts, r.at_start, r.at_end, r.n_options, r.last_at])));
+    $('csvRows').addEventListener('click', async () => {
+      const { data, error } = await sp.client.rpc('admin_gap_export', { p_days: Number($('days').value) });
+      if (error) return denied('Could not load: ' + error.message);
+      csvDownload('dictionary-gaps-rows.csv', ['at', 'word_qn', 'word_char', 'n_options', 'prev_qn', 'prev_char', 'next_qn', 'next_char', 'pos', 'n_words', 'model'],
+        data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, r.prev_qn, r.prev_char, r.next_qn, r.next_char, r.pos, r.n_words, r.model]));
     });
+    $('gapFilter').addEventListener('change', () => { filterMode = $('gapFilter').value; openWord = null; drawGaps(); });
     $('days').addEventListener('change', load);
     $('reload').addEventListener('click', load);
     const state = await Admin.check(sp);

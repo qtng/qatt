@@ -116,9 +116,11 @@ async function hit(userId: string): Promise<number | null> {
   return Number(await r.json());
 }
 
-// the words with a character of the model's own (or "?"), each with the word before and after as "before | word | after" ("-" where there is none), in Quốc Ngữ and as characters;
-// n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The sentence itself is not stored.
-type Gap = { word_qn: string; word_char: string; n_options: number; context_qn: string; context_chars: string; model: string | null };
+// the words with a character of the model's own (or "?"), each with the word before and after (Quốc Ngữ and the character chosen for it; null where there is none),
+// its position and the length of the sentence in words; n_options = how many options the page sent for the word (0: the dictionary has nothing for it).
+// The sentence itself is not stored.
+type Gap = { word_qn: string; word_char: string; n_options: number; prev_qn: string | null; prev_char: string | null; next_qn: string | null; next_char: string | null;
+  pos: number; n_words: number; model: string | null };
 function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null): Gap[] {
   const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
   const rows: Gap[] = [];
@@ -126,7 +128,8 @@ function gapRows(words: { at: number; len: number; qn: string; chosen: string; o
     if (!w.own) return;
     const prev = words[i - 1], next = words[i + 1], span = sent.find(s => s && s.at === w.at && s.len === w.len);
     rows.push({ word_qn: w.qn, word_char: w.chosen, n_options: span && Array.isArray(span.options) ? span.options.length : 0,
-      context_qn: [prev ? prev.qn : '-', w.qn, next ? next.qn : '-'].join(' | '), context_chars: [prev ? prev.chosen : '-', w.chosen, next ? next.chosen : '-'].join(' | '), model });
+      prev_qn: prev ? prev.qn : null, prev_char: prev ? prev.chosen : null, next_qn: next ? next.qn : null, next_char: next ? next.chosen : null,
+      pos: i + 1, n_words: words.length, model });
   });
   return rows.slice(0, 30);
 }
