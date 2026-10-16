@@ -78,7 +78,7 @@ html[data-theme="popart"] {
   --retro-hover: #fff; --retro-active: #ffd500;
   --pop-yellow: #ffd500; --pop-red: #e8212b; --pop-blue: #1e5bd8; --pop-cyan: #2cc4f0; --pop-pink: #ff5fa8;
   --pop-title: Impact, "Arial Black", sans-serif;
-  --rule: #111;   /* the lines between the sections of a page (index.html) */
+  --rule: #111; --rule-width: 3px;   /* the lines between the sections of a page (index.html): heavy, like the outlines */
 }
 html[data-theme="popart"] body {
   background-color: var(--pop-yellow);
