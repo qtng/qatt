@@ -81,7 +81,7 @@
     const $ = id => document.getElementById(id);
     const sp = new SupabaseService();
     await sp.init();
-    QattLogin.status(sp, $('account'), { en: 'with your admin account', vi: 'bằng tài khoản quản trị' });
+    QattLogin.status(sp, $('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
     const denied = text => { $('content').hidden = true; $('denied').hidden = false; $('denied').textContent = text; };
     const sec = ms => ms === null || ms === undefined ? '' : (ms / 1000).toFixed(1);
     const fill = (id, rows) => $(id).replaceChildren(...rows.map(cells => {

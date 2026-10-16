@@ -2,9 +2,9 @@
 Login dialog and account line for the pages that use SupabaseService (js/supabase.js).
 
 await QattLogin.require(db, 'Sign in to create decks.')   // true if signed in; else opens the dialog and gives false
-QattLogin.status(db, element, hint)                       // "Signed in as …" with a sign-out link, or "Not signed in. Sign in <hint>." (the hint of the page, e.g. 'to keep your progress on every device'; without it a general one)
+QattLogin.status(db, element, hint, hintVi)               // "Signed in as …" with a sign-out link, or "Not signed in." and the hint with a sign-in link. The hint replaces the general one ("Sign in to keep your work on every device."); the words of the link are in [ ], e.g. '[Sign in] to use the translator.' and hintVi '[Đăng nhập] để dùng công cụ dịch.' (without [ ] the whole hint is the link; without hintVi the hint stays English)
 QattLogin.t(en, vi)                                       // the text in the language of the page (Lang of navigation.js), English where Lang is not loaded
-// Every text is English and Vietnamese (the Vietnamese ones were written by Claude: drafts). A message or a hint can be a text or { en, vi }. The account line follows a switch of the language.
+// Every text is English and Vietnamese (the Vietnamese ones were written by Claude: drafts). A message of QattLogin.open can be a text or { en, vi }. The account line follows a switch of the language.
 QattLogin.open(db, message)                               // the dialog
 await QattLogin.chooseName(db, { required, current })     // the name for the leaderboard: the new name, null if the dialog was closed
 */
@@ -152,17 +152,24 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 	// a message or hint of a page: a text, or { en, vi }
 	const pick = x => (x && typeof x === 'object' ? T(x.en, x.vi) : x);
 
-	// what the sign-in link says when the page gives no hint of its own
-	const KEEP_HINT = { en: 'to keep your work on every device', vi: 'để lưu công việc của bạn trên mọi thiết bị' };
+	// the hint of the account line when the page gives none; the words of the link are in [ ]
+	const KEEP_HINT = { en: '[Sign in] to keep your work on every device.', vi: '[Đăng nhập] để lưu công việc của bạn trên mọi thiết bị.' };
 
 	const accountLines = new Set();   // the lines that follow a change of the language
-	function status(db, element, hint) {
+	function status(db, element, hint, hintVi) {
 		addStyle();
 		element.classList.add('qatt-account');
-		accountLines.add({ db, element, hint });
-		renderStatus(db, element, hint);
+		accountLines.add({ db, element, hint, hintVi });
+		renderStatus(db, element, hint, hintVi);
 	}
-	function renderStatus(db, element, hint) {
+	// the text of the hint with the words in [ ] as the link; without [ ] the whole text is the link
+	function linkText(text, onClick) {
+		const m = /\[([^\]]+)\]/.exec(text);
+		const link = el('a', { textContent: m ? m[1] : text });
+		link.addEventListener('click', onClick);
+		return m ? [text.slice(0, m.index), link, text.slice(m.index + m[0].length)] : [link];
+	}
+	function renderStatus(db, element, hint, hintVi) {
 		element.replaceChildren();
 		if (!db || !db.user) return;
 		if (signedIn(db)) {
@@ -170,12 +177,11 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 			out.addEventListener('click', async () => { await db.signOut(); location.reload(); });
 			element.append(`${T('Signed in as', 'Đã đăng nhập:')} ${db.user.email || T('you', 'bạn')} · `, out);
 		} else {
-			const inn = el('a', { textContent: T('Sign in', 'Đăng nhập') });
-			inn.addEventListener('click', () => open(db));
-			element.append(T('Not signed in.', 'Chưa đăng nhập.') + ' ', inn, ' ' + (pick(hint) || pick(KEEP_HINT)) + '.');
+			const text = hint ? T(hint, hintVi || hint) : T(KEEP_HINT.en, KEEP_HINT.vi);
+			element.append(T('Not signed in.', 'Chưa đăng nhập.') + ' ', ...linkText(text, () => open(db)));
 		}
 	}
-	document.addEventListener('langchange', () => accountLines.forEach(l => { if (l.element.isConnected) renderStatus(l.db, l.element, l.hint); else accountLines.delete(l); }));
+	document.addEventListener('langchange', () => accountLines.forEach(l => { if (l.element.isConnected) renderStatus(l.db, l.element, l.hint, l.hintVi); else accountLines.delete(l); }));
 
 	window.QattLogin = { open, require, status, chooseName, t: T };
 })();
