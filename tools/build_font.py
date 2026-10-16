@@ -278,7 +278,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and not LABEL else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
+fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE != 'kai' else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
