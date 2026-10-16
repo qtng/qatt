@@ -43,10 +43,6 @@
       <select id="days" class="form-select form-select-sm w-auto">
         <option value="1">24 hours</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">1 year</option>
       </select>
-      <label for="who" class="ms-2 me-1">Calls of</label>
-      <select id="who" class="form-select form-select-sm w-auto" title="The calls of admins are marked when they are logged (your own tests)">
-        <option value="all">everybody</option><option value="users" selected>users (without admins)</option><option value="admins">admins only</option>
-      </select>
       <button type="button" class="btn btn-sm btn-quiet" id="reload">Reload</button>
       <span class="note ms-2" id="at"></span>
     </div>
@@ -82,6 +78,7 @@
     </div>
 
     <h3 class="h6 mt-4">Newest, with the words around</h3>
+    <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="noAdmin" checked><label class="form-check-label" for="noAdmin">Without admins (your own tests)</label></div>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
         <thead><tr><th class="l">Time</th><th class="l">In the sentence</th><th class="l">As characters</th></tr></thead>
@@ -92,7 +89,6 @@
     <hr class="mt-4">
     <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
     <p class="note mb-1"><b>Missing word:</b> a word for which the model gave a character of its own (or "?" when it knew none) because the list of the page had no suitable character. "The dictionary has: nothing" = no character at all for this word, "n characters" = it has some, but none fitted. In the newest list the word is marked, with the words before and after it (5 if the user has the switch "Help improve the model" on, else 1; fewer or nothing there = the word is near the start or end of the sentence). Only these words are stored, not the whole sentence.</p>
-    <p class="note mb-1"><b>Calls of:</b> the calls of admins (your own tests) are marked when they are logged (since 16 Oct 2026; earlier rows count as users). "Users" leaves them out, "admins only" shows only them; this holds for the languages and the missing words, not for the other admin pages.</p>
     <p class="note mb-1"><b>Language:</b> the language of the free translation that was asked for. <b>Errors</b> = no answer (busy, over quota, ...). <b>Fallback</b> = the model's answer was unusable twice. <b>Own characters</b> = share of the words that are missing in the dictionary. Recorded since 16 Oct 2026.</p>
   </div>
 </main>
@@ -145,8 +141,8 @@
     let allowed = false;
     async function load() {
       if (!allowed) return;
-      const days = Number($('days').value), who = $('who').value;
-      const [lang, gaps] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days, p_who: who }), sp.client.rpc('admin_gaps', { p_days: days, p_who: who })]);
+      const days = Number($('days').value);
+      const [lang, gaps] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gaps', { p_days: days })]);
       const error = lang.error || gaps.error;
       if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
       $('denied').hidden = true; $('content').hidden = false;
@@ -163,7 +159,12 @@
       for (const r of G.top) for (const c of (r.chars || [])) rows.push({ word: r.word_qn, ch: c.c, n: c.n, options: r.n_options });
       rows.sort((a, b) => b.n - a.n);
       fill('gaps', rows.map(r => [r.word, { v: r.ch, cls: 'l han' }, r.n, { v: dict(r.options), cls: 'l' }]));
-      $('recent').replaceChildren(...G.recent.map(r => {
+      recentRows = G.recent;
+      showRecent();
+    }
+    let recentRows = [];
+    function showRecent() {   // the newest list; the calls of admins are marked in the data, here they are hidden if the box is checked
+      $('recent').replaceChildren(...recentRows.filter(r => !($('noAdmin').checked && r.is_admin)).map(r => {
         const tr = el('tr');
         const around = (list, idx) => [list.slice(0, idx - 1).join(' '), list[idx - 1], list.slice(idx).join(' ')];   // before, the word of the gap, after
         tr.append(el('td', 'l', new Date(r.at).toLocaleString() + (r.is_admin ? ' (admin)' : '')), sentence(...around(r.ctx_qn, r.idx)), sentence(...around(r.ctx_chars, r.idx)));
@@ -173,13 +174,13 @@
     }
 
     $('csvRows').addEventListener('click', async () => {
-      const { data, error } = await sp.client.rpc('admin_gap_export', { p_days: Number($('days').value), p_who: $('who').value });
+      const { data, error } = await sp.client.rpc('admin_gap_export', { p_days: Number($('days').value) });
       if (error) return denied('Could not load: ' + error.message);
       csvDownload('missing-words.csv', ['time', 'word', 'character_chosen', 'characters_in_dictionary', 'context_words', 'context_characters', 'index_of_the_word_in_the_context', 'position_in_sentence', 'words_in_sentence', 'model', 'admin'],
         data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, (r.ctx_qn || []).join(' | '), (r.ctx_chars || []).join(' | '), r.idx, r.pos, r.n_words, r.model, r.is_admin ? 'yes' : '']));
     });
     $('days').addEventListener('change', load);
-    $('who').addEventListener('change', load);
+    $('noAdmin').addEventListener('change', showRecent);
     $('reload').addEventListener('click', load);
     const state = await Admin.check(sp);
     if (state === 'admin') { allowed = true; load(); }
