@@ -458,7 +458,7 @@ window.Lang = window.Lang || (function() {
 // only when somebody uses the page (tap, key, mouse wheel or button; so most bots do not count) and not for browsers that name themselves as bots.
 // localStorage "qv" = { d: the UTC day of the last count, t: the time of the last activity }: once per browser and day = a visitor, a pause of more
 // than 30 minutes = a new visit. kind: "account" if the session of the browser is a signed-in user, else "anonymous".
-// localStorage.qv_off = "1" switches it off in this browser (for the admin).
+// Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" switches it off in a browser that is not signed in.
 (function() {
     try {
         const SITE = location.hostname === "qatt.org" ? "qatt.org" : location.hostname === "chunom.org" ? "chunom.org" : null;
@@ -469,7 +469,11 @@ window.Lang = window.Lang || (function() {
         const read = () => { try { return JSON.parse(localStorage.getItem("qv")) || {}; } catch (e) { return {}; } };
         const write = s => { try { localStorage.setItem("qv", JSON.stringify(s)); } catch (e) {} };
         const kind = () => {
-            try { const s = JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")); return s && s.user && s.user.is_anonymous === false ? "account" : "anonymous"; }
+            try {
+                const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user;
+                if (u && u.app_metadata && u.app_metadata.is_admin === true) return "admin";   // admins are not counted
+                return u && u.is_anonymous === false ? "account" : "anonymous";
+            }
             catch (e) { return "anonymous"; }
         };
         const count = e => {
@@ -479,8 +483,10 @@ window.Lang = window.Lang || (function() {
             const newVisitor = s.d !== today, newVisit = newVisitor || !s.t || now - s.t > PAUSE;
             write({ d: today, t: now });
             if (!newVisit) return;
+            const k = kind();
+            if (k === "admin") return;
             fetch(SUPABASE + "/rest/v1/rpc/count_visit", { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
-                body: JSON.stringify({ p_site: SITE, p_kind: kind(), p_new_visitor: newVisitor }) }).catch(() => {});
+                body: JSON.stringify({ p_site: SITE, p_kind: k, p_new_visitor: newVisitor }) }).catch(() => {});
         };
         EVENTS.forEach(e => addEventListener(e, count, { passive: true }));
         // when the page is left the time of the last activity is stored, so a pause is measured from there

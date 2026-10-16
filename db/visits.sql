@@ -2,7 +2,8 @@
 -- js/navigation.js (on every page of both sites) calls count_visit() when somebody uses the page (scrolls, taps, types), not for bots.
 --   visitors = browsers that came on that day (once per browser and day), visits = a new visit of a browser (more than 30 minutes since the last).
 --   kind: 'account' = signed in with Google or e-mail, 'anonymous' = everybody else (also the first visit without a session).
--- Anybody may call count_visit() (it is only a counter, so the numbers can be inflated by hand); only admins read them, through admin_visits().
+-- Anybody may call count_visit(); it counts at most 200 per minute for the whole site, so the numbers can not be inflated by hand by more than that.
+-- Only admins read the numbers, through admin_visits(). Admins are not counted (the script does not send them).
 
 create table if not exists public.visits_daily (
   day date not null,
@@ -15,14 +16,30 @@ create table if not exists public.visits_daily (
 alter table public.visits_daily enable row level security;
 revoke all on public.visits_daily from anon, authenticated;
 
+-- counts of the last minutes, for the limit of count_visit()
+create table if not exists public.visits_limit (
+  minute timestamptz primary key,
+  n integer not null default 0
+);
+alter table public.visits_limit enable row level security;
+revoke all on public.visits_limit from anon, authenticated;
+
 create or replace function public.count_visit(p_site text, p_kind text, p_new_visitor boolean)
 returns void
 language plpgsql
 security definer
 set search_path = ''
 as $$
+declare
+  calls integer;
 begin
   if p_site not in ('qatt.org', 'chunom.org') or p_kind not in ('account', 'anonymous') then return; end if;
+  -- at most 200 counts per minute for the whole site: the function is public, so a script can not inflate the numbers by more than that
+  insert into public.visits_limit as l (minute, n) values (date_trunc('minute', now()), 1)
+  on conflict (minute) do update set n = l.n + 1
+  returning l.n into calls;
+  if calls = 1 then delete from public.visits_limit where minute < now() - interval '1 hour'; end if;
+  if calls > 200 then return; end if;
   insert into public.visits_daily as v (day, site, kind, visitors, visits)
   values ((now() at time zone 'utc')::date, p_site, p_kind, case when p_new_visitor then 1 else 0 end, 1)
   on conflict (day, site, kind) do update
