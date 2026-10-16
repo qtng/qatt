@@ -15,7 +15,7 @@ const QATT_FONTS = [
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
   { family: "QATT Pen ExtraLight",   label: "Pen extra light",     file: "qatt-pen-extralight", admin: true },
   { family: "QATT Pen Light",        label: "Pen light",           file: "qatt-pen-light", admin: true },
-  { family: "QATT Pen",              label: "Pen",                 file: "qatt-pen", admin: true },
+  { family: "QATT Pen",              label: "Pen",                 file: "qatt-pen" },
   { family: "QATT Pen Medium",       label: "Pen medium",          file: "qatt-pen-medium" },
   { family: "QATT Pen Bold",         label: "Pen bold",            file: "qatt-pen-bold", admin: true },
   { family: "QATT Pen Heavy",        label: "Pen heavy",           file: "qatt-pen-heavy", admin: true },

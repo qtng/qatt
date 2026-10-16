@@ -26,6 +26,7 @@
     .bar { display: flex; align-items: center; gap: 1rem; }
     .bar .text { flex: 1 1 auto; display: flex; align-items: center; gap: .7rem; margin: 0; font-size: .85rem; min-width: 0; }
     .bar .text input { flex: 1 1 auto; min-width: 0; }
+    .bar .text span { white-space: nowrap; }
     .telex { display: flex; align-items: center; gap: .45rem; margin: 0; padding: 0; min-height: 0; font-size: .85rem; white-space: nowrap; }   /* typing Vietnamese on a keyboard without a Vietnamese layout */
     .telex .form-check-input { float: none; margin: 0; }
     .telex .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
@@ -53,22 +54,22 @@
 <header class="hero pt-5 pb-4">
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
-    <h1 class="mb-3">QATT fonts</h1>
-    <p class="lead mx-auto mb-4">All fonts of the QATT block, each from small to large. Type your own text in Quốc Ngữ.</p>
-    <a class="btn btn-cinnabar btn-pill" href="codetable.html">Reference font</a>
-    <a class="btn btn-outline-secondary btn-pill" href="editor.html">Type QATT</a>
+    <h1 class="mb-3" data-vi="Phông chữ QATT">QATT fonts</h1>
+    <p class="lead mx-auto mb-4" data-vi="Tất cả phông chữ của khối QATT, mỗi phông từ cỡ nhỏ đến cỡ lớn. Hãy gõ văn bản của bạn bằng chữ Quốc Ngữ.">All fonts of the QATT block, each from small to large. Type your own text in Quốc Ngữ.</p>
+    <a class="btn btn-cinnabar btn-pill" href="codetable.html" data-vi="Phông chữ tham chiếu">Reference font</a>
+    <a class="btn btn-outline-secondary btn-pill" href="editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
   </div>
 </header>
 
 <main class="wrap">
   <div class="sheet">
   <div class="bar">
-    <label class="text"><span class="muted">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ"></label>
+    <label class="text"><span class="muted" data-vi="Văn bản">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" data-vi-placeholder="Văn bản của bạn bằng chữ Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ" data-vi-aria-label="Văn bản bằng chữ Quốc Ngữ"></label>
     <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off" checked><label class="form-check-label" for="telex">Telex</label></div>
   </div>
   <div id="fonts"></div>
   </div>
-  <p class="note">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts. <a href="fonts/LICENSE.txt">Licence</a></p>
+  <p class="note"><span data-vi="© 2026 qatt.org. Bảo lưu mọi quyền. Phông chữ được dùng để đọc, viết và in văn bản QATT, không được sửa đổi hay dùng làm nền cho phông chữ khác.">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts.</span> <a href="fonts/LICENSE.txt" data-vi="Giấy phép">Licence</a></p>
 </main>
 
 <script src="js/parser.js"></script>
@@ -88,19 +89,19 @@
   const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Bold": .82, "QATT Gothic Wide": .82 };
   const SAMPLE = 'Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen.';   // Truyện Kiều, lines 1 to 6
   const SIZES = [14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56];   // from small to large
-  const ABOUT = [   // the first entry whose name starts the family
-    ["QATT Serif", "Thin horizontals, heavy verticals, small triangles at the ends."],
-    ["QATT Gothic Bold", "The Gothic font with strokes 1.7 times as heavy."],
-    ["QATT Gothic Wide", "The Gothic font; a joined pair takes 1.25 cells, so its halves are less squeezed."],
-    ["QATT Gothic", "Strokes of one width."],
-    ["QATT Pen Cut", "The Pen strokes with flat ends cut at a slant, as in Song: thin horizontals, heavy verticals."],
-    ["QATT Pen", "Strokes of a felt-tip pen: round ends, slightly bowed horizontals, a hint of clerical script."],
-    ["QATT Prototype Light", "The strokes of qatt.js, thinner."],
-    ["QATT Prototype", "The strokes of qatt.js as lines of one width: the first font of the proposal."],
-    ["QATT Brush", "Brush strokes made with the brush editor."],
+  const ABOUT = [   // the first entry whose name starts the family: English, Vietnamese (drafts by Claude)
+    ["QATT Serif", "Thin horizontals, heavy verticals, small triangles at the ends.", "Nét ngang mảnh, nét dọc đậm, có tam giác nhỏ ở cuối nét."],
+    ["QATT Gothic Bold", "The Gothic font with strokes 1.7 times as heavy.", "Phông Gothic với nét đậm gấp 1,7 lần."],
+    ["QATT Gothic Wide", "The Gothic font; a joined pair takes 1.25 cells, so its halves are less squeezed.", "Phông Gothic; một cặp ghép chiếm 1,25 ô nên hai nửa ít bị ép hơn."],
+    ["QATT Gothic", "Strokes of one width.", "Nét đều, cùng một độ dày."],
+    ["QATT Pen Cut", "The Pen strokes with flat ends cut at a slant, as in Song: thin horizontals, heavy verticals.", "Nét của phông Pen với đầu nét cắt phẳng và vát, như kiểu chữ Tống: nét ngang mảnh, nét dọc đậm."],
+    ["QATT Pen", "Strokes of a felt-tip pen: round ends, slightly bowed horizontals, a hint of clerical script.", "Nét bút dạ: đầu nét tròn, nét ngang hơi cong, thoáng dáng chữ Lệ."],
+    ["QATT Prototype Light", "The strokes of qatt.js, thinner.", "Nét của qatt.js, mảnh hơn."],
+    ["QATT Prototype", "The strokes of qatt.js as lines of one width: the first font of the proposal.", "Nét của qatt.js thành những đường cùng độ dày: phông chữ đầu tiên của bản đề xuất."],
+    ["QATT Brush", "Brush strokes made with the brush editor.", "Nét bút lông, vẽ bằng trình chỉnh sửa nét bút lông."],
   ];
-  const about = family => (ABOUT.find(([name]) => family.startsWith(name)) || [, ''])[1];
-  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const about = family => ABOUT.find(([name]) => family.startsWith(name)) || [, '', ''];
+  const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };   // data-vi: Lang (navigation.js) shows the Vietnamese text
 
   // one entry per font
   const list = $('#fonts'), samples = [];
@@ -115,11 +116,12 @@
       left.append(line); samples.push(q);
     }
     const info = el('div', 'info');
-    info.append(el('p', '', about(f.family)));
+    const [, en, vi] = about(f.family);
+    info.append(el('p', '', en, vi));
     const dl = el('dl');
-    const fact = (k, v) => dl.append(el('dt', '', k), el('dd', '', v));
-    fact('Family', f.family);
-    fact('Characters', '164');
+    const fact = (k, vi, v) => dl.append(el('dt', '', k, vi), el('dd', '', v));
+    fact('Family', 'Họ phông', f.family);
+    fact('Characters', 'Số ký tự', '164');
     info.append(dl);
     box.append(left, info);
     list.append(box);
