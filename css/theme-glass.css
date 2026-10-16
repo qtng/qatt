@@ -1,0 +1,46 @@
+/* Theme "glass": glassmorphism: frosted translucent panels and buttons over a soft colour gradient, blurred backdrop, light borders, rounded corners.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="glass"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="glass"] { --ink: #1d1b3a; --accent: #6b4dff; --cinnabar: #6b4dff; --paper: #eef0ff; --line: rgba(255, 255, 255, .55); --field: rgba(29, 27, 58, .25); --muted: #4b4870;
+  --glass: rgba(255, 255, 255, .42); --glass-strong: rgba(255, 255, 255, .62); --glass-line: rgba(255, 255, 255, .7); --glass-shadow: 0 .6rem 2rem rgba(60, 40, 140, .18);
+  --grad: linear-gradient(135deg, #7b5cff 0%, #c86bff 50%, #ff7eb6 100%); }
+html[data-theme="glass"] body { color: var(--ink); background: #e9e6ff fixed;
+  background-image: radial-gradient(40rem 30rem at 10% 10%, rgba(123, 92, 255, .45), transparent 70%), radial-gradient(36rem 28rem at 90% 20%, rgba(255, 126, 182, .4), transparent 70%),
+    radial-gradient(40rem 30rem at 50% 100%, rgba(80, 200, 255, .35), transparent 70%); background-attachment: fixed; }
+html[data-theme="glass"] h1, html[data-theme="glass"] h2, html[data-theme="glass"] h3 { color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
+html[data-theme="glass"] h2 { border-bottom: 1px solid var(--glass-line); }
+html[data-theme="glass"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--accent); }
+html[data-theme="glass"] .text-secondary, html[data-theme="glass"] .text-muted, html[data-theme="glass"] .note { color: var(--muted) !important; }
+html[data-theme="glass"] .hero, html[data-theme="glass"] .editor-head { background: transparent; border-bottom: 0; color: var(--ink); }
+html[data-theme="glass"] .hero h1, html[data-theme="glass"] .editor-head h1 { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-weight: 800; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html[data-theme="glass"] .hero .han, html[data-theme="glass"] .editor-head .han { display: inline-block; color: var(--ink); background: var(--glass); border: 1px solid var(--glass-line); border-radius: 2rem; padding: .2rem .8rem .2rem 1.3rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+html[data-theme="glass"] .hero .lead { color: var(--muted); }
+html[data-theme="glass"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 1rem; --bs-btn-border-width: 1px; font-weight: 600; box-shadow: var(--glass-shadow); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .15s, box-shadow .15s, background-color .15s; }
+html[data-theme="glass"] .btn:not(.btn-close):not(.btn-link):hover:not(:disabled) { transform: translateY(-2px); }
+html[data-theme="glass"] .btn-cinnabar, html[data-theme="glass"] .btn-accent { --bs-btn-color: #fff; --bs-btn-border-color: rgba(255, 255, 255, .6); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: #fff; --bs-btn-active-color: #fff; background-image: var(--grad); }
+html[data-theme="glass"] .btn-quiet, html[data-theme="glass"] .btn-ink, html[data-theme="glass"] .btn-pill, html[data-theme="glass"] .btn[class*="btn-outline-"] { --bs-btn-bg: var(--glass); --bs-btn-color: var(--ink); --bs-btn-border-color: var(--glass-line); --bs-btn-hover-bg: var(--glass-strong); --bs-btn-hover-color: var(--ink); --bs-btn-hover-border-color: #fff; --bs-btn-active-bg: var(--glass-strong); --bs-btn-active-color: var(--ink); --bs-btn-active-border-color: #fff; }
+html[data-theme="glass"] .btn-cinnabar.btn-pill, html[data-theme="glass"] .btn-accent.btn-pill { --bs-btn-color: #fff; }
+html[data-theme="glass"] .form-select { --bs-border-radius: 1rem; --bs-border-color: var(--glass-line); background-color: var(--glass); color: var(--ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: var(--glass-shadow); }
+html[data-theme="glass"] .form-control, html[data-theme="glass"] textarea { border: 1px solid var(--glass-line); border-radius: 1rem; background-color: var(--glass-strong); color: var(--ink); }
+html[data-theme="glass"] .form-control:focus, html[data-theme="glass"] textarea:focus, html[data-theme="glass"] .form-select:focus { border-color: #fff; box-shadow: 0 0 0 .25rem rgba(107, 77, 255, .25); outline: none; }
+html[data-theme="glass"] .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+html[data-theme="glass"] input[type="range"] { accent-color: var(--accent); }
+html[data-theme="glass"] .card, html[data-theme="glass"] .card-box, html[data-theme="glass"] .alert, html[data-theme="glass"] .editor, html[data-theme="glass"] .content-container, html[data-theme="glass"] .sticky-card, html[data-theme="glass"] .panel {
+  background: var(--glass); border: 1px solid var(--glass-line); border-radius: 1.4rem; box-shadow: var(--glass-shadow); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
+html[data-theme="glass"] .dropdown-menu, html[data-theme="glass"] .modal-content, html[data-theme="glass"] dialog#variants { background: var(--glass-strong); border: 1px solid var(--glass-line); border-radius: 1.2rem; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+html[data-theme="glass"] #field, html[data-theme="glass"] .output-pane, html[data-theme="glass"] .sample { background-color: rgba(255, 255, 255, .55); }
+html[data-theme="glass"] .table { --bs-table-bg: rgba(255, 255, 255, .45); border-radius: 1rem; overflow: hidden; }
+html[data-theme="glass"] .rule, html[data-theme="glass"] .pane-title, html[data-theme="glass"] .powered-by, html[data-theme="glass"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="glass"] .rule::before, html[data-theme="glass"] .rule::after { border-top: 1px solid var(--glass-line); }
+html[data-theme="glass"] hr { border-top: 1px solid var(--glass-line); opacity: 1; }
+html[data-theme="glass"] .glyph-strip .g[data-code] { border: 1px solid var(--glass-line); border-radius: 1rem; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 .3rem 1rem rgba(60, 40, 140, .14); transition: transform .15s, box-shadow .15s; }
+html[data-theme="glass"] .glyph-strip .g[data-code]:hover, html[data-theme="glass"] .glyph-strip .g[data-code]:focus-visible { transform: translateY(-2px); box-shadow: 0 .6rem 1.4rem rgba(60, 40, 140, .22); outline: none; }
+html[data-theme="glass"] #variants .speak { border: 1px solid var(--glass-line); background: var(--glass); }
+html[data-theme="glass"] #variants .var { border: 1px solid var(--glass-line); border-radius: .9rem; background: var(--glass); }
+html[data-theme="glass"] #variants .var.hit { border-color: var(--accent); background: rgba(107, 77, 255, .14); }
+html[data-theme="glass"] .search-bar { background: transparent; }
+html[data-theme="glass"] .search-bar .input-group { border-radius: 1rem; box-shadow: var(--glass-shadow); }
+html[data-theme="glass"] .search-bar .input-group-text, html[data-theme="glass"] .search-bar .form-control { border-color: var(--glass-line); background: var(--glass-strong); }
+html[data-theme="glass"] .search-bar .input-group-text { border-radius: 1rem 0 0 1rem; }
+html[data-theme="glass"] .search-bar .btn { border-radius: 0 1rem 1rem 0; }
+html[data-theme="glass"] .controls { border-radius: 1.2rem; border: 1px solid var(--glass-line); background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }

@@ -1,4 +1,4 @@
-/* Theme "popart": flat Lichtenstein colours, thick black outlines, hard offset shadows, Ben-Day dots. A complete theme of its own: the first part is the retro look
+/* Theme "popart": flat Lichtenstein colours, thick black outlines, hard offset shadows, Ben-Day dots (a lighter tint of the background, not a second colour, so that text stays easy to read). A complete theme of its own: the first part is the retro look
    (copied from theme-retro.css, keep them in step when retro changes), the second part, under html[data-theme="popart"] (more specific than the rules of the pages), is
    what is pop art. Loaded by js/navigation.js (Theme). */
 /* every Bootstrap button: a 2px dark outline and a hard 2px shadow that the button presses into when it is clicked.
@@ -81,7 +81,7 @@ html[data-theme="popart"] {
 }
 html[data-theme="popart"] body {
   background-color: var(--pop-yellow);
-  background-image: radial-gradient(circle, rgba(232, 33, 43, .55) 22%, transparent 24%);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, .38) 22%, transparent 24%);
   background-size: 16px 16px;
   color: var(--ink);
   font-weight: 700;
@@ -89,10 +89,10 @@ html[data-theme="popart"] body {
 html[data-theme="popart"] h1, html[data-theme="popart"] h2, html[data-theme="popart"] h3 { font-family: var(--pop-title); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; }
 html[data-theme="popart"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: var(--pop-blue); }
 html[data-theme="popart"] .text-secondary, html[data-theme="popart"] .text-muted, html[data-theme="popart"] .note { color: var(--ink) !important; }
-/* the header of a page: a blue panel with cyan dots, the title like a comic cover */
+/* the header of a page: a blue panel with lighter blue dots (only a tint, so that the text stays easy to read), the title like a comic cover */
 html[data-theme="popart"] .hero {
   background-color: var(--pop-blue);
-  background-image: radial-gradient(circle, rgba(44, 196, 240, .85) 22%, transparent 24%);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, .16) 22%, transparent 24%);
   background-size: 14px 14px;
   border-bottom: 5px solid var(--ink);
   color: #fff;

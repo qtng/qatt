@@ -1,0 +1,46 @@
+/* Theme "clay": claymorphism: soft puffy pastel shapes, as if made of modelling clay: big rounded corners, a soft outer shadow and inner light and shade, a rounded type.
+   A complete theme of its own: it does not build on another theme and no other theme builds on it. Every rule starts with html[data-theme="clay"] so that it is
+   more specific than the colour variables and rules of the pages' own <style>. Loaded by js/navigation.js (Theme). */
+html[data-theme="clay"] { --ink: #3a2f4f; --accent: #ff7a8a; --cinnabar: #ff7a8a; --paper: #f4eefc; --line: #e6dcf5; --field: #d8cdea; --muted: #6e6488;
+  --clay-out: 8px 10px 20px rgba(120, 90, 170, .25); --clay-in: inset -6px -6px 12px rgba(80, 50, 120, .12), inset 6px 6px 12px rgba(255, 255, 255, .8);
+  --clay-font: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", "Arial Rounded MT Bold", system-ui, sans-serif; }
+html[data-theme="clay"] body { background: var(--paper); color: var(--ink); font-family: var(--clay-font); }
+html[data-theme="clay"] .nav-backdrop, html[data-theme="clay"] .bottom-bar { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+html[data-theme="clay"] h1, html[data-theme="clay"] h2, html[data-theme="clay"] h3 { font-family: var(--clay-font); font-weight: 800; color: var(--ink); }
+html[data-theme="clay"] h2 { border-bottom: 0; }
+html[data-theme="clay"] :where(main, p, td, .alert) a:not(.btn):not([class*="nav"]) { color: #c2456b; }
+html[data-theme="clay"] .text-secondary, html[data-theme="clay"] .text-muted, html[data-theme="clay"] .note { color: var(--muted) !important; }
+html[data-theme="clay"] .hero, html[data-theme="clay"] .editor-head { background: linear-gradient(180deg, #e9dcff, var(--paper)); border-bottom: 0; color: var(--ink); }
+html[data-theme="clay"] .hero h1, html[data-theme="clay"] .editor-head h1 { font-family: var(--clay-font); font-weight: 900; color: var(--ink); text-shadow: 0 3px 0 rgba(255, 255, 255, .9), 0 6px 12px rgba(120, 90, 170, .25); }
+html[data-theme="clay"] .hero .han, html[data-theme="clay"] .editor-head .han { display: inline-block; color: #fff; background: #b89cff; border-radius: 1.4rem; padding: .25rem .9rem .25rem 1.4rem; box-shadow: var(--clay-out), var(--clay-in); }
+html[data-theme="clay"] .hero .lead { color: var(--muted); }
+html[data-theme="clay"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 1.4rem; --bs-btn-border-width: 0; font-family: var(--clay-font); font-weight: 800; padding-top: .55rem; padding-bottom: .55rem; box-shadow: var(--clay-out), var(--clay-in); transition: transform .15s, box-shadow .15s; }
+html[data-theme="clay"] .btn:not(.btn-close):not(.btn-link):hover:not(:disabled) { transform: translateY(-2px) scale(1.02); }
+html[data-theme="clay"] .btn:not(.btn-close):not(.btn-link):active:not(:disabled) { transform: scale(.97); box-shadow: 3px 4px 10px rgba(120, 90, 170, .25), var(--clay-in); }
+html[data-theme="clay"] .btn-cinnabar, html[data-theme="clay"] .btn-accent { --bs-btn-bg: #ff8a98; --bs-btn-color: #fff; --bs-btn-hover-bg: #ff7a8a; --bs-btn-hover-color: #fff; --bs-btn-active-bg: #f56a7c; --bs-btn-active-color: #fff; }
+html[data-theme="clay"] .btn-quiet, html[data-theme="clay"] .btn-ink, html[data-theme="clay"] .btn-pill, html[data-theme="clay"] .btn[class*="btn-outline-"] { --bs-btn-bg: #fff; --bs-btn-color: var(--ink); --bs-btn-hover-bg: #fbf8ff; --bs-btn-hover-color: var(--ink); --bs-btn-active-bg: #f1eafd; --bs-btn-active-color: var(--ink); }
+html[data-theme="clay"] .btn-cinnabar.btn-pill, html[data-theme="clay"] .btn-accent.btn-pill { --bs-btn-bg: #ff8a98; --bs-btn-color: #fff; }
+html[data-theme="clay"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: #8fd8c4; --bs-btn-hover-bg: #7ccdb6; --bs-btn-color: #24453b; --bs-btn-hover-color: #24453b; }
+html[data-theme="clay"] .form-select { --bs-border-radius: 1.2rem; --bs-border-width: 0; background-color: #fff; color: var(--ink); font-weight: 700; box-shadow: 4px 5px 12px rgba(120, 90, 170, .2), var(--clay-in); }
+html[data-theme="clay"] .form-control, html[data-theme="clay"] textarea { border: 0; border-radius: 1.4rem; background-color: #fff; color: var(--ink); box-shadow: inset 4px 4px 10px rgba(80, 50, 120, .14), inset -4px -4px 10px rgba(255, 255, 255, .9); }
+html[data-theme="clay"] .form-control:focus, html[data-theme="clay"] textarea:focus, html[data-theme="clay"] .form-select:focus { box-shadow: inset 4px 4px 10px rgba(80, 50, 120, .14), 0 0 0 .25rem rgba(255, 122, 138, .3); outline: none; }
+html[data-theme="clay"] .form-check-input { border: 0; box-shadow: var(--clay-in), 2px 3px 6px rgba(120, 90, 170, .25); }
+html[data-theme="clay"] .form-check-input:checked { background-color: #ff8a98; }
+html[data-theme="clay"] input[type="range"] { accent-color: #ff8a98; }
+html[data-theme="clay"] .card, html[data-theme="clay"] .card-box, html[data-theme="clay"] .alert, html[data-theme="clay"] .editor, html[data-theme="clay"] .content-container, html[data-theme="clay"] .sticky-card, html[data-theme="clay"] .panel { background: #fff; border: 0; border-radius: 2rem; box-shadow: var(--clay-out), var(--clay-in); }
+html[data-theme="clay"] .dropdown-menu, html[data-theme="clay"] .modal-content, html[data-theme="clay"] dialog#variants { border: 0; border-radius: 1.6rem; background: #fff; box-shadow: var(--clay-out), var(--clay-in); }
+html[data-theme="clay"] .table { --bs-table-bg: #fff; border-radius: 1.4rem; overflow: hidden; box-shadow: var(--clay-out); }
+html[data-theme="clay"] .rule, html[data-theme="clay"] .pane-title, html[data-theme="clay"] .powered-by, html[data-theme="clay"] .powered-by a { color: var(--muted) !important; }
+html[data-theme="clay"] .rule::before, html[data-theme="clay"] .rule::after { border-top: 3px dotted #cdbdf0; }
+html[data-theme="clay"] hr { border-top: 3px dotted #cdbdf0; opacity: 1; }
+html[data-theme="clay"] .glyph-strip .g[data-code] { border: 0; border-radius: 1.3rem; box-shadow: 5px 6px 12px rgba(120, 90, 170, .25), var(--clay-in); transition: transform .15s; }
+html[data-theme="clay"] .glyph-strip .g[data-code]:hover, html[data-theme="clay"] .glyph-strip .g[data-code]:focus-visible { transform: translateY(-3px) scale(1.04); outline: none; }
+html[data-theme="clay"] .glyph-strip .g[data-code]:active { transform: scale(.95); }
+html[data-theme="clay"] #variants .speak { border: 0; box-shadow: 3px 4px 8px rgba(120, 90, 170, .25), var(--clay-in); }
+html[data-theme="clay"] #variants .var { border: 0; border-radius: 1.1rem; background: #fff; box-shadow: 4px 5px 10px rgba(120, 90, 170, .2), var(--clay-in); }
+html[data-theme="clay"] #variants .var.hit { background: #ffe3e7; box-shadow: 4px 5px 10px rgba(255, 122, 138, .35), var(--clay-in); }
+html[data-theme="clay"] .search-bar .input-group { border-radius: 1.4rem; box-shadow: var(--clay-out); }
+html[data-theme="clay"] .search-bar .input-group-text, html[data-theme="clay"] .search-bar .form-control { border: 0; background: #fff; box-shadow: none; }
+html[data-theme="clay"] .search-bar .input-group-text { border-radius: 1.4rem 0 0 1.4rem; }
+html[data-theme="clay"] .search-bar .btn { border-radius: 0 1.4rem 1.4rem 0; }
+html[data-theme="clay"] .controls { border: 0; border-radius: 1.6rem; background: #fff; box-shadow: var(--clay-out), var(--clay-in); }
