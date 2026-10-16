@@ -120,7 +120,7 @@ async function hit(userId: string): Promise<number | null> {
 // of the sentence) in Quốc Ngữ and the characters chosen for them, as arrays, and idx = the place of the word in these arrays (from 1); the window can be
 // changed here without a change of the table. Also its position and the length of the sentence in words; n_options = how many options the page sent for the
 // word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
-const CONTEXT = 2;
+const CONTEXT = 3;
 type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: string[]; ctx_chars: string[]; idx: number; pos: number; n_words: number; model: string | null };
 function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null): Gap[] {
   const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
