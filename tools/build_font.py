@@ -14,6 +14,8 @@ from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.cu2quPen import Cu2QuPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.fontBuilder import FontBuilder
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import font_names
 
 # --light: thinner strokes (LIGHT times the stroke widths), family "QATT Prototype Light"
 LIGHT = 0.6
@@ -280,7 +282,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable({'familyName': ('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE != 'pen' else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), 'styleName': 'Regular'})
+fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE != 'pen' else '') + LABEL + (' Wide' if WIDE != 1.0 else '')))   # with copyright and licence, see tools/font_names.py
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString

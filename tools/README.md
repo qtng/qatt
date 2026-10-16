@@ -2,6 +2,10 @@
 
 ## Reference font (`fonts/`)
 
+**Licence.** The fonts and their glyph data are © 2026 qatt.org, all rights reserved (`fonts/LICENSE.txt`, also on `license.html`). `build_font.py` writes
+copyright, licence, version, maker, full and PostScript name into the name table (`tools/font_names.py`); `python3 tools/font_names.py fonts/qatt-*.ttf`
+gives fonts that are already built the same entries (and writes their `.woff2` again) without building them again.
+
 The font is built from the strokes that `qatt.js` draws, in two steps. Both outputs are checked in, so the font only has
 to be rebuilt when `qatt.js`, the character data or the font design changes.
 

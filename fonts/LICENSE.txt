@@ -1,0 +1,27 @@
+QATT fonts
+Copyright (c) 2026 qatt.org. All rights reserved.
+
+This licence covers the font files in this folder (qatt-*.ttf, qatt-*.woff2) and the
+glyph data they are built from (kage.json, glyphs.json, brush.json). They are not
+free software and not open source.
+
+You may
+  - use the fonts to read, write and print text in the QATT script
+    (Quoc Am Tan Tu), for yourself and for others;
+  - embed them, as subsets, in documents such as PDF files so that the text
+    shows as written.
+Text and images that you set with the fonts belong to you.
+
+You may not, without written permission of qatt.org,
+  - modify, convert, adapt or extend the fonts or the glyph data, or take
+    glyphs or outlines out of them;
+  - use the fonts, their glyphs or the glyph data as the basis of other
+    fonts, glyph sets, drawings or other derived works;
+  - copy, redistribute, publish, host, sell or sublicense the fonts or the
+    glyph data.
+
+The fonts are provided "as is", without warranty of any kind. In no event
+shall qatt.org be liable for any claim, damages or other liability arising
+from the use of the fonts.
+
+Permission for other uses: https://qatt.org
