@@ -59,6 +59,16 @@
       </table>
     </div>
 
+    <h2>Translator</h2>
+    <p class="note">One row per call, numbers only (no text, no user). Time in seconds for the whole call; "own" = characters the model chose itself, not from the list.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-2">
+        <thead><tr><th>Day</th><th>Calls</th><th>OK</th><th>Fallback</th><th>Errors</th><th>Failed tries</th><th>Avg s</th><th>95% s</th><th>Own</th><th>Tokens in</th><th>Tokens out</th></tr></thead>
+        <tbody id="tdaily"></tbody>
+      </table>
+    </div>
+    <p class="note mb-0" id="tmore"></p>
+
     <h2>Last 14 days</h2>
     <p class="note">From the tables themselves (also before the history started): new visitors and accounts, translator.</p>
     <table class="table table-sm mb-0">
@@ -110,6 +120,19 @@
          r.deck_takeovers, r.translate_users, r.translate_calls].forEach(v => { const td = document.createElement('td'); td.textContent = v === null || v === undefined ? '' : v; tr.append(td); });
         return tr;
       }));
+      const tr14 = await sp.client.rpc('admin_translate', { p_days: 14 });
+      if (tr14.data) {
+        const t = tr14.data;
+        $('tdaily').replaceChildren(...t.daily.map(d => {
+          const tr = document.createElement('tr');
+          [d.day, d.calls, d.ok, d.fallback, d.errors, d.failed_tries, d.avg_ms === null ? '' : (d.avg_ms / 1000).toFixed(1), d.p95_ms === null ? '' : (d.p95_ms / 1000).toFixed(1),
+           d.words ? Math.round(100 * d.own_words / d.words) + ' %' : '', d.tokens_in, d.tokens_out].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+          return tr;
+        }));
+        const list = rows => rows.map(r => r.k + ' ' + r.n).join(', ') || 'none';
+        $('tmore').textContent = 'Models: ' + list(t.by_model.map(m => ({ k: m.model, n: m.calls }))) + '. Languages: ' + list(t.by_lang.map(l => ({ k: l.lang, n: l.calls })))
+          + '. Results: ' + list(t.by_status.map(x => ({ k: x.status, n: x.calls }))) + '.';
+      }
       $('daily').replaceChildren(...data.daily.map(d => {
         const tr = document.createElement('tr');
         [d.day, d.new_anonymous, d.new_with_account, d.translate_users, d.translate_calls].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });

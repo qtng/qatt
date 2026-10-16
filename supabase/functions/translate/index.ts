@@ -4,6 +4,7 @@
 // The prompts (and, if listed there, the model names) are loaded from the website, see PROMPTS_URL: they are changed in the
 // git repository qtng/chunom (js/translate_prompts.json), without deploying this function. The built-in defaults are the fallback.
 // Only signed-in users (no anonymous ones) may call it, the key never leaves this function.
+// Every call is logged as one row of numbers in public.translate_log (time, models, tokens, counts; no text and no user), see db/translate_log.sql.
 import { translate, parsePrompts, DEFAULT_PROMPTS } from './pipeline.js';
 
 const ORIGINS = ['https://qatt.org', 'https://chunom.org', 'https://v2.chunom.org'];
@@ -60,7 +61,11 @@ async function logModels(key: string) {   // once per instance: which models thi
 // a model that answered 429 (quota) is skipped for a minute, so the next call does not lose time on it
 const coolDown = new Map<string, number>();
 
-async function callGemini(system: string, user: string, opts: { attempts?: number } = {}) {
+// what a call of the page cost: collected over the calls of Gemini of one translation, written to translate_log
+type Meter = { tries: number; failed: number; models: string[]; tokensIn: number; tokensOut: number; geminiMs: number };
+const newMeter = (): Meter => ({ tries: 0, failed: 0, models: [], tokensIn: 0, tokensOut: 0, geminiMs: 0 });
+
+async function callGemini(system: string, user: string, opts: { attempts?: number; meter?: Meter } = {}) {
   const key = Deno.env.get('GEMINI_API_KEY');
   if (!key) throw Object.assign(new Error('no key'), { code: 'config' });
   const body = JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }],
@@ -70,12 +75,14 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
     const live = MODELS.filter(m => (coolDown.get(m) || 0) < Date.now());
     const model = (live.length ? live : MODELS)[attempt % (live.length || MODELS.length)];
     const t0 = Date.now();
+    if (opts.meter) opts.meter.tries++;
     let r: Response;
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         signal: AbortSignal.timeout(60000), method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body });
-    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; continue; }
+    } catch (e) { console.error('gemini', model, 'no answer', Date.now() - t0, 'ms', String(e)); last = 'busy'; if (opts.meter) opts.meter.failed++; continue; }
     if (r.status === 429 || r.status >= 500 || r.status === 404) {
+      if (opts.meter) opts.meter.failed++;
       console.error('gemini', model, r.status, Date.now() - t0, 'ms', (await r.text()).slice(0, 300));
       last = r.status === 404 ? 'model' : 'busy';
       if (r.status === 429 || r.status === 404) coolDown.set(model, Date.now() + 60000);
@@ -86,6 +93,11 @@ async function callGemini(system: string, user: string, opts: { attempts?: numbe
     if (!r.ok) { console.error('gemini', model, r.status, (await r.text()).slice(0, 500)); throw Object.assign(new Error('model ' + r.status), { code: 'model' }); }
     const data = await r.json();
     console.log('gemini', model, r.status, Date.now() - t0, 'ms');
+    if (opts.meter) {
+      opts.meter.models.push(model); opts.meter.geminiMs += Date.now() - t0;
+      opts.meter.tokensIn += Number(data?.usageMetadata?.promptTokenCount) || 0;
+      opts.meter.tokensOut += (Number(data?.usageMetadata?.candidatesTokenCount) || 0) + (Number(data?.usageMetadata?.thoughtsTokenCount) || 0);
+    }
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') || '';
     try { return JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, '')); } catch { return {}; }
   }
@@ -99,6 +111,16 @@ async function hit(userId: string): Promise<number | null> {
     headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_user: userId }) });
   if (!r.ok) return null;   // a failing counter must not block the page
   return Number(await r.json());
+}
+
+// one row of numbers per call; a failing log must never break the translation
+async function logCall(row: Record<string, unknown>) {
+  try {
+    const base = Deno.env.get('SUPABASE_URL')!, key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const r = await fetch(`${base}/rest/v1/translate_log`, { method: 'POST', signal: AbortSignal.timeout(4000),
+      headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(row) });
+    if (!r.ok) console.error('translate_log', r.status, (await r.text()).slice(0, 200));
+  } catch (e) { console.error('translate_log', String(e)); }
 }
 
 Deno.serve(async (req) => {
@@ -123,13 +145,20 @@ Deno.serve(async (req) => {
   const stream = new ReadableStream({
     async start(controller) {
       const send = (o: unknown) => controller.enqueue(enc.encode(JSON.stringify(o) + '\n'));
+      const meter = newMeter(), t0 = Date.now();
       try {
-        const result = await translate(text, spans, { callModel: callGemini, prompts: cfg.prompts, lang, progress: (step: number) => send({ step }) });
+        const result = await translate(text, spans, { callModel: (sys: string, usr: string) => callGemini(sys, usr, { meter }), prompts: cfg.prompts, lang, progress: (step: number) => send({ step }) });
         console.log('result', cfg.version, JSON.stringify(result.words.map((w: { qn: string; chosen: string; own: boolean }) => [w.qn, w.chosen, w.own ? 'own' : 'list'])));
         send({ result: { ...result, version: cfg.version, left, limit: LIMIT } });
+        const ws = result.words as { own: boolean }[];
+        await logCall({ status: result.fallback ? 'fallback' : 'ok', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
+          model: meter.models[meter.models.length - 1] || null, lang: lang || null, syllables: result.words.reduce((n: number, w: { len: number }) => n + w.len, 0),
+          words: ws.length, own_words: ws.filter(w => w.own).length, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length });
       } catch (e) {
         console.error('translate failed', e);
         send({ error: (e as { code?: string }).code || 'failed' });
+        await logCall({ status: (e as { code?: string }).code || 'failed', ms: Date.now() - t0, gemini_ms: meter.geminiMs, tries: meter.tries, failed_tries: meter.failed,
+          model: meter.models[meter.models.length - 1] || null, lang: lang || null, tokens_in: meter.tokensIn, tokens_out: meter.tokensOut, prompts_version: cfg.version, chars: text.length });
       }
       controller.close();
     },
