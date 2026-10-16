@@ -118,9 +118,9 @@ async function hit(userId: string): Promise<number | null> {
 
 // the words with a character of the model's own (or "?"). Each is stored with its context: the words around it (`context` on each side, fewer at the start or end
 // of the sentence) in Quốc Ngữ and the characters chosen for them, as arrays, and idx = the place of the word in these arrays (from 1). The page sets `context`
-// in its request (0 to MAX_CONTEXT, default DEFAULT_CONTEXT), so the window can change without a change of the table or of this function. Also its position and the
+// in its request (MIN_CONTEXT to MAX_CONTEXT, default DEFAULT_CONTEXT; one word on each side is always stored), so the window can change without a change of the table or of this function. Also its position and the
 // length of the sentence in words; n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
-const DEFAULT_CONTEXT = 3, MAX_CONTEXT = 5;
+const MIN_CONTEXT = 1, DEFAULT_CONTEXT = 3, MAX_CONTEXT = 5;
 type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: string[]; ctx_chars: string[]; idx: number; pos: number; n_words: number; model: string | null };
 function gapRows(words: { at: number; len: number; qn: string; chosen: string; own: boolean }[], spans: unknown, model: string | null, context: number): Gap[] {
   const sent = Array.isArray(spans) ? spans as { at: number; len: number; options?: unknown[] }[] : [];
@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
   let text = '', spans: unknown = [], lang = '', context = DEFAULT_CONTEXT;
   try {
     const body = await req.json(); text = String(body.text || '').trim(); spans = body.spans; lang = String(body.lang || '');
-    if (Number.isInteger(body.context)) context = Math.min(MAX_CONTEXT, Math.max(0, body.context));   // the words around a gap that are stored, set by the page
+    if (Number.isInteger(body.context)) context = Math.min(MAX_CONTEXT, Math.max(MIN_CONTEXT, body.context));   // the words around a gap that are stored, set by the page
   } catch { return fail(400, 'bad_request'); }
   if (!text) return fail(400, 'empty');
   if (text.length > MAX_CHARS) return fail(413, 'too_long');
