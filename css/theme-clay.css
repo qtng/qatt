@@ -44,3 +44,5 @@ html[data-theme="clay"] .search-bar .input-group-text, html[data-theme="clay"] .
 html[data-theme="clay"] .search-bar .input-group-text { border-radius: 1.4rem 0 0 1.4rem; }
 html[data-theme="clay"] .search-bar .btn { border-radius: 0 1.4rem 1.4rem 0; }
 html[data-theme="clay"] .controls { border: 0; border-radius: 1.6rem; background: #fff; box-shadow: var(--clay-out), var(--clay-in); }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: dark plum */
+html[data-theme="clay"] { --nav-bg: #3a2434; }

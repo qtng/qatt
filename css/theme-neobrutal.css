@@ -52,3 +52,5 @@ html[data-theme="neobrutal"] .search-bar .input-group-text, html[data-theme="neo
 html[data-theme="neobrutal"] .search-bar .input-group-text { border-radius: .6rem 0 0 .6rem; border-right: 0; }
 html[data-theme="neobrutal"] .search-bar .btn { border-radius: 0 .6rem .6rem 0; box-shadow: none; }
 html[data-theme="neobrutal"] .controls { border: 3px solid #111; border-radius: .7rem; background: var(--nb-yellow); box-shadow: 4px 4px 0 #111; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: bluish on top, brownish at the bottom */
+html[data-theme="neobrutal"] { --nav-bg: #1b2a52; --nav-bottom-bg: #3f2a1a; }

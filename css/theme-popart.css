@@ -148,4 +148,5 @@ html[data-theme="popart"] hr { border-top: 4px solid var(--ink); opacity: 1; }
 @media (max-width: 575.98px) {
   html[data-theme="popart"] .card-box { border-width: 4px 0; box-shadow: none; }
 }
-
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: dark blue on top, dark red at the bottom */
+html[data-theme="popart"] { --nav-bg: #18215a; --nav-bottom-bg: #5a1622; }

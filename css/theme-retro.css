@@ -70,3 +70,5 @@
 .search-bar .input-group-text { border-radius: .55rem 0 0 .55rem; }
 .search-bar .btn { border-radius: 0 .55rem .55rem 0; }
 .controls { border-radius: .55rem; }
+/* the menu bar and the bottom bar (js/navigation.js): dark, with a tint of this theme: warm dark brown, like old wood */
+html[data-theme="retro"] { --nav-bg: #2f2620; }
