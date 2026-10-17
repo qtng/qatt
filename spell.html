@@ -427,7 +427,8 @@
     // the measuring: bao  1.9 | 2.4 ✗ | 0.7; the lines below are the earlier words, the newest first
     let watch = { done: [], t0: 0, on: false, word: '', finished: false }, logLines = [];
     const watchLine = () => watch.word.padEnd(8) + watch.done.concat(watch.on ? [((performance.now() - watch.t0) / 1000).toFixed(1)] : []).join(' | ');
-    const drawWatch = () => { if (!watch.word) return; $('log').textContent = [watchLine()].concat(logLines).join('\n'); $('log').hidden = false; };
+    const adminSeen = () => typeof isAdmin === 'function' && isAdmin();   // the log is for admins (isAdmin of js/fonts.js), as the ranking
+    const drawWatch = () => { if (!watch.word || !adminSeen()) return; $('log').textContent = [watchLine()].concat(logLines).join('\n'); $('log').hidden = false; };
     setInterval(() => { if (watch.on) drawWatch(); }, 100);
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
