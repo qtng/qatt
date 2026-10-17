@@ -57,8 +57,8 @@
     .overview a.card-font:hover { box-shadow: 0 .45em 1.1em rgba(0, 0, 0, .35); }
     .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 8.5cqw; line-height: 1.1; color: #2b2118; white-space: nowrap; text-align: center; }
     .overview .quad { container-type: inline-size; width: 96%; color: #2b2118; }
-    .overview .quad > div { display: grid; grid-template-columns: repeat(2, 44cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
-    .overview .quad span { height: 38cqw; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 45cqw); line-height: 1; white-space: nowrap; }
+    .overview .quad > div { display: grid; grid-template-columns: repeat(2, 48cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
+    .overview .quad span { height: 42cqw; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 53cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
@@ -168,7 +168,7 @@
   // the overview cards: the name without weight, then Quôc âm tân tư (without tones) as 2 x 2 cells
   const ovCells = [], overview = $('#overview');
   for (const entry of entries) {
-    if (entry.g === 'QATT Pen Cut') continue;   // no card for Pen cut
+    if (/^QATT (Pen Cut|Prototype|Brush)/.test(entry.tabs[0].f.family)) continue;   // no card for these
     const col = el('div', 'col'), a = el('a', 'card-font'), quad = el('div', 'quad'), grid = el('div');
     a.href = '#' + entry.box.id;
     const base = entry.tabs[0];   // the first font of the stack
