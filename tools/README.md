@@ -127,7 +127,7 @@ python3 tools/build_font.py --kage fonts/kage.json --pen --weight 2.4 --label Me
 
 **Kaiti (draft).** `--kaiti` (with `--kage`) draws the KAGE lines as brush strokes of regular script (`tools/kaiti_strokes.js`, style "kaiti" in `kage_outlines.js`, family `QATT Kaiti`):
 horizontals rise a little and are thin with a pressed start and a bulge where they stop, verticals are pressed at the start and thinner towards a round end, left-falling strokes taper to a point,
-right-falling strokes swell to a foot (the horizontal follows a template, its outline is a smooth Bezier spline: `poly.smooth` in `outlineOf`). It builds on the Pen module (`pen_strokes.js` exports its helpers) and takes `--weight` like Pen. No font files are committed yet while the design is worked out:
+right-falling strokes swell to a foot (the horizontal and the vertical (longer than 4 W) follow templates, its outline is a smooth Bezier spline: `poly.smooth` in `outlineOf`). It builds on the Pen module (`pen_strokes.js` exports its helpers) and takes `--weight` like Pen. No font files are committed yet while the design is worked out:
 `python3 tools/build_font.py --kage fonts/kage.json --kaiti --weight 3 fonts/glyphs.json /tmp/qatt-kaiti`.
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
