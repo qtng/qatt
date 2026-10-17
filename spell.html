@@ -326,9 +326,10 @@
     // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + WRONG_ADD (at most CAP), a time above CAP counts as CAP, a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 5, WRONG_ADD = 2, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are 5 times of that kind
+    const CAP = 5, WRONG_ADD = 2, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
     // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the fast one (ALPHA_FAST: the form of the day,
-    // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least 10 times) the player gets MILESTONE_POINTS)
+    // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
+    const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
     const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
     let me = { score: 0, stats: { onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } } };
@@ -361,7 +362,7 @@
       st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
       st.f = st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f);
       const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
-      if (st.n >= 10 && reached > st.m) {
+      if (st.n >= MIN_SAMPLES && reached > st.m) {
         st.m = reached;
         const m = MILESTONES[reached - 1], names = { onset: ['Onsets', 'Âm đầu'], rhyme: ['Rhymes', 'Vần'], tone: ['Tones', 'Thanh'] }[kind];
         setTimeout(() => { addPoints(MILESTONE_POINTS); cheer(Lang.t(names[0] + ' under ' + m + ' s!', names[1] + ' dưới ' + m + ' giây!')); }, 700);
@@ -379,7 +380,7 @@
       const t = Math.min((performance.now() - lap.t0) / 1000, CAP);
       const st = me.stats[kind], first = !lap.wrong && !lap.hinted && !hiddenDuring;
       if (first) {
-        if (!(t <= Math.min(QUICK_MAX, st.n >= 5 ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false;   // slow for this player
+        if (!(t <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false;   // slow for this player
         addTime(kind, t);
       } else word_.quick = false;
       newLap();
