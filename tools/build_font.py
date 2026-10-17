@@ -56,6 +56,7 @@ SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell
 # baseline (the ink of common Han characters in WenQuanYi Zen Hei and Nom Na Tong is about y -100..800 of the 1000 em; the letters of qatt.js alone fill y 70..740)
 VS = float(os.environ.get('QATT_VS', 1.4))
 VC = float(os.environ.get('QATT_VC', 577))
+HS = float(os.environ.get('QATT_HS', 1.3))   # the single forms of the KAGE fonts are stretched in x by HS around the middle of the cell, to be as wide as a Han character (the pairs: PAIR_M, 60 instead of 100 as margin; the wide font keeps 100)
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
 ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y 4.2 .. 95.8
@@ -66,7 +67,7 @@ PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhym
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
 PAIR_GROW = 1.0               # size of a pair (the Can/Chi forms are GROW)
-PAIR_M, PAIR_G = 100, 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
+PAIR_M, PAIR_G = float(os.environ.get('QATT_PM', 100 if WIDE != 1.0 else 60)), 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
 PAIR_W = 1000 * WIDE           # width of a joined pair
 HALF = int(PAIR_W // 2)        # advance of each half
 PAIR_T = PAIR_W - 2 * PAIR_M - PAIR_G   # what the two halves share
@@ -127,6 +128,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
     width of the outline in font units (None until the first run has asked for it)."""
     out = pathops.Path()
     kx = SX * k * grow
+    if KAGE and HS != 1.0 and not fit and not ids[0].startswith('q'): kx *= HS   # the single forms (and the stack) are wider, the halves of a pair are fitted into their box by PAIR_M
     f = Y0 - GROW_Y * SY * (1 - grow)
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
