@@ -53,11 +53,11 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-_6" data-onsetsize="xsmall" d="M61 22 m30 0 m1-8 v16"/>
     	<path id="v2-_" d="M61 22 h30 M62 45 h26 M60 70 l34 -3"/>
 
-    	<path id="v2-b" d="M62 30 c0 0 10 10 28 33 M82 15 c0 0 -7 40 -17 55 M57 85 h35"/>
+    	<path id="v2-b" d="M62 30 c0 0 10 10 28 33 M82 15 c0 0 -7 40 -17 55 M57 82 h35"/>
     	<path id="v2-b1" data-onsetsize="xsmall" d="M62 30 m1 -8 l-5 15"/>
     	<path id="v2-b2" data-onsetsize="xsmall" d="M82 15 m-17 55 m-6-4 l10 11"/>
-    	<path id="v2-b3" data-onsetsize="xsmall" d="M57 85 m0-8 v16"/>
-    	<path id="v2-b4" data-onsetsize="xsmall" d="M57 85 m35 0 m0-8 v16"/>
+    	<path id="v2-b3" data-onsetsize="xsmall" d="M57 82 m0-8 v16"/>
+    	<path id="v2-b4" data-onsetsize="xsmall" d="M57 82 m35 0 m0-8 v16"/>
     	<path id="v2-b5" data-onsetsize="xsmall" d="M62 30 m28 33 m5 -8 l-6 15"/>
     	<path id="v2-b6" data-onsetsize="xsmall" d="M82 15 m-8 -1 h16"/>
 
@@ -126,12 +126,12 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-l" d="M63 16 v30 c0 5 0 20 -5 34 M79 18 v54 M95 16 v58"/>
 
     	<path id="v2-m1" data-onsetsize="xsmall" d="M60 18 m-2 -8 v16"/>
-    	<path id="v2-m2" data-onsetsize="xsmall" d="M66 35 m0-8 l-6 14"/>
-    	<path id="v2-m3" data-onsetsize="xsmall" d="M85 30 m-25 50 m-1 -10 l6 14"/>
-    	<path id="v2-m4" data-onsetsize="xsmall" d="M66 35 m23 42 m0 4 l6-14"/>
-    	<path id="v2-m5" data-onsetsize="xsmall" d="M85 30 m-2-4 l10 15"/>
+    	<path id="v2-m2" data-onsetsize="xsmall" d="M66 32 m0-8 l-6 14"/>
+    	<path id="v2-m3" data-onsetsize="xsmall" d="M85 27 m-25 50 m-1 -10 l6 14"/>
+    	<path id="v2-m4" data-onsetsize="xsmall" d="M66 32 m23 42 m0 4 l6-14"/>
+    	<path id="v2-m5" data-onsetsize="xsmall" d="M85 27 m-2-4 l10 15"/>
     	<path id="v2-m6" data-onsetsize="xsmall" d="M60 18 m30 0 m2 -8 v16"/>
-    	<path id="v2-m" d="M60 18 h30 M85 30 c0 0 -8 30 -20 50 M66 35 c0 0 12 18 23 42"/>
+    	<path id="v2-m" d="M60 18 h30 M85 27 c0 0 -8 30 -20 50 M66 32 c0 0 12 18 23 42"/>
 
     	<path id="v2-n1" data-onsetsize="xsmall" d="M60 16 m-8 0 h16"/>
 		<path id="v2-n2" data-onsetsize="xsmall" d="M60 16 m0 64 m-8 0 h16"/>
@@ -224,7 +224,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-_-medial" d="M9 22 m0-8 v16"/>
     	<path id="v2-_-small" d="M11 22 h30 M12 45 h26 M10 70 l34 -3"/>
     	<path id="v2-b-medial" d="M14 25 m0-8 l-5 16"/>
-    	<path id="v2-b-small" d="M14 25 l30 35 M35 10 c0 0 -7 40 -20 65 M10 80 l38 -5"/>
+    	<path id="v2-b-small" d="M14 25 l30 35 M35 10 c0 0 -7 40 -20 65 M10 77 l38 -5"/>
     	<path id="v2-c-medial" d="M14 40 m0-8 v16"/>
     	<path id="v2-c-small" d="M44 18 v60 M14 40 h30 M12 62 l30 -4"/>
     	<path id="v2-ch-medial" d="M28 17 m-8 0 h16"/>
@@ -243,7 +243,7 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2-l-medial" d="M30 16 m-6 0 h12"/>
     	<path id="v2-l-small" d="M15 16 v30 c0 5 0 20 -5 34 M30 16 v58 M45 16 v58"/>
     	<path id="v2-m-medial" d="M10 15 m0 -8 v16"/>
-    	<path id="v2-m-small" d="M10 15 h30 c-4 22 -8 45 -30 70 M16 38 c6 8 14 18 28 40"/>
+    	<path id="v2-m-small" d="M10 15 h30 c-4 21 -8 43 -30 67 M16 35 c6 8 14 18 28 40"/>
     	<path id="v2-n-medial" d="M15 16 m-8 0 h16"/>
     	<path id="v2-n-small" d="M15 16 v64 M34 23 v44 M20 45 h26"/>
     	<path id="v2-ng-medial" d="M10 22 m-2-8 v16"/>
@@ -321,11 +321,11 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2c-_5" d="M26.75 45 m39 0 m1.5 -8 v16"/>
     	<path id="v2c-_6" d="M25.25 22 m45 0 m1.5 -8 v16"/>
     	<path id="v2c-_" d="M25.25 22 h45 M26.75 45 h39 M23.75 70 l51 -3"/>
-    	<path id="v2c-b" d="M26.75 30 c0 0 15 10 42 33 M56.75 15 c0 0 -10.5 40 -25.5 55 M19.25 85 h52.5"/>
+    	<path id="v2c-b" d="M26.75 30 c0 0 15 10 42 33 M56.75 15 c0 0 -10.5 40 -25.5 55 M19.25 82 h52.5"/>
     	<path id="v2c-b1" d="M26.75 30 m1.5 -8 l-7.5 15"/>
     	<path id="v2c-b2" d="M56.75 15 m-25.5 55 m-9 -4 l15 11"/>
-    	<path id="v2c-b3" d="M19.25 85 m0 -8 v16"/>
-    	<path id="v2c-b4" d="M19.25 85 m52.5 0 m0 -8 v16"/>
+    	<path id="v2c-b3" d="M19.25 82 m0 -8 v16"/>
+    	<path id="v2c-b4" d="M19.25 82 m52.5 0 m0 -8 v16"/>
     	<path id="v2c-b5" d="M26.75 30 m42 33 m7.5 -8 l-9 15"/>
     	<path id="v2c-b6" d="M56.75 15 m-12 -1 h24"/>
     	<path id="v2c-c1" d="M23.75 40 m-1.5 -8 v16"/>
@@ -385,12 +385,12 @@ const defaultSvgDefs = `<svg xmlns="http://www.w3.org/2000/svg"
     	<path id="v2c-l6" d="M76.25 16 m-9 -4 h21"/>
     	<path id="v2c-l" d="M28.25 16 v30 c0 5 0 20 -7.5 34 M52.25 18 v54 M76.25 16 v58"/>
     	<path id="v2c-m1" d="M23.75 18 m-3 -8 v16"/>
-    	<path id="v2c-m2" d="M32.75 35 m0 -8 l-9 14"/>
-    	<path id="v2c-m3" d="M61.25 30 m-37.5 50 m-1.5 -10 l9 14"/>
-    	<path id="v2c-m4" d="M32.75 35 m34.5 42 m0 4 l9 -14"/>
-    	<path id="v2c-m5" d="M61.25 30 m-3 -4 l15 15"/>
+    	<path id="v2c-m2" d="M32.75 32 m0 -8 l-9 14"/>
+    	<path id="v2c-m3" d="M61.25 27 m-37.5 50 m-1.5 -10 l9 14"/>
+    	<path id="v2c-m4" d="M32.75 32 m34.5 42 m0 4 l9 -14"/>
+    	<path id="v2c-m5" d="M61.25 27 m-3 -4 l15 15"/>
     	<path id="v2c-m6" d="M23.75 18 m45 0 m3 -8 v16"/>
-    	<path id="v2c-m" d="M23.75 18 h45 M61.25 30 c0 0 -12 30 -30 50 M32.75 35 c0 0 18 18 34.5 42"/>
+    	<path id="v2c-m" d="M23.75 18 h45 M61.25 27 c0 0 -12 30 -30 50 M32.75 32 c0 0 18 18 34.5 42"/>
     	<path id="v2c-n1" d="M23.75 16 m-12 0 h24"/>
     	<path id="v2c-n2" d="M23.75 16 m0 64 m-12 0 h24"/>
     	<path id="v2c-n3" d="M25.25 46 m4.5 1 l10.5 14"/>
