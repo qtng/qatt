@@ -216,7 +216,6 @@
     <div class="gaugeVal"><b id="gaugeNum">0</b> <span data-vi="Phong độ">Form</span></div>
     <div id="progBadges"></div>
     <p id="progPraise" class="praise"></p>
-    <p id="progScore"></p>
     <table id="progKinds"></table>
     <div class="btns"><button type="button" class="btn btn-sm btn-cinnabar" id="progClose" data-vi="Tiếp tục">Continue</button></div>
   </dialog>
@@ -403,12 +402,12 @@
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, last: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
         me.score = saved.score;
-        for (const k of ['shadow', 'pending', 'asked', 'words', 'last']) if (typeof saved[k] === 'number') me[k] = saved[k];
+        for (const k of ['shadow', 'pending', 'asked', 'words']) if (typeof saved[k] === 'number') me[k] = saved[k];
         if (saved.avg && typeof saved.avg.v === 'number') me.avg = saved.avg;
         if (saved.skipOk === false) me.skipOk = false;
         if (saved.round && KINDS.every(k => Array.isArray(saved.round[k])) && saved.round.wrong) me.round = saved.round;
@@ -643,7 +642,7 @@
       }
     }
     function showProgress() {
-      const total = signed ? me.score : me.shadow, prev = me.prev || {};
+      const prev = me.prev || {};
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const kinds = KINDS.map(k => { const t = me.round[k].length ? mean(me.round[k]) : null; return { k, t, stars: t === null ? null : starsOf(k, t), fraction: t === null ? 0 : starsPart(k, t), wrong: me.round.wrong[k] }; });
       const have = kinds.filter(x => x.stars !== null);
@@ -657,7 +656,6 @@
       const top = have.length ? have.reduce((a, x) => x.fraction > a.fraction ? x : a) : null;
       $('progPraise').textContent = !top ? '' : top.stars >= 1 ? Lang.t(`Your best: ${names[top.k]} (${top.stars} ★)`, `Tốt nhất: ${names[top.k]} (${top.stars} ★)`) : Lang.t('Every word trains you – keep going!', 'Mỗi từ đều giúp bạn tiến bộ!');
       if (value !== null) { me.best = Math.max(me.best, value); me.lastValue = value; }
-      $('progScore').textContent = Lang.t(`Score ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} since the last card)`, `Điểm ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} từ lần trước)`) + (signed ? '' : Lang.t(', not counted (sign in to count)', ', chưa tính (đăng nhập để tính)'));
       $('progKinds').replaceChildren(...kinds.map(x => {
         const r = document.createElement('tr'), cells = [document.createElement('td'), document.createElement('td'), document.createElement('td'), document.createElement('td')];
         cells[0].textContent = names[x.k];
@@ -669,7 +667,7 @@
         r.append(...cells); return r;
       }));
       me.prev = Object.fromEntries(kinds.filter(x => x.t !== null).map(x => [x.k, x.t]));
-      me.round = freshRound(); me.last = total; saveMe();
+      me.round = freshRound(); saveMe();
       const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
       $('progress').showModal();
       requestAnimationFrame(() => { needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (value || 0) * 1.8}deg)`; });
