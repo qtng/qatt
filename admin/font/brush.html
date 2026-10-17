@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QATT Brush 2</title>
-  <meta name="description" content="Editor for brush strokes on the QATT shapes: a library of forms (bend, kind of start and end, width gradient) and the symbols made of them; the brush is the same for all.">
-  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/site.css">
-  <script src="js/navigation.js"></script>
-  <script src="js/qatt.js"></script>
-  <script src="js/parser.js"></script>
-  <script src="js/brush.js"></script>
-  <script src="js/brush-model.js"></script>
-  <script src="js/brush2.js"></script>
-  <script src="js/brush2-model.js"></script>
+  <title>QATT Brush</title>
+  <meta name="description" content="Editor for brush strokes (Kaiti style) on the QATT shapes: a library of named strokes and the symbols made of them, with every combination shown live.">
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../css/site.css">
+  <script src="../../js/navigation.js"></script>
+  <script src="../../js/qatt.js"></script>
+  <script src="../../js/parser.js"></script>
+  <script src="../../js/brush.js"></script>
+  <script src="../../js/brush-model.js"></script>
   <style>
     :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --line: #dccfb2; --muted: #6a5a48; --combo: 46px; }
     body { color: var(--ink); background: #fffdf8; }
@@ -31,7 +29,7 @@
     .tabs .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
     #views .btn { padding: .35rem 1.2rem; }
 
-    svg.glyph { width: 100%; height: auto; aspect-ratio: 1; fill: var(--ink); }
+    svg.glyph { width: 100%; height: auto; aspect-ratio: 128 / 136; fill: var(--ink); }
     svg.glyph path.faint { fill: #cbbd9f; }
 
     #sym-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr)); gap: .3rem; }
@@ -46,15 +44,10 @@
     .lib-cell small { display: block; color: var(--muted); }
 
     .edit-canvas { width: 100%; max-width: 32rem; display: block; margin: 0 auto; touch-action: none; user-select: none; background: #fffdf8; border: 1px solid #e8dcc0; border-radius: .4rem; }
-    #canvas { aspect-ratio: 1; }
+    #canvas { aspect-ratio: 130 / 135; }
     #lib-canvas { aspect-ratio: 1; max-width: 26rem; }
     .edit-canvas .grid line { stroke: #efe6d2; stroke-width: .25; }
-    .edit-canvas .grid .window { fill: rgba(123, 75, 183, .06); stroke: #7b4bb7; stroke-width: .5; }
-    .edit-canvas .grid .base { stroke: #7b4bb7; stroke-width: .5; stroke-dasharray: 3 2; }
-    .edit-canvas .grid .noto { fill: none; stroke: #1f6fd1; stroke-width: .5; }
-    .edit-canvas .grid .noto.limit { stroke-dasharray: 2 2; }
-    .edit-canvas .letterwin { fill: none; stroke: #2e8b57; stroke-width: .4; stroke-dasharray: 1 1.5; pointer-events: none; }
-    .edit-canvas .grid .box { fill: none; stroke: #7a1f17; stroke-width: .5; }
+    .edit-canvas .grid .box { fill: none; stroke: var(--line); stroke-width: .35; stroke-dasharray: 1.5 1.5; }
     .edit-canvas .ctx { fill: #b9ab8f; }
     .edit-canvas .orig { fill: none; stroke: #3d8bd4; stroke-width: .35; opacity: .8; pointer-events: none; }
     .edit-canvas .stroke { fill: var(--ink); }
@@ -85,26 +78,15 @@
     .slider { display: grid; grid-template-columns: 9.5rem 1fr 2.8rem; align-items: center; gap: .5rem; font-size: .85rem; margin: 0; width: 100%; }
     .slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
     .slider input { width: 100%; accent-color: var(--cinnabar); }
-    .ctx-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
+    .ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; }
     .ctx-grid label { font-size: .8rem; color: var(--muted); }
 
-    #sample-out { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
+    #combos, #sample-out, #lib-uses { display: flex; flex-wrap: wrap; gap: .6rem .5rem; }
     .combo { display: flex; flex-direction: column; align-items: center; width: calc(var(--combo) + .9rem); }
     .combo svg { width: var(--combo); }
     .combo span { font-size: .75rem; color: var(--muted); line-height: 1.2; text-align: center; }
+    #lib-uses .combo { cursor: pointer; }
     #sample-out svg { width: calc(var(--combo) * 1.1); }
-    /* comparison glyphs: one line, scroll sideways, size from the slider */
-    #combos, #lib-uses { display: flex; flex-wrap: nowrap; gap: 0; margin: 0 0 .25rem; overflow-x: auto; }
-    #combos svg, #lib-uses svg { flex: 0 0 var(--cg, 80px); width: var(--cg, 80px); height: auto; }
-    #lib-uses svg { cursor: pointer; }
-    #lib-uses svg:hover { background: rgba(168, 54, 42, .08); }
-    @media (max-width: 991.98px) {
-      .rightcol { display: contents; }
-      .o1 { order: 1; } .o2 { order: 2; } .o3 { order: 3; } .o4 { order: 4; } .o5 { order: 5; } .o6 { order: 6; }
-    }
-    .edit-canvas .gline { stroke: #2f9e6b; stroke-width: .3; stroke-dasharray: 2 1; pointer-events: none; }
-    .guide-row { font-size: .85rem; margin-top: .3rem; }
-    .guide-row > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; }
     .hint { font-size: .82rem; color: var(--muted); }
     [hidden] { display: none !important; }
     kbd { background: #efe6d2; color: var(--ink); font-size: .75rem; }
@@ -114,10 +96,9 @@
 <header class="hero pt-4 pb-3">
   <div class="container text-center">
     <div class="han mb-1">國音新字</div>
-    <h1 class="mb-2">QATT Brush 2</h1>
-    <p class="lead mx-auto mb-3">A library of stroke forms: each has a bend, a kind of start and end (flat, pointed or kihitsu) and a gradient for its width.
-      Every symbol is made of three of them between two end points. Width, angle and size of the ends are the same for all forms.
-      Your work is kept in this browser; export it as JSON to keep a copy. The first time, the symbols of the <a href="brush.html">first brush editor</a> are taken over.</p>
+    <h1 class="mb-2">QATT Brush</h1>
+    <p class="lead mx-auto mb-3">Build a library of named brush strokes, then make every symbol from three of them and move only their end points.
+      Your work is kept in this browser; export it as JSON to keep a copy.</p>
     <div class="btn-group tabs" id="views" role="group" aria-label="View">
       <button type="button" class="btn btn-outline-dark" data-view="symbols">Symbols</button>
       <button type="button" class="btn btn-outline-dark" data-view="library">Stroke library</button>
@@ -128,7 +109,7 @@
 <main class="container-fluid py-3 px-3 px-lg-4">
   <div class="row g-3">
     <!-- symbols view -->
-    <div class="col-lg-3 o1" data-only="symbols">
+    <div class="col-lg-3" data-only="symbols">
       <div class="panel">
         <div class="btn-group btn-group-sm d-flex mb-2 tabs" id="forms" role="group" aria-label="Form">
           <button type="button" class="btn btn-outline-dark" data-form="rhyme">Rhyme</button>
@@ -139,20 +120,17 @@
         <p class="hint mt-2 mb-0">A dot after the name marks a symbol you changed. Until you change it, a centred form follows its rhyme form.</p>
       </div>
     </div>
-    <div class="col-lg-5 o3" data-only="symbols">
+    <div class="col-lg-5" data-only="symbols">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
           <h2 class="me-auto mb-0" id="sym-name"></h2>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="undo" title="Undo (Ctrl+Z)">Undo</button>
           <button type="button" class="btn btn-sm btn-outline-secondary" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
         </div>
-        <label class="small d-flex align-items-center gap-2 mb-1">Size of the comparison <input type="range" class="cmp-size flex-grow-1" min="16" max="300"></label>
-        <div id="combos"></div>
-        <svg id="canvas" class="edit-canvas" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
-        <p class="hint mt-2 mb-0"><span style="color:#7b4bb7">Violet frame</span>: the em box of the font cell, 1000 &times; 1000 (Noto Sans CJK), its lower edge is the ideographic baseline. <span style="color:#7a1f17">Dark red frame</span>: the ICF box (ideographic character face), where the glyph should sit. <span style="color:#7b4bb7">Dashed line</span>: the Latin baseline. <span style="color:#2e8b57">Green dotted frame</span>: the 0&ndash;100 window in which the letters of qatt.js were drawn; the placement below (offset and scale) puts it into the ICF box. <span style="color:#1f6fd1">Blue frame</span>: the extent of dense glyphs in Noto Sans CJK (margin about 3.5 % at the sides, bottom edge 80 units below the baseline); dashed blue: the outermost overshoot of any Noto glyph.</p>
+        <svg id="canvas" class="edit-canvas" viewBox="-15 -30 130 135" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label><input type="checkbox" id="view-orig"> Original lines</label>
-          <label><input type="checkbox" id="view-snap"> Snap to other end points and guides</label>
+          <label><input type="checkbox" id="view-snap"> Snap to other end points</label>
         </div>
         <div class="edit-bar mt-2">
           <span>Edit</span><div id="stroke-buttons"></div><div id="mark-buttons"></div>
@@ -171,13 +149,13 @@
     </div>
 
     <!-- library view -->
-    <div class="col-lg-3 o1" data-only="library">
+    <div class="col-lg-3" data-only="library">
       <div class="panel">
         <h2>Strokes</h2>
         <div id="lib-list"></div>
       </div>
     </div>
-    <div class="col-lg-5 o3" data-only="library">
+    <div class="col-lg-5" data-only="library">
       <div class="panel">
         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
           <input class="form-control form-control-sm" id="lib-name" aria-label="Name of the stroke" style="max-width: 16rem">
@@ -185,21 +163,18 @@
           <button type="button" class="btn btn-sm btn-outline-secondary" id="lib-reset">Reset</button>
           <button type="button" class="btn btn-sm btn-outline-danger" id="lib-delete" title="Only unused strokes can be deleted">Delete</button>
         </div>
-        <label class="small d-flex align-items-center gap-2 mb-1">Size of the comparison <input type="range" class="cmp-size flex-grow-1" min="16" max="300"></label>
-        <div id="lib-uses"></div>
         <svg id="lib-canvas" class="edit-canvas" viewBox="0 -10 100 100" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="d-flex flex-wrap gap-3 mt-2 small">
           <label class="d-flex align-items-center gap-2">Handles and lines visible <input type="range" id="handle-opacity" min="0" max="1" step="0.05" value="0.5"></label>
         </div>
-        <p class="hint mt-2 mb-2">Drag the square handle to bend the stroke. The round ones only change this preview (direction and length).</p>
+        <p class="hint mt-2 mb-2">Drag the square handles to bend the stroke. The round ones only change this preview (direction and length).</p>
         <div id="lib-fields" class="d-grid gap-1"></div>
       </div>
     </div>
 
-    <!-- both views; on a phone the order is: list, brush, canvas, context, sample, save -->
-    <div class="col-lg-4 rightcol">
-      <div class="o4" data-only="symbols">
-      <div class="panel mb-3">
+    <!-- both views -->
+    <div class="col-lg-4">
+      <div class="panel mb-3" data-only="symbols">
         <h2>Context</h2>
         <div class="ctx-grid">
           <label>Onset<select class="form-select form-select-sm" id="ctx-onset"></select></label>
@@ -209,22 +184,10 @@
         </div>
         <p class="hint mt-2 mb-0">The parts drawn around the symbol in the editor and in the combinations.</p>
       </div>
-      </div>
-      <div class="o2">
       <div class="panel mb-3">
         <div class="d-flex align-items-center mb-2"><h2 class="me-auto mb-0">Brush</h2><button type="button" class="btn btn-sm btn-link p-0" id="params-reset">Reset</button></div>
         <div id="params" class="d-grid gap-1"></div>
       </div>
-      </div>
-    </div>
-
-    <div class="col-12 o5" data-only="symbols">
-      <div class="panel">
-        <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
-        <div id="sample-out"></div>
-      </div>
-    </div>
-    <div class="col-12 o6">
       <div class="panel">
         <h2>Save</h2>
         <div class="d-flex flex-wrap gap-2">
@@ -235,9 +198,28 @@
         <p class="hint mt-2 mb-0">Changes are saved in this browser automatically. The export also holds the finished outlines of all paths.</p>
       </div>
     </div>
+
+    <div class="col-12" data-only="symbols">
+      <div class="panel">
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
+          <h2 class="me-auto mb-0" id="combos-title"></h2>
+          <label class="small d-flex align-items-center gap-2">Size <input type="range" id="size" min="28" max="110" value="46"></label>
+        </div>
+        <div id="combos"></div>
+        <hr class="my-3">
+        <input class="form-control form-control-sm mb-2" id="sample" value="Trăm năm trong cõi người ta chữ tài chữ mệnh khéo là ghét nhau" aria-label="Sample text in Vietnamese">
+        <div id="sample-out"></div>
+      </div>
+    </div>
+    <div class="col-12" data-only="library">
+      <div class="panel">
+        <h2 id="lib-uses-title"></h2>
+        <div id="lib-uses"></div>
+      </div>
+    </div>
   </div>
 </main>
 
-<script src="js/brush2-editor.js"></script>
+<script src="../../js/brush-editor.js"></script>
 </body>
 </html>

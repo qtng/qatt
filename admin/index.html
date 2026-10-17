@@ -24,8 +24,8 @@
 </head>
 <body>
 <main class="container py-4" style="max-width: 48rem">
-  <h1>Admin</h1>
-  <p class="note" id="account"></p>
+  <h1 id="adminTitle" hidden>Admin</h1>
+  <p class="note" id="account" hidden></p>
   <div class="card-box d-flex flex-wrap justify-content-center gap-2 p-3 mb-3" id="adminNav" hidden>
     <a class="btn admin-yellow" href="stats.html">Statistics</a>
     <a class="btn admin-yellow" href="models.html">AI models</a>
@@ -33,7 +33,11 @@
     <a class="btn admin-yellow" href="rhymes.html">Rhymes</a>
     <a class="btn admin-yellow" href="admin-slides.html">Slides</a>
   </div>
-  <div id="denied" class="alert alert-warning">Checking...</div>
+  <div class="card-box d-flex flex-wrap justify-content-center gap-2 p-3 mb-3" id="fontNav" hidden>
+    <a class="btn admin-yellow" href="font/font-editor.html">Glyph editor</a>
+    <a class="btn admin-yellow" href="font/brush.html">Brush</a>
+    <a class="btn admin-yellow" href="font/brush2.html">Brush 2</a>
+  </div>
 
   <div id="area" hidden>
   <p class="note">Tools and pages that no other page links to. For reviewing what can be removed.</p>
@@ -53,8 +57,9 @@
     <li><a href="../intro.html">intro.html</a> <small>Quốc Âm Tân Tự – Intro</small></li>
     <li><a href="../decoding.html">decoding.html</a> <small>QATT Sprites Overview</small></li>
     <li><a href="../vandao/index.html">vandao/</a> <small>Thiên Calligraphy, with two PDFs</small></li>
-    <li><a href="../brush.html">brush.html</a> <small>QATT Brush (brush model of the strokes)</small></li>
-    <li><a href="../brush2.html">brush2.html</a> <small>QATT Brush 2</small></li>
+    <li><a href="font/font-editor.html">font/font-editor.html</a> <small>Glyph editor: KAGE lines of the symbols (fonts/kage.json)</small></li>
+    <li><a href="font/brush.html">font/brush.html</a> <small>QATT Brush (brush model of the strokes)</small></li>
+    <li><a href="font/brush2.html">font/brush2.html</a> <small>QATT Brush 2</small></li>
     <li><a href="../logo-creator.html">logo-creator.html</a> <small>QATT Logo Creator (commented out in the menu)</small></li>
   </ul>
 
@@ -139,11 +144,13 @@
     await sp.init();
     QattLogin.status(sp, document.getElementById('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
     const state = await Admin.check(sp);
-    document.getElementById('area').hidden = state !== 'admin';
-    document.getElementById('adminNav').hidden = state !== 'admin';
-    const box = document.getElementById('denied');
-    box.hidden = state === 'admin';
-    box.textContent = state === 'signin' ? 'Sign in with your admin account.' : 'This account is not an admin.';
+    // an admin sees everything, somebody not signed in only the line with the sign-in link, a signed-in non-admin nothing at all
+    const admin = state === 'admin';
+    document.getElementById('area').hidden = !admin;
+    document.getElementById('adminNav').hidden = !admin;
+    document.getElementById('fontNav').hidden = !admin;
+    document.getElementById('adminTitle').hidden = !admin;
+    document.getElementById('account').hidden = state === 'denied';
   });
 </script>
 </body>

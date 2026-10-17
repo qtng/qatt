@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>QATT glyph editor</title>
-  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../css/site.css">
   <style>
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
@@ -45,12 +45,12 @@
     .edit .body:hover.s { stroke: rgba(43, 108, 176, .18); } .edit .body:hover.m { stroke: rgba(168, 54, 42, .18); }
     .edit .guide { stroke: #7b6c58; stroke-width: .25; stroke-dasharray: 2 2; fill: none; }
   </style>
-  <script src="js/navigation.js"></script>
-  <script src="js/qatt.js"></script>
-  <script src="js/parser.js"></script>
-  <script src="js/brush.js"></script>
-  <script src="js/brush-model.js"></script>
-  <script src="js/kage-engine.min.js"></script>
+  <script src="../../js/navigation.js"></script>
+  <script src="../../js/qatt.js"></script>
+  <script src="../../js/parser.js"></script>
+  <script src="../../js/brush.js"></script>
+  <script src="../../js/brush-model.js"></script>
+  <script src="../../js/kage-engine.min.js"></script>
 </head>
 <body>
 <main>
@@ -254,7 +254,7 @@ const plainEnds = (strokes, marks) => strokes.map(l => {
   $("reset").onclick = () => { if (confirm("Discard all edits?")) { checkpoint(); edits = {}; save(); render(); } };
   for (const id of ["undo", "d-undo"]) $(id).onclick = undo;
   document.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z" && document.activeElement !== $("d-text")) { e.preventDefault(); undo(); } });
-  Promise.all([fetch("fonts/kage.json").then(r => r.json()), fetch("fonts/brush.json").then(r => r.json())]).then(([k, b]) => { seed = k; brush = b; buildMarks(); render(); });
+  Promise.all([fetch("/fonts/kage.json").then(r => r.json()), fetch("/fonts/brush.json").then(r => r.json())]).then(([k, b]) => { seed = k; brush = b; buildMarks(); render(); });
 })();
 </script>
 </body>
