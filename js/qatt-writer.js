@@ -23,19 +23,21 @@ const QattWriter = (() => {
       background: color-mix(in srgb, currentColor 3%, transparent); }   /* a tint of the text colour: light on a light theme, dark on a dark one */
     @media (min-width: 768px) { .writer-bar { flex-direction: row; justify-content: space-between; } }
     .writer-bar .btn { font-size: .85rem; padding: .25rem .8rem; }
-    /* toolbar above the field, QATT fonts */
-    .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: .4rem 1.2rem; padding: .5rem .6rem 0; font-size: .78rem; }
+    /* toolbar above the field: everything about QATT (reading, font, convert) and the size; it never wraps, the dropdowns and the slider give way */
+    .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: .4rem .8rem; padding: .5rem .6rem 0; font-size: .78rem; }
     body:not(.qatt-on) .qatt-bar .group { display: none; }
-    .qatt-bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; min-width: 0; }
-    .qatt-bar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 0; }
-    .qatt-bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; flex: 1 1 8rem; max-width: 15rem; min-width: 5rem; }
-    .qatt-bar input[type=range] { flex: 1 1 auto; width: 0; min-width: 2.5rem; accent-color: var(--accent); }
+    .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
+    .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
+    .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
+    .qatt-bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; flex: 1 1 8rem; max-width: 15rem; min-width: 3.5rem; }
+    .qatt-bar input[type=range] { flex: 1 1 auto; width: 0; min-width: 1.5rem; accent-color: var(--accent); }
+    @media (max-width: 575.98px) { #size-label { display: none; } }   /* the toolbar never wraps: the percentage goes first, on a very narrow screen the words of the button too */
+    @media (max-width: 419.98px) { #convert-btn .lbl { display: none; } }
     #size-label { min-width: 2.6em; color: var(--muted); }
     #pending { display: none; height: 1.2rem; align-items: center; gap: .8rem; padding: 0 .9rem; font-size: .85rem; color: var(--muted); }
     .qatt-on #pending { display: flex; }
     #pending .glyph { font-family: var(--qfont), sans-serif; font-size: 1.8rem; line-height: 1; color: var(--ink); }
     #pending .word { font-style: italic; }
-    .reading-out { margin: .3rem .9rem .2rem; padding: .4rem .7rem; border: 1px dashed var(--field); border-radius: .5rem; color: var(--ink); font-size: 1.05rem; white-space: pre-wrap; }
     .qatt-only { display: none; }
     .qatt-on .qatt-only { display: inline-block; }
     .qatt-on li.qatt-only { display: list-item; }
@@ -56,6 +58,7 @@ const QattWriter = (() => {
       <div class="group">
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
+        <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
       </div>
       <label><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="size-label">100%</span></label>
     </div>
@@ -63,13 +66,10 @@ const QattWriter = (() => {
       <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Type here…" data-vi-placeholder="Gõ ở đây…"></textarea>
     </div>
     <div id="pending" aria-live="polite"></div>
-    <div id="readingOut" class="reading-out" hidden aria-live="polite"></div>
     <div class="writer-bar">
       <div class="bar-buttons">
         <button type="button" class="btn btn-quiet" id="copy-btn"><span data-vi="Sao chép">Copy</span></button>
         <button type="button" class="btn btn-quiet qatt-only" id="example-btn"><i class="bi bi-magic"></i> <span data-vi="Ví dụ">Example</span></button>
-        <button type="button" class="btn btn-quiet qatt-only" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển">Convert</span></button>
-        <button type="button" class="btn btn-quiet qatt-only" id="reading-btn" title="Show the QATT characters of the field as Quốc Ngữ, without changing the field"><i class="bi bi-translate"></i> Quốc Ngữ</button>
         <button type="button" class="btn btn-quiet" id="clear-btn"><i class="bi bi-x-lg"></i> <span data-vi="Xóa">Clear</span></button>
       </div>
       <div class="opts">
@@ -309,12 +309,6 @@ const QattWriter = (() => {
       showPending();
     });
     $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); showPending(); });   // without the spaces
-    $('reading-btn').addEventListener('click', () => {
-      const box = $('readingOut');
-      if (!box.hidden) { box.hidden = true; return; }   // a second click hides it again
-      box.textContent = readAsQuocNgu(typer.value) || '(nothing to read)';
-      box.hidden = false;
-    });
 
     // ---------- buttons ----------
     const copyBtn = $('copy-btn');
@@ -326,7 +320,6 @@ const QattWriter = (() => {
       setTimeout(() => { copyBtn.innerHTML = label; }, 1400);
     });
     $('clear-btn').addEventListener('click', () => {
-      $('readingOut').hidden = true;
       typer.value = '';
       typer.dispatchEvent(new Event('input', { bubbles: true }));
       typer.focus();
