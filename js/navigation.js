@@ -165,7 +165,7 @@ window.Theme = window.Theme || (function() {
         linkClass: "link-qatt",
         site: onChunom ? QATT_SITE : "",
         links: [
-            { name: "Home", vi: "Trang chủ", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
+            { name: "Qatt.org home", vi: "Trang chủ Qatt.org", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Spell it!", vi: "Đánh vần!", bar: "Spell it!", barOrder: 4, barVi: "Đánh vần!", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barOrder: 2, barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
@@ -180,7 +180,7 @@ window.Theme = window.Theme || (function() {
         linkClass: "link-nom",
         site: onChunom ? "" : CHUNOM_SITE,
         links: [
-            { name: "Character search", vi: "Tra cứu chữ", bar: "Search", barVi: "Tra cứu", barOrder: 1, url: "/chunom/index.html", icon: "bi-search" },
+            { name: "Chunom.org home", vi: "Trang chủ Chunom.org", bar: "Home", barVi: "Trang chủ", barOrder: 1, url: "/chunom/index.html", icon: "bi-house" },
             { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
             { name: "Chữ Nôm writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
             { name: "Nôm converter", vi: "Bộ chuyển đổi", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
