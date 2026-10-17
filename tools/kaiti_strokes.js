@@ -9,12 +9,35 @@
 "use strict";
 const { nums, centreline, ease, touches } = require("./pen_strokes.js");
 
+// The horizontal stroke, taken from a Kaiti glyph (the lower right stroke of 2693E.svg in chunom-assets glyph-composer/new, measured at W = 90 units):
+// a wedge with a straight top edge that rises 0.125 per unit of length and an almost flat bottom edge. At the left a pointed start whose belly hangs below the line,
+// at the right a rounded bulge that falls back to the tip. The ends keep their size in units of W whatever the length; the middle stretches.
+// Offsets are in W (positive downwards), measured from the line between the two tips; d is the distance from the left tip, e from the right tip, both in W.
+const RISE = 0.125, BASE = 0.2;
+const BELLY = [[0, -0.11], [0.44, 0.34], [0.89, 0.58], [1.33, 0.63], [1.78, 0.56], [2.22, 0.47], [2.67, 0.38], [3.11, 0.31], [4.4, 0.13], [5.8, 0.02], [7, 0]];   // bottom edge near the start, above BASE
+const TIPDROP = [[0, 1.38], [0.14, 1.09], [0.59, 0.66], [1.03, 0.37], [1.48, 0.16], [2.0, 0.04], [2.4, 0]];   // the top edge falls from the rising line to the right tip
+const FOOT = [[0, 0], [0.14, 0.03], [0.59, 0.11], [1.03, 0.09], [1.5, 0.04], [2.2, 0]];   // the bottom edge near the right tip, above BASE
+const table = (t, x) => { if (x <= t[0][0]) return t[0][1]; for (let i = 1; i < t.length; i++) if (x <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (x - t[i - 1][0]) / (t[i][0] - t[i - 1][0]); return t[t.length - 1][1]; };
+function horizontal(p0, p1, W) {
+  const [a, b] = p0[0] <= p1[0] ? [p0, p1] : [p1, p0];
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / len, ty = (b[1] - a[1]) / len, N = Math.max(24, Math.ceil(len / 2));
+  const top = [], bot = [];
+  for (let i = 0; i <= N; i++) {
+    const d = len * i / N / W, e = (len / W) - d, u = len * i / N;
+    const t = -0.01 - RISE * d + table(TIPDROP, e), v = BASE + table(BELLY, d) + table(FOOT, e);
+    const at = o => [a[0] + tx * u - ty * o * W, a[1] + ty * u + tx * o * W];
+    top.push(at(t)); bot.push(at(v));
+  }
+  return [...top, ...bot.reverse()];
+}
+
 function stroke(line, W, others) {
   const f = nums(line), p0 = [f[3], f[4]], p1 = [f[f.length - 2], f[f.length - 1]];
   const dx = p1[0] - p0[0], dy = p1[1] - p0[1], ax = Math.abs(dx), ay = Math.abs(dy);
   let kind;
   if (f[0] === 1) kind = ay < ax * 0.3 ? "h" : ax < ay * 0.3 ? "v" : dx < 0 ? "pie" : "na";
   else kind = f[1] === 7 ? "arc" : dx < 0 ? "pie" : "na";
+  if (kind === "h") return horizontal(p0, p1, W);
   const free0 = !touches(p0, others, W), free1 = !touches(p1, others, W);
   const rise = kind === "h" ? Math.min(Math.hypot(dx, dy) * 0.05, 3) : 0;
   const { pts: pts0, len } = centreline(f, 0);
