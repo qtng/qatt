@@ -333,6 +333,10 @@ window.Theme = window.Theme || (function() {
                 .bottom-bar .active { color: #fff; border-top-color: var(--bar-accent); }
                 .bottom-bar .active i { color: var(--bar-accent); }
             }
+            /* round button that scrolls to the top: in the colour of the bar, shown after some scrolling, above the bottom bar of the phone */
+            .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
+            .to-top.show { opacity: 1; pointer-events: auto; }
+            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
             .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
             .powered-by a { color: inherit; opacity: .45; text-decoration: none; }
@@ -542,14 +546,26 @@ window.Theme = window.Theme || (function() {
         initOffcanvas();
     }
 
+    function injectToTop() {
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'to-top';
+        button.setAttribute('aria-label', 'Back to top'); button.setAttribute('data-vi-aria-label', 'Lên đầu trang');
+        button.innerHTML = '<i class="bi bi-arrow-up"></i>';
+        button.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        window.addEventListener('scroll', () => button.classList.toggle('show', window.scrollY > 400), { passive: true });
+        document.body.appendChild(button);
+    }
+
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", () => {
             injectDependencies();
             injectNav();
+            injectToTop();
         });
     } else {
         injectDependencies();
         injectNav();
+        injectToTop();
     }
 })();
 
