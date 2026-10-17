@@ -52,6 +52,10 @@ UPM = 1000
 CELL = (0, 0, 100, 100)
 SY = float(os.environ.get('QATT_SY', 10))      # font units per svg unit (vertical): the cell height 100 fills the em (1000)
 SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 100 x 100)
+# The letters are stretched in y by VS around the font y VC (QATT_VS, QATT_VC), so that a cell is as high as a Han character and lies on the same
+# baseline (the ink of common Han characters in WenQuanYi Zen Hei and Nom Na Tong is about y -100..800 of the 1000 em; the letters of qatt.js alone fill y 70..740)
+VS = float(os.environ.get('QATT_VS', 1.4))
+VC = float(os.environ.get('QATT_VC', 577))
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
 ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y 4.2 .. 95.8
@@ -127,7 +131,10 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     if not fit and not ids[0].startswith('q'): centre, f = centre + EXTRA_X * SX, f - EXTRA_Y * SY
-    matrix = (kx, 0, 0, -SY * grow * v, centre - cx * kx, f)
+    sy = -SY * grow * v
+    if VS != 1.0 and not ids[0].startswith('q'):   # the letters are stretched in y around the font y VC, before they are stroked (the stroke widths stay), the tones are not
+        sy, f = sy * VS, VS * f + (1 - VS) * VC
+    matrix = (kx, 0, 0, sy, centre - cx * kx, f)
     if BRUSH and ids[0].startswith('q'):   # tones: narrower than the letters (see TONE_X), the middle of the tone stays where it is
         bs = []
         for i in ids:
@@ -139,7 +146,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
         # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
         ids, u = tuple(ids), SY * grow
-        key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
+        key = (ids, round(kx / u, 6), round(-matrix[3] / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
                round(width / STROKE if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
         if fit: key += (round(fit[0] / u, 4), round(fit[1] / u, 4))
         if ink: key += ('ink',)

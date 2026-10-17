@@ -57,8 +57,8 @@
     .overview a.card-font:hover { box-shadow: 0 .45em 1.1em rgba(0, 0, 0, .35); }
     .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 8.5cqw; line-height: 1.1; color: #2b2118; white-space: nowrap; text-align: center; }
     .overview .quad { container-type: inline-size; width: 96%; color: #2b2118; }
-    .overview .quad > div { display: grid; grid-template-columns: repeat(2, 48cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
-    .overview .quad span { height: 42cqw; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 53cqw); line-height: 1; white-space: nowrap; }
+    .overview .quad > div { display: grid; grid-template-columns: repeat(2, 44cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
+    .overview .quad span { height: 38cqw; display: flex; align-items: center; justify-content: center; font-size: 38cqw; line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
@@ -101,8 +101,6 @@
     style.textContent = FONTS.filter(f => f.admin).map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2) format("woff2"), url(fonts/${f.file}.ttf) format("truetype"); }`).join('\n');
     document.head.append(style);
   }
-  // the older KAGE fonts fill their cell more than the others: drawn smaller so that all look the same size
-  const FIT = { "QATT Serif": .8, "QATT Gothic": .82, "QATT Gothic Wide": .82 };
   const SAMPLE = 'Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen.';   // Truyện Kiều, lines 1 to 6
   const SIZES = [24, 28, 32, 36, 42, 48, 56, 72, 96];   // from small to large
   const ABOUT = [   // the first entry whose name starts the family: English, Vietnamese (drafts by Claude)
@@ -139,7 +137,7 @@
     const left = el('div', 'samples');
     for (const px of SIZES) {
       const line = el('div', 'line'), q = el('div', 'q');
-      q.style.cssText = `font-family: "${f.family}"; font-size: ${px * (FIT[f.family] || 1)}px`;
+      q.style.cssText = `font-family: "${f.family}"; font-size: ${px}px`;
       line.append(el('span', 'px muted', px), q);
       left.append(line); samples.push(q);
     }
@@ -177,7 +175,7 @@
     const base = entry.tabs[0];   // the first font of the stack
     entry.family = base.f.family;
     a.append(el('div', 'name', entry.title.textContent));
-    for (let i = 0; i < 4; i++) { const c = el('span'); c.style.fontFamily = `"${entry.family}"`; c.style.setProperty('--fit', FIT[entry.family] || 1); ovCells.push(c); grid.append(c); }
+    for (let i = 0; i < 4; i++) { const c = el('span'); c.style.fontFamily = `"${entry.family}"`; ovCells.push(c); grid.append(c); }
     quad.append(grid); a.append(quad); col.append(a); overview.append(col);
   }
   ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quôc', 'âm', 'tân', 'tư'][i % 4], parser).trim(); });

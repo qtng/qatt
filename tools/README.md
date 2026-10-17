@@ -31,7 +31,11 @@ Playwright. Only requests to the local server are allowed (no CDN), the paths do
 
 ### All fonts at once: `build_all.py`
 
-`python3 tools/build_all.py` builds all 14 fonts (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. State: the Pen, Pen Cut, Khai, Brush and Prototype fonts come out of it exactly like the ones in `fonts/` (same outlines); Serif, Gothic and Gothic wide do not: they were last built with an older state of the data and the tools, which cannot be found again, so a build today draws them thinner and smaller (see the comparison in the pull request that rebuilds them).
+`python3 tools/build_all.py` builds all 14 fonts (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. The Serif and Gothic files that were in `fonts/` before 2026-10-17 could not be built again (they came from a state of the data that is not in the repository), so all fonts were built anew.
+
+### Size and baseline of the letters (compared with Han characters)
+
+The letters of qatt.js alone fill y 70..740 of the 1000 em, common Han characters (WenQuanYi Zen Hei, Nom Na Tong, a Noto CJK has the ICF box -78..838) y -100..800. So `build_font.py` stretches all letters in y by `VS` = 1.4 around the font y `VC` = 577 before they are stroked (the stroke widths stay; the tones are not stretched; environment variables `QATT_VS`, `QATT_VC` for tests): a cell is as high as a Han character and lies on the same baseline (check: the letters of a font next to 國音新字學喃 at one font size, top and bottom of the ink line up). `QATT_VS=1` gives the old, smaller size.
 
 ### 2. Build the font: `build_font.py`
 
