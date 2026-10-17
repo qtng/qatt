@@ -29,6 +29,10 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright CHROMIUM=/path/to/chromium \
 `PLAYWRIGHT_MODULE` and `CHROMIUM` are only needed if Playwright is not installed locally or Chromium is not found by
 Playwright. Only requests to the local server are allowed (no CDN), the paths do not depend on Bootstrap.
 
+### All fonts at once: `build_all.py`
+
+`python3 tools/build_all.py` builds all 14 fonts (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. State: the Pen, Pen Cut, Khai, Brush and Prototype fonts come out of it exactly like the ones in `fonts/` (same outlines); Serif, Gothic and Gothic wide do not: they were last built with an older state of the data and the tools, which cannot be found again, so a build today draws them thinner and smaller (see the comparison in the pull request that rebuilds them).
+
 ### 2. Build the font: `build_font.py`
 
 Turns the (open) stroke paths into outlines (round caps and joins, `skia-pathops`), fits them into the monospace cell and
