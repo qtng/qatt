@@ -346,7 +346,7 @@
     const dec = () => $('decoding').value || 'qatt';
     const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
-    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0 }, hiddenDuring = false;
+    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
@@ -380,21 +380,32 @@
       }
       showStats(); saveMe();
     }
-    // the choice of a step: kind = onset, rhyme or tone; ok = right
-    function judge(kind, ok) {
-      if (!ok) {   // a wrong choice counts in the speed as well: the own value plus CAP_ADD seconds (else one could click wrong on purpose and only hurry on easy words)
+    // The kinds of symbol: a CELL of the word (onset or rhyme) is one item, whether it takes one click (the shape) or two (the shape, then its marked form): its time
+    // is the mean of the times of its clicks. A tone is one click. A click on a shape or a marked form that is wrong cannot be given to a kind (the player may look for
+    // an onset or a rhyme): it waits (word_.queue) for the next right click of that stage, that one shows which kind it was, and the penalty goes to that kind.
+    const cellKind = c => c.role === 'onset' ? 'onset' : 'rhyme';   // 'both' (one letter that is onset and rhyme) counts as a rhyme
+    const penalty = kind => Math.min(CAP, mine()[kind].v + CAP_ADD);   // the same as the cap of a slow time: waiting long is not better than a wrong click
+    const slowFor = st => st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP;   // the cap of a time moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
+    // the choice of a step: kind = onset, rhyme, tone (null if a wrong choice); ok = right; cells = the cells it found; done = those of them that are complete now
+    function judge(kind, ok, cells = [], done = []) {
+      if (!ok) {
         lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
-        addTime(kind, Math.min(CAP, mine()[kind].v + CAP_ADD));   // the same as the cap of a slow time: waiting long is not better than a wrong click
+        if (kind === 'tone') addTime('tone', penalty('tone')); else word_.queue++;
         return;
       }
       addPoints(POINTS.right);
       const st = mine()[kind];
-      const t = Math.min((performance.now() - lap.t0) / 1000, st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP);   // the cap moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
+      const t = Math.min((performance.now() - lap.t0) / 1000, slowFor(st));
       const first = !lap.wrong && !lap.hinted && !hiddenDuring;
-      if (first) {
-        if (!(t <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false;   // slow for this player
-        addTime(kind, t);
-      } else word_.quick = false;
+      const quick = x => { if (!(x <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false; };   // slow for this player
+      if (kind === 'tone') { if (first) { quick(t); addTime('tone', t); } else word_.quick = false; }
+      else {
+        for (; word_.queue > 0; word_.queue--) addTime(kind, penalty(kind));   // the wrong choices before it were for this kind
+        for (const c of cells) c.parts = first && c.parts !== null ? (c.parts || []).concat(t) : null;   // null: a wrong choice or a hint on the way, the cell does not count
+        for (const c of done) {
+          if (c.parts) { const mean = c.parts.reduce((a, b) => a + b, 0) / c.parts.length; quick(mean); addTime(cellKind(c), mean); } else word_.quick = false;
+        }
+      }
       newLap();
       setTimeout(armHint, 0);   // the next step may be another kind: the hint waits for its time
     }
@@ -430,7 +441,7 @@
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
-      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now() }; newLap();
+      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0 }; newLap();
       startTimer();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
@@ -485,8 +496,7 @@
       const found = slots.filter(s => s.shape === shape);
       verdict(b, found.length > 0);
       mood(found.length > 0);
-      const next = slots.find(x => x.state === 'empty');   // a wrong shape counts for the kind of the cell that is still to be found
-      judge((found[0] || next || {}).role === 'onset' ? 'onset' : 'rhyme', found.length > 0);   // the shape of the rhyme (or of a single letter) counts as a rhyme
+      judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found.filter(c => !c.mark));   // a cell without a mark is complete with its shape
       sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
@@ -506,7 +516,7 @@
       const found = slots.filter(s => s.shape === shape && s.mark === mark);
       verdict(b, found.length > 0);
       mood(found.length > 0);
-      judge('rhyme', found.length > 0);
+      judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found);   // the marked form completes the cell
       for (const s of found) s.state = 'full';
       renderCells();
       update();
