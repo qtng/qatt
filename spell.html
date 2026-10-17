@@ -134,13 +134,12 @@
     dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     dialog.ask p { margin: 0 0 1rem; }
     dialog.prog { text-align: center; }
-    dialog.prog svg { width: min(16rem, 80%); display: block; margin: 0 auto; color: var(--ink); overflow: visible; }
-    #needle { transform-origin: 100px 100px; transform: rotate(-90deg); transition: transform 1.3s cubic-bezier(.2, 1.35, .4, 1); }
-    .gaugeVal { font-size: 1rem; margin: .2rem 0 .6rem; } .gaugeVal b { font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+    .starsBig { font-size: 2.2rem; line-height: 1.1; margin: .3rem 0 .4rem; letter-spacing: .1em; }
+    .star { color: #e0a800; } .star.off { color: color-mix(in srgb, currentColor 25%, transparent); }
     dialog.prog table { width: 100%; margin: 0 0 1rem; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: left; }
     dialog.prog td { padding: .1rem .3rem; }
-    dialog.prog td.bar { width: 45%; } dialog.prog td.bar i { display: block; height: .6rem; border-radius: .3rem; background: #198754; }
-    dialog.prog td.bar.low i { background: #dc3545; } dialog.prog td.bar.mid i { background: #e0a800; }
+    dialog.prog td.stars { font-size: 1.15rem; letter-spacing: .05em; white-space: nowrap; }
+    dialog.prog td.trend { white-space: nowrap; color: var(--muted); }
     dialog.ask .btns { display: flex; gap: .6rem; justify-content: flex-end; }
     #log { white-space: pre-wrap; text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; }
     .stats { font-size: .85rem; color: var(--muted, #6c5d4a); font-variant-numeric: tabular-nums; }
@@ -200,12 +199,8 @@
     </div>
   </dialog>
   <dialog class="ask prog" id="progress">
-    <h2 data-vi="Tiến bộ của bạn">Your progress</h2>
-    <svg id="gauge" viewBox="0 0 200 118" role="img" aria-label="Confidence" data-vi-aria-label="Độ chắc chắn">
-      <g id="gaugeArcs"></g>
-      <g id="needle"><line x1="100" y1="100" x2="100" y2="32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="8" fill="currentColor"/></g>
-    </svg>
-    <div class="gaugeVal"><b id="gaugeNum">0</b> <span data-vi="Độ chắc chắn">Confidence</span></div>
+    <h2 data-vi="Những từ vừa rồi">Your last words</h2>
+    <div class="starsBig" id="starsBig" role="img"></div>
     <p id="progScore"></p>
     <table id="progKinds"></table>
     <div class="btns"><button type="button" class="btn btn-sm btn-cinnabar" id="progClose" data-vi="Tiếp tục">Continue</button></div>
@@ -379,11 +374,11 @@
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
     const CAP = 10, CAP_ADD = 2, HINT_ADD = 5, ALPHA = 0.05, ALPHA_FAST = 0.2, ALPHA_AVG = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
     // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the faster one (ALPHA_FAST 0.2: after 10 equal times it has covered about 90% of the way; the form of the day,
-    // for the display (the card, the gauge) and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
+    // for the display (the status line) and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
     const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
-    // what is shown (status line, card, gauge, milestones) is not the measured time: every click holds the time to find and press the button (CLICK_TIME of its kind), and the first click of a word,
+    // what is shown (status line, card, milestones) is not the measured time: every click holds the time to find and press the button (CLICK_TIME of its kind), and the first click of a word,
     // the onset, also the time to read the word (READ_TIME); both are taken off (at least MIN_SHOWN, a rhyme is the mean of its clicks, so CLICK_TIME off the mean is the same). The tones take
     // longer to find: 8 marks, four circles and four half circles that differ only by their place, so one has to look closely;
     // what is kept, sent to the server and shown in the stopwatch stays the measured time
@@ -392,7 +387,8 @@
     let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, last: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, last: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
@@ -400,6 +396,8 @@
         for (const k of ['shadow', 'pending', 'asked', 'words', 'last']) if (typeof saved[k] === 'number') me[k] = saved[k];
         if (saved.avg && typeof saved.avg.v === 'number') me.avg = saved.avg;
         if (saved.skipOk === false) me.skipOk = false;
+        if (saved.round && KINDS.every(k => Array.isArray(saved.round[k])) && saved.round.wrong) me.round = saved.round;
+        if (saved.prev && typeof saved.prev === 'object') me.prev = saved.prev;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
         else if (saved.stats) me.stats = saved.stats;
       }
@@ -441,7 +439,8 @@
       floatPoints(n, delay); showScore(signed); saveMe();
     };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
-    function addTime(kind, t) {
+    function addTime(kind, t, wrong = false) {
+      me.round[kind].push(t); if (wrong) me.round.wrong[kind]++;   // for the card: the last words
       const st = mine()[kind]; st.n++; st.t = t;   // t: the last time, shown in the status line to check the measuring
       st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
       st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
@@ -464,7 +463,7 @@
       watch.done.push(((performance.now() - watch.t0) / 1000).toFixed(1) + (ok ? '' : ' ✗')); watch.t0 = performance.now();
       if (!ok) {
         lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
-        if (kind === 'tone') addTime('tone', penalty('tone')); else word_.queue++;
+        if (kind === 'tone') addTime('tone', penalty('tone'), true); else word_.queue++;
         return;
       }
       addPoints(POINTS.right);
@@ -474,7 +473,7 @@
       const quick = x => { if (!(x <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false; };   // slow for this player
       if (kind === 'tone') { if (first) { quick(t); addTime('tone', t); } else word_.quick = false; }
       else {
-        for (; word_.queue > 0; word_.queue--) addTime(kind, penalty(kind));   // the wrong choices before it were for this kind
+        for (; word_.queue > 0; word_.queue--) addTime(kind, penalty(kind), true);   // the wrong choices before it were for this kind
         for (const c of cells) c.parts = first && c.parts !== null ? (c.parts || []).concat(t) : null;   // null: a wrong choice or a hint on the way, the cell does not count
         for (const c of done) {
           if (c.parts) { const mean = c.parts.reduce((a, b) => a + b, 0) / c.parts.length; quick(mean); addTime(cellKind(c), mean); } else word_.quick = false;
@@ -526,7 +525,7 @@
     function skipWord() {
       if (!$('nextRow').hidden) return another();   // the word is solved: only the next word, nothing to take back
       if (!me.skipOk) return;
-      if (word_.snap) { const snap = JSON.parse(word_.snap); me.score = snap.score; me.shadow = snap.shadow; me.pending = snap.pending; me.stats = snap.stats; }
+      if (word_.snap) { const snap = JSON.parse(word_.snap); me.score = snap.score; me.shadow = snap.shadow; me.pending = snap.pending; me.stats = snap.stats; me.round = snap.round || freshRound(); }
       me.skipOk = false; saveMe(); showScore(); showStats(); showSkip();
       another();
     }
@@ -593,42 +592,35 @@
       table.replaceChildren(...out);
       $('board').hidden = !out.length;
     }
-    // ---- the progress card: every STATS_EVERY solved words the score and a gauge of the confidence of the player ---------------------------------------------------------
-    // Confidence: per kind of symbol (from MIN_SAMPLES times on) TARGET seconds against the faster value f (1 at TARGET or faster, 0.5 at twice as long ...), the mean of the kinds, in per cent.
-    const STATS_EVERY = 5, TARGET = 1.0;
-    function confidence() {
-      const set = mine(), kinds = KINDS.map(k => ({ k, v: shown(k, set[k].f), n: set[k].n, pct: set[k].n >= MIN_SAMPLES ? Math.round(100 * TARGET / Math.max(shown(k, set[k].f), TARGET)) : null }));
-      const ok = kinds.filter(x => x.pct !== null);
-      return { value: ok.length ? Math.round(ok.reduce((a, x) => a + x.pct, 0) / ok.length) : null, kinds };
-    }
-    const polar = (deg, r) => [100 + r * Math.cos(Math.PI - deg * Math.PI / 180), 100 - r * Math.sin(Math.PI - deg * Math.PI / 180)];
-    function drawGauge() {   // three arcs: red up to 40, yellow up to 70, green above (the value 0..100 goes over 180 degrees)
-      const g = $('gaugeArcs'); if (g.children.length) return;
-      for (const [from, to, color] of [[0, 40, '#dc3545'], [40, 70, '#e0a800'], [70, 100, '#198754']]) {
-        const [x0, y0] = polar(from * 1.8, 80), [x1, y1] = polar(to * 1.8, 80);
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M${x0.toFixed(1)} ${y0.toFixed(1)} A80 80 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`);
-        path.setAttribute('fill', 'none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width', '16');
-        g.append(path);
-      }
-    }
+    // ---- the progress card: every STATS_EVERY solved words the score and stars for those last words, per kind of symbol --------------------------------------------------------
+    // The stars show only the short time: the mean of the times of the words since the last card (a wrong choice is a slow time, see penalty), shown as the status line shows them (shown()),
+    // against the times of MILESTONES: a star for each one that is beaten (0 to 5). The arrow compares with the mean of the card before.
+    const STATS_EVERY = 5;
+    const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+    const starsOf = (kind, t) => MILESTONES.filter(m => shown(kind, t) < m).length;
+    const starText = n => Array.from({ length: MILESTONES.length }, (_, i) => `<span class="star${i < n ? '' : ' off'}">★</span>`).join('');
     function showProgress() {
-      drawGauge();
-      const c = confidence(), total = signed ? me.score : me.shadow;
+      const total = signed ? me.score : me.shadow, prev = me.prev || {};
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
-      $('gaugeNum').textContent = c.value === null ? '–' : c.value;
-      $('progScore').textContent = Lang.t(`Score ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} since the last card)`, `Điểm ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} từ lần trước)`) + (signed ? '' : Lang.t(', not counted', ', chưa tính'));
-      $('progKinds').replaceChildren(...c.kinds.map(x => {
-        const r = document.createElement('tr'), a = document.createElement('td'), b = document.createElement('td'), d = document.createElement('td');
-        a.textContent = names[x.k]; b.textContent = x.n ? x.v.toFixed(1) + ' s' : '–';
-        d.className = 'bar ' + (x.pct === null ? '' : x.pct < 40 ? 'low' : x.pct < 70 ? 'mid' : '');
-        const i = document.createElement('i'); i.style.width = (x.pct || 0) + '%'; d.append(i);
-        r.append(a, b, d); return r;
+      const kinds = KINDS.map(k => { const t = me.round[k].length ? mean(me.round[k]) : null; return { k, t, stars: t === null ? null : starsOf(k, t), wrong: me.round.wrong[k] }; });
+      const have = kinds.filter(x => x.stars !== null);
+      const overall = have.length ? Math.round(have.reduce((a, x) => a + x.stars, 0) / have.length) : null;
+      $('starsBig').innerHTML = overall === null ? '–' : starText(overall);
+      $('starsBig').setAttribute('aria-label', overall === null ? '' : overall + ' / ' + MILESTONES.length);
+      $('progScore').textContent = Lang.t(`Score ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} since the last card)`, `Điểm ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} từ lần trước)`) + (signed ? '' : Lang.t(', not counted (sign in to count)', ', chưa tính (đăng nhập để tính)'));
+      $('progKinds').replaceChildren(...kinds.map(x => {
+        const r = document.createElement('tr'), cells = [document.createElement('td'), document.createElement('td'), document.createElement('td'), document.createElement('td')];
+        cells[0].textContent = names[x.k];
+        cells[1].className = 'stars'; cells[1].innerHTML = x.stars === null ? '–' : starText(x.stars);
+        cells[2].textContent = x.t === null ? '' : shown(x.k, x.t).toFixed(1) + ' s';
+        cells[3].className = 'trend';
+        const before = prev[x.k];
+        cells[3].textContent = (x.t !== null && typeof before === 'number' ? (x.t < before - 0.05 ? '↑ ' : x.t > before + 0.05 ? '↓ ' : '') : '') + (x.wrong ? '✗' + x.wrong : '');
+        r.append(...cells); return r;
       }));
-      me.last = total; saveMe();
-      const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
+      me.prev = Object.fromEntries(kinds.filter(x => x.t !== null).map(x => [x.k, x.t]));
+      me.round = freshRound(); me.last = total; saveMe();
       $('progress').showModal();
-      requestAnimationFrame(() => { needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (c.value || 0) * 1.8}deg)`; });
     }
     $('progClose').addEventListener('click', () => $('progress').close());
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
@@ -655,7 +647,7 @@
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
-      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
+      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats, round: me.round }) }; newLap();   // snap: the state before the word, for Skip
       startTimer(); $('lateRow').hidden = true;
       if (watch.word && watch.done.length) { logLines.unshift(watchLine() + (watch.finished ? '' : '  (not finished)')); logLines.length = Math.min(logLines.length, 200); }
       watch = { done: [], t0: performance.now(), on: true, word, finished: false }; drawWatch();
