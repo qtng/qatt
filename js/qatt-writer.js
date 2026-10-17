@@ -308,15 +308,17 @@ const QattWriter = (() => {
       if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
       else pending.append(' (no QATT letter yet)');
     }
-    // Tham Thư (stack): the button is on when the two characters before the cursor are letters of QATT (U+F0000..U+F0099), the tone marks behind the second one do not count; a click
-    // puts the combiner U+F009A between the two letters, the cursor stays behind the same characters
+    // Tham Thư (stack): the button is on when the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the
+    // rhyme of a pair, so it does not count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair,
+    // but not the upper part of a stack. A click puts the combiner U+F009A between the two letters, the cursor stays behind the same characters.
     const tham = $('tham-btn');
     const thamAt = () => {
       if (!qatt || typer.selectionStart !== typer.selectionEnd) return null;
-      const before = Array.from(typer.value.slice(0, typer.selectionStart), ch => ch.codePointAt(0));
+      const before = Array.from(typer.value.slice(0, typer.selectionStart), ch => ch.codePointAt(0)), after = typer.value.codePointAt(typer.selectionStart);
+      if (after === JOINER || after === COMBINER) return null;   // the cursor is inside a cell
       let j = before.length - 1;
       while (j >= 0 && before[j] >= 0xF009C && before[j] <= 0xF00A3) j--;
-      if (j < 1 || !LETTER(before[j]) || !LETTER(before[j - 1])) return null;
+      if (j < 1 || !LETTER(before[j]) || !LETTER(before[j - 1]) || before[j - 2] === COMBINER) return null;
       return before.slice(0, j).reduce((n, c) => n + (c > 0xFFFF ? 2 : 1), 0);   // where the combiner goes: before the second letter
     };
     const showTham = () => { tham.disabled = thamAt() === null; };
