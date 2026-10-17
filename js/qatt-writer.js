@@ -5,7 +5,7 @@ The writer: a text field in which Quốc Ngữ becomes Quốc Âm Tân Tự (QAT
   <div id="writer" class="card-box writer"></div>
   QattWriter.mount(document.getElementById('writer'), { switch: 'qatt', storage: 'chunom_writer_' })
 
-  switch  'qatt'  the Chunom writer: Chữ Nôm candidates are always on, the switch "Quốc Âm Tân Tự" turns QATT on and off (on at the start)
+  switch  'qatt'  the Chunom writer: Chữ Nôm candidates are always on, the switch "Quốc Âm Tân Tự" turns QATT on and off (off at the start)
           'nom'   the QATT editor: QATT is always on, the switch "Chữ Nôm" turns the candidate list on and off (off at the start)
   storage the prefix of the keys in localStorage (the size and the switch are kept)
 
@@ -42,10 +42,6 @@ const QattWriter = (() => {
     .size-bar input[type=range] { flex: 1 1 auto; width: 0; min-width: 4rem; accent-color: var(--accent); }
     @media (max-width: 419.98px) { #convert-btn .lbl { display: none; } }   /* on a very narrow screen the button is only its symbol */
     #size-label { min-width: 2.6em; color: var(--muted); }
-    #pending { display: none; height: 1.2rem; align-items: center; gap: .8rem; padding: 0 .9rem; font-size: .85rem; color: var(--muted); }
-    .qatt-on #pending { display: flex; }
-    #pending .glyph { font-family: var(--qfont), sans-serif; font-size: 1.8rem; line-height: 1; color: var(--ink); }
-    #pending .word { font-style: italic; }
     .qatt-only { display: none; }
     .qatt-on .qatt-only { display: inline-block; }
     .qatt-on li.qatt-only { display: list-item; }
@@ -64,7 +60,7 @@ const QattWriter = (() => {
     /* floating candidate list: ime.js draws it under the caret, the page only sets its colours */
     :root { --vietime-color: var(--ink); --vietime-border: 1px solid var(--line); --vietime-active: rgba(168, 54, 42, .10); --vietime-ring: rgba(168, 54, 42, .45); --vietime-remainder: var(--accent); }
     .vietime { box-shadow: 0 .6rem 1.6rem rgba(60, 40, 20, .22); }
-    @media (max-width: 575.98px) { #field { min-height: 7.4rem; } }
+    @media (max-width: 575.98px) { #field { min-height: 14rem; } }
     @media (min-width: 576px) { #field { min-height: 10.8rem; font-size: 1.7rem; } }`;
 
   // the toolbar stands above the card, centred, so that the card is always the same
@@ -84,7 +80,6 @@ const QattWriter = (() => {
     <div class="writer-pad">
       <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Type here…" data-vi-placeholder="Gõ ở đây…"></textarea>
     </div>
-    <div id="pending" aria-live="polite"></div>
     <div class="writer-bar">
       <div class="bar-buttons">
         <button type="button" class="btn btn-quiet qatt-only" id="example-btn"><i class="bi bi-magic"></i> <span data-vi="Ví dụ">Example</span></button>
@@ -119,7 +114,7 @@ const QattWriter = (() => {
     root.before(wrap); wrap.append(bar, root);
     root.innerHTML = HTML;
     const $ = id => wrap.querySelector('#' + id);
-    const typer = $('field'), pending = $('pending'), status = $('status');
+    const typer = $('field'), status = $('status');
     const store = {
       get(key, fallback) { try { const v = localStorage.getItem(prefix + key); return v === null ? fallback : v; } catch { return fallback; } },
       set(key, value) { try { localStorage.setItem(prefix + key, value); } catch { /* storage may be blocked */ } }
@@ -169,7 +164,7 @@ const QattWriter = (() => {
       typer.value = QattText.recode(typer.value, parser, new VietnameseParser(decoding.value));
       parser.setDecoding(decoding.value);
       if (ime) ime.hide();
-      showPending();
+      refresh();
     });
     font.addEventListener('change', applyFont);   // the font is not stored: every visit starts with Pen
     size.addEventListener('input', () => { store.set('size', size.value); applyFont(); });
@@ -177,7 +172,6 @@ const QattWriter = (() => {
 
     function setState() {
       apply();
-      store.set(mode === 'qatt' ? 'qatt' : 'nom', modeBox.checked);
       document.body.classList.toggle('qatt-on', qatt);
       status.innerHTML = qatt && nom ? '<b>Space</b> converts QATT, <b>Enter</b> picks first Hán Nôm'
         : nom ? '<b>Space</b> and <b>Enter</b> pick first Hán Nôm'
@@ -185,9 +179,9 @@ const QattWriter = (() => {
         : '';
       if (ime) { ime.update(imeOptions()); if (!nom) ime.hide(); }
       applyFont();
-      showPending();
+      refresh();
     }
-    modeBox.addEventListener('change', setState);
+    modeBox.addEventListener('change', () => { store.set('on', modeBox.checked); setState(); });   // kept only when somebody chose it
 
     // the word that ends right before `end` becomes QATT characters (if there are any)
     const convertBefore = end => {
@@ -256,7 +250,7 @@ const QattWriter = (() => {
       typer.setRangeText('', cell.start, cell.end, 'end');
       typer.setSelectionRange(cell.start, cell.start);
       tidy();
-      showPending();
+      refresh();
     });
 
     // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
@@ -292,27 +286,18 @@ const QattWriter = (() => {
       if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
       else if (!e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
       if (!e.isComposing) tidy();
-      showPending();
+      refresh();
     });
     // keyboards that compose whole words (Android): the space comes with the end of the composition
     typer.addEventListener('compositionend', e => setTimeout(() => {
       if (!qatt) return;
       if (e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)));
       tidy();
-      showPending();
+      refresh();
     }, 0));
 
-    // the word being typed and how it will look
-    function showPending() {
-      pending.replaceChildren();
-      showTham();
-      const pos = typer.selectionStart, m = qatt && pos === typer.selectionEnd && WORD_END.exec(typer.value.slice(0, pos));
-      if (!m) return;
-      const text = QattText.word(m[0], parser);
-      pending.append(Object.assign(document.createElement('span'), { className: 'word', textContent: m[0] }));
-      if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
-      else pending.append(' (no QATT letter yet)');
-    }
+    // what depends on the text and the cursor: the Tham Thư button
+    function refresh() { showTham(); }
     // Tham Thư (stack): the button is on when the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the
     // rhyme of a pair, so it does not count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair,
     // but not the upper part of a stack. A click puts the combiner U+F009A between the two letters, the cursor stays behind the same characters.
@@ -334,9 +319,9 @@ const QattWriter = (() => {
       typer.setRangeText(String.fromCodePoint(COMBINER), at, at, 'preserve');
       typer.focus({ preventScroll: true });   // the cursor stays in the field (the button does not keep the focus)
       typer.setSelectionRange(caret + 2, caret + 2);   // behind the same characters
-      showPending();
+      refresh();
     });
-    document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === typer) showPending(); });
+    document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === typer) refresh(); });
 
     // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
     // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
@@ -358,9 +343,9 @@ const QattWriter = (() => {
     // Convert: with QATT characters in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
       typer.value = QattText.cells(typer.value).length ? readAsQuocNgu(typer.value) : toQatt(typer.value);
-      showPending();
+      refresh();
     });
-    $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); showPending(); });   // without the spaces
+    $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); refresh(); });   // without the spaces
 
     // ---------- buttons ----------
     const copyBtn = $('copy-btn');
@@ -379,7 +364,7 @@ const QattWriter = (() => {
 
     font.value = DEFAULT_FONT;
     size.value = store.get('size', '100');
-    modeBox.checked = store.get(mode === 'qatt' ? 'qatt' : 'nom', mode === 'qatt' ? 'true' : 'false') === 'true';   // the key of the Chunom writer was always 'qatt'
+    modeBox.checked = store.get('on', 'false') === 'true';   // off at the start, on both sites (QATT on the Chunom site, Chữ Nôm on qatt.org)
     setState();
     return { field: typer };
   }
