@@ -51,12 +51,12 @@
     [hidden] { display: none !important; }
 
     /* overview: one card per font name (the weights together), "Quốc Âm Tân Tự" in four cells; the glyphs fill the width of the card */
-    .overview { padding: 1.6rem 0 .4rem; }
+    .overview { padding: .8rem 0 1.6rem; margin-bottom: 0; border-bottom: 1px solid rgba(127, 127, 127, .25); }
     .overview .col { container-type: inline-size; }
-    .overview .card-font { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqw; width: 100cqw; aspect-ratio: 1; padding: 12cqw; overflow: hidden; border: 1px solid rgba(127, 127, 127, .3); border-radius: 50%; box-shadow: 0 .35em .9em rgba(0, 0, 0, .25); color: inherit; text-decoration: none; }
-    .overview .card-font:hover { color: inherit; box-shadow: 0 .45em 1.1em rgba(0, 0, 0, .35); }
-    .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 8cqw; line-height: 1.1; white-space: nowrap; text-align: center; }
-    .overview .quad { container-type: inline-size; width: 94%; }
+    .overview a.card-font { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqw; width: 100cqw; aspect-ratio: 1; padding: 15cqw 11cqw; overflow: hidden; border: 1px solid rgba(127, 127, 127, .3); border-radius: 50%; box-shadow: 0 .35em .9em rgba(0, 0, 0, .25); color: #2b2118; text-decoration: none; }
+    .overview a.card-font:hover { color: #2b2118; box-shadow: 0 .45em 1.1em rgba(0, 0, 0, .35); }
+    .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 9cqw; line-height: 1.1; color: #2b2118; white-space: nowrap; text-align: center; }
+    .overview .quad { container-type: inline-size; width: 94%; color: #2b2118; }
     .overview .quad > div { display: grid; grid-template-columns: 1fr 1fr; }   /* four equal squares: even gaps in both directions */
     .overview .quad span { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 50cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
@@ -78,11 +78,11 @@
 
 <main class="wrap">
   <div class="sheet">
-  <div class="overview row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 align-items-stretch justify-content-center" id="overview"></div>
   <div class="bar">
     <label class="text"><span class="muted" data-vi="Văn bản">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" data-vi-placeholder="Văn bản của bạn bằng chữ Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ" data-vi-aria-label="Văn bản bằng chữ Quốc Ngữ"></label>
     <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off" checked><label class="form-check-label" for="telex">Telex</label></div>
   </div>
+  <div class="overview row row-cols-3 g-3 align-items-stretch justify-content-center" id="overview"></div>
   <div id="fonts"></div>
   </div>
   <p class="note"><span data-vi="© 2026 qatt.org. Bảo lưu mọi quyền. Phông chữ được dùng để đọc, viết và in văn bản QATT, không được sửa đổi hay dùng làm nền cho phông chữ khác.">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts.</span> <a href="fonts/LICENSE.txt" data-vi="Giấy phép">Licence</a></p>
@@ -171,7 +171,7 @@
     if (entry.g === 'QATT Pen Cut') continue;   // no card for Pen cut
     const col = el('div', 'col'), a = el('a', 'card-font'), quad = el('div', 'quad'), grid = el('div');
     a.href = '#' + entry.box.id;
-    const base = entry.tabs.find(t => t.f.family === entry.g) || entry.tabs[0];   // the font without a weight ("normal")
+    const base = entry.tabs[0];   // the first font of the stack
     entry.family = base.f.family;
     a.append(el('div', 'name', entry.title.textContent));
     for (let i = 0; i < 4; i++) { const c = el('span'); c.style.fontFamily = `"${entry.family}"`; c.style.setProperty('--fit', FIT[entry.family] || 1); ovCells.push(c); grid.append(c); }
