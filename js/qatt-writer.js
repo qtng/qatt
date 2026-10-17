@@ -23,8 +23,8 @@ const QattWriter = (() => {
       background: color-mix(in srgb, currentColor 3%, transparent); }   /* a tint of the text colour: light on a light theme, dark on a dark one */
     @media (min-width: 768px) { .writer-bar { flex-direction: row; justify-content: space-between; } }
     .writer-bar .btn { font-size: .85rem; padding: .25rem .8rem; }
-    /* toolbar above the field: everything about QATT (reading, font, convert) and the size; it never wraps, the dropdowns and the slider give way */
-    .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: .4rem .8rem; padding: .5rem .6rem 0; font-size: .78rem; }
+    /* toolbar above the card, centred: everything about QATT (reading, font, convert) and the size; it never wraps, the dropdowns and the slider give way */
+    .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: .4rem .8rem; margin: 0 0 .6rem; padding: 0; min-height: 1.9rem; font-size: .78rem; }   /* the same height with QATT off: the card does not move */
     body:not(.qatt-on) .qatt-bar .group { display: none; }
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
@@ -53,15 +53,17 @@ const QattWriter = (() => {
     @media (max-width: 575.98px) { #field { min-height: 7.4rem; } }
     @media (min-width: 576px) { #field { min-height: 10.8rem; font-size: 1.7rem; } }`;
 
-  const HTML = `
-    <div class="qatt-bar">
+  // the toolbar stands above the card, centred, so that the card is always the same
+  const BAR = `
       <div class="group">
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
       </div>
       <label><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="size-label">100%</span></label>
-    </div>
+`;
+
+  const HTML = `
     <div class="writer-pad">
       <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Type here…" data-vi-placeholder="Gõ ở đây…"></textarea>
     </div>
@@ -95,8 +97,11 @@ const QattWriter = (() => {
     if (!document.getElementById('qatt-writer-style')) {
       const style = document.createElement('style'); style.id = 'qatt-writer-style'; style.textContent = CSS; document.head.append(style);
     }
+    const wrap = document.createElement('div'), bar = document.createElement('div');
+    bar.className = 'qatt-bar'; bar.innerHTML = BAR;
+    root.before(wrap); wrap.append(bar, root);
     root.innerHTML = HTML;
-    const $ = id => root.querySelector('#' + id);
+    const $ = id => wrap.querySelector('#' + id);
     const typer = $('field'), pending = $('pending'), status = $('status');
     const store = {
       get(key, fallback) { try { const v = localStorage.getItem(prefix + key); return v === null ? fallback : v; } catch { return fallback; } },
