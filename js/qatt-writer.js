@@ -30,7 +30,12 @@ const QattWriter = (() => {
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
-    #tham-btn { font-size: .95rem; line-height: 1.3; }
+    #tham-btn { line-height: 1.3; }
+    #tham-btn .icon { font-style: normal; font-size: .95rem; }   /* the character is only an icon: not slanted like the text of a button in some themes */
+    #tham-btn .wide { display: none; font-size: .78rem; }   /* the name too, on a big screen */
+    @media (min-width: 768px) { #tham-btn .wide { display: inline; } }
+    /* the buttons of the toolbar are the same in every theme: square with a little rounding (some themes give buttons slanted corners or cut edges) */
+    html .qatt-bar .btn, html[data-theme] .qatt-bar .btn { border-radius: .35rem !important; clip-path: none !important; }
     /* the size, in the card above the field */
     .size-bar { display: flex; justify-content: center; padding: .5rem .6rem 0; font-size: .78rem; }
     .size-bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; flex: 1 1 8rem; max-width: 15rem; }
@@ -68,7 +73,7 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
-        <button type="button" class="btn btn-quiet" id="tham-btn" disabled title="Tham Thư: stack the two characters before the cursor (puts the combiner between them)" data-vi-title="Tham Thư: xếp chồng hai ký tự trước con trỏ (chèn dấu ghép vào giữa)">品</button>
+        <button type="button" class="btn btn-quiet" id="tham-btn" disabled title="Tham Thư: stack the two characters before the cursor (puts the combiner between them)" data-vi-title="Tham Thư: xếp chồng hai ký tự trước con trỏ (chèn dấu ghép vào giữa)"><span class="icon">品</span><span class="wide"> Tham Thư</span></button>
       </div>
 `;
 
