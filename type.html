@@ -148,6 +148,7 @@
             row.className = 'line';
             let last = 0;
             const plain = text => {
+                text = text.trim();   // spaces between syllables are dropped: the glyphs have their own spacing
                 if (!text) return;
                 const span = document.createElement('span');
                 span.className = 'plain';
