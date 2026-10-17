@@ -61,7 +61,7 @@ const QattWriter = (() => {
     :root { --vietime-color: var(--ink); --vietime-border: 1px solid var(--line); --vietime-active: rgba(168, 54, 42, .10); --vietime-ring: rgba(168, 54, 42, .45); --vietime-remainder: var(--accent); }
     .vietime { box-shadow: 0 .6rem 1.6rem rgba(60, 40, 20, .22); }
     @media (max-width: 575.98px) { #field { min-height: 14rem; } }
-    @media (min-width: 576px) { #field { min-height: 10.8rem; font-size: 1.7rem; } }`;
+    @media (min-width: 576px) { #field { min-height: 21.6rem; font-size: 1.7rem; } }   /* twice as high on a wide screen */`;
 
   // the toolbar stands above the card, centred, so that the card is always the same
   const BAR = `
