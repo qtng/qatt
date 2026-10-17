@@ -6,6 +6,7 @@
   <meta name="robots" content="noindex">
   <title>Admin</title>
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
   <link rel="stylesheet" href="../css/site.css">
   <script src="../js/navigation.js"></script>
   <script src="../vendor/supabase/supabase.min.js"></script>
@@ -15,133 +16,98 @@
   <style>
     body { background: #f7efdc; color: #2b2118; }
     h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
-    h2 { margin-top: 2rem; font-size: 1.4rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
-    h3 { font-size: 1rem; margin-top: 1.2rem; color: #7b6c58; text-transform: uppercase; letter-spacing: .08em; }
     a { color: #a8362a; }
     .note { color: #7b6c58; font-size: .9rem; }
-    li small { color: #7b6c58; }
+    .head { display: flex; align-items: baseline; flex-wrap: wrap; gap: .25rem 1rem; margin-bottom: 1.25rem; }
+    .head h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.4rem); }
+    .head .note { margin: 0; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); align-items: start; }
+    .sect { background: #fffdf8; border: 1px solid #dccfb2; border-radius: .9rem; padding: 1rem 1rem .6rem; }
+    .sect h2 { font-size: 1.15rem; margin: 0 0 .1rem; display: flex; align-items: center; gap: .5rem; }
+    .sect h2 .bi { background: #ffe600; color: #111; border: 2px solid #111; border-radius: .5rem; width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; flex: none; }
+    .sect > .note { margin: 0 0 .6rem 2.5rem; }
+    .tile { display: block; text-decoration: none; color: inherit; border: 1px solid #e6dbc2; border-radius: .6rem; padding: .5rem .75rem; margin-bottom: .45rem; background: #fff; }
+    .tile:hover, .tile:focus-visible { border-color: #111; background: #fff9c4; }
+    .tile b { color: #2b2118; }
+    .tile small { display: block; color: #7b6c58; line-height: 1.25; }
+    .tile .ext { float: right; color: #a89877; font-size: .8rem; }
+    details.files { margin-top: 1.25rem; background: #fffdf8; border: 1px solid #dccfb2; border-radius: .9rem; padding: .75rem 1rem; }
+    details.files summary { cursor: pointer; font-family: Georgia, "Times New Roman", serif; font-size: 1.15rem; }
+    details.files h3 { font-size: .8rem; margin: 1rem 0 .35rem; color: #7b6c58; text-transform: uppercase; letter-spacing: .08em; }
+    .chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .chips a { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; text-decoration: none; border: 1px solid #e6dbc2; background: #fff; border-radius: .4rem; padding: .1rem .45rem; }
+    .chips a:hover { border-color: #111; background: #fff9c4; }
   </style>
 </head>
 <body>
-<main class="container py-4" style="max-width: 48rem">
-  <h1 id="adminTitle" hidden>Admin</h1>
-  <p class="note" id="account" hidden></p>
-  <div class="card-box d-flex flex-wrap justify-content-center gap-2 p-3 mb-3" id="adminNav" hidden>
-    <a class="btn admin-yellow" href="stats.html">Statistics</a>
-    <a class="btn admin-yellow" href="models.html">AI models</a>
-    <a class="btn admin-yellow" href="translator.html">Translator data</a>
-    <a class="btn admin-yellow" href="rhymes.html">Rhymes</a>
-    <a class="btn admin-yellow" href="admin-slides.html">Slides</a>
-  </div>
-  <div class="card-box d-flex flex-wrap justify-content-center gap-2 p-3 mb-3" id="fontNav" hidden>
-    <a class="btn admin-yellow" href="font/font-editor.html">Glyph editor</a>
-    <a class="btn admin-yellow" href="font/brush.html">Brush</a>
-    <a class="btn admin-yellow" href="font/brush2.html">Brush 2</a>
-    <a class="btn admin-yellow" href="font/codetable.html">Code table</a>
-    <a class="btn admin-yellow" href="decoding.html">Sprites</a>
-    <a class="btn admin-yellow" href="https://chunom.org/chunom/dict/tdcntd.html">TĐCNTD</a>
+<main class="container py-4" style="max-width: 70rem">
+  <div class="head">
+    <h1 id="adminTitle" hidden>Admin</h1>
+    <p class="note" id="account" hidden></p>
   </div>
 
   <div id="area" hidden>
-  <p class="note">Tools and pages that no other page links to. For reviewing what can be removed.</p>
+    <div class="grid" id="sections"></div>
 
-  <h2>qatt.org</h2>
-  <h3>Tools</h3>
-  <ul>
-    <li><a href="rhymes.html">rhymes.html</a> <small>QATT Sprites Overview (uses Supabase)</small></li>
-    <li><a href="stats.html"><b>Statistics</b></a> <small>sign-ups, translator, decks, practice</small></li>
-    <li><a href="translator.html"><b>Translator data</b></a> <small>languages, gaps of the dictionary (with context)</small></li>
-    <li><a href="models.html"><b>Gemini models</b></a> <small>tries, quota and overload, speed and quality per model</small></li>
-    <li><a href="admin-slides.html">admin-slides.html</a> <small>Manage Slides</small></li>
-  </ul>
-  <h3>Not linked anywhere else</h3>
-  <ul>
-    <li><a href="../type.html">type.html</a> <small>QATT Editor, the former editor with two panes (qatt.js)</small></li>
-    <li><a href="../intro.html">intro.html</a> <small>Quốc Âm Tân Tự – Intro</small></li>
-    <li><a href="decoding.html">decoding.html</a> <small>QATT Sprites Overview</small></li>
-    <li><a href="../vandao/index.html">vandao/</a> <small>Thiên Calligraphy, with two PDFs</small></li>
-    <li><a href="font/font-editor.html">font/font-editor.html</a> <small>Glyph editor: KAGE lines of the symbols (fonts/kage.json)</small></li>
-    <li><a href="font/codetable.html">font/codetable.html</a> <small>QATT reference font: all 164 characters of the draft block</small></li>
-    <li><a href="font/brush.html">font/brush.html</a> <small>QATT Brush (brush model of the strokes)</small></li>
-    <li><a href="font/brush2.html">font/brush2.html</a> <small>QATT Brush 2</small></li>
-  </ul>
-
-  <h2>chunom.org</h2>
-  <h3>Not linked anywhere else</h3>
-  <ul>
-    <li><a href="https://chunom.org/chunom/translate.html">translate.html</a> <small>Quốc Ngữ → Chữ Nôm with your own chatbot</small></li>
-    <li><a href="https://chunom.org/chunom/dict/tdcntd.html">dict/tdcntd.html</a> <small>TĐCNTD 2009, deliberately not linked (the pages are not in chunom-assets yet)</small></li>
-  </ul>
-
-  <h2>JavaScript</h2>
-  <p class="note">The scripts of both sites. Open one and reload it (Ctrl+Shift+R) to refresh it in the browser cache.</p>
-  <h3>qatt.org</h3>
-  <ul>
-    <li><a href="../js/brush-editor.js">js/brush-editor.js</a></li>
-    <li><a href="../js/brush-model.js">js/brush-model.js</a></li>
-    <li><a href="../js/brush.js">js/brush.js</a></li>
-    <li><a href="../js/brush2-editor.js">js/brush2-editor.js</a></li>
-    <li><a href="../js/brush2-model.js">js/brush2-model.js</a></li>
-    <li><a href="../js/brush2.js">js/brush2.js</a></li>
-    <li><a href="../js/fonts.js">js/fonts.js</a></li>
-    <li><a href="../js/login.js">js/login.js</a></li>
-    <li><a href="../js/navigation.js">js/navigation.js</a></li>
-    <li><a href="../js/parser.js">js/parser.js</a></li>
-    <li><a href="../js/qatt-text.js">js/qatt-text.js</a></li>
-    <li><a href="../js/qatt.js">js/qatt.js</a></li>
-    <li><a href="../js/supabase.js">js/supabase.js</a></li>
-    <li><a href="../js/kage-engine.min.js">js/kage-engine.min.js</a></li>
-  </ul>
-  <h3>chunom.org</h3>
-  <ul>
-    <li><a href="https://chunom.org/chunom/js/detail.js">js/detail.js</a></li>
-    <li><a href="https://chunom.org/chunom/js/ime.js">js/ime.js</a></li>
-    <li><a href="https://chunom.org/chunom/js/ipa.js">js/ipa.js</a></li>
-    <li><a href="https://chunom.org/chunom/js/practice.js">js/practice.js</a></li>
-    <li><a href="https://chunom.org/chunom/dict/viewer.js">dict/viewer.js</a></li>
-    <li><a href="https://chunom.org/chunom/dict/collate.js">dict/collate.js</a></li>
-    <li><a href="https://chunom.org/chunom/dict/dictionaries.js">dict/dictionaries.js</a></li>
-    <li><a href="https://chunom.org/chunom/decks/audiomanager.js">decks/audiomanager.js</a></li>
-    <li><a href="https://chunom.org/chunom/decks/deck-cover.js">decks/deck-cover.js</a></li>
-  </ul>
-  <h3>Libraries (vendor/)</h3>
-  <ul>
-    <li><a href="../vendor/bootstrap/js/bootstrap.bundle.min.js">bootstrap.bundle.min.js</a></li>
-    <li><a href="../vendor/supabase/supabase.min.js">supabase.min.js</a></li>
-  </ul>
-
-  <h2>CSS</h2>
-  <p class="note">The stylesheets. Open one and reload it (Ctrl+Shift+R) to refresh it in the browser cache.</p>
-  <h3>qatt.org</h3>
-  <ul>
-    <li><a href="../css/site.css">css/site.css</a></li>
-    <li><a href="../css/theme-classic.css">css/theme-classic.css</a></li>
-    <li><a href="../css/theme-retro.css">css/theme-retro.css</a></li>
-    <li><a href="../css/theme-popart.css">css/theme-popart.css</a></li>
-    <li><a href="../css/theme-editorial.css">css/theme-editorial.css</a></li>
-    <li><a href="../css/theme-swiss.css">css/theme-swiss.css</a></li>
-    <li><a href="../css/theme-glass.css">css/theme-glass.css</a></li>
-    <li><a href="../css/theme-clay.css">css/theme-clay.css</a></li>
-    <li><a href="../css/theme-boho.css">css/theme-boho.css</a></li>
-    <li><a href="../css/theme-pixel.css">css/theme-pixel.css</a></li>
-    <li><a href="../css/theme-vector.css">css/theme-vector.css</a></li>
-    <li><a href="../css/theme-neobrutal.css">css/theme-neobrutal.css</a></li>
-    <li><a href="../css/theme-vietnam.css">css/theme-vietnam.css</a></li>
-    <li><a href="../css/theme-future.css">css/theme-future.css</a></li>
-  </ul>
-  <h3>chunom.org</h3>
-  <ul>
-    <li><a href="https://chunom.org/chunom/css/practice.css">css/practice.css</a></li>
-    <li><a href="https://chunom.org/chunom/dict/dict.css">dict/dict.css</a></li>
-  </ul>
-  <h3>Libraries (vendor/)</h3>
-  <ul>
-    <li><a href="../vendor/bootstrap/css/bootstrap.min.css">bootstrap.min.css</a></li>
-    <li><a href="../vendor/bootstrap-icons/bootstrap-icons.min.css">bootstrap-icons.min.css</a></li>
-  </ul>
+    <details class="files">
+      <summary>Scripts and stylesheets</summary>
+      <p class="note mt-2 mb-0">Open a file and reload it (Ctrl+Shift+R) to refresh it in the browser cache.</p>
+      <div id="files"></div>
+    </details>
   </div>
 </main>
 <script>
+  // what the page shows: [title, icon, short text, [name, address, text]]; addresses with a domain open the other site
+  const SECTIONS = [
+    ['Numbers and data', 'bi-bar-chart-line', 'What the sites and the functions do', [
+      ['Statistics', 'stats.html', 'sign-ups, translator, decks, practice'],
+      ['Translator data', 'translator.html', 'languages, gaps of the dictionary (with context)'],
+      ['AI models', 'models.html', 'Gemini: tries, quota and overload, speed and quality per model'],
+    ]],
+    ['Fonts and symbols', 'bi-fonts', 'The tools of the QATT fonts', [
+      ['Glyph editor', 'font/font-editor.html', 'KAGE lines of the symbols (fonts/kage.json)'],
+      ['Brush', 'font/brush.html', 'brush model of the strokes (fonts/brush.json)'],
+      ['Brush 2', 'font/brush2.html', 'the second brush editor'],
+      ['Code table', 'font/codetable.html', 'reference font: all 164 characters of the draft block'],
+      ['Sprites', 'decoding.html', 'QATT sprites overview'],
+      ['Rhymes', 'rhymes.html', 'QATT sprites overview with the data of Supabase'],
+    ]],
+    ['Content', 'bi-collection-play', 'Pages that people see', [
+      ['Slides', 'admin-slides.html', 'manage the slides'],
+    ]],
+    ['Not linked anywhere else', 'bi-link-45deg', 'Pages that no menu leads to; for reviewing what can be removed', [
+      ['QATT editor, old', '../type.html', 'the former editor with two panes (qatt.js)'],
+      ['Intro', '../intro.html', 'Quốc Âm Tân Tự – intro'],
+      ['Thiên calligraphy', '../vandao/index.html', 'vandao/, with two PDFs'],
+      ['Translate with a chatbot', 'https://chunom.org/chunom/translate-chatbot.html', 'Quốc Ngữ → Chữ Nôm with your own chatbot (chunom.org)'],
+      ['TĐCNTD 2009', 'https://chunom.org/chunom/dict/tdcntd.html', 'dictionary, deliberately not linked: the pages are not in chunom-assets yet (chunom.org)'],
+    ]],
+  ];
+
+  const THEMES = 'classic retro popart editorial swiss glass clay boho pixel vector neobrutal vietnam future'.split(' ');
+  const CH = 'https://chunom.org/chunom/';
+  const FILES = [
+    ['JavaScript, qatt.org', 'brush-editor brush-model brush brush2-editor brush2-model brush2 fonts login navigation parser qatt-text qatt supabase kage-engine.min'.split(' ').map(n => ['js/' + n + '.js', '../js/' + n + '.js'])],
+    ['JavaScript, chunom.org', [['js/detail.js', 'js/detail.js'], ['js/ime.js', 'js/ime.js'], ['js/ipa.js', 'js/ipa.js'], ['js/practice.js', 'js/practice.js'], ['dict/viewer.js', 'dict/viewer.js'], ['dict/collate.js', 'dict/collate.js'], ['dict/dictionaries.js', 'dict/dictionaries.js'], ['decks/audiomanager.js', 'decks/audiomanager.js'], ['decks/deck-cover.js', 'decks/deck-cover.js']].map(([n, p]) => [n, CH + p])],
+    ['CSS, qatt.org', [['css/site.css', '../css/site.css']].concat(THEMES.map(t => ['css/theme-' + t + '.css', '../css/theme-' + t + '.css']))],
+    ['CSS, chunom.org', [['css/practice.css', CH + 'css/practice.css'], ['dict/dict.css', CH + 'dict/dict.css']]],
+    ['Libraries (vendor/)', [['bootstrap.bundle.min.js', '../vendor/bootstrap/js/bootstrap.bundle.min.js'], ['supabase.min.js', '../vendor/supabase/supabase.min.js'], ['bootstrap.min.css', '../vendor/bootstrap/css/bootstrap.min.css'], ['bootstrap-icons.min.css', '../vendor/bootstrap-icons/bootstrap-icons.min.css']]],
+  ];
+
+  const el = (tag, attrs = {}, ...kids) => { const e = Object.assign(document.createElement(tag), attrs); e.append(...kids); return e; };
+
+  document.getElementById('sections').append(...SECTIONS.map(([title, icon, text, tiles]) => el('section', { className: 'sect' },
+    el('h2', {}, el('i', { className: 'bi ' + icon }), title),
+    el('p', { className: 'note', textContent: text }),
+    ...tiles.map(([name, href, desc]) => el('a', { className: 'tile', href },
+      /^https?:/.test(href) ? el('i', { className: 'bi bi-box-arrow-up-right ext' }) : '',
+      el('b', { textContent: name }), el('small', { textContent: desc }))))));
+
+  document.getElementById('files').append(...FILES.flatMap(([title, files]) => [
+    el('h3', { textContent: title }),
+    el('div', { className: 'chips' }, ...files.map(([name, href]) => el('a', { href, textContent: name }))),
+  ]));
+
   window.addEventListener('DOMContentLoaded', async () => {
     const sp = new SupabaseService();
     await sp.init();
@@ -150,8 +116,6 @@
     // an admin sees everything, somebody not signed in only the line with the sign-in link, a signed-in non-admin nothing at all
     const admin = state === 'admin';
     document.getElementById('area').hidden = !admin;
-    document.getElementById('adminNav').hidden = !admin;
-    document.getElementById('fontNav').hidden = !admin;
     document.getElementById('adminTitle').hidden = !admin;
     document.getElementById('account').hidden = state === 'denied';
   });
