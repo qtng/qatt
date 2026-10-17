@@ -276,6 +276,8 @@ window.Theme = window.Theme || (function() {
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
             .theme-switch > button:hover, .theme-switch > button[aria-expanded="true"] { color: #fff; }
+            .admin-link { margin-right: .4rem; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; text-decoration: none; }   /* only shown to admins */
+            .admin-link:hover { color: #fff; }
             .theme-menu { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 1080; min-width: 11rem; max-height: 70vh; overflow: auto; padding: .3rem; background: var(--nav-bg); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .35); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
             .theme-menu button { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: .35rem; padding: .3rem .6rem; color: rgba(255, 255, 255, .8); font-size: .9rem; }
             .theme-menu button:hover { background: rgba(255, 255, 255, .1); color: #fff; }
@@ -422,6 +424,7 @@ window.Theme = window.Theme || (function() {
                         <button type="button" aria-haspopup="true" aria-expanded="false" title="Theme" data-vi-title="Giao diện" aria-label="Theme" data-vi-aria-label="Giao diện"><i class="bi bi-palette"></i></button>
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
+                    <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
                     </button>
