@@ -151,7 +151,7 @@
     fact('Family', 'Họ phông', f.family);
     fact('Characters', 'Số ký tự', '164');
     const dd = el('dd'), lic = el('a', '', 'Licence', 'Giấy phép'); lic.href = 'fonts/LICENSE.txt';
-    dd.append('© 2026 Qatt.org', document.createElement('br'), lic);
+    dd.append(el('span', '', '© 2026 Qatt.org. All rights reserved.', '© 2026 Qatt.org. Bảo lưu mọi quyền.'), document.createElement('br'), lic);
     dl.append(el('dt', '', 'Copyright', 'Bản quyền'), dd);
     info.append(dl);
     const tab = { f, left, info };
