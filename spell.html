@@ -539,16 +539,20 @@
     }
     let nameAsked = false;
     async function ensureName() {   // once per visit: a player without a name is not in the ranking; the dialog can be closed
-      if (nameAsked || !signed) return;
+      if (nameAsked || !signed || !rankingShown()) return;
       nameAsked = true;
       try { if (!(await db.getDisplayName())) await QattLogin.chooseName(db, { required: false }); } catch (e) {}
       loadBoard();
     }
+    // the ranking is shown only to admins for now (isAdmin of js/fonts.js), as long as hardly anybody plays; RANKING_PUBLIC = true shows it to everybody (and asks for a name)
+    const RANKING_PUBLIC = false;
+    const rankingShown = () => RANKING_PUBLIC || (typeof isAdmin === 'function' && isAdmin());
     const ASK_AT = [60, 300, 1000];   // the points a visitor would have when he is asked to sign in (once for each)
     function askLogin() {
       me.asked = ASK_AT.filter(x => x <= me.shadow).length; saveMe();
-      $('askText').textContent = Lang.t(`You would have ${me.shadow} points. Sign in so that your points count and you appear in the ranking.`,
-                                        `Bạn sẽ có ${me.shadow} điểm. Hãy đăng nhập để điểm được tính và bạn có tên trong bảng xếp hạng.`);
+      $('askText').textContent = RANKING_PUBLIC
+        ? Lang.t(`You would have ${me.shadow} points. Sign in so that your points count and you appear in the ranking.`, `Bạn sẽ có ${me.shadow} điểm. Hãy đăng nhập để điểm được tính và bạn có tên trong bảng xếp hạng.`)
+        : Lang.t(`You would have ${me.shadow} points. Sign in so that your points count.`, `Bạn sẽ có ${me.shadow} điểm. Hãy đăng nhập để điểm được tính.`);
       $('askLogin').showModal();
     }
     const maybeAsk = () => { if (!signed && db && me.asked < ASK_AT.length && me.shadow >= ASK_AT[me.asked]) { askLogin(); return true; } return false; };
@@ -560,7 +564,7 @@
     $('score').addEventListener('click', () => { if (!signed && db) askLogin(); });
     // the ranking: the best and the own rank; a visitor sees a grey line with the points he would have
     async function loadBoard() {
-      if (!db) return;
+      if (!db || !rankingShown()) { $('board').hidden = true; return; }
       const rows = await db.spellLeaderboard(dec(), 10).catch(() => []);
       const table = $('boardTable'), tr = (cls, ...cells) => { const r = document.createElement('tr'); r.className = cls || ''; cells.forEach((c, i) => { const d = document.createElement('td'); if (i !== 1) d.className = 'num'; d.textContent = c; r.append(d); }); return r; };
       const out = []; let last = 0;
