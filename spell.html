@@ -410,7 +410,7 @@
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const set = mine(), have = KINDS.filter(k => set[k].n);
       $('stats').hidden = !have.length;
-      $('stats').textContent = have.map(k => names[k] + ' ' + set[k].v.toFixed(1) + ' s (' + set[k].f.toFixed(1) + ')').join(' · ');   // the slow value, in brackets the fast one
+      $('stats').textContent = have.map(k => names[k] + ' ' + set[k].v.toFixed(1) + ' s (' + set[k].f.toFixed(1) + ')' + (typeof set[k].t === 'number' ? ' ← ' + set[k].t.toFixed(1) : '')).join(' · ');   // the slow value, in brackets the fast one, after the arrow the last time
     };
     const floatPoints = (n, delay = 0) => {
       if (!n) return;
@@ -428,7 +428,7 @@
     };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
     function addTime(kind, t) {
-      const st = mine()[kind]; st.n++;
+      const st = mine()[kind]; st.n++; st.t = t;   // t: the last time, shown in the status line to check the measuring
       st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
       st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
       const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
