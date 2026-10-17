@@ -172,6 +172,7 @@
       </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
       <div class="solution" id="solution" hidden><div class="full" id="full"></div></div>
+      <div class="text-center" id="lateRow" hidden><button type="button" class="btn btn-sm tool-btn" id="lateNext"><span data-vi="Từ tiếp theo">Next word</span> <i class="bi bi-arrow-right"></i></button></div>   <!-- when the minute is over: the word can be left, or learned on -->
       <div class="foot">
         <span class="timer" id="timer" title="One minute per word"><i class="bi bi-stopwatch"></i><span id="time">1:00</span></span>
         <button type="button" class="speak" id="speak" aria-label="Sound on or off" aria-pressed="true"><i class="bi bi-volume-up-fill"></i></button>
@@ -306,7 +307,7 @@
     function tick() {
       const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
       $('time').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
-      if (!left) { stopTimer(); $('task').classList.add('late'); $('mood').textContent = '💔'; react('shake'); }
+      if (!left) { stopTimer(); $('task').classList.add('late'); $('mood').textContent = '💔'; react('shake'); $('lateRow').hidden = !$('nextRow').hidden; }
     }
     function startTimer() {
       stopTimer();
@@ -639,7 +640,7 @@
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
-      startTimer();
+      startTimer(); $('lateRow').hidden = true;
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
@@ -743,7 +744,7 @@
       if (!ok) return;
       finishWord();
       say(wordInTone(answer, n));   // only a right choice is spoken
-      stopTimer();
+      stopTimer(); $('lateRow').hidden = true;
       for (const x of $('tonePad').querySelectorAll('button')) x.disabled = true;
       for (const x of slots) x.state = 'full';   // the faint cells show their marked forms
       show($('variants'), false);
@@ -803,6 +804,7 @@
 
     const another = () => { const e = draw(); start(e.w, e.nom); };
     $('next').addEventListener('click', another);
+    $('lateNext').addEventListener('click', another);   // after the minute: the word is left without a take-back (the points of its clicks stay), no Skip rule
     $('reload').addEventListener('click', skipWord);
     showSkip();
     $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); showStats(); start(answer, nomOf); });   // the same word after the other decoding
