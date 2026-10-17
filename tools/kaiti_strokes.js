@@ -143,17 +143,19 @@ function rightFalling(f, W, free0) {
   const p = []; for (let i = 3; i + 1 < f.length; i += 2) p.push([f[i], f[i + 1]]);
   const A = p[0], Z = p[p.length - 1], len = Math.hypot(Z[0] - A[0], Z[1] - A[1]), ux = (Z[0] - A[0]) / len, uy = (Z[1] - A[1]) / len;
   const bend = u => { for (let i = 1; i < NA_BEND.length; i++) if (u <= NA_BEND[i][0]) { const q = NA_BEND[i - 1], r = NA_BEND[i]; return q[1] + (r[1] - q[1]) * (u - q[0]) / (r[0] - q[0]); } return NA_BEND[NA_BEND.length - 1][1]; };
-  const c = [];
-  for (let i = 0, S = 0; i <= 200; i++) {
-    const u = i / 200, o = bend(u) * len, q = [A[0] + (Z[0] - A[0]) * u - uy * o, A[1] + (Z[1] - A[1]) * u + ux * o];
-    if (i) S += Math.hypot(q[0] - c[i - 1][0], q[1] - c[i - 1][1]);
-    c.push([q[0], q[1], S]);
-  }
-  const T = c[200][2], poly = [], cut = free0 ? 0 : 0.12;   // it starts on another stroke: without its head (the first 12 %), cut straight there
-  for (let k = 0; k < NA_PTS.length; k += 2) {
-    if (NA_PTS[k] < cut) { if (poly.length && !poly.straight) poly.straight = [poly.length - 1]; continue; }
-    const S = (NA_PTS[k] - cut) / (1 - cut) * T, i = S <= 0 ? 0 : S >= T ? 199 : Math.max(0, c.findIndex(q => q[2] >= S) - 1);
-    const a = c[i], b = c[i + 1], l = b[2] - a[2] || 1, h = (S - a[2]) / l, tx = (b[0] - a[0]) / l, ty = (b[1] - a[1]) / l, n = NA_PTS[k + 1] * NA_SCALE * W;
+  // the middle line of the template in its own frame (x along its chord, y the bend), with the distance along it; then a similarity puts the point where
+  // the drawn stroke starts (its start, or 12 % on where it starts on another stroke and loses its head) on the KAGE start and the end on the KAGE end
+  const cut = free0 ? 0 : 0.12, m = [];
+  for (let i = 0, S = 0; i <= 200; i++) { const q = [i / 200, bend(i / 200)]; if (i) S += Math.hypot(q[0] - m[i - 1][0], q[1] - m[i - 1][1]); m.push([q[0], q[1], S]); }
+  const T0 = m[200][2], pointAt = S => { const i = S <= 0 ? 0 : S >= T0 ? 199 : Math.max(0, m.findIndex(q => q[2] >= S) - 1), a = m[i], b = m[i + 1], h = (S - a[2]) / (b[2] - a[2] || 1); return [a[0] + (b[0] - a[0]) * h, a[1] + (b[1] - a[1]) * h]; };
+  const P0 = pointAt(cut * T0), P1 = m[200], vx = P1[0] - P0[0], vy = P1[1] - P0[1], k = len / Math.hypot(vx, vy);
+  const ca = (vx * ux + vy * uy) / Math.hypot(vx, vy), sa = (vx * uy - vy * ux) / Math.hypot(vx, vy);   // the turn from the template frame to the stroke
+  const world = q => { const x = (q[0] - P0[0]) * k, y = (q[1] - P0[1]) * k; return [A[0] + x * ca - y * sa, A[1] + x * sa + y * ca]; };
+  const c = m.map(q => [...world(q), q[2] * k]), T = T0 * k, poly = [];
+  for (let j = 0; j < NA_PTS.length; j += 2) {
+    if (cut && NA_PTS[j] < cut) { if (poly.length && !poly.straight) poly.straight = [poly.length - 1]; continue; }   // the head is left out, the cut is straight
+    const S = NA_PTS[j] * T, i = S <= 0 ? 0 : S >= T ? 199 : Math.max(0, c.findIndex(q => q[2] >= S) - 1);
+    const a = c[i], b = c[i + 1], l = b[2] - a[2] || 1, h = (S - a[2]) / l, tx = (b[0] - a[0]) / l, ty = (b[1] - a[1]) / l, n = NA_PTS[j + 1] * NA_SCALE * W;
     poly.push([a[0] + (b[0] - a[0]) * h - ty * n, a[1] + (b[1] - a[1]) * h + tx * n]);
   }
   poly.smooth = true;
