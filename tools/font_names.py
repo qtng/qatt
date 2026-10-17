@@ -16,7 +16,7 @@ LICENSE_URL = 'https://qatt.org/fonts/LICENSE.txt'
 VERSION = 'Version 1.000'
 
 
-def names(family, style='Regular'):
+def names(family, style='Regular', description=None):
     """The entries of the name table (keys of fontTools' FontBuilder.setupNameTable)."""
     ps = family.replace(' ', '') + '-' + style.replace(' ', '')
     return {
@@ -31,11 +31,12 @@ def names(family, style='Regular'):
         'vendorURL': 'https://qatt.org',
         'licenseDescription': LICENSE,
         'licenseInfoURL': LICENSE_URL,
+        **({'description': description} if description else {}),   # name ID 10: how the font was built (parameters of build_font.py)
     }
 
 
 NAME_IDS = {'copyright': 0, 'familyName': 1, 'styleName': 2, 'uniqueFontIdentifier': 3, 'fullName': 4, 'version': 5, 'psName': 6,
-            'manufacturer': 8, 'vendorURL': 11, 'licenseDescription': 13, 'licenseInfoURL': 14}
+            'manufacturer': 8, 'description': 10, 'vendorURL': 11, 'licenseDescription': 13, 'licenseInfoURL': 14}
 
 
 def apply(font):

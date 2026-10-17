@@ -57,7 +57,7 @@ SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell
 VS = float(os.environ.get('QATT_VS', 1.4))
 VC = float(os.environ.get('QATT_VC', 577))
 TV = float(os.environ.get('QATT_TV', 0.5))   # how much of the move of the letters the tones follow in y (0 none, 1 all)
-TH = float(os.environ.get('QATT_TH', 0.0))   # the same for x: how much of the widening of the letters the tones follow (away from the middle of the cell)
+TH = float(os.environ.get('QATT_TH', -0.5))   # the same for x: how much of the widening of the letters the tones follow (away from the middle of the cell)
 HS = float(os.environ.get('QATT_HS', 1.3))   # the single forms of the KAGE fonts are stretched in x by HS around the middle of the cell, to be as wide as a Han character (the pairs: PAIR_M, 60 instead of 100 as margin; the wide font keeps 100)
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
@@ -303,6 +303,18 @@ cname = 'u%05X' % (BASE + COMBINER)
 glyphs[cname + '.zw'] = TTGlyphPen(None).glyph(); adv[cname + '.zw'] = 0; order.append(cname + '.zw')
 glyphs[jname + '.zw'] = TTGlyphPen(None).glyph(); adv[jname + '.zw'] = 0; order.append(jname + '.zw')
 
+def build_info():
+    """Name ID 10 (description): the parameters this font was built with and the commit of the tools, so that it can be built again (tools/build_all.py)"""
+    import datetime
+    here = os.path.dirname(os.path.abspath(__file__))
+    try:
+        git = lambda *args: subprocess.run(['git', '-C', here] + list(args), capture_output=True, text=True, check=True).stdout.strip()
+        commit = git('rev-parse', '--short', 'HEAD') + ('+changes' if git('status', '--porcelain', '--', '.', ':!../fonts') else '')   # uncommitted changes of the tools
+    except (OSError, subprocess.CalledProcessError): commit = 'unknown'
+    p = [('style', KAGE_STYLE + ('-cut' if CUT else '') if KAGE else 'brush' if BRUSH else 'prototype'), ('weight', BOLD), ('light', int(light)), ('wide', WIDE),
+         ('VS', VS), ('VC', VC), ('HS', HS), ('PAIR_M', PAIR_M), ('PAIR_K', round(PAIR_K, 4)), ('TV', TV), ('TH', TH), ('SY', SY), ('SX', SX)]
+    return 'Built %s with tools/build_font.py of the repository qtng/qatt, commit %s: %s' % (datetime.date.today().isoformat(), commit, ', '.join('%s %s' % kv for kv in p))
+
 fb = FontBuilder(UPM, isTTF=True)
 fb.setupGlyphOrder(order)
 fb.setupCharacterMap(cmap)
@@ -315,7 +327,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif', 'kaiti': 'Khai'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti') else '') + LABEL + (' Wide' if WIDE != 1.0 else '')))   # with copyright and licence, see tools/font_names.py
+fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif', 'kaiti': 'Khai'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti') else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), description=build_info()))   # with copyright, licence and the build parameters, see tools/font_names.py
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
