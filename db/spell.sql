@@ -33,6 +33,16 @@ create table if not exists public.spell_speed (
   primary key (user_id, decoding)
 );
 
+-- spell_daily: who played on which UTC day and how many words (written by spell_submit; read through admin_spell() by admins only)
+create table if not exists public.spell_daily (
+  day date not null,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  words integer not null default 0,
+  primary key (day, user_id)
+);
+alter table public.spell_daily enable row level security;
+revoke all on public.spell_daily from anon, authenticated;
+
 alter table public.spell_scores enable row level security;
 alter table public.spell_speed enable row level security;
 
@@ -120,6 +130,8 @@ begin
   update public.spell_scores set score = greatest(0, score + p_delta), words = words + 1, updated_at = clock_timestamp()
     where user_id = uid returning * into row_score;
   perform public.spell_write_speed(uid, p_decoding, p_speed, p_device);
+  insert into public.spell_daily as d (day, user_id, words) values ((now() at time zone 'utc')::date, uid, 1)
+    on conflict (day, user_id) do update set words = d.words + 1;
 
   return jsonb_build_object('score', row_score.score, 'words', row_score.words);
 end;
@@ -187,3 +199,34 @@ revoke all on function public.spell_leaderboard(text, integer) from public;
 grant execute on function public.spell_submit(integer, text, jsonb, text) to authenticated;
 grant execute on function public.spell_import(integer, jsonb) to authenticated;
 grant execute on function public.spell_leaderboard(text, integer) to anon, authenticated;
+
+-- numbers of the game for the statistics page (admins only): the last p_days days (players and solved words per day), the totals
+create or replace function public.admin_spell(p_days integer default 14)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  n integer := greatest(1, least(coalesce(p_days, 14), 400));
+begin
+  if coalesce((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean, false) is not true then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+  return jsonb_build_object(
+    'total', jsonb_build_object(
+      'players', (select count(*) from public.spell_scores where words > 0),
+      'words', (select coalesce(sum(words), 0) from public.spell_scores),
+      'players_10_words', (select count(*) from public.spell_scores where words >= 10),
+      'players_100_words', (select count(*) from public.spell_scores where words >= 100)),
+    'daily', (
+      select coalesce(jsonb_agg(jsonb_build_object(
+        'day', g.day,
+        'players', (select count(*) from public.spell_daily where day = g.day),
+        'words', (select coalesce(sum(words), 0) from public.spell_daily where day = g.day)
+      ) order by g.day desc), '[]'::jsonb)
+      from (select ((now() at time zone 'utc')::date - i) as day from generate_series(0, n - 1) i) g));
+end;
+$$;
+revoke all on function public.admin_spell(integer) from public, anon;
+grant execute on function public.admin_spell(integer) to authenticated;
