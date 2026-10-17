@@ -31,6 +31,8 @@ const QattWriter = (() => {
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
     #tham-btn { font-size: .95rem; line-height: 1.3; }
+    /* the buttons of the toolbar are the same in every theme: square with a little rounding (some themes give buttons slanted corners or cut edges) */
+    html .qatt-bar .btn, html[data-theme] .qatt-bar .btn { border-radius: .35rem !important; clip-path: none !important; }
     /* the size, in the card above the field */
     .size-bar { display: flex; justify-content: center; padding: .5rem .6rem 0; font-size: .78rem; }
     .size-bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; flex: 1 1 8rem; max-width: 15rem; }
