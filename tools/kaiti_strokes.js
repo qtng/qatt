@@ -22,15 +22,20 @@ function horizontal(p0, p1, W) {
   const [a, b] = p0[0] <= p1[0] ? [p0, p1] : [p1, p0];
   const len = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / len, ty = (b[1] - a[1]) / len, L = len / W, N = Math.max(60, Math.ceil(L * 8));
   const at = (u, o) => [a[0] + tx * u - ty * o * W, a[1] + ty * u + tx * o * W];
-  const top = [], bot = [], round = (x, r) => x >= r ? 1 : Math.sqrt(Math.max(0, 1 - (1 - Math.max(0, x) / r) ** 2));   // the end is a quarter ellipse of depth r (in W): the edges meet there in a curve, no cap sticks out
+  const ts = [], vs = [], round = (x, r) => x >= r ? 1 : Math.sqrt(Math.max(0, 1 - (1 - Math.max(0, x) / r) ** 2));   // the end is a quarter ellipse of depth r (in W): the edges meet there in a curve, no cap sticks out
   for (let i = 0; i <= N; i++) {
     const d = L * i / N, e = L - d;
     const k = Math.max(0, 1 - e / 2.4), shift = RISE * (L - 11.26) * k * k * (3 - 2 * k);   // the tip keeps its place relative to the right end whatever the length: the template is 11.26 W long
     const t = -0.01 - RISE * d + table(TIPDROP, e) + shift, v = BASE + table(BELLY, d) + table(FOOT, e);
     const m = (t + v) / 2, h = (v - t) / 2 * round(e, 0.3) * round(d, 0.15);
-    top.push(at(d * W, m - h)); bot.push(at(d * W, m + h));
+    ts.push(m - h); vs.push(m + h);
   }
-  return [...top, ...bot.reverse()];
+  const soften = a => { for (let r = 0; r < 3; r++) { const c = a.slice(); for (let i = 1; i < N; i++) a[i] = (c[i - 1] + 2 * c[i] + c[i + 1]) / 4; } };   // the tables are piecewise linear: smooth the kinks of the edges (the end points stay)
+  soften(ts); soften(vs);
+  const pts = i => [at(L * i / N * W, ts[i]), at(L * i / N * W, vs[i])];
+  const poly = [...ts.keys()].map(i => pts(i)[0]).concat([...vs.keys()].reverse().map(i => pts(i)[1]));
+  poly.smooth = true;   // outlineOf joins the points with Bezier curves (Catmull-Rom) instead of straight lines
+  return poly;
 }
 
 function stroke(line, W, others) {
