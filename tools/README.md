@@ -31,7 +31,7 @@ Playwright. Only requests to the local server are allowed (no CDN), the paths do
 
 ### Logo and icons: `make_logo.py`
 
-`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009B U+F003D) in QATT Gothic: `img/logo.svg` (320 high on the red tile with the thin frame, used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-gothic.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
+`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009B U+F003D) in QATT Khai: `img/logo.svg` (320 high on the red tile with the thin frame, used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-khai.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
 
 ### All fonts at once: `build_all.py`
 
@@ -93,7 +93,7 @@ in `unicode.html`.
 
 ```python
 import uharfbuzz as hb
-font = hb.Font(hb.Face(hb.Blob.from_file_path('fonts/qatt-gothic.ttf')))
+font = hb.Font(hb.Face(hb.Blob.from_file_path('fonts/qatt-khai.ttf')))
 buf = hb.Buffer(); buf.add_str('\U000F0001\U000F009B\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
 print([(font.glyph_to_string(i.codepoint), p.x_advance) for i, p in zip(buf.glyph_infos, buf.glyph_positions)])
 # [('uF0001.left', 500), ('uF009B.zw', 0), ('uF0000.right', 500)]
@@ -118,7 +118,7 @@ standard stroke library of the brush editor (this overwrites hand edits). Edits 
 
 **KAGE font.** With `--kage fonts/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
 `js/kage-engine.min.js` in Node.js) from the KAGE data refined in `font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
-their stroke widths. The tones stay stroked circles (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js). `--gothic` selects the Gothic style (family "QATT Gothic", `fonts/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
+their stroke widths. The tones stay stroked circles (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js). `--gothic` selects the Gothic style (family "QATT Khai", `fonts/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
 
 ```sh
 python3 tools/build_font.py --kage fonts/kage.json fonts/glyphs.json fonts/qatt-serif     # writes fonts/qatt-serif.ttf / .woff2
@@ -153,7 +153,7 @@ different on the left or on the right gets its own form: `v2l-X` (left half) and
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
 one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
 
-**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Serif only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Gothic Bold" and "QATT Mincho Bold":
+**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Serif only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Khai Bold" and "QATT Mincho Bold":
 
 ```sh
 python3 tools/build_font.py --kage fonts/kage.json --gothic --bold fonts/glyphs.json fonts/qatt-gothic-bold
@@ -162,7 +162,7 @@ python3 tools/build_font.py --kage fonts/kage.json --gothic --bold fonts/glyphs.
 
 The bold Serif font is not published any more (`--bold` without `--gothic` still builds it).
 
-**Wide.** `--wide` (with `--kage`) makes a joined pair 1.25 cells wide (each half 625 units instead of 500), so its halves are squeezed less; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Gothic Wide":
+**Wide.** `--wide` (with `--kage`) makes a joined pair 1.25 cells wide (each half 625 units instead of 500), so its halves are squeezed less; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Khai Wide":
 
 ```sh
 python3 tools/build_font.py --kage fonts/kage.json --gothic --wide fonts/glyphs.json fonts/qatt-gothic-wide

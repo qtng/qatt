@@ -1,8 +1,8 @@
-"""The logo and the icons of qatt.org: the syllable "tân" (the big symbol of the home page, U+F003F U+F009B U+F003D) in QATT Gothic, light on the red tile.
+"""The logo and the icons of qatt.org: the syllable "tân" (the big symbol of the home page, U+F003F U+F009B U+F003D) in QATT Khai, light on the red tile.
 
   python3 tools/make_logo.py        # writes img/logo.svg, img/favicon.svg and img/apple-touch-icon.png (Playwright for node renders the PNG)
 
-The outlines come out of fonts/qatt-gothic.ttf (shaped with HarfBuzz, so the two halves of the pair stand as in the font), as paths: the logo does not need the font.
+The outlines come out of fonts/qatt-khai.ttf (shaped with HarfBuzz, so the two halves of the pair stand as in the font), as paths: the logo does not need the font.
 """
 import json, os, sys
 import uharfbuzz as hb
@@ -12,7 +12,7 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.boundsPen import BoundsPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FONT = os.path.join(ROOT, 'fonts', 'qatt-gothic.ttf')
+FONT = os.path.join(ROOT, 'fonts', 'qatt-khai.ttf')
 TEXT = '\U000F003F\U000F009B\U000F003D'      # tân
 RED, CREAM = '#a8362a', '#f7efdc'
 TILE = 512
@@ -46,8 +46,8 @@ def svg(d, w, h, scale_height, thicken=0, ring=False):
 if __name__ == '__main__':
     d, w, h = outline()
     out = lambda name, text: open(os.path.join(ROOT, 'img', name), 'w').write(text)
-    out('logo.svg', svg(d, w, h, 320, thicken=6, ring=True))          # the logo: the symbol 320 high on the tile, with the thin frame
-    out('favicon.svg', svg(d, w, h, 372, thicken=10))                 # the icon: bigger and a little bolder, for 16 to 32 pixels
+    out('logo.svg', svg(d, w, h, 320, thicken=0, ring=True))          # the logo: the symbol 320 high on the tile, with the thin frame
+    out('favicon.svg', svg(d, w, h, 372, thicken=4))                 # the icon: bigger and a little bolder, for 16 to 32 pixels
     if '--no-png' not in sys.argv:   # the PNG of the home screen icon: the icon rendered by Chromium (Playwright for node: NODE_PATH may point to its node_modules)
         import subprocess
         icon = os.path.join(ROOT, 'img', 'favicon.svg'); png = os.path.join(ROOT, 'img', 'apple-touch-icon.png')
