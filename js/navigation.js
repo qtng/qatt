@@ -96,7 +96,7 @@ window.Lang = window.Lang || (function() {
 
 // ---------- the menu ----------
 // ---------- Theme: the look of the pages ----------
-// localStorage.theme (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, in license.html, or ?theme=<name>) says which file
+// localStorage.theme1 (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, in license.html, or ?theme=<name>) says which file
 // css/theme-<name>.css of qatt.org is part of the page. Every theme is a complete file of its own, none builds on or overrides another; the pages only have their layout
 // (css/site.css has what all themes share). The file is written into the <head> while the page is parsed (document.write, so that the page is not drawn without it)
 // and data-theme is set on <html> (the themes other than classic need it to be more specific than the pages).
@@ -108,7 +108,7 @@ window.Lang = window.Lang || (function() {
 //   Theme.choosable     whether a theme can be chosen on this page
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
 window.Theme = window.Theme || (function() {
-    const KEY = "theme";
+    const KEY = "theme1";   // the key was "theme" before: a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
         neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"] };
