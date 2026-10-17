@@ -133,6 +133,14 @@
     dialog.ask::backdrop { background: rgba(43, 33, 24, .45); }
     dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     dialog.ask p { margin: 0 0 1rem; }
+    dialog.prog { text-align: center; }
+    dialog.prog svg { width: min(16rem, 80%); display: block; margin: 0 auto; color: var(--ink); overflow: visible; }
+    #needle { transform-origin: 100px 100px; transform: rotate(-90deg); transition: transform 1.3s cubic-bezier(.2, 1.35, .4, 1); }
+    .gaugeVal { font-size: 1rem; margin: .2rem 0 .6rem; } .gaugeVal b { font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+    dialog.prog table { width: 100%; margin: 0 0 1rem; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: left; }
+    dialog.prog td { padding: .1rem .3rem; }
+    dialog.prog td.bar { width: 45%; } dialog.prog td.bar i { display: block; height: .6rem; border-radius: .3rem; background: #198754; }
+    dialog.prog td.bar.low i { background: #dc3545; } dialog.prog td.bar.mid i { background: #e0a800; }
     dialog.ask .btns { display: flex; gap: .6rem; justify-content: flex-end; }
     .stats { font-size: .85rem; color: var(--muted, #6c5d4a); font-variant-numeric: tabular-nums; }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
@@ -187,6 +195,17 @@
       <button type="button" class="btn btn-sm tool-btn" id="askLater" data-vi="Để sau">Not now</button>
       <button type="button" class="btn btn-sm btn-cinnabar" id="askSignIn" data-vi="Đăng nhập">Sign in</button>
     </div>
+  </dialog>
+  <dialog class="ask prog" id="progress">
+    <h2 data-vi="Tiến bộ của bạn">Your progress</h2>
+    <svg id="gauge" viewBox="0 0 200 118" role="img" aria-label="Confidence" data-vi-aria-label="Độ chắc chắn">
+      <g id="gaugeArcs"></g>
+      <g id="needle"><line x1="100" y1="100" x2="100" y2="32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="8" fill="currentColor"/></g>
+    </svg>
+    <div class="gaugeVal"><b id="gaugeNum">0</b> <span data-vi="Độ chắc chắn">Confidence</span></div>
+    <p id="progScore"></p>
+    <table id="progKinds"></table>
+    <div class="btns"><button type="button" class="btn btn-sm btn-cinnabar" id="progClose" data-vi="Tiếp tục">Continue</button></div>
   </dialog>
 
 </div>
@@ -364,12 +383,12 @@
     let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, last: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
         me.score = saved.score;
-        for (const k of ['shadow', 'pending', 'asked']) if (typeof saved[k] === 'number') me[k] = saved[k];
+        for (const k of ['shadow', 'pending', 'asked', 'words', 'last']) if (typeof saved[k] === 'number') me[k] = saved[k];
         if (saved.avg && typeof saved.avg.v === 'number') me.avg = saved.avg;
         if (saved.skipOk === false) me.skipOk = false;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
@@ -478,7 +497,9 @@
       a.n++; a.v = a.n === 1 ? pts : a.v + Math.max(1 / a.n, ALPHA_FAST) * (pts - a.v);
       saveMe(); showSkip();
       if (!signed && typeof loadBoard === 'function') loadBoard();   // the grey line of a visitor with the points he would have
-      setTimeout(() => { if (typeof maybeAsk === 'function') maybeAsk(); }, 2400);   // a visitor is asked to sign in after a good word
+      me.words++; saveMe();
+      const due = me.words % STATS_EVERY === 0;
+      setTimeout(() => { if (typeof maybeAsk === 'function' && !maybeAsk() && due) showProgress(); }, 2400);   // a visitor is asked to sign in after a good word; every few words the card of progress
     }
     // Skip: the word does not count at all (the state before the word comes back: score and times); then Skip is locked until a word is solved that beats the own average
     function showSkip() {
@@ -530,7 +551,7 @@
                                         `Bạn sẽ có ${me.shadow} điểm. Hãy đăng nhập để điểm được tính và bạn có tên trong bảng xếp hạng.`);
       $('askLogin').showModal();
     }
-    const maybeAsk = () => { if (!signed && db && me.asked < ASK_AT.length && me.shadow >= ASK_AT[me.asked]) askLogin(); };
+    const maybeAsk = () => { if (!signed && db && me.asked < ASK_AT.length && me.shadow >= ASK_AT[me.asked]) { askLogin(); return true; } return false; };
     $('askLater').addEventListener('click', () => $('askLogin').close());
     $('askSignIn').addEventListener('click', () => {
       $('askLogin').close();
@@ -551,6 +572,44 @@
       table.replaceChildren(...out);
       $('board').hidden = !out.length;
     }
+    // ---- the progress card: every STATS_EVERY solved words the score and a gauge of the confidence of the player ---------------------------------------------------------
+    // Confidence: per kind of symbol (from MIN_SAMPLES times on) TARGET seconds against the slow time (1 at TARGET or faster, 0.5 at twice as long ...), the mean of the kinds, in per cent.
+    const STATS_EVERY = 5, TARGET = 1.0;
+    function confidence() {
+      const set = mine(), kinds = KINDS.map(k => ({ k, v: set[k].v, n: set[k].n, pct: set[k].n >= MIN_SAMPLES ? Math.round(100 * TARGET / Math.max(set[k].v, TARGET)) : null }));
+      const ok = kinds.filter(x => x.pct !== null);
+      return { value: ok.length ? Math.round(ok.reduce((a, x) => a + x.pct, 0) / ok.length) : null, kinds };
+    }
+    const polar = (deg, r) => [100 + r * Math.cos(Math.PI - deg * Math.PI / 180), 100 - r * Math.sin(Math.PI - deg * Math.PI / 180)];
+    function drawGauge() {   // three arcs: red up to 40, yellow up to 70, green above (the value 0..100 goes over 180 degrees)
+      const g = $('gaugeArcs'); if (g.children.length) return;
+      for (const [from, to, color] of [[0, 40, '#dc3545'], [40, 70, '#e0a800'], [70, 100, '#198754']]) {
+        const [x0, y0] = polar(from * 1.8, 80), [x1, y1] = polar(to * 1.8, 80);
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M${x0.toFixed(1)} ${y0.toFixed(1)} A80 80 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`);
+        path.setAttribute('fill', 'none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width', '16');
+        g.append(path);
+      }
+    }
+    function showProgress() {
+      drawGauge();
+      const c = confidence(), total = signed ? me.score : me.shadow;
+      const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
+      $('gaugeNum').textContent = c.value === null ? '–' : c.value;
+      $('progScore').textContent = Lang.t(`Score ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} since the last card)`, `Điểm ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} từ lần trước)`) + (signed ? '' : Lang.t(', not counted', ', chưa tính'));
+      $('progKinds').replaceChildren(...c.kinds.map(x => {
+        const r = document.createElement('tr'), a = document.createElement('td'), b = document.createElement('td'), d = document.createElement('td');
+        a.textContent = names[x.k]; b.textContent = x.n ? x.v.toFixed(1) + ' s' : '–';
+        d.className = 'bar ' + (x.pct === null ? '' : x.pct < 40 ? 'low' : x.pct < 70 ? 'mid' : '');
+        const i = document.createElement('i'); i.style.width = (x.pct || 0) + '%'; d.append(i);
+        r.append(a, b, d); return r;
+      }));
+      me.last = total; saveMe();
+      const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
+      $('progress').showModal();
+      requestAnimationFrame(() => { needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (c.value || 0) * 1.8}deg)`; });
+    }
+    $('progClose').addEventListener('click', () => $('progress').close());
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
     async function initAccount() {
       db = window.QATT_SPELL_DB || (typeof SupabaseService !== 'undefined' && typeof supabase !== 'undefined' ? new SupabaseService() : null);
