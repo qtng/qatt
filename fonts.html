@@ -53,12 +53,12 @@
     /* overview: one card per font name (the weights together), "Quốc Âm Tân Tự" in four cells; the glyphs fill the width of the card */
     .overview { padding: .8rem 0 1.6rem; margin-bottom: 0; border-bottom: 1px solid rgba(127, 127, 127, .25); }
     .overview .col { container-type: inline-size; }
-    .overview a.card-font { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqw; width: 100cqw; aspect-ratio: 1; padding: 17cqw 10cqw 10cqw; overflow: hidden; border: 1px solid rgba(127, 127, 127, .3); border-radius: 50%; box-shadow: 0 .35em .9em rgba(0, 0, 0, .25); text-decoration: none; }
+    .overview a.card-font { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqw; width: 100cqw; aspect-ratio: 1; padding: 15cqw 10cqw 13cqw; overflow: hidden; border: 1px solid rgba(127, 127, 127, .3); border-radius: 50%; box-shadow: 0 .35em .9em rgba(0, 0, 0, .25); text-decoration: none; }
     .overview a.card-font:hover { box-shadow: 0 .45em 1.1em rgba(0, 0, 0, .35); }
-    .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 8.5cqw; line-height: 1.1; white-space: nowrap; text-align: center; }
+    .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 8.5cqw; line-height: 1.1; color: #2b2118; white-space: nowrap; text-align: center; }
     .overview .quad { container-type: inline-size; width: 96%; color: #2b2118; }
     .overview .quad > div { display: grid; grid-template-columns: 1fr 1fr; }   /* four equal squares: even gaps in both directions */
-    .overview .quad span { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 50cqw); line-height: 1; white-space: nowrap; }
+    .overview .quad span { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 43cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
@@ -165,7 +165,7 @@
   }
   for (const entry of entries) show(entry, entry.tabs.find(t => !entry.g || t.f.family === entry.g) || entry.tabs[0]);   // the normal weight first
 
-  // the overview cards: the name without weight, then Quốc Âm Tân Tự as 2 x 2 cells
+  // the overview cards: the name without weight, then Quôc âm tân tư (without tones) as 2 x 2 cells
   const ovCells = [], overview = $('#overview');
   for (const entry of entries) {
     if (entry.g === 'QATT Pen Cut') continue;   // no card for Pen cut
@@ -177,7 +177,7 @@
     for (let i = 0; i < 4; i++) { const c = el('span'); c.style.fontFamily = `"${entry.family}"`; c.style.setProperty('--fit', FIT[entry.family] || 1); ovCells.push(c); grid.append(c); }
     quad.append(grid); a.append(quad); col.append(a); overview.append(col);
   }
-  ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quốc', 'Âm', 'Tân', 'Tự'][i % 4], parser).trim(); });
+  ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quôc', 'âm', 'tân', 'tư'][i % 4], parser).trim(); });
 
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
