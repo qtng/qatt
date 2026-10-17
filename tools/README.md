@@ -29,6 +29,14 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright CHROMIUM=/path/to/chromium \
 `PLAYWRIGHT_MODULE` and `CHROMIUM` are only needed if Playwright is not installed locally or Chromium is not found by
 Playwright. Only requests to the local server are allowed (no CDN), the paths do not depend on Bootstrap.
 
+### All fonts at once: `build_all.py`
+
+`python3 tools/build_all.py` builds all 14 fonts (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. The Serif and Gothic files that were in `fonts/` before 2026-10-17 could not be built again (they came from a state of the data that is not in the repository), so all fonts were built anew.
+
+### Size and baseline of the letters (compared with Han characters)
+
+The letters of qatt.js alone fill y 70..740 of the 1000 em, common Han characters (WenQuanYi Zen Hei, Nom Na Tong, a Noto CJK has the ICF box -78..838) y -100..800. So `build_font.py` stretches all letters in y by `VS` = 1.4 around the font y `VC` = 577 before they are stroked (the stroke widths stay; the tones are not stretched, but moved in y only by what the stretch would move their middle (the upper ones up, the lower ones down, x as before); environment variables `QATT_VS`, `QATT_VC` for tests): a cell is as high as a Han character and lies on the same baseline (check: the letters of a font next to 國音新字學喃 at one font size, top and bottom of the ink line up). `QATT_VS=1` gives the old, smaller size. The width is fitted the same way: a Han character is about 860 wide, a joined pair was 800 and a single letter only about 600. The single forms (and the stack) are stretched in x by `HS` = 1.3 (`QATT_HS`) around the middle of the cell, the margin of a pair to the cell edge `PAIR_M` is 60 instead of 100 (`QATT_PM`; the wide font keeps 100, its pairs are 1.25 cells wide). Brush and Prototype (not KAGE) get the same `HS` for their single forms; their pairs are drawn wider by the factor `QATT_PW` = 1.36 on `PAIR_K` (a pair of qatt.js is 63 units wide; as wide as a Han character it would be about 86).
+
 ### 2. Build the font: `build_font.py`
 
 Turns the (open) stroke paths into outlines (round caps and joins, `skia-pathops`), fits them into the monospace cell and

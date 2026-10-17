@@ -52,6 +52,11 @@ UPM = 1000
 CELL = (0, 0, 100, 100)
 SY = float(os.environ.get('QATT_SY', 10))      # font units per svg unit (vertical): the cell height 100 fills the em (1000)
 SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell, 100 x 100)
+# The letters are stretched in y by VS around the font y VC (QATT_VS, QATT_VC), so that a cell is as high as a Han character and lies on the same
+# baseline (the ink of common Han characters in WenQuanYi Zen Hei and Nom Na Tong is about y -100..800 of the 1000 em; the letters of qatt.js alone fill y 70..740)
+VS = float(os.environ.get('QATT_VS', 1.4))
+VC = float(os.environ.get('QATT_VC', 577))
+HS = float(os.environ.get('QATT_HS', 1.3))   # the single forms of the KAGE fonts are stretched in x by HS around the middle of the cell, to be as wide as a Han character (the pairs: PAIR_M, 60 instead of 100 as margin; the wide font keeps 100)
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
 ICF_B, ICF_T, ICF_L, ICF_R = -78, 838, 42, 958   # in svg units: x and y 4.2 .. 95.8
@@ -62,12 +67,12 @@ PAIR_X0, PAIR_X1 = 5, 104      # svg x extent of the onset forms (left) and rhym
 CENTRED_X0, CENTRED_X1 = 19.25, 82.25   # svg x extent of the single (centred) forms
 PAIR_K = (CENTRED_X1 - CENTRED_X0) / (PAIR_X1 - PAIR_X0)   # horizontal squeeze of a pair: as wide as a single form
 PAIR_GROW = 1.0               # size of a pair (the Can/Chi forms are GROW)
-PAIR_M, PAIR_G = 100, 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
+PAIR_M, PAIR_G = float(os.environ.get('QATT_PM', 100 if WIDE != 1.0 else 60)), 80       # KAGE fonts: margin of a joined pair to the cell edge and gap between its two halves (font units)
 PAIR_W = 1000 * WIDE           # width of a joined pair
 HALF = int(PAIR_W // 2)        # advance of each half
 PAIR_T = PAIR_W - 2 * PAIR_M - PAIR_G   # what the two halves share
 SPLITS = (45, 50, 55)          # KAGE fonts: share of the left half in per cent; the halves are fitted into these boxes by KAGE
-PAIR_K = float(os.environ.get('PAIR_K', PAIR_K))
+PAIR_K = float(os.environ.get('PAIR_K', PAIR_K * float(os.environ.get('QATT_PW', 1.0 if KAGE else 1.36))))   # Brush, Prototype: the pairs are wider (a KAGE pair is fitted by PAIR_M)
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
@@ -116,18 +121,22 @@ def onset_map(shape):
     sx, sy = (c1 - c0) / (a1 - a0), (d1 - d0) / (b1 - b0)
     return sx, sy, c0 - a0 * sx, d0 - b0 * sy
 
-def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, fit=None, ink=False):
+def outline_raw(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, fit=None, ink=False):
     """Stroke the paths (qatt.js ids) into one outline; k squeezes horizontally, centre is the x the svg x `cx` goes to,
     grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`. KAGE fonts only: fit=(left, right)
     in font units fits the outline into that box (the strokes are scaled and moved in x, the stroke widths stay); ink=True answers the
     width of the outline in font units (None until the first run has asked for it)."""
     out = pathops.Path()
     kx = SX * k * grow
+    if HS != 1.0 and not fit and not ids[0].startswith('q') and cx == 50: kx *= HS   # the single forms (and the stack) are wider; the halves of a pair are fitted into their box by PAIR_M (KAGE) or are wider by PAIR_K
     f = Y0 - GROW_Y * SY * (1 - grow)
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
     if not fit and not ids[0].startswith('q'): centre, f = centre + EXTRA_X * SX, f - EXTRA_Y * SY
-    matrix = (kx, 0, 0, -SY * grow * v, centre - cx * kx, f)
+    sy = -SY * grow * v
+    if VS != 1.0 and not ids[0].startswith('q'):   # the letters are stretched in y around the font y VC, before they are stroked (the stroke widths stay), the tones are not
+        sy, f = sy * VS, VS * f + (1 - VS) * VC
+    matrix = (kx, 0, 0, sy, centre - cx * kx, f)
     if BRUSH and ids[0].startswith('q'):   # tones: narrower than the letters (see TONE_X), the middle of the tone stays where it is
         bs = []
         for i in ids:
@@ -139,7 +148,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
         # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
         ids, u = tuple(ids), SY * grow
-        key = (ids, round(kx / u, 6), round(SY * grow * v / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
+        key = (ids, round(kx / u, 6), round(-matrix[3] / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
                round(width / STROKE if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
         if fit: key += (round(fit[0] / u, 4), round(fit[1] / u, 4))
         if ink: key += ('ink',)
@@ -174,6 +183,16 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
             p.convertConicsToQuads(0.1)
             p.draw(out.getPen())
     out.simplify(fix_winding=True)
+    return out
+
+def outline(ids, width, *a, **kw):
+    """outline_raw; a tone (not stretched, see VS) moves up or down in y by what the stretch of the letters would move its middle: the upper ones up, the lower ones down"""
+    out = outline_raw(ids, width, *a, **kw)
+    if VS != 1.0 and ids and ids[0].startswith('q') and not kw.get('ink') and out is not None and out.bounds:
+        x0, y0, x1, y1 = out.bounds
+        dy = (VS - 1) * ((y0 + y1) / 2 - VC)
+        moved = pathops.Path(); out.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, 0, dy)))
+        return moved
     return out
 
 TONE_MARGIN = 14               # a tone mark stays this far (font units) inside its cell
