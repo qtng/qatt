@@ -73,6 +73,7 @@
     .game { max-width: 34rem; }
     .game .tool, .game .tool-btn { font-size: .8rem; color: var(--ink); background-color: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); transition: transform .12s, box-shadow .12s; }
     .game .tool { padding-top: .15rem; padding-bottom: .15rem; }
+    .game .tools { flex-wrap: nowrap; } .game .tools .tool { min-width: 0; flex: 0 1 auto; text-overflow: ellipsis; } .game .tool-btn { flex: none; }   /* the buttons keep their size, the selects give way */
     .game .tool-btn { padding: .2rem .7rem; font-weight: 600; }
     .game .tool-btn:hover { background: #fff1c9; color: var(--ink); transform: translateY(-1px); }
     .game .tool-btn:active { transform: translateY(2px); box-shadow: none; }

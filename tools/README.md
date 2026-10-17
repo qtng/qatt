@@ -77,7 +77,7 @@ in `unicode.html`.
 
 ```python
 import uharfbuzz as hb
-font = hb.Font(hb.Face(hb.Blob.from_file_path('fonts/qatt-prototype.ttf')))
+font = hb.Font(hb.Face(hb.Blob.from_file_path('fonts/qatt-gothic.ttf')))
 buf = hb.Buffer(); buf.add_str('\U000F0001\U000F009B\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
 print([(font.glyph_to_string(i.codepoint), p.x_advance) for i, p in zip(buf.glyph_infos, buf.glyph_positions)])
 # [('uF0001.left', 500), ('uF009B.zw', 0), ('uF0000.right', 500)]
@@ -119,8 +119,6 @@ python3 tools/build_font.py --kage fonts/kage.json --pen --weight 0.6 --label Ex
 python3 tools/build_font.py --kage fonts/kage.json --pen --weight 1.0 --label Light      fonts/glyphs.json fonts/qatt-pen-light
 python3 tools/build_font.py --kage fonts/kage.json --pen --weight 1.6 fonts/glyphs.json fonts/qatt-pen                       # Regular
 python3 tools/build_font.py --kage fonts/kage.json --pen --weight 2.4 --label Medium     fonts/glyphs.json fonts/qatt-pen-medium
-python3 tools/build_font.py --kage fonts/kage.json --pen --weight 3.2 --label Bold       fonts/glyphs.json fonts/qatt-pen-bold
-python3 tools/build_font.py --kage fonts/kage.json --pen --weight 4.0 --label Heavy      fonts/glyphs.json fonts/qatt-pen-heavy
 ```
 
 **Pen Cut.** `--pen --cut` is a variant of the Pen font with flat stroke ends cut at a slant, as in Song: thin horizontals with a small flare where they stop, heavy verticals
@@ -137,6 +135,7 @@ one); "Use the single form" removes an own form again (also one that `kage.json`
 ```sh
 python3 tools/build_font.py --kage fonts/kage.json --gothic --bold fonts/glyphs.json fonts/qatt-gothic-bold
 ```
+# (the Bold file is no longer kept; this is how it was made)
 
 The bold Serif font is not published any more (`--bold` without `--gothic` still builds it).
 
