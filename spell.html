@@ -142,6 +142,7 @@
     dialog.prog td.bar { width: 45%; } dialog.prog td.bar i { display: block; height: .6rem; border-radius: .3rem; background: #198754; }
     dialog.prog td.bar.low i { background: #dc3545; } dialog.prog td.bar.mid i { background: #e0a800; }
     dialog.ask .btns { display: flex; gap: .6rem; justify-content: flex-end; }
+    #log { white-space: pre-wrap; text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; }
     .stats { font-size: .85rem; color: var(--muted, #6c5d4a); font-variant-numeric: tabular-nums; }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
     #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
@@ -190,6 +191,7 @@
     <h2 data-vi="Bảng xếp hạng">Ranking</h2>
     <table id="boardTable"></table>
   </div>
+  <pre class="stats mt-4 mb-5" id="log" hidden></pre>
   <dialog class="ask" id="askLogin">
     <h2 data-vi="Điểm của bạn" id="askTitle">Your points</h2>
     <p id="askText"></p>
@@ -403,7 +405,8 @@
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
     // the stopwatch under the card: the time of every click of this word (right or wrong ✗) and the one that is running, to check the measuring: 1.9 | 2.4 ✗ | 0.7
-    let watch = { done: [], t0: 0, on: false };
+    let watch = { done: [], t0: 0, on: false, word: '', logged: true }, logLines = [];
+    const logWatch = note => { watch.logged = true; logLines.unshift(watch.word.padEnd(8) + watch.done.join(' | ') + (note || '')); logLines.length = Math.min(logLines.length, 200); $('log').textContent = logLines.join('\n'); $('log').hidden = false; };   // the log under the page: a word and its stopwatch per line, the newest on top
     const drawWatch = () => { $('watch').textContent = watch.done.concat(watch.on ? [((performance.now() - watch.t0) / 1000).toFixed(1)] : []).join(' | '); };
     setInterval(() => { if (watch.on) drawWatch(); }, 100);
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
@@ -492,7 +495,7 @@
     }
     // the word is solved: the bonus of the time, the cheer of a quick one
     function finishWord() {
-      watch.on = false; drawWatch();
+      watch.on = false; drawWatch(); logWatch();
       const elapsed = (Date.now() - word_.t0) / 1000;
       let bonus = Math.max(0, POINTS.bonus - Math.floor(elapsed / POINTS.bonusStep));
       if (word_.hinted) bonus = Math.floor(bonus / 2);
@@ -648,7 +651,8 @@
       answer = word; nomOf = nom || '';
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
       startTimer(); $('lateRow').hidden = true;
-      watch = { done: [], t0: performance.now(), on: true }; drawWatch();
+      if (!watch.logged && watch.done.length) logWatch('  (not finished)');
+      watch = { done: [], t0: performance.now(), on: true, word, logged: false }; drawWatch();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
