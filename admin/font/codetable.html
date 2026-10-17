@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>QATT reference font</title>
-  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../css/site.css">
   <style>
     :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; }
     * { box-sizing: border-box; }
@@ -54,8 +54,8 @@
     #info { margin-top: .3rem; font-size: .8rem; color: var(--muted); text-align: center; }
     #info:empty { display: none; }
   </style>
-  <script src="js/navigation.js"></script>
-  <script src="js/qatt.js"></script>
+  <script src="../../js/navigation.js"></script>
+  <script src="../../js/qatt.js"></script>
 </head>
 <body>
 <header class="hero pt-5 pb-4">
@@ -63,9 +63,9 @@
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3" data-vi="Phông chữ tham chiếu QATT">QATT reference font</h1>
     <p class="lead mx-auto mb-4" data-vi="Phông chữ cho bản đề xuất Unicode: đủ 164 ký tự của khối dự thảo, mỗi ký tự một ô. Bản thử nghiệm.">The font for the Unicode proposal: all 164 characters of the draft block, one square each. A prototype.</p>
-    <a class="btn btn-outline-secondary btn-pill" href="editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
-    <a class="btn btn-outline-secondary btn-pill" href="fonts.html" data-vi="Tất cả phông chữ">All fonts</a>
-    <a class="btn btn-outline-secondary btn-pill" href="unicode.html" data-vi="Đề xuất Unicode">Unicode proposal</a>
+    <a class="btn btn-outline-secondary btn-pill" href="/editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
+    <a class="btn btn-outline-secondary btn-pill" href="/fonts.html" data-vi="Tất cả phông chữ">All fonts</a>
+    <a class="btn btn-outline-secondary btn-pill" href="/unicode.html" data-vi="Đề xuất Unicode">Unicode proposal</a>
   </div>
 </header>
 <main>
@@ -94,11 +94,11 @@
   <div class="grid" id="grid"></div>
 </main>
 
-<script src="js/fonts.js"></script>
+<script src="../../js/fonts.js"></script>
 <script>
 (async () => {
   const BASE = 0xF0000;
-  const glyphs = await (await fetch('fonts/glyphs.json')).json();
+  const glyphs = await (await fetch('/fonts/glyphs.json')).json();
   const $ = s => document.querySelector(s);
   const grids = [$('#grid-format'), $('#grid-marks'), $('#grid')], sample = $('#sample'), info = $('#info');
   const hex = n => n.toString(16).toUpperCase().padStart(5, '0');

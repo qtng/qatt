@@ -113,7 +113,7 @@
     // a heading inside each dropdown
     const group = (select, label, vi) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.setAttribute('data-vi-label', vi); g.append(...select.options); select.append(g); select.value = value; };
     group($('decoding'), 'Choose decoding', 'Lựa chọn cách giải mã');
-    $('font').value = 'QATT Pen';   // the default of the Writer (codetable.html keeps Serif)
+    $('font').value = 'QATT Pen';   // the default of the Writer (admin/font/codetable.html keeps Serif)
     $('font').dispatchEvent(new Event('change'));
     // a new decoding: every QATT cell is read with the old decoding and written with the new one, other text stays as it is
     $('decoding').addEventListener('change', () => {
