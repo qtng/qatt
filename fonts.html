@@ -168,7 +168,7 @@
   // the overview cards: the name without weight, then Quôc âm tân tư (without tones) as 2 x 2 cells
   const ovCells = [], overview = $('#overview');
   for (const entry of entries) {
-    if (entry.g === 'QATT Pen Cut') continue;   // no card for Pen cut
+    if (/^QATT (Pen Cut|Prototype|Brush)/.test(entry.tabs[0].f.family)) continue;   // no card for these
     const col = el('div', 'col'), a = el('a', 'card-font'), quad = el('div', 'quad'), grid = el('div');
     a.href = '#' + entry.box.id;
     const base = entry.tabs[0];   // the first font of the stack
