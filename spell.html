@@ -665,8 +665,7 @@
       for (const id of ['tones', 'variants']) show($(id), false);
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
-      const pad = $('basePad');
-      pad.replaceChildren(...SHAPES.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
+      fillPad();
       $('cells').replaceChildren();
       renderCells();
       show($('bases'), true);
@@ -706,14 +705,28 @@
       });
     }
 
+    // the shapes come in two steps: first the onset, with ONSET_KEYS buttons (the right one and others, chosen at random, in random order: with 22 the choice would take far
+    // longer than the rhyme steps), then the rhyme with all shapes (the order of symbols.html); a word of one marked letter (role both) has only the onset step
+    const ONSET_KEYS = 6;
+    const inOnset = () => slots.some(s => s.role !== 'rhyme' && s.state === 'empty');
+    const shapeStage = () => inOnset() ? slots.filter(s => s.role !== 'rhyme') : slots.filter(s => s.role === 'rhyme');
+    const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+    function fillPad() {
+      const cells = shapeStage();
+      if (!cells.length) return;
+      const shapes = inOnset() ? shuffle([cells[0].shape, ...shuffle(SHAPES.filter(x => x !== cells[0].shape)).slice(0, ONSET_KEYS - 1)]) : SHAPES;
+      $('basePad').replaceChildren(...shapes.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
+    }
+
     function pickShape(shape, b) {
-      const found = slots.filter(s => s.shape === shape);
+      const found = shapeStage().filter(s => s.shape === shape), wasOnset = inOnset();
       verdict(b, found.length > 0);
       mood(found.length > 0);
       judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found.filter(c => !c.mark));   // a cell without a mark is complete with its shape
       sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
+      if (wasOnset && !inOnset()) fillPad();   // the rhyme step: all the shapes
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
         const group = document.createElement('div');
         group.className = 'group';
