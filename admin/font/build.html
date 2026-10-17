@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How the QATT fonts are built</title>
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../css/site.css">
+  <style>
+    :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --muted: #7b6c58; }
+    body { background: var(--paper); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, sans-serif; }
+    main { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1rem 3.5rem; }
+    h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h1 { font-size: clamp(2rem, 6vw, 2.8rem); }
+    h2 { font-size: 1.5rem; margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+    h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+    a { color: var(--accent); }
+    code { color: var(--ink); background: #fffdf8; border: 1px solid var(--line); border-radius: .3rem; padding: .05rem .3rem; font-size: .88em; }
+    pre { background: #fffdf8; border: 1px solid var(--line); border-radius: .5rem; padding: .7rem .9rem; overflow-x: auto; font-size: .88rem; }
+    pre code { border: 0; padding: 0; background: none; }
+    .lead { color: #4a3d30; }
+    .note { color: var(--muted); font-size: .92rem; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; position: relative; padding: .1rem 0 .9rem 2.6rem; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: var(--accent); color: #fffdf8; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: .9rem; }
+    .steps b { display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: .93rem; background: #fffdf8; }
+    th, td { border: 1px solid var(--line); padding: .4rem .6rem; vertical-align: top; }
+    th { background: #f1e6cc; text-align: left; font-weight: 600; }
+    td:first-child { white-space: nowrap; }
+    .tw { overflow-x: auto; }
+    figure { margin: 1rem 0 1.4rem; }
+    figure img { max-width: 100%; height: auto; border-radius: .5rem; }
+    figcaption { color: var(--muted); font-size: .9rem; margin-top: .3rem; }
+    .tip { background: #fffdf8; border-left: 4px solid var(--accent); padding: .6rem .9rem; border-radius: 0 .5rem .5rem 0; }
+  </style>
+  <script src="../../js/navigation.js"></script>
+</head>
+<body>
+<main>
+  <p class="note mb-1"><a href="../index.html">Admin</a> / Fonts</p>
+  <h1>How the QATT fonts are built</h1>
+  <p class="lead">The fonts are not drawn by hand letter by letter. A script builds them from stroke data, so a change of one number (the height of the letters, the place of the tones) can be applied to all 14 fonts at once. This page explains the steps and what the numbers do.</p>
+
+  <h2>The process in short</h2>
+  <ol class="steps">
+    <li><b>Stroke data</b>The shapes of the symbols are kept as lines, not as finished outlines: <code>fonts/glyphs.json</code> (the 164 characters as drawn by <code>qatt.js</code>), <code>fonts/kage.json</code> (the shapes of the Glyph editor, used by Serif, Gothic, Pen and Khai) and <code>fonts/brush.json</code> (the brush model of the Brush editor). You change them in the editors of this admin area.</li>
+    <li><b>Outlines: <code>build_font.py</code></b>Turns the lines into letters: gives them a stroke width, stretches them to the size of a Chinese character, puts them in their cell and adds the rules that join onset, rhyme and tone into one syllable.</li>
+    <li><b>Vertical text: <code>font_vertical.py</code></b>Adds a second set of positions for vertical writing, so that a syllable is one square in a column and the tones stand at the side.</li>
+    <li><b>Name and numbers: <code>font_names.py</code></b>Writes copyright, licence and the numbers used for the build into the font (see "Read the numbers out of a font").</li>
+    <li><b>All fonts: <code>build_all.py</code></b>Does steps 2 to 4 for every font in one go and writes <code>.ttf</code> and <code>.woff2</code> into <code>fonts/</code>. Both files are kept in the repository, so a font only has to be built again when the data or the design changes.</li>
+  </ol>
+  <p class="note">A font that is built must also be listed in <code>js/fonts.js</code> (that is where the menus of the editors get their fonts), and the other way round.</p>
+
+  <h2>Build the fonts</h2>
+  <p>Once, to set up (Python 3):</p>
+<pre><code>python3 -m venv .venv &amp;&amp; . .venv/bin/activate
+pip install -r tools/requirements.txt</code></pre>
+  <p>Then, in the root of the repository:</p>
+<pre><code>python3 tools/build_all.py                 # all fonts, about a minute
+python3 tools/build_all.py pen khai        # only fonts whose name contains one of the words
+python3 tools/build_all.py --out /tmp/new  # into another folder, to compare before you replace anything</code></pre>
+  <p>To try a number, put it in front of the command. This builds the Pen fonts with taller letters and leaves everything else as it is:</p>
+<pre><code>QATT_VS=1.5 python3 tools/build_all.py --out /tmp/test pen</code></pre>
+  <div class="tip">Always build into another folder first (<code>--out</code>) and look at the result with the <a href="codetable.html">code table</a> (pick the font there) before you copy it into <code>fonts/</code>.</div>
+
+  <h2>The fonts</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Font</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>Serif</td><td>Song style, thin horizontals and thick verticals (from the Glyph editor)</td></tr>
+      <tr><td>Gothic, Gothic wide</td><td>Even strokes without serifs. The wide one gives a joined pair 1.25 cells instead of 1</td></tr>
+      <tr><td>Pen (4 weights)</td><td>Round strokes like a pen: extra light, light, regular, medium</td></tr>
+      <tr><td>Pen cut (4 weights)</td><td>The same with flat, slanted stroke ends</td></tr>
+      <tr><td>Khai</td><td>Regular script style (draft)</td></tr>
+      <tr><td>Brush</td><td>Strokes with the brush model of the Brush editor</td></tr>
+      <tr><td>Prototype light</td><td>The first font, straight from the lines of <code>qatt.js</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>The numbers</h2>
+  <p>Sizes are in <em>font units</em>: the letter square (the "em") is 1000 units high and wide. A letter should be about as big as a Chinese character, so that QATT and Han text look right next to each other.</p>
+
+  <h3>Per font (written after the file name in <code>build_all.py</code>)</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Option</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>--kage file</code></td><td>Use the shapes of the Glyph editor. The style is Serif unless one of the next three is given</td></tr>
+      <tr><td><code>--pen</code>, <code>--gothic</code>, <code>--kaiti</code></td><td>Pen, Gothic or Khai style</td></tr>
+      <tr><td><code>--cut</code></td><td>Flat, slanted stroke ends (with <code>--pen</code>)</td></tr>
+      <tr><td><code>--weight F</code></td><td>How thick the strokes are. For Pen: 0.6 extra light, 1.0 light, 1.6 regular, 2.4 medium (Khai 2.0)</td></tr>
+      <tr><td><code>--label Name</code></td><td>Adds a word to the font name, e.g. "Light"</td></tr>
+      <tr><td><code>--wide</code></td><td>Joined pairs 1.25 cells wide, so their halves are squeezed less</td></tr>
+      <tr><td><code>--light</code></td><td>Thin strokes (Prototype only)</td></tr>
+      <tr><td><code>--vertical</code></td><td>Adds the vertical positions (<code>build_all.py</code> always sets it)</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="build/weight.png" alt="The syllables tân tự in four stroke weights of QATT Pen" loading="lazy"><figcaption><code>--weight</code>: the same Pen font with four stroke thicknesses (extra light, light, regular, medium). These four are built with <code>build_all.py</code> as separate fonts.</figcaption></figure>
+
+  <h3>Size and shape (all fonts, set in front of the command)</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Number</th><th>Standard</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>QATT_VS</code></td><td>1.4</td><td>How much the letters are stretched in height. The raw letters fill only about two thirds of the square; a Chinese character fills it. 1 means no stretching</td></tr>
+      <tr><td><code>QATT_VC</code></td><td>577</td><td>The height the stretching grows from: what lies above it moves up, what lies below it moves down. Decides where the letters sit on the line</td></tr>
+      <tr><td><code>QATT_HS</code></td><td>1.3</td><td>How much a single letter (not a joined pair) is stretched in width, to be as wide as a Chinese character</td></tr>
+      <tr><td><code>QATT_PM</code></td><td>60 (wide font: 100)</td><td>Space between a joined pair and the edge of its cell. Smaller number, wider pair</td></tr>
+      <tr><td><code>QATT_PW</code></td><td>1.36 (Brush, Prototype)</td><td>Width of a joined pair in the fonts that are not made from the Glyph editor</td></tr>
+      <tr><td><code>QATT_SY</code></td><td>10</td><td>Size of the drawing in the square: 10 means the 100 x 100 drawing fills the 1000 units exactly. Changes the size of everything</td></tr>
+      <tr><td><code>QATT_SXF</code></td><td>1.0</td><td>Width in relation to height (1 is square). Changes the width of everything</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="build/vs.png" alt="Chinese characters next to QATT syllables with QATT_VS 1, 1.4 and 1.8" loading="lazy"><figcaption><code>QATT_VS</code>: with 1 the letters are small next to the Chinese characters; with 1.4 they are as high; with 1.8 they are too high (the tone marks too).</figcaption></figure>
+  <figure><img src="build/vc.png" alt="Chinese characters next to QATT syllables with QATT_VC 450, 577 and 700" loading="lazy"><figcaption><code>QATT_VC</code>: moves where the letters sit on the line. With 450 they sit higher, with 700 lower. The change is small, a few units of height.</figcaption></figure>
+  <figure><img src="build/hs.png" alt="Chinese characters next to QATT syllables with QATT_HS 1, 1.3 and 1.6" loading="lazy"><figcaption><code>QATT_HS</code>: the width of a single letter. With 1 it is narrow, with 1.3 about as wide as a Chinese character, with 1.6 too wide.</figcaption></figure>
+
+  <h3>Tones in horizontal text</h3>
+  <p>The tone marks hang over and under the syllable. When the letters are stretched, the tones should not stay behind, so they follow the stretching by a share:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Number</th><th>Standard</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>QATT_TV</code></td><td>0.5</td><td>How much of the vertical stretching the tones follow. 0: they stay where they are; 1: they move as far as the letters; 0.5: half way. The upper ones go up, the lower ones down</td></tr>
+      <tr><td><code>QATT_TH</code></td><td>-0.5</td><td>The same sideways. A negative number moves the tones in towards the middle of their cell, a positive one out</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="build/tv.png" alt="Six syllables with the tones 1 to 6 and QATT_TV 0, 0.5 and 1" loading="lazy"><figcaption><code>QATT_TV</code>: with 0 the tones stay close to the letters, with 1 they move away from them as far as the letters grew. Look at the lower tone in the third syllable and the upper ones.</figcaption></figure>
+  <figure><img src="build/th.png" alt="Six syllables with the tones 1 to 6 and QATT_TH 0.5, 0 and -0.5" loading="lazy"><figcaption><code>QATT_TH</code>: with 0.5 the tones move out of their cell, with -0.5 they sit nearer to the middle of it.</figcaption></figure>
+
+  <h3>Tones in vertical text</h3>
+  <p>In a column the cell above and below is the next syllable, so tones that hang over and under the cell would lie on the neighbours. In vertical text they therefore move into the height of their cell and out to the side:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Number</th><th>Standard</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>QATT_TONE_SIDE</code></td><td>140</td><td>How far a tone moves to the left or right, away from the middle of the column. Bigger number: the tone is further from the letters (and nearer to the next column)</td></tr>
+      <tr><td><code>QATT_TONE_Y</code></td><td>0</td><td>How far a tone stays inside the top or bottom edge of its cell. 0: it touches the edge; bigger: further in, towards the letters</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="build/tone-side.png" alt="Six syllables in a vertical column with the tones at QATT_TONE_SIDE 0, 140 and 250" loading="lazy"><figcaption><code>QATT_TONE_SIDE</code> in vertical text: with 0 the tones lie on the letters, with 140 they sit at the edge of the letters, with 250 they hang out into the space between the columns.</figcaption></figure>
+  <figure><img src="build/tone-y.png" alt="Six syllables in a vertical column with the tones at QATT_TONE_Y 0, 40 and 80" loading="lazy"><figcaption><code>QATT_TONE_Y</code> in vertical text: with 0 the tones touch the top or bottom edge of their cell, with 80 they have moved towards the middle of the syllable.</figcaption></figure>
+  <p class="note">These two only change vertical text. They can also be applied to fonts that are already built, without building them again: <code>QATT_TONE_SIDE=100 python3 tools/font_vertical.py fonts/qatt-*.ttf</code> (it changes the <code>.ttf</code> files and writes the <code>.woff2</code> again; running it twice does no harm).</p>
+
+  <h3>Fine tuning in the code</h3>
+  <p>A few more constants are at the top of <code>build_font.py</code> and have no environment variable: the stroke widths (<code>STROKE</code> and its relatives), the share of the upper letter in a stack (<code>STACK_UP</code>), the gap between the two halves of a pair (<code>PAIR_G</code>) and how far a tone must stay inside its cell (<code>TONE_MARGIN</code>). Change them in the file and build again.</p>
+  <p class="note">The pictures on this page are made with <code>node tools/build_images.js</code>: it builds QATT Pen again with one number changed, sets the same text in each and takes the pictures into <code>admin/font/build/</code>. To change a picture, edit its entry in the list at the top of the script.</p>
+
+  <h2>Read the numbers out of a font</h2>
+  <p>Every font built with <code>build_font.py</code> carries the numbers it was built with, in the description of the font (name ID 10), together with the date and the commit of the tools. With them a font can be built again exactly:</p>
+<pre><code>python3 -c "from fontTools.ttLib import TTFont; print(TTFont('fonts/qatt-pen.ttf')['name'].getDebugName(10))"</code></pre>
+  <p>It prints something like <code>Built 2026-10-17 with tools/build_font.py … commit 4b054e7: style pen, weight 1.6, … VS 1.4, VC 577.0, HS 1.3, … TV 0.5, TH -0.5, … TONE_SIDE 140, TONE_Y 0</code>. A <code>+changes</code> after the commit means the tools had changes that were not committed yet. Fonts built before the tones in vertical text were added do not list <code>TONE_SIDE</code> and <code>TONE_Y</code>; they were built with the standard values.</p>
+
+  <h2>What the font does with the characters</h2>
+  <p>Onset, rhyme and tone are separate characters that the font puts together (OpenType rule <code>ccmp</code>):</p>
+  <ul>
+    <li>Onset, <code>U+F009B</code> (joiner), rhyme: one cell. The onset goes in the left half, the rhyme in the right half; the joiner takes no space.</li>
+    <li>Letter, <code>U+F009A</code> (combiner), letter: the first goes into the lower 55 %, the second into the upper 45 % of the cell.</li>
+    <li>A tone after any character becomes a small form without width that lies over the cell before it.</li>
+  </ul>
+  <p>The code points are <code>U+F0000</code> plus the number in the Unicode proposal (<a href="../../unicode.html">unicode.html</a>). The complete description of the tools, with all commands, is <code>tools/README.md</code> in the repository.</p>
+</main>
+</body>
+</html>
