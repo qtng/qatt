@@ -85,12 +85,22 @@ function vertical(p0, p1, W, free0, free1) {
 // which tapers to the tip. P_WIDTH: [s, width] of that body in W (measured at W = 90), s along the template stroke from its head (3 W) to its tip (15 W).
 // The body is laid symmetric on the centre line of the KAGE stroke (so its curve comes from the data), its widths scaled to meet the head; its middle moves
 // from the middle of the head to the line towards the tip.
+const P_BEND = [[0, 0], [0.025, 0.038], [0.05, 0.075], [0.075, 0.113], [0.1, 0.151], [0.125, 0.188], [0.15, 0.226], [0.175, 0.263], [0.2, 0.301], [0.225, 0.337], [0.25, 0.401], [0.275, 0.47], [0.3, 0.536], [0.325, 0.6], [0.35, 0.661], [0.375, 0.719], [0.4, 0.776], [0.425, 0.827], [0.45, 0.87], [0.475, 0.904], [0.5, 0.934], [0.525, 0.957], [0.55, 0.976], [0.575, 0.989], [0.6, 0.997], [0.625, 1], [0.65, 0.995], [0.675, 0.982], [0.7, 0.961], [0.725, 0.93], [0.75, 0.892], [0.775, 0.845], [0.8, 0.79], [0.825, 0.727], [0.85, 0.656], [0.875, 0.577], [0.9, 0.489], [0.925, 0.392], [0.95, 0.285], [0.975, 0.16], [1, 0]];   // [share of the chord, bend]: the middle line of the template off its chord, 1 at most
+const P_TIP = [[2.17, 1.013], [1.844, 0.96], [1.519, 0.898], [1.193, 0.825], [0.868, 0.739], [0.651, 0.697], [0.434, 0.62], [0.325, 0.569], [0.217, 0.533], [0.108, 0.387], [0.05, 0.27], [0.02, 0.17], [0, 0]];   // [W from the tip, width]: the rounded tip of the template, measured across its middle line
 const P_WIDTH = [[3, 1.484], [3.5, 1.462], [4, 1.448], [4.5, 1.44], [5, 1.429], [5.5, 1.409], [6, 1.375], [6.5, 1.358], [7, 1.357], [7.5, 1.357], [8, 1.357], [8.5, 1.357], [9, 1.343], [9.5, 1.309], [10, 1.26], [10.5, 1.24], [11, 1.21], [11.5, 1.149], [12, 1.099], [12.5, 1.039], [13, 0.967], [13.5, 0.871], [13.9, 0.748], [14, 0.737], [14.1, 0.013], [14.2, 0.013], [14.3, 0.013], [14.4, 0.013], [14.5, 0.013], [14.6, 0.013], [14.7, 0.013], [14.8, 0.013], [14.9, 0.013], [15, 0]];
 function falling(f, W) {
   const p = [], c = []; for (let i = 3; i + 1 < f.length; i += 2) p.push([f[i], f[i + 1]]);
-  for (let i = 0, S = 0; i <= 200; i++) {                // the centre line of the stroke: points with their distance from the start
-    const t = i / 200, u = 1 - t;
-    const q = f[0] === 2 && p.length === 3 ? [u * u * p[0][0] + 2 * u * t * p[1][0] + t * t * p[2][0], u * u * p[0][1] + 2 * u * t * p[1][1] + t * t * p[2][1]] : [p[0][0] + (p[p.length - 1][0] - p[0][0]) * t, p[0][1] + (p[p.length - 1][1] - p[0][1]) * t];
+  // the centre line: the chord of the stroke, bent like the template (P_BEND: straight on at first, the curve from about a third on), so much that it starts
+  // in the direction of the KAGE curve (a straight KAGE line gets a slight bend, 0.06 of its length)
+  const A = p[0], Z = p[p.length - 1], len = Math.hypot(Z[0] - A[0], Z[1] - A[1]), ux = (Z[0] - A[0]) / len, uy = (Z[1] - A[1]) / len;
+  let sag = -0.06 * len;
+  if (f[0] === 2 && p.length === 3) {                     // as much bend as makes the stroke start in the direction of the KAGE curve (P_BEND rises 1.52 per share at the start)
+    const sx = p[1][0] - A[0], sy = p[1][1] - A[1], along = sx * ux + sy * uy, across = sx * -uy + sy * ux;
+    if (along > 0) sag = across / along / 1.52 * len;
+  }
+  const bend = u => { for (let i = 1; i < P_BEND.length; i++) if (u <= P_BEND[i][0]) { const q = P_BEND[i - 1], r = P_BEND[i]; return q[1] + (r[1] - q[1]) * (u - q[0]) / (r[0] - q[0]); } return 0; };
+  for (let i = 0, S = 0; i <= 200; i++) {
+    const u = i / 200, o = bend(u) * sag, q = [A[0] + (Z[0] - A[0]) * u - uy * o, A[1] + (Z[1] - A[1]) * u + ux * o];
     if (i) S += Math.hypot(q[0] - c[i - 1][0], q[1] - c[i - 1][1]);
     c.push([q[0], q[1], S]);
   }
@@ -104,8 +114,8 @@ function falling(f, W) {
   const row = [];
   for (const [d] of V_HEAD) row.push([d * g, ...rows(V_HEAD, d).map(x => x * kV)]);
   const [hl, hr] = rows(V_HEAD, V_H).map(x => x * kV), hc = (hl + hr) / 2, fw = (hr - hl) / P_WIDTH[0][1], s0 = P_WIDTH[0][0], s1 = P_WIDTH[P_WIDTH.length - 1][0];
-  const tip = 1.5, wt = rows(P_WIDTH.map(([s, w]) => [s, w, w]), s1 - tip)[0];   // the last 1.5 W of the template: a smooth taper to the point (the measure is noisy there)
-  const body = P_WIDTH.filter(([s]) => s > s0 && s < s1 - tip).concat([...Array(9).keys()].map(i => { const e = tip * (1 - i / 8) ** 1.5; return [s1 - e, wt * (e / tip) ** 0.75]; }));
+  const tip = P_TIP[0][0];                                 // the last 2.17 W: the rounded tip of the template
+  const body = P_WIDTH.filter(([s]) => s > s0 && s < s1 - tip).concat(P_TIP.map(([e, w]) => [s1 - e, w]));
   for (const [s, w] of body) {
     const k = (s - s0) / (s1 - s0), d = V_H * g + k * (L - V_H * g), m = hc * (1 - k);
     row.push([d, m - w * fw / 2, m + w * fw / 2]);
