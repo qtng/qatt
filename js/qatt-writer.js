@@ -327,25 +327,32 @@ const QattWriter = (() => {
       if (at === null) return;
       const caret = typer.selectionStart;
       typer.setRangeText(String.fromCodePoint(COMBINER), at, at, 'preserve');
-      typer.setSelectionRange(caret + 2, caret + 2);   // behind the same characters (no focus: the keyboard of a phone stays closed)
+      typer.focus({ preventScroll: true });   // the cursor stays in the field (the button does not keep the focus)
+      typer.setSelectionRange(caret + 2, caret + 2);   // behind the same characters
       showPending();
     });
     document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === typer) showPending(); });
 
+    // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
+    // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
+    const IDS_STACK = '\u2FF1', COMBINER_CHAR = String.fromCodePoint(COMBINER);
     // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
-    const readAsQuocNgu = text => {
+    const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
       let out = '', afterCell = false;
-      for (const [part] of text.matchAll(QattText.CELL_ANY)) {
+      for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
         const isCell = /^[\u{F0000}-\u{F0099}]/u.test(part);
         if (isCell) out += (afterCell ? ' ' : '') + QattText.reading(part, parser);
         else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
         afterCell = isCell;
       }
       return out;
-    };
+    }).join(IDS_STACK);
+    // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
+    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => QattText.word(w, parser) ?? w)
+      .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
     // Convert: with QATT characters in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
-      typer.value = QattText.cells(typer.value).length ? readAsQuocNgu(typer.value) : typer.value.replace(/[\p{Script=Latin}\p{M}]+/gu, w => QattText.word(w, parser) ?? w);
+      typer.value = QattText.cells(typer.value).length ? readAsQuocNgu(typer.value) : toQatt(typer.value);
       showPending();
     });
     $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); showPending(); });   // without the spaces
