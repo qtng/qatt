@@ -323,15 +323,30 @@
     // Points: a right choice +10, a wrong one -2 (the score does not go below 0); a solved word gives a bonus that falls by 1 every 1.2 seconds
     // (50 at the start, 0 after the minute; half of it if a hint wiggled); a word without a wrong choice and a hint, in which every step was quick, gives 25 more
     // and a cheer. Speed: the time of every right choice that was the first try, without a hint, from the moment its buttons were there (the last right choice
-    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a time above CAP counts as CAP, a time in
+    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + CAP_ADD (at most CAP, 10 s), a time above the cap counts as the cap (the own slow value + CAP_ADD s, at most CAP = 10 s; plain CAP until there are MIN_SAMPLES times), a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 5, ALPHA = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are 5 times of that kind
+    const CAP = 10, CAP_ADD = 2, HINT_ADD = 5, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
+    // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the fast one (ALPHA_FAST: the form of the day,
+    // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
+    const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
+    const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
-    let me = { score: 0, stats: { onset: { v: 0, n: 0 }, rhyme: { v: 0, n: 0 }, tone: { v: 0, n: 0 } } };
-    try { const saved = JSON.parse(localStorage.getItem('qattSpell')); if (saved && typeof saved.score === 'number') me = { ...me, ...saved }; } catch (e) {}
+    // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
+    const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
+    let me = { score: 0, decoding: 'qatt', stats: {} };
+    try {
+      const saved = JSON.parse(localStorage.getItem('qattSpell'));
+      if (saved && typeof saved.score === 'number') {
+        me.score = saved.score;
+        if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
+        else if (saved.stats) me.stats = saved.stats;
+      }
+    } catch (e) {}
+    const dec = () => $('decoding').value || 'qatt';
+    const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
-    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0 }, hiddenDuring = false;
+    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
@@ -340,9 +355,9 @@
     };
     const showStats = () => {
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
-      const have = KINDS.filter(k => me.stats[k].n);
+      const set = mine(), have = KINDS.filter(k => set[k].n);
       $('stats').hidden = !have.length;
-      $('stats').textContent = have.map(k => names[k] + ' ' + me.stats[k].v.toFixed(1) + ' s').join(' · ');
+      $('stats').textContent = have.map(k => names[k] + ' ' + set[k].v.toFixed(1) + ' s (' + set[k].f.toFixed(1) + ')').join(' · ');   // the slow value, in brackets the fast one
     };
     const floatPoints = (n, delay = 0) => {
       if (!n) return;
@@ -352,24 +367,53 @@
       $('task').append(e); setTimeout(() => e.remove(), 1200 + delay * 1000);
     };
     const addPoints = (n, delay) => { me.score = Math.max(0, me.score + n); floatPoints(n, delay); showScore(true); saveMe(); };
-    // the choice of a step: kind = onset, rhyme or tone; ok = right
-    function judge(kind, ok) {
-      if (!ok) { lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong); return; }
+    // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
+    function addTime(kind, t) {
+      const st = mine()[kind]; st.n++;
+      st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
+      st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
+      const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
+      if (st.n >= MIN_SAMPLES && reached > st.m) {
+        st.m = reached;
+        const m = MILESTONES[reached - 1], names = { onset: ['Onsets', 'Âm đầu'], rhyme: ['Rhymes', 'Vần'], tone: ['Tones', 'Thanh'] }[kind];
+        setTimeout(() => { addPoints(MILESTONE_POINTS); cheer(Lang.t(names[0] + ' under ' + m + ' s!', names[1] + ' dưới ' + m + ' giây!')); }, 700);
+      }
+      showStats(); saveMe();
+    }
+    // The kinds of symbol: a CELL of the word (onset or rhyme) is one item, whether it takes one click (the shape) or two (the shape, then its marked form): its time
+    // is the mean of the times of its clicks. A tone is one click. A click on a shape or a marked form that is wrong cannot be given to a kind (the player may look for
+    // an onset or a rhyme): it waits (word_.queue) for the next right click of that stage, that one shows which kind it was, and the penalty goes to that kind.
+    const cellKind = c => c.role === 'onset' ? 'onset' : 'rhyme';   // 'both' (one letter that is onset and rhyme) counts as a rhyme
+    const penalty = kind => Math.min(CAP, mine()[kind].v + CAP_ADD);   // the same as the cap of a slow time: waiting long is not better than a wrong click
+    const slowFor = st => st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP;   // the cap of a time moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
+    // the choice of a step: kind = onset, rhyme, tone (null if a wrong choice); ok = right; cells = the cells it found; done = those of them that are complete now
+    function judge(kind, ok, cells = [], done = []) {
+      if (!ok) {
+        lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
+        if (kind === 'tone') addTime('tone', penalty('tone')); else word_.queue++;
+        return;
+      }
       addPoints(POINTS.right);
-      const t = Math.min((performance.now() - lap.t0) / 1000, CAP);
-      const st = me.stats[kind], first = !lap.wrong && !lap.hinted && !hiddenDuring;
-      if (first) {
-        if (!(t <= Math.min(QUICK_MAX, st.n >= 5 ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false;   // slow for this player
-        st.n++; st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
-        showStats(); saveMe();
-      } else word_.quick = false;
+      const st = mine()[kind];
+      const t = Math.min((performance.now() - lap.t0) / 1000, slowFor(st));
+      const first = !lap.wrong && !lap.hinted && !hiddenDuring;
+      const quick = x => { if (!(x <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false; };   // slow for this player
+      if (kind === 'tone') { if (first) { quick(t); addTime('tone', t); } else word_.quick = false; }
+      else {
+        for (; word_.queue > 0; word_.queue--) addTime(kind, penalty(kind));   // the wrong choices before it were for this kind
+        for (const c of cells) c.parts = first && c.parts !== null ? (c.parts || []).concat(t) : null;   // null: a wrong choice or a hint on the way, the cell does not count
+        for (const c of done) {
+          if (c.parts) { const mean = c.parts.reduce((a, b) => a + b, 0) / c.parts.length; quick(mean); addTime(cellKind(c), mean); } else word_.quick = false;
+        }
+      }
       newLap();
+      setTimeout(armHint, 0);   // the next step may be another kind: the hint waits for its time
     }
     const CHEERS = [['Bravo!', 'Hoan hô!'], ['Unbelievable!', 'Không thể tin nổi!'], ['Brilliant!', 'Xuất sắc!'], ['Perfect!', 'Hoàn hảo!'], ['Wow!', 'Tuyệt vời!']];
-    function cheer() {
+    function cheer(text) {   // a text of its own (a milestone) or one of CHEERS
       const [en, vi] = pick(CHEERS);
       const c = document.createElement('div');
-      c.className = 'cheer'; c.textContent = Lang.t(en, vi);
+      c.className = 'cheer'; c.textContent = text || Lang.t(en, vi);
       $('task').append(c); setTimeout(() => c.remove(), 1950);
       if (REDUCED) return;
       for (let i = 0; i < 14; i++) {   // sparks fly out from the middle
@@ -397,9 +441,10 @@
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
-      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now() }; newLap();
+      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0 }; newLap();
       startTimer();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
+      setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
       $('word').textContent = word;
@@ -451,7 +496,7 @@
       const found = slots.filter(s => s.shape === shape);
       verdict(b, found.length > 0);
       mood(found.length > 0);
-      judge(found.length && found[0].role === 'onset' ? 'onset' : 'rhyme', found.length > 0);   // the shape of the rhyme (or of a single letter) counts as a rhyme
+      judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found.filter(c => !c.mark));   // a cell without a mark is complete with its shape
       sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
@@ -471,7 +516,7 @@
       const found = slots.filter(s => s.shape === shape && s.mark === mark);
       verdict(b, found.length > 0);
       mood(found.length > 0);
-      judge('rhyme', found.length > 0);
+      judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found);   // the marked form completes the cell
       for (const s of found) s.state = 'full';
       renderCells();
       update();
@@ -532,8 +577,18 @@
       }
       return null;
     };
+    // the kind of the step that is open: the tones, the marked forms (rhyme) or the first cell that is still empty
+    const pendingKind = () => {
+      if (!$('tones').hidden) return 'tone';
+      if (!$('variants').hidden) return 'rhyme';
+      const next = slots && slots.find(x => x.state === 'empty');
+      return next && next.role === 'onset' ? 'onset' : 'rhyme';
+    };
+    // the hint comes after the own value of that kind + HINT_ADD seconds without a click (5 seconds until there are MIN_SAMPLES times), and again at that distance;
+    // a step with a hint does not count in the speed, it is only a help to learn
     const armHint = () => {
       clearTimeout(hintTimer);
+      const st = mine()[pendingKind()];
       hintTimer = setTimeout(() => {
         const b = hintButton();
         if (b) {
@@ -544,7 +599,7 @@
           b.addEventListener('animationend', () => b.classList.remove('hint'), { once: true });
         }
         armHint();
-      }, 5000);
+      }, ((st.n >= MIN_SAMPLES ? st.v : 0) + HINT_ADD) * 1000);
     };
     ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, armHint, true));
     armHint();
@@ -552,7 +607,7 @@
     const another = () => { const e = draw(); start(e.w, e.nom); };
     $('next').addEventListener('click', another);
     $('reload').addEventListener('click', another);
-    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); start(answer, nomOf); });   // the same word after the other decoding
+    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); showStats(); start(answer, nomOf); });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
     loadDict().catch(() => {}).then(() => {   // without the dictionary the short list is used
