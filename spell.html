@@ -323,10 +323,10 @@
     // Points: a right choice +10, a wrong one -2 (the score does not go below 0); a solved word gives a bonus that falls by 1 every 1.2 seconds
     // (50 at the start, 0 after the minute; half of it if a hint wiggled); a word without a wrong choice and a hint, in which every step was quick, gives 25 more
     // and a cheer. Speed: the time of every right choice that was the first try, without a hint, from the moment its buttons were there (the last right choice
-    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + WRONG_ADD (at most CAP, 10 s), a time above the cap counts as the cap (the own slow value + CAP_ADD s, at most CAP = 10 s; plain CAP until there are MIN_SAMPLES times), a time in
+    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + CAP_ADD (at most CAP, 10 s), a time above the cap counts as the cap (the own slow value + CAP_ADD s, at most CAP = 10 s; plain CAP until there are MIN_SAMPLES times), a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 10, CAP_ADD = 2, WRONG_ADD = 2, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
+    const CAP = 10, CAP_ADD = 2, HINT_ADD = 5, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
     // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the fast one (ALPHA_FAST: the form of the day,
     // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
@@ -370,8 +370,8 @@
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
     function addTime(kind, t) {
       const st = mine()[kind]; st.n++;
-      st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
-      st.f = st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f);
+      st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
+      st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
       const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
       if (st.n >= MIN_SAMPLES && reached > st.m) {
         st.m = reached;
@@ -382,9 +382,9 @@
     }
     // the choice of a step: kind = onset, rhyme or tone; ok = right
     function judge(kind, ok) {
-      if (!ok) {   // a wrong choice counts in the speed as well: the own value plus WRONG_ADD seconds (else one could click wrong on purpose and only hurry on easy words)
+      if (!ok) {   // a wrong choice counts in the speed as well: the own value plus CAP_ADD seconds (else one could click wrong on purpose and only hurry on easy words)
         lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
-        addTime(kind, Math.min(CAP, mine()[kind].v + WRONG_ADD));
+        addTime(kind, Math.min(CAP, mine()[kind].v + CAP_ADD));   // the same as the cap of a slow time: waiting long is not better than a wrong click
         return;
       }
       addPoints(POINTS.right);
@@ -396,6 +396,7 @@
         addTime(kind, t);
       } else word_.quick = false;
       newLap();
+      setTimeout(armHint, 0);   // the next step may be another kind: the hint waits for its time
     }
     const CHEERS = [['Bravo!', 'Hoan hô!'], ['Unbelievable!', 'Không thể tin nổi!'], ['Brilliant!', 'Xuất sắc!'], ['Perfect!', 'Hoàn hảo!'], ['Wow!', 'Tuyệt vời!']];
     function cheer(text) {   // a text of its own (a milestone) or one of CHEERS
@@ -432,6 +433,7 @@
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now() }; newLap();
       startTimer();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
+      setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
       $('word').textContent = word;
@@ -565,8 +567,18 @@
       }
       return null;
     };
+    // the kind of the step that is open: the tones, the marked forms (rhyme) or the first cell that is still empty
+    const pendingKind = () => {
+      if (!$('tones').hidden) return 'tone';
+      if (!$('variants').hidden) return 'rhyme';
+      const next = slots && slots.find(x => x.state === 'empty');
+      return next && next.role === 'onset' ? 'onset' : 'rhyme';
+    };
+    // the hint comes after the own value of that kind + HINT_ADD seconds without a click (5 seconds until there are MIN_SAMPLES times), and again at that distance;
+    // a step with a hint does not count in the speed, it is only a help to learn
     const armHint = () => {
       clearTimeout(hintTimer);
+      const st = mine()[pendingKind()];
       hintTimer = setTimeout(() => {
         const b = hintButton();
         if (b) {
@@ -577,7 +589,7 @@
           b.addEventListener('animationend', () => b.classList.remove('hint'), { once: true });
         }
         armHint();
-      }, 5000);
+      }, ((st.n >= MIN_SAMPLES ? st.v : 0) + HINT_ADD) * 1000);
     };
     ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, armHint, true));
     armHint();
