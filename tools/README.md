@@ -29,6 +29,10 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright CHROMIUM=/path/to/chromium \
 `PLAYWRIGHT_MODULE` and `CHROMIUM` are only needed if Playwright is not installed locally or Chromium is not found by
 Playwright. Only requests to the local server are allowed (no CDN), the paths do not depend on Bootstrap.
 
+### Logo and icons: `make_logo.py`
+
+`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009B U+F003D) in QATT Gothic: `img/logo.svg` (320 high on the red tile with the thin frame, used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-gothic.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
+
 ### All fonts at once: `build_all.py`
 
 `python3 tools/build_all.py` builds all 14 fonts (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. The Serif and Gothic files that were in `fonts/` before 2026-10-17 could not be built again (they came from a state of the data that is not in the repository), so all fonts were built anew.
