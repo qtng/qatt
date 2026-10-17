@@ -24,8 +24,6 @@
     .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
     .head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .5rem; margin-bottom: .8rem; }
     .word { font-family: Georgia, "Times New Roman", serif; font-size: 1.6rem; line-height: 1.1; color: var(--ink); text-align: left; overflow-wrap: anywhere; }
-    .nom { justify-self: end; width: 32px; height: 32px; display: block; }
-    .nom img { display: block; }
     .mood { text-align: center; font-size: 2.6rem; line-height: 1.2; }
     .cells { display: flex; justify-content: center; margin: 0 auto 1.6rem; width: max-content; max-width: 100%; border: 2px solid #cdbd9a; border-radius: .8rem; overflow: hidden; }
     .cell { width: 7rem; height: 7rem; display: flex; align-items: center; justify-content: center; font-family: var(--qfont), sans-serif; font-size: 5.2rem; line-height: 1; color: var(--ink); }
@@ -144,7 +142,6 @@
       <div class="head">
         <div class="word" id="word" lang="vi"></div>
         <div class="mood" id="mood" aria-live="polite">🙂</div>
-        <a class="nom" id="nomLink" target="_blank" rel="noopener" title="Details in the dictionary" hidden><img id="nom" alt="" width="32" height="32"></a>
       </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
       <div class="solution" id="solution" hidden><div class="full" id="full"></div></div>
@@ -401,16 +398,6 @@
       answer = word; nomOf = nom || '';
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now() }; newLap();
       startTimer();
-      const img = $('nom');
-      $('nomLink').hidden = true;
-      const ch = nom && [...nom][0];   // the first character of the Nôm form as a 32px image, as in the Chunom site
-      if (ch) {
-        img.alt = nom;
-        $('nomLink').href = CHUNOM_SITE + 'chunom/index.html?detail=' + encodeURIComponent(ch);   // the details of the character in the dictionary
-        img.onload = () => { $('nomLink').hidden = false; };
-        img.onerror = () => { $('nomLink').hidden = true; };
-        img.src = `${CHUNOM_SITE}chunom-assets/generated/32/${ch.codePointAt(0).toString(16).toUpperCase()}.webp`;
-      }
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       tone = a.tone; code = a.code; hop = a.hop;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
