@@ -14,14 +14,15 @@ A vertical advance is *taken away* from the 1 em that points down, so "no advanc
 
   python3 tools/font_vertical.py fonts/qatt-*.ttf     # changes each .ttf and writes its .woff2 again; running it twice does no harm
 """
-import sys
+import os, sys
 from fontTools.ttLib import TTFont, newTable
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 
 EM, ASCENT = 1000, 880   # the em and the ascent of the fonts (hhea)
 
 
-TONE_SIDE = 140   # in vertical text a tone moves this far away from the middle of the column, so that it hangs at the side of the letters (not on them)
+TONE_SIDE = round(float(os.environ.get('QATT_TONE_SIDE', 140)))   # in vertical text a tone moves this far away from the middle of the column, so that it hangs at the side of the letters (not on them)
+TONE_Y = round(float(os.environ.get('QATT_TONE_Y', 0)))         # and stays this far inside the top or bottom edge of its cell (0: its edge touches the edge of the cell; more: further in)
 
 
 def tone_offset(g, glyf, centre):
@@ -31,8 +32,8 @@ def tone_offset(g, glyf, centre):
     mid_x = (g.xMin + g.xMax) / 2 + centre          # middle of the tone in the column (0 is the middle of the column)
     dx = TONE_SIDE if mid_x > 0 else -TONE_SIDE
     top, bottom = ASCENT, ASCENT - EM
-    dy = top - g.yMax if g.yMin > ASCENT / 2 else bottom - g.yMin
-    return dx, dy
+    dy = top - TONE_Y - g.yMax if g.yMin > ASCENT / 2 else bottom + TONE_Y - g.yMin
+    return dx, round(dy)
 
 
 def apply(font):
