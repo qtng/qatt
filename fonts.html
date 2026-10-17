@@ -150,6 +150,9 @@
     const fact = (k, vi, v) => dl.append(el('dt', '', k, vi), el('dd', '', v));
     fact('Family', 'Họ phông', f.family);
     fact('Characters', 'Số ký tự', '164');
+    const dd = el('dd'), lic = el('a', '', 'Licence', 'Giấy phép'); lic.href = 'fonts/LICENSE.txt';
+    dd.append('© 2026 Qatt.org', document.createElement('br'), lic);
+    dl.append(el('dt', '', 'Copyright', 'Bản quyền'), dd);
     info.append(dl);
     const tab = { f, left, info };
     entry.tabs.push(tab);
