@@ -60,6 +60,9 @@
     .overview .quad > div { display: grid; grid-template-columns: repeat(2, 48cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
     .overview .quad span { height: 42cqw; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 53cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
+    .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg, #212529); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .to-top.show { opacity: 1; pointer-events: auto; }
+    @media (max-width: 991.98px) { .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }   /* above the bottom bar of the phone */
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
   <script src="js/navigation.js"></script>
@@ -88,6 +91,7 @@
   <p class="note"><span data-vi="© 2026 qatt.org. Bảo lưu mọi quyền. Phông chữ được dùng để đọc, viết và in văn bản QATT, không được sửa đổi hay dùng làm nền cho phông chữ khác.">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts.</span> <a href="fonts/LICENSE.txt" data-vi="Giấy phép">Licence</a></p>
 </main>
 
+<button type="button" class="to-top" id="toTop" aria-label="Back to top" data-vi-aria-label="Lên đầu trang"><i class="bi bi-arrow-up"></i></button>
 <script src="js/parser.js"></script>
 <script src="js/qatt-text.js"></script>
 <script src="js/fonts.js"></script>
@@ -183,6 +187,9 @@
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
     for (const q of samples) q.textContent = qatt;
   };
+  const toTop = $('#toTop');
+  addEventListener('scroll', () => toTop.classList.toggle('show', scrollY > 400), { passive: true });
+  toTop.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
   $('#text').addEventListener('input', render);
   render();
   // Telex (VietIme of the Chunom site, loaded with defer: ready at DOMContentLoaded); without it the switch is hidden
