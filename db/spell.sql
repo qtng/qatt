@@ -92,7 +92,7 @@ $$;
 
 -- a solved or left word of the signed-in user: the points of the word (p_delta, between -200 and 400: what a word can give at most) are added to the score
 -- (it stays at 0 or more), the speed of the decoding in use is replaced by the one of the page; gives { score, words }.
--- At most one call a second (the page needs longer for a word).
+-- At most one call a second (the page needs longer for a word; time of the clock, not of the transaction).
 create or replace function public.spell_submit(p_delta integer, p_decoding text, p_speed jsonb, p_device text default null)
 returns jsonb
 language plpgsql
@@ -111,13 +111,13 @@ begin
     raise exception 'invalid points';
   end if;
 
-  insert into public.spell_scores (user_id) values (uid) on conflict do nothing;
+  insert into public.spell_scores (user_id, updated_at) values (uid, clock_timestamp() - interval '2 seconds') on conflict do nothing;
   select updated_at into last_at from public.spell_scores where user_id = uid for update;
-  if last_at is not null and last_at > now() - interval '1 second' and p_delta <> 0 then
+  if last_at > clock_timestamp() - interval '1 second' and p_delta <> 0 then
     raise exception 'too fast' using errcode = '54000';
   end if;
 
-  update public.spell_scores set score = greatest(0, score + p_delta), words = words + 1, updated_at = now()
+  update public.spell_scores set score = greatest(0, score + p_delta), words = words + 1, updated_at = clock_timestamp()
     where user_id = uid returning * into row_score;
   perform public.spell_write_speed(uid, p_decoding, p_speed, p_device);
 
@@ -143,7 +143,8 @@ begin
   if exists (select 1 from public.spell_scores where user_id = uid) then
     return jsonb_build_object('imported', false);
   end if;
-  insert into public.spell_scores (user_id, score) values (uid, least(greatest(coalesce(p_score, 0), 0), 100000));
+  insert into public.spell_scores (user_id, score, updated_at)
+    values (uid, least(greatest(coalesce(p_score, 0), 0), 100000), clock_timestamp() - interval '2 seconds');   -- a first word may follow at once
   if p_speed is not null and jsonb_typeof(p_speed) = 'object' then
     foreach d in array array['qatt', 'omniglot'] loop
       perform public.spell_write_speed(uid, d, p_speed -> d, null);
