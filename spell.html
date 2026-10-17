@@ -323,10 +323,10 @@
     // Points: a right choice +10, a wrong one -2 (the score does not go below 0); a solved word gives a bonus that falls by 1 every 1.2 seconds
     // (50 at the start, 0 after the minute; half of it if a hint wiggled); a word without a wrong choice and a hint, in which every step was quick, gives 25 more
     // and a cheer. Speed: the time of every right choice that was the first try, without a hint, from the moment its buttons were there (the last right choice
-    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + WRONG_ADD (at most CAP, 10 s), a time above CAP counts as CAP, a time in
+    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + WRONG_ADD (at most CAP, 10 s), a time above the cap counts as the cap (the own slow value + CAP_ADD s, at most CAP = 10 s; plain CAP until there are MIN_SAMPLES times), a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 10, WRONG_ADD = 2, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
+    const CAP = 10, CAP_ADD = 2, WRONG_ADD = 2, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
     // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the fast one (ALPHA_FAST: the form of the day,
     // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
@@ -388,8 +388,9 @@
         return;
       }
       addPoints(POINTS.right);
-      const t = Math.min((performance.now() - lap.t0) / 1000, CAP);
-      const st = mine()[kind], first = !lap.wrong && !lap.hinted && !hiddenDuring;
+      const st = mine()[kind];
+      const t = Math.min((performance.now() - lap.t0) / 1000, st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP);   // the cap moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
+      const first = !lap.wrong && !lap.hinted && !hiddenDuring;
       if (first) {
         if (!(t <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false;   // slow for this player
         addTime(kind, t);
