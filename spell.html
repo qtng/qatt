@@ -11,6 +11,9 @@
   <script src="js/parser.js"></script>
   <script src="js/qatt-text.js"></script>
   <script defer src="js/fonts.js"></script>
+  <script src="vendor/supabase/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/login.js"></script>
   <style>
     :root { --qfont: "QATT Pen"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
@@ -117,6 +120,20 @@
     .cheer { position: absolute; left: 50%; top: 24%; z-index: 3; pointer-events: none; white-space: nowrap; font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-style: italic; font-size: clamp(2.2rem, 10vw, 3.6rem); color: #ffd23f; -webkit-text-stroke: .28em #0f5132; paint-order: stroke fill; text-shadow: 0 .06em .12em rgba(0, 0, 0, .35); opacity: 0; animation: cheer 1.9s ease-out forwards; }   /* letters only: gold with a dark green outline, no box */
     @keyframes cheer { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3) rotate(-8deg); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(3deg); } 30% { transform: translate(-50%, -50%) scale(1) rotate(-2deg); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -64%) scale(1.05) rotate(0); } }
     .spark { position: absolute; left: 50%; top: 42%; z-index: 3; pointer-events: none; font-size: 1.6rem; }
+    .board { max-width: 28rem; margin: 1.4rem auto 0; padding: .8rem 1rem; background: #fffdf8; color: var(--ink); border: 2px solid var(--ink); border-radius: .7rem; box-shadow: 4px 4px 0 var(--ink); font-size: .9rem; }
+    .board h2 { font: 700 1.05rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
+    .board table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .board td { padding: .15rem .3rem; }
+    .board td.num { text-align: right; white-space: nowrap; }
+    .board tr.me td { font-weight: 700; background: color-mix(in srgb, #ffd23f 45%, transparent); }
+    .board tr.guest td { color: color-mix(in srgb, var(--ink) 55%, transparent); font-style: italic; }
+    .board .more td { color: color-mix(in srgb, var(--ink) 45%, transparent); text-align: center; line-height: .6; }
+    #scoreLock { font-size: .8em; opacity: .55; margin-left: .15rem; }
+    dialog.ask { max-width: 24rem; width: calc(100vw - 2rem); padding: 1.2rem 1.3rem; background: #fffdf8; color: var(--ink); border: 3px solid var(--ink); border-radius: .8rem; box-shadow: 5px 5px 0 var(--ink); }
+    dialog.ask::backdrop { background: rgba(43, 33, 24, .45); }
+    dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
+    dialog.ask p { margin: 0 0 1rem; }
+    dialog.ask .btns { display: flex; gap: .6rem; justify-content: flex-end; }
     .stats { font-size: .85rem; color: var(--muted, #6c5d4a); font-variant-numeric: tabular-nums; }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
     #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
@@ -143,7 +160,7 @@
       <div class="head">
         <div class="word" id="word" lang="vi"></div>
         <div class="mood" id="mood" aria-live="polite">🙂</div>
-        <div class="score" id="score" title="Score"><i class="bi bi-star-fill"></i> <span id="scoreVal">0</span></div>
+        <div class="score" id="score" title="Score"><i class="bi bi-star-fill"></i> <span id="scoreVal">0</span><i class="bi bi-lock-fill" id="scoreLock" hidden></i></div>
       </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
       <div class="solution" id="solution" hidden><div class="full" id="full"></div></div>
@@ -159,6 +176,18 @@
   <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
   <div id="nextRow" class="text-center" hidden><button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button></div>
   <div class="stats text-center mt-3" id="stats" hidden aria-live="off"></div>
+  <div class="board" id="board" hidden>
+    <h2 data-vi="Bảng xếp hạng">Ranking</h2>
+    <table id="boardTable"></table>
+  </div>
+  <dialog class="ask" id="askLogin">
+    <h2 data-vi="Điểm của bạn" id="askTitle">Your points</h2>
+    <p id="askText"></p>
+    <div class="btns">
+      <button type="button" class="btn btn-sm tool-btn" id="askLater" data-vi="Để sau">Not now</button>
+      <button type="button" class="btn btn-sm btn-cinnabar" id="askSignIn" data-vi="Đăng nhập">Sign in</button>
+    </div>
+  </dialog>
 
 </div>
 </main>
@@ -332,13 +361,15 @@
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
     const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
+    let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
-    let me = { score: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true };   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
         me.score = saved.score;
+        for (const k of ['shadow', 'pending', 'asked']) if (typeof saved[k] === 'number') me[k] = saved[k];
         if (saved.avg && typeof saved.avg.v === 'number') me.avg = saved.avg;
         if (saved.skipOk === false) me.skipOk = false;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
@@ -368,7 +399,13 @@
       e.className = 'pts ' + (n > 0 ? 'plus' : 'minus'); e.textContent = (n > 0 ? '+' : '−') + Math.abs(n);
       $('task').append(e); setTimeout(() => e.remove(), 1200 + delay * 1000);
     };
-    const addPoints = (n, delay) => { const before = me.score; me.score = Math.max(0, me.score + n); word_.points += me.score - before; floatPoints(n, delay); showScore(true); saveMe(); };
+    // the points count (and go to the server) only for a signed-in player; a visitor sees them rise from the card, but the score stays at 0 (the points are kept in `shadow`)
+    const addPoints = (n, delay) => {
+      const key = signed ? 'score' : 'shadow', before = me[key];
+      me[key] = Math.max(0, before + n); word_.points += me[key] - before;
+      if (signed) { me.pending += me[key] - before; schedSync(); }
+      floatPoints(n, delay); showScore(signed); saveMe();
+    };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
     function addTime(kind, t) {
       const st = mine()[kind]; st.n++;
@@ -440,6 +477,8 @@
       if (!a.n || pts > a.v) me.skipOk = true;
       a.n++; a.v = a.n === 1 ? pts : a.v + Math.max(1 / a.n, ALPHA_FAST) * (pts - a.v);
       saveMe(); showSkip();
+      if (!signed && typeof loadBoard === 'function') loadBoard();   // the grey line of a visitor with the points he would have
+      setTimeout(() => { if (typeof maybeAsk === 'function') maybeAsk(); }, 2400);   // a visitor is asked to sign in after a good word
     }
     // Skip: the word does not count at all (the state before the word comes back: score and times); then Skip is locked until a word is solved that beats the own average
     function showSkip() {
@@ -449,18 +488,94 @@
     function skipWord() {
       if (!$('nextRow').hidden) return another();   // the word is solved: only the next word, nothing to take back
       if (!me.skipOk) return;
-      if (word_.snap) { const snap = JSON.parse(word_.snap); me.score = snap.score; me.stats = snap.stats; }
+      if (word_.snap) { const snap = JSON.parse(word_.snap); me.score = snap.score; me.shadow = snap.shadow; me.pending = snap.pending; me.stats = snap.stats; }
       me.skipOk = false; saveMe(); showScore(); showStats(); showSkip();
       another();
     }
     newLap(); showScore(); showStats();
+
+    // ---- the account: score and speed of a signed-in player go to the server (db/spell.sql, js/supabase.js), a visitor only plays --------------------------------------
+    const device = () => matchMedia('(max-width: 767.98px)').matches ? 'phone' : 'desktop';
+    const showLock = () => {
+      $('scoreLock').hidden = signed;
+      $('score').title = signed ? 'Score' : Lang.t('Sign in so that your points count', 'Đăng nhập để điểm được tính');
+      $('score').style.cursor = signed ? '' : 'pointer';
+    };
+    function schedSync() { clearTimeout(syncTimer); syncTimer = setTimeout(sync, 2000); }
+    // sends the points of the last words and the speed of the decoding in use; a failure (too fast, offline) keeps them for the next try
+    async function sync() {
+      if (!signed || !db || syncing || !me.pending) return;
+      const d = Math.max(-200, Math.min(400, me.pending));   // what the server takes at most at once
+      syncing = true;
+      const res = await db.spellSubmit(d, dec(), mine(), device()).catch(error => ({ error }));
+      syncing = false;
+      if (!res || res.error) { syncTimer = setTimeout(sync, 8000); return; }
+      me.pending -= d; me.score = res.score + me.pending;   // the server has the score, what is not sent yet comes on top
+      saveMe(); showScore();
+      if (me.pending) schedSync();
+      loadBoard();
+      ensureName();
+    }
+    let nameAsked = false;
+    async function ensureName() {   // once per visit: a player without a name is not in the ranking; the dialog can be closed
+      if (nameAsked || !signed) return;
+      nameAsked = true;
+      try { if (!(await db.getDisplayName())) await QattLogin.chooseName(db, { required: false }); } catch (e) {}
+      loadBoard();
+    }
+    const ASK_AT = [60, 300, 1000];   // the points a visitor would have when he is asked to sign in (once for each)
+    function askLogin() {
+      me.asked = ASK_AT.filter(x => x <= me.shadow).length; saveMe();
+      $('askText').textContent = Lang.t(`You would have ${me.shadow} points. Sign in so that your points count and you appear in the ranking.`,
+                                        `Bạn sẽ có ${me.shadow} điểm. Hãy đăng nhập để điểm được tính và bạn có tên trong bảng xếp hạng.`);
+      $('askLogin').showModal();
+    }
+    const maybeAsk = () => { if (!signed && db && me.asked < ASK_AT.length && me.shadow >= ASK_AT[me.asked]) askLogin(); };
+    $('askLater').addEventListener('click', () => $('askLogin').close());
+    $('askSignIn').addEventListener('click', () => {
+      $('askLogin').close();
+      QattLogin.open(db, { en: 'Sign in with Google or an email link. Your points count from then on.', vi: 'Đăng nhập bằng Google hoặc liên kết email. Từ lúc đó điểm của bạn được tính.' });
+    });
+    $('score').addEventListener('click', () => { if (!signed && db) askLogin(); });
+    // the ranking: the best and the own rank; a visitor sees a grey line with the points he would have
+    async function loadBoard() {
+      if (!db) return;
+      const rows = await db.spellLeaderboard(dec(), 10).catch(() => []);
+      const table = $('boardTable'), tr = (cls, ...cells) => { const r = document.createElement('tr'); r.className = cls || ''; cells.forEach((c, i) => { const d = document.createElement('td'); if (i !== 1) d.className = 'num'; d.textContent = c; r.append(d); }); return r; };
+      const out = []; let last = 0;
+      for (const r of rows) {
+        if (last && r.rank > last + 1) { const more = tr('more', '', '⋮', ''); out.push(more); }
+        out.push(tr(r.is_me ? 'me' : '', r.rank, r.username, r.score)); last = r.rank;
+      }
+      if (!signed && me.shadow) out.push(tr('guest', '–', Lang.t('You (not counted)', 'Bạn (chưa tính)'), me.shadow));
+      table.replaceChildren(...out);
+      $('board').hidden = !out.length;
+    }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
+    async function initAccount() {
+      db = window.QATT_SPELL_DB || (typeof SupabaseService !== 'undefined' && typeof supabase !== 'undefined' ? new SupabaseService() : null);
+      if (!db) { me.shadow += me.score; me.score = 0; me.pending = 0; showScore(); showLock(); return; }
+      try { signed = !!(await db.initQuiet()); } catch (e) { signed = false; }
+      if (signed) {
+        me.shadow = 0;   // what a visitor would have had does not come along: the points count from now on
+        const rec = await db.spellLoad().catch(() => null);
+        if (rec) {   // the server has the truth: the score and the speed of the decodings it knows
+          me.score = rec.score + me.pending;
+          for (const d of Object.keys(rec.speed)) me.stats[d] = rec.speed[d];
+        } else if (rec === null) me.score = me.score;   // an error: the browser keeps what it has
+        else me.score = me.pending;
+        if (me.pending) schedSync();
+      } else { me.shadow += me.score; me.score = 0; me.pending = 0; }   // points of an earlier version of the page
+      saveMe(); showScore(); showStats(); showLock(); loadBoard();
+    }
+    initAccount();
 
     let nomOf = '';
     function start(word, nom) {
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
-      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
+      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
       startTimer();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)

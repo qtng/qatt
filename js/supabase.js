@@ -16,6 +16,7 @@ s.suggestedName();                // a first suggestion from the account (first 
 await s.signInWithGoogle();
 await s.signInWithEmail(email);   // sends a link
 await s.signOut();
+await s.initQuiet();               // the user if signed in for real, else null; no anonymous account is made (Spell it!: spellLoad, spellSubmit, spellLeaderboard)
 s.isAnonymous                     // true until the user has signed in (see js/login.js for the dialog)
 
 Everybody starts as an anonymous user (their decks and score belong to it). Signing in with Google or an email
@@ -168,6 +169,48 @@ class SupabaseService {
   async getDisplayName() {
     const profile = await this.getProfile();
     return profile ? profile.name : null;
+  }
+
+  // --- Spell it! (spell.html): score and speed of the signed-in user, see db/spell.sql ---
+
+  // like init(), but without signing in anonymously: gives the user if somebody is signed in for real (not an anonymous one), else null
+  async initQuiet() {
+    if (typeof supabase === 'undefined') return null;
+    if (!this.client) this.client = supabase.createClient(this.url, this.key, { global: { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } } });
+    const { data: { session } } = await this.client.auth.getSession();
+    this.user = session && session.user && session.user.is_anonymous === false ? session.user : null;
+    this.client.auth.onAuthStateChange((event, session) => { this.user = session && session.user && session.user.is_anonymous === false ? session.user : this.user; });
+    return this.user;
+  }
+
+  // the record of the user: { score, speed: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } } or null (no row yet, or an error)
+  async spellLoad() {
+    if (!this.client || !this.user) return null;
+    const [score, speed] = await Promise.all([
+      this.client.from('spell_scores').select('score').eq('user_id', this.user.id).maybeSingle(),
+      this.client.from('spell_speed').select('*').eq('user_id', this.user.id),
+    ]);
+    if (score.error || speed.error) return null;
+    const out = { score: (score.data && score.data.score) || 0, speed: {} };
+    for (const r of speed.data || []) {
+      out.speed[r.decoding] = {};
+      for (const k of ['onset', 'rhyme', 'tone']) out.speed[r.decoding][k] = { v: r[k + '_v'], f: r[k + '_f'], n: r[k + '_n'], m: r[k + '_m'] };
+    }
+    return out;
+  }
+
+  // the points of a word (delta) and the speed of the decoding in use ({ onset, rhyme, tone: { v, f, n, m } }): { score, words } or { error }
+  async spellSubmit(delta, decoding, speed, device) {
+    if (!this.client || !this.user) return { error: new Error('not signed in') };
+    const { data, error } = await this.client.rpc('spell_submit', { p_delta: delta, p_decoding: decoding, p_speed: speed, p_device: device || null });
+    return error ? { error } : data;
+  }
+
+  // [{ rank, username, score, onset_v, rhyme_v, tone_v, is_me }]: the best and the own rank (also for a visitor that is not signed in)
+  async spellLeaderboard(decoding = 'qatt', limit = 10) {
+    if (!this.client) return [];
+    const { data, error } = await this.client.rpc('spell_leaderboard', { p_decoding: decoding, p_limit: limit });
+    return error ? [] : data || [];
   }
 
   // --- practice: progress and score are kept on the server, see db/practice_progress.sql ---
