@@ -305,14 +305,14 @@ glyphs[jname + '.zw'] = TTGlyphPen(None).glyph(); adv[jname + '.zw'] = 0; order.
 
 def build_info():
     """Name ID 10 (description): the parameters this font was built with and the commit of the tools, so that it can be built again (tools/build_all.py)"""
-    import datetime
+    import datetime, font_vertical
     here = os.path.dirname(os.path.abspath(__file__))
     try:
         git = lambda *args: subprocess.run(['git', '-C', here] + list(args), capture_output=True, text=True, check=True).stdout.strip()
         commit = git('rev-parse', '--short', 'HEAD') + ('+changes' if git('status', '--porcelain', '--', '.', ':!../fonts') else '')   # uncommitted changes of the tools
     except (OSError, subprocess.CalledProcessError): commit = 'unknown'
     p = [('style', KAGE_STYLE + ('-cut' if CUT else '') if KAGE else 'brush' if BRUSH else 'prototype'), ('weight', BOLD), ('light', int(light)), ('wide', WIDE),
-         ('VS', VS), ('VC', VC), ('HS', HS), ('PAIR_M', PAIR_M), ('PAIR_K', round(PAIR_K, 4)), ('TV', TV), ('TH', TH), ('SY', SY), ('SX', SX)]
+         ('VS', VS), ('VC', VC), ('HS', HS), ('PAIR_M', PAIR_M), ('PAIR_K', round(PAIR_K, 4)), ('TV', TV), ('TH', TH), ('SY', SY), ('SX', SX), ('TONE_SIDE', font_vertical.TONE_SIDE), ('TONE_Y', font_vertical.TONE_Y)]
     return 'Built %s with tools/build_font.py of the repository qtng/qatt, commit %s: %s' % (datetime.date.today().isoformat(), commit, ', '.join('%s %s' % kv for kv in p))
 
 fb = FontBuilder(UPM, isTTF=True)

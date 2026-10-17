@@ -6,17 +6,34 @@ does a tone mark (a syllable 3 to 4 em high and 1 em wide). Here the font gets `
   left half (.left, .left45, .left55, .leftlow)   half a half-cell to the left of the middle (the middle of the glyph is already on the middle of the column), no advance
   right half (.right ...)                           half a half-cell to the right, the pen moves on by the 1 em of the cell
   joiner and combiner (.zw)                         no advance
-  tone marks and the upper glyph of a stack (.mark, .markw, .up, .upw; zero width, lying over the cell to their left in horizontal text)
+  the upper glyph of a stack (.up, .upw; zero width, lying over the cell to its left in horizontal text)
                                                     moved to the middle of that cell (half its width to the right) and up by 1 em, no advance
+  tone marks (.mark, .markw)                        the same move back into the cell, then (tone_offset) inside it in y (the tones of horizontal text hang over and under the
+                                                    cell, which in a column lies on the neighbours) and TONE_SIDE out to the side they stand on, at the edge of the letters
 A vertical advance is *taken away* from the 1 em that points down, so "no advance" is -1000. Horizontal text is not changed.
 
   python3 tools/font_vertical.py fonts/qatt-*.ttf     # changes each .ttf and writes its .woff2 again; running it twice does no harm
 """
-import sys
+import os, sys
 from fontTools.ttLib import TTFont, newTable
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 
 EM, ASCENT = 1000, 880   # the em and the ascent of the fonts (hhea)
+
+
+TONE_SIDE = round(float(os.environ.get('QATT_TONE_SIDE', 140)))   # in vertical text a tone moves this far away from the middle of the column, so that it hangs at the side of the letters (not on them)
+TONE_Y = round(float(os.environ.get('QATT_TONE_Y', 0)))         # and stays this far inside the top or bottom edge of its cell (0: its edge touches the edge of the cell; more: further in)
+
+
+def tone_offset(g, glyf, centre):
+    """Offset of a tone mark in vertical text, on top of the move back into the cell: the horizontal text puts the tones over and under the cell (y 832..1013 and
+    -308..-83), which in a column lies on the neighbours, so they go down or up into the cell (its top is ASCENT, its bottom ASCENT - EM) and out to the side they stand on."""
+    g.recalcBounds(glyf)
+    mid_x = (g.xMin + g.xMax) / 2 + centre          # middle of the tone in the column (0 is the middle of the column)
+    dx = TONE_SIDE if mid_x > 0 else -TONE_SIDE
+    top, bottom = ASCENT, ASCENT - EM
+    dy = top - TONE_Y - g.yMax if g.yMin > ASCENT / 2 else bottom + TONE_Y - g.yMin
+    return dx, round(dy)
 
 
 def apply(font):
@@ -30,14 +47,17 @@ def apply(font):
     lefts = ends('.left', '.left45', '.left55', '.leftlow')
     rights = ends('.right', '.right45', '.right55', '.rightlow')
     zero = ends('.zw')
-    over = ends('.mark', '.up')                      # over the cell to the left: its middle is half an em away (over a pair: half the pair)
-    over_wide = ends('.markw', '.upw')
+    over = ends('.up')                              # over the cell to the left: its middle is half an em away (over a pair: half the pair)
+    over_wide = ends('.upw')
     fea = 'feature vert {\n'
     fea += f'    pos [{" ".join(lefts)}] <{-half // 2} 0 0 {-EM}>;\n'
     fea += f'    pos [{" ".join(rights)}] <{half // 2} 0 0 0>;\n'
     fea += f'    pos [{" ".join(zero)}] <0 0 0 {-EM}>;\n'
     fea += f'    pos [{" ".join(over)}] <{EM // 2} {EM} 0 {-EM}>;\n'
-    if over_wide: fea += f'    pos [{" ".join(over_wide)}] <{half} {EM} 0 {-EM}>;\n'
+    for names, centre in ((ends('.mark'), EM // 2), (ends('.markw'), half)):   # a tone: back into the cell (up by 1 em) and, in vertical text, inside it and at the side
+        for n in names:
+            dx, dy = tone_offset(glyf[n], glyf, centre)
+            fea += f'    pos {n} <{centre + dx} {EM + dy} 0 {-EM}>;\n'
     fea += '} vert;\n'
     addOpenTypeFeaturesFromString(font, fea, tables=['GPOS'])
     # vertical metrics: every glyph 1 em high, its top (the vertical origin) at the ascent like the horizontal drawing
