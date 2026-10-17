@@ -46,7 +46,7 @@ def svg(d, w, h, scale_height, thicken=0, ring=False):
 if __name__ == '__main__':
     d, w, h = outline()
     out = lambda name, text: open(os.path.join(ROOT, 'img', name), 'w').write(text)
-    out('logo.svg', svg(d, w, h, 320, thicken=0, ring=True))          # the logo: the symbol 320 high on the tile, with the thin frame
+    out('logo.svg', svg(d, w, h, 340, thicken=4, ring=True))          # the logo: the symbol 340 high on the tile, with the thin frame
     out('favicon.svg', svg(d, w, h, 372, thicken=4))                 # the icon: bigger and a little bolder, for 16 to 32 pixels
     if '--no-png' not in sys.argv:   # the PNG of the home screen icon: the icon rendered by Chromium (Playwright for node: NODE_PATH may point to its node_modules)
         import subprocess

@@ -31,7 +31,7 @@ Playwright. Only requests to the local server are allowed (no CDN), the paths do
 
 ### Logo and icons: `make_logo.py`
 
-`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009B U+F003D) in QATT Khai: `img/logo.svg` (320 high on the red tile with the thin frame, used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-khai.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
+`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009B U+F003D) in QATT Khai: `img/logo.svg` (340 high on the red tile with the thin frame, the lines as bold as in the icon; used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-khai.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
 
 ### All fonts at once: `build_all.py`
 
