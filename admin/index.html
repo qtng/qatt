@@ -26,6 +26,11 @@
 <main class="container py-4" style="max-width: 48rem">
   <h1>Admin</h1>
   <p class="note" id="account"></p>
+  <div class="card-box d-flex flex-wrap justify-content-center gap-2 p-3 mb-3" id="adminNav" hidden>
+    <a class="btn admin-yellow" href="stats.html">Statistics</a>
+    <a class="btn admin-yellow" href="models.html">AI models</a>
+    <a class="btn admin-yellow" href="translator.html">Translator data</a>
+  </div>
   <div id="denied" class="alert alert-warning">Checking...</div>
 
   <div id="area" hidden>
@@ -114,6 +119,7 @@
     QattLogin.status(sp, document.getElementById('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
     const state = await Admin.check(sp);
     document.getElementById('area').hidden = state !== 'admin';
+    document.getElementById('adminNav').hidden = state !== 'admin';
     const box = document.getElementById('denied');
     box.hidden = state === 'admin';
     box.textContent = state === 'signin' ? 'Sign in with your admin account.' : 'This account is not an admin.';

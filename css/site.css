@@ -6,3 +6,7 @@
 :root { --ink: #2b2118; --cinnabar: #a8362a; --retro-hover: #fff1c9; --retro-active: #ffe39a; }
 .btn { white-space: nowrap; }   /* a button never wraps its text, whatever the language */
 .btn-pill { padding: .5rem 1.3rem; }   /* the shape of the button comes from the theme */
+
+/* a button that only admins see (the buttons of the admin pages): bright yellow in every theme */
+.btn.admin-yellow { background: #ffe600 !important; color: #111 !important; border: 2px solid #111 !important; font-weight: 600; }
+.btn.admin-yellow:hover, .btn.admin-yellow:focus-visible { background: #fff176 !important; }
