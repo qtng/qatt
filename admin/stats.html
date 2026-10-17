@@ -56,6 +56,16 @@
     <h2>Total</h2>
     <div class="tiles" id="totalTiles"></div>
 
+    <h2>Spell it!</h2>
+    <div class="tiles" id="spellTiles"></div>
+    <p class="note mt-2">Signed-in players only (the points of visitors stay in their browser). Per UTC day, counting from the day <code>db/spell.sql</code> was run again.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Day</th><th>Players</th><th>Words solved</th></tr></thead>
+        <tbody id="spell"></tbody>
+      </table>
+    </div>
+
     <h2>Sessions</h2>
     <p class="note">Visitors and sessions per day, site and kind (definitions in the footnote at the bottom). Counting started on 16 Oct 2026.</p>
     <div class="table-responsive">
@@ -176,6 +186,17 @@
         .forEach(([v, l]) => tile($('windowTiles'), v, l));
       [[t.with_account, 'accounts'], [t.practising, 'people who practised'], [t.decks, 'decks'], [t.public_decks, 'public decks']]
         .forEach(([v, l]) => tile($('totalTiles'), v, l));
+      const sps = await sp.client.rpc('admin_spell', { p_days: 14 });
+      if (sps.data) {
+        $('spellTiles').replaceChildren();
+        [[sps.data.total.players, 'players'], [sps.data.total.words, 'words solved'], [sps.data.total.players_10_words, 'with 10+ words'], [sps.data.total.players_100_words, 'with 100+ words']]
+          .forEach(([v, l]) => tile($('spellTiles'), v, l));
+        $('spell').replaceChildren(...sps.data.daily.map(d => {
+          const tr = document.createElement('tr');
+          [d.day, d.players, d.words].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+          return tr;
+        }));
+      }
       const vis = await sp.client.rpc('admin_visits', { p_days: 60 });
       const cutoff = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
       const byDay = new Map();
