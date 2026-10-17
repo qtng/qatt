@@ -20,13 +20,15 @@ const FOOT = [[0, 0], [0.14, 0.03], [0.59, 0.11], [1.03, 0.09], [1.5, 0.04], [2.
 const table = (t, x) => { if (x <= t[0][0]) return t[0][1]; for (let i = 1; i < t.length; i++) if (x <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (x - t[i - 1][0]) / (t[i][0] - t[i - 1][0]); return t[t.length - 1][1]; };
 function horizontal(p0, p1, W) {
   const [a, b] = p0[0] <= p1[0] ? [p0, p1] : [p1, p0];
-  const len = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / len, ty = (b[1] - a[1]) / len, N = Math.max(24, Math.ceil(len / 2));
-  const top = [], bot = [];
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / len, ty = (b[1] - a[1]) / len, L = len / W, N = Math.max(60, Math.ceil(L * 8));
+  const at = (u, o) => [a[0] + tx * u - ty * o * W, a[1] + ty * u + tx * o * W];
+  const top = [], bot = [], round = (x, r) => x >= r ? 1 : Math.sqrt(Math.max(0, 1 - (1 - Math.max(0, x) / r) ** 2));   // the end is a quarter ellipse of depth r (in W): the edges meet there in a curve, no cap sticks out
   for (let i = 0; i <= N; i++) {
-    const d = len * i / N / W, e = (len / W) - d, u = len * i / N;
-    const t = -0.01 - RISE * d + table(TIPDROP, e), v = BASE + table(BELLY, d) + table(FOOT, e);
-    const at = o => [a[0] + tx * u - ty * o * W, a[1] + ty * u + tx * o * W];
-    top.push(at(t)); bot.push(at(v));
+    const d = L * i / N, e = L - d;
+    const k = Math.max(0, 1 - e / 2.4), shift = RISE * (L - 11.26) * k * k * (3 - 2 * k);   // the tip keeps its place relative to the right end whatever the length: the template is 11.26 W long
+    const t = -0.01 - RISE * d + table(TIPDROP, e) + shift, v = BASE + table(BELLY, d) + table(FOOT, e);
+    const m = (t + v) / 2, h = (v - t) / 2 * round(e, 0.3) * round(d, 0.15);
+    top.push(at(d * W, m - h)); bot.push(at(d * W, m + h));
   }
   return [...top, ...bot.reverse()];
 }
@@ -34,6 +36,7 @@ function horizontal(p0, p1, W) {
 function stroke(line, W, others) {
   const f = nums(line), p0 = [f[3], f[4]], p1 = [f[f.length - 2], f[f.length - 1]];
   const dx = p1[0] - p0[0], dy = p1[1] - p0[1], ax = Math.abs(dx), ay = Math.abs(dy);
+  if (!Number.isFinite(dx + dy) || Math.hypot(dx, dy) < 1e-6) return [];   // a stroke without length (the squeezing of a pair can collapse one)
   let kind;
   if (f[0] === 1) kind = ay < ax * 0.3 ? "h" : ax < ay * 0.3 ? "v" : dx < 0 ? "pie" : "na";
   else kind = f[1] === 7 ? "arc" : dx < 0 ? "pie" : "na";
@@ -77,5 +80,5 @@ function stroke(line, W, others) {
   return [...L, ...cap(N - 1, 1, roundEnd), ...R.slice().reverse(), ...cap(0, -1, roundStart).reverse()];
 }
 
-function kaitiPolygons(lines, W) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i))); }
+function kaitiPolygons(lines, W) { const fs = lines.map(nums); return fs.map((f, i) => { try { const r = stroke(lines[i], W, fs.filter((_, j) => j !== i)); if (r.some(q => !Number.isFinite(q[0] + q[1]))) throw new Error("NaN"); return r; } catch (e) { throw new Error(lines[i] + ": " + e.message); } }).filter(poly => poly.length); }
 module.exports = { kaitiPolygons };
