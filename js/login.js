@@ -171,7 +171,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 	}
 	function renderStatus(db, element, hint, hintVi) {
 		element.replaceChildren();
-		if (!db || !db.user) return;
+		if (!db) return;   // without a login there is no user (nobody is signed in anonymously any more): the line then offers the sign-in
 		if (signedIn(db)) {
 			const out = el('a', { textContent: T('Sign out', 'Đăng xuất') });
 			out.addEventListener('click', async () => { await db.signOut(); location.reload(); });
