@@ -19,7 +19,7 @@ import font_names
 
 # --light: thinner strokes (LIGHT times the stroke widths), family "QATT Prototype Light"
 LIGHT = 0.6
-VERTICAL = '--vertical' in sys.argv    # vertical metrics and a `vert` rule, so that a syllable is one square in vertical text
+VERTICAL = '--vertical' in sys.argv    # then font_vertical.py adds the vertical metrics and the vert rule to the built font
 if VERTICAL: sys.argv.remove('--vertical')
 light = '--light' in sys.argv
 if light: sys.argv.remove('--light')
@@ -285,14 +285,6 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-if VERTICAL:   # every glyph is 1 em high in vertical text, its origin on the top of the em box (the ascent), as the horizontal drawing
-    fb.setupVerticalHeader(ascent=500, descent=-500)
-    def tsb(n):
-        gl = glyphs[n]
-        if not gl.numberOfContours: return 0
-        gl.recalcBounds(None)
-        return 880 - gl.yMax
-    fb.setupVerticalMetrics({n: (ADV, tsb(n)) for n in order})
 fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif', 'kaiti': 'Khai'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti') else '') + LABEL + (' Wide' if WIDE != 1.0 else '')))   # with copyright and licence, see tools/font_names.py
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
@@ -332,23 +324,6 @@ lookup TONE_MARK_W {{ sub @TONE by @TONE_MARKW; }} TONE_MARK_W;
 '''
     upper_pair = 'UPPER_W'; BR = ''
     tone_wide = f"sub [{RA} @UPW] @TONE' lookup TONE_MARK_W;"
-vertical_fea = ''
-if VERTICAL:
-    # vertical text (the vert feature): the halves of a pair lie side by side as in horizontal text, so a syllable is one square: the left half is
-    # drawn half a cell to the left of the column middle and the right half half a cell to the right, neither moves the pen except the right one (1 em);
-    # joiner, combiner, tone marks and the upper glyph of a stack (zero width, lying over the cell to their left in horizontal text) are moved up by the
-    # cell they follow and to the middle, and do not move the pen either. Values: xPlacement yPlacement xAdvance yAdvance (a vertical advance is taken away from the downward 1 em, so -1000 is none).
-    lefts = ' '.join(x for x in f'{LA} {LL}'.split() if x.startswith('@')) 
-    rights = ' '.join(x for x in f'{RA} {RL}'.split() if x.startswith('@'))
-    over = '@UP @TONE_MARK' + (' @UPW @TONE_MARKW' if WIDE != 1.0 else '')
-    vertical_fea = f'''
-feature vert {{
-    pos [{lefts}] <-250 0 0 -1000>;
-    pos [{rights}] <250 0 0 0>;
-    pos [{jname}.zw {cname}.zw {jname} {cname}] <0 0 0 -1000>;
-    pos [{over}] <500 1000 0 -1000>;
-}} vert;
-'''
 addOpenTypeFeaturesFromString(fb.font, f'''
 @FULL = [{' '.join(halves)}];
 @LEFT = [{' '.join(n + '.left' for n in halves)}];
@@ -382,7 +357,7 @@ feature ccmp {{
     lookup STACK;
     lookup TONE_AFTER;
 }} ccmp;
-{vertical_fea}''')
+''')
 
 # BASE table as in Noto Sans CJK: the baselines of the cell (horizontal text): romn 0, ideo -120 (bottom of the em box), icfb/icft the ideographic character face box
 from fontTools.ttLib import newTable
@@ -403,5 +378,9 @@ fb.font['BASE'] = _base
 
 fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont
-f = TTFont(OUT + '.ttf'); f.flavor = 'woff2'; f.save(OUT + '.woff2')
+f = TTFont(OUT + '.ttf')
+if VERTICAL:
+    import font_vertical
+    font_vertical.apply(f); f.save(OUT + '.ttf')
+f.flavor = 'woff2'; f.save(OUT + '.woff2')
 print(len(order) - 1, 'glyphs')
