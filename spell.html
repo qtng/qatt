@@ -323,10 +323,10 @@
     // Points: a right choice +10, a wrong one -2 (the score does not go below 0); a solved word gives a bonus that falls by 1 every 1.2 seconds
     // (50 at the start, 0 after the minute; half of it if a hint wiggled); a word without a wrong choice and a hint, in which every step was quick, gives 25 more
     // and a cheer. Speed: the time of every right choice that was the first try, without a hint, from the moment its buttons were there (the last right choice
-    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a time above CAP counts as CAP, a time in
+    // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + WRONG_ADD (at most CAP), a time above CAP counts as CAP, a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 5, ALPHA = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are 5 times of that kind
+    const CAP = 5, WRONG_ADD = 2, ALPHA = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are 5 times of that kind
     const KINDS = ['onset', 'rhyme', 'tone'];
     let me = { score: 0, stats: { onset: { v: 0, n: 0 }, rhyme: { v: 0, n: 0 }, tone: { v: 0, n: 0 } } };
     try { const saved = JSON.parse(localStorage.getItem('qattSpell')); if (saved && typeof saved.score === 'number') me = { ...me, ...saved }; } catch (e) {}
@@ -354,7 +354,13 @@
     const addPoints = (n, delay) => { me.score = Math.max(0, me.score + n); floatPoints(n, delay); showScore(true); saveMe(); };
     // the choice of a step: kind = onset, rhyme or tone; ok = right
     function judge(kind, ok) {
-      if (!ok) { lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong); return; }
+      if (!ok) {   // a wrong choice counts in the speed as well: the own value plus WRONG_ADD seconds (else one could click wrong on purpose and only hurry on easy words)
+        lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
+        const st = me.stats[kind], t = Math.min(CAP, st.v + WRONG_ADD);
+        st.n++; st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
+        showStats(); saveMe();
+        return;
+      }
       addPoints(POINTS.right);
       const t = Math.min((performance.now() - lap.t0) / 1000, CAP);
       const st = me.stats[kind], first = !lap.wrong && !lap.hinted && !hiddenDuring;
@@ -451,7 +457,8 @@
       const found = slots.filter(s => s.shape === shape);
       verdict(b, found.length > 0);
       mood(found.length > 0);
-      judge(found.length && found[0].role === 'onset' ? 'onset' : 'rhyme', found.length > 0);   // the shape of the rhyme (or of a single letter) counts as a rhyme
+      const next = slots.find(x => x.state === 'empty');   // a wrong shape counts for the kind of the cell that is still to be found
+      judge((found[0] || next || {}).role === 'onset' ? 'onset' : 'rhyme', found.length > 0);   // the shape of the rhyme (or of a single letter) counts as a rhyme
       sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
