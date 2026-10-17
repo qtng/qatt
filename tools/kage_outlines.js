@@ -81,12 +81,13 @@ function outlineOf(polygons) {
   for (const poly of polygons) {
     const p = poly.map(q => [q[0] / S, q[1] / S]);
     let area = 0; for (let i = 0; i < p.length; i++) { const u = p[i], v = p[(i + 1) % p.length]; area += u[0] * v[1] - v[0] * u[1]; a = Math.min(a, u[0]); b = Math.max(b, u[0]); }
-    if (area < 0) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
+    const flip = area < 0; if (flip) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
     const f = q => q[0].toFixed(3) + " " + q[1].toFixed(3);
     if (poly.smooth) {                         // a closed Catmull-Rom spline through the points, as cubic Bezier curves
       const n = p.length, P = i => p[(i + n) % n];
       d += "M" + f(p[0]);
-      for (let i = 0; i < n; i++) { const a = P(i - 1), b = P(i), c = P(i + 1), e = P(i + 2); d += "C" + f([b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6]) + " " + f([c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6]) + " " + f(c); }
+      const straight = new Set((poly.straight || []).map(i => flip ? (2 * n - 2 - i) % n : i));   // segments i -> i + 1 drawn as lines
+      for (let i = 0; i < n; i++) { const a = P(i - 1), b = P(i), c = P(i + 1), e = P(i + 2); d += straight.has(i) ? "L" + f(c) : "C" + f([b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6]) + " " + f([c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6]) + " " + f(c); }
       d += "Z";
     } else d += "M" + p.map(f).join("L") + "Z";
   }
