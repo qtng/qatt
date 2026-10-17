@@ -61,7 +61,7 @@ Rules when you write or change pages:
 `chunom.org` is the address of the Chunom site (done, with `v2.chunom.org` before). What was done, for reference or for a move to another domain:
 
 1. DNS of `chunom.org` to GitHub Pages (A records `185.199.108.153` … `185.199.111.153`; `www` as CNAME to `qtng.github.io`), then the custom domain `chunom.org` in `qtng.github.io` → Settings → Pages and enforce HTTPS. Never use "Unpublish site" to switch domains (it removes the certificate).
-2. In `qtng/qatt` the domain in `js/navigation.js` constant `CHUNOM_SITE`, `404.html` constant `CHUNOM_SITE`, `spell.html`, `editor.html`, `type.html`, `practice/qatt.html`, `admin/index.html` and the default `PROMPTS_URL` / allowed origins of the function `translate`.
+2. In `qtng/qatt` the domain in `js/navigation.js` constant `CHUNOM_SITE`, `404.html` constant `CHUNOM_SITE`, `spell.html`, `editor.html`, `admin/font/qatt-editor.html`, `practice/qatt.html`, `admin/index.html` and the default `PROMPTS_URL` / allowed origins of the function `translate`.
 3. In `qtng/pages` `python3 tools/generate.py --site https://chunom.org` (add `--chunom ../chunom --assets ../chunom-assets` for local checkouts) and commit `docs/`.
 4. Nothing to change in `qtng/chunom` and `qtng/chunom-assets` (root-relative paths).
 5. Search Console: verify `chunom.org`, submit `https://chunom.org/pages/sitemap.xml`.

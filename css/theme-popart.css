@@ -113,7 +113,7 @@ html[data-theme="popart"] .hero .rule { color: #fff !important; }
 html[data-theme="popart"] .rule::before, html[data-theme="popart"] .rule::after { border-top: 3px solid var(--ink); }
 html[data-theme="popart"] .hero .rule::before, html[data-theme="popart"] .hero .rule::after { border-top-color: #fff; }
 html[data-theme="popart"] ::placeholder { color: #333 !important; opacity: .65; }
-/* the head and the two panes of type.html */
+/* the head and the two panes of admin/font/qatt-editor.html */
 html[data-theme="popart"] .editor-head h1 { font-size: clamp(2rem, 7vw, 3rem); color: var(--pop-blue); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 4px 4px 0 var(--ink), 7px 7px 0 var(--pop-red); display: inline-block; transform: rotate(-2deg); }
 html[data-theme="popart"] .editor-head .han { color: #fff; background: var(--pop-red); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); display: inline-block; padding: .1rem .9rem .1rem 1.4rem; transform: rotate(1.5deg); }
 html[data-theme="popart"] .editor-head p { color: var(--ink); }
