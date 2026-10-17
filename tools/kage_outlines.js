@@ -84,6 +84,10 @@ function outlineOf(polygons) {
     const flip = area < 0; if (flip) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
     const f = q => q[0].toFixed(3) + " " + q[1].toFixed(3);
     if (poly.smooth) {                         // a closed Catmull-Rom spline through the points, as cubic Bezier curves
+      if (!poly.straight) {                    // tiny steps (crowded at the tips) make the boolean operations of the build fail: keep points at least 0.1 apart
+        const keep = [p[0]]; for (const q of p.slice(1)) if (Math.hypot(q[0] - keep[keep.length - 1][0], q[1] - keep[keep.length - 1][1]) > 0.1) keep.push(q);
+        if (keep.length > 8) p.splice(0, p.length, ...keep);
+      }
       const n = p.length, P = i => p[(i + n) % n];
       d += "M" + f(p[0]);
       const straight = new Set((poly.straight || []).map(i => flip ? (2 * n - 2 - i) % n : i));   // segments i -> i + 1 drawn as lines
