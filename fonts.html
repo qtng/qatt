@@ -44,6 +44,11 @@
     .info dl { display: grid; grid-template-columns: auto 1fr; gap: .15rem .8rem; margin: 0 0 1rem; }
     .info dt { font-weight: 400; opacity: .62; }
     .info dd { margin: 0; }
+    .tabs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .3rem; margin: 0 0 .5rem; }
+    .tab { background: none; border: 1px solid rgba(127, 127, 127, .35); border-radius: 2rem; padding: .15rem .8rem; font-size: .8rem; color: inherit; text-transform: capitalize; }
+    .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .samples-wrap { min-width: 0; }
+    [hidden] { display: none !important; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
@@ -102,11 +107,23 @@
   const about = family => ABOUT.find(([name]) => family.startsWith(name)) || [, '', ''];
   const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };   // data-vi: Lang (navigation.js) shows the Vietnamese text
 
-  // one entry per font
-  const list = $('#fonts'), samples = [];
+  // one entry per font; the fonts of one family (Pen, Pen cut, Gothic) share an entry: their samples are tabs named by the part of the font name that follows the common name
+  const GROUPS = ["QATT Pen Cut", "QATT Pen", "QATT Gothic"];   // the longer name first
+  const groupOf = f => GROUPS.find(g => f.family === g || f.family.startsWith(g + ' '));
+  const tabName = (f, g) => { const rest = f.family.slice(g.length).trim(); return rest ? rest.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase() : 'normal'; };   // ExtraLight -> extra light, nothing -> normal
+  const list = $('#fonts'), samples = [], entries = [];
   for (const f of FONTS) {
-    const box = el('article', 'font');
-    box.append(el('h2', '', f.label));
+    const g = groupOf(f);
+    let entry = g && entries.find(e => e.g === g);
+    if (!entry) {
+      entry = { g, tabs: [], box: el('article', 'font') };
+      entry.title = el('h2', '', g ? g.replace(/^QATT /, '') : f.label);
+      entry.box.append(entry.title);
+      if (g) { entry.bar = el('div', 'tabs'); entry.bar.setAttribute('role', 'tablist'); entry.box.append(entry.bar); }
+      entry.left = el('div', 'samples-wrap'); entry.info = el('div', 'info');
+      entry.box.append(entry.left, entry.info);
+      entries.push(entry); list.append(entry.box);
+    }
     const left = el('div', 'samples');
     for (const px of SIZES) {
       const line = el('div', 'line'), q = el('div', 'q');
@@ -114,7 +131,7 @@
       line.append(el('span', 'px muted', px), q);
       left.append(line); samples.push(q);
     }
-    const info = el('div', 'info');
+    const info = el('div', 'info-tab');
     const [, en, vi] = about(f.family);
     info.append(el('p', '', en, vi));
     const dl = el('dl');
@@ -122,9 +139,19 @@
     fact('Family', 'Họ phông', f.family);
     fact('Characters', 'Số ký tự', '164');
     info.append(dl);
-    box.append(left, info);
-    list.append(box);
+    const tab = { f, left, info };
+    entry.tabs.push(tab);
+    entry.left.append(left); entry.info.append(info);
+    if (entry.bar) {
+      tab.button = el('button', 'tab', tabName(f, g)); tab.button.type = 'button'; tab.button.setAttribute('role', 'tab');
+      tab.button.addEventListener('click', () => show(entry, tab));
+      entry.bar.append(tab.button);
+    }
   }
+  function show(entry, tab) {
+    for (const t of entry.tabs) { const on = t === tab; t.left.hidden = t.info.hidden = !on; if (t.button) t.button.setAttribute('aria-selected', on); }
+  }
+  for (const entry of entries) show(entry, entry.tabs.find(t => !entry.g || t.f.family === entry.g) || entry.tabs[0]);   // the normal weight first
 
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
