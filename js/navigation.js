@@ -350,7 +350,7 @@ window.Theme = window.Theme || (function() {
         document.head.appendChild(style);
     }
 
-    // footnote "powered by chunom.org": links to license.html, the hash lists the scripts, styles and fonts this page has loaded
+    // footnote "powered by chunom.org": links to license.html, the hash lists the scripts and styles this page has loaded (no fonts)
     // (taken when the link is used, so also the files loaded later are in it)
     function injectFooter(licenseUrl) {
         // paths are relative to the site of license.html; files of the other site need the full address
@@ -359,7 +359,7 @@ window.Theme = window.Theme || (function() {
             const seen = new Set();
             performance.getEntriesByType('resource').forEach(e => {
                 const url = new URL(e.name, location.href);
-                if (!/^https?:$/.test(url.protocol) || /license\.html$/.test(url.pathname) || !/\.(js|css|woff2?|ttf|otf)$/i.test(url.pathname)) return;
+                if (!/^https?:$/.test(url.protocol) || /license\.html$/.test(url.pathname) || !/\.(js|css)$/i.test(url.pathname)) return;
                 seen.add(url.origin === licenseOrigin ? url.pathname : url.origin + url.pathname);
             });
             return [...seen];
