@@ -184,7 +184,8 @@
   <div id="bases"><div class="pad grid8" id="basePad"></div></div>
   <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
   <div id="nextRow" class="text-center" hidden><button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button></div>
-  <div class="stats text-center mt-3" id="stats" hidden aria-live="off"></div>
+  <div class="stats text-center mt-3" id="watch" aria-live="off"></div>
+  <div class="stats text-center mt-1" id="stats" hidden aria-live="off"></div>
   <div class="board" id="board" hidden>
     <h2 data-vi="Bảng xếp hạng">Ranking</h2>
     <table id="boardTable"></table>
@@ -401,6 +402,10 @@
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
+    // the stopwatch under the card: the time of every click of this word (right or wrong ✗) and the one that is running, to check the measuring: 1.9 | 2.4 ✗ | 0.7
+    let watch = { done: [], t0: 0, on: false };
+    const drawWatch = () => { $('watch').textContent = watch.done.concat(watch.on ? [((performance.now() - watch.t0) / 1000).toFixed(1)] : []).join(' | '); };
+    setInterval(() => { if (watch.on) drawWatch(); }, 100);
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
       $('scoreVal').textContent = me.score;
@@ -447,6 +452,7 @@
     const slowFor = st => st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP;   // the cap of a time moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
     // the choice of a step: kind = onset, rhyme, tone (null if a wrong choice); ok = right; cells = the cells it found; done = those of them that are complete now
     function judge(kind, ok, cells = [], done = []) {
+      watch.done.push(((performance.now() - watch.t0) / 1000).toFixed(1) + (ok ? '' : ' ✗')); watch.t0 = performance.now();
       if (!ok) {
         lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
         if (kind === 'tone') addTime('tone', penalty('tone')); else word_.queue++;
@@ -486,6 +492,7 @@
     }
     // the word is solved: the bonus of the time, the cheer of a quick one
     function finishWord() {
+      watch.on = false; drawWatch();
       const elapsed = (Date.now() - word_.t0) / 1000;
       let bonus = Math.max(0, POINTS.bonus - Math.floor(elapsed / POINTS.bonusStep));
       if (word_.hinted) bonus = Math.floor(bonus / 2);
@@ -641,6 +648,7 @@
       answer = word; nomOf = nom || '';
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
       startTimer(); $('lateRow').hidden = true;
+      watch = { done: [], t0: performance.now(), on: true }; drawWatch();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
