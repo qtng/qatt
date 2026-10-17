@@ -85,7 +85,7 @@
   <div class="overview row row-cols-2 row-cols-md-4 g-3 align-items-stretch justify-content-center" id="overview"></div>
   <div id="fonts"></div>
   </div>
-  <p class="note"><span data-vi="© 2026 qatt.org. Bảo lưu mọi quyền. Phông chữ được dùng để đọc, viết và in văn bản QATT, không được sửa đổi hay dùng làm nền cho phông chữ khác.">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts.</span> <a href="fonts/LICENSE.txt" data-vi="Giấy phép">Licence</a></p>
+  <p class="note"><span data-vi="© 2026 qatt.org. Bảo lưu mọi quyền. Phông chữ được dùng để đọc, viết và in văn bản QATT, không được sửa đổi hay dùng làm nền cho phông chữ khác.">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts.</span> <a href="font-license.html" data-vi="Giấy phép">Licence</a></p>
 </main>
 
 <script src="js/parser.js"></script>
@@ -148,7 +148,7 @@
     const fact = (k, vi, v) => dl.append(el('dt', '', k, vi), el('dd', '', v));
     fact('Family', 'Họ phông', f.family);
     fact('Characters', 'Số ký tự', '164');
-    const dd = el('dd'), lic = el('a', '', 'Licence', 'Giấy phép'); lic.href = 'fonts/LICENSE.txt';
+    const dd = el('dd'), lic = el('a', '', 'Licence', 'Giấy phép'); lic.href = 'font-license.html';
     dd.append('© 2026 Qatt.org,', document.createElement('br'), el('span', '', 'All rights reserved.', 'Bảo lưu mọi quyền.'), document.createElement('br'), lic);
     dl.append(el('dt', '', 'Copyright', 'Bản quyền'), dd);
     info.append(dl);

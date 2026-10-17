@@ -276,6 +276,9 @@ window.Theme = window.Theme || (function() {
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
             .theme-switch > button:hover, .theme-switch > button[aria-expanded="true"] { color: #fff; }
+            /* what only admins see is bright yellow: the palette button and the shield */
+            .admin-link, .theme-switch > button { color: #ffe600 !important; }
+            .admin-link:hover, .theme-switch > button:hover, .theme-switch > button[aria-expanded="true"] { color: #fff59d !important; }
             .admin-link { margin-right: .4rem; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; text-decoration: none; }   /* only shown to admins */
             .admin-link:hover { color: #fff; }
             .theme-menu { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 1080; min-width: 11rem; max-height: 70vh; overflow: auto; padding: .3rem; background: var(--nav-bg); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .35); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
