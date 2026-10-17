@@ -21,6 +21,7 @@ const QATT_FONTS = [
   { family: "QATT Pen Cut Light",    label: "Pen cut light",       file: "qatt-pencut-light", admin: true },
   { family: "QATT Pen Cut",          label: "Pen cut",             file: "qatt-pencut", admin: true },
   { family: "QATT Pen Cut Medium",   label: "Pen cut medium",      file: "qatt-pencut-medium", admin: true },
+  { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light" },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush" },
 ];
