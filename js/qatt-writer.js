@@ -308,13 +308,16 @@ const QattWriter = (() => {
       if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
       else pending.append(' (no QATT letter yet)');
     }
-    // Tham Thư (stack): the button is on when the two characters before the cursor are letters of QATT (U+F0000..U+F0099); a click puts the combiner U+F009A between them,
-    // the cursor stays behind the same characters
+    // Tham Thư (stack): the button is on when the two characters before the cursor are letters of QATT (U+F0000..U+F0099), the tone marks behind the second one do not count; a click
+    // puts the combiner U+F009A between the two letters, the cursor stays behind the same characters
     const tham = $('tham-btn');
     const thamAt = () => {
       if (!qatt || typer.selectionStart !== typer.selectionEnd) return null;
-      const last = Array.from(typer.value.slice(0, typer.selectionStart)).slice(-2).map(ch => ch.codePointAt(0));
-      return last.length === 2 && LETTER(last[0]) && LETTER(last[1]) ? typer.selectionStart - 2 : null;   // the second letter is a code point of two units
+      const before = Array.from(typer.value.slice(0, typer.selectionStart), ch => ch.codePointAt(0));
+      let j = before.length - 1;
+      while (j >= 0 && before[j] >= 0xF009C && before[j] <= 0xF00A3) j--;
+      if (j < 1 || !LETTER(before[j]) || !LETTER(before[j - 1])) return null;
+      return before.slice(0, j).reduce((n, c) => n + (c > 0xFFFF ? 2 : 1), 0);   // where the combiner goes: before the second letter
     };
     const showTham = () => { tham.disabled = thamAt() === null; };
     tham.addEventListener('click', () => {
