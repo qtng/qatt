@@ -1,10 +1,10 @@
-/* Theme "retro": the retro buttons of check.html: a 2px dark outline, a hard 2px shadow that the button presses into when it is clicked, softly rounded corners;
+/* Theme "retro": the retro buttons of spell.html: a 2px dark outline, a hard 2px shadow that the button presses into when it is clicked, softly rounded corners;
    dropdowns, symbol buttons, the boxes of the variants and the search bar the same. A complete theme of its own. Loaded by js/navigation.js (Theme). */
 /* every Bootstrap button: a 2px dark outline and a hard 2px shadow that the button presses into when it is clicked.
    Bootstrap draws its buttons from --bs-btn-* variables, so only these are set (the colours of btn-primary, btn-danger, … stay). */
 .btn:not(.btn-close):not(.btn-link) {
   --bs-btn-border-width: 2px;
-  --bs-btn-border-radius: .55rem;   /* square with softly rounded corners, like the Skip button of check.html */
+  --bs-btn-border-radius: .55rem;   /* square with softly rounded corners, like the Skip button of spell.html */
   --bs-btn-border-color: var(--ink);
   --bs-btn-hover-border-color: var(--ink);
   --bs-btn-active-border-color: var(--ink);
