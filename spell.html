@@ -52,8 +52,8 @@
     .tones { display: flex; justify-content: center; gap: 1.6rem; }
     .tones .block { display: grid; grid-template-columns: repeat(2, 1fr); gap: .3rem; }
     .tones .gbtn { width: 4.2rem; height: 4.2rem; }
-    .pad.grid8 { gap: .3rem; max-width: 34rem; }   /* 8 buttons per row, the last row centred */
-    .grid8 .gbtn { width: calc((100% - 7 * .3rem) / 8); height: auto; aspect-ratio: 1; }
+    .pad.grid3 { gap: .5rem; max-width: 15rem; }   /* 6 shapes in two rows of 3 */
+    .grid3 .gbtn { width: calc((100% - 1rem) / 3); height: auto; aspect-ratio: 1; font-size: 2.6rem; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
     .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: var(--b, #fffdf8); border: 2px solid var(--bc, #d9ccb0); border-radius: .55rem; box-shadow: 0 2px 0 var(--bc, #d9ccb0); color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s, box-shadow .12s; }
@@ -182,7 +182,7 @@
   </div>
 
   <div id="variants" hidden><div class="pad" id="variantPad"></div></div>
-  <div id="bases"><div class="pad grid8" id="basePad"></div></div>
+  <div id="bases"><div class="pad grid3" id="basePad"></div></div>
   <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
   <div id="nextRow" class="text-center" hidden><button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button></div>
   <div class="stats text-center mt-3" id="stats" hidden aria-live="off"></div>
@@ -705,28 +705,30 @@
       });
     }
 
-    // the shapes come in two steps: first the onset, with ONSET_KEYS buttons (the right one and others, chosen at random, in random order: with 22 the choice would take far
-    // longer than the rhyme steps), then the rhyme with all shapes (the order of symbols.html); a word of one marked letter (role both) has only the onset step
-    const ONSET_KEYS = 6;
-    const inOnset = () => slots.some(s => s.role !== 'rhyme' && s.state === 'empty');
-    const shapeStage = () => inOnset() ? slots.filter(s => s.role !== 'rhyme') : slots.filter(s => s.role === 'rhyme');
-    const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+    // the shapes of a word: 6 buttons in two rows of 3 for the onset and the rhyme together (22 were far too many to choose from). The 22 base shapes are
+    // in three rows of 8, 8 and 6 (the order of symbols.html); the rows of the onset and of the rhyme are the two rows of the word; if both are in one row,
+    // the next row is added (the one above when it is the last); each of the two rows is filled up to 3 shapes at random, in the order of the row
+    const ROWS = [SHAPES.slice(0, 8), SHAPES.slice(8, 16), SHAPES.slice(16)], SHAPES_PER_ROW = 3;
     function fillPad() {
-      const cells = shapeStage();
-      if (!cells.length) return;
-      const shapes = inOnset() ? shuffle([cells[0].shape, ...shuffle(SHAPES.filter(x => x !== cells[0].shape)).slice(0, ONSET_KEYS - 1)]) : SHAPES;
+      const need = [...new Set(slots.map(s => s.shape))];
+      let rows = [...new Set(need.map(x => ROWS.findIndex(r => r.includes(x))))].filter(i => i >= 0);
+      if (rows.length < 2) rows.push(rows[0] < ROWS.length - 1 ? rows[0] + 1 : rows[0] - 1);
+      const shapes = rows.sort((a, b) => a - b).flatMap(ri => {
+        const have = ROWS[ri].filter(x => need.includes(x));
+        const more = ROWS[ri].filter(x => !need.includes(x)).sort(() => Math.random() - .5).slice(0, Math.max(0, SHAPES_PER_ROW - have.length));
+        return ROWS[ri].filter(x => have.includes(x) || more.includes(x));
+      });
       $('basePad').replaceChildren(...shapes.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
     }
 
     function pickShape(shape, b) {
-      const found = shapeStage().filter(s => s.shape === shape), wasOnset = inOnset();
+      const found = slots.filter(s => s.shape === shape);
       verdict(b, found.length > 0);
       mood(found.length > 0);
       judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found.filter(c => !c.mark));   // a cell without a mark is complete with its shape
       sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
-      if (wasOnset && !inOnset()) fillPad();   // the rhyme step: all the shapes
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
         const group = document.createElement('div');
         group.className = 'group';
