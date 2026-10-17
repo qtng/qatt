@@ -57,7 +57,7 @@
     .overview a.card-font:hover { box-shadow: 0 .45em 1.1em rgba(0, 0, 0, .35); }
     .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 8.5cqw; line-height: 1.1; color: #2b2118; white-space: nowrap; text-align: center; }
     .overview .quad { container-type: inline-size; width: 96%; color: #2b2118; }
-    .overview .quad > div { display: grid; grid-template-columns: 1fr 1fr; }   /* four equal squares: even gaps in both directions */
+    .overview .quad > div { display: grid; grid-template-columns: repeat(2, 42cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
     .overview .quad span { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 43cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
