@@ -30,6 +30,7 @@ const QattWriter = (() => {
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
+    #tham-btn { font-size: .95rem; line-height: 1.3; }
     /* the size, in the card above the field */
     .size-bar { display: flex; justify-content: center; padding: .5rem .6rem 0; font-size: .78rem; }
     .size-bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; flex: 1 1 8rem; max-width: 15rem; }
@@ -67,6 +68,7 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
+        <button type="button" class="btn btn-quiet" id="tham-btn" disabled title="Tham Thư: stack the two characters before the cursor (puts the combiner between them)" data-vi-title="Tham Thư: xếp chồng hai ký tự trước con trỏ (chèn dấu ghép vào giữa)">品</button>
       </div>
 `;
 
@@ -298,6 +300,7 @@ const QattWriter = (() => {
     // the word being typed and how it will look
     function showPending() {
       pending.replaceChildren();
+      showTham();
       const pos = typer.selectionStart, m = qatt && pos === typer.selectionEnd && WORD_END.exec(typer.value.slice(0, pos));
       if (!m) return;
       const text = QattText.word(m[0], parser);
@@ -305,6 +308,28 @@ const QattWriter = (() => {
       if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
       else pending.append(' (no QATT letter yet)');
     }
+    // Tham Thư (stack): the button is on when the cursor stands behind two letters of QATT whose second is a single letter (a letter after a joiner is the rhyme of a
+    // pair); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair, but not the upper part of a stack.
+    // The combiner goes between the two, the cursor stays behind the same characters.
+    const tham = $('tham-btn');
+    const thamAt = () => {
+      if (!qatt || typer.selectionStart !== typer.selectionEnd) return null;
+      const before = Array.from(typer.value.slice(0, typer.selectionStart), ch => ch.codePointAt(0)), after = typer.value.codePointAt(typer.selectionStart);
+      if (after === JOINER || after === COMBINER) return null;
+      let j = before.length - 1;
+      while (j >= 0 && before[j] >= 0xF009C && before[j] <= 0xF00A3) j--;
+      if (j < 1 || !LETTER(before[j]) || !LETTER(before[j - 1]) || before[j - 2] === COMBINER) return null;
+      return before.slice(0, j).reduce((n, c) => n + (c > 0xFFFF ? 2 : 1), 0);   // where the combiner goes: before the second letter
+    };
+    const showTham = () => { tham.disabled = thamAt() === null; };
+    tham.addEventListener('click', () => {
+      const at = thamAt();
+      if (at === null) return;
+      const caret = typer.selectionStart;
+      typer.setRangeText(String.fromCodePoint(COMBINER), at, at, 'preserve');
+      typer.setSelectionRange(caret + 2, caret + 2);   // behind the same characters (no focus: the keyboard of a phone stays closed)
+      showPending();
+    });
     document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === typer) showPending(); });
 
     // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
