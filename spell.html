@@ -383,6 +383,10 @@
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
     const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
+    // what is shown (status line, card, gauge, milestones) is not the measured time: the onset is the first click of a word and holds the time to read it, so READ_TIME is taken off (at least MIN_SHOWN);
+    // what is kept, sent to the server and shown in the stopwatch stays the measured time
+    const READ_TIME = 2, MIN_SHOWN = 0.1;
+    const shown = (kind, x) => Math.max(MIN_SHOWN, kind === 'onset' ? x - READ_TIME : x);
     let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
@@ -418,7 +422,7 @@
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const set = mine(), have = KINDS.filter(k => set[k].n);
       $('stats').hidden = !have.length;
-      $('stats').textContent = have.map(k => names[k] + ' ' + set[k].v.toFixed(1) + ' s (' + set[k].f.toFixed(1) + ')' + (typeof set[k].t === 'number' ? ' ← ' + set[k].t.toFixed(1) : '')).join(' · ');   // the slow value, in brackets the fast one, after the arrow the last time
+      $('stats').textContent = have.map(k => names[k] + ' ' + shown(k, set[k].v).toFixed(1) + ' s (' + shown(k, set[k].f).toFixed(1) + ')' + (typeof set[k].t === 'number' ? ' ← ' + shown(k, set[k].t).toFixed(1) : '')).join(' · ');   // the slow value, in brackets the fast one, after the arrow the last time
     };
     const floatPoints = (n, delay = 0) => {
       if (!n) return;
@@ -439,7 +443,7 @@
       const st = mine()[kind]; st.n++; st.t = t;   // t: the last time, shown in the status line to check the measuring
       st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
       st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
-      const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
+      const reached = MILESTONES.filter(m => shown(kind, st.f) < m).length;   // how many of the times are beaten
       if (st.n >= MIN_SAMPLES && reached > st.m) {
         st.m = reached;
         const m = MILESTONES[reached - 1], names = { onset: ['Onsets', 'Âm đầu'], rhyme: ['Rhymes', 'Vần'], tone: ['Tones', 'Thanh'] }[kind];
@@ -591,7 +595,7 @@
     // Confidence: per kind of symbol (from MIN_SAMPLES times on) TARGET seconds against the faster value f (1 at TARGET or faster, 0.5 at twice as long ...), the mean of the kinds, in per cent.
     const STATS_EVERY = 5, TARGET = 1.0;
     function confidence() {
-      const set = mine(), kinds = KINDS.map(k => ({ k, v: set[k].f, n: set[k].n, pct: set[k].n >= MIN_SAMPLES ? Math.round(100 * TARGET / Math.max(set[k].v, TARGET)) : null }));
+      const set = mine(), kinds = KINDS.map(k => ({ k, v: shown(k, set[k].f), n: set[k].n, pct: set[k].n >= MIN_SAMPLES ? Math.round(100 * TARGET / Math.max(shown(k, set[k].f), TARGET)) : null }));
       const ok = kinds.filter(x => x.pct !== null);
       return { value: ok.length ? Math.round(ok.reduce((a, x) => a + x.pct, 0) / ok.length) : null, kinds };
     }
@@ -661,8 +665,7 @@
       for (const id of ['tones', 'variants']) show($(id), false);
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
-      const pad = $('basePad');
-      pad.replaceChildren(...SHAPES.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
+      fillPad();
       $('cells').replaceChildren();
       renderCells();
       show($('bases'), true);
@@ -702,14 +705,28 @@
       });
     }
 
+    // the shapes come in two steps: first the onset, with ONSET_KEYS buttons (the right one and others, chosen at random, in random order: with 22 the choice would take far
+    // longer than the rhyme steps), then the rhyme with all shapes (the order of symbols.html); a word of one marked letter (role both) has only the onset step
+    const ONSET_KEYS = 6;
+    const inOnset = () => slots.some(s => s.role !== 'rhyme' && s.state === 'empty');
+    const shapeStage = () => inOnset() ? slots.filter(s => s.role !== 'rhyme') : slots.filter(s => s.role === 'rhyme');
+    const shuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+    function fillPad() {
+      const cells = shapeStage();
+      if (!cells.length) return;
+      const shapes = inOnset() ? shuffle([cells[0].shape, ...shuffle(SHAPES.filter(x => x !== cells[0].shape)).slice(0, ONSET_KEYS - 1)]) : SHAPES;
+      $('basePad').replaceChildren(...shapes.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
+    }
+
     function pickShape(shape, b) {
-      const found = slots.filter(s => s.shape === shape);
+      const found = shapeStage().filter(s => s.shape === shape), wasOnset = inOnset();
       verdict(b, found.length > 0);
       mood(found.length > 0);
       judge(found.length ? cellKind(found[0]) : null, found.length > 0, found, found.filter(c => !c.mark));   // a cell without a mark is complete with its shape
       sayOnset(shape, b);   // right or wrong
       if (!found.length) return;
       for (const s of found) s.state = s.mark ? 'near' : 'full';
+      if (wasOnset && !inOnset()) fillPad();   // the rhyme step: all the shapes
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
         const group = document.createElement('div');
         group.className = 'group';
