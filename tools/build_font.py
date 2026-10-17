@@ -121,7 +121,7 @@ def onset_map(shape):
     sx, sy = (c1 - c0) / (a1 - a0), (d1 - d0) / (b1 - b0)
     return sx, sy, c0 - a0 * sx, d0 - b0 * sy
 
-def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, fit=None, ink=False):
+def outline_raw(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, fit=None, ink=False):
     """Stroke the paths (qatt.js ids) into one outline; k squeezes horizontally, centre is the x the svg x `cx` goes to,
     grow enlarges the drawing around its middle, v squeezes vertically around the svg y `anchor`. KAGE fonts only: fit=(left, right)
     in font units fits the outline into that box (the strokes are scaled and moved in x, the stroke widths stay); ink=True answers the
@@ -183,6 +183,16 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
             p.convertConicsToQuads(0.1)
             p.draw(out.getPen())
     out.simplify(fix_winding=True)
+    return out
+
+def outline(ids, width, *a, **kw):
+    """outline_raw; a tone (not stretched, see VS) moves up or down in y by what the stretch of the letters would move its middle: the upper ones up, the lower ones down"""
+    out = outline_raw(ids, width, *a, **kw)
+    if VS != 1.0 and ids and ids[0].startswith('q') and not kw.get('ink') and out is not None and out.bounds:
+        x0, y0, x1, y1 = out.bounds
+        dy = (VS - 1) * ((y0 + y1) / 2 - VC)
+        moved = pathops.Path(); out.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, 0, dy)))
+        return moved
     return out
 
 TONE_MARGIN = 14               # a tone mark stays this far (font units) inside its cell
