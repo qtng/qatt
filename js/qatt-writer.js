@@ -21,7 +21,7 @@ const QattWriter = (() => {
     #field.vertical { writing-mode: vertical-rl; height: 24rem; min-height: 0; resize: horizontal; overflow: auto; }   /* vertical, lines from right to left */
     .writer-bar { display: flex; flex-direction: column; align-items: center; gap: 1.3rem; padding: .7rem .6rem; border-top: 1px solid var(--line);
       background: color-mix(in srgb, currentColor 3%, transparent); }   /* a tint of the text colour: light on a light theme, dark on a dark one */
-    @media (min-width: 768px) { .writer-bar { flex-direction: row; justify-content: space-between; } }
+    @media (min-width: 768px) { .writer-bar { flex-direction: row; justify-content: space-between; } .opts { order: 1; } .bar-buttons { order: 2; } }   /* wide: the switches on the left, the buttons on the right */
     .writer-bar .btn { font-size: .85rem; padding: .25rem .8rem; }
     /* the QATT toolbar above the card, centred: everything about QATT (reading, font, convert); it is there while QATT is on (the space stays, so the card does not move),
        it never wraps, the dropdowns give way */
