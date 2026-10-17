@@ -135,8 +135,10 @@
     dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     dialog.ask p { margin: 0 0 1rem; }
     dialog.prog { text-align: center; }
-    dialog.prog { transition: background-color 1.3s ease; }   /* the card takes the colour of the result while the needle swings: the subtle colours of Bootstrap, like the three arcs of the gauge */
-    dialog.prog.tint-low { background: var(--bs-danger-bg-subtle, #f8d7da); } dialog.prog.tint-mid { background: var(--bs-warning-bg-subtle, #fff3cd); } dialog.prog.tint-high { background: var(--bs-success-bg-subtle, #d1e7dd); }
+    /* the card takes the colours of the result while the needle swings: the alert classes of Bootstrap (alert-danger, alert-warning, alert-success) give the colour of the text, the subtle background and the border,
+       like the three arcs of the gauge; only their variables are used, not the box of .alert */
+    dialog.prog { transition: background-color 1.3s ease, border-color 1.3s ease; }
+    dialog.prog[class*="alert-"] { --ink: var(--bs-alert-color); --muted: color-mix(in srgb, var(--bs-alert-color) 75%, var(--bs-alert-bg)); background: var(--bs-alert-bg); border-color: var(--bs-alert-border-color); }
     dialog.prog svg { width: min(16rem, 80%); display: block; margin: 0 auto; color: var(--ink); overflow: visible; }
     #needle { transform-origin: 100px 100px; transform: rotate(-90deg); transition: transform 1.3s cubic-bezier(.2, 1.35, .4, 1); }
     .gaugeVal { font-size: 1rem; margin: .2rem 0 .6rem; } .gaugeVal b { font-size: 1.8rem; font-variant-numeric: tabular-nums; }
@@ -672,12 +674,12 @@
       }));
       me.prev = Object.fromEntries(kinds.filter(x => x.t !== null).map(x => [x.k, x.t]));
       me.round = freshRound(); saveMe();
-      $('progress').classList.remove('tint-low', 'tint-mid', 'tint-high');
+      $('progress').classList.remove('alert-danger', 'alert-warning', 'alert-success');
       const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
       $('progress').showModal();
       requestAnimationFrame(() => {
         needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (value || 0) * 1.8}deg)`;
-        if (value !== null) $('progress').classList.add(value < 40 ? 'tint-low' : value < 70 ? 'tint-mid' : 'tint-high');   // the same limits as the arcs of the gauge
+        if (value !== null) $('progress').classList.add(value < 40 ? 'alert-danger' : value < 70 ? 'alert-warning' : 'alert-success');   // the same limits as the arcs of the gauge
       });
       countUp($('gaugeNum'), value, 1300);
       setTimeout(() => burst($('progress'), value >= 70 ? 24 : value >= 40 ? 10 : 0, '30%'), 1250);   // sparks by the result: green a lot, yellow a few, red none
