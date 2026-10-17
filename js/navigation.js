@@ -243,9 +243,9 @@ window.Theme = window.Theme || (function() {
               stroke-linejoin: square;
             }
             /* the colours of the bars: dark grey; a theme gives them a dark tint of its own (css/theme-*.css: html[data-theme="…"] { --nav-bg: …; }):
-               --nav-bg the menu bar and its menus, --nav-bottom-bg the bottom bar of the phone (the same unless a theme sets it), --nav-alpha how opaque they are,
+               --nav-bg the menu bar and its menus, --nav-bottom-bg the bottom bar of the phone (dark grey with only 22% of the theme tint unless a theme sets it), --nav-alpha how opaque they are,
                --nav-line the line at their edge (a lighter shade of the bar unless a theme sets it) */
-            :root { --nav-bg: #212529; --nav-bottom-bg: var(--nav-bg); --nav-alpha: 95%; }
+            :root { --nav-bg: #212529; --nav-bottom-bg: color-mix(in srgb, var(--nav-bg) 22%, #212529); --nav-alpha: 95%; }
             .nav-backdrop{
               height: 60px; /* the page content starts below it, see the body padding */
               background: color-mix(in srgb, var(--nav-bg) var(--nav-alpha), transparent);
