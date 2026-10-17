@@ -63,8 +63,8 @@ python3 tools/build_font.py fonts/glyphs.json fonts/qatt-prototype      # writes
 python3 tools/build_font.py --light fonts/glyphs.json fonts/qatt-prototype-light   # family "QATT Prototype Light"
 ```
 
-**Brush variant.** With the export of `brush.html` (`fonts/brush.json`) as a third argument, the glyphs get its brush
-instead of stroked centre lines; an export of `brush2.html` (version 3, `js/brush2.js` and `js/brush2-model.js`) works the same way.
+**Brush variant.** With the export of `admin/font/brush.html` (`fonts/brush.json`) as a third argument, the glyphs get its brush
+instead of stroked centre lines; an export of `admin/font/brush2.html` (version 3, `js/brush2.js` and `js/brush2-model.js`) works the same way.
 `tools/brush_outlines.js` (Node.js, uses `js/brush.js` and `js/brush-model.js` like the editor) lays the brush on the centre lines after they are squeezed and moved into place, so the half-width and stacked
 variants keep their stroke widths; the stroke width constants only scale the brush weight per variant:
 
@@ -112,12 +112,12 @@ If the data changes (new characters or offsets), run the font steps above again.
 
 ## KAGE prototype
 
-`font-editor.html` draws the QATT symbols with the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see `js/kage-engine.COPYING`)
+`admin/font/font-editor.html` draws the QATT symbols with the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see `js/kage-engine.COPYING`)
 next to the brush outlines. `fonts/kage.json` holds the KAGE data (one line per stroke and mark); `node tools/kage_seed.js --force` regenerates it from the
-standard stroke library of the brush editor (this overwrites hand edits). Edits in `font-editor.html` live in the browser (`localStorage` `qatt-kage-v1`) and can be exported as JSON.
+standard stroke library of the brush editor (this overwrites hand edits). Edits in `admin/font/font-editor.html` live in the browser (`localStorage` `qatt-kage-v1`) and can be exported as JSON.
 
 **KAGE font.** With `--kage fonts/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
-`js/kage-engine.min.js` in Node.js) from the KAGE data refined in `font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
+`js/kage-engine.min.js` in Node.js) from the KAGE data refined in `admin/font/font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
 their stroke widths. The tones stay stroked circles (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js). `--gothic` selects the Gothic style (family "QATT Khai", `fonts/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
 
 ```sh
@@ -150,7 +150,7 @@ right-falling strokes swell to a foot (the horizontal, the vertical (longer than
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
-order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
+order as the single form; `admin/font/font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
 one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
 
 **Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Serif only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Khai Bold" and "QATT Mincho Bold":

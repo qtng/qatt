@@ -1,4 +1,4 @@
-// Editor of brush.html. Two views:
+// Editor of admin/font/brush.html. Two views:
 // - Symbols: each of the 66 symbols (22 shapes as rhyme, onset and centred form) is three strokes from the library between
 //   two end points, plus its marks (six for the rhyme and the centred form, the medial for the onset form).
 // - Stroke library: named strokes (bend and width profile) used by the symbols.
