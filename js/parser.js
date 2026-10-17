@@ -148,6 +148,8 @@ class VietnameseParser {
             static RHYME_SUBSTITUTES = { "anh": "ơnh", "oanh": "uơnh" };
 
             // Syllables ending in c, ch, t, p use the rhyme of the nasal twin and an entering tone (6 = âm nhập, 7 = dương nhập)
+            static OPEN_DIPHTHONG = { ia: "iê", ya: "yê", ua: "uô", "ưa": "ươ" };
+
             static STOP_TWIN = { "c": "ng", "ch": "nh", "t": "n", "p": "m" };
 
             static QATT_VOWEL_MAP = {
@@ -342,6 +344,7 @@ class VietnameseParser {
                 const candidates = [rhyme];
                 if (res.onset == "q" && rhyme.startsWith("u")) candidates.push("o" + rhyme.slice(1));
                 for (const r of candidates.slice()) { const alt = VietnameseParser.RHYME_SUBSTITUTES[r]; if (alt) candidates.push(alt); }
+                for (const r of candidates.slice()) { const m = /^(.*?)(ia|ya|ua|ưa)$/.exec(r); if (m) candidates.push(m[1] + VietnameseParser.OPEN_DIPHTHONG[m[2]]); } // the open ia, ua, ưa are the rhymes iê, uô, ươ where the table has only those (chia = chiê)
                 for (const r of candidates) if (this.rhymes.has(r)) return this.rhymes.get(r);
                 return null;
             }
