@@ -385,7 +385,7 @@
     const KINDS = ['onset', 'rhyme', 'tone'];
     // what is shown (status line, card, gauge, milestones) is not the measured time: the onset is the first click of a word and holds the time to read it, so READ_TIME is taken off (at least MIN_SHOWN);
     // what is kept, sent to the server and shown in the stopwatch stays the measured time
-    const READ_TIME = 1.5, MIN_SHOWN = 0.1;
+    const READ_TIME = 2, MIN_SHOWN = 0.1;
     const shown = (kind, x) => Math.max(MIN_SHOWN, kind === 'onset' ? x - READ_TIME : x);
     let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
