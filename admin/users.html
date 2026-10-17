@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Accounts</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
+  <style>
+    body { background: #f7efdc; color: #2b2118; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    .note { color: #7b6c58; font-size: .85rem; }
+    .scroll { overflow-x: auto; background: #fffdf8; border: 1px solid #dccfb2; border-radius: .6rem; }
+    table { font-size: .85rem; margin: 0; white-space: nowrap; }
+    th { font-weight: 600; color: #5b4d3d; cursor: pointer; user-select: none; position: sticky; top: 0; background: #fffdf8; }
+    th.sorted::after { content: " ▾"; } th.sorted.asc::after { content: " ▴"; }
+    td.num, th.num { text-align: right; }
+    .tag { font-size: .7rem; border: 1px solid #2b2118; border-radius: .3rem; padding: 0 .3rem; margin-left: .3rem; background: #ffe600; color: #111; }
+    .tag.anon { background: #eee; color: #555; border-color: #aaa; }
+    .muted { color: #a89877; }
+  </style>
+</head>
+<body>
+<main class="container-fluid py-4" style="max-width: 90rem">
+  <h1 id="title" hidden>Accounts</h1>
+  <p class="note" id="account" hidden></p>
+
+  <div id="content" hidden>
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+      <input type="search" id="q" class="form-control form-control-sm w-auto" placeholder="Search name or e-mail" style="min-width: 15rem">
+      <select id="site" class="form-select form-select-sm w-auto" aria-label="Site">
+        <option value="">All sites</option><option value="qatt.org">qatt.org</option><option value="chunom.org">chunom.org</option><option value="both">both sites</option><option value="none">nothing used yet</option>
+      </select>
+      <div class="form-check form-switch mb-0 ms-1"><input class="form-check-input" type="checkbox" id="anon"><label class="form-check-label" for="anon">Include anonymous</label></div>
+      <button type="button" class="btn btn-sm btn-quiet" id="reload">Reload</button>
+      <button type="button" class="btn btn-sm btn-quiet" id="csv">Download CSV</button>
+      <span class="note ms-2" id="count"></span>
+    </div>
+    <div class="scroll"><table class="table table-sm table-hover" id="tbl"><thead></thead><tbody></tbody></table></div>
+    <p class="note mt-2">The site is taken from what an account did: Spell it! is on qatt.org; decks, practice and the translator are on chunom.org. An account that has not used anything yet has none. Anonymous visitors are mostly not worth a look, so they are hidden until you switch them on.</p>
+  </div>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const COLUMNS = [   // [key, title, numeric, text of a row]
+    ['username', 'Name', false, r => r.username || ''],
+    ['email', 'E-mail', false, r => r.email || ''],
+    ['provider', 'Sign-in', false, r => r.provider],
+    ['site', 'Site', false, r => r.site === 'none' ? '' : r.site],
+    ['created_at', 'Created', false, r => stamp(r.created_at)],
+    ['last_sign_in_at', 'Last sign-in', false, r => stamp(r.last_sign_in_at)],
+    ['spell_score', 'Spell it!', true, r => r.spell_words ? r.spell_score + ' (' + r.spell_words + ' words)' : ''],
+    ['decks', 'Decks', true, r => r.decks || ''],
+    ['deck_saves', 'Taken over', true, r => r.deck_saves || ''],
+    ['practice_answers', 'Practice', true, r => r.practice_answers ? r.practice_answers + ' answers, ' + r.practice_words + ' words' : ''],
+    ['translate_calls', 'Translator', true, r => r.translate_calls || ''],
+  ];
+  const stamp = t => t ? t.slice(0, 16).replace('T', ' ') : '';
+  let sp, allowed = false, rows = [], sortKey = 'created_at', asc = false;
+
+  function visible() {
+    const q = $('q').value.trim().toLowerCase(), site = $('site').value, anon = $('anon').checked;
+    const list = rows.filter(r => (anon || !r.is_anonymous) && (!site || r.site === site)
+      && (!q || (r.username || '').toLowerCase().includes(q) || (r.email || '').toLowerCase().includes(q)));
+    const col = COLUMNS.find(c => c[0] === sortKey);
+    list.sort((a, b) => {
+      const x = a[sortKey] ?? '', y = b[sortKey] ?? '';
+      const d = col[2] ? x - y : String(x).localeCompare(String(y));
+      return (asc ? d : -d) || String(b.created_at).localeCompare(String(a.created_at));
+    });
+    return list;
+  }
+
+  function render() {
+    const list = visible();
+    $('tbl').tHead.replaceChildren(Object.assign(document.createElement('tr'), {}));
+    $('tbl').tHead.rows[0].append(...COLUMNS.map(([key, title, num]) => {
+      const th = Object.assign(document.createElement('th'), { textContent: title, className: (num ? 'num ' : '') + (key === sortKey ? 'sorted' + (asc ? ' asc' : '') : '') });
+      th.onclick = () => { asc = key === sortKey ? !asc : false; sortKey = key; render(); };
+      return th;
+    }));
+    $('tbl').tBodies[0].replaceChildren(...list.map(r => {
+      const tr = document.createElement('tr');
+      COLUMNS.forEach(([key, , num, text], i) => {
+        const td = document.createElement('td');
+        td.className = num ? 'num' : '';
+        td.textContent = text(r);
+        if (i === 0) {
+          if (!r.username) { td.textContent = ''; td.append(Object.assign(document.createElement('span'), { className: 'muted', textContent: '–' })); }
+          if (r.is_admin) td.append(Object.assign(document.createElement('span'), { className: 'tag', textContent: 'admin' }));
+          if (r.is_anonymous) td.append(Object.assign(document.createElement('span'), { className: 'tag anon', textContent: 'anonymous' }));
+        }
+        tr.append(td);
+      });
+      return tr;
+    }));
+    $('count').textContent = list.length + ' shown of ' + rows.length + ' loaded';
+  }
+
+  async function load() {
+    if (!allowed) return;
+    const { data, error } = await sp.client.rpc('admin_users', { p_limit: 5000 });
+    if (error) { $('count').textContent = error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the accounts: ' + error.message; return; }
+    rows = data.rows;
+    render();
+    $('count').textContent += (data.total > rows.length ? ' (' + data.total + ' in total)' : '');
+  }
+
+  function download() {
+    const cell = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const head = ['user_id', 'username', 'email', 'provider', 'anonymous', 'admin', 'site', 'created_at', 'last_sign_in_at', 'spell_score', 'spell_words', 'decks', 'deck_saves', 'practice_words', 'practice_answers', 'translate_calls'];
+    const text = [head.join(',')].concat(visible().map(r => head.map(k => cell(k === 'anonymous' ? r.is_anonymous : k === 'admin' ? r.is_admin : r[k])).join(','))).join('\n');
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' })), download: 'accounts.csv' });
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
+    const state = await Admin.check(sp);
+    allowed = state === 'admin';
+    // an admin sees the list, somebody not signed in only the sign-in line, a signed-in non-admin nothing at all
+    $('title').hidden = !allowed; $('content').hidden = !allowed; $('account').hidden = state === 'denied';
+    ['q', 'site', 'anon'].forEach(id => $(id).addEventListener('input', render));
+    $('reload').onclick = load; $('csv').onclick = download;
+    load();
+  });
+</script>
+</body>
+</html>
