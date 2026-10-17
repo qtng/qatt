@@ -621,12 +621,15 @@
     }
     // ---- the progress card: every STATS_EVERY solved words the score and stars for those last words, per kind of symbol --------------------------------------------------------
     // The stars show only the short time: the mean of the times of the words since the last card (a wrong choice is a slow time, see penalty), shown as the status line shows them (shown()),
-    // against the times of MILESTONES: a star for each one that is beaten (0 to 5); the gauge over them is the same scale in parts (0 to 100, mean of the kinds). The arrow compares with the mean of the card before.
+    // against the times of STAR_STEPS (of every kind): a star for each one that is beaten (0 to 5); the gauge over them is the same scale in parts (0 to 100, mean of the kinds). The arrow compares with the mean of the card before.
     const STATS_EVERY = 5;
     const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
-    const starsOf = (kind, t) => MILESTONES.filter(m => shown(kind, t) < m).length;
+    // the times of the stars are of their own for every kind, so that each is about as hard (the shown times differ in kind: the onset holds little more than the thinking, a rhyme is two clicks, the
+    // tones are hard to tell apart): 3 stars for an ordinary round, 5 for an excellent one. The milestones of the points (MILESTONES) stay as they are.
+    const STAR_STEPS = { onset: [1, 0.7, 0.5, 0.3, 0.15], rhyme: [3, 2.5, 2, 1.5, 1], tone: [4, 3.5, 3, 2.5, 2] };
+    const starsOf = (kind, t) => STAR_STEPS[kind].filter(m => shown(kind, t) < m).length;
     // the same in parts (a star is full at its time and empty at the time before): the needle of the gauge moves with every tenth of a second
-    const starsPart = (kind, t) => { const x = shown(kind, t), n = starsOf(kind, t); return n === 0 || n >= MILESTONES.length ? n : n + (MILESTONES[n - 1] - x) / (MILESTONES[n - 1] - MILESTONES[n]); };
+    const starsPart = (kind, t) => { const x = shown(kind, t), st = STAR_STEPS[kind], n = starsOf(kind, t); return n === 0 || n >= st.length ? n : n + (st[n - 1] - x) / (st[n - 1] - st[n]); };
     // the stars of a row light up one after the other (row = the line of the card, before = the stars of the card before: the new ones glow)
     const starText = (n, row = 0, before = n) => Array.from({ length: MILESTONES.length }, (_, i) => i >= n ? '<span class="star off">★</span>'
       : `<span class="star pop${i >= before ? ' new' : ''}" style="--d:${(0.3 + (row * MILESTONES.length + i) * 0.1).toFixed(2)}s">★</span>`).join('');
@@ -652,7 +655,7 @@
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const kinds = KINDS.map(k => { const t = me.round[k].length ? mean(me.round[k]) : null; return { k, t, stars: t === null ? null : starsOf(k, t), fraction: t === null ? 0 : starsPart(k, t), wrong: me.round.wrong[k] }; });
       const have = kinds.filter(x => x.stars !== null);
-      const value = have.length ? Math.round(mean(have.map(x => 100 * x.fraction / MILESTONES.length))) : null;   // the same scale as the stars, with the parts between two times
+      const value = have.length ? Math.round(mean(have.map(x => 100 * x.fraction / STAR_STEPS[x.k].length))) : null;   // the same scale as the stars, with the parts between two times
       drawGauge();
       $('progress').querySelectorAll('.spark').forEach(e => e.remove());
       // the reward: how far the needle goes, a new best form, the gain since the last card, the best part of the round
