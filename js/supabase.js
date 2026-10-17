@@ -20,8 +20,7 @@ await s.initQuiet();               // the user if signed in for real, else null;
 s.isAnonymous                     // true until the user has signed in (see js/login.js for the dialog)
 
 Nobody is signed in anonymously any more: without a login there is no user (s.user is null, s.isAnonymous is true) and nothing is
-written to the server; public decks can still be read. Browsers that have an old anonymous session keep it until it ends (isAnonymous is
-true for it too, signing in with Google or an email link turns it into a permanent user with the same id).
+written to the server; public decks can still be read. An old anonymous session of a browser is ended by init().
 */
 class SupabaseService {
   
@@ -43,7 +42,7 @@ class SupabaseService {
     if (typeof supabase === 'undefined') return;
     if (this.client) {   // called again (the methods call it when there is no user): only look at the session
       const { data: { session } } = await this.client.auth.getSession();
-      this.user = session ? session.user : null;
+      this.user = session && session.user.is_anonymous === false ? session.user : null;
       return this.user;
     }
     const returned = this._signInReturnError(); // read before the client works on the address
@@ -77,7 +76,13 @@ class SupabaseService {
       }
     } = await this.client.auth.getSession();
     this.user = session ? session.user : null;   // no anonymous sign-in: visitors without a login have no user
-    if (session && !this.isAnonymous) sessionStorage.removeItem('qatt_google_retry');
+    if (this.user && this.user.is_anonymous !== false) {
+      // an old anonymous session of this browser: the anonymous accounts are gone (switched off and deleted), so the session is of no use and
+      // would make the sign-in try to link a user that does not exist any more
+      await this.client.auth.signOut({ scope: 'local' });
+      this.user = null;
+    }
+    if (this.user) sessionStorage.removeItem('qatt_google_retry');
     this.client.auth.onAuthStateChange((event, session) => {
       if (session && session.user) this.user = session.user;
     });
@@ -323,32 +328,16 @@ class SupabaseService {
   async signInWithGoogle() {
     if (!this.client) return { error: new Error('Supabase is not available') };
     const redirectTo = this._returnUrl();
-    if (this.user && this.isAnonymous) {
-      // an old anonymous session: keeps the user id, so the decks and the score stay with the account
-      const { error } = await this.client.auth.linkIdentity({ provider: 'google', options: { redirectTo } });
-      if (!error) return {};
-      if (error.code !== 'identity_already_exists') {
-        console.error("Login error:", error.message);
-        return { error };
-      }
-      // this Google account belongs to another user already: sign in to it
-    }
     const { error } = await this.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
     if (error) console.error("Login error:", error.message);
     return error ? { error } : {};
   }
 
-  // Sends a link by email. An old anonymous session gets the email address (and keeps the id once the link is opened);
-  // an address that exists already gets a link to sign in.
+  // Sends a link by email (a new address makes a new account, an address that exists already gets a link to sign in).
   async signInWithEmail(email) {
     if (!this.client) return { error: new Error('Supabase is not available') };
     email = (email || '').trim();
     const redirectTo = this._returnUrl();
-    if (this.user && this.isAnonymous) {
-      const { error } = await this.client.auth.updateUser({ email }, { emailRedirectTo: redirectTo });
-      if (!error) return { sent: true };
-      if (error.code !== 'email_exists') return { error };
-    }
     const { error } = await this.client.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
     return error ? { error } : { sent: true };
   }
