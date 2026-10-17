@@ -134,7 +134,9 @@
     dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     dialog.ask p { margin: 0 0 1rem; }
     dialog.prog { text-align: center; }
-    .starsBig { font-size: 2.2rem; line-height: 1.1; margin: .3rem 0 .4rem; letter-spacing: .1em; }
+    dialog.prog svg { width: min(16rem, 80%); display: block; margin: 0 auto; color: var(--ink); overflow: visible; }
+    #needle { transform-origin: 100px 100px; transform: rotate(-90deg); transition: transform 1.3s cubic-bezier(.2, 1.35, .4, 1); }
+    .gaugeVal { font-size: 1rem; margin: .2rem 0 .6rem; } .gaugeVal b { font-size: 1.8rem; font-variant-numeric: tabular-nums; }
     .star { color: #e0a800; } .star.off { color: color-mix(in srgb, currentColor 25%, transparent); }
     dialog.prog table { width: 100%; margin: 0 0 1rem; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: left; }
     dialog.prog td { padding: .1rem .3rem; }
@@ -200,7 +202,11 @@
   </dialog>
   <dialog class="ask prog" id="progress">
     <h2 data-vi="Những từ vừa rồi">Your last words</h2>
-    <div class="starsBig" id="starsBig" role="img"></div>
+    <svg id="gauge" viewBox="0 0 200 118" role="img" aria-label="Confidence" data-vi-aria-label="Độ chắc chắn">
+      <g id="gaugeArcs"></g>
+      <g id="needle"><line x1="100" y1="100" x2="100" y2="32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="8" fill="currentColor"/></g>
+    </svg>
+    <div class="gaugeVal"><b id="gaugeNum">0</b> <span data-vi="Phong độ">Form</span></div>
     <p id="progScore"></p>
     <table id="progKinds"></table>
     <div class="btns"><button type="button" class="btn btn-sm btn-cinnabar" id="progClose" data-vi="Tiếp tục">Continue</button></div>
@@ -594,19 +600,32 @@
     }
     // ---- the progress card: every STATS_EVERY solved words the score and stars for those last words, per kind of symbol --------------------------------------------------------
     // The stars show only the short time: the mean of the times of the words since the last card (a wrong choice is a slow time, see penalty), shown as the status line shows them (shown()),
-    // against the times of MILESTONES: a star for each one that is beaten (0 to 5). The arrow compares with the mean of the card before.
+    // against the times of MILESTONES: a star for each one that is beaten (0 to 5); the gauge over them is the same scale in parts (0 to 100, mean of the kinds). The arrow compares with the mean of the card before.
     const STATS_EVERY = 5;
     const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
     const starsOf = (kind, t) => MILESTONES.filter(m => shown(kind, t) < m).length;
+    // the same in parts (a star is full at its time and empty at the time before): the needle of the gauge moves with every tenth of a second
+    const starsPart = (kind, t) => { const x = shown(kind, t), n = starsOf(kind, t); return n === 0 || n >= MILESTONES.length ? n : n + (MILESTONES[n - 1] - x) / (MILESTONES[n - 1] - MILESTONES[n]); };
     const starText = n => Array.from({ length: MILESTONES.length }, (_, i) => `<span class="star${i < n ? '' : ' off'}">★</span>`).join('');
+    const polar = (deg, r) => [100 + r * Math.cos(Math.PI - deg * Math.PI / 180), 100 - r * Math.sin(Math.PI - deg * Math.PI / 180)];
+    function drawGauge() {   // three arcs: red up to 40, yellow up to 70, green above (the value 0..100 goes over 180 degrees)
+      const g = $('gaugeArcs'); if (g.children.length) return;
+      for (const [from, to, color] of [[0, 40, '#dc3545'], [40, 70, '#e0a800'], [70, 100, '#198754']]) {
+        const [x0, y0] = polar(from * 1.8, 80), [x1, y1] = polar(to * 1.8, 80);
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M${x0.toFixed(1)} ${y0.toFixed(1)} A80 80 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`);
+        path.setAttribute('fill', 'none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width', '16');
+        g.append(path);
+      }
+    }
     function showProgress() {
       const total = signed ? me.score : me.shadow, prev = me.prev || {};
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
-      const kinds = KINDS.map(k => { const t = me.round[k].length ? mean(me.round[k]) : null; return { k, t, stars: t === null ? null : starsOf(k, t), wrong: me.round.wrong[k] }; });
+      const kinds = KINDS.map(k => { const t = me.round[k].length ? mean(me.round[k]) : null; return { k, t, stars: t === null ? null : starsOf(k, t), fraction: t === null ? 0 : starsPart(k, t), wrong: me.round.wrong[k] }; });
       const have = kinds.filter(x => x.stars !== null);
-      const overall = have.length ? Math.round(have.reduce((a, x) => a + x.stars, 0) / have.length) : null;
-      $('starsBig').innerHTML = overall === null ? '–' : starText(overall);
-      $('starsBig').setAttribute('aria-label', overall === null ? '' : overall + ' / ' + MILESTONES.length);
+      const value = have.length ? Math.round(mean(have.map(x => 100 * x.fraction / MILESTONES.length))) : null;   // the same scale as the stars, with the parts between two times
+      drawGauge();
+      $('gaugeNum').textContent = value === null ? '–' : value;
       $('progScore').textContent = Lang.t(`Score ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} since the last card)`, `Điểm ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} từ lần trước)`) + (signed ? '' : Lang.t(', not counted (sign in to count)', ', chưa tính (đăng nhập để tính)'));
       $('progKinds').replaceChildren(...kinds.map(x => {
         const r = document.createElement('tr'), cells = [document.createElement('td'), document.createElement('td'), document.createElement('td'), document.createElement('td')];
@@ -620,7 +639,9 @@
       }));
       me.prev = Object.fromEntries(kinds.filter(x => x.t !== null).map(x => [x.k, x.t]));
       me.round = freshRound(); me.last = total; saveMe();
+      const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
       $('progress').showModal();
+      requestAnimationFrame(() => { needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (value || 0) * 1.8}deg)`; });
     }
     $('progClose').addEventListener('click', () => $('progress').close());
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
