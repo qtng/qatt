@@ -272,18 +272,28 @@
     // a click on a shape or marked form: the seven characters of its group (U+F0000 + 7 * i, the shape and its six marked forms) in code point order
     const dlg = document.getElementById('variants'), body = document.getElementById('variantsBody');
     document.getElementById('variantsClose').addEventListener('click', () => dlg.close());
-    // read all readings of the popup aloud, one after the other (the voice of the browser for Vietnamese)
+    // read all readings of the popup aloud, one after the other, with the speech of the Chunom site (decks/audiomanager.js:
+    // a recording of the syllable if there is one, else the browser voice, else Google TTS); loaded at the first click
     const speak = document.getElementById('variantsSpeak');
-    const stopSpeaking = () => { speechSynthesis?.cancel(); speak.classList.remove('on'); };
-    speak.hidden = !('speechSynthesis' in window);
+    let speaker = null, run = 0;
+    const withSpeaker = fn => {
+      const go = () => { speaker = speaker || new AudioManager(new Audio(), {}); fn(speaker); };
+      if (typeof AudioManager !== 'undefined') return go();
+      const sc = document.createElement('script');
+      sc.src = 'https://chunom.org/chunom/decks/audiomanager.js';
+      sc.onload = go;
+      sc.onerror = () => speak.classList.remove('on');
+      document.head.append(sc);
+    };
+    const stopSpeaking = () => { run++; speaker?.stopSpeech(); speak.classList.remove('on'); };
     speak.addEventListener('click', () => {
       if (speak.classList.contains('on')) return stopSpeaking();
-      const u = new SpeechSynthesisUtterance(Array.from(body.querySelectorAll('.r'), r => r.textContent).filter(Boolean).join(', '));
-      u.lang = 'vi-VN';
-      u.onend = u.onerror = () => speak.classList.remove('on');
-      speechSynthesis.cancel();
+      const words = Array.from(body.querySelectorAll('.r'), r => r.textContent.trim()).filter(Boolean), mine = ++run;
       speak.classList.add('on');
-      speechSynthesis.speak(u);
+      withSpeaker(async sp => {
+        for (const w of words) { if (run !== mine) return; await sp.speak(w, 'auto', 0.8); }
+        if (run === mine) speak.classList.remove('on');
+      });
     });
     dlg.addEventListener('close', stopSpeaking);
     dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // a click outside the box
