@@ -165,7 +165,7 @@
   }
   for (const entry of entries) show(entry, entry.tabs.find(t => !entry.g || t.f.family === entry.g) || entry.tabs[0]);   // the normal weight first
 
-  // the overview cards: the name without weight, then Quôc âm tân tư (without tones) as 2 x 2 cells
+  // the overview cards: the name without weight, then Quốc âm tân tự as 2 x 2 cells
   const ovCells = [], overview = $('#overview');
   for (const entry of entries) {
     if (/^QATT (Pen Cut|Prototype|Brush)/.test(entry.tabs[0].f.family)) continue;   // no card for these
@@ -177,7 +177,7 @@
     for (let i = 0; i < 4; i++) { const c = el('span'); c.style.fontFamily = `"${entry.family}"`; ovCells.push(c); grid.append(c); }
     quad.append(grid); a.append(quad); col.append(a); overview.append(col);
   }
-  ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quôc', 'âm', 'tân', 'tư'][i % 4], parser).trim(); });
+  ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quốc', 'Âm', 'Tân', 'Tự'][i % 4], parser).trim(); });
 
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
