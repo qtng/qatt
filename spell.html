@@ -334,11 +334,13 @@
     const KINDS = ['onset', 'rhyme', 'tone'];
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
-    let me = { score: 0, decoding: 'qatt', stats: {} };
+    let me = { score: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true };   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
         me.score = saved.score;
+        if (saved.avg && typeof saved.avg.v === 'number') me.avg = saved.avg;
+        if (saved.skipOk === false) me.skipOk = false;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
         else if (saved.stats) me.stats = saved.stats;
       }
@@ -346,7 +348,7 @@
     const dec = () => $('decoding').value || 'qatt';
     const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
-    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0 }, hiddenDuring = false;
+    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
@@ -366,7 +368,7 @@
       e.className = 'pts ' + (n > 0 ? 'plus' : 'minus'); e.textContent = (n > 0 ? '+' : '−') + Math.abs(n);
       $('task').append(e); setTimeout(() => e.remove(), 1200 + delay * 1000);
     };
-    const addPoints = (n, delay) => { me.score = Math.max(0, me.score + n); floatPoints(n, delay); showScore(true); saveMe(); };
+    const addPoints = (n, delay) => { const before = me.score; me.score = Math.max(0, me.score + n); word_.points += me.score - before; floatPoints(n, delay); showScore(true); saveMe(); };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
     function addTime(kind, t) {
       const st = mine()[kind]; st.n++;
@@ -433,6 +435,23 @@
       const sure = !word_.wrong && !word_.hinted && word_.quick;
       addPoints(bonus + (sure ? POINTS.quick : 0), .35);
       if (sure) cheer();
+      // Skip comes back only if this word was better than the player's own average word: the points of the word against the smoothed points of the words so far
+      const pts = word_.points, a = me.avg;
+      if (!a.n || pts > a.v) me.skipOk = true;
+      a.n++; a.v = a.n === 1 ? pts : a.v + Math.max(1 / a.n, ALPHA_FAST) * (pts - a.v);
+      saveMe(); showSkip();
+    }
+    // Skip: the word does not count at all (the state before the word comes back: score and times); then Skip is locked until a word is solved that beats the own average
+    function showSkip() {
+      $('reload').disabled = !me.skipOk;
+      $('reload').title = me.skipOk ? '' : Lang.t('Solve a word better than your average to use Skip again', 'Giải một từ tốt hơn mức trung bình của bạn để được bỏ qua tiếp');
+    }
+    function skipWord() {
+      if (!$('nextRow').hidden) return another();   // the word is solved: only the next word, nothing to take back
+      if (!me.skipOk) return;
+      if (word_.snap) { const snap = JSON.parse(word_.snap); me.score = snap.score; me.stats = snap.stats; }
+      me.skipOk = false; saveMe(); showScore(); showStats(); showSkip();
+      another();
     }
     newLap(); showScore(); showStats();
 
@@ -441,7 +460,7 @@
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
-      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0 }; newLap();
+      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
       startTimer();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
@@ -606,7 +625,8 @@
 
     const another = () => { const e = draw(); start(e.w, e.nom); };
     $('next').addEventListener('click', another);
-    $('reload').addEventListener('click', another);
+    $('reload').addEventListener('click', skipWord);
+    showSkip();
     $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); showStats(); start(answer, nomOf); });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
