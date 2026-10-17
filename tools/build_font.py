@@ -56,6 +56,8 @@ SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell
 # baseline (the ink of common Han characters in WenQuanYi Zen Hei and Nom Na Tong is about y -100..800 of the 1000 em; the letters of qatt.js alone fill y 70..740)
 VS = float(os.environ.get('QATT_VS', 1.4))
 VC = float(os.environ.get('QATT_VC', 577))
+TV = float(os.environ.get('QATT_TV', 0.5))   # how much of the move of the letters the tones follow in y (0 none, 1 all)
+TH = float(os.environ.get('QATT_TH', 0.25))   # the same for x: how much of the widening of the letters the tones follow (away from the middle of the cell)
 HS = float(os.environ.get('QATT_HS', 1.3))   # the single forms of the KAGE fonts are stretched in x by HS around the middle of the cell, to be as wide as a Han character (the pairs: PAIR_M, 60 instead of 100 as margin; the wide font keeps 100)
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
@@ -186,12 +188,14 @@ def outline_raw(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=
     return out
 
 def outline(ids, width, *a, **kw):
-    """outline_raw; a tone (not stretched, see VS) moves up or down in y by what the stretch of the letters would move its middle: the upper ones up, the lower ones down"""
+    """outline_raw; a tone (not stretched, see VS) moves up or down in y by TV (y) and TH (x) times what the stretch of the letters would move its middle: the upper ones up, the lower ones down"""
     out = outline_raw(ids, width, *a, **kw)
     if VS != 1.0 and ids and ids[0].startswith('q') and not kw.get('ink') and out is not None and out.bounds:
         x0, y0, x1, y1 = out.bounds
-        dy = (VS - 1) * ((y0 + y1) / 2 - VC)
-        moved = pathops.Path(); out.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, 0, dy)))
+        dy = TV * (VS - 1) * ((y0 + y1) / 2 - VC)
+        mid = a[1] if len(a) > 1 else kw.get('centre', 500)        # the middle of the cell the tone belongs to (the x of the glyph origin: 500, -500 over the cell to the left, ...)
+        dx = TH * (HS - 1) * ((x0 + x1) / 2 - mid)                 # the letters are wider by HS around that middle: the tone moves out by TH times as much
+        moved = pathops.Path(); out.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, dx, dy)))
         return moved
     return out
 
