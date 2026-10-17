@@ -14,25 +14,25 @@ const { nums, centreline, ease, touches } = require("./pen_strokes.js");
 // at the right a rounded bulge that falls back to the tip. The ends keep their size in units of W whatever the length; the middle stretches.
 // Offsets are in W (positive downwards), measured from the line between the two tips; d is the distance from the left tip, e from the right tip, both in W.
 const RISE = 0.125, BASE = 0.2;
-const BELLY = [[0, -0.11], [0.44, 0.34], [0.89, 0.58], [1.33, 0.63], [1.78, 0.56], [2.22, 0.47], [2.67, 0.38], [3.11, 0.31], [4.4, 0.13], [5.8, 0.02], [7, 0]];   // bottom edge near the start, above BASE
-const TIPDROP = [[0, 1.38], [0.14, 1.09], [0.59, 0.66], [1.03, 0.37], [1.48, 0.16], [2.0, 0.04], [2.4, 0]];   // the top edge falls from the rising line to the right tip
-const FOOT = [[0, 0], [0.14, 0.03], [0.59, 0.11], [1.03, 0.09], [1.5, 0.04], [2.2, 0]];   // the bottom edge near the right tip, above BASE
+const BELLY = [[0, -0.167], [0.022, -0.08], [0.056, -0.021], [0.111, 0.052], [0.222, 0.164], [0.389, 0.301], [0.556, 0.415], [0.778, 0.529], [1, 0.603], [1.33, 0.63], [1.78, 0.56], [2.22, 0.47], [2.67, 0.38], [3.11, 0.31], [4.4, 0.13], [5.8, 0.02], [7, 0]];   // bottom edge near the start, above BASE
+const STARTTOP = [[0, 0.043], [0.022, -0.021], [0.056, -0.047], [0.111, -0.067], [0.222, -0.078], [0.389, -0.073], [0.556, -0.069], [0.778, -0.064], [1, -0.059], [1.33, -0.053], [2.22, -0.033], [3.1, -0.01], [4, 0]];   // the top edge near the start, against the rising line (the rounded corner)
+const TIPDROP = [[0, 1.38], [0.006, 1.363], [0.022, 1.301], [0.044, 1.247], [0.089, 1.166], [0.144, 1.084], [0.222, 0.988], [0.333, 0.878], [0.5, 0.737], [0.667, 0.611], [0.889, 0.46], [1.111, 0.331], [1.48, 0.16], [2.0, 0.04], [2.4, 0]];   // the top edge falls from the rising line to the right tip
+const FOOT = [[0, -0.142], [0.022, -0.091], [0.044, -0.053], [0.089, -0.006], [0.144, 0.03], [0.222, 0.064], [0.333, 0.091], [0.5, 0.11], [0.667, 0.107], [0.889, 0.089], [1.111, 0.072], [1.5, 0.04], [2.2, 0]];   // the bottom edge near the right tip, above BASE
 const table = (t, x) => { if (x <= t[0][0]) return t[0][1]; for (let i = 1; i < t.length; i++) if (x <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (x - t[i - 1][0]) / (t[i][0] - t[i - 1][0]); return t[t.length - 1][1]; };
 function horizontal(p0, p1, W) {
   const [a, b] = p0[0] <= p1[0] ? [p0, p1] : [p1, p0];
   const len = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / len, ty = (b[1] - a[1]) / len, L = len / W, N = Math.max(60, Math.ceil(L * 8));
   const at = (u, o) => [a[0] + tx * u - ty * o * W, a[1] + ty * u + tx * o * W];
-  const ts = [], vs = [], round = (x, r) => x >= r ? 1 : Math.sqrt(Math.max(0, 1 - (1 - Math.max(0, x) / r) ** 2));   // the end is a quarter ellipse of depth r (in W): the edges meet there in a curve, no cap sticks out
+  const ts = [], vs = [];
   for (let i = 0; i <= N; i++) {
-    const d = L * i / N, e = L - d;
+    const d = L * (1 - Math.cos(Math.PI * i / N)) / 2, e = L - d;   // the points crowd at both ends, where the outline turns quickly
     const k = Math.max(0, 1 - e / 2.4), shift = RISE * (L - 11.26) * k * k * (3 - 2 * k);   // the tip keeps its place relative to the right end whatever the length: the template is 11.26 W long
-    const t = -0.01 - RISE * d + table(TIPDROP, e) + shift, v = BASE + table(BELLY, d) + table(FOOT, e);
-    const m = (t + v) / 2, h = (v - t) / 2 * round(e, 0.3) * round(d, 0.15);
-    ts.push(m - h); vs.push(m + h);
+    const t = -0.01 - RISE * d + table(STARTTOP, d) + table(TIPDROP, e) + shift, v = BASE + table(BELLY, d) + table(FOOT, e);
+    ts.push(t); vs.push(v);
   }
   const soften = a => { for (let r = 0; r < 3; r++) { const c = a.slice(); for (let i = 1; i < N; i++) a[i] = (c[i - 1] + 2 * c[i] + c[i + 1]) / 4; } };   // the tables are piecewise linear: smooth the kinks of the edges (the end points stay)
   soften(ts); soften(vs);
-  const pts = i => [at(L * i / N * W, ts[i]), at(L * i / N * W, vs[i])];
+  const pts = i => { const u = L * (1 - Math.cos(Math.PI * i / N)) / 2 * W; return [at(u, ts[i]), at(u, vs[i])]; };
   const poly = [...ts.keys()].map(i => pts(i)[0]).concat([...vs.keys()].reverse().map(i => pts(i)[1]));
   poly.smooth = true;   // outlineOf joins the points with Bezier curves (Catmull-Rom) instead of straight lines
   return poly;
