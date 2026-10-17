@@ -22,47 +22,21 @@
     .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
     .hero .lead { max-width: 38rem; color: #4a3d30; }
     @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
-    main { max-width: 56rem; margin: 0 auto; padding: 1.2rem 1rem 1.5rem; }
+    main { max-width: 62rem; margin: 0 auto; padding: 0 1rem 3rem; }
     a { color: var(--accent); }
-    .card-box { margin: 0 0 .4rem; padding: .5rem .7rem .6rem; background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
-    /* all controls centred in one row, the slider gives way on a narrow screen */
-    .bar { display: flex; flex-wrap: nowrap; justify-content: center; gap: .4rem 1.2rem; align-items: center; margin: 0 0 .5rem; font-size: .78rem; }
-    .bar .group { display: flex; align-items: center; gap: .4rem .8rem; white-space: nowrap; flex: 0 1 auto; min-width: 0; }
-    .bar .group select { min-width: 0; }
-    .bar .sizebox { flex: 1 1 8rem; max-width: 15rem; min-width: 5rem; }
-    .bar select { font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; }
-    .bar label { display: flex; align-items: center; gap: .3rem; white-space: nowrap; margin: 0; }
-    .bar input[type=range] { flex: 1 1 auto; width: 0; min-width: 2.5rem; max-width: 200px; accent-color: var(--accent); }
-    #sizeLabel { min-width: 2.6em; color: var(--muted); }
-    #field { display: block; width: 100%; min-height: 12rem; resize: vertical; border: 1px solid var(--field); border-radius: .5rem; background: #fffdf8; padding: .2rem .6rem; color: var(--ink);
-      font-family: var(--qfont), system-ui, sans-serif; font-size: 48px; line-height: 1.15; }
-    #field:focus { outline: 2px solid rgba(168, 54, 42, .35); }
-    #pending { margin-top: .1rem; height: 1.2rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
-    #pending .glyph { font-family: var(--qfont); font-size: 1.8rem; line-height: 1; color: var(--ink); }
-    #pending .word { font-style: italic; }
-    .switches { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 1.6rem; }
-    #field.vertical { writing-mode: vertical-rl; height: 24rem; min-height: 0; resize: horizontal; overflow: auto; }   /* vertical, lines from right to left */
-    .telex { display: flex; justify-content: center; align-items: center; gap: .5rem; margin: .3rem 0 0; padding: 0; min-height: 0; font-size: .85rem; }
-    .telex .form-check-input { float: none; margin: 0; }
-    .telex .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
-    .reading-out { margin: 0 0 1.2rem; padding: .4rem .7rem; border: 1px dashed var(--field); border-radius: .5rem; color: var(--ink); font-size: 1.05rem; white-space: pre-wrap; word-break: break-word; }
-    .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin-top: .2rem; }
-    .keys .btn { font-size: .85rem; padding: .25rem .85rem; }
-    /* on a phone the card is not a card: one section edge to edge, directly below the header, the field too */
+    /* the writing card (.card-box: the panel of the theme); the parts inside are in js/qatt-writer.js */
+    .card-box { background: #fff; border: 1px solid var(--line); border-radius: 1rem; box-shadow: 0 .5rem 1.5rem rgba(60, 40, 20, .08); }
     @media (max-width: 575.98px) {
-      body { background: #fffdf8; }
-      .hero.mb-4 { margin-bottom: 0 !important; }
-      main { padding: 0; }
-      .card-box { margin: 0; padding: .6rem 0 .9rem; border: 0; border-radius: 0; box-shadow: none; }
-      .card-box > :not(#field) { margin-left: .75rem; margin-right: .75rem; }
-      #field { border-width: 1px 0; border-color: var(--line); border-radius: 0; padding: .7rem .75rem; }
-      #field:focus { outline-offset: -2px; }
+      .hero { padding-top: 1.2rem !important; padding-bottom: .8rem !important; margin-bottom: .8rem !important; }
+      .hero .lead, .hero .btn { display: none; }
     }
   </style>
   <script src="js/navigation.js"></script>
   <script src="js/parser.js"></script>
   <script src="js/qatt-text.js"></script>
+  <script src="js/fonts.js"></script>   <!-- the QATT fonts (QATT_FONTS) and their @font-face rules -->
   <script defer src="https://chunom.org/chunom/js/ime.js"></script>
+  <script src="js/qatt-writer.js"></script>
 </head>
 <body>
 <header class="hero pt-5 pb-4 mb-4">
@@ -75,215 +49,11 @@
   </div>
 </header>
 <main>
-  <div class="card-box">
-    <div class="bar">
-      <div class="group">
-        <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table (decodings.html)"></select>
-        <select id="font" data-qatt-fonts autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
-      </div>
-      <label class="sizebox"><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="sizeLabel">100%</span></label>
-    </div>
-    <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Input Quốc Ngữ..." data-vi-placeholder="Gõ Quốc Ngữ..."></textarea>
-    <div class="switches">
-      <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off"><label class="form-check-label" for="telex">Telex</label></div>
-      <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="vertical" autocomplete="off"><label class="form-check-label" for="vertical" data-vi="Dọc">Vertical</label></div>
-    </div>
-    <div id="pending" aria-live="polite"></div>
-    <div id="readingOut" class="reading-out" hidden aria-live="polite"></div>
-    <div class="keys">
-      <button type="button" class="btn btn-accent" id="copy"><span data-vi="Sao chép">Copy</span></button>
-      <button type="button" class="btn btn-quiet" id="example"><i class="bi bi-magic"></i> <span data-vi="Ví dụ">Example</span></button>
-      <button type="button" class="btn btn-quiet" id="convert" title="Convert every Quốc Ngữ word in the field, e.g. after pasting"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển">Convert all</span></button>
-      <button type="button" class="btn btn-quiet" id="reading" title="Read the QATT characters of the field as Quốc Ngữ"><i class="bi bi-translate"></i> Quốc Ngữ</button>
-      <button type="button" class="btn btn-quiet" id="clear"><i class="bi bi-x-lg"></i> <span data-vi="Xóa">Clear</span></button>
-    </div>
-  </div>
+  <div id="writer" class="card-box writer"></div>
 </main>
 
-<script src="js/fonts.js"></script>
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const $ = id => document.getElementById(id);
-    const field = $('field'), pending = $('pending');
-    const parser = new VietnameseParser();
-    const NOT_LETTER = /[^\p{L}\p{M}]/u, WORD_END = /[\p{L}\p{M}]+$/u;
-
-    // decodings (readings of the rhyme table)
-    for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot.com']]) $('decoding').append(new Option(label, name, name === 'qatt', name === 'qatt'));
-    // a heading inside each dropdown
-    const group = (select, label, vi) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.setAttribute('data-vi-label', vi); g.append(...select.options); select.append(g); select.value = value; };
-    group($('decoding'), 'Choose decoding', 'Lựa chọn cách giải mã');
-    $('font').value = 'QATT Pen';   // the default of the Writer (admin/font/codetable.html keeps Serif)
-    $('font').dispatchEvent(new Event('change'));
-    // a new decoding: every QATT cell is read with the old decoding and written with the new one, other text stays as it is
-    $('decoding').addEventListener('change', () => {
-      const next = new VietnameseParser($('decoding').value);
-      field.value = QattText.recode(field.value, parser, next);
-      parser.setDecoding($('decoding').value);
-      showPending();
-    });
-    // size: 100% is 36 pixels
-    const applySize = () => { field.style.fontSize = Math.round($('size').value * 0.363) + 'px'; $('sizeLabel').textContent = $('size').value + '%'; };
-    $('size').addEventListener('input', applySize);
-    applySize();
-
-    // Telex (typing Vietnamese on a keyboard without a Vietnamese layout)
-    $('telex').checked = true;
-    const ime = window.VietIme ? new VietIme(field, { telex: $('telex').checked, candidates: false }) : null;
-    if (!ime) $('telex').closest('.telex').hidden = true;
-    $('vertical').addEventListener('change', () => { field.classList.toggle('vertical', $('vertical').checked); field.focus(); });
-    $('telex').addEventListener('change', () => { ime?.update({ telex: $('telex').checked }); field.focus(); });
-
-    // the word that ends right before position `end` is replaced by its QATT characters (if there are any)
-    const convertBefore = end => {
-      const m = WORD_END.exec(field.value.slice(0, end));
-      if (!m) return false;
-      const text = QattText.word(m[0], parser);
-      if (!text) return false;
-      const start = end - m[0].length, caret = field.selectionStart;
-      field.setRangeText(text, start, end, 'end');
-      const at = caret + text.length - m[0].length;
-      field.setSelectionRange(at, at);
-      return true;
-    };
-
-    // ---------- keeping the cells whole ----------
-    // A cell is what the font draws as one square: a letter of the block (U+F0000..U+F0099), a joiner U+F009B or combiner U+F009A with
-    // another letter, and the tone marks U+F009C..U+F00A3 after it. Any other character is a cell of its own.
-    const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009B, COMBINER = 0xF009A;
-    const CELL = QattText.CELL_ANY;
-    const WINDOW = 64;
-    // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
-    const cellAt = (text, pos, which) => {
-      const from = Math.max(0, pos - WINDOW), part = text.slice(from, pos + WINDOW);
-      for (const m of part.matchAll(CELL)) {
-        const start = from + m.index, end = start + m[0].length;
-        if (which === 'before' ? (start < pos && pos <= end) : which === 'after' ? (start <= pos && pos < end) : (start < pos && pos < end)) return { start, end };
-      }
-      return null;
-    };
-    // Removes the joiners and combiners that join nothing: a joiner needs a letter that is still an onset before it and a letter after it
-    // (B J B J B: the second joiner is left over, the first pair is a cell already), a combiner needs a letter on both sides.
-    const tidy = () => {
-      const text = field.value, caret = field.selectionStart, end = field.selectionEnd;
-      const cps = Array.from(text, ch => ch.codePointAt(0));
-      let out = '', open = false, prev = 0, i = 0, dropBeforeStart = 0, dropBeforeEnd = 0;
-      cps.forEach((c, k) => {
-        const next = cps[k + 1], len = c > 0xFFFF ? 2 : 1;
-        let keep = true;
-        if (LETTER(c)) open = prev !== JOINER && prev !== COMBINER;
-        else if (c === JOINER) { keep = open && LETTER(next); open = false; }
-        else if (c === COMBINER) { keep = LETTER(prev) && LETTER(next); open = false; }
-        else open = false;
-        if (keep) { out += String.fromCodePoint(c); prev = c; }
-        else { if (i < caret) dropBeforeStart += len; if (i < end) dropBeforeEnd += len; }
-        i += len;
-      });
-      if (out === text) return;
-      field.value = out;
-      field.setSelectionRange(caret - dropBeforeStart, end - dropBeforeEnd);
-    };
-
-    // the text as it was before the last edit, to repair a deletion that cut a cell in two (keyboards that bypass the Backspace handler below)
-    let before = '';
-    field.addEventListener('beforeinput', () => { before = field.value; });
-    const repairDeletion = () => {
-      const fixed = QattText.repairDeletion(before, field.value, field.selectionStart);
-      if (!fixed) return;
-      field.value = fixed.value;
-      field.setSelectionRange(fixed.caret, fixed.caret);
-    };
-
-    // Backspace and Delete remove a whole cell
-    field.addEventListener('beforeinput', e => {
-      if (e.isComposing || (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward')) return;
-      const pos = field.selectionStart;
-      if (pos !== field.selectionEnd) return;
-      const cell = cellAt(field.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
-      if (!cell || field.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
-      e.preventDefault();
-      field.setRangeText('', cell.start, cell.end, 'end');
-      field.setSelectionRange(cell.start, cell.start);
-      tidy();
-      showPending();
-    });
-
-    // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
-    let lastPos = 0;
-    const snap = () => {
-      if (document.activeElement !== field) return;
-      let a = field.selectionStart, b = field.selectionEnd;
-      if (a === b) {
-        const cell = cellAt(field.value, a);
-        if (cell) a = b = a > lastPos ? cell.end : cell.start;
-      } else {
-        a = cellAt(field.value, a)?.start ?? a;
-        b = cellAt(field.value, b)?.end ?? b;
-      }
-      if (a !== field.selectionStart || b !== field.selectionEnd) field.setSelectionRange(a, b, field.selectionDirection);
-      lastPos = field.selectionStart;
-    };
-
-    // the character just typed (space, Enter, ...) ends the word before it; when the word was converted, that character is swallowed
-    const flush = length => {
-      const pos = field.selectionStart;
-      if (pos !== field.selectionEnd || pos < length) return;
-      if (!NOT_LETTER.test(field.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
-      const at = field.selectionStart;
-      field.setRangeText('', at - length, at, 'end');
-    };
-    field.addEventListener('input', e => {
-      repairDeletion();
-      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1);
-      else if (!e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length);
-      if (!e.isComposing) tidy();
-      showPending();
-    });
-    // keyboards that compose whole words (Android): the space comes with the end of the composition
-    field.addEventListener('compositionend', e => setTimeout(() => {
-      if (e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1);
-      tidy();
-      showPending();
-    }, 0));
-
-    // the word being typed and how it will look
-    function showPending() {
-      const pos = field.selectionStart, m = pos === field.selectionEnd && WORD_END.exec(field.value.slice(0, pos));
-      pending.replaceChildren();
-      if (!m) return;
-      const text = QattText.word(m[0], parser);
-      const word = Object.assign(document.createElement('span'), { className: 'word', textContent: m[0] });
-      pending.append(word);
-      if (text) pending.append('→', Object.assign(document.createElement('span'), { className: 'glyph', textContent: text }));
-      else pending.append(' (no QATT letter yet)');
-    }
-    document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === field) showPending(); });
-
-    $('convert').addEventListener('click', () => { field.value = QattText.convert(field.value, parser); showPending(); });   // no focus: the keyboard of a phone stays closed
-    $('example').addEventListener('click', () => { field.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); showPending(); });   // without the spaces
-    // the QATT characters of the field read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
-    $('reading').addEventListener('click', () => {
-      let out = '', afterCell = false;
-      for (const [part] of field.value.matchAll(QattText.CELL_ANY)) {
-        const isCell = /^[\u{F0000}-\u{F0099}]/u.test(part);
-        if (isCell) out += (afterCell ? ' ' : '') + QattText.reading(part, parser);
-        else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
-        afterCell = isCell;
-      }
-      const box = $('readingOut');
-      if (!box.hidden) { box.hidden = true; return; }   // a second click hides it again
-      box.textContent = out || '(nothing to read)';
-      box.hidden = false;
-    });
-    $('clear').addEventListener('click', () => { $('readingOut').hidden = true; field.value = ''; showPending(); });
-    $('copy').addEventListener('click', async () => {
-      const btn = $('copy');
-      const label = btn.innerHTML;
-      try { await navigator.clipboard.writeText(field.value); btn.textContent = 'Copied'; }
-      catch { field.select(); btn.textContent = document.execCommand('copy') ? 'Copied' : 'Select and copy'; }
-      setTimeout(() => { btn.innerHTML = label; }, 1500);
-    });
-  });
+  window.addEventListener('DOMContentLoaded', () => QattWriter.mount(document.getElementById('writer'), { switch: 'nom', storage: 'qatt_editor_' }));
 </script>
 </body>
 </html>
