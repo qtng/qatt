@@ -260,7 +260,7 @@
     document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === field) showPending(); });
 
     $('convert').addEventListener('click', () => { field.value = QattText.convert(field.value, parser); showPending(); });   // no focus: the keyboard of a phone stays closed
-    $('example').addEventListener('click', () => { field.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser); showPending(); });
+    $('example').addEventListener('click', () => { field.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); showPending(); });   // without the spaces
     // the QATT characters of the field read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
     $('reading').addEventListener('click', () => {
       let out = '', afterCell = false;
@@ -275,7 +275,7 @@
       box.textContent = out || '(nothing to read)';
       box.hidden = false;
     });
-    $('clear').addEventListener('click', () => { $('readingOut').hidden = true; field.value = ''; showPending(); field.focus(); });
+    $('clear').addEventListener('click', () => { $('readingOut').hidden = true; field.value = ''; showPending(); });
     $('copy').addEventListener('click', async () => {
       const btn = $('copy');
       const label = btn.innerHTML;
