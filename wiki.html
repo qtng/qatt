@@ -13,7 +13,7 @@
     <script src="js/navigation.js"></script>
 
     <style>
-        :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Gothic"; }
+        :root { --ink: #2b2118; --accent: #a8362a; --paper: #f7efdc; --line: #e4d9c0; --field: #cdbf9f; --muted: #7b6c58; --qfont: "QATT Pen"; }
         body { background: var(--paper); color: var(--ink); }
         a { color: var(--accent); }
 
@@ -51,7 +51,8 @@
         .wiki-content img { max-width: 100%; height: auto; border-radius: .5rem; margin-bottom: 1.25rem; display: block; }
 
         /* the text of the article is set in the QATT font, everything it has no glyph for falls back to the usual font */
-        .qatt-on { font-family: var(--qfont), system-ui, sans-serif; font-size: 1.6rem; line-height: 1.5; }
+        .qatt-on { font-family: var(--qfont), system-ui, sans-serif !important; font-size: 1.6rem; line-height: 1.5; }   /* !important: the heading font of a theme (h1) must not win */
+        h1.qatt-on { font-weight: 400 !important; }   /* no synthetic bold on the QATT glyphs */
         .qatt-on ruby { ruby-position: over; }
         .qatt-on rt { font-family: system-ui, sans-serif; font-size: .4em; line-height: 1; color: var(--muted); user-select: none; }
         .no-reading rt { display: none; }
@@ -135,7 +136,7 @@
         let originalTitle = "";
 
         // the default font of the page (fonts.js has already filled the dropdown)
-        $('font').value = 'QATT Gothic';
+        $('font').value = 'QATT Pen';
         $('font').dispatchEvent(new Event('change'));
 
         // A text with its cells of QATT text wrapped in <ruby>: the cell is the base, the reading its annotation (QattText.reading, a dummy for now)
