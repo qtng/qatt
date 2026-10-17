@@ -383,11 +383,12 @@
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
     const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
-    // what is shown (status line, card, gauge, milestones) is not the measured time: every click holds the time to find and press the button (CLICK_TIME), and the first click of a word, the onset,
-    // also the time to read the word (READ_TIME); both are taken off (at least MIN_SHOWN, a rhyme is the mean of its clicks, so CLICK_TIME off the mean is the same);
+    // what is shown (status line, card, gauge, milestones) is not the measured time: every click holds the time to find and press the button (CLICK_TIME of its kind), and the first click of a word,
+    // the onset, also the time to read the word (READ_TIME); both are taken off (at least MIN_SHOWN, a rhyme is the mean of its clicks, so CLICK_TIME off the mean is the same). The tones take
+    // longer to find: 8 marks, four circles and four half circles that differ only by their place, so one has to look closely;
     // what is kept, sent to the server and shown in the stopwatch stays the measured time
-    const READ_TIME = 1.5, CLICK_TIME = 0.5, MIN_SHOWN = 0.1;
-    const shown = (kind, x) => Math.max(MIN_SHOWN, x - CLICK_TIME - (kind === 'onset' ? READ_TIME : 0));
+    const READ_TIME = 1.5, CLICK_TIME = { onset: 0.5, rhyme: 0.5, tone: 1 }, MIN_SHOWN = 0.1;
+    const shown = (kind, x) => Math.max(MIN_SHOWN, x - CLICK_TIME[kind] - (kind === 'onset' ? READ_TIME : 0));
     let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
