@@ -19,7 +19,7 @@ const QattWriter = (() => {
     #field { display: block; width: 100%; min-height: 11.4rem; padding: .75rem .9rem; font-size: 1.5rem; line-height: 1.5; border: none; outline: none; background: transparent;
       color: var(--ink); resize: none; font-family: var(--qfont), system-ui, sans-serif; }
     #field.vertical { writing-mode: vertical-rl; height: 24rem; min-height: 0; resize: horizontal; overflow: auto; }   /* vertical, lines from right to left */
-    .writer-bar { display: flex; flex-direction: column; align-items: center; gap: .6rem; padding: .4rem .6rem; border-top: 1px solid var(--line);
+    .writer-bar { display: flex; flex-direction: column; align-items: center; gap: 1.3rem; padding: .7rem .6rem; border-top: 1px solid var(--line);
       background: color-mix(in srgb, currentColor 3%, transparent); }   /* a tint of the text colour: light on a light theme, dark on a dark one */
     @media (min-width: 768px) { .writer-bar { flex-direction: row; justify-content: space-between; } }
     .writer-bar .btn { font-size: .85rem; padding: .25rem .8rem; }
@@ -80,9 +80,9 @@ const QattWriter = (() => {
     <div id="pending" aria-live="polite"></div>
     <div class="writer-bar">
       <div class="bar-buttons">
-        <button type="button" class="btn btn-quiet" id="copy-btn"><span data-vi="Sao chép">Copy</span></button>
         <button type="button" class="btn btn-quiet qatt-only" id="example-btn"><i class="bi bi-magic"></i> <span data-vi="Ví dụ">Example</span></button>
         <button type="button" class="btn btn-quiet" id="clear-btn"><i class="bi bi-x-lg"></i> <span data-vi="Xóa">Clear</span></button>
+        <button type="button" class="btn btn-quiet" id="copy-btn"><span data-vi="Sao chép">Copy</span></button>
       </div>
       <div class="opts">
         <div class="form-check form-switch">
