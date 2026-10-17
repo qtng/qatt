@@ -387,7 +387,7 @@
     // the onset, also the time to read the word (READ_TIME); both are taken off (at least MIN_SHOWN, a rhyme is the mean of its clicks, so CLICK_TIME off the mean is the same). The tones take
     // longer to find: 8 marks, four circles and four half circles that differ only by their place, so one has to look closely;
     // what is kept, sent to the server and shown in the stopwatch stays the measured time
-    const READ_TIME = 1.5, CLICK_TIME = { onset: 0.5, rhyme: 0.5, tone: 1 }, MIN_SHOWN = 0.1;
+    const READ_TIME = 1.25, CLICK_TIME = { onset: 0.5, rhyme: 0.5, tone: 1 }, MIN_SHOWN = 0.1;   // off the onset 1.75 s, off a rhyme 0.5 s, off a tone 1 s
     const shown = (kind, x) => Math.max(MIN_SHOWN, x - CLICK_TIME[kind] - (kind === 'onset' ? READ_TIME : 0));
     let signed = false, db = null, syncTimer = null, syncing = false;   // signed: somebody is signed in for real (their points count and go to the server)
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
