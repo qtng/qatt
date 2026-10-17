@@ -140,6 +140,13 @@
     .star { color: #e0a800; } .star.off { color: color-mix(in srgb, currentColor 25%, transparent); }
     dialog.prog table { width: 100%; margin: 0 0 1rem; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: left; }
     dialog.prog td { padding: .1rem .3rem; }
+    .star { display: inline-block; } .star.pop { animation: starPop .5s cubic-bezier(.2, 1.6, .4, 1) both; animation-delay: var(--d, 0s); }
+    .star.new { text-shadow: 0 0 .5rem #ffd43b, 0 0 1.1rem rgba(255, 193, 7, .7); }
+    @keyframes starPop { 0% { opacity: 0; transform: scale(.2) rotate(-40deg); } 70% { opacity: 1; transform: scale(1.5) rotate(8deg); } 100% { opacity: 1; transform: none; } }
+    #progBadges { display: flex; justify-content: center; flex-wrap: wrap; gap: .4rem; min-height: 1.6rem; margin: -.2rem 0 .3rem; }
+    .badge2 { padding: .05rem .7rem; border-radius: 1rem; font-size: .85rem; font-weight: 600; animation: pop .5s both; animation-delay: 1.3s; }
+    .badge2.best { background: #ffe082; color: #5c4300; } .badge2.up { background: #d3f0dc; color: #146c43; }
+    dialog.prog .praise { margin: 0 0 .6rem; font-size: .95rem; }
     dialog.prog td.stars { font-size: 1.15rem; letter-spacing: .05em; white-space: nowrap; }
     dialog.prog td.trend { white-space: nowrap; color: var(--muted); }
     dialog.ask .btns { display: flex; gap: .6rem; justify-content: flex-end; }
@@ -207,6 +214,8 @@
       <g id="needle"><line x1="100" y1="100" x2="100" y2="32" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="100" cy="100" r="8" fill="currentColor"/></g>
     </svg>
     <div class="gaugeVal"><b id="gaugeNum">0</b> <span data-vi="Phong độ">Form</span></div>
+    <div id="progBadges"></div>
+    <p id="progPraise" class="praise"></p>
     <p id="progScore"></p>
     <table id="progKinds"></table>
     <div class="btns"><button type="button" class="btn btn-sm btn-cinnabar" id="progClose" data-vi="Tiếp tục">Continue</button></div>
@@ -394,7 +403,7 @@
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, last: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, last: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
@@ -404,6 +413,8 @@
         if (saved.skipOk === false) me.skipOk = false;
         if (saved.round && KINDS.every(k => Array.isArray(saved.round[k])) && saved.round.wrong) me.round = saved.round;
         if (saved.prev && typeof saved.prev === 'object') me.prev = saved.prev;
+        if (typeof saved.best === 'number') me.best = saved.best;
+        if (typeof saved.lastValue === 'number') me.lastValue = saved.lastValue;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
         else if (saved.stats) me.stats = saved.stats;
       }
@@ -494,11 +505,16 @@
       const c = document.createElement('div');
       c.className = 'cheer'; c.textContent = text || Lang.t(en, vi);
       $('task').append(c); setTimeout(() => c.remove(), 1950);
+      burst($('task'), 14);
+    }
+    // sparks fly out from the middle of a place (a box with position)
+    function burst(host, n, top) {
       if (REDUCED) return;
-      for (let i = 0; i < 14; i++) {   // sparks fly out from the middle
+      for (let i = 0; i < n; i++) {
         const e = document.createElement('span'), ang = Math.random() * 2 * Math.PI, r = 80 + Math.random() * 90;
         e.className = 'spark'; e.textContent = pick(['✨', '⭐', '🎉', '🌟', '💫']);
-        $('task').append(e);
+        if (top) e.style.top = top;
+        host.append(e);
         e.animate([{ transform: 'translate(-50%, -50%) scale(.4)', opacity: 1 },
                    { transform: `translate(calc(-50% + ${Math.cos(ang) * r}px), calc(-50% + ${Math.sin(ang) * r}px)) scale(1.1)`, opacity: 0 }],
                   { duration: 1100 + Math.random() * 500, easing: 'ease-out' }).onfinish = () => e.remove();
@@ -606,7 +622,15 @@
     const starsOf = (kind, t) => MILESTONES.filter(m => shown(kind, t) < m).length;
     // the same in parts (a star is full at its time and empty at the time before): the needle of the gauge moves with every tenth of a second
     const starsPart = (kind, t) => { const x = shown(kind, t), n = starsOf(kind, t); return n === 0 || n >= MILESTONES.length ? n : n + (MILESTONES[n - 1] - x) / (MILESTONES[n - 1] - MILESTONES[n]); };
-    const starText = n => Array.from({ length: MILESTONES.length }, (_, i) => `<span class="star${i < n ? '' : ' off'}">★</span>`).join('');
+    // the stars of a row light up one after the other (row = the line of the card, before = the stars of the card before: the new ones glow)
+    const starText = (n, row = 0, before = n) => Array.from({ length: MILESTONES.length }, (_, i) => i >= n ? '<span class="star off">★</span>'
+      : `<span class="star pop${i >= before ? ' new' : ''}" style="--d:${(0.3 + (row * MILESTONES.length + i) * 0.1).toFixed(2)}s">★</span>`).join('');
+    // a number runs up to its value while the needle swings
+    const countUp = (el, to, ms) => {
+      if (REDUCED || !to) { el.textContent = to === null ? '–' : to; return; }
+      const t0 = performance.now(), step = now => { const x = Math.min(1, (now - t0) / ms); el.textContent = Math.round(to * (1 - Math.pow(1 - x, 3))); if (x < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    };
     const polar = (deg, r) => [100 + r * Math.cos(Math.PI - deg * Math.PI / 180), 100 - r * Math.sin(Math.PI - deg * Math.PI / 180)];
     function drawGauge() {   // three arcs: red up to 40, yellow up to 70, green above (the value 0..100 goes over 180 degrees)
       const g = $('gaugeArcs'); if (g.children.length) return;
@@ -625,12 +649,19 @@
       const have = kinds.filter(x => x.stars !== null);
       const value = have.length ? Math.round(mean(have.map(x => 100 * x.fraction / MILESTONES.length))) : null;   // the same scale as the stars, with the parts between two times
       drawGauge();
-      $('gaugeNum').textContent = value === null ? '–' : value;
+      $('progress').querySelectorAll('.spark').forEach(e => e.remove());
+      // the reward: how far the needle goes, a new best form, the gain since the last card, the best part of the round
+      const gain = value !== null && me.lastValue !== null ? value - me.lastValue : null, isBest = value !== null && me.best > 0 && value > me.best;
+      const badge = (cls, text) => Object.assign(document.createElement('span'), { className: 'badge2 ' + cls, textContent: text });
+      $('progBadges').replaceChildren(...[isBest && badge('best', Lang.t('★ New best form!', '★ Phong độ cao nhất từ trước đến nay!')), gain > 0 && badge('up', Lang.t(`▲ +${gain} since the last card`, `▲ +${gain} so với lần trước`))].filter(Boolean));
+      const top = have.length ? have.reduce((a, x) => x.fraction > a.fraction ? x : a) : null;
+      $('progPraise').textContent = !top ? '' : top.stars >= 1 ? Lang.t(`Your best: ${names[top.k]} (${top.stars} ★)`, `Tốt nhất: ${names[top.k]} (${top.stars} ★)`) : Lang.t('Every word trains you – keep going!', 'Mỗi từ đều giúp bạn tiến bộ!');
+      if (value !== null) { me.best = Math.max(me.best, value); me.lastValue = value; }
       $('progScore').textContent = Lang.t(`Score ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} since the last card)`, `Điểm ${total} (${total - me.last >= 0 ? '+' : ''}${total - me.last} từ lần trước)`) + (signed ? '' : Lang.t(', not counted (sign in to count)', ', chưa tính (đăng nhập để tính)'));
       $('progKinds').replaceChildren(...kinds.map(x => {
         const r = document.createElement('tr'), cells = [document.createElement('td'), document.createElement('td'), document.createElement('td'), document.createElement('td')];
         cells[0].textContent = names[x.k];
-        cells[1].className = 'stars'; cells[1].innerHTML = x.stars === null ? '–' : starText(x.stars);
+        cells[1].className = 'stars'; cells[1].innerHTML = x.stars === null ? '–' : starText(x.stars, KINDS.indexOf(x.k), typeof prev[x.k] === 'number' ? starsOf(x.k, prev[x.k]) : x.stars);
         cells[2].textContent = x.t === null ? '' : shown(x.k, x.t).toFixed(1) + ' s';
         cells[3].className = 'trend';
         const before = prev[x.k];
@@ -642,6 +673,8 @@
       const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
       $('progress').showModal();
       requestAnimationFrame(() => { needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (value || 0) * 1.8}deg)`; });
+      countUp($('gaugeNum'), value, 1300);
+      setTimeout(() => burst($('progress'), value >= 70 ? 24 : value >= 40 ? 10 : 0, '30%'), 1250);   // sparks by the result: green a lot, yellow a few, red none
     }
     $('progClose').addEventListener('click', () => $('progress').close());
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
