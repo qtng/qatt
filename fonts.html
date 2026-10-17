@@ -49,6 +49,15 @@
     .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
     .samples-wrap { min-width: 0; }
     [hidden] { display: none !important; }
+
+    /* overview: one card per font name (the weights together), "Quốc Âm Tân Tự" in four cells; the glyphs fill the width of the card */
+    .overview { padding: 1.6rem 0 .4rem; }
+    .overview .card-font { display: flex; flex-direction: column; align-items: center; height: 100%; padding: .8rem .4rem .6rem; border: 1px solid rgba(127, 127, 127, .3); border-radius: .7rem; color: inherit; text-decoration: none; }
+    .overview .card-font:hover { border-color: var(--accent); color: inherit; }
+    .overview .name { font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; margin: 0 0 .6rem; text-align: center; }
+    .overview .quad { container-type: inline-size; width: 100%; margin-top: auto; }
+    .overview .quad > div { display: grid; grid-template-columns: 1fr 1fr; }   /* four equal squares: even gaps in both directions */
+    .overview .quad span { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 50cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
@@ -68,6 +77,7 @@
 
 <main class="wrap">
   <div class="sheet">
+  <div class="overview row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 align-items-stretch" id="overview"></div>
   <div class="bar">
     <label class="text"><span class="muted" data-vi="Văn bản">Text</span><input type="text" id="text" class="form-control" value="" placeholder="Your own text in Quốc Ngữ" data-vi-placeholder="Văn bản của bạn bằng chữ Quốc Ngữ" autocomplete="off" spellcheck="false" aria-label="Text in Quốc Ngữ" data-vi-aria-label="Văn bản bằng chữ Quốc Ngữ"></label>
     <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off" checked><label class="form-check-label" for="telex">Telex</label></div>
@@ -116,7 +126,8 @@
     const g = groupOf(f);
     let entry = g && entries.find(e => e.g === g);
     if (!entry) {
-      entry = { g, tabs: [], box: el('article', 'font') };
+      entry = { g, tabs: [], box: el('article', 'font'), family: f.family };
+      entry.box.id = 'font-' + (g || f.family).toLowerCase().replace(/[^a-z0-9]+/g, '-');
       entry.title = el('h2', '', g ? g.replace(/^QATT /, '') : f.label);
       entry.box.append(entry.title);
       if (g) { entry.bar = el('div', 'tabs'); entry.bar.setAttribute('role', 'tablist'); entry.box.append(entry.bar); }
@@ -152,6 +163,17 @@
     for (const t of entry.tabs) { const on = t === tab; t.left.hidden = t.info.hidden = !on; if (t.button) t.button.setAttribute('aria-selected', on); }
   }
   for (const entry of entries) show(entry, entry.tabs.find(t => !entry.g || t.f.family === entry.g) || entry.tabs[0]);   // the normal weight first
+
+  // the overview cards: the name without weight, then Quốc Âm Tân Tự as 2 x 2 cells
+  const ovCells = [], overview = $('#overview');
+  for (const entry of entries) {
+    const col = el('div', 'col'), a = el('a', 'card-font'), quad = el('div', 'quad'), grid = el('div');
+    a.href = '#' + entry.box.id;
+    a.append(el('div', 'name', entry.title.textContent));
+    for (let i = 0; i < 4; i++) { const c = el('span'); c.style.fontFamily = `"${entry.family}"`; c.style.setProperty('--fit', FIT[entry.family] || 1); ovCells.push(c); grid.append(c); }
+    quad.append(grid); a.append(quad); col.append(a); overview.append(col);
+  }
+  ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quốc', 'Âm', 'Tân', 'Tự'][i % 4], parser).trim(); });
 
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
