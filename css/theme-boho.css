@@ -24,7 +24,7 @@ html[data-theme="boho"] .hero .btn-cinnabar + .btn-cinnabar { --bs-btn-bg: var(-
 html[data-theme="boho"] .form-select { --bs-border-radius: 1.2rem; --bs-border-color: var(--field); background-color: #fbf3e6; color: var(--ink); }
 html[data-theme="boho"] .form-control, html[data-theme="boho"] textarea { border: 1px solid var(--field); border-radius: 1rem; background-color: #fffaf1; color: var(--ink); }
 html[data-theme="boho"] .form-control:focus, html[data-theme="boho"] textarea:focus, html[data-theme="boho"] .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 .2rem rgba(184, 92, 56, .2); outline: none; }
-html[data-theme="boho"] .form-check-input:checked { background-color: var(--boho-olive); border-color: var(--boho-olive); }
+html[data-theme="boho"] .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
 html[data-theme="boho"] input[type="range"] { accent-color: var(--accent); }
 html[data-theme="boho"] .card, html[data-theme="boho"] .card-box, html[data-theme="boho"] .alert, html[data-theme="boho"] .editor, html[data-theme="boho"] .content-container, html[data-theme="boho"] .sticky-card, html[data-theme="boho"] .panel { background: #fffaf1; border: 1px solid var(--line); border-radius: 1.6rem .5rem 1.6rem .5rem; box-shadow: 0 .4rem 1.2rem rgba(120, 70, 30, .12); }
 html[data-theme="boho"] .dropdown-menu, html[data-theme="boho"] .modal-content, html[data-theme="boho"] dialog#variants { background: #fffaf1; border: 1px solid var(--field); border-radius: 1.2rem; }
