@@ -11,7 +11,7 @@ const root = path.join(__dirname, "..");
 const ctx = {}; vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "js/parser.js"), "utf8") + ";this.SHAPES = VietnameseParser.SHAPES;", ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "js/kage-engine.min.js"), "utf8") + ";this.Kage = Kage;", ctx);
-const Kage = ctx.Kage, { penPolygons } = require("./pen_strokes.js");
+const Kage = ctx.Kage, { penPolygons } = require("./pen_strokes.js"), { kaitiPolygons } = require("./kaiti_strokes.js");
 const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 
 const [kageFile, jobsFile, outFile, style = "mincho", boldArg = "1"] = process.argv.slice(2);
@@ -65,6 +65,7 @@ function draw({ lines, w }, m) {
   const f = ([x, y]) => { const X = m[0] * (x / S) + m[2], Y = m[1] * (y / S) + m[3]; return [X * S, Y * S]; };
   const moved = lines.map(l => withPts(l, ptsOf(l).map(f).map(p => p.map(v => Math.round(v * 1000) / 1000))));
   if (style === "pen" || style === "pen-cut") return outlineOf(penPolygons(moved, 5 * Math.max(w, 0.8) * 0.76 * bold * 1.15, style === "pen-cut"));
+  if (style === "kaiti") return outlineOf(kaitiPolygons(moved, 5 * Math.max(w, 0.8) * 0.76 * bold * 1.15));
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
@@ -80,8 +81,26 @@ function outlineOf(polygons) {
   for (const poly of polygons) {
     const p = poly.map(q => [q[0] / S, q[1] / S]);
     let area = 0; for (let i = 0; i < p.length; i++) { const u = p[i], v = p[(i + 1) % p.length]; area += u[0] * v[1] - v[0] * u[1]; a = Math.min(a, u[0]); b = Math.max(b, u[0]); }
-    if (area < 0) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
-    d += "M" + p.map(q => q[0].toFixed(3) + " " + q[1].toFixed(3)).join("L") + "Z";
+    const flip = area < 0; if (flip) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
+    const f = q => q[0].toFixed(3) + " " + q[1].toFixed(3);
+    if (poly.smooth) {                         // a closed Catmull-Rom spline through the points, as cubic Bezier curves
+      if (!poly.straight) {                    // tiny steps (crowded at the tips) make the boolean operations of the build fail: the outline is sampled anew in even steps of about 0.12
+        const m = p.length, cum = [0];
+        for (let i = 1; i <= m; i++) cum.push(cum[i - 1] + Math.hypot(p[i % m][0] - p[i - 1][0], p[i % m][1] - p[i - 1][1]));
+        const k = Math.max(16, Math.min(m, Math.round(cum[m] / 0.12))), out = [];
+        for (let j = 0, i = 0; j < k; j++) {
+          const at = cum[m] * j / k; while (cum[i + 1] < at) i++;
+          const f = (at - cum[i]) / (cum[i + 1] - cum[i] || 1), a = p[i], b = p[(i + 1) % m];
+          out.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+        }
+        p.splice(0, m, ...out);
+      }
+      const n = p.length, P = i => p[(i + n) % n];
+      d += "M" + f(p[0]);
+      const straight = new Set((poly.straight || []).map(i => flip ? (2 * n - 2 - i) % n : i));   // segments i -> i + 1 drawn as lines
+      for (let i = 0; i < n; i++) { const a = P(i - 1), b = P(i), c = P(i + 1), e = P(i + 2); d += straight.has(i) ? "L" + f(c) : "C" + f([b[0] + (c[0] - a[0]) / 6, b[1] + (c[1] - a[1]) / 6]) + " " + f([c[0] - (e[0] - b[0]) / 6, c[1] - (e[1] - b[1]) / 6]) + " " + f(c); }
+      d += "Z";
+    } else d += "M" + p.map(f).join("L") + "Z";
   }
   return { d, ink: [a, b] };
 }
