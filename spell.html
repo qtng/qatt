@@ -142,6 +142,7 @@
     dialog.prog td.bar { width: 45%; } dialog.prog td.bar i { display: block; height: .6rem; border-radius: .3rem; background: #198754; }
     dialog.prog td.bar.low i { background: #dc3545; } dialog.prog td.bar.mid i { background: #e0a800; }
     dialog.ask .btns { display: flex; gap: .6rem; justify-content: flex-end; }
+    #log { white-space: pre-wrap; text-align: left; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; }
     .stats { font-size: .85rem; color: var(--muted, #6c5d4a); font-variant-numeric: tabular-nums; }
     #next { background: #146c43; border-color: #146c43; color: #fff; }
     #next:hover, #next:focus-visible { background: #0f5132; border-color: #0f5132; color: #fff; }
@@ -189,6 +190,7 @@
     <h2 data-vi="Bảng xếp hạng">Ranking</h2>
     <table id="boardTable"></table>
   </div>
+  <pre class="stats mt-4 mb-5" id="log" hidden></pre>
   <dialog class="ask" id="askLogin">
     <h2 data-vi="Điểm của bạn" id="askTitle">Your points</h2>
     <p id="askText"></p>
@@ -375,9 +377,9 @@
     // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + CAP_ADD (at most CAP, 10 s), a time above the cap counts as the cap (the own slow value + CAP_ADD s, at most CAP = 10 s; plain CAP until there are MIN_SAMPLES times), a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 10, CAP_ADD = 2, HINT_ADD = 5, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
-    // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the fast one (ALPHA_FAST: the form of the day,
-    // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
+    const CAP = 10, CAP_ADD = 2, HINT_ADD = 5, ALPHA = 0.05, ALPHA_FAST = 0.2, ALPHA_AVG = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are MIN_SAMPLES times of that kind
+    // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the faster one (ALPHA_FAST 0.2: after 10 equal times it has covered about 90% of the way; the form of the day,
+    // for the display (the card, the gauge) and for the milestones: the first time it falls below one of the times of MILESTONES (at least MIN_SAMPLES times) the player gets MILESTONE_POINTS)
     const MIN_SAMPLES = 5;   // from this many times of a kind the values count (the quick check of a word, the milestones, later the ranking)
     const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
@@ -401,6 +403,12 @@
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
+    // the stopwatch and the log at the bottom of the page: the first line is the word in play with the time of every click (right, or wrong ✗) and the running one, to check
+    // the measuring: bao  1.9 | 2.4 ✗ | 0.7; the lines below are the earlier words, the newest first
+    let watch = { done: [], t0: 0, on: false, word: '', finished: false }, logLines = [];
+    const watchLine = () => watch.word.padEnd(8) + watch.done.concat(watch.on ? [((performance.now() - watch.t0) / 1000).toFixed(1)] : []).join(' | ');
+    const drawWatch = () => { if (!watch.word) return; $('log').textContent = [watchLine()].concat(logLines).join('\n'); $('log').hidden = false; };
+    setInterval(() => { if (watch.on) drawWatch(); }, 100);
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
       $('scoreVal').textContent = me.score;
@@ -410,7 +418,7 @@
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const set = mine(), have = KINDS.filter(k => set[k].n);
       $('stats').hidden = !have.length;
-      $('stats').textContent = have.map(k => names[k] + ' ' + set[k].v.toFixed(1) + ' s (' + set[k].f.toFixed(1) + ')').join(' · ');   // the slow value, in brackets the fast one
+      $('stats').textContent = have.map(k => names[k] + ' ' + set[k].v.toFixed(1) + ' s (' + set[k].f.toFixed(1) + ')' + (typeof set[k].t === 'number' ? ' ← ' + set[k].t.toFixed(1) : '')).join(' · ');   // the slow value, in brackets the fast one, after the arrow the last time
     };
     const floatPoints = (n, delay = 0) => {
       if (!n) return;
@@ -428,7 +436,7 @@
     };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
     function addTime(kind, t) {
-      const st = mine()[kind]; st.n++;
+      const st = mine()[kind]; st.n++; st.t = t;   // t: the last time, shown in the status line to check the measuring
       st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
       st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
       const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
@@ -447,6 +455,7 @@
     const slowFor = st => st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP;   // the cap of a time moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
     // the choice of a step: kind = onset, rhyme, tone (null if a wrong choice); ok = right; cells = the cells it found; done = those of them that are complete now
     function judge(kind, ok, cells = [], done = []) {
+      watch.done.push(((performance.now() - watch.t0) / 1000).toFixed(1) + (ok ? '' : ' ✗')); watch.t0 = performance.now();
       if (!ok) {
         lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
         if (kind === 'tone') addTime('tone', penalty('tone')); else word_.queue++;
@@ -486,6 +495,7 @@
     }
     // the word is solved: the bonus of the time, the cheer of a quick one
     function finishWord() {
+      watch.on = false; watch.finished = true; drawWatch();
       const elapsed = (Date.now() - word_.t0) / 1000;
       let bonus = Math.max(0, POINTS.bonus - Math.floor(elapsed / POINTS.bonusStep));
       if (word_.hinted) bonus = Math.floor(bonus / 2);
@@ -495,7 +505,7 @@
       // Skip comes back only if this word was better than the player's own average word: the points of the word against the smoothed points of the words so far
       const pts = word_.points, a = me.avg;
       if (!a.n || pts > a.v) me.skipOk = true;
-      a.n++; a.v = a.n === 1 ? pts : a.v + Math.max(1 / a.n, ALPHA_FAST) * (pts - a.v);
+      a.n++; a.v = a.n === 1 ? pts : a.v + Math.max(1 / a.n, ALPHA_AVG) * (pts - a.v);
       saveMe(); showSkip();
       if (!signed && typeof loadBoard === 'function') loadBoard();   // the grey line of a visitor with the points he would have
       me.words++; saveMe();
@@ -578,10 +588,10 @@
       $('board').hidden = !out.length;
     }
     // ---- the progress card: every STATS_EVERY solved words the score and a gauge of the confidence of the player ---------------------------------------------------------
-    // Confidence: per kind of symbol (from MIN_SAMPLES times on) TARGET seconds against the slow time (1 at TARGET or faster, 0.5 at twice as long ...), the mean of the kinds, in per cent.
+    // Confidence: per kind of symbol (from MIN_SAMPLES times on) TARGET seconds against the faster value f (1 at TARGET or faster, 0.5 at twice as long ...), the mean of the kinds, in per cent.
     const STATS_EVERY = 5, TARGET = 1.0;
     function confidence() {
-      const set = mine(), kinds = KINDS.map(k => ({ k, v: set[k].v, n: set[k].n, pct: set[k].n >= MIN_SAMPLES ? Math.round(100 * TARGET / Math.max(set[k].v, TARGET)) : null }));
+      const set = mine(), kinds = KINDS.map(k => ({ k, v: set[k].f, n: set[k].n, pct: set[k].n >= MIN_SAMPLES ? Math.round(100 * TARGET / Math.max(set[k].v, TARGET)) : null }));
       const ok = kinds.filter(x => x.pct !== null);
       return { value: ok.length ? Math.round(ok.reduce((a, x) => a + x.pct, 0) / ok.length) : null, kinds };
     }
@@ -641,6 +651,8 @@
       answer = word; nomOf = nom || '';
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
       startTimer(); $('lateRow').hidden = true;
+      if (watch.word && watch.done.length) { logLines.unshift(watchLine() + (watch.finished ? '' : '  (not finished)')); logLines.length = Math.min(logLines.length, 200); }
+      watch = { done: [], t0: performance.now(), on: true, word, finished: false }; drawWatch();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
