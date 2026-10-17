@@ -125,6 +125,11 @@ python3 tools/build_font.py --kage fonts/kage.json --pen --weight 2.4 --label Me
 (`style "pen-cut"` in `tools/pen_strokes.js`). The same six weights, files `fonts/qatt-pencut[-extralight|-light|-medium|-bold|-heavy]`, family `QATT Pen Cut ...`
 (`python3 tools/build_font.py --kage fonts/kage.json --pen --cut --weight 1.6 fonts/glyphs.json fonts/qatt-pencut`).
 
+**Kaiti (draft).** `--kaiti` (with `--kage`) draws the KAGE lines as brush strokes of regular script (`tools/kaiti_strokes.js`, style "kaiti" in `kage_outlines.js`, family `QATT Kaiti`):
+horizontals rise a little and are thin with a pressed start and a bulge where they stop, verticals are pressed at the start and thinner towards a round end, left-falling strokes taper to a point,
+right-falling strokes swell to a foot. It builds on the Pen module (`pen_strokes.js` exports its helpers) and takes `--weight` like Pen. No font files are committed yet while the design is worked out:
+`python3 tools/build_font.py --kage fonts/kage.json --kaiti --weight 3 fonts/glyphs.json /tmp/qatt-kaiti`.
+
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
 order as the single form; `font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make

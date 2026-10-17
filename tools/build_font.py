@@ -27,9 +27,10 @@ if BOLD_ON: sys.argv.remove('--bold')
 KAGE = KAGE_STYLE = None      # --kage fonts/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Serif (KAGE style mincho) or Gothic
 if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
-    KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'pen' if '--pen' in sys.argv else 'mincho'
+    KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'pen' if '--pen' in sys.argv else 'kaiti' if '--kaiti' in sys.argv else 'mincho'
     if '--pen' in sys.argv: sys.argv.remove('--pen')
     if '--gothic' in sys.argv: sys.argv.remove('--gothic')
+    if '--kaiti' in sys.argv: sys.argv.remove('--kaiti')
 CUT = '--cut' in sys.argv      # --cut (with --pen): flat, slanted stroke ends like Song, family "QATT Pen Cut"
 if CUT: sys.argv.remove('--cut')
 WIDE = 1.25 if '--wide' in sys.argv else 1.0    # --wide (with --kage): a joined pair is 1.25 cells wide, so its halves are squeezed less
@@ -74,7 +75,7 @@ BRUSH_WEIGHT = 0.8             # the brush font: weight of the brush.html export
 if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
     BRUSH_WEIGHT *= LIGHT
-if BOLD != 1.0 and KAGE_STYLE != 'pen': STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
+if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti'): STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
 # Placement of the letters in the cell (as in brush2.html): svg x, y -> offset + scale * (x, y); the letters of qatt.js lie in 0..100, the ink of all brush forms is 7..95.6 high and the ICF box is 4.2..95.8 (scale 1.034, offset -1.7 / -3.0).
 # It is done as GROW around the point (50, 50) plus the rest of the offset; a brush2 export can hold its own "place" (x, y, s in per cent). Tones keep their size and corner positions.
 PLACE = [-1.7, -3.0, 103.4]
@@ -282,7 +283,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE != 'pen' else '') + LABEL + (' Wide' if WIDE != 1.0 else '')))   # with copyright and licence, see tools/font_names.py
+fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti') else '') + LABEL + (' Wide' if WIDE != 1.0 else '')))   # with copyright and licence, see tools/font_names.py
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString

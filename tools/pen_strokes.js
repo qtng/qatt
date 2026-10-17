@@ -100,4 +100,4 @@ function stroke(line, W, others, cut) {
 }
 
 function penPolygons(lines, W, cut = false) { const fs = lines.map(nums); return fs.map((f, i) => stroke(lines[i], W, fs.filter((_, j) => j !== i), cut)); }
-module.exports = { penPolygons };
+module.exports = { penPolygons, nums, centreline, ease, touches };

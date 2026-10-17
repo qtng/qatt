@@ -11,7 +11,7 @@ const root = path.join(__dirname, "..");
 const ctx = {}; vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "js/parser.js"), "utf8") + ";this.SHAPES = VietnameseParser.SHAPES;", ctx);
 vm.runInContext(fs.readFileSync(path.join(root, "js/kage-engine.min.js"), "utf8") + ";this.Kage = Kage;", ctx);
-const Kage = ctx.Kage, { penPolygons } = require("./pen_strokes.js");
+const Kage = ctx.Kage, { penPolygons } = require("./pen_strokes.js"), { kaitiPolygons } = require("./kaiti_strokes.js");
 const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 
 const [kageFile, jobsFile, outFile, style = "mincho", boldArg = "1"] = process.argv.slice(2);
@@ -65,6 +65,7 @@ function draw({ lines, w }, m) {
   const f = ([x, y]) => { const X = m[0] * (x / S) + m[2], Y = m[1] * (y / S) + m[3]; return [X * S, Y * S]; };
   const moved = lines.map(l => withPts(l, ptsOf(l).map(f).map(p => p.map(v => Math.round(v * 1000) / 1000))));
   if (style === "pen" || style === "pen-cut") return outlineOf(penPolygons(moved, 5 * Math.max(w, 0.8) * 0.76 * bold * 1.15, style === "pen-cut"));
+  if (style === "kaiti") return outlineOf(kaitiPolygons(moved, 5 * Math.max(w, 0.8) * 0.76 * bold * 1.15));
   const k = new Kage();
   k.kShotai = style === "gothic" ? k.kGothic : k.kMincho;
   const F = k.kFont;
