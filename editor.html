@@ -40,6 +40,8 @@
     #pending { margin-top: .1rem; height: 1.2rem; display: flex; align-items: center; gap: .8rem; font-size: .85rem; color: var(--muted); }
     #pending .glyph { font-family: var(--qfont); font-size: 1.8rem; line-height: 1; color: var(--ink); }
     #pending .word { font-style: italic; }
+    .switches { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 1.6rem; }
+    #field.vertical { writing-mode: vertical-rl; text-orientation: upright; height: 24rem; min-height: 0; resize: horizontal; overflow: auto; }   /* vertical, lines from right to left */
     .telex { display: flex; justify-content: center; align-items: center; gap: .5rem; margin: .3rem 0 0; padding: 0; min-height: 0; font-size: .85rem; }
     .telex .form-check-input { float: none; margin: 0; }
     .telex .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
@@ -82,7 +84,10 @@
       <label class="sizebox"><input type="range" id="size" min="50" max="400" step="10" value="100" autocomplete="off" aria-label="Size"><span id="sizeLabel">100%</span></label>
     </div>
     <textarea id="field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Text" placeholder="Input Quốc Ngữ..." data-vi-placeholder="Gõ Quốc Ngữ..."></textarea>
-    <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off"><label class="form-check-label" for="telex">Telex</label></div>
+    <div class="switches">
+      <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="telex" autocomplete="off"><label class="form-check-label" for="telex">Telex</label></div>
+      <div class="telex form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="vertical" autocomplete="off"><label class="form-check-label" for="vertical" data-vi="Dọc">Vertical</label></div>
+    </div>
     <div id="pending" aria-live="polite"></div>
     <div id="readingOut" class="reading-out" hidden aria-live="polite"></div>
     <div class="keys">
@@ -126,6 +131,7 @@
     $('telex').checked = true;
     const ime = window.VietIme ? new VietIme(field, { telex: $('telex').checked, candidates: false }) : null;
     if (!ime) $('telex').closest('.telex').hidden = true;
+    $('vertical').addEventListener('change', () => { field.classList.toggle('vertical', $('vertical').checked); field.focus(); });
     $('telex').addEventListener('change', () => { ime?.update({ telex: $('telex').checked }); field.focus(); });
 
     // the word that ends right before position `end` is replaced by its QATT characters (if there are any)
