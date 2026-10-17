@@ -57,7 +57,7 @@ SX = SY * float(os.environ.get('QATT_SXF', 1.0))   # in x: the same (square cell
 VS = float(os.environ.get('QATT_VS', 1.4))
 VC = float(os.environ.get('QATT_VC', 577))
 TV = float(os.environ.get('QATT_TV', 0.5))   # how much of the move of the letters the tones follow in y (0 none, 1 all)
-TH = float(os.environ.get('QATT_TH', 0.25))   # the same for x: how much of the widening of the letters the tones follow (away from the middle of the cell)
+TH = float(os.environ.get('QATT_TH', 0.0))   # the same for x: how much of the widening of the letters the tones follow (away from the middle of the cell)
 HS = float(os.environ.get('QATT_HS', 1.3))   # the single forms of the KAGE fonts are stretched in x by HS around the middle of the cell, to be as wide as a Han character (the pairs: PAIR_M, 60 instead of 100 as margin; the wide font keeps 100)
 TONE_X = 1.0                   # the tones have the same scale as the letters
 # Noto Sans CJK (Japan): em box 1000 x 1000 from y -120 to 880; the ICF box (ideographic character face) y -78..838, x 42..958 (the stroke ends of 永 2 reach 34..965)
@@ -188,14 +188,12 @@ def outline_raw(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=
     return out
 
 def outline(ids, width, *a, **kw):
-    """outline_raw; a tone (not stretched, see VS) moves up or down in y by TV (y) and TH (x) times what the stretch of the letters would move its middle: the upper ones up, the lower ones down"""
+    """outline_raw; a tone (not stretched, see VS) moves up or down in y by TV times what the stretch of the letters would move its middle: the upper ones up, the lower ones down"""
     out = outline_raw(ids, width, *a, **kw)
     if VS != 1.0 and ids and ids[0].startswith('q') and not kw.get('ink') and out is not None and out.bounds:
         x0, y0, x1, y1 = out.bounds
         dy = TV * (VS - 1) * ((y0 + y1) / 2 - VC)
-        mid = a[1] if len(a) > 1 else kw.get('centre', 500)        # the middle of the cell the tone belongs to (the x of the glyph origin: 500, -500 over the cell to the left, ...)
-        dx = TH * (HS - 1) * ((x0 + x1) / 2 - mid)                 # the letters are wider by HS around that middle: the tone moves out by TH times as much
-        moved = pathops.Path(); out.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, dx, dy)))
+        moved = pathops.Path(); out.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, 0, dy)))
         return moved
     return out
 
@@ -208,6 +206,15 @@ def keep_inside(path, lo, hi, margin=TONE_MARGIN):
     if not d: return path
     out = pathops.Path()
     path.draw(TransformPen(out.getPen(), (1, 0, 0, 1, d, 0)))
+    return out
+
+def tone_x(path, mid):
+    """The tones follow the widening of the letters (HS) in x by TH: away from the middle `mid` of their cell (the x of the glyph origin: 500, -500 over the cell to the left), after
+    keep_inside; a negative TH moves them in"""
+    if HS == 1.0 or TH == 0: return path
+    x0, _, x1, _ = path.bounds
+    out = pathops.Path()
+    path.draw(TransformPen(out.getPen(), (1, 0, 0, 1, TH * (HS - 1) * ((x0 + x1) / 2 - mid), 0)))
     return out
 
 def make_glyphs():
@@ -238,7 +245,7 @@ def make_glyphs():
             frame.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         else:
             path = outline(ids, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
-            if tone: path = keep_inside(path, 0, ADV)
+            if tone: path = tone_x(keep_inside(path, 0, ADV), 500)
             path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         name = 'u%05X' % (BASE + o)
         glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
@@ -274,11 +281,11 @@ def make_glyphs():
                 add(name + '.rightlow', outline(letter_ids(g, 'right'), STROKE_LOW, PAIR_K, 0, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
         if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
             pen = TTGlyphPen(None)
-            keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -500), -ADV, 0).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+            tone_x(keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -500), -ADV, 0), -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
             glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
             if WIDE != 1.0:                         # and over a pair: in the corners of the wide cell
                 pen = TTGlyphPen(None)
-                keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -PAIR_W / 2), -PAIR_W, 0).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+                tone_x(keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -PAIR_W / 2), -PAIR_W, 0), -PAIR_W / 2).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
                 glyphs[name + '.markw'] = pen.glyph(); adv[name + '.markw'] = 0; order.append(name + '.markw')
             tones.append(name)
 
