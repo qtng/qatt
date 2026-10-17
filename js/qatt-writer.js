@@ -5,7 +5,7 @@ The writer: a text field in which Quốc Ngữ becomes Quốc Âm Tân Tự (QAT
   <div id="writer" class="card-box writer"></div>
   QattWriter.mount(document.getElementById('writer'), { switch: 'qatt', storage: 'chunom_writer_' })
 
-  switch  'qatt'  the Chunom writer: Chữ Nôm candidates are always on, the switch "Quốc Âm Tân Tự" turns QATT on and off (on at the start)
+  switch  'qatt'  the Chunom writer: Chữ Nôm candidates are always on, the switch "Quốc Âm Tân Tự" turns QATT on and off (off at the start)
           'nom'   the QATT editor: QATT is always on, the switch "Chữ Nôm" turns the candidate list on and off (off at the start)
   storage the prefix of the keys in localStorage (the size and the switch are kept)
 
@@ -172,7 +172,6 @@ const QattWriter = (() => {
 
     function setState() {
       apply();
-      store.set(mode === 'qatt' ? 'qatt' : 'nom', modeBox.checked);
       document.body.classList.toggle('qatt-on', qatt);
       status.innerHTML = qatt && nom ? '<b>Space</b> converts QATT, <b>Enter</b> picks first Hán Nôm'
         : nom ? '<b>Space</b> and <b>Enter</b> pick first Hán Nôm'
@@ -182,7 +181,7 @@ const QattWriter = (() => {
       applyFont();
       refresh();
     }
-    modeBox.addEventListener('change', setState);
+    modeBox.addEventListener('change', () => { store.set('on', modeBox.checked); setState(); });   // kept only when somebody chose it
 
     // the word that ends right before `end` becomes QATT characters (if there are any)
     const convertBefore = end => {
@@ -365,7 +364,7 @@ const QattWriter = (() => {
 
     font.value = DEFAULT_FONT;
     size.value = store.get('size', '100');
-    modeBox.checked = store.get(mode === 'qatt' ? 'qatt' : 'nom', mode === 'qatt' ? 'true' : 'false') === 'true';   // the key of the Chunom writer was always 'qatt'
+    modeBox.checked = store.get('on', 'false') === 'true';   // off at the start, on both sites (QATT on the Chunom site, Chữ Nôm on qatt.org)
     setState();
     return { field: typer };
   }
