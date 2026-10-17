@@ -72,7 +72,7 @@ PAIR_W = 1000 * WIDE           # width of a joined pair
 HALF = int(PAIR_W // 2)        # advance of each half
 PAIR_T = PAIR_W - 2 * PAIR_M - PAIR_G   # what the two halves share
 SPLITS = (45, 50, 55)          # KAGE fonts: share of the left half in per cent; the halves are fitted into these boxes by KAGE
-PAIR_K = float(os.environ.get('PAIR_K', PAIR_K))
+PAIR_K = float(os.environ.get('PAIR_K', PAIR_K * float(os.environ.get('QATT_PW', 1.0 if KAGE else 1.36))))   # Brush, Prototype: the pairs are wider (a KAGE pair is fitted by PAIR_M)
 JOINER = 155                   # offset of the component joiner
 COMBINER = 154                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
@@ -128,7 +128,7 @@ def outline(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=50, 
     width of the outline in font units (None until the first run has asked for it)."""
     out = pathops.Path()
     kx = SX * k * grow
-    if KAGE and HS != 1.0 and not fit and not ids[0].startswith('q'): kx *= HS   # the single forms (and the stack) are wider, the halves of a pair are fitted into their box by PAIR_M
+    if HS != 1.0 and not fit and not ids[0].startswith('q') and cx == 50: kx *= HS   # the single forms (and the stack) are wider; the halves of a pair are fitted into their box by PAIR_M (KAGE) or are wider by PAIR_K
     f = Y0 - GROW_Y * SY * (1 - grow)
     if anchor is not None:       # the point `anchor` stays where it is, the rest is squeezed towards it
         f = (Y0 - (GROW_Y + (anchor - GROW_Y) * grow) * SY) + anchor * SY * grow * v
