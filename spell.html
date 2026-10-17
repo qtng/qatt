@@ -326,10 +326,13 @@
     // or the start of the word), kept per kind of symbol (onset, rhyme, tone) as an exponentially smoothed value; a wrong choice counts as the own value + WRONG_ADD (at most CAP), a time above CAP counts as CAP, a time in
     // which the page was hidden does not count. Both are kept in the browser (localStorage); the server comes later.
     const POINTS = { right: 10, wrong: 2, bonus: 50, bonusStep: 1.2, quick: 25 };
-    const CAP = 5, WRONG_ADD = 2, ALPHA = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are 5 times of that kind
+    const CAP = 5, WRONG_ADD = 2, ALPHA = 0.05, ALPHA_FAST = 0.1, QUICK_FACTOR = 1.5, QUICK_MAX = 3;   // seconds; smoothing; "quick": at most 3 seconds, and at most 1.5 times the own value once there are 5 times of that kind
+    // v: the slow value (ALPHA, for the server and the ranking: it follows only slowly, so a good day does not count); f: the fast one (ALPHA_FAST: the form of the day,
+    // for the display and for the milestones: the first time it falls below one of the times of MILESTONES (at least 10 times) the player gets MILESTONE_POINTS)
+    const MILESTONES = [3, 2, 1.5, 1, 0.7], MILESTONE_POINTS = 50;
     const KINDS = ['onset', 'rhyme', 'tone'];
-    let me = { score: 0, stats: { onset: { v: 0, n: 0 }, rhyme: { v: 0, n: 0 }, tone: { v: 0, n: 0 } } };
-    try { const saved = JSON.parse(localStorage.getItem('qattSpell')); if (saved && typeof saved.score === 'number') me = { ...me, ...saved }; } catch (e) {}
+    let me = { score: 0, stats: { onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } } };
+    try { const saved = JSON.parse(localStorage.getItem('qattSpell')); if (saved && typeof saved.score === 'number') me = { ...me, ...saved }; for (const k of KINDS) me.stats[k] = { f: me.stats[k].v, m: 0, ...me.stats[k] }; } catch (e) {}
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
@@ -342,7 +345,7 @@
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const have = KINDS.filter(k => me.stats[k].n);
       $('stats').hidden = !have.length;
-      $('stats').textContent = have.map(k => names[k] + ' ' + me.stats[k].v.toFixed(1) + ' s').join(' · ');
+      $('stats').textContent = have.map(k => names[k] + ' ' + me.stats[k].v.toFixed(1) + ' s (' + me.stats[k].f.toFixed(1) + ')').join(' · ');   // the slow value, in brackets the fast one
     };
     const floatPoints = (n, delay = 0) => {
       if (!n) return;
@@ -352,13 +355,24 @@
       $('task').append(e); setTimeout(() => e.remove(), 1200 + delay * 1000);
     };
     const addPoints = (n, delay) => { me.score = Math.max(0, me.score + n); floatPoints(n, delay); showScore(true); saveMe(); };
+    // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
+    function addTime(kind, t) {
+      const st = me.stats[kind]; st.n++;
+      st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
+      st.f = st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f);
+      const reached = MILESTONES.filter(m => st.f < m).length;   // how many of the times are beaten
+      if (st.n >= 10 && reached > st.m) {
+        st.m = reached;
+        const m = MILESTONES[reached - 1], names = { onset: ['Onsets', 'Âm đầu'], rhyme: ['Rhymes', 'Vần'], tone: ['Tones', 'Thanh'] }[kind];
+        setTimeout(() => { addPoints(MILESTONE_POINTS); cheer(Lang.t(names[0] + ' under ' + m + ' s!', names[1] + ' dưới ' + m + ' giây!')); }, 700);
+      }
+      showStats(); saveMe();
+    }
     // the choice of a step: kind = onset, rhyme or tone; ok = right
     function judge(kind, ok) {
       if (!ok) {   // a wrong choice counts in the speed as well: the own value plus WRONG_ADD seconds (else one could click wrong on purpose and only hurry on easy words)
         lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
-        const st = me.stats[kind], t = Math.min(CAP, st.v + WRONG_ADD);
-        st.n++; st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
-        showStats(); saveMe();
+        addTime(kind, Math.min(CAP, me.stats[kind].v + WRONG_ADD));
         return;
       }
       addPoints(POINTS.right);
@@ -366,16 +380,15 @@
       const st = me.stats[kind], first = !lap.wrong && !lap.hinted && !hiddenDuring;
       if (first) {
         if (!(t <= Math.min(QUICK_MAX, st.n >= 5 ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false;   // slow for this player
-        st.n++; st.v = st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v);
-        showStats(); saveMe();
+        addTime(kind, t);
       } else word_.quick = false;
       newLap();
     }
     const CHEERS = [['Bravo!', 'Hoan hô!'], ['Unbelievable!', 'Không thể tin nổi!'], ['Brilliant!', 'Xuất sắc!'], ['Perfect!', 'Hoàn hảo!'], ['Wow!', 'Tuyệt vời!']];
-    function cheer() {
+    function cheer(text) {   // a text of its own (a milestone) or one of CHEERS
       const [en, vi] = pick(CHEERS);
       const c = document.createElement('div');
-      c.className = 'cheer'; c.textContent = Lang.t(en, vi);
+      c.className = 'cheer'; c.textContent = text || Lang.t(en, vi);
       $('task').append(c); setTimeout(() => c.remove(), 1950);
       if (REDUCED) return;
       for (let i = 0; i < 14; i++) {   // sparks fly out from the middle
