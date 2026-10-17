@@ -19,15 +19,16 @@ const STARTTOP = [[0, 0.043], [0.022, -0.021], [0.056, -0.047], [0.111, -0.067],
 const TIPDROP = [[0, 1.38], [0.006, 1.363], [0.022, 1.301], [0.044, 1.247], [0.089, 1.166], [0.144, 1.084], [0.222, 0.988], [0.333, 0.878], [0.5, 0.737], [0.667, 0.611], [0.889, 0.46], [1.111, 0.331], [1.48, 0.16], [2.0, 0.04], [2.4, 0]];   // the top edge falls from the rising line to the right tip
 const FOOT = [[0, -0.142], [0.022, -0.091], [0.044, -0.053], [0.089, -0.006], [0.144, 0.03], [0.222, 0.064], [0.333, 0.091], [0.5, 0.11], [0.667, 0.107], [0.889, 0.089], [1.111, 0.072], [1.5, 0.04], [2.2, 0]];   // the bottom edge near the right tip, above BASE
 const table = (t, x) => { if (x <= t[0][0]) return t[0][1]; for (let i = 1; i < t.length; i++) if (x <= t[i][0]) return t[i - 1][1] + (t[i][1] - t[i - 1][1]) * (x - t[i - 1][0]) / (t[i][0] - t[i - 1][0]); return t[t.length - 1][1]; };
-function horizontal(p0, p1, W) {
-  const [a, b] = p0[0] <= p1[0] ? [p0, p1] : [p1, p0];
+function horizontal(p0, p1, W, free0, free1) {
+  const [a, b] = p0[0] <= p1[0] ? [p0, p1] : [p1, p0], freeA = p0[0] <= p1[0] ? free0 : free1;   // freeA: the left end is open (not on another stroke)
   const len = Math.hypot(b[0] - a[0], b[1] - a[1]), tx = (b[0] - a[0]) / len, ty = (b[1] - a[1]) / len, L = len / W, N = Math.max(60, Math.ceil(L * 8));
   const at = (u, o) => [a[0] + tx * u - ty * o * W, a[1] + ty * u + tx * o * W];
   const ts = [], vs = [];
   for (let i = 0; i <= N; i++) {
     const d = L * (1 - Math.cos(Math.PI * i / N)) / 2, e = L - d;   // the points crowd at both ends, where the outline turns quickly
     const k = Math.max(0, 1 - e / 2.4), shift = RISE * (L - 11.26) * k * k * (3 - 2 * k);   // the tip keeps its place relative to the right end whatever the length: the template is 11.26 W long
-    const t = -0.01 - RISE * d + table(STARTTOP, d) + table(TIPDROP, e) + shift, v = BASE + table(BELLY, d) + table(FOOT, e);
+    const t = -0.01 - RISE * d + (freeA ? table(STARTTOP, d) : 0) + table(TIPDROP, e) + shift;
+    const v = BASE + (freeA ? table(BELLY, d) : Math.max(0, 0.6 - RISE * d)) + table(FOOT, e);   // on another stroke: no pointed start and belly, a band of 0.8 W until the wedge is that thick
     ts.push(t); vs.push(v);
   }
   const soften = a => { for (let r = 0; r < 3; r++) { const c = a.slice(); for (let i = 1; i < N; i++) a[i] = (c[i - 1] + 2 * c[i] + c[i + 1]) / 4; } };   // the tables are piecewise linear: smooth the kinks of the edges (the end points stay)
@@ -35,6 +36,7 @@ function horizontal(p0, p1, W) {
   const pts = i => { const u = L * (1 - Math.cos(Math.PI * i / N)) / 2 * W; return [at(u, ts[i]), at(u, vs[i])]; };
   const poly = [...ts.keys()].map(i => pts(i)[0]).concat([...vs.keys()].reverse().map(i => pts(i)[1]));
   poly.smooth = true;   // outlineOf joins the points with Bezier curves (Catmull-Rom) instead of straight lines
+  if (!freeA) poly.straight = [poly.length - 1];   // the start on another stroke is cut straight
   return poly;
 }
 
@@ -86,7 +88,7 @@ function stroke(line, W, others) {
   let kind;
   if (f[0] === 1) kind = ay < ax * 0.3 ? "h" : ax < ay * 0.3 ? "v" : dx < 0 ? "pie" : "na";
   else kind = f[1] === 7 ? "arc" : dx < 0 ? "pie" : "na";
-  if (kind === "h") return horizontal(p0, p1, W);
+  if (kind === "h") return horizontal(p0, p1, W, !touches(p0, others, W), !touches(p1, others, W));
   if (kind === "v" && Math.hypot(dx, dy) >= 4 * W) {
     let [top, bottom] = p0[1] <= p1[1] ? [p0, p1] : [p1, p0];
     const free0 = !touches(top, others, W), free1 = !touches(bottom, others, W);
