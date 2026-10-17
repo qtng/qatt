@@ -46,6 +46,12 @@ const QattWriter = (() => {
     .bar-buttons, .opts { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
     .opts { gap: .2rem 1.5rem; }
     .opts .form-check { margin: 0; }
+    @media (max-width: 575.98px) {   /* on a phone the switches are a little tighter, and in one row from 360 px on */
+      .opts { gap: .2rem .8rem; }
+      .opts .form-check { white-space: nowrap; font-size: .85rem; padding-left: 2.2em; }
+      .opts .form-check-input { margin-left: -2.2em; }
+    }
+    @media (min-width: 360px) and (max-width: 575.98px) { .opts { flex-wrap: nowrap; } }
     .opts .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
     .status { padding: 0 .9rem .7rem; text-align: center; font-size: .9rem; color: var(--muted); }
     .status b { color: var(--ink); font-weight: 600; }
@@ -116,7 +122,7 @@ const QattWriter = (() => {
     const haveQatt = !!parser && typeof QattText !== 'undefined', haveIme = typeof VietIme !== 'undefined';
     // the switch: QATT (Chunom site) or Chữ Nôm (qatt.org); the other part is always on
     const modeBox = $('mode-select');
-    $('mode-label').innerHTML = mode === 'qatt' ? 'Quốc Âm Tân Tự <span class="text-secondary">(QATT)</span>' : 'Chữ Nôm';
+    $('mode-label').innerHTML = mode === 'qatt' ? 'Quốc Âm Tân Tự' : 'Chữ Nôm';
     if (mode === 'qatt' ? !haveQatt : !haveIme) modeBox.closest('.form-check').hidden = true;
     if (!haveIme) $('telex-select').closest('.form-check').hidden = true;
     let qatt = false, nom = false;   // what is on now
