@@ -60,7 +60,7 @@
     .overview .quad > div { display: grid; grid-template-columns: repeat(2, 48cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
     .overview .quad span { height: 42cqw; display: flex; align-items: center; justify-content: center; font-size: calc(var(--fit, 1) * 53cqw); line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
-    .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--accent); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg, #212529); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
     .to-top.show { opacity: 1; pointer-events: auto; }
     @media (max-width: 991.98px) { .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }   /* above the bottom bar of the phone */
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
