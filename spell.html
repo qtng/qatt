@@ -185,8 +185,7 @@
   <div id="bases"><div class="pad grid8" id="basePad"></div></div>
   <div id="tones" hidden><div class="tones" id="tonePad"></div></div>
   <div id="nextRow" class="text-center" hidden><button type="button" class="btn btn-cinnabar btn-pill" id="next" data-vi="Từ tiếp theo">Next word</button></div>
-  <div class="stats text-center mt-3" id="watch" aria-live="off"></div>
-  <div class="stats text-center mt-1" id="stats" hidden aria-live="off"></div>
+  <div class="stats text-center mt-3" id="stats" hidden aria-live="off"></div>
   <div class="board" id="board" hidden>
     <h2 data-vi="Bảng xếp hạng">Ranking</h2>
     <table id="boardTable"></table>
@@ -404,10 +403,11 @@
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
-    // the stopwatch under the card: the time of every click of this word (right or wrong ✗) and the one that is running, to check the measuring: 1.9 | 2.4 ✗ | 0.7
-    let watch = { done: [], t0: 0, on: false, word: '', logged: true }, logLines = [];
-    const logWatch = note => { watch.logged = true; logLines.unshift(watch.word.padEnd(8) + watch.done.join(' | ') + (note || '')); logLines.length = Math.min(logLines.length, 200); $('log').textContent = logLines.join('\n'); $('log').hidden = false; };   // the log under the page: a word and its stopwatch per line, the newest on top
-    const drawWatch = () => { $('watch').textContent = watch.done.concat(watch.on ? [((performance.now() - watch.t0) / 1000).toFixed(1)] : []).join(' | '); };
+    // the stopwatch and the log at the bottom of the page: the first line is the word in play with the time of every click (right, or wrong ✗) and the running one, to check
+    // the measuring: bao  1.9 | 2.4 ✗ | 0.7; the lines below are the earlier words, the newest first
+    let watch = { done: [], t0: 0, on: false, word: '', finished: false }, logLines = [];
+    const watchLine = () => watch.word.padEnd(8) + watch.done.concat(watch.on ? [((performance.now() - watch.t0) / 1000).toFixed(1)] : []).join(' | ');
+    const drawWatch = () => { if (!watch.word) return; $('log').textContent = [watchLine()].concat(logLines).join('\n'); $('log').hidden = false; };
     setInterval(() => { if (watch.on) drawWatch(); }, 100);
     const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
@@ -495,7 +495,7 @@
     }
     // the word is solved: the bonus of the time, the cheer of a quick one
     function finishWord() {
-      watch.on = false; drawWatch(); logWatch();
+      watch.on = false; watch.finished = true; drawWatch();
       const elapsed = (Date.now() - word_.t0) / 1000;
       let bonus = Math.max(0, POINTS.bonus - Math.floor(elapsed / POINTS.bonusStep));
       if (word_.hinted) bonus = Math.floor(bonus / 2);
@@ -651,8 +651,8 @@
       answer = word; nomOf = nom || '';
       word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats }) }; newLap();   // snap: the state before the word, for Skip
       startTimer(); $('lateRow').hidden = true;
-      if (!watch.logged && watch.done.length) logWatch('  (not finished)');
-      watch = { done: [], t0: performance.now(), on: true, word, logged: false }; drawWatch();
+      if (watch.word && watch.done.length) { logLines.unshift(watchLine() + (watch.finished ? '' : '  (not finished)')); logLines.length = Math.min(logLines.length, 200); }
+      watch = { done: [], t0: performance.now(), on: true, word, finished: false }; drawWatch();
       slots = a.cells.map(c => ({ ...c, state: 'empty' }));
       setTimeout(armHint, 0);   // the hint of this word waits for its time (the own value of the first kind + HINT_ADD)
       tone = a.tone; code = a.code; hop = a.hop;
