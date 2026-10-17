@@ -29,6 +29,9 @@
     th { background: #f1e6cc; text-align: left; font-weight: 600; }
     td:first-child { white-space: nowrap; }
     .tw { overflow-x: auto; }
+    figure { margin: 1rem 0 1.4rem; }
+    figure img { max-width: 100%; height: auto; border-radius: .5rem; }
+    figcaption { color: var(--muted); font-size: .9rem; margin-top: .3rem; }
     .tip { background: #fffdf8; border-left: 4px solid var(--accent); padding: .6rem .9rem; border-radius: 0 .5rem .5rem 0; }
   </style>
   <script src="../../js/navigation.js"></script>
@@ -92,6 +95,7 @@ python3 tools/build_all.py --out /tmp/new  # into another folder, to compare bef
       <tr><td><code>--vertical</code></td><td>Adds the vertical positions (<code>build_all.py</code> always sets it)</td></tr>
     </tbody>
   </table></div>
+  <figure><img src="build/weight.png" alt="The syllables tân tự in four stroke weights of QATT Pen" loading="lazy"><figcaption><code>--weight</code>: the same Pen font with four stroke thicknesses (extra light, light, regular, medium). These four are built with <code>build_all.py</code> as separate fonts.</figcaption></figure>
 
   <h3>Size and shape (all fonts, set in front of the command)</h3>
   <div class="tw"><table>
@@ -106,6 +110,9 @@ python3 tools/build_all.py --out /tmp/new  # into another folder, to compare bef
       <tr><td><code>QATT_SXF</code></td><td>1.0</td><td>Width in relation to height (1 is square). Changes the width of everything</td></tr>
     </tbody>
   </table></div>
+  <figure><img src="build/vs.png" alt="Chinese characters next to QATT syllables with QATT_VS 1, 1.4 and 1.8" loading="lazy"><figcaption><code>QATT_VS</code>: with 1 the letters are small next to the Chinese characters; with 1.4 they are as high; with 1.8 they are too high (the tone marks too).</figcaption></figure>
+  <figure><img src="build/vc.png" alt="Chinese characters next to QATT syllables with QATT_VC 450, 577 and 700" loading="lazy"><figcaption><code>QATT_VC</code>: moves where the letters sit on the line. With 450 they sit higher, with 700 lower. The change is small, a few units of height.</figcaption></figure>
+  <figure><img src="build/hs.png" alt="Chinese characters next to QATT syllables with QATT_HS 1, 1.3 and 1.6" loading="lazy"><figcaption><code>QATT_HS</code>: the width of a single letter. With 1 it is narrow, with 1.3 about as wide as a Chinese character, with 1.6 too wide.</figcaption></figure>
 
   <h3>Tones in horizontal text</h3>
   <p>The tone marks hang over and under the syllable. When the letters are stretched, the tones should not stay behind, so they follow the stretching by a share:</p>
@@ -116,6 +123,8 @@ python3 tools/build_all.py --out /tmp/new  # into another folder, to compare bef
       <tr><td><code>QATT_TH</code></td><td>-0.5</td><td>The same sideways. A negative number moves the tones in towards the middle of their cell, a positive one out</td></tr>
     </tbody>
   </table></div>
+  <figure><img src="build/tv.png" alt="Six syllables with the tones 1 to 6 and QATT_TV 0, 0.5 and 1" loading="lazy"><figcaption><code>QATT_TV</code>: with 0 the tones stay close to the letters, with 1 they move away from them as far as the letters grew. Look at the lower tone in the third syllable and the upper ones.</figcaption></figure>
+  <figure><img src="build/th.png" alt="Six syllables with the tones 1 to 6 and QATT_TH 0.5, 0 and -0.5" loading="lazy"><figcaption><code>QATT_TH</code>: with 0.5 the tones move out of their cell, with -0.5 they sit nearer to the middle of it.</figcaption></figure>
 
   <h3>Tones in vertical text</h3>
   <p>In a column the cell above and below is the next syllable, so tones that hang over and under the cell would lie on the neighbours. In vertical text they therefore move into the height of their cell and out to the side:</p>
@@ -126,10 +135,13 @@ python3 tools/build_all.py --out /tmp/new  # into another folder, to compare bef
       <tr><td><code>QATT_TONE_Y</code></td><td>0</td><td>How far a tone stays inside the top or bottom edge of its cell. 0: it touches the edge; bigger: further in, towards the letters</td></tr>
     </tbody>
   </table></div>
+  <figure><img src="build/tone-side.png" alt="Six syllables in a vertical column with the tones at QATT_TONE_SIDE 0, 140 and 250" loading="lazy"><figcaption><code>QATT_TONE_SIDE</code> in vertical text: with 0 the tones lie on the letters, with 140 they sit at the edge of the letters, with 250 they hang out into the space between the columns.</figcaption></figure>
+  <figure><img src="build/tone-y.png" alt="Six syllables in a vertical column with the tones at QATT_TONE_Y 0, 40 and 80" loading="lazy"><figcaption><code>QATT_TONE_Y</code> in vertical text: with 0 the tones touch the top or bottom edge of their cell, with 80 they have moved towards the middle of the syllable.</figcaption></figure>
   <p class="note">These two only change vertical text. They can also be applied to fonts that are already built, without building them again: <code>QATT_TONE_SIDE=100 python3 tools/font_vertical.py fonts/qatt-*.ttf</code> (it changes the <code>.ttf</code> files and writes the <code>.woff2</code> again; running it twice does no harm).</p>
 
   <h3>Fine tuning in the code</h3>
   <p>A few more constants are at the top of <code>build_font.py</code> and have no environment variable: the stroke widths (<code>STROKE</code> and its relatives), the share of the upper letter in a stack (<code>STACK_UP</code>), the gap between the two halves of a pair (<code>PAIR_G</code>) and how far a tone must stay inside its cell (<code>TONE_MARGIN</code>). Change them in the file and build again.</p>
+  <p class="note">The pictures on this page are made with <code>node tools/build_images.js</code>: it builds QATT Pen again with one number changed, sets the same text in each and takes the pictures into <code>admin/font/build/</code>. To change a picture, edit its entry in the list at the top of the script.</p>
 
   <h2>Read the numbers out of a font</h2>
   <p>Every font built with <code>build_font.py</code> carries the numbers it was built with, in the description of the font (name ID 10), together with the date and the commit of the tools. With them a font can be built again exactly:</p>

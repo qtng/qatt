@@ -179,3 +179,7 @@ Bootstrap 5.3.3 (CSS, JS bundle) and Bootstrap Icons 1.11.3 (CSS, fonts) are par
 Pages link them relatively (`vendor/…`, `../vendor/…` from a subfolder, `/vendor/…` in `404.html`); `js/navigation.js` finds the folder from its own address, so pages of other sites that load it get the same files.
 To update: take the files from the npm packages `bootstrap` and `bootstrap-icons` (`dist/css/bootstrap.min.css`, `dist/js/bootstrap.bundle.min.js`, `font/bootstrap-icons.min.css`, `font/fonts/*`).
 `vendor/supabase/` holds supabase-js 2.117.3 (UMD build `supabase.min.js`, pinned instead of the floating `@2`).
+
+## Pictures of the build numbers: `build_images.js`
+
+`node tools/build_images.js` (Node.js with Playwright and a Chromium, Python with the packages of `requirements.txt`, a Han font) builds QATT Pen several times with one number changed (`QATT_VS`, `QATT_VC`, `QATT_HS`, `QATT_TV`, `QATT_TH`, `QATT_TONE_SIDE`, `QATT_TONE_Y`) in a temporary folder, sets the same text in each and writes one picture per number into `admin/font/build/` (before and after, shown on `admin/font/build.html`). About a minute. The numbers and their values are the list `FIGURES` at the top of the script.
