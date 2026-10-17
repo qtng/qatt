@@ -84,9 +84,16 @@ function outlineOf(polygons) {
     const flip = area < 0; if (flip) p.reverse();                  // one orientation for all polygons, so the nonzero fill unites them
     const f = q => q[0].toFixed(3) + " " + q[1].toFixed(3);
     if (poly.smooth) {                         // a closed Catmull-Rom spline through the points, as cubic Bezier curves
-      if (!poly.straight) {                    // tiny steps (crowded at the tips) make the boolean operations of the build fail: keep points at least 0.1 apart
-        const keep = [p[0]]; for (const q of p.slice(1)) if (Math.hypot(q[0] - keep[keep.length - 1][0], q[1] - keep[keep.length - 1][1]) > 0.1) keep.push(q);
-        if (keep.length > 8) p.splice(0, p.length, ...keep);
+      if (!poly.straight) {                    // tiny steps (crowded at the tips) make the boolean operations of the build fail: the outline is sampled anew in even steps of about 0.12
+        const m = p.length, cum = [0];
+        for (let i = 1; i <= m; i++) cum.push(cum[i - 1] + Math.hypot(p[i % m][0] - p[i - 1][0], p[i % m][1] - p[i - 1][1]));
+        const k = Math.max(16, Math.min(m, Math.round(cum[m] / 0.12))), out = [];
+        for (let j = 0, i = 0; j < k; j++) {
+          const at = cum[m] * j / k; while (cum[i + 1] < at) i++;
+          const f = (at - cum[i]) / (cum[i + 1] - cum[i] || 1), a = p[i], b = p[(i + 1) % m];
+          out.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+        }
+        p.splice(0, m, ...out);
       }
       const n = p.length, P = i => p[(i + n) % n];
       d += "M" + f(p[0]);
