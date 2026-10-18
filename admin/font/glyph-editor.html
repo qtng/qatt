@@ -65,6 +65,7 @@
     .views div { text-align: center; font-size: .72rem; color: var(--muted, #7b6c58); cursor: pointer; border-radius: .35rem; padding: .1rem; }
     .views div.on { background: #6b46c1; color: #fff; } .views div.on svg { border-color: #6b46c1; background: Canvas; color: CanvasText; }
     .side.own .big { border: 2px solid #6b46c1; } .side.own #title { color: #6b46c1; }
+    .cell .warn { position: absolute; bottom: 1.55rem; right: .3rem; color: #d97706; font-size: .85rem; line-height: 1; }
     .cell .fs { position: absolute; top: .2rem; left: .25rem; display: flex; gap: .15rem; }
     .cell .fs span { font: 600 .62rem/1 system-ui, sans-serif; color: #6b46c1; border: 1px solid #6b46c1; border-radius: .2rem; padding: .08rem .2rem; }
     .cell .fs span.on { color: #fff; background: #6b46c1; }
@@ -221,6 +222,7 @@
       violette Buchstaben oben links, welche Schriften für das Symbol eine eigene Glyphe haben (S Serif, G Gothic, P Pen, C Pen Cut, K Khai); eine Vorschau
       mit eigener Glyphe heißt „· own“. Eine eigene Glyphe folgt späteren Änderungen der zentralen nicht. Linke / rechte Form einer Schrift: ihre eigene linke
       Form, sonst die zentrale linke, sonst ihre eigene Einzelform, sonst die zentrale Einzelform.</dd>
+    <dt><span style="color:#d97706">⚠</span> Warnung</dt><dd>In der Übersicht unten rechts in der Kachel: eine Schrift hat für dieses Symbol eine eigene Glyphe, aber das Symbol hat eine zentrale linke oder rechte Form, die für die Schrift nicht überschrieben wurde. Die Glyphe ist dann vermutlich unvollständig: die Schrift mischt ihre eigene Einzelform mit einer zentralen Hälfte. Der Tooltip nennt die Schrift und die fehlende Seite. Abhilfe: für die Schrift die linke / rechte Form bearbeiten (Form oben wählen, Vorschau anklicken) oder zentral keine eigene linke / rechte Form haben.</dd>
     <dt>roter Punkt</dt><dd>In der Übersicht: die Form ist seit dem letzten Haltepunkt bearbeitet (ohne Haltepunkt: anders als in der Datei).</dd>
     <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Ziehen mit Move.</dd>
     <dt>Strg+Z</dt><dd>Rückgängig.</dd>
@@ -340,13 +342,25 @@
   const glyph = (f, st, set, cls = 'ink') => `<g transform="scale(${S})"><path class="${cls}" d="${outline(f, st, set)}"/></g>`;
 
   const ABBR = { mincho: 'S', gothic: 'G', pen: 'P', 'pen-cut': 'C', kaiti: 'K' };
+  // a font with a glyph of its own for the single form, while the symbol has a central left / right form that the font did not override: the
+  // glyph looks unfinished (the font mixes its own single form with a central half). -> the texts of the warnings
+  function incomplete(s) {
+    const out = [];
+    for (const st of STYLES) {
+      const o = lvl(data, st[1]); if (!o['v2c-' + s]) continue;
+      const miss = [['l', 'left'], ['r', 'right']].filter(([k]) => data.forms['v2' + k + '-' + s] && !o['v2' + k + '-' + s]).map(x => x[1]);
+      if (miss.length) out.push(`${st[0]} has its own glyph but no own ${miss.join(' and ')} form (the central ${miss.join(' and ')} form is used)`);
+    }
+    return out;
+  }
   function renderGrid() {
     $('grid').innerHTML = SHAPES.map(s => {
       const id = idOf(s), f = formOf(id);
       const L = lvl(data, edit), mark = edit ? (L[id] ? 'own' : '') : derived(id) ? 'single form' : isLR(id) ? 'own' : '';
       const lr = (L['v2l-' + s] ? '<span class="l" title="has an own left form">L</span>' : '') + (L['v2r-' + s] ? '<span class="r" title="has an own right form">R</span>' : '');
       const fs = STYLES.filter(st => ['v2c-', 'v2l-', 'v2r-'].some(pre => lvl(data, st[1])[pre + s])).map(st => `<span class="${st[1] === edit ? 'on' : ''}" title="has a glyph of its own in ${st[0]}">${ABBR[st[1]]}</span>`).join('');
-      return `<div class="cell${s === sym ? ' sel' : ''}" data-s="${s}">${lr ? `<div class="lr">${lr}</div>` : ''}${fs ? `<div class="fs">${fs}</div>` : ''}<svg viewBox="0 0 200 200">${glyph(f, style, marksOn)}</svg>
+      const warn = incomplete(s);
+      return `<div class="cell${s === sym ? ' sel' : ''}" data-s="${s}">${warn.length ? `<div class="warn" title="${esc(warn.join('. ') + '.')}"><i class="bi bi-exclamation-triangle-fill"></i></div>` : ''}${lr ? `<div class="lr">${lr}</div>` : ''}${fs ? `<div class="fs">${fs}</div>` : ''}<svg viewBox="0 0 200 200">${glyph(f, style, marksOn)}</svg>
         <div class="lab"><span>${s === '_' ? 'z' : s}</span><span class="note">${mark}</span><span class="ed">${changed(id) ? '●' : ''}</span></div></div>`;
     }).join('');
   }
