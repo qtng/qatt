@@ -4,7 +4,12 @@
 // fonts/paths.json: {format: "qatt-paths", version: 1, box: 200, forms: {id: {strokes: [item], marks: [item | null] (the marks 1..6)}}}
 //   id: v2c-X the single form of the symbol X, v2l-X / v2r-X its own left / right form for the halves of a pair (optional)
 //   item: "M x y L x y" (a straight stroke) or "M x y Q cx cy x y" (a curve with one control point), in the KAGE box of 200 x 200 (y down);
-//         or {d: "...", type: "1:0:2"} with a KAGE line type set by hand (the first three numbers of a KAGE line: kind, start, end)
+//         or {d: "...", type: "1:0:2", dock: [2, 1]} with a KAGE line type set by hand (the first three numbers of a KAGE line: kind, start, end)
+//         and/or, for a mark (always straight), the end of a stroke it is docked to: [index of the stroke, 0 its start / 1 its end, the place
+//         of the mark that lies on it, 0..1 from its start (without it the glyph editor finds it)]; the editor moves a docked mark along with that
+//         end (the build does not use it)
+// markLength (optional): {h, v, d} the length of the marks, horizontal, vertical and slanted, which the glyph editor gives every mark when it
+//         opens (and an edited one also an angle in steps of 5°); without it 1/5 of the width of the box, 1/5 of its height and the mean of both
 // Without a type set by hand, the type follows from the path (the rules by which the first KAGE data was made from qatt.js; they give the types of all strokes of that data):
 //   nearly horizontal: 1:0:2 for a mark or a stroke that ends on another stroke (a plain end), else 1:0:0 (the triangle of Mincho)
 //   a curve that is nearly vertical: 2:0:0; nearly vertical: 1:0:0; slanted: 2:0:7 down to the left (a left sweep), 2:7:8 down to the right
@@ -79,7 +84,7 @@
   // the text of fonts/paths.json: one path per line, so that a change shows as a change of that line
   function stringify(data) {
     const items = a => "[\n    " + a.map(it => JSON.stringify(it)).join(",\n    ") + "\n   ]";
-    return "{\n \"format\": \"qatt-paths\", \"version\": 1, \"box\": 200,\n \"forms\": {\n" +
+    return "{\n \"format\": \"qatt-paths\", \"version\": 1, \"box\": 200,\n" + (data.markLength ? ` "markLength": ${JSON.stringify(data.markLength)},\n` : "") + " \"forms\": {\n" +
       Object.entries(data.forms).map(([id, f]) => `  ${JSON.stringify(id)}: {\n   "strokes": ${items(f.strokes || [])},\n   "marks": ${items(f.marks || [])}\n  }`).join(",\n") +
       "\n }\n}\n";
   }
