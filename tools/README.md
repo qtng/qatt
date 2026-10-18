@@ -112,8 +112,9 @@ If the data changes (new characters or offsets), run the font steps above again.
 
 **The paths.** `fonts/paths.json`: `{format: "qatt-paths", version: 1, box: 200, forms: {id: {strokes: [item], marks: [item]}}}`, id `v2c-X` the single form
 of the symbol X, `v2l-X` / `v2r-X` its own left / right form (optional); the marks 1–6 in their order; an item is `"M x y L x y"` (straight) or
-`"M x y Q cx cy x y"` (a curve with one control point) in the KAGE box of 200 × 200 (y down), or `{"d": ..., "type": "1:0:2"}` with a KAGE line type set
-by hand. One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
+`"M x y Q cx cy x y"` (a curve with one control point) in the KAGE box of 200 × 200 (y down), or `{"d": ..., "type": "1:0:2", "dock": [1, 0]}` with a KAGE line type set
+by hand and/or, for a mark (always straight), the end of a stroke it is docked to (`[index of the stroke, 0 its start / 1 its end]`; the editor moves it
+along with that end; 132 of the 156 marks, those on which an end lies, were docked from the start; the build does not use it). One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
 set a type, make a straight stroke a curve and back; the draft lives in the browser (`localStorage` `qattPaths1`), "Copy JSON" gives the whole file.
 
 **The line types.** `tools/qatt_paths.js` turns the paths into KAGE lines (`toKage`). Without a type set by hand, the type follows from the path: nearly

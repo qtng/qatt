@@ -37,6 +37,9 @@
     .big .orig { fill: none; stroke: #888; stroke-opacity: .45; stroke-width: 3.2; stroke-linecap: round; }
     .big .p { fill: none; stroke-width: 1; stroke-linecap: round; }
     .big .p.s { stroke: #2b6cb0; } .big .p.m { stroke: #c8372d; } .big .p.off { opacity: .35; }
+    .big .p.m.free { stroke-dasharray: 3 2; }
+    .big .dock { fill: none; stroke: #c8372d; stroke-width: 1.3; } .big .dock.off { opacity: .4; }
+    table.items .dk { font-weight: 400; font-size: .7rem; color: var(--muted, #7b6c58); display: block; }
     .big .p.sel { stroke-width: 2.4; }
     .big .tan { stroke: currentColor; opacity: .5; stroke-width: .4; stroke-dasharray: 1.5 1.5; }
     .big .h { stroke: #fff; stroke-width: .9; }
@@ -103,6 +106,11 @@
           <button class="btn btn-quiet" id="alignH" title="The selected point gets the height (y) of the other end of its path (a control point: of the nearer end)">Horizontal</button>
           <button class="btn btn-quiet" id="alignV" title="The selected point gets the x of the other end of its path (a control point: of the nearer end)">Vertical</button>
         </div>
+        <span>Mark</span>
+        <div class="btn-group btn-group-sm" role="group">
+          <button class="btn btn-quiet" id="dockBtn" title="Dock the selected mark to the nearest end of a stroke (it moves onto it and then moves with it)">Dock</button>
+          <button class="btn btn-quiet" id="undockBtn" title="The selected mark no longer moves with the end of a stroke">Undock</button>
+        </div>
       </div>
       <svg id="big" class="big" viewBox="-12 -12 224 224" xmlns="http://www.w3.org/2000/svg"></svg>
       <div id="info" class="note"></div>
@@ -143,6 +151,11 @@
       Scrollen), Antippen wählt weiter.</dd>
     <dt>Align</dt><dd>Horizontal gibt dem gewählten Punkt die Höhe (y) des anderen Endpunkts seines Pfads, Vertical dessen x. Bei einem Kontrollpunkt gilt der
       nähere Endpunkt.</dd>
+    <dt>Andocken</dt><dd>Ein Zusatzstrich (immer eine Gerade) kann an einem Endpunkt eines Hauptstrichs hängen. Dann bewegt er sich mit diesem Endpunkt mit,
+      wenn der Endpunkt oder der ganze Hauptstrich verschoben wird; der Andockpunkt ist die Stelle des Zusatzstrichs, auf der der Endpunkt liegt.
+      Verschiebt man den ganzen Zusatzstrich, rastet er an einem Endpunkt ein, sobald dieser nahe an ihm liegt, und hängt dann an ihm; weiter weg ist er
+      wieder frei. „Dock“ hängt den gewählten Zusatzstrich an den nächsten Endpunkt, „Undock“ löst ihn. Angedockt: durchgezogen, mit einer Raute am Endpunkt;
+      frei: gestrichelt. Verschiebt man nur einen Punkt des Zusatzstrichs, bleibt er angedockt, solange der Endpunkt noch auf ihm liegt.</dd>
     <dt>grau dick</dt><dd>Die Pfade, wie sie beim Öffnen der Form waren. Sie bleiben beim Bearbeiten stehen; unter der Ansicht steht, wie weit das Gewählte davon
       weg ist.</dd>
     <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Wischen mit Move.</dd>
@@ -195,7 +208,17 @@
   const items = f => [...f.strokes.map((it, i) => ({ kind: 's', i, it })), ...f.marks.map((it, i) => ({ kind: 'm', i, it })).filter(x => x.it)];
   const dOf = it => typeof it === 'string' ? it : it.d;
   const typeSet = it => typeof it === 'string' ? '' : it.type || '';
-  const withD = (it, d) => typeof it === 'string' ? d : Object.assign({}, it, { d });
+  const dockOf = it => typeof it === 'string' ? null : it.dock || null;   // a mark docked to an end of a stroke: [stroke index, 0 start / 1 end]
+  const mk = (d, type, dock) => type || dock ? Object.assign({ d }, type ? { type } : {}, dock ? { dock } : {}) : d;   // a plain string when there is only the path
+  const withD = (it, d) => mk(d, typeSet(it), dockOf(it));
+  const withDock = (it, dock) => mk(dOf(it), typeSet(it), dock);
+  const endOf = (pts, e) => e ? pts[pts.length - 1] : pts[0];
+  function project(q, pts) {   // the point of a straight mark nearest to q
+    const a = pts[0], b = pts[pts.length - 1], dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy || 1;
+    const t = Math.max(0, Math.min(1, ((q[0] - a[0]) * dx + (q[1] - a[1]) * dy) / l2));
+    return [a[0] + t * dx, a[1] + t * dy];
+  }
+  const DOCKED = 0.6;   // an end this near a mark lies on it
   function setItem(f, x, v) { if (x.kind === 's') f.strokes[x.i] = v; else f.marks[x.i] = v; }
   function getItem(f, x) { return x.kind === 's' ? f.strokes[x.i] : f.marks[x.i]; }
 
@@ -232,10 +255,12 @@
     h += `<g transform="scale(${S})"><path class="bg" d="${outline(f, style, marksOn)}"/></g>`;
     if (orig) h += items(orig).map(x => `<path class="orig" d="${dPath(P.points(dOf(x.it)))}"/>`).join('');
     const list = items(f);
-    let paths = '', handles = '', ring = '';
+    let paths = '', handles = '', ring = '', docks = '';
     list.forEach((x, n) => {
       const pts = P.points(dOf(x.it)), isSel = sel && sel.n === n, off = isOff(x) ? ' off' : '';
-      paths += `<path class="p ${x.kind}${off}${isSel && sel.k === 'all' ? ' sel' : ''}" d="${dPath(pts)}"/>`;
+      const dk = x.kind === 'm' && dockOf(x.it);
+      paths += `<path class="p ${x.kind}${off}${x.kind === 'm' && !dk ? ' free' : ''}${isSel && sel.k === 'all' ? ' sel' : ''}" d="${dPath(pts)}"/>`;
+      if (dk && f.strokes[dk[0]]) { const q = endOf(P.points(dOf(f.strokes[dk[0]])), dk[1]); docks += `<path class="dock${off}" d="M${q[0]} ${q[1] - 7}l7 7l-7 7l-7 -7z"/>`; }
       if (pts.length === 3) handles += `<path class="tan" d="M${pts[0]}L${pts[1]}L${pts[2]}"/>`;
       pts.forEach((p, k) => {
         const c = pts.length === 3 && k === 1 ? 'c' : x.kind;
@@ -245,11 +270,13 @@
       const a = pts[0];
       handles += `<text class="lbl" x="${a[0] + 5}" y="${a[1] - 5}">${x.kind === 's' ? 'S' + (x.i + 1) : 'M' + (x.i + 1)}</text>`;
     });
-    $('big').innerHTML = h + paths + handles + ring;
+    $('big').innerHTML = h + paths + handles + docks + ring;
     $('title').textContent = `${id} (${sym === '_' ? 'z' : sym})` + (derived(id) ? ': no own form, the single form is shown; a change makes an own one' : '');
     $('single').hidden = !(isLR(id) && data.forms[id]);
     $('views').innerHTML = STYLES.map(st => `<div><svg viewBox="0 0 200 200">${glyph(f, st, marksOn)}</svg>${st[0]}</div>`).join('');
     $('alignH').disabled = $('alignV').disabled = !sel || sel.k === 'all';
+    const selMark = sel && list[sel.n] && list[sel.n].kind === 'm' ? list[sel.n] : null;
+    $('dockBtn').disabled = !selMark; $('undockBtn').disabled = !(selMark && dockOf(selMark.it));
     renderItems(f, list);
   }
   function renderItems(f, list) {
@@ -259,10 +286,11 @@
       const t = typeSet(x.it), curve = P.points(dOf(x.it)).length === 3;
       const autoOf = typeof x.it === 'string' ? auto : P.kageForm(Object.assign({}, f, x.kind === 's' ? { strokes: f.strokes.map((it, j) => j === x.i ? dOf(it) : it) } : { marks: f.marks.map((it, j) => j === x.i ? dOf(it) : it) }))[x.kind === 's' ? 'strokes' : 'marks'][x.i].split(':').slice(0, 3).join(':');
       const opts = [`<option value="">auto (${autoOf})</option>`].concat(TYPES.concat(t && !TYPES.includes(t) ? [t] : []).map(v => `<option${v === t ? ' selected' : ''}>${v}</option>`), ['<option value="?">other…</option>']).join('');
-      return `<tr data-n="${n}" class="${sel && sel.n === n ? 'sel' : ''}"><td class="name ${x.kind}">${x.kind === 's' ? 'Stroke ' + (x.i + 1) : 'Mark ' + (x.i + 1)}</td>
+      const dk = x.kind === 'm' && dockOf(x.it), dkText = x.kind === 'm' ? `<span class="dk">${dk ? `on S${dk[0] + 1} ${dk[1] ? 'end' : 'start'}` : 'free'}</span>` : '';
+      return `<tr data-n="${n}" class="${sel && sel.n === n ? 'sel' : ''}"><td class="name ${x.kind}">${x.kind === 's' ? 'Stroke ' + (x.i + 1) : 'Mark ' + (x.i + 1)}${dkText}</td>
         <td><input class="form-control form-control-sm d" value="${dOf(x.it)}"></td>
         <td><select class="form-select form-select-sm t">${opts}</select></td>
-        <td><button class="btn btn-quiet btn-sm cv">${curve ? 'Straight' : 'Curve'}</button></td></tr>`;
+        <td>${x.kind === 's' ? `<button class="btn btn-quiet btn-sm cv">${curve ? 'Straight' : 'Curve'}</button>` : ''}</td></tr>`;
     }).join('');
   }
   function renderInfo() {
@@ -272,18 +300,42 @@
     let moved = '';
     if (op && op.length === pts.length) {
       const k = sel.k === 'all' ? 0 : sel.k, dx = Math.round((pts[k][0] - op[k][0]) * 100) / 100, dy = Math.round((pts[k][1] - op[k][1]) * 100) / 100;
-      moved = sel.k === 'all' && pts.some((p, i) => p[0] - op[i][0] !== dx || p[1] - op[i][1] !== dy) ? ' · changed against the original' : (dx || dy ? ` · moved ${dx}, ${dy} against the original` : ' · as the original');
+      const r2 = v => Math.round(v * 100) / 100;
+      moved = sel.k === 'all' && pts.some((p, i) => r2(p[0] - op[i][0]) !== dx || r2(p[1] - op[i][1]) !== dy) ? ' · changed against the original' : (dx || dy ? ` · moved ${dx}, ${dy} against the original` : ' · as the original');
     }
-    $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + (sel.k === 'all' ? ' (whole path)' : ` · ${pts.length === 3 && sel.k === 1 ? 'control point' : 'point ' + (sel.k === 0 ? 1 : 2)}`) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + moved;
+    const dk = x.kind === 'm' ? dockOf(x.it) : null, dockText = x.kind === 'm' ? (dk ? ` · docked to the ${dk[1] ? 'end' : 'start'} of stroke ${dk[0] + 1}` : ' · free (not docked)') : '';
+    $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + (sel.k === 'all' ? ' (whole path)' : ` · ${pts.length === 3 && sel.k === 1 ? 'control point' : 'point ' + (sel.k === 0 ? 1 : 2)}`) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + dockText + moved;
   }
   function renderAll() { renderGrid(); renderBig(); renderInfo(); }
   function update() { save(); renderBig(); renderInfo(); renderGrid(); }
 
-  // change the points of item n: fn(pts) -> pts
-  function change(n, fn) {
-    const id = idOf(), f = own(id), x = items(f)[n];
-    const pts = fn(P.points(dOf(x.it)).map(p => p.slice()));
-    setItem(f, x, withD(x.it, P.path(pts)));
+  // the end of a stroke a mark would dock to: the nearest one within tol of the mark (pts) -> {pts moved onto it, dock}, else {pts, dock: null}
+  function snapMark(f, pts, tol) {
+    let best = null;
+    f.strokes.forEach((st, i) => { const sp = P.points(dOf(st)); for (const e of [0, 1]) {
+      const q = endOf(sp, e), r = project(q, pts), d = Math.hypot(q[0] - r[0], q[1] - r[1]);
+      if (d < tol && (!best || d < best.d)) best = { d, dx: q[0] - r[0], dy: q[1] - r[1], dock: [i, e] };
+    } });
+    return best ? { pts: pts.map(p => [p[0] + best.dx, p[1] + best.dy]), dock: best.dock } : { pts, dock: null };
+  }
+  // change the points of item n: fn(pts) -> pts. A stroke takes the marks docked to its ends along; a mark moved whole with how.snap
+  // docks to an end within that distance (or comes free), otherwise it stays docked while the end still lies on it
+  function change(n, fn, how = {}) {
+    const f = own(idOf()), x = items(f)[n], old = P.points(dOf(x.it));
+    let pts = fn(old.map(p => p.slice()));
+    if (x.kind === 's') {
+      f.marks.forEach((m, j) => {
+        const dk = m && dockOf(m); if (!dk || dk[0] !== x.i) return;
+        const a = endOf(old, dk[1]), b = endOf(pts, dk[1]), dx = b[0] - a[0], dy = b[1] - a[1];
+        if (dx || dy) f.marks[j] = withD(m, P.path(P.points(dOf(m)).map(p => [p[0] + dx, p[1] + dy])));
+      });
+      setItem(f, x, withD(x.it, P.path(pts)));
+      return;
+    }
+    let dock = dockOf(x.it);
+    if (how.snap) ({ pts, dock } = snapMark(f, pts, how.snap));
+    else if (dock) { const q = f.strokes[dock[0]] && endOf(P.points(dOf(f.strokes[dock[0]])), dock[1]), r = q && project(q, pts); if (!q || Math.hypot(q[0] - r[0], q[1] - r[1]) > DOCKED) dock = null; }
+    setItem(f, x, withDock(withD(x.it, P.path(pts)), dock));
   }
   const snap = (v, alt) => alt ? Math.round(v * 100) / 100 : Math.round(v * 2) / 2;
   function movePts(pts0, k, dx, dy, alt) {   // the selection moved by dx, dy: one point or (k 'all') the whole path
@@ -305,6 +357,15 @@
     change(sel.n, pts => { const r = reference(pts, sel.k); pts[sel.k][axis] = r[axis]; return pts; });
     update();
   }
+  $('dockBtn').addEventListener('click', () => {
+    if (!sel) return; checkpoint();
+    change(sel.n, pts => pts, { snap: 15 });
+    if (!dockOf(items(formOf(idOf()))[sel.n].it)) $('info').textContent = 'No end of a stroke near this mark (within 15 units).'; else update();
+  });
+  $('undockBtn').addEventListener('click', () => {
+    if (!sel) return; checkpoint();
+    const f = own(idOf()), x = items(f)[sel.n]; setItem(f, x, withDock(x.it, null)); update();
+  });
   $('alignH').addEventListener('click', () => align(1));
   $('alignV').addEventListener('click', () => align(0));
 
@@ -342,7 +403,8 @@
       if (undoStack[undoStack.length - 1] !== drag.snap) undoStack.push(drag.snap); $('undo').disabled = false; drag.moved = true;
     }
     const q = svgPt(e);
-    change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey));
+    const x = items(formOf(idOf()))[sel.n];
+    change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey), x.kind === 'm' && sel.k === 'all' ? { snap: 10 * unitsPerPx() } : {});
     save(); renderBig(); renderInfo();
   });
   big.addEventListener('pointerup', e => {
@@ -383,12 +445,12 @@
     const tr = e.target.closest('tr[data-n]'); if (!tr) return;
     const n = +tr.dataset.n, f = own(idOf()), x = items(f)[n];
     if (e.target.classList.contains('d')) {
-      try { P.points(e.target.value); } catch (err) { e.target.classList.add('is-invalid'); return; }
-      checkpoint(); setItem(f, x, withD(x.it, P.path(P.points(e.target.value))));
+      let np; try { np = P.points(e.target.value); if (x.kind === 'm' && np.length !== 2) throw 0; } catch (err) { e.target.classList.add('is-invalid'); return; }
+      checkpoint(); change(n, () => np);
     } else if (e.target.classList.contains('t')) {
       let t = e.target.value;
       if (t === '?') { t = (prompt('KAGE line type (kind:start:end, e.g. 1:12:13)', typeSet(x.it) || '') || '').trim(); if (!/^\d+:\d+:\d+$/.test(t)) { renderBig(); return; } }
-      checkpoint(); setItem(f, x, t ? { d: dOf(x.it), type: t } : dOf(x.it));
+      checkpoint(); setItem(f, x, mk(dOf(x.it), t, dockOf(x.it)));
     }
     sel = { n, k: 'all' }; update();
   });
