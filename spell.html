@@ -407,7 +407,7 @@
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
@@ -419,6 +419,7 @@
         if (saved.prev && typeof saved.prev === 'object') me.prev = saved.prev;
         if (typeof saved.best === 'number') me.best = saved.best;
         if (typeof saved.lastValue === 'number') me.lastValue = saved.lastValue;
+        if (saved.base && typeof saved.base === 'object') me.base = saved.base;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
         else if (saved.stats) me.stats = saved.stats;
       }
@@ -462,6 +463,7 @@
     };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
     function addTime(kind, t, wrong = false) {
+      if (!me.base || me.base.decoding !== dec()) me.base = usualTimes();   // the usual times are taken before the first time of a round goes in
       me.round[kind].push(t); if (wrong) me.round.wrong[kind]++;   // for the card: the last words
       const st = mine()[kind]; st.n++; st.t = t;   // t: the last time, shown in the status line to check the measuring
       st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
@@ -492,6 +494,7 @@
       const st = mine()[kind];
       const t = Math.min((performance.now() - lap.t0) / 1000, slowFor(st));
       const first = !lap.wrong && !lap.hinted && !hiddenDuring;
+      if (lap.hinted) me.round[kind].push(penalty(kind));   // for the card only: a step with a hint is a slow time (it does not count in the speed)
       const quick = x => { if (!(x <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false; };   // slow for this player
       if (kind === 'tone') { if (first) { quick(t); addTime('tone', t); } else word_.quick = false; }
       else {
@@ -619,11 +622,17 @@
       table.replaceChildren(...out);
       $('board').hidden = !out.length;
     }
-    // ---- the progress card: every STATS_EVERY solved words the score and stars for those last words, per kind of symbol --------------------------------------------------------
-    // The stars show only the short time: the mean of the times of the words since the last card (a wrong choice is a slow time, see penalty), shown as the status line shows them (shown()),
-    // against the times of STAR_STEPS (of every kind): a star for each one that is beaten (0 to 5); the gauge over them is the same scale in parts (0 to 100, mean of the kinds). The arrow compares with the mean of the card before.
-    const STATS_EVERY = 5;
+    // ---- the progress card: every STATS_EVERY solved words the form of those last words: the gauge, and stars per kind of symbol ----------------------------------------------------
+    // The form compares the round with the player's own usual time of every kind: the slow value v when the card before was shown (me.base), against the geometric mean of the times
+    // of the round (measured, without the deductions; a wrong choice and a step with a hint are slow times, see penalty), which damps a single slow click. 50 is a round as usual, 100 one that
+    // is FORM_SPAN times as fast, 0 one that is FORM_SPAN times as slow; with few times the value stays nearer to 50 (n / (n + FORM_DAMP) of the difference). The gauge is the mean of
+    // the kinds. A kind without its usual time yet (fewer than MIN_SAMPLES times) takes the scale of the stars. So an ordinary round is always in the middle, whatever the level, and
+    // there is no ceiling. The stars are the level, absolute: the same geometric mean, as the status line shows it (shown()), against the times of STAR_STEPS (0 to 5).
+    // The arrow compares with the card before.
+    const STATS_EVERY = 4, FORM_SPAN = 1.5, FORM_DAMP = 2;
+    const usualTimes = () => { const set = mine(); return { decoding: dec(), ...Object.fromEntries(KINDS.map(k => [k, { v: set[k].v, n: set[k].n }])) }; };
     const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+    const gmean = a => Math.exp(mean(a.map(x => Math.log(Math.max(x, 0.05)))));
     // the times of the stars are of their own for every kind, so that each is about as hard (the shown times differ in kind: the onset holds little more than the thinking, a rhyme is two clicks, the
     // tones are hard to tell apart). They are even steps from a poor time (no star) to an excellent one (5 stars) around an ordinary round (onset 0.5 s, rhyme 1.55 s, tone 2.9 s shown), which
     // is in the middle: 2.5 stars, half of the gauge. The milestones of the points (MILESTONES) stay as they are.
@@ -654,16 +663,25 @@
     function showProgress() {
       const prev = me.prev || {};
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
-      const kinds = KINDS.map(k => { const t = me.round[k].length ? mean(me.round[k]) : null; return { k, t, stars: t === null ? null : starsOf(k, t), fraction: t === null ? 0 : starsPart(k, t), wrong: me.round.wrong[k] }; });
-      const have = kinds.filter(x => x.stars !== null);
-      const value = have.length ? Math.round(mean(have.map(x => 100 * x.fraction / STAR_STEPS[x.k].length))) : null;   // the same scale as the stars, with the parts between two times
+      const base = me.base && me.base.decoding === dec() ? me.base : null;
+      const kinds = KINDS.map(k => {
+        const ts = me.round[k], t = ts.length ? gmean(ts) : null, b = base && base[k];
+        let form = null;
+        if (t !== null && b && b.n >= MIN_SAMPLES && b.v > 0) {
+          const s = Math.max(0, Math.min(100, 50 + 50 * Math.log(b.v / t) / Math.log(FORM_SPAN)));
+          form = 50 + (s - 50) * ts.length / (ts.length + FORM_DAMP);
+        } else if (t !== null) form = 100 * starsPart(k, t) / STAR_STEPS[k].length;   // no usual time yet: the scale of the stars
+        return { k, t, form, stars: t === null ? null : starsOf(k, t), wrong: me.round.wrong[k] };
+      });
+      const have = kinds.filter(x => x.t !== null);
+      const value = have.length ? Math.round(mean(have.map(x => x.form))) : null;
       drawGauge();
       $('progress').querySelectorAll('.spark').forEach(e => e.remove());
       // the reward: how far the needle goes, a new best form, the gain since the last card, the best part of the round
       const gain = value !== null && me.lastValue !== null ? value - me.lastValue : null, isBest = value !== null && me.best > 0 && value > me.best;
       const badge = (cls, text) => Object.assign(document.createElement('span'), { className: 'badge2 ' + cls, textContent: text });
       $('progBadges').replaceChildren(...[isBest && badge('best', Lang.t('★ New best form!', '★ Phong độ cao nhất từ trước đến nay!')), gain > 0 && badge('up', Lang.t(`▲ +${gain} since the last card`, `▲ +${gain} so với lần trước`))].filter(Boolean));
-      const top = have.length ? have.reduce((a, x) => x.fraction > a.fraction ? x : a) : null;
+      const top = have.length ? have.reduce((a, x) => x.form > a.form ? x : a) : null;   // the kind with the best form of the round
       $('progPraise').textContent = !top ? '' : top.stars >= 1 ? Lang.t(`Your best: ${names[top.k]} (${top.stars} ★)`, `Tốt nhất: ${names[top.k]} (${top.stars} ★)`) : Lang.t('Every word trains you – keep going!', 'Mỗi từ đều giúp bạn tiến bộ!');
       if (value !== null) { me.best = Math.max(me.best, value); me.lastValue = value; }
       $('progKinds').replaceChildren(...kinds.map(x => {
@@ -677,7 +695,7 @@
         r.append(...cells); return r;
       }));
       me.prev = Object.fromEntries(kinds.filter(x => x.t !== null).map(x => [x.k, x.t]));
-      me.round = freshRound(); saveMe();
+      me.round = freshRound(); me.base = usualTimes(); saveMe();   // the usual times for the next round
       $('progress').classList.remove('alert-danger', 'alert-warning', 'alert-success');
       const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
       $('progress').showModal();
