@@ -27,4 +27,6 @@ The small tone mark at the upper left (U+F009F) sits over the upper left corner;
 
 Open: the small strokes falling to the right at the top of 139 BONG MARKED-6 (`v2c-b`, mark 5) and 145 VONG MARKED-5 (`v2c-v`, mark 4)
 also touch the circle (139 also the one at the upper left); they are unchanged and will be looked at separately.
-Still to do: the same in `js/qatt.js` (the SVG shapes) and a look at the other fonts once they get the brush tones.
+Applied to the other sources too (fonts v5): `js/qatt.js` (the paths `v2-` and `v2c-` of these marks; 2 KAGE units = 1.05, 3 = 1.58 qatt.js units,
+scale 1.9), `fonts/brush.json` (the marks in `sym` and the finished `outlines`) and `fonts/glyphs.json` (extracted again), so Prototype and Brush
+have them as well.
