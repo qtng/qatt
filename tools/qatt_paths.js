@@ -10,6 +10,9 @@
 //         end (the build does not use it)
 // markLength (optional): {h, v, d} the length of the marks, horizontal, vertical and slanted, which the glyph editor gives every mark when it
 //         opens (and an edited one also an angle in steps of 5°); without it 1/5 of the width of the box, 1/5 of its height and the mean of both
+// styles (optional): {mincho | gothic | pen | pen-cut | kaiti: {forms: {id: form}}} the glyphs a font has of its own; in that font (all its
+//         weights; Gothic Wide is gothic) they take the place of the central ones (toKage with the style). A left / right form of a font:
+//         its own left form, the central left form, its own single form, the central single form
 // checkpoints (optional): [{id, time, message, markLength, forms}] states kept in the glyph editor (one per line, the last one the current one,
 //         against which it marks the changed forms); the build does not use them
 // Without a type set by hand, the type follows from the path (the rules by which the first KAGE data was made from qatt.js; they give the types of all strokes of that data):
@@ -68,11 +71,13 @@
       marks: (f.marks || []).map(it => it ? kageLine(it, true, others) : null),
     };
   }
-  // fonts/paths.json -> the KAGE data of kage_outlines.js ({format: "qatt-kage", version, scale, sym})
-  function toKage(data) {
+  // fonts/paths.json -> the KAGE data of kage_outlines.js ({format: "qatt-kage", version, scale, sym}); style (mincho, gothic, pen, pen-cut,
+  // kaiti): the glyphs that font has of its own (styles[style].forms) take the place of the central ones. A left or right form is looked up as
+  // v2l-X / v2r-X, then v2c-X (kage_outlines.js), so the order is: own left form of the font, central left form, own single form, central single form
+  function toKage(data, style) {
     if (!data || data.format !== "qatt-paths") throw new Error("not a qatt-paths file");
-    const sym = {};
-    for (const [id, f] of Object.entries(data.forms)) sym[id] = kageForm(f);
+    const sym = {}, forms = Object.assign({}, data.forms, style && data.styles && data.styles[style] ? data.styles[style].forms : {});
+    for (const [id, f] of Object.entries(forms)) sym[id] = kageForm(f);
     return { format: "qatt-kage", version: 1, scale: 1.9, sym };
   }
   // a KAGE line -> an item (the path; with its type only where the rules would give another one)
@@ -85,10 +90,12 @@
   }
   // the text of fonts/paths.json: one path per line, so that a change shows as a change of that line
   function stringify(data) {
-    const items = a => "[\n    " + a.map(it => JSON.stringify(it)).join(",\n    ") + "\n   ]";
+    const items = (a, ind) => "[\n" + ind + " " + a.map(it => JSON.stringify(it)).join(",\n" + ind + " ") + "\n" + ind + "]";
+    const forms = (fs, ind) => Object.entries(fs).map(([id, f]) => `${ind}${JSON.stringify(id)}: {\n${ind} "strokes": ${items(f.strokes || [], ind + " ")},\n${ind} "marks": ${items(f.marks || [], ind + " ")}\n${ind}}`).join(",\n");
+    const styles = Object.entries(data.styles || {}).filter(([, v]) => v && v.forms && Object.keys(v.forms).length);
     return "{\n \"format\": \"qatt-paths\", \"version\": 1, \"box\": 200,\n" + (data.markLength ? ` "markLength": ${JSON.stringify(data.markLength)},\n` : "") + " \"forms\": {\n" +
-      Object.entries(data.forms).map(([id, f]) => `  ${JSON.stringify(id)}: {\n   "strokes": ${items(f.strokes || [])},\n   "marks": ${items(f.marks || [])}\n  }`).join(",\n") +
-      "\n }" + (data.checkpoints && data.checkpoints.length ? ",\n \"checkpoints\": [\n  " + data.checkpoints.map(c => JSON.stringify(c)).join(",\n  ") + "\n ]" : "") + "\n}\n";
+      forms(data.forms, "  ") + "\n }" +
+      (styles.length ? ",\n \"styles\": {\n" + styles.map(([k, v]) => `  ${JSON.stringify(k)}: {"forms": {\n${forms(v.forms, "   ")}\n  }}`).join(",\n") + "\n }" : "") + (data.checkpoints && data.checkpoints.length ? ",\n \"checkpoints\": [\n  " + data.checkpoints.map(c => JSON.stringify(c)).join(",\n  ") + "\n ]" : "") + "\n}\n";
   }
   return { points, path, autoType, kageLine, kageForm, toKage, fromKageLine, stringify, TOUCH };
 });

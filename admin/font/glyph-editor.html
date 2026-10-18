@@ -62,7 +62,12 @@
     .big .cl.b { stroke: #6e6e6e; opacity: .55; } .big .cl.k { stroke: currentColor; opacity: .3; stroke-dasharray: .6 1.2; }
     .big .clt { font: 3.6px system-ui, sans-serif; } .big .clt.g { fill: #6e6e6e; } .big .clt.r { fill: #d23232; }
     .views { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-top: .4rem; }
-    .views div { text-align: center; font-size: .72rem; color: var(--muted, #7b6c58); }
+    .views div { text-align: center; font-size: .72rem; color: var(--muted, #7b6c58); cursor: pointer; border-radius: .35rem; padding: .1rem; }
+    .views div.on { background: #6b46c1; color: #fff; } .views div.on svg { border-color: #6b46c1; background: Canvas; color: CanvasText; }
+    .side.own .big { border: 2px solid #6b46c1; } .side.own #title { color: #6b46c1; }
+    .cell .fs { position: absolute; top: .2rem; left: .25rem; display: flex; gap: .15rem; }
+    .cell .fs span { font: 600 .62rem/1 system-ui, sans-serif; color: #6b46c1; border: 1px solid #6b46c1; border-radius: .2rem; padding: .08rem .2rem; }
+    .cell .fs span.on { color: #fff; background: #6b46c1; }
     .views svg { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .3rem; }
     table.items { width: 100%; font-size: .78rem; margin-top: .5rem; }
     table.items td { padding: .1rem .2rem; vertical-align: middle; }
@@ -103,11 +108,12 @@
 
   <div class="layout">
     <div class="grid" id="grid"></div>
-    <div class="side">
+    <div class="side" id="side">
       <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
         <b id="title" class="small"></b>
         <span class="d-flex gap-1">
           <button class="btn btn-quiet btn-sm" id="single" title="No own form: the fonts take the single form">Use the single form</button>
+          <button class="btn btn-quiet btn-sm" id="dropFont" hidden title="The font takes the central glyph again"></button>
           <button class="btn btn-quiet btn-sm" id="resetForm" title="Back to the form of the current checkpoint">Reset</button>
         </span>
       </div>
@@ -208,6 +214,13 @@
     <dt>grau dick</dt><dd>Die Pfade des aktuellen Haltepunkts (ohne Haltepunkt: wie in der Datei, mit der Anpassung der Zusatzstriche beim Öffnen). Sie bleiben
       beim Bearbeiten stehen und werden mit jedem neuen Haltepunkt neu gezeichnet; unter der Ansicht steht, wie weit das Gewählte davon weg ist.</dd>
     <dt><span style="background:#2b6cb0;color:#fff;padding:0 .2rem;border-radius:.2rem">L</span> <span style="background:#2f855a;color:#fff;padding:0 .2rem;border-radius:.2rem">R</span></dt><dd>In der Übersicht oben rechts: das Symbol hat eine eigene linke (L) bzw. rechte (R) Form.</dd>
+    <dt>Einzelne Schrift</dt><dd>Ein Klick auf eine der 5 Vorschauen unter der großen Ansicht bearbeitet die Glyphe nur für diese Schrift (violett hervorgehoben,
+      „Khai only“ im Titel; die Font-Auswahl oben folgt, und eine andere Font-Auswahl wechselt zu jener Schrift). Die erste Änderung legt eine eigene Glyphe der
+      Schrift an, als Kopie der zentralen; sie gilt im Build statt der zentralen, für alle Gewichte der Schrift (Gothic Wide folgt Gothic). „Remove the … glyph“
+      entfernt sie, dann gilt wieder die zentrale. Ein zweiter Klick auf dieselbe Vorschau führt zurück zur zentralen Bearbeitung. In der Übersicht zeigen
+      violette Buchstaben oben links, welche Schriften für das Symbol eine eigene Glyphe haben (S Serif, G Gothic, P Pen, C Pen Cut, K Khai); eine Vorschau
+      mit eigener Glyphe heißt „· own“. Eine eigene Glyphe folgt späteren Änderungen der zentralen nicht. Linke / rechte Form einer Schrift: ihre eigene linke
+      Form, sonst die zentrale linke, sonst ihre eigene Einzelform, sonst die zentrale Einzelform.</dd>
     <dt>roter Punkt</dt><dd>In der Übersicht: die Form ist seit dem letzten Haltepunkt bearbeitet (ohne Haltepunkt: anders als in der Datei).</dd>
     <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Ziehen mit Move.</dd>
     <dt>Strg+Z</dt><dd>Rückgängig.</dd>
@@ -254,18 +267,37 @@
 
   const idOf = (s = sym) => form + s;
   const isLR = id => /^v2[lr]-/.test(id);
-  const formOf = id => data.forms[id] || (isLR(id) ? data.forms[id.replace(/^v2[lr]-/, 'v2c-')] : null);
-  const derived = id => isLR(id) && !data.forms[id];
-  // the checkpoints (data.checkpoints, in the file): {id, time, message, markLength, forms}; the last one is the current one. The red dots and
-  // the grey paths compare with it (without one: with the file of the repository, its marks as the editor gives them when it opens)
+  const cOf = id => id.replace(/^v2[lr]-/, 'v2c-');
+  // the glyphs of one font (data.styles[key].forms, key of STYLES such as 'kaiti': only the glyphs it has of its own) override the central ones
+  // (data.forms) in that font. edit: the font whose own glyphs are edited (a click on its preview), null: the central glyphs
+  let edit = null;
+  const lvl = (d, st) => st ? ((d.styles || {})[st] || {}).forms || {} : d.forms;
+  // the form a font draws (as toKage of tools/qatt_paths.js): its own, else the central one; a left / right form: the own left form of the
+  // font, the central left form, the own single form of the font, the central single form
+  const resolveIn = (d, id, st) => { const o = lvl(d, st), c = d.forms; return o[id] || c[id] || (isLR(id) ? o[cOf(id)] || c[cOf(id)] : null) || null; };
+  const formOf = (id, st = edit) => resolveIn(data, id, st);
+  const derived = id => !lvl(data, edit)[id] && (!!edit || isLR(id));   // no form of its own at the level edited: another one is shown
+  const styleName = st => (STYLES.find(x => x[1] === st) || [st])[0];
+  // the checkpoints (data.checkpoints, in the file): {id, time, message, markLength, forms, styles}; the last one is the current one. The red dots
+  // and the grey paths compare with it (without one: with the file of the repository, its marks as the editor gives them when it opens)
   const current = () => (data.checkpoints || [])[(data.checkpoints || []).length - 1] || null;
-  function rebase() { const cp = current(); base = cp ? { forms: cp.forms } : normalizeMarks({ forms: clone(repo.forms) }); }
-  const changed = id => JSON.stringify(data.forms[id] || null) !== JSON.stringify(base.forms[id] || null);
-  const origOf = id => base.forms[id] || base.forms[id.replace(/^v2[lr]-/, 'v2c-')] || formOf(id);   // the grey paths
-  function own(id) {   // the form to change: a left or right form without data of its own gets a copy of the single form first
-    if (!data.forms[id]) data.forms[id] = clone(formOf(id));
-    return data.forms[id];
+  function rebase() { const cp = current(); base = cp ? { forms: cp.forms, styles: cp.styles || {} } : normalizeMarks({ forms: clone(repo.forms), styles: clone(repo.styles || {}) }); }
+  const changed = (id, st = edit) => JSON.stringify(lvl(data, st)[id] || null) !== JSON.stringify(lvl(base, st)[id] || null);
+  // all glyphs of a state: the central ones by id, the own ones of a font as key/id (to count changes)
+  const flat = d => { const o = Object.assign({}, d.forms); for (const [k, v] of Object.entries(d.styles || {})) for (const [id, f] of Object.entries(v.forms || {})) o[k + '/' + id] = f; return o; };
+  const countDiff = (a, b) => { const A = flat(a), Bf = flat(b); return Object.keys(Object.assign({}, A, Bf)).filter(k => JSON.stringify(A[k] || null) !== JSON.stringify(Bf[k] || null)).length; };
+  const origOf = id => resolveIn(base, id, edit) || formOf(id);   // the grey paths
+  function own(id) {   // the form to change at the level edited: without one of its own it gets a copy of the form shown first
+    let o = data.forms;
+    if (edit) { data.styles = data.styles || {}; data.styles[edit] = data.styles[edit] || {}; o = data.styles[edit].forms = data.styles[edit].forms || {}; }
+    if (!o[id]) o[id] = clone(formOf(id));
+    return o[id];
   }
+  function pruneStyles(d) {   // no empty fonts in the data
+    for (const k of Object.keys(d.styles || {})) if (!Object.keys((d.styles[k] || {}).forms || {}).length) delete d.styles[k];
+    if (d.styles && !Object.keys(d.styles).length) delete d.styles;
+  }
+  function dropOwn(id) { delete lvl(data, edit)[id]; pruneStyles(data); }
   // the items of a form: strokes, then the marks 1..6, as {kind, i, it}
   const items = f => [...f.strokes.map((it, i) => ({ kind: 's', i, it })), ...f.marks.map((it, i) => ({ kind: 'm', i, it })).filter(x => x.it)];
   const dOf = it => typeof it === 'string' ? it : it.d;
@@ -293,7 +325,7 @@
   function save() {
     const same = JSON.stringify(data) === JSON.stringify(repo);
     store.set(KEY, same ? null : JSON.stringify(data));
-    const n = Object.keys(Object.assign({}, data.forms, base.forms)).filter(changed).length;
+    const n = countDiff(data, base);
     $('draft').textContent = `${n ? n + (n === 1 ? ' form' : ' forms') + ' changed' : 'nothing changed'} since ${current() ? 'the checkpoint' : 'the file'}` +
       (same ? ' · as in the repository' : ' · draft, not in the repository yet');
   }
@@ -307,12 +339,14 @@
   }
   const glyph = (f, st, set, cls = 'ink') => `<g transform="scale(${S})"><path class="${cls}" d="${outline(f, st, set)}"/></g>`;
 
+  const ABBR = { mincho: 'S', gothic: 'G', pen: 'P', 'pen-cut': 'C', kaiti: 'K' };
   function renderGrid() {
     $('grid').innerHTML = SHAPES.map(s => {
       const id = idOf(s), f = formOf(id);
-      const mark = derived(id) ? 'single form' : isLR(id) ? 'own' : '';
-      const lr = (data.forms['v2l-' + s] ? '<span class="l" title="has an own left form">L</span>' : '') + (data.forms['v2r-' + s] ? '<span class="r" title="has an own right form">R</span>' : '');
-      return `<div class="cell${s === sym ? ' sel' : ''}" data-s="${s}">${lr ? `<div class="lr">${lr}</div>` : ''}<svg viewBox="0 0 200 200">${glyph(f, style, marksOn)}</svg>
+      const L = lvl(data, edit), mark = edit ? (L[id] ? 'own' : '') : derived(id) ? 'single form' : isLR(id) ? 'own' : '';
+      const lr = (L['v2l-' + s] ? '<span class="l" title="has an own left form">L</span>' : '') + (L['v2r-' + s] ? '<span class="r" title="has an own right form">R</span>' : '');
+      const fs = STYLES.filter(st => ['v2c-', 'v2l-', 'v2r-'].some(pre => lvl(data, st[1])[pre + s])).map(st => `<span class="${st[1] === edit ? 'on' : ''}" title="has a glyph of its own in ${st[0]}">${ABBR[st[1]]}</span>`).join('');
+      return `<div class="cell${s === sym ? ' sel' : ''}" data-s="${s}">${lr ? `<div class="lr">${lr}</div>` : ''}${fs ? `<div class="fs">${fs}</div>` : ''}<svg viewBox="0 0 200 200">${glyph(f, style, marksOn)}</svg>
         <div class="lab"><span>${s === '_' ? 'z' : s}</span><span class="note">${mark}</span><span class="ed">${changed(id) ? '●' : ''}</span></div></div>`;
     }).join('');
   }
@@ -394,9 +428,12 @@
       handles += `<text class="lbl" x="${a[0] + 5}" y="${a[1] - 5}">${x.kind === 's' ? 'S' + (x.i + 1) : 'M' + (x.i + 1)}</text>`;
     });
     $('big').innerHTML = h + paths + handles + docks + ring;
-    $('title').textContent = `${id} (${sym === '_' ? 'z' : sym})` + (derived(id) ? ': no own form, the single form is shown; a change makes an own one' : '');
-    $('single').hidden = !(isLR(id) && data.forms[id]);
-    $('views').innerHTML = STYLES.map(st => `<div><svg viewBox="0 0 200 200">${glyph(f, st, marksOn)}</svg>${st[0]}</div>`).join('');
+    $('title').textContent = (edit ? `${styleName(edit)} only · ` : '') + `${id} (${sym === '_' ? 'z' : sym})` + (!derived(id) ? '' : edit ? `: no glyph of its own in ${styleName(edit)}, the one it takes is shown; a change makes one` : ': no own form, the single form is shown; a change makes an own one');
+    $('single').hidden = !(isLR(id) && lvl(data, edit)[id]);
+    $('dropFont').hidden = !(edit && lvl(data, edit)[id]); $('dropFont').textContent = edit ? `Remove the ${styleName(edit)} glyph` : '';
+    $('side').classList.toggle('own', !!edit);
+    $('views').innerHTML = STYLES.map(st => { const o = lvl(data, st[1]), has = o[id] || (isLR(id) && !data.forms[id] && o[cOf(id)]);
+      return `<div data-st="${st[1]}" class="${edit === st[1] ? 'on' : ''}" title="${edit === st[1] ? 'Back to the central glyphs' : 'Edit the glyph for ' + st[0] + ' only'}"><svg viewBox="0 0 200 200">${glyph(formOf(id, st[1]), st, marksOn)}</svg>${st[0]}${has ? ' · own' : ''}</div>`; }).join('');
     const selMark = sel && list[sel.n] && list[sel.n].kind === 'm' ? list[sel.n] : null;
     $('alignH').disabled = $('alignV').disabled = !sel || (sel.k === 'all' && !selMark);
     $('dockBtn').disabled = $('rotL').disabled = $('rotR').disabled = !selMark; $('undockBtn').disabled = !(selMark && dockOf(selMark.it));
@@ -436,7 +473,7 @@
   function renderCheckpoints() {
     const cps = data.checkpoints || [];
     $('cps').innerHTML = cps.length ? cps.map((cp, i) => {
-      const prev = cps[i - 1], n = prev ? Object.keys(Object.assign({}, cp.forms, prev.forms)).filter(id => JSON.stringify(cp.forms[id] || null) !== JSON.stringify(prev.forms[id] || null)).length : null;
+      const prev = cps[i - 1], n = prev ? countDiff(cp, prev) : null;
       const cur = i === cps.length - 1;
       return `<tr data-i="${i}" class="${cur ? 'cur' : 'cp'}" title="${cur ? 'The current checkpoint' : 'Go back to this state (as a new checkpoint)'}"><td>#${cp.id}</td><td class="when">${when(cp.time)}</td>
         <td>${esc(cp.message)}${cur ? ' <span class="badge text-bg-secondary">current</span>' : ''}</td><td class="note">${n === null ? '' : n + (n === 1 ? ' form' : ' forms') + ' changed'}</td>
@@ -445,7 +482,7 @@
   }
   function addCheckpoint(message) {
     const cps = data.checkpoints || (data.checkpoints = []);
-    cps.push({ id: cps.reduce((m, c) => Math.max(m, c.id), 0) + 1, time: new Date().toISOString(), message, markLength: clone(lengths()), forms: clone(data.forms) });
+    cps.push({ id: cps.reduce((m, c) => Math.max(m, c.id), 0) + 1, time: new Date().toISOString(), message, markLength: clone(lengths()), forms: clone(data.forms), styles: clone(data.styles || {}) });
     rebase(); save(); renderAll();
   }
   $('cpSet').addEventListener('click', () => {
@@ -459,9 +496,9 @@
       if (!confirm(`Delete checkpoint #${cp.id} “${cp.message}”?`)) return;
       snapshot(); cps.splice(i, 1); save(); renderCheckpoints(); return;
     }
-    const n = Object.keys(Object.assign({}, data.forms, base.forms)).filter(changed).length;
+    const n = countDiff(data, base);
     if (n && !confirm(`${n} ${n === 1 ? 'form was' : 'forms were'} changed since the current checkpoint; going back drops these changes (Undo brings them back). Go back to #${cp.id}?`)) return;
-    snapshot(); data.forms = clone(cp.forms); data.markLength = clone(cp.markLength);
+    snapshot(); data.forms = clone(cp.forms); data.styles = clone(cp.styles || {}); pruneStyles(data); data.markLength = clone(cp.markLength);
     sel = null; showLengths(); addCheckpoint(`Back to #${cp.id}: ${cp.message}`);
   });
   function update() { save(); renderBig(); renderInfo(); renderGrid(); }
@@ -493,7 +530,7 @@
   // place of 10 % (found from where the end lies on it), a free one keeps its middle
   // (a mark that already keeps them stays as it is, so that opening the editor again changes nothing)
   function normalizeMarks(d) {
-    for (const f of Object.values(d.forms)) f.marks = f.marks.map(m => {
+    for (const f of [d.forms, ...Object.values(d.styles || {}).map(v => v.forms || {})].flatMap(Object.values)) f.marks = f.marks.map(m => {
       if (!m) return m;
       const pts = P.points(dOf(m)), a = angleOf(pts), dk = dockOf(m), q = dk && f.strokes[dk[0]] && endOf(P.points(dOf(f.strokes[dk[0]])), dk[1]);
       let n;
@@ -711,17 +748,26 @@
   $('grid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (!c) return; sym = c.dataset.s; openForm(); renderAll(); });
   $('form').addEventListener('change', e => { form = e.target.value; openForm(); renderAll(); });
   for (const st of STYLES) $('style').add(new Option(st[0], st[1]));
-  $('style').addEventListener('change', e => { style = STYLES.find(s => s[1] === e.target.value); renderAll(); });
+  $('style').addEventListener('change', e => { style = STYLES.find(s => s[1] === e.target.value); if (edit) { edit = style[1]; sel = null; } renderAll(); });   // editing a font of its own: the other font
+  // a click on a preview: edit the glyphs of that font only (the font select follows); a second click: back to the central glyphs
+  $('views').addEventListener('click', e => {
+    const v = e.target.closest('[data-st]'); if (!v) return;
+    edit = edit === v.dataset.st ? null : v.dataset.st; sel = null;
+    if (edit) { style = STYLES.find(s => s[1] === edit); $('style').value = edit; }
+    renderAll();
+  });
   $('marks').innerHTML = [0, 1, 2, 3, 4, 5].map(i => `<button class="btn btn-quiet btn-sm" data-i="${i}">${i + 1}</button>`).join('');
   $('marks').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     const i = +b.dataset.i; marksOn.has(i) ? marksOn.delete(i) : marksOn.add(i);
     b.className = 'btn btn-sm ' + (marksOn.has(i) ? 'btn-cinnabar' : 'btn-quiet'); renderAll();
   });
-  $('single').addEventListener('click', () => { snapshot(); delete data.forms[idOf()]; sel = null; save(); renderAll(); });
+  $('single').addEventListener('click', () => { snapshot(); dropOwn(idOf()); sel = null; save(); renderAll(); });
+  $('dropFont').addEventListener('click', () => { if (!edit) return; snapshot(); dropOwn(idOf()); sel = null; save(); renderAll(); });
   $('resetForm').addEventListener('click', () => {
     const id = idOf(); snapshot();
-    if (base.forms[id]) data.forms[id] = clone(base.forms[id]); else delete data.forms[id];
+    const b = lvl(base, edit)[id];
+    if (b) { own(id); lvl(data, edit)[id] = clone(b); } else dropOwn(id);
     sel = null; save(); renderAll();
   });
   $('undo').addEventListener('click', undo);
