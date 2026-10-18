@@ -1,4 +1,4 @@
-"""Builds all QATT fonts from fonts/glyphs.json, fonts/kage.json and fonts/brush.json, with the vertical metrics (--vertical) and the name table.
+"""Builds all QATT fonts that are still built (the KAGE fonts) from fonts/glyphs.json and fonts/paths.json, with the vertical metrics (--vertical) and the name table.
 
   python3 tools/build_all.py                 # writes fonts/qatt-*.ttf and .woff2
   python3 tools/build_all.py --out /some/dir # builds into another folder (to compare with fonts/ first)
@@ -12,10 +12,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-KAGE = ['--kage', 'fonts/kage.json']
+KAGE = ['--kage', 'fonts/paths.json']
 FONTS = {   # file name: arguments of build_font.py before the data files
-    'qatt-prototype-light': ['--light'],
-    'qatt-brush': [],
     'qatt-serif': KAGE,
     'qatt-gothic': KAGE + ['--gothic'],
     'qatt-gothic-wide': KAGE + ['--gothic', '--wide'],
@@ -33,7 +31,6 @@ FONTS = {   # file name: arguments of build_font.py before the data files
 
 def build(name, out):
     args = ['python3', os.path.join(HERE, 'build_font.py'), '--vertical'] + FONTS[name] + ['fonts/glyphs.json', os.path.join(out, name)]
-    if name == 'qatt-brush': args.append('fonts/brush.json')
     r = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
     print(('ok     ' if r.returncode == 0 else 'FAILED ') + name, flush=True)
     if r.returncode: print(r.stdout[-800:], r.stderr[-1500:])
