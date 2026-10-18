@@ -24,14 +24,14 @@
   <p class="note" id="account"></p>
   <p id="msg" class="note" hidden></p>
   <div id="list" hidden>
-    <p class="note">Pages of the private repository qtng/chunom-private, kept in the database and shown to admins only. Open one as <code>view.html?f=<i>feature</i>&amp;p=<i>path</i></code>.</p>
+    <p class="note">Pages of the private repository qtng/chunom-private, kept in the database and shown to the owner only. Open one as <code>view.html?f=<i>feature</i>&amp;p=<i>path</i></code>.</p>
     <ul id="pages" class="list-unstyled"></ul>
   </div>
 </main>
 <script>
 /*
 The viewer of the private pages (the admin pages of the features of the private repository qtng/chunom-private, see its README): view.html?f=fonts&p=admin/glyph-editor.html.
-The page and the files it needs are in the table private_files, which only admins can read (private_file() checks app_metadata.is_admin in the database). In the
+The page and the files it needs are in the table private_files, which only the owner can read (private_file() checks app_metadata.is_owner in the database). In the
 page, an address without a leading slash is a private file (relative to the folder of the page in the repository) and an address with a slash (or a domain) is
 the public site as usual:
   script src="../lib/x.js"                          the file is read from the database and put into the tag
@@ -93,6 +93,7 @@ Opened as a plain file (without this viewer) the page reads its data-src with fe
     QattLogin.status(sp, $('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
     const state = await Admin.check(sp);
     if (state !== 'admin') { if (state === 'denied') { $('account').hidden = true; say('This page is for admins.'); } return; }
+    if (!await Admin.owner(sp)) { $('account').hidden = true; say('This page is for the owner.'); return; }
     const q = new URLSearchParams(location.search), feature = q.get('f'), path = q.get('p');
     if (!feature || !path) { list(); return; }
     say('Loading ' + feature + '/' + path + ' …');
