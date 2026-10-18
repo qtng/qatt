@@ -132,6 +132,12 @@
     dialog.ask { --ink: #2b2118; --muted: #7b6c58; /* the box is light in every theme (the dark theme makes --ink light) */ max-width: 24rem; width: calc(100vw - 2rem); padding: 1.2rem 1.3rem; background: #fffdf8; color: var(--ink); border: 3px solid var(--ink); border-radius: .8rem; box-shadow: 5px 5px 0 var(--ink); }
     html[data-theme] dialog.ask :is(h2, p) { color: var(--ink); text-shadow: none; }   /* a theme (the dark one) must not colour the texts of the light box */
     dialog.ask::backdrop { background: rgba(43, 33, 24, .45); }
+    dialog.ask.intro::backdrop { background: rgba(43, 33, 24, .28); }   /* the loaded game shows through */
+    dialog.ask.intro { max-width: 22rem; padding: 1.8rem 1.5rem 1.8rem; text-align: center; }
+    dialog.ask.intro h2 { font: 400 2.3rem Georgia, "Times New Roman", serif; margin: 0; }
+    dialog.ask.intro .stamp { display: block; width: 3.2rem; height: .3rem; margin: .7rem auto 1.6rem; background: var(--cinnabar); }
+    dialog.ask.intro .intro-start { font-size: 1.3rem; padding: .6rem 2.6rem; }
+    dialog.ask.intro .intro-start:disabled { opacity: .55; }
     dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     dialog.ask p { margin: 0 0 1rem; }
     dialog.prog { text-align: center; }
@@ -171,17 +177,21 @@
 </header>
 
 <main class="container py-3" id="content">
+<dialog class="ask intro" id="intro" aria-labelledby="introTitle">   <!-- opens over the loaded game: nothing runs, and nothing can be clicked, before Start -->
+  <h2 id="introTitle"><span data-vi="Sẵn sàng?">Ready?</span></h2>
+  <span class="stamp" aria-hidden="true"></span>
+  <div class="text-center"><button type="button" class="btn btn-cinnabar btn-pill intro-start" id="startGame" disabled><i class="bi bi-play-fill"></i> <span data-vi="Bắt đầu">Start</span></button></div>
+</dialog>
 <div class="game mx-auto">
   <div class="d-flex justify-content-center align-items-center gap-2 tools">
     <select id="decoding" class="form-select form-select-sm w-auto tool" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select>
     <select id="font" data-qatt-fonts data-qatt-default="QATT Pen" class="form-select form-select-sm w-auto tool" aria-label="Font"></select>
     <button type="button" class="btn btn-sm tool-btn" id="reload" data-vi="Bỏ qua" disabled>Skip</button>
   </div>
-  <div class="text-center my-5" id="startRow" hidden><button type="button" class="btn btn-cinnabar btn-pill btn-lg" id="startGame"><i class="bi bi-play-fill"></i> <span data-vi="Bắt đầu">Start</span></button></div>   <!-- the game begins with a click (also lets the browser play the speech) -->
-  <div class="card task mx-auto mb-4" id="task" hidden>
+  <div class="card task mx-auto mb-4" id="task">
     <div class="card-body">
       <div class="head">
-        <div class="word" id="word" lang="vi"></div>
+        <div class="word" id="word" lang="vi">?</div>
         <div class="mood" id="mood" aria-live="polite">🙂</div>
         <div class="score" id="score" title="Score"><i class="bi bi-star-fill"></i> <span id="scoreVal">0</span><i class="bi bi-lock-fill" id="scoreLock" hidden></i></div>
       </div>
@@ -934,9 +944,13 @@
 
     const wanted = new URLSearchParams(location.search).get('word');
     // the game starts with a click on Start (the word, its speech and the clocks wait for it)
-    loadDict().catch(() => {}).then(() => { $('startRow').hidden = false; });
+    $('intro').addEventListener('cancel', e => e.preventDefault());   // Escape does not skip the start
+    // a preview of the shapes behind the popup (inert: nothing is drawn or clicked before Start)
+    $('basePad').replaceChildren(...[...ROWS[0].slice(0, 3), ...ROWS[1].slice(0, 3)].map(s => button(glyph(s), 'gbtn', () => {})));
+    $('intro').showModal();
+    loadDict().catch(() => {}).then(() => { $('startGame').disabled = false; });
     $('startGame').addEventListener('click', () => {
-      started = true; $('startRow').hidden = true; showSkip();
+      started = true; $('intro').close(); showSkip();
       if (wanted) start(wanted, (DICT.find(e => e.w === wanted.trim().toLowerCase()) || {}).nom);
       else another();
     });
