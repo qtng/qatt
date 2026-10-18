@@ -59,6 +59,7 @@
     table.items .name { white-space: nowrap; font-weight: 600; cursor: pointer; }
     table.items .name.s { color: #2b6cb0; } table.items .name.m { color: #c8372d; }
     textarea { font: .78rem ui-monospace, Menlo, monospace; }
+    .bar .num { width: 4.4rem; }
     dialog.help { max-width: 40rem; width: calc(100% - 2rem); border: 1px solid var(--line, #e4d9c0); border-radius: .7rem; padding: 1rem 1.2rem; background: Canvas; color: CanvasText; }
     dialog.help::backdrop { background: rgba(0, 0, 0, .35); }
     dialog.help h2 { font-size: 1.1rem; } dialog.help h3 { font-size: .95rem; margin: .9rem 0 .3rem; }
@@ -79,6 +80,10 @@
       <option value="v2c-">Single</option><option value="v2l-">Left (own form, optional)</option><option value="v2r-">Right (own form, optional)</option></select></label>
     <span>Marks</span><span class="marks" id="marks"></span>
     <label>Font <select id="style" class="form-select form-select-sm"></select></label>
+    <span title="The length the editor gives a mark it changes: horizontal, vertical, slanted (KAGE units of the box of 200)">Mark length</span>
+    <label>— <input id="lenH" type="number" step="0.5" min="1" class="form-control form-control-sm num"></label>
+    <label>| <input id="lenV" type="number" step="0.5" min="1" class="form-control form-control-sm num"></label>
+    <label>/ <input id="lenD" type="number" step="0.5" min="1" class="form-control form-control-sm num"></label>
     <button class="btn btn-quiet btn-sm" id="undo" disabled>Undo</button>
     <button class="btn btn-quiet btn-sm" id="helpBtn"><i class="bi bi-question-circle"></i> Help</button>
   </div>
@@ -110,6 +115,8 @@
         <div class="btn-group btn-group-sm" role="group">
           <button class="btn btn-quiet" id="dockBtn" title="Dock the selected mark to the nearest end of a stroke (it moves onto it and then moves with it)">Dock</button>
           <button class="btn btn-quiet" id="undockBtn" title="The selected mark no longer moves with the end of a stroke">Undock</button>
+          <button class="btn btn-quiet" id="rotL" title="Turn the selected mark by 5° anticlockwise (about its dock, else its middle)">⟲ 5°</button>
+          <button class="btn btn-quiet" id="rotR" title="Turn the selected mark by 5° clockwise (about its dock, else its middle)">⟳ 5°</button>
         </div>
       </div>
       <svg id="big" class="big" viewBox="-12 -12 224 224" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -151,11 +158,15 @@
       Scrollen), Antippen wählt weiter.</dd>
     <dt>Align</dt><dd>Horizontal gibt dem gewählten Punkt die Höhe (y) des anderen Endpunkts seines Pfads, Vertical dessen x. Bei einem Kontrollpunkt gilt der
       nähere Endpunkt.</dd>
-    <dt>Andocken</dt><dd>Ein Zusatzstrich (immer eine Gerade) kann an einem Endpunkt eines Hauptstrichs hängen. Dann bewegt er sich mit diesem Endpunkt mit,
-      wenn der Endpunkt oder der ganze Hauptstrich verschoben wird; der Andockpunkt ist die Stelle des Zusatzstrichs, auf der der Endpunkt liegt.
-      Verschiebt man den ganzen Zusatzstrich, rastet er an einem Endpunkt ein, sobald dieser nahe an ihm liegt, und hängt dann an ihm; weiter weg ist er
-      wieder frei. „Dock“ hängt den gewählten Zusatzstrich an den nächsten Endpunkt, „Undock“ löst ihn. Angedockt: durchgezogen, mit einer Raute am Endpunkt;
-      frei: gestrichelt. Verschiebt man nur einen Punkt des Zusatzstrichs, bleibt er angedockt, solange der Endpunkt noch auf ihm liegt.</dd>
+    <dt>Zusatzstriche</dt><dd>Immer Geraden, Winkel nur in 5°-Schritten, die Länge ihrer Art: „Mark length“ oben, waagrecht (—), senkrecht (|) und schräg (/),
+      für alle Schriften; ohne Wert 1/5 der Breite des Kastens, 1/5 seiner Höhe und der Mittelwert. Die Regeln gelten für jeden Zusatzstrich, den man
+      bearbeitet; ältere, die man noch nicht angefasst hat, bleiben, wie sie sind (in der Liste „(old)“).</dd>
+    <dt>Andocken</dt><dd>Ein Zusatzstrich kann mit seinem Anfang, seiner Mitte oder seinem Ende an einem Endpunkt eines Hauptstrichs hängen. Dann bewegt er sich
+      mit diesem Endpunkt mit, sein Winkel bleibt dabei gleich. Verschiebt man den ganzen Zusatzstrich, rastet er mit Anfang, Mitte oder Ende an einem Endpunkt ein,
+      sobald einer davon nahe daran liegt; weiter weg ist er wieder frei. „Dock“ hängt ihn an den nächsten Endpunkt, „Undock“ löst ihn. Angedockt: durchgezogen,
+      mit einer Raute am Endpunkt; frei: gestrichelt.</dd>
+    <dt>Drehen</dt><dd>Wischen mit einem gewählten Punkt eines Zusatzstrichs dreht ihn in 5°-Schritten um seinen Andockpunkt (frei: um sein anderes Ende; wird der
+      angedockte Punkt selbst gezogen, löst er sich). „⟲ 5°“ / „⟳ 5°“ und die Pfeiltasten drehen ihn ebenso, Align macht ihn waagrecht oder senkrecht.</dd>
     <dt>grau dick</dt><dd>Die Pfade, wie sie beim Öffnen der Form waren. Sie bleiben beim Bearbeiten stehen; unter der Ansicht steht, wie weit das Gewählte davon
       weg ist.</dd>
     <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Wischen mit Move.</dd>
@@ -219,6 +230,11 @@
     return [a[0] + t * dx, a[1] + t * dy];
   }
   const DOCKED = 0.6;   // an end this near a mark lies on it
+  function markInfo(it) {   // angle and length of a mark, and whether it keeps the rules (5°, the length of its kind)
+    const p = P.points(dOf(it)), a = angleOf(p), len = Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]);
+    const ok = Math.abs(a - snapAngle(a)) < 0.05 && Math.abs(len - lenFor(snapAngle(a))) < 0.05;
+    return `${Math.round(((a % 180) + 180) % 180 * 10) / 10}°, ${Math.round(len * 10) / 10}` + (ok ? '' : ' (old)');
+  }
   function setItem(f, x, v) { if (x.kind === 's') f.strokes[x.i] = v; else f.marks[x.i] = v; }
   function getItem(f, x) { return x.kind === 's' ? f.strokes[x.i] : f.marks[x.i]; }
 
@@ -229,7 +245,7 @@
     $('draft').textContent = same ? 'as in the repository' : `${n} forms changed, draft (not in the repository yet)`;
   }
   const checkpoint = () => { const s = JSON.stringify(data); if (undoStack[undoStack.length - 1] !== s) undoStack.push(s); if (undoStack.length > 200) undoStack.shift(); $('undo').disabled = false; };
-  function undo() { if (!undoStack.length) return; data = JSON.parse(undoStack.pop()); $('undo').disabled = !undoStack.length; save(); renderAll(); }
+  function undo() { if (!undoStack.length) return; data = JSON.parse(undoStack.pop()); $('undo').disabled = !undoStack.length; save(); showLengths(); renderAll(); }
 
   // the drawing of a form in a font: strokes and the marks of `set` (indices), as SVG path data in KAGE units
   function outline(f, st, set) {
@@ -274,9 +290,9 @@
     $('title').textContent = `${id} (${sym === '_' ? 'z' : sym})` + (derived(id) ? ': no own form, the single form is shown; a change makes an own one' : '');
     $('single').hidden = !(isLR(id) && data.forms[id]);
     $('views').innerHTML = STYLES.map(st => `<div><svg viewBox="0 0 200 200">${glyph(f, st, marksOn)}</svg>${st[0]}</div>`).join('');
-    $('alignH').disabled = $('alignV').disabled = !sel || sel.k === 'all';
     const selMark = sel && list[sel.n] && list[sel.n].kind === 'm' ? list[sel.n] : null;
-    $('dockBtn').disabled = !selMark; $('undockBtn').disabled = !(selMark && dockOf(selMark.it));
+    $('alignH').disabled = $('alignV').disabled = !sel || (sel.k === 'all' && !selMark);
+    $('dockBtn').disabled = $('rotL').disabled = $('rotR').disabled = !selMark; $('undockBtn').disabled = !(selMark && dockOf(selMark.it));
     renderItems(f, list);
   }
   function renderItems(f, list) {
@@ -286,7 +302,7 @@
       const t = typeSet(x.it), curve = P.points(dOf(x.it)).length === 3;
       const autoOf = typeof x.it === 'string' ? auto : P.kageForm(Object.assign({}, f, x.kind === 's' ? { strokes: f.strokes.map((it, j) => j === x.i ? dOf(it) : it) } : { marks: f.marks.map((it, j) => j === x.i ? dOf(it) : it) }))[x.kind === 's' ? 'strokes' : 'marks'][x.i].split(':').slice(0, 3).join(':');
       const opts = [`<option value="">auto (${autoOf})</option>`].concat(TYPES.concat(t && !TYPES.includes(t) ? [t] : []).map(v => `<option${v === t ? ' selected' : ''}>${v}</option>`), ['<option value="?">other…</option>']).join('');
-      const dk = x.kind === 'm' && dockOf(x.it), dkText = x.kind === 'm' ? `<span class="dk">${dk ? `on S${dk[0] + 1} ${dk[1] ? 'end' : 'start'}` : 'free'}</span>` : '';
+      const dk = x.kind === 'm' && dockOf(x.it), dkText = x.kind === 'm' ? `<span class="dk">${dk ? `${dk[2] || 'mid'} on S${dk[0] + 1} ${dk[1] ? 'end' : 'start'}` : 'free'} · ${markInfo(x.it)}</span>` : '';
       return `<tr data-n="${n}" class="${sel && sel.n === n ? 'sel' : ''}"><td class="name ${x.kind}">${x.kind === 's' ? 'Stroke ' + (x.i + 1) : 'Mark ' + (x.i + 1)}${dkText}</td>
         <td><input class="form-control form-control-sm d" value="${dOf(x.it)}"></td>
         <td><select class="form-select form-select-sm t">${opts}</select></td>
@@ -303,27 +319,40 @@
       const r2 = v => Math.round(v * 100) / 100;
       moved = sel.k === 'all' && pts.some((p, i) => r2(p[0] - op[i][0]) !== dx || r2(p[1] - op[i][1]) !== dy) ? ' · changed against the original' : (dx || dy ? ` · moved ${dx}, ${dy} against the original` : ' · as the original');
     }
-    const dk = x.kind === 'm' ? dockOf(x.it) : null, dockText = x.kind === 'm' ? (dk ? ` · docked to the ${dk[1] ? 'end' : 'start'} of stroke ${dk[0] + 1}` : ' · free (not docked)') : '';
+    const dk = x.kind === 'm' ? dockOf(x.it) : null, dockText = x.kind === 'm' ? (dk ? ` · its ${dk[2] || 'mid'} docked to the ${dk[1] ? 'end' : 'start'} of stroke ${dk[0] + 1}` : ' · free (not docked)') + ` · ${markInfo(x.it)}` : '';
     $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + (sel.k === 'all' ? ' (whole path)' : ` · ${pts.length === 3 && sel.k === 1 ? 'control point' : 'point ' + (sel.k === 0 ? 1 : 2)}`) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + dockText + moved;
   }
   function renderAll() { renderGrid(); renderBig(); renderInfo(); }
   function update() { save(); renderBig(); renderInfo(); renderGrid(); }
 
-  // the end of a stroke a mark would dock to: the nearest one within tol of the mark (pts) -> {pts moved onto it, dock}, else {pts, dock: null}
+  // marks: always straight, angles in steps of 5°, the length of their kind (data.markLength, else 1/5 of the box); docked by their start, middle or end
+  const BOX = 200, AT = { start: 0, mid: 0.5, end: 1 }, AT_NAME = ['start', 'mid', 'end'];
+  function lengths() { const m = data.markLength || {}, h = m.h ?? BOX / 5, v = m.v ?? BOX / 5; return { h, v, d: m.d ?? (h + v) / 2 }; }
+  const angleOf = pts => Math.atan2(pts[1][1] - pts[0][1], pts[1][0] - pts[0][0]) * 180 / Math.PI;   // degrees, y down: clockwise on the screen
+  const snapAngle = a => Math.round(a / 5) * 5;
+  function lenFor(angle) { const a = ((angle % 180) + 180) % 180, L = lengths(); return a === 0 ? L.h : a === 90 ? L.v : L.d; }
+  const pointAt = (pts, t) => [pts[0][0] + t * (pts[1][0] - pts[0][0]), pts[0][1] + t * (pts[1][1] - pts[0][1])];
+  function markLine(pivot, t, angle) {   // the mark whose point t (0 start, 0.5 middle, 1 end) is pivot, at this angle, with the length of its kind
+    const L = lenFor(angle), r = angle * Math.PI / 180, u = [Math.cos(r), Math.sin(r)], a = [pivot[0] - t * L * u[0], pivot[1] - t * L * u[1]];
+    return [a, [a[0] + L * u[0], a[1] + L * u[1]]];
+  }
+  const strokeEnd = (f, dk) => f.strokes[dk[0]] && endOf(P.points(dOf(f.strokes[dk[0]])), dk[1]);
+  // the dock of a mark (pts) within tol: the end of a stroke nearest to its start, middle or end -> {dock, pivot, t}, else null
   function snapMark(f, pts, tol) {
     let best = null;
-    f.strokes.forEach((st, i) => { const sp = P.points(dOf(st)); for (const e of [0, 1]) {
-      const q = endOf(sp, e), r = project(q, pts), d = Math.hypot(q[0] - r[0], q[1] - r[1]);
-      if (d < tol && (!best || d < best.d)) best = { d, dx: q[0] - r[0], dy: q[1] - r[1], dock: [i, e] };
+    f.strokes.forEach((st, i) => { const sp = P.points(dOf(st)); for (const e of [0, 1]) for (const name of AT_NAME) {
+      const q = endOf(sp, e), r = pointAt(pts, AT[name]), d = Math.hypot(q[0] - r[0], q[1] - r[1]);
+      if (d < tol && (!best || d < best.d)) best = { d, dock: [i, e, name], pivot: q, t: AT[name] };
     } });
-    return best ? { pts: pts.map(p => [p[0] + best.dx, p[1] + best.dy]), dock: best.dock } : { pts, dock: null };
+    return best;
   }
-  // change the points of item n: fn(pts) -> pts. A stroke takes the marks docked to its ends along; a mark moved whole with how.snap
-  // docks to an end within that distance (or comes free), otherwise it stays docked while the end still lies on it
+  // change item n. A stroke: fn(pts) -> pts, the marks docked to its ends go along (their angle stays). A mark follows the rules of marks
+  // (how.op): 'move' fn moves it whole, it docks within how.tol (or comes free); 'rotate' its point how.k goes towards how.target, it turns about
+  // its dock (or its other end); 'angle' how.set or how.delta (degrees) about its dock or middle; 'text' fn gives its new points
   function change(n, fn, how = {}) {
     const f = own(idOf()), x = items(f)[n], old = P.points(dOf(x.it));
-    let pts = fn(old.map(p => p.slice()));
     if (x.kind === 's') {
+      const pts = fn(old.map(p => p.slice()));
       f.marks.forEach((m, j) => {
         const dk = m && dockOf(m); if (!dk || dk[0] !== x.i) return;
         const a = endOf(old, dk[1]), b = endOf(pts, dk[1]), dx = b[0] - a[0], dy = b[1] - a[1];
@@ -332,9 +361,25 @@
       setItem(f, x, withD(x.it, P.path(pts)));
       return;
     }
-    let dock = dockOf(x.it);
-    if (how.snap) ({ pts, dock } = snapMark(f, pts, how.snap));
-    else if (dock) { const q = f.strokes[dock[0]] && endOf(P.points(dOf(f.strokes[dock[0]])), dock[1]), r = q && project(q, pts); if (!q || Math.hypot(q[0] - r[0], q[1] - r[1]) > DOCKED) dock = null; }
+    let dock = dockOf(x.it), pts;
+    const docked = dock && strokeEnd(f, dock), t0 = dock ? AT[dock[2] || 'mid'] : 0.5;
+    if (how.op === 'rotate') {
+      const k = how.k, fixed = docked && t0 !== k;   // turning about the dock, unless its docked point itself is moved: then about the other end, and it comes free
+      if (!fixed) dock = null;
+      const pivot = fixed ? docked : how.from[1 - k], t = fixed ? t0 : 1 - k, sg = Math.sign(k - t) || 1;
+      const angle = snapAngle(Math.atan2((how.target[1] - pivot[1]) * sg, (how.target[0] - pivot[0]) * sg) * 180 / Math.PI);
+      pts = markLine(pivot, t, angle);
+    } else if (how.op === 'angle') {
+      const angle = how.set !== undefined ? how.set : snapAngle(angleOf(old)) + how.delta;
+      pts = markLine(docked || pointAt(old, 0.5), docked ? t0 : 0.5, angle);
+    } else {
+      const moved = fn(old.map(p => p.slice())), angle = snapAngle(angleOf(moved));
+      const sn = how.op === 'move' ? snapMark(f, moved, how.tol) : null;
+      const at = pointAt(moved, t0);
+      if (sn) { dock = sn.dock; pts = markLine(sn.pivot, sn.t, angle); }
+      else if (how.op === 'text' && docked && Math.hypot(at[0] - docked[0], at[1] - docked[1]) < DOCKED) pts = markLine(docked, t0, angle);
+      else { dock = null; pts = markLine(pointAt(moved, 0.5), 0.5, angle); }
+    }
     setItem(f, x, withDock(withD(x.it, P.path(pts)), dock));
   }
   const snap = (v, alt) => alt ? Math.round(v * 100) / 100 : Math.round(v * 2) / 2;
@@ -351,15 +396,20 @@
     const d = q => Math.hypot(q[0] - pts[1][0], q[1] - pts[1][1]);
     return d(pts[0]) <= d(pts[2]) ? pts[0] : pts[2];
   }
-  function align(axis) {   // axis 1: horizontal (same y), 0: vertical (same x)
-    if (!sel || sel.k === 'all') return;
+  function align(axis) {   // axis 1: horizontal (same y), 0: vertical (same x); a mark is turned to 0° or 90°
+    if (!sel) return;
+    const isMark = items(formOf(idOf()))[sel.n].kind === 'm';
+    if (!isMark && sel.k === 'all') return;
     checkpoint();
-    change(sel.n, pts => { const r = reference(pts, sel.k); pts[sel.k][axis] = r[axis]; return pts; });
+    if (isMark) change(sel.n, null, { op: 'angle', set: axis ? 0 : 90 });
+    else change(sel.n, pts => { const r = reference(pts, sel.k); pts[sel.k][axis] = r[axis]; return pts; });
     update();
   }
+  $('rotL').addEventListener('click', () => { if (!sel) return; checkpoint(); change(sel.n, null, { op: 'angle', delta: -5 }); update(); });
+  $('rotR').addEventListener('click', () => { if (!sel) return; checkpoint(); change(sel.n, null, { op: 'angle', delta: 5 }); update(); });
   $('dockBtn').addEventListener('click', () => {
     if (!sel) return; checkpoint();
-    change(sel.n, pts => pts, { snap: 15 });
+    change(sel.n, pts => pts, { op: 'move', tol: 15 });
     if (!dockOf(items(formOf(idOf()))[sel.n].it)) $('info').textContent = 'No end of a stroke near this mark (within 15 units).'; else update();
   });
   $('undockBtn').addEventListener('click', () => {
@@ -404,7 +454,8 @@
     }
     const q = svgPt(e);
     const x = items(formOf(idOf()))[sel.n];
-    change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey), x.kind === 'm' && sel.k === 'all' ? { snap: 10 * unitsPerPx() } : {});
+    if (x.kind === 'm' && sel.k !== 'all') change(sel.n, null, { op: 'rotate', k: sel.k, from: drag.pts0, target: movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], true)[sel.k] });
+    else change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey), { op: 'move', tol: 10 * unitsPerPx() });
     save(); renderBig(); renderInfo();
   });
   big.addEventListener('pointerup', e => {
@@ -421,7 +472,9 @@
     const m = e.shiftKey ? 5 : 0.5, v = { ArrowLeft: [-m, 0], ArrowRight: [m, 0], ArrowUp: [0, -m], ArrowDown: [0, m] }[e.key];
     if (!v || (mode === 'h' && v[1]) || (mode === 'v' && v[0])) return;
     e.preventDefault(); checkpoint();
-    change(sel.n, pts => movePts(pts, sel.k, v[0], v[1], false));
+    const x = items(formOf(idOf()))[sel.n];
+    if (x.kind === 'm' && sel.k !== 'all') change(sel.n, null, { op: 'angle', delta: v[0] + v[1] > 0 ? 5 : -5 });   // a point of a mark: the arrows turn it by 5°
+    else change(sel.n, pts => movePts(pts, sel.k, v[0], v[1], false), { op: 'move', tol: DOCKED });
     update();
   });
   function showMode() {
@@ -439,14 +492,14 @@
       change(n, pts => pts.length === 2 ? [pts[0], [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2], pts[1]] : [pts[0], pts[2]]);
       sel = { n, k: 'all' }; update(); return;
     }
-    if (e.target.classList.contains('name')) { sel = { n, k: 'all' }; renderBig(); renderInfo(); }
+    if (e.target.closest('.name')) { sel = { n, k: 'all' }; renderBig(); renderInfo(); }
   });
   $('items').addEventListener('change', e => {
     const tr = e.target.closest('tr[data-n]'); if (!tr) return;
     const n = +tr.dataset.n, f = own(idOf()), x = items(f)[n];
     if (e.target.classList.contains('d')) {
       let np; try { np = P.points(e.target.value); if (x.kind === 'm' && np.length !== 2) throw 0; } catch (err) { e.target.classList.add('is-invalid'); return; }
-      checkpoint(); change(n, () => np);
+      checkpoint(); change(n, () => np, { op: 'text' });
     } else if (e.target.classList.contains('t')) {
       let t = e.target.value;
       if (t === '?') { t = (prompt('KAGE line type (kind:start:end, e.g. 1:12:13)', typeSet(x.it) || '') || '').trim(); if (!/^\d+:\d+:\d+$/.test(t)) { renderBig(); return; } }
@@ -472,6 +525,11 @@
     sel = null; save(); renderAll();
   });
   $('undo').addEventListener('click', undo);
+  function showLengths() { const L = lengths(); $('lenH').value = L.h; $('lenV').value = L.v; $('lenD').value = L.d; }
+  for (const [id, key] of [['lenH', 'h'], ['lenV', 'v'], ['lenD', 'd']]) $(id).addEventListener('change', e => {
+    const v = Math.round(+e.target.value * 2) / 2; if (!(v > 0)) { showLengths(); return; }
+    checkpoint(); data.markLength = Object.assign({}, lengths(), { [key]: v }); save(); showLengths(); renderBig(); renderInfo();
+  });
   $('helpBtn').addEventListener('click', () => $('help').showModal());
   $('helpClose').addEventListener('click', () => $('help').close());
   $('help').addEventListener('click', e => { if (e.target === $('help')) $('help').close(); });
@@ -488,7 +546,7 @@
   });
   $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to fonts/paths.json of the repository?')) return; checkpoint(); data = clone(repo); openForm(); save(); renderAll(); });
 
-  save(); openForm(); showMode(); renderAll();
+  save(); openForm(); showMode(); showLengths(); renderAll();
 })();
 </script>
 </body>
