@@ -3,7 +3,8 @@ stroke that ends in a little hook (hook). Font units, y up; both give a pathops.
 
 fonts/tones.json: per style (the KAGE style of build_font.py, e.g. "kaiti") the weight the stroke widths are for, the settings of the two shapes ("ring", "hook") and per tone (the code point
 after U+F0000 in hex, "A1" = U+F00A1) its shape, side (1 right, -1 left), rot (turned, degrees anticlockwise) and the ellipse of the standalone glyph ("glyph") and
-of the small form over the cell before (".mark"): [cx, cy, rx, ry, stroke width]. A style without an entry keeps the circles of qatt.js."""
+of the small form over the cell before (".mark"): [cx, cy, rx, ry, stroke width]. A style without an entry keeps the circles of qatt.js; an entry that is
+a string takes the tones of that style ("pen-cut": "kaiti")."""
 import json, math, pathops
 
 
@@ -11,7 +12,8 @@ def load(path, style, weight=None):
     """the tones of `style`: {code point: (standalone path, mark path)}, or {} when the style has none; their stroke widths are drawn for the weight
     "weight" of the style and follow `weight` (--weight of build_font.py) in proportion"""
     try:
-        data = json.load(open(path)).get(style)
+        all_ = json.load(open(path)); data = all_.get(style)
+        if isinstance(data, str): data = all_[data]
     except FileNotFoundError:
         return {}
     if not data: return {}
