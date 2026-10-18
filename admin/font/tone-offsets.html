@@ -59,7 +59,7 @@
       <button class="btn btn-quiet" id="modeH">Horizontal</button><button class="btn btn-quiet" id="modeV">Vertical</button>
     </div>
     <label>Font <select id="font" class="form-select form-select-sm"></select></label>
-    <label>Partner <input id="partner" type="number" min="0" max="153" class="form-control form-control-sm num" title="the other half of the pair"></label>
+    <label>Partner <select id="partner" class="form-select form-select-sm" style="max-width:15rem" title="Only for the picture and the measurement: the other half of the pair the letters are drawn with. The offsets belong to the letter, not to the partner."></select></label>
     <label>Show <select id="filter" class="form-select form-select-sm">
       <option value="all">all letters</option><option value="bad">touching or close</option><option value="set">with an offset</option></select></label>
     <span id="stats" class="note"></span>
@@ -404,6 +404,7 @@
     repo = rj; for (const g of gj) names[g.o] = g.n;
     try { data = JSON.parse(store.get(KEY)) || JSON.parse(JSON.stringify(repo)); } catch (e) { data = JSON.parse(JSON.stringify(repo)); }
     save(); buildTones(); buildGrid(); showMode();
+    for (let n = 0; n < N; n++) $('partner').add(new Option(`${n} ${names[n] || ''}`, n));
     $('partner').value = partner.right;
     await loadFont(); redrawAll(); select(0);
   }
@@ -411,7 +412,7 @@
   $('modeH').addEventListener('click', () => { mode = 'h'; showMode(); redrawAll(); });
   $('modeV').addEventListener('click', () => { mode = 'v'; showMode(); redrawAll(); });
   $('font').addEventListener('change', async e => { font = FONTS.find(f => f[1] === e.target.value); await loadFont(); showV(); redrawAll(); });
-  $('partner').addEventListener('change', e => { const v = Math.max(0, Math.min(N - 1, +e.target.value || 0)); partner[tone[2] ? 'right' : 'left'] = v; e.target.value = v; redrawAll(); });
+  $('partner').addEventListener('change', e => { partner[tone[2] ? 'right' : 'left'] = +e.target.value; redrawAll(); });
   $('filter').addEventListener('change', () => { for (let n = 0; n < N; n++) cellState(n); });
   $('vSide').addEventListener('input', e => setV('side', Math.round(+e.target.value || 0)));
   $('vY').addEventListener('input', e => setV('y', Math.round(+e.target.value || 0)));
