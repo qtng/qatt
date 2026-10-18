@@ -752,6 +752,7 @@
       tone = a.tone; code = a.code; hop = a.hop;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
       $('word').textContent = word;
+      say(word);   // the new word is read aloud when it appears (if the sound is on)
       for (const id of ['tones', 'variants']) show($(id), false);
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
