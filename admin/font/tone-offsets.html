@@ -26,7 +26,8 @@
     .cell.hit { border-color: #d33; border-width: 2px; }
     .cell.near { border-color: #e69500; border-width: 2px; }
     .cell .off { color: var(--cinnabar, #a8362a); }
-    .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; touch-action: none; cursor: grab; }
+    .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: background-color .15s; }
+    .big.unlocked { background-color: color-mix(in srgb, #2e9e4f 16%, transparent); cursor: move; }
     .pad { display: grid; grid-template-columns: repeat(3, 2.4rem); gap: .25rem; }
     .pad .btn { padding: .15rem 0; }
     .num { width: 5rem; }
@@ -50,7 +51,7 @@
     <b>Vertical</b>: the tone is moved into its cell, <i>y</i> units inside its top or bottom edge and <i>side</i> units out from the middle of
     the column, for the font or per tone, and an offset per letter on top. The page draws the letters with the font and the mark from its
     outline, as the font will show it once it is built with these values. Font units, y up. Select a cell, then move the mark with the arrow
-    keys (Shift: 10 units) or by dragging it in the large view. Red: the mark overlaps the letter; orange: closer than 20 units. The lines and
+    keys (Shift: 10 units) or by dragging it in the large view (press and hold for half a second until the view turns green; without that, swiping scrolls the page). Red: the mark overlaps the letter; orange: closer than 20 units. The lines and
     boxes of the large view are explained under <i>Help</i>. Hand the export over to be committed as <code>fonts/tone-offsets.json</code> and built (<code>tools/tone_offsets.py</code>);
     single letters, stacks and the wide font have no offsets per letter.</p>
 
@@ -138,7 +139,9 @@
   </dl>
   <h3>Töne und Zellen</h3>
   <dl>
-    <dt><span style="color:#c8372d">roter Ton</span></dt><dd>Der Ton an der Stelle, die er mit diesen Werten in der Schrift bekommt.</dd>
+    <dt>Verschieben</dt><dd>Erst wenn man irgendwo auf der Ansicht länger als eine halbe Sekunde still drückt (Long Press), färbt sie sich leicht grün; dann
+      verschiebt Ziehen den Ton. Ohne Long Press geht jede Wischgeste an den Browser (auf dem Handy scrollt die Seite). Nach dem Loslassen ist wieder gesperrt.</dd>
+    <dt><b>schwarzer Ton</b></dt><dd>Der Ton an der Stelle, die er mit diesen Werten in der Schrift bekommt.</dd>
     <dt><span class="text-secondary">grauer Ton</span></dt><dd>„without the offset“: wo der Ton ohne den Offset dieses Buchstabens säße.</dd>
     <dt>roter Rand, ✕n</dt><dd>Der Ton überschneidet den Buchstaben (n: überlappende Pixel, bei 4 Einheiten pro Pixel).</dd>
     <dt>oranger Rand</dt><dd>Der Abstand zum Buchstaben ist kleiner als 20 Einheiten. Die Zahl in der Mitte einer Zelle ist der Abstand in Einheiten (bis 60 gezeigt).</dd>
@@ -308,7 +311,7 @@
   }
 
   const ink = () => getComputedStyle(document.body).color;
-  const MARK = '#c8372d';
+  const MARK = '#000';
   function cellState(n) {
     const r = results[n], el = $('grid').children[n], d = off(tone[0], n);
     el.classList.toggle('hit', r.overlap > 0); el.classList.toggle('near', !r.overlap && r.gap < NEAR);
@@ -442,17 +445,29 @@
     const m = e.shiftKey ? 10 : 1, k = { ArrowLeft: [-m, 0], ArrowRight: [m, 0], ArrowUp: [0, m], ArrowDown: [0, -m] }[e.key];
     if (k) { e.preventDefault(); move(...k); } else if (e.key === 'n' || e.key === 'N') next();
   });
-  // drag the mark in the large view
+  // drag the mark in the large view, after a long press: press anywhere on the view and hold it still for LONG_MS, the view turns green, then
+  // drag. Without that nothing is moved and the browser gets every swipe (the page scrolls on a phone: touch-action stays auto)
   let drag = null;
-  const big = $('big');
-  big.addEventListener('pointerdown', e => { if (sel == null) return; big.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, d: off() }; big.style.cursor = 'grabbing'; });
+  const LONG_MS = 500, STILL_PX = 6, big = $('big');
+  const lockAgain = () => { if (drag && drag.timer) clearTimeout(drag.timer); big.classList.remove('unlocked'); };
+  big.addEventListener('pointerdown', e => {
+    lockAgain();
+    if (sel == null) { drag = null; return; }
+    const d = drag = { x: e.clientX, y: e.clientY, d: off(), unlocked: false };
+    d.timer = setTimeout(() => { d.unlocked = true; big.classList.add('unlocked'); try { big.setPointerCapture(e.pointerId); } catch (err) {} }, LONG_MS);
+  });
   big.addEventListener('pointermove', e => {
     if (!drag) return;
+    if (!drag.unlocked) { if (drag.timer && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) >= STILL_PX) { clearTimeout(drag.timer); drag.timer = 0; } return; }
+    e.preventDefault();
     const u = (X1 - X0) / big.getBoundingClientRect().width;
     const d = [Math.round(drag.d[0] + (e.clientX - drag.x) * u), Math.round(drag.d[1] - (e.clientY - drag.y) * u)];
     const c = off(); if (d[0] !== c[0] || d[1] !== c[1]) move(d[0], d[1], true);
   });
-  const end = () => { drag = null; big.style.cursor = ''; };
+  // a touch that began with a long press must not scroll the page (the finger was still, so the browser has not begun to scroll)
+  big.addEventListener('touchmove', e => { if (drag && drag.unlocked) e.preventDefault(); }, { passive: false });
+  big.addEventListener('contextmenu', e => e.preventDefault());
+  const end = () => { lockAgain(); drag = null; };
   big.addEventListener('pointerup', end); big.addEventListener('pointercancel', end);
 
   $('export').addEventListener('click', async () => {
