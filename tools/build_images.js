@@ -23,7 +23,7 @@ const FIGURES = [
 ];
 
 const run = (env, out) => new Promise((ok, fail) => {
-  const args = ['tools/build_font.py', '--vertical', '--kage', 'fonts/kage.json', '--pen', '--weight', '1.6', 'fonts/glyphs.json', out];
+  const args = ['tools/build_font.py', '--vertical', '--kage', 'fonts/paths.json', '--pen', '--weight', '1.6', 'fonts/glyphs.json', out];
   const p = spawn('python3', args, { cwd: ROOT, env: { ...process.env, ...env }, stdio: 'ignore' });
   p.on('exit', c => c ? fail(new Error('build failed: ' + out)) : ok());
 });
