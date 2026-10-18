@@ -336,10 +336,10 @@ F0098	QUOC AM TAN TU PHONG MARKED-5
 F0099	QUOC AM TAN TU PHONG MARKED-6
 	* Chi of the base phông
 @		Format characters
-F009A	QUOC AM TAN TU THAM THU COMBINER
-	* places the following Chi above a Hợp Thư
-F009B	QUOC AM TAN TU COMPONENT JOINER
+F009A	QUOC AM TAN TU COMPONENT JOINER
 	* joins two components into one character; their order gives the arrangement
+F009B	QUOC AM TAN TU THAM THU COMBINER
+	* places the following Chi above a Hợp Thư
 @		Tone marks
 F009C	QUOC AM TAN TU TONE SEMICIRCLE LOWER LEFT
 	= âm bình (ngang)
