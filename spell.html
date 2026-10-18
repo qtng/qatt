@@ -407,7 +407,7 @@
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null, relearn1: true };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
@@ -422,12 +422,13 @@
         if (saved.base && typeof saved.base === 'object') me.base = saved.base;
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
         else if (saved.stats) me.stats = saved.stats;
+        me.relearn1 = !!saved.relearn1;
       }
     } catch (e) {}
     const dec = () => $('decoding').value || 'qatt';
     const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
-    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, queue: 0, points: 0 }, hiddenDuring = false;
+    let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
     // the stopwatch and the log at the bottom of the page: the first line is the word in play with the time of every click (right, or wrong ✗) and the running one, to check
     // the measuring: bao  1.9 | 2.4 ✗ | 0.7; the lines below are the earlier words, the newest first
@@ -436,7 +437,7 @@
     const adminSeen = () => typeof isAdmin === 'function' && isAdmin();   // the log is for admins (isAdmin of js/fonts.js), as the ranking
     const drawWatch = () => { if (!watch.word || !adminSeen()) return; $('log').textContent = [watchLine()].concat(logLines).join('\n'); $('log').hidden = false; };
     setInterval(() => { if (watch.on) drawWatch(); }, 100);
-    const newLap = () => { lap = { t0: performance.now(), wrong: false, hinted: false }; hiddenDuring = false; };
+    const newLap = () => { lap = { t0: performance.now(), wrong: false, wrongs: 0, hinted: false }; hiddenDuring = false; };
     const showScore = bump => {
       $('scoreVal').textContent = me.score;
       if (bump) { const el = $('score'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
@@ -462,9 +463,9 @@
       floatPoints(n, delay); showScore(signed); saveMe();
     };
     // a time of a kind: both smoothed values (the first times are the plain mean: weight 1/n); a milestone gives points
-    function addTime(kind, t, wrong = false) {
+    function addTime(kind, t) {
       if (!me.base || me.base.decoding !== dec()) me.base = usualTimes();   // the usual times are taken before the first time of a round goes in
-      me.round[kind].push(t); if (wrong) me.round.wrong[kind]++;   // for the card: the last words
+      me.round[kind].push(t);   // for the card: the last words
       const st = mine()[kind]; st.n++; st.t = t;   // t: the last time, shown in the status line to check the measuring
       st.v = Math.min(CAP, st.n === 1 ? t : st.v + Math.max(1 / st.n, ALPHA) * (t - st.v));   // the values stop at CAP: more is a player who only presses keys
       st.f = Math.min(CAP, st.n === 1 ? t : st.f + Math.max(1 / st.n, ALPHA_FAST) * (t - st.f));
@@ -477,29 +478,25 @@
       showStats(); saveMe();
     }
     // The kinds of symbol: a CELL of the word (onset or rhyme) is one item, whether it takes one click (the shape) or two (the shape, then its marked form): its time
-    // is the mean of the times of its clicks. A tone is one click. A click on a shape or a marked form that is wrong cannot be given to a kind (the player may look for
-    // an onset or a rhyme): it waits (word_.queue) for the next right click of that stage, that one shows which kind it was, and the penalty goes to that kind.
+    // is the mean of the times of its clicks. A tone is one click. A wrong click adds CAP_ADD seconds to the time of its step (the time from the start of the step to the right click,
+    // which holds the wrong clicks too): a wrong click cannot be given to a kind by itself (the player may look for an onset or a rhyme), the right click shows which kind it was.
+    // It is not a time of its own: a penalty of the own time + 2 s fed the own time and grew with it.
     const cellKind = c => c.role === 'onset' ? 'onset' : 'rhyme';   // 'both' (one letter that is onset and rhyme) counts as a rhyme
-    const penalty = kind => Math.min(CAP, mine()[kind].v + CAP_ADD);   // the same as the cap of a slow time: waiting long is not better than a wrong click
     const slowFor = st => st.n >= MIN_SAMPLES ? Math.min(CAP, st.v + CAP_ADD) : CAP;   // the cap of a time moves with the player: the own value + CAP_ADD, at most CAP; until there are MIN_SAMPLES times CAP
     // the choice of a step: kind = onset, rhyme, tone (null if a wrong choice); ok = right; cells = the cells it found; done = those of them that are complete now
     function judge(kind, ok, cells = [], done = []) {
       watch.done.push(((performance.now() - watch.t0) / 1000).toFixed(1) + (ok ? '' : ' ✗')); watch.t0 = performance.now();
-      if (!ok) {
-        lap.wrong = word_.wrong = true; addPoints(-POINTS.wrong);
-        if (kind === 'tone') addTime('tone', penalty('tone'), true); else word_.queue++;
-        return;
-      }
+      if (!ok) { lap.wrong = word_.wrong = true; lap.wrongs++; addPoints(-POINTS.wrong); return; }
       addPoints(POINTS.right);
       const st = mine()[kind];
-      const t = Math.min((performance.now() - lap.t0) / 1000, slowFor(st));
-      const first = !lap.wrong && !lap.hinted && !hiddenDuring;
-      if (lap.hinted) me.round[kind].push(penalty(kind));   // for the card only: a step with a hint is a slow time (it does not count in the speed)
-      const quick = x => { if (!(x <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false; };   // slow for this player
-      if (kind === 'tone') { if (first) { quick(t); addTime('tone', t); } else word_.quick = false; }
+      const t = Math.min(CAP, Math.min((performance.now() - lap.t0) / 1000, slowFor(st)) + lap.wrongs * CAP_ADD);   // the wrong clicks of the step: CAP_ADD each
+      const counts = !lap.hinted && !hiddenDuring;   // a step with a hint, or while the page was hidden, does not count in the speed
+      me.round.wrong[kind] += lap.wrongs;
+      if (lap.hinted) me.round[kind].push(t);   // for the card only: a step with a hint is a slow time
+      const quick = x => { if (lap.wrongs || !(x <= Math.min(QUICK_MAX, st.n >= MIN_SAMPLES ? QUICK_FACTOR * st.v : QUICK_MAX))) word_.quick = false; };   // slow for this player
+      if (kind === 'tone') { if (counts) { quick(t); addTime('tone', t); } else word_.quick = false; }
       else {
-        for (; word_.queue > 0; word_.queue--) addTime(kind, penalty(kind), true);   // the wrong choices before it were for this kind
-        for (const c of cells) c.parts = first && c.parts !== null ? (c.parts || []).concat(t) : null;   // null: a wrong choice or a hint on the way, the cell does not count
+        for (const c of cells) c.parts = counts && c.parts !== null ? (c.parts || []).concat(t) : null;   // null: a hint on the way, the cell does not count
         for (const c of done) {
           if (c.parts) { const mean = c.parts.reduce((a, b) => a + b, 0) / c.parts.length; quick(mean); addTime(cellKind(c), mean); } else word_.quick = false;
         }
@@ -624,7 +621,7 @@
     }
     // ---- the progress card: every STATS_EVERY solved words the form of those last words: the gauge, and stars per kind of symbol ----------------------------------------------------
     // The form compares the round with the player's own usual time of every kind: the slow value v when the card before was shown (me.base), against the geometric mean of the times
-    // of the round (measured, without the deductions; a wrong choice and a step with a hint are slow times, see penalty), which damps a single slow click. 50 is a round as usual, 100 one that
+    // of the round (measured, without the deductions; a wrong click adds CAP_ADD to its step, a step with a hint is a slow time), which damps a single slow click. 50 is a round as usual, 100 one that
     // is FORM_SPAN times as fast, 0 one that is FORM_SPAN times as slow; with few times the value stays nearer to 50 (n / (n + FORM_DAMP) of the difference). The gauge is the mean of
     // the kinds. A kind without its usual time yet (fewer than MIN_SAMPLES times) takes the scale of the stars. So an ordinary round is always in the middle, whatever the level, and
     // there is no ceiling. The stars are the level, absolute: the same geometric mean, as the status line shows it (shown()), against the times of STAR_STEPS (0 to 5).
@@ -682,7 +679,7 @@
       const badge = (cls, text) => Object.assign(document.createElement('span'), { className: 'badge2 ' + cls, textContent: text });
       $('progBadges').replaceChildren(...[isBest && badge('best', Lang.t('★ New best form!', '★ Phong độ cao nhất từ trước đến nay!')), gain > 0 && badge('up', Lang.t(`▲ +${gain} since the last card`, `▲ +${gain} so với lần trước`))].filter(Boolean));
       const top = have.length ? have.reduce((a, x) => x.form > a.form ? x : a) : null;   // the kind with the best form of the round
-      $('progPraise').textContent = !top ? '' : top.stars >= 1 ? Lang.t(`Your best: ${names[top.k]} (${top.stars} ★)`, `Tốt nhất: ${names[top.k]} (${top.stars} ★)`) : Lang.t('Every word trains you – keep going!', 'Mỗi từ đều giúp bạn tiến bộ!');
+      $('progPraise').textContent = top && top.form >= 50 ? Lang.t(`Best form: ${names[top.k]}`, `Phong độ tốt nhất: ${names[top.k]}`) : top ? Lang.t('Every word trains you – keep going!', 'Mỗi từ đều giúp bạn tiến bộ!') : '';
       if (value !== null) { me.best = Math.max(me.best, value); me.lastValue = value; }
       $('progKinds').replaceChildren(...kinds.map(x => {
         const r = document.createElement('tr'), cells = [document.createElement('td'), document.createElement('td'), document.createElement('td'), document.createElement('td')];
@@ -708,9 +705,16 @@
     }
     $('progClose').addEventListener('click', () => $('progress').close());
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
+    // once: the former penalty of a wrong click (the own time + 2 s, a time of its own) had pushed the times up; they learn anew: the next times weigh 1/n again
+    // (n down to MIN_SAMPLES), after the times of the server came in
+    function relearnOnce() {
+      if (me.relearn1) return;
+      for (const set of Object.values(me.stats)) for (const k of KINDS) if (set && set[k] && set[k].n > MIN_SAMPLES) set[k].n = MIN_SAMPLES;
+      me.base = null; me.relearn1 = true; saveMe();
+    }
     async function initAccount() {
       db = window.QATT_SPELL_DB || (typeof SupabaseService !== 'undefined' && typeof supabase !== 'undefined' ? new SupabaseService() : null);
-      if (!db) { me.shadow += me.score; me.score = 0; me.pending = 0; showScore(); showLock(); return; }
+      if (!db) { relearnOnce(); me.shadow += me.score; me.score = 0; me.pending = 0; showScore(); showLock(); return; }
       try { signed = !!(await db.initQuiet()); } catch (e) { signed = false; }
       if (signed) {
         me.shadow = 0;   // what a visitor would have had does not come along: the points count from now on
@@ -722,7 +726,7 @@
         else me.score = me.pending;
         if (me.pending) schedSync();
       } else { me.shadow += me.score; me.score = 0; me.pending = 0; }   // points of an earlier version of the page
-      saveMe(); showScore(); showStats(); showLock(); loadBoard();
+      relearnOnce(); saveMe(); showScore(); showStats(); showLock(); loadBoard();
     }
     initAccount();
 
@@ -731,7 +735,7 @@
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
-      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), queue: 0, points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats, round: me.round }) }; newLap();   // snap: the state before the word, for Skip
+      word_ = { wrong: false, hinted: false, quick: true, t0: Date.now(), points: 0, snap: JSON.stringify({ score: me.score, shadow: me.shadow, pending: me.pending, stats: me.stats, round: me.round }) }; newLap();   // snap: the state before the word, for Skip
       startTimer(); $('lateRow').hidden = true;
       if (watch.word && watch.done.length) { logLines.unshift(watchLine() + (watch.finished ? '' : '  (not finished)')); logLines.length = Math.min(logLines.length, 200); }
       watch = { done: [], t0: performance.now(), on: true, word, finished: false }; drawWatch();
