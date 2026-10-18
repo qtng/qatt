@@ -30,10 +30,10 @@
     .cell.sel { outline: 3px solid var(--cinnabar, #a8362a); outline-offset: 1px; }
     .cell .ed { color: var(--cinnabar, #a8362a); }
     svg .ink { fill: currentColor; }
-    .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; touch-action: none; user-select: none; }
+    .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: background-color .15s; }
     .big .bg { fill: currentColor; opacity: .16; }
     .big .guide { stroke: currentColor; opacity: .35; stroke-width: .3; stroke-dasharray: 2 2; fill: none; }
-    .big.locked { touch-action: auto; }
+    .big.unlocked { background-color: color-mix(in srgb, #2e9e4f 16%, transparent); cursor: move; }
     .big .orig { fill: none; stroke: #888; stroke-opacity: .45; stroke-width: 3.2; stroke-linecap: round; }
     .big .p { fill: none; stroke-width: 1; stroke-linecap: round; }
     .big .p.s { stroke: #2b6cb0; } .big .p.m { stroke: #c8372d; stroke-width: 2; } .big .p.off { opacity: .35; }
@@ -77,7 +77,7 @@
 <main>
   <h1 class="h3">Glyph editor</h1>
   <p class="note mb-2">The letters of all KAGE fonts (Serif, Gothic, Pen, Pen Cut, Khai) as open paths: straight strokes and curves with one control
-    point, the strokes of a symbol and its marks 1–6. Double-tap and drag the points, the control points or a whole path; set checkpoints along the way; the fonts below show the result as the
+    point, the strokes of a symbol and its marks 1–6. Press and hold, then drag the points, the control points or a whole path; set checkpoints along the way; the fonts below show the result as the
     build draws it. The line type (how the ends are drawn) follows from the path unless it is set by hand. Hand the export over to be committed as
     <code>fonts/paths.json</code>; the fonts are then built from it.</p>
 
@@ -107,7 +107,7 @@
       <div class="tools">
         <span>Move</span>
         <div class="btn-group btn-group-sm" role="group" id="moveMode">
-          <button class="btn" data-m="free" title="Dragging (after a double tap) moves the selection in any direction">Free</button>
+          <button class="btn" data-m="free" title="Dragging (after a long press) moves the selection in any direction">Free</button>
           <button class="btn" data-m="h" title="Dragging moves the selection only horizontally">Horizontal</button>
           <button class="btn" data-m="v" title="Dragging moves the selection only vertically">Vertical</button>
           <button class="btn" data-m="lock" title="Dragging moves nothing; tapping still selects">Locked</button>
@@ -170,10 +170,10 @@
       bleibt beim Antippen gewählt. Liegen Punkte mehrerer Pfade übereinander, kommt der des gewählten Pfads zuerst. Neben den Punkten wählt es einen
       ganzen Pfad (liegen mehrere dort: der Reihe nach den nächsten). Antippen einer leeren Stelle hebt die Auswahl auf. Der gewählte Punkt bekommt einen
       schwarzen Ring, der gewählte Pfad wird dick.</dd>
-    <dt>Verschieben</dt><dd>Nur mit Doppeltippen: zweimal schnell antippen, beim zweiten Mal gedrückt halten und ziehen. Das verschiebt das Gewählte (wie es nach
-      dem ersten Antippen gewählt ist), den Punkt oder den ganzen Pfad, um die Strecke des Ziehens. Einfaches Wischen verschiebt nichts. Es rastet auf
-      halbe Einheiten ein; mit Alt frei. Also: Doppeltippen auf einen Punkt und ziehen verschiebt den ganzen Pfad; ist der Pfad schon gewählt, verschiebt
-      es den Punkt.</dd>
+    <dt>Verschieben</dt><dd>Erst wenn man irgendwo auf der Fläche länger als eine halbe Sekunde still drückt (Long Press), färbt sie sich leicht grün; dann
+      verschiebt Ziehen das Gewählte, den Punkt oder den ganzen Pfad. Ohne Long Press verschiebt nichts, jede Wischgeste geht an den Browser (auf dem
+      Handy scrollt die Seite). Es rastet auf Vielfache von 5 ein, absolut (105, 110, 115); ein ganzer Pfad so, dass sein erster Punkt darauf liegt;
+      mit Alt frei. Nach dem Loslassen ist wieder alles gesperrt.</dd>
     <dt>Move</dt><dd>Free: in jede Richtung; Horizontal / Vertical: nur waagrecht oder nur senkrecht; Locked: Ziehen verschiebt nichts, Antippen wählt weiter.</dd>
     <dt>Align</dt><dd>Horizontal gibt dem gewählten Punkt die Höhe (y) des anderen Endpunkts seines Pfads, Vertical dessen x. Bei einem Kontrollpunkt gilt der
       nähere Endpunkt.</dd>
@@ -186,12 +186,12 @@
       die nächste Stelle in 10-%-Schritten; beim Bearbeiten sind nur diese Stellen möglich. Verschiebt man den ganzen Zusatzstrich, rastet er an einem
       Endpunkt ein, sobald eine solche Stelle nahe daran liegt; weiter weg ist er wieder frei. „Dock“ hängt ihn an den nächsten Endpunkt, „Undock“ löst ihn,
       „at … %“ verschiebt ihn entlang sich selbst. Angedockt: durchgezogen, mit einer Raute am Endpunkt; frei: gestrichelt.</dd>
-    <dt>Drehen</dt><dd>Ziehen (nach Doppeltippen) mit einem gewählten Punkt eines Zusatzstrichs dreht ihn in 5°-Schritten um seinen Andockpunkt (frei: um sein anderes Ende; wird der
+    <dt>Drehen</dt><dd>Ziehen (nach Long Press) mit einem gewählten Punkt eines Zusatzstrichs dreht ihn in 5°-Schritten um seinen Andockpunkt (frei: um sein anderes Ende; wird der
       angedockte Punkt selbst gezogen, löst er sich). „⟲ 5°“ / „⟳ 5°“ und die Pfeiltasten drehen ihn ebenso, Align macht ihn waagrecht oder senkrecht.</dd>
     <dt>grau dick</dt><dd>Die Pfade des aktuellen Haltepunkts (ohne Haltepunkt: wie in der Datei, mit der Anpassung der Zusatzstriche beim Öffnen). Sie bleiben
       beim Bearbeiten stehen und werden mit jedem neuen Haltepunkt neu gezeichnet; unter der Ansicht steht, wie weit das Gewählte davon weg ist.</dd>
     <dt>roter Punkt</dt><dd>In der Übersicht: die Form ist seit dem letzten Haltepunkt bearbeitet (ohne Haltepunkt: anders als in der Datei).</dd>
-    <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Wischen mit Move.</dd>
+    <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Ziehen mit Move.</dd>
     <dt>Strg+Z</dt><dd>Rückgängig.</dd>
     <dt>Gerade / Kurve</dt><dd>In der Liste: „Curve“ macht aus einer Geraden eine Kurve (Kontrollpunkt in der Mitte), „Straight“ umgekehrt.</dd>
     <dt>Type</dt><dd>Die KAGE-Art des Strichs: wie Anfang und Ende gezeichnet werden. „auto“ leitet sie aus dem Pfad ab (in Klammern, was dabei herauskommt):
@@ -472,10 +472,17 @@
     setItem(f, x, withDock(withD(x.it, P.path(pts)), dock));
   }
   const snap = (v, alt) => alt ? Math.round(v * 100) / 100 : Math.round(v * 2) / 2;
-  function movePts(pts0, k, dx, dy, alt) {   // the selection moved by dx, dy: one point or (k 'all') the whole path
-    if (mode === 'h') dy = 0; else if (mode === 'v') dx = 0;
-    const pts = pts0.map(p => p.slice());
-    for (const p of k === 'all' ? pts : [pts[k]]) { p[0] = snap(p[0] + dx, alt); p[1] = snap(p[1] + dy, alt); }
+  // the selection moved by dx, dy: one point or (k 'all') the whole path. grid: a point lands on a multiple of 5 (absolute: 105, 110, 115),
+  // a whole path moves so that its first point does; alt: free (0.01); else steps of 0.5
+  function movePts(pts0, k, dx, dy, alt, grid) {
+    const goX = mode !== 'v', goY = mode !== 'h', pts = pts0.map(p => p.slice());
+    const sn = (v, d) => alt || !grid ? snap(v + d, alt) : Math.round((v + d) / 5) * 5;
+    if (k === 'all' && grid && !alt) {
+      const ref = pts0[0], mx = goX ? sn(ref[0], dx) - ref[0] : 0, my = goY ? sn(ref[1], dy) - ref[1] : 0;
+      for (const p of pts) { p[0] = snap(p[0] + mx, true); p[1] = snap(p[1] + my, true); }
+      return pts;
+    }
+    for (const p of k === 'all' ? pts : [pts[k]]) { if (goX) p[0] = sn(p[0], dx); if (goY) p[1] = sn(p[1], dy); }
     return pts;
   }
   // the reference of a point for Align: the other end of its path; for a control point the nearer end
@@ -541,36 +548,49 @@
     const i = sel ? cands.findIndex(c => c.n === sel.n && c.k === sel.k) : -1;
     return cands[(i + 1) % cands.length];
   }
-  // a move starts only with a double tap: the second press of it, held and dragged, moves the selection (a single swipe moves nothing)
-  let drag = null, lastTap = null;
-  const DOUBLE_MS = 450, DOUBLE_PX = 24;
+  // a move starts only after a long press: press anywhere on the view and hold it still for LONG_MS, the view turns green, then drag. Without
+  // that, nothing is moved and the browser gets every swipe (the page scrolls on a phone: the view has touch-action auto)
+  let drag = null;
+  const LONG_MS = 500, STILL_PX = 6;
+  const unlockOff = () => { if (drag && drag.timer) clearTimeout(drag.timer); big.classList.remove('unlocked'); };
   big.addEventListener('pointerdown', e => {
-    const armed = !!lastTap && performance.now() - lastTap.t < DOUBLE_MS && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < DOUBLE_PX;
-    drag = { q0: svgPt(e), x0: e.clientX, y0: e.clientY, moved: false, armed, snap: JSON.stringify(data) };
+    unlockOff();
+    drag = { q0: svgPt(e), x0: e.clientX, y0: e.clientY, moved: false, unlocked: false, snap: JSON.stringify(data) };
     if (sel) drag.pts0 = P.points(dOf(items(formOf(idOf()))[sel.n].it));
-    if (mode !== 'lock') { big.setPointerCapture(e.pointerId); e.preventDefault(); }
+    if (sel && mode !== 'lock') {
+      const d = drag;
+      d.timer = setTimeout(() => { d.unlocked = true; big.classList.add('unlocked'); try { big.setPointerCapture(e.pointerId); } catch (err) {} }, LONG_MS);
+    }
   });
   big.addEventListener('pointermove', e => {
     if (!drag || mode === 'lock' || !sel || !drag.pts0) return;
+    if (!drag.unlocked) {   // moved before the long press: an ordinary swipe, left to the browser
+      if (drag.timer && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) >= STILL_PX) { clearTimeout(drag.timer); drag.timer = 0; drag.swiped = true; }
+      return;
+    }
     if (!drag.moved) {
-      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return;   // a tap until the finger has moved 4 px
-      if (!drag.armed) { if (!drag.hinted) { drag.hinted = true; $('info').textContent = 'To move: tap twice and keep the second tap down, then drag.'; } return; }
+      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return;   // a long press until the finger has moved 4 px
       if (undoStack[undoStack.length - 1] !== drag.snap) undoStack.push(drag.snap); $('undo').disabled = false; drag.moved = true;
     }
+    e.preventDefault();
     const q = svgPt(e);
     const x = items(formOf(idOf()))[sel.n];
     if (x.kind === 'm' && sel.k !== 'all') change(sel.n, null, { op: 'rotate', k: sel.k, from: drag.pts0, target: movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], true)[sel.k] });
-    else change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey), { op: 'move', tol: 10 * unitsPerPx() });
+    else change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey, true), { op: 'move', tol: 10 * unitsPerPx() });
     save(); renderBig(); renderInfo();
   });
+  // a touch that began with a long press must not scroll the page (touch-action cannot change during a touch, but a touchmove can be cancelled
+  // as long as the browser has not begun to scroll, which it has not: the finger was still)
+  big.addEventListener('touchmove', e => { if (drag && drag.unlocked) e.preventDefault(); }, { passive: false });
+  big.addEventListener('contextmenu', e => e.preventDefault());
   big.addEventListener('pointerup', e => {
     if (!drag) return;
-    if (drag.moved) { renderGrid(); lastTap = null; }
-    else if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) { sel = pick(drag.q0); lastTap = { t: performance.now(), x: e.clientX, y: e.clientY }; renderBig(); renderInfo(); }
-    else lastTap = null;
+    unlockOff();
+    if (drag.moved) renderGrid();
+    else if (!drag.swiped && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < STILL_PX && !drag.unlocked) { sel = pick(drag.q0); renderBig(); renderInfo(); }
     drag = null;
   });
-  big.addEventListener('pointercancel', () => { drag = null; });
+  big.addEventListener('pointercancel', () => { unlockOff(); drag = null; });
 
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); undo(); return; }
@@ -585,7 +605,6 @@
   });
   function showMode() {
     for (const b of $('moveMode').children) b.className = 'btn ' + (b.dataset.m === mode ? 'btn-cinnabar' : 'btn-quiet');
-    big.classList.toggle('locked', mode === 'lock');
   }
   $('moveMode').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { mode = b.dataset.m; showMode(); } });
 
