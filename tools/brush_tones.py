@@ -1,23 +1,25 @@
 """Tones drawn as brush strokes, for a style that has them in fonts/tones.json (Khai): the circles as a brush ring (ring), the half circles as a curved
 stroke that ends in a little hook (hook). Font units, y up; both give a pathops.Path. build_font.py takes them instead of the stroked circles of qatt.js.
 
-fonts/tones.json: per style (the KAGE style of build_font.py, e.g. "kaiti") the settings of the two shapes ("ring", "hook") and per tone (the code point
+fonts/tones.json: per style (the KAGE style of build_font.py, e.g. "kaiti") the weight the stroke widths are for, the settings of the two shapes ("ring", "hook") and per tone (the code point
 after U+F0000 in hex, "A1" = U+F00A1) its shape, side (1 right, -1 left), rot (turned, degrees anticlockwise) and the ellipse of the standalone glyph ("glyph") and
 of the small form over the cell before (".mark"): [cx, cy, rx, ry, stroke width]. A style without an entry keeps the circles of qatt.js."""
 import json, math, pathops
 
 
-def load(path, style):
-    """the tones of `style`: {code point: (standalone path, mark path)}, or {} when the style has none"""
+def load(path, style, weight=None):
+    """the tones of `style`: {code point: (standalone path, mark path)}, or {} when the style has none; their stroke widths are drawn for the weight
+    "weight" of the style and follow `weight` (--weight of build_font.py) in proportion"""
     try:
         data = json.load(open(path)).get(style)
     except FileNotFoundError:
         return {}
     if not data: return {}
+    k = weight / data['weight'] if weight and data.get('weight') else 1
     out = {}
     for hexcode, t in data['tones'].items():
         draw = (lambda e: ring(*e, **data['ring'])) if t['shape'] == 'ring' else (lambda e: hook(*e, t['side'], rot=t.get('rot', 0), **data['hook']))
-        out[0xF0000 + int(hexcode, 16)] = (draw(t['glyph']), draw(t['mark']))
+        out[0xF0000 + int(hexcode, 16)] = (draw(t['glyph'][:4] + [t['glyph'][4] * k]), draw(t['mark'][:4] + [t['mark'][4] * k]))
     return out
 
 

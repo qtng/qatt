@@ -100,7 +100,7 @@ PAIR_GROW = GROW
 data = json.load(open(SRC))  # fonts/glyphs.json
 import brush_tones
 # tones drawn as brush strokes, for a style that has them in fonts/tones.json (Khai): {code point: (standalone, mark)}, at their own places (no keep_inside, tone_x)
-BRUSH_TONES = brush_tones.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'fonts', 'tones.json'), KAGE_STYLE) if KAGE else {}
+BRUSH_TONES = brush_tones.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'fonts', 'tones.json'), KAGE_STYLE, BOLD) if KAGE else {}
 BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
 JOBS, RESULTS = {}, {}         # brush outlines: requested on a first run over the glyphs, made by brush_outlines.js, used on the second
 

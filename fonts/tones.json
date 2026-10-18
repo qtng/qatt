@@ -1,5 +1,6 @@
 {
 "kaiti": {
+ "weight": 2.0,
  "ring": {},
  "hook": {"turn": 140, "open_": 0, "curl": 0.86, "curl_from": 0.45, "square": 3, "smoothw": [0.35, 0.4, 1.25], "samples": 400, "smooth": 120},
  "tones": {
