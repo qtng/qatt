@@ -335,13 +335,18 @@
     // sound on/off (off at the start): every click on a shape or a tone is read aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
     let sound = true, speaker = null;   // on unless it was switched off
     try { sound = localStorage.getItem('qattCheckSound') !== '0'; } catch (e) {}
+    let speakerLoad = null;   // the script is added once, even when several calls come before it has loaded
     const withSpeaker = fn => {
       const go = () => { speaker = speaker || new AudioManager(new Audio(), {}); fn(speaker); };
       if (typeof AudioManager !== 'undefined') return go();
-      const sc = document.createElement('script');
-      sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
-      sc.onload = go;
-      document.head.append(sc);
+      if (!speakerLoad) {
+        speakerLoad = [];
+        const sc = document.createElement('script');
+        sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
+        sc.onload = () => speakerLoad.forEach(f => f());
+        document.head.append(sc);
+      }
+      speakerLoad.push(go);
     };
     const say = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };
     const showSound = () => {
@@ -695,7 +700,7 @@
       me.round = freshRound(); me.base = usualTimes(); saveMe();   // the usual times for the next round
       $('progress').classList.remove('alert-danger', 'alert-warning', 'alert-success');
       const needle = $('needle'); needle.style.transition = 'none'; needle.style.transform = 'rotate(-90deg)'; void needle.getBoundingClientRect();
-      cardAt = performance.now(); $('progress').showModal();
+      $('progress').showModal();
       requestAnimationFrame(() => {
         needle.style.transition = ''; needle.style.transform = `rotate(${-90 + (value || 0) * 1.8}deg)`;
         if (value !== null) $('progress').classList.add(value < 40 ? 'alert-danger' : value < 70 ? 'alert-warning' : 'alert-success');   // the same limits as the arcs of the gauge
@@ -704,14 +709,8 @@
       setTimeout(() => burst($('progress'), value >= 70 ? 24 : value >= 40 ? 10 : 0, '30%'), 1250);   // sparks by the result: green a lot, yellow a few, red none
     }
     $('progClose').addEventListener('click', () => $('progress').close());
-    // the word under the card waits: the clocks of the word (step, bonus, countdown, hint) stand still while the card is open
-    let cardAt = 0;
-    $('progress').addEventListener('close', () => {
-      if (!cardAt) return;
-      const d = performance.now() - cardAt; cardAt = 0;
-      if (!$('nextRow').hidden) return;   // the word is solved already: nothing runs
-      lap.t0 += d; watch.t0 += d; word_.t0 += d; deadline += d; armHint();
-    });
+    // closing the card starts a new word: the word that was already in play under it is dropped (its clicks stay as they were)
+    $('progress').addEventListener('close', () => { if ($('nextRow').hidden) another(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
     // once: the former penalty of a wrong click (the own time + 2 s, a time of its own) had pushed the times up; they learn anew: the next times weigh 1/n again
     // (n down to MIN_SAMPLES), after the times of the server came in
