@@ -50,7 +50,7 @@
   const $ = id => document.getElementById(id);
   const COLUMNS = [   // [key, title, numeric, text of a row]
     ['username', 'Name', false, r => r.username || ''],
-    ['email', 'E-mail', false, r => r.email || ''],
+    ['email', 'E-mail', false, r => short(r.email)],
     ['provider', 'Sign-in', false, r => r.provider],
     ['site', 'Site', false, r => r.site === 'none' ? '' : r.site],
     ['created_at', 'Created', false, r => stamp(r.created_at)],
@@ -61,6 +61,7 @@
     ['practice_answers', 'Practice', true, r => r.practice_answers ? r.practice_answers + ' answers, ' + r.practice_words + ' words' : ''],
     ['translate_calls', 'Translator', true, r => r.translate_calls || ''],
   ];
+  const short = m => { const [a, d] = String(m || '').split('@'); return d ? a.slice(0, 2) + '…@' + d : ''; };   // only shortened on screen; the search and the CSV have the whole address
   const stamp = t => t ? t.slice(0, 16).replace('T', ' ') : '';
   let sp, allowed = false, rows = [], sortKey = 'created_at', asc = false;
 
