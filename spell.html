@@ -175,9 +175,10 @@
   <div class="d-flex justify-content-center align-items-center gap-2 tools">
     <select id="decoding" class="form-select form-select-sm w-auto tool" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select>
     <select id="font" data-qatt-fonts data-qatt-default="QATT Pen" class="form-select form-select-sm w-auto tool" aria-label="Font"></select>
-    <button type="button" class="btn btn-sm tool-btn" id="reload" data-vi="Bỏ qua">Skip</button>
+    <button type="button" class="btn btn-sm tool-btn" id="reload" data-vi="Bỏ qua" disabled>Skip</button>
   </div>
-  <div class="card task mx-auto mb-4" id="task">
+  <div class="text-center my-5" id="startRow" hidden><button type="button" class="btn btn-cinnabar btn-pill btn-lg" id="startGame"><i class="bi bi-play-fill"></i> <span data-vi="Bắt đầu">Start</span></button></div>   <!-- the game begins with a click (also lets the browser play the speech) -->
+  <div class="card task mx-auto mb-4" id="task" hidden>
     <div class="card-body">
       <div class="head">
         <div class="word" id="word" lang="vi"></div>
@@ -335,13 +336,18 @@
     // sound on/off (off at the start): every click on a shape or a tone is read aloud with the speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS)
     let sound = true, speaker = null;   // on unless it was switched off
     try { sound = localStorage.getItem('qattCheckSound') !== '0'; } catch (e) {}
+    let speakerLoad = null;   // the script is added once, even when several calls come before it has loaded
     const withSpeaker = fn => {
       const go = () => { speaker = speaker || new AudioManager(new Audio(), {}); fn(speaker); };
       if (typeof AudioManager !== 'undefined') return go();
-      const sc = document.createElement('script');
-      sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
-      sc.onload = go;
-      document.head.append(sc);
+      if (!speakerLoad) {
+        speakerLoad = [];
+        const sc = document.createElement('script');
+        sc.src = CHUNOM_SITE + 'chunom/decks/audiomanager.js';
+        sc.onload = () => speakerLoad.forEach(f => f());
+        document.head.append(sc);
+      }
+      speakerLoad.push(go);
     };
     const say = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };
     const showSound = () => {
@@ -545,8 +551,9 @@
       setTimeout(() => { if (typeof maybeAsk === 'function' && !maybeAsk() && due) showProgress(); }, 2400);   // a visitor is asked to sign in after a good word; every few words the card of progress
     }
     // Skip: the word does not count at all (the state before the word comes back: score and times); then Skip is locked until a word is solved that beats the own average
+    let started = false;   // the game begins with the click on Start
     function showSkip() {
-      $('reload').disabled = !me.skipOk;
+      $('reload').disabled = !me.skipOk || !started;
       $('reload').title = me.skipOk ? '' : Lang.t('Solve a word better than your average to use Skip again', 'Giải một từ tốt hơn mức trung bình của bạn để được bỏ qua tiếp');
     }
     function skipWord() {
@@ -704,6 +711,8 @@
       setTimeout(() => burst($('progress'), value >= 70 ? 24 : value >= 40 ? 10 : 0, '30%'), 1250);   // sparks by the result: green a lot, yellow a few, red none
     }
     $('progClose').addEventListener('click', () => $('progress').close());
+    // closing the card starts a new word: the word that was already in play under it is dropped (its clicks stay as they were)
+    $('progress').addEventListener('close', () => { if ($('nextRow').hidden) another(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden) sync(); });
     // once: the former penalty of a wrong click (the own time + 2 s, a time of its own) had pushed the times up; they learn anew: the next times weigh 1/n again
     // (n down to MIN_SAMPLES), after the times of the server came in
@@ -744,6 +753,7 @@
       tone = a.tone; code = a.code; hop = a.hop;
       $('mood').textContent = '🙂'; $('mood').classList.remove('bounce', 'shake');
       $('word').textContent = word;
+      say(word);   // the new word is read aloud when it appears (if the sound is on)
       for (const id of ['tones', 'variants']) show($(id), false);
       $('variantPad').replaceChildren();
       $('tonePad').replaceChildren();
@@ -920,10 +930,13 @@
     $('lateNext').addEventListener('click', another);   // after the minute: the word is left without a take-back (the points of its clicks stay), no Skip rule
     $('reload').addEventListener('click', skipWord);
     showSkip();
-    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); showStats(); start(answer, nomOf); });   // the same word after the other decoding
+    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); showStats(); if (started) start(answer, nomOf); });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
-    loadDict().catch(() => {}).then(() => {   // without the dictionary the short list is used
+    // the game starts with a click on Start (the word, its speech and the clocks wait for it)
+    loadDict().catch(() => {}).then(() => { $('startRow').hidden = false; });
+    $('startGame').addEventListener('click', () => {
+      started = true; $('startRow').hidden = true; showSkip();
       if (wanted) start(wanted, (DICT.find(e => e.w === wanted.trim().toLowerCase()) || {}).nom);
       else another();
     });
