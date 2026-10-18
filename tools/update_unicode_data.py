@@ -54,8 +54,8 @@ for o, c in chars.items():
         c['b'], c['m'] = o // 7, o % 7
         c['t'] = 'unmarked' if c['m'] == 0 else 'marked' if c['m'] == 1 else 'chi'
         if c['m'] == 0: del c['m']
-    elif o == 154: c['t'] = 'combiner'
-    elif o == 155: c['t'] = 'joiner'
+    elif o == 154: c['t'] = 'joiner'
+    elif o == 155: c['t'] = 'combiner'
     else: c['t'] = 'tone'
 commit = subprocess.check_output(['git', '-C', REPO, 'rev-parse', '--short', 'HEAD'], text=True).strip()
 out = dict(source=dict(repo='qtng/qatt-unicode', commit=commit, base=base, size=176, block='Quoc Am Tan Tu', script='Quoc_Am_Tan_Tu'),

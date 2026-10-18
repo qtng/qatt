@@ -151,8 +151,8 @@ python3 tools/build_all.py --out /tmp/new  # into another folder, to compare bef
   <h2>What the font does with the characters</h2>
   <p>Onset, rhyme and tone are separate characters that the font puts together (OpenType rule <code>ccmp</code>):</p>
   <ul>
-    <li>Onset, <code>U+F009B</code> (joiner), rhyme: one cell. The onset goes in the left half, the rhyme in the right half; the joiner takes no space.</li>
-    <li>Letter, <code>U+F009A</code> (combiner), letter: the first goes into the lower 55 %, the second into the upper 45 % of the cell.</li>
+    <li>Onset, <code>U+F009A</code> (joiner), rhyme: one cell. The onset goes in the left half, the rhyme in the right half; the joiner takes no space.</li>
+    <li>Letter, <code>U+F009B</code> (combiner), letter: the first goes into the lower 55 %, the second into the upper 45 % of the cell.</li>
     <li>A tone after any character becomes a small form without width that lies over the cell before it.</li>
   </ul>
   <p>The code points are <code>U+F0000</code> plus the number in the Unicode proposal (<a href="../../unicode.html">unicode.html</a>). The complete description of the tools, with all commands, is <code>tools/README.md</code> in the repository.</p>

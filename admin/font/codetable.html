@@ -79,8 +79,8 @@
 
   <div class="keys">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy">Copy</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009B">A⿰B</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009A">B⿱C</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="joiner" title="Add the component joiner U+F009A">A⿰B</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="stack" title="Add the Tham Thư combiner U+F009B">B⿱C</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" id="clear" title="Empty the sample field">Clear</button>
   </div>
   <div class="sample" id="sample" spellcheck="false" aria-label="Sample text" data-placeholder="Click characters below to add them here"></div>
@@ -106,16 +106,16 @@
 
   // the sample field is plain text, no caret: characters are added at its end
   const add = text => { sample.textContent += text; };
-  // one of the 22 unmarked letters (U+F0000 + 7 * n) is the onset of a pair: the component joiner U+F009B follows it, unless it already follows a joiner (then it is the rhyme)
+  // one of the 22 unmarked letters (U+F0000 + 7 * n) is the onset of a pair: the component joiner U+F009A follows it, unless it already follows a joiner (then it is the rhyme)
   const addLetter = o => {
-    const J = String.fromCodePoint(BASE + 155), prev = Array.from(sample.textContent).pop();
+    const J = String.fromCodePoint(BASE + 154), prev = Array.from(sample.textContent).pop();
     add(String.fromCodePoint(BASE + o) + (o < 154 && o % 7 === 0 && prev !== J ? J : ''));
   };
 
   // the format characters and the tone marks first, then the letters
   const EXPLAIN = {   // what the two format characters do
-    combiner: ['Tham Thư combiner', '<em>A</em> <code>U+F009A</code> <em>B</em> writes <em>B</em> above <em>A</em>; <em>A</em> may be a joined pair.'],
-    joiner: ['Component joiner', '<em>A</em> <code>U+F009B</code> <em>B</em> is shown as one square, <em>A</em> in the left and <em>B</em> in the right half.'],
+    combiner: ['Tham Thư combiner', '<em>A</em> <code>U+F009B</code> <em>B</em> writes <em>B</em> above <em>A</em>; <em>A</em> may be a joined pair.'],
+    joiner: ['Component joiner', '<em>A</em> <code>U+F009A</code> <em>B</em> is shown as one square, <em>A</em> in the left and <em>B</em> in the right half.'],
   };
   for (const g of glyphs) {
     const cell = document.createElement('div');
