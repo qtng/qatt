@@ -115,10 +115,10 @@
   const about = family => ABOUT.find(([name]) => family.startsWith(name)) || [, '', ''];
   const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };   // data-vi: Lang (navigation.js) shows the Vietnamese text
 
-  // one entry per font; the fonts of one family (Pen, Pen cut, Gothic) share an entry: their samples are tabs named by the part of the font name that follows the common name
-  const GROUPS = ["QATT Pen Cut", "QATT Pen", "QATT Gothic"];   // the longer name first
-  const groupOf = f => GROUPS.find(g => f.family === g || f.family.startsWith(g + ' '));
-  const tabName = (f, g) => { const rest = f.family.slice(g.length).trim(); return rest ? rest.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase() : 'normal'; };   // ExtraLight -> extra light, nothing -> normal
+  // one entry per family: the fonts that start with the same word after "QATT" (Pen, Pen Cut and the weights; Khai and Khai v2; Gothic and Gothic Wide) share an entry: their samples are tabs named by the rest of the font name
+  const firstWord = f => f.family.replace(/^QATT /, '').split(' ')[0];
+  const groupOf = f => FONTS.filter(x => firstWord(x) === firstWord(f)).length > 1 ? 'QATT ' + firstWord(f) : undefined;   // a font alone has no tabs
+  const tabName = (f, g) => { const rest = f.family.slice(g.length).trim(); return rest ? rest.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase() : 'normal'; };   // ExtraLight -> extra light, Cut ExtraLight -> cut extra light, nothing -> normal
   const list = $('#fonts'), samples = [], entries = [];
   for (const f of FONTS) {
     const g = groupOf(f);
@@ -168,7 +168,7 @@
   // the overview cards: the name without weight, then Quốc âm tân tự as 2 x 2 cells
   const ovCells = [], overview = $('#overview');
   for (const entry of entries) {
-    if (/^QATT (Pen Cut|Prototype|Brush)/.test(entry.tabs[0].f.family)) continue;   // no card for these
+    if (/^QATT (Prototype|Brush)/.test(entry.tabs[0].f.family)) continue;   // no card for these
     const col = el('div', 'col'), a = el('a', 'card-font'), quad = el('div', 'quad'), grid = el('div');
     a.href = '#' + entry.box.id;
     const base = entry.tabs[0];   // the first font of the stack
