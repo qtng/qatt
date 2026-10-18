@@ -10,6 +10,8 @@
 //         end (the build does not use it)
 // markLength (optional): {h, v, d} the length of the marks, horizontal, vertical and slanted, which the glyph editor gives every mark when it
 //         opens (and an edited one also an angle in steps of 5°); without it 1/5 of the width of the box, 1/5 of its height and the mean of both
+// checkpoints (optional): [{id, time, message, markLength, forms}] states kept in the glyph editor (one per line, the last one the current one,
+//         against which it marks the changed forms); the build does not use them
 // Without a type set by hand, the type follows from the path (the rules by which the first KAGE data was made from qatt.js; they give the types of all strokes of that data):
 //   nearly horizontal: 1:0:2 for a mark or a stroke that ends on another stroke (a plain end), else 1:0:0 (the triangle of Mincho)
 //   a curve that is nearly vertical: 2:0:0; nearly vertical: 1:0:0; slanted: 2:0:7 down to the left (a left sweep), 2:7:8 down to the right
@@ -86,7 +88,7 @@
     const items = a => "[\n    " + a.map(it => JSON.stringify(it)).join(",\n    ") + "\n   ]";
     return "{\n \"format\": \"qatt-paths\", \"version\": 1, \"box\": 200,\n" + (data.markLength ? ` "markLength": ${JSON.stringify(data.markLength)},\n` : "") + " \"forms\": {\n" +
       Object.entries(data.forms).map(([id, f]) => `  ${JSON.stringify(id)}: {\n   "strokes": ${items(f.strokes || [])},\n   "marks": ${items(f.marks || [])}\n  }`).join(",\n") +
-      "\n }\n}\n";
+      "\n }" + (data.checkpoints && data.checkpoints.length ? ",\n \"checkpoints\": [\n  " + data.checkpoints.map(c => JSON.stringify(c)).join(",\n  ") + "\n ]" : "") + "\n}\n";
   }
   return { points, path, autoType, kageLine, kageForm, toKage, fromKageLine, stringify, TOUCH };
 });

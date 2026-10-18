@@ -120,6 +120,9 @@ marks were docked from the start; the build does not use it). `"markLength": {"h
 the editor opens, every mark gets the length of its kind (its angle stays) and a docked one the nearest place in steps of 10 %; an edited mark also gets
 an angle in steps of 5°, and docks only at its ends or a step of 10 %. So the file changes only through the editor. One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
 set a type, make a straight stroke a curve and back; the draft lives in the browser (`localStorage` `qattPaths1`), "Copy JSON" gives the whole file.
+`"checkpoints": [{id, time, message, markLength, forms}]` (optional, one per line at the end of the file): states kept with "Set checkpoint" in the
+editor; the last one is the current one, the red dots of the editor (forms changed) and its grey paths compare with it. Going back to an older one copies
+it as a new checkpoint; the build does not read them.
 
 **The line types.** `tools/qatt_paths.js` turns the paths into KAGE lines (`toKage`). Without a type set by hand, the type follows from the path: nearly
 horizontal 1:0:2 for a mark or a stroke that ends on another stroke (a plain end) else 1:0:0 (the triangle of Mincho); a curve that is nearly vertical
