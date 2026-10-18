@@ -19,6 +19,13 @@
     th, td { border: 1px solid #dccfb2; padding: .25rem .5rem; vertical-align: top; }
     th { background: #f7efdc; }
     .table-wrap { overflow-x: auto; }
+    details.sec { border-bottom: 1px solid #dccfb2; }
+    details.sec > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: .6rem; }
+    details.sec > summary::-webkit-details-marker { display: none; }
+    details.sec > summary::before { content: "\25B8"; color: #a8362a; transition: transform .15s; }
+    details.sec[open] > summary::before { transform: rotate(90deg); }
+    details.sec > summary h2 { border-bottom: 0; margin: 1rem 0; flex: 1; }
+    details.sec > :not(summary):last-child { margin-bottom: 1.5rem; }
     main img { max-width: 100%; height: auto; border: 1px solid #dccfb2; }
     code, pre { font-size: .85rem; }
     pre { background: #f7efdc; padding: .75rem 1rem; overflow-x: auto; }
@@ -40,5 +47,15 @@
 <p>Each example is the unmarked Cán of đông standing alone with one tone mark.</p>
 
   </main>
+  <script>
+    // a link to an anchor inside a closed section opens the section
+    function openTarget() {
+      const t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      for (let d = t && t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+      if (t) t.scrollIntoView();
+    }
+    addEventListener('hashchange', openTarget);
+    openTarget();
+  </script>
 </body>
 </html>
