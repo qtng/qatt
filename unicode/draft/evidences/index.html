@@ -26,7 +26,6 @@
     h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; }
     @media (hover: none) { .anchor { opacity: .45; } }
     h1, h2, h3, h4 { scroll-margin-top: 4.5rem; }
-    .scans { columns: 2; list-style: none; padding: 0; }
   </style>
 </head>
 <body>
@@ -46,7 +45,6 @@ image: [E04-1.png]
 status: located
 ---
 
-[Image: Source 1](images/E04-1.png)
 
 ## Transcription
 …
@@ -98,7 +96,7 @@ status: located
 </tbody>
 </table></div>
 <p>Transcriptions write QATT characters as placeholders until a font exists: <code>{CU 翁}</code> is a standalone unmarked Cán annotated 翁, <code>{CM 翁}</code> a standalone marked Cán, <code>{CH …}</code> a standalone Chi, <code>{PT …}</code> a phản thiết pair, <code>{QT …}</code> a QATT character whose class has not been determined.</p>
-<p>Cite Source 1, and add Source 2 only where it differs or where its reading matters. Both witnesses share the page numbering and the layout of the columns. The proposal cites by page only, for example (p. <a href="../pages/S1-p2.jpg" target="_blank">2</a>), and names a source only where it matters.</p>
+<p>Cite Source 1, and add Source 2 only where it differs or where its reading matters. Both witnesses share the page numbering and the layout of the columns. The proposal cites by page only, for example (p. 2), and names a source only where it matters.</p>
 <p>Full pages are in <code>pages/</code>: <code>S1-p1.jpg</code> … <code>S1-p8.jpg</code> for Source 1 and <code>S2-p1.jpg</code> … <code>S2-p8.jpg</code> for Source 2, extracted unchanged from the scan of the volume (folios 3–18, 785 × 1525 pixels each). An entry can show a full page by giving its path, for example <code>image: [pages/S1-p4.jpg]</code>.</p>
 <p>Cut-outs go in <code>images/</code>. They are cut from the full pages by <code>python tools/make_crops.py</code>, using the page and the pixel box (left, top, right, bottom) listed for each image in <code>crops.csv</code>; to change a cut-out, edit its box and run the script again. The optional column <code>strike</code> lists boxes (left top right bottom, separated by semicolons) that are not relevant to the evidence; they are framed with a red rectangle and crossed out, so that a full page can be shown with the relevant columns only. Cut-outs are named after the entry id, for example <code>E08-1.png</code> (Source 1) and <code>E08-2.png</code> (Source 2). Publish scans only where the holding institution permits it.</p>
 <h2 id="overview">Overview<a class="anchor" href="#overview" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
@@ -118,28 +116,28 @@ status: located
 <td><a href="E01.html">E01</a></td>
 <td>The listing under the heading 幹音二十二字 shows 22 forms, the marked Cán, each of three strokes and one short marking stroke</td>
 <td>4.1, 6.4</td>
-<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>2</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E02.html">E02</a></td>
 <td>Five Chi per Cán: the marking stroke sits only at stroke ends (six positions); the marked Cán has it at the start position (upper left or upper middle), and moving it counter-clockwise gives the Chi in order</td>
 <td>4.1</td>
-<td><a href="../pages/S1-p3.jpg" target="_blank">3</a></td>
+<td>3</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E04.html">E04</a></td>
 <td>Components written standalone and side by side when the text explains combination, including a standalone unmarked Cán and two adjacent unmarked Cán</td>
 <td>3.2, 4.1, 5.4</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E05.html">E05</a></td>
 <td>Phản thiết method described in the section Phản Thiết Hài Âm Pháp (反切諧音法); components of different bases, unmarked Cán first</td>
 <td>3.2, 4.2</td>
-<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>located</td>
 </tr>
 <tr>
@@ -153,14 +151,14 @@ status: located
 <td><a href="E07.html">E07</a></td>
 <td>Hợp Thư: same-base pairs only, Chi first (scope of the term)</td>
 <td>3.2, 4.2, 5.7</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E08.html">E08</a></td>
 <td>Function in a Hợp Thư: Chi gives the initial, unmarked Cán the rhyme (main argument for the reading order)</td>
 <td>4.2, 5.4</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
@@ -174,7 +172,7 @@ status: located
 <td><a href="E10.html">E10</a></td>
 <td>Tham Thư rule: the base is a Hợp Thư</td>
 <td>4.3</td>
-<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>7</td>
 <td>located</td>
 </tr>
 <tr>
@@ -202,14 +200,14 @@ status: located
 <td><a href="E14.html">E14</a></td>
 <td>Tone marks: circle and semicircle in four corners, eight tones</td>
 <td>4.4</td>
-<td><a href="../pages/S1-p4.jpg" target="_blank">4</a></td>
+<td>4</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E15.html">E15</a></td>
 <td>Tone marks in all four corners, both shapes: the unmarked Cán of đông written with all eight tone marks, annotated 東 董 凍 篤 同 洞 動 獨</td>
 <td>4.4, B</td>
-<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>located</td>
 </tr>
 <tr>
@@ -223,14 +221,14 @@ status: located
 <td><a href="E17.html">E17</a></td>
 <td>Eight tones follow the Chinese yin-yang method</td>
 <td>2.1</td>
-<td><a href="../pages/S1-p4.jpg" target="_blank">4</a></td>
+<td>4</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E18.html">E18</a></td>
 <td>Listing of the 22 base sounds (幹音二十二字) in source order, each shown with its QATT character and annotated with the name of its sound in Chữ Nôm</td>
 <td>6.4, 7.1</td>
-<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>2</td>
 <td>cited</td>
 </tr>
 <tr>
@@ -272,56 +270,56 @@ status: located
 <td><a href="E24.html">E24</a></td>
 <td>Tone marks are optional: marked and unmarked characters in the same passage</td>
 <td>4.4, 5.6</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E25.html">E25</a></td>
 <td>The neutral tone (ngang, âm bình) has its own mark, a semicircle in the lower left corner; an unmarked character does not mean the neutral tone</td>
 <td>4.4, 5.6</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E26.html">E26</a></td>
 <td>Tone marks on standalone components (unmarked Cán and Chi)</td>
 <td>4.4, 5.3</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E27.html">E27</a></td>
 <td>Round and angular forms of the same tone mark are handwriting variation: Source 1 writes the mark now round, now close to a hook; Source 2 writes all tone marks of the passage angular</td>
 <td>4.4, 8</td>
-<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E28.html">E28</a></td>
 <td>The source lists the tones first with the four half circles, then the four full circles, each starting lower left and running clockwise</td>
 <td>7</td>
-<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E29.html">E29</a></td>
 <td>Table of the Chi under the heading 枝字一百一十字, 'the 110 Chi characters'; the table shows 109, one left out by oversight</td>
 <td>4.1, 6.4, 7.1</td>
-<td><a href="../pages/S1-p3.jpg" target="_blank">3</a></td>
+<td>3</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E30.html">E30</a></td>
 <td>Dating: the character 華 lacks its final stroke, a naming taboo for Hồ Thị Hoa, mother of Emperor Thiệu Trị (1841–1847)</td>
 <td>1, 2.1, 3.1</td>
-<td><a href="../pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>1</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E31.html">E31</a></td>
 <td>Author's signature: Nam Thành cư sĩ Nguyễn Tử (南城居士阮子)</td>
 <td>2.1</td>
-<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>2</td>
 <td>cited</td>
 </tr>
 <tr>
@@ -335,14 +333,14 @@ status: located
 <td><a href="E33.html">E33</a></td>
 <td>Name of the script: 國音新字 (Quốc Âm Tân Tự), in the heading of the preface 國音新字序</td>
 <td>1, 2, 2.1</td>
-<td><a href="../pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>1</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E34.html">E34</a></td>
 <td>Marked Cán and unmarked Cán both appear standalone, with the same reading, also with tone marks; only the unmarked Cán combines, never the marked Cán</td>
 <td>4.1, 5.3</td>
-<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>located</td>
 </tr>
 <tr>
@@ -356,28 +354,28 @@ status: located
 <td><a href="E36.html">E36</a></td>
 <td>Counts of the characters in the section 音数: 176 single Cán, 880 single characters, 880 合書 with Chi left and Cán right, 18,480 合書 with Cán left and Chi right, each including the tone marks; eight times 22, 110, 110 and 2,310</td>
 <td>4.1, 4.2, 4.5</td>
-<td><a href="../pages/S1-p8.jpg" target="_blank">8</a></td>
+<td>8</td>
 <td>located</td>
 </tr>
 <tr>
 <td><a href="E37.html">E37</a></td>
 <td>The term Cán (幹): the listing of the 22 Cán is headed 幹音二十二字, 'trunk sounds, twenty-two characters'</td>
 <td>4.1, 6.4</td>
-<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>2</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E38.html">E38</a></td>
 <td>The term Cán (幹) also occurs with 字 in 二十二幹字為標, 'the 22 Cán characters as the mark'; with 幹音二十二字 (<a href="E37.html">E37</a>) the source uses 幹 with 音 and with 字</td>
 <td>4.1</td>
-<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>7</td>
 <td>cited</td>
 </tr>
 <tr>
 <td><a href="E39.html">E39</a></td>
-<td>Passage on p. <a href="../pages/S1-p7.jpg" target="_blank">7</a>, first and second column, without heading: a worked example of a phản thiết pair, the unmarked Cán of ONG and the Chi MARKED-5 of CHONG, read yên, and a list of five characters</td>
+<td>Passage on p. 7, first and second column, without heading: a worked example of a phản thiết pair, the unmarked Cán of ONG and the Chi MARKED-5 of CHONG, read yên, and a list of five characters</td>
 <td>4.2</td>
-<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>7</td>
 <td>located</td>
 </tr>
 </tbody>
