@@ -97,13 +97,17 @@
 
   const el = (tag, attrs = {}, ...kids) => { const e = Object.assign(document.createElement(tag), attrs); e.append(...kids); return e; };
 
-  document.getElementById('sections').append(...SECTIONS.map(([title, icon, text, tiles]) => el('section', { className: 'sect' },
+  const isPrivate = href => /^view\.html/.test(href);
+  function build(owner) {
+  document.getElementById('sections').replaceChildren(...SECTIONS.map(([title, icon, text, tiles]) => el('section', { className: 'sect' },
     el('h2', {}, el('i', { className: 'bi ' + icon }), title),
     el('p', { className: 'note', textContent: text }),
-    ...tiles.map(([name, href, desc]) => el('a', { className: 'tile', href },
+    ...tiles.filter(t => owner || !isPrivate(t[1])).map(([name, href, desc]) => el('a', { className: 'tile', href },
       /^https?:/.test(href) ? el('i', { className: 'bi bi-box-arrow-up-right ext' }) : '',
-      /^view\.html/.test(href) ? el('i', { className: 'bi bi-shield-lock-fill ext', title: 'Private page: kept in the private repository, shown to admins only' }) : '',
+      isPrivate(href) ? el('i', { className: 'bi bi-shield-lock-fill ext', title: 'Private page: kept in the private repository, shown to the owner only' }) : '',
       el('b', { textContent: name }), el('small', { textContent: desc }))))));
+  }
+  build(false);
 
   document.getElementById('files').append(...FILES.flatMap(([title, files]) => [
     el('h3', { textContent: title }),
@@ -117,6 +121,7 @@
     const state = await Admin.check(sp);
     // an admin sees everything, somebody not signed in only the line with the sign-in link, a signed-in non-admin nothing at all
     const admin = state === 'admin';
+    if (admin) build(await Admin.owner(sp));
     document.getElementById('area').hidden = !admin;
     document.getElementById('adminTitle').hidden = !admin;
     document.getElementById('account').hidden = state === 'denied';
