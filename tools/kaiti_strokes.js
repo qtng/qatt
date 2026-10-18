@@ -168,15 +168,18 @@ function rightFalling(f, W, free0) {
 
 function stroke(line, W, others) {
   const f = nums(line), p0 = [f[3], f[4]], p1 = [f[f.length - 2], f[f.length - 1]];
+  // the directions in which the stroke leaves its ends (from the neighbouring control point), for touches()
+  const out = (p, q) => { const l = Math.hypot(p[0] - q[0], p[1] - q[1]) || 1; return [(p[0] - q[0]) / l, (p[1] - q[1]) / l]; };
+  const d0 = out(p0, [f[5], f[6]]), d1 = out(p1, [f[f.length - 4], f[f.length - 3]]);
   const dx = p1[0] - p0[0], dy = p1[1] - p0[1], ax = Math.abs(dx), ay = Math.abs(dy);
   if (!Number.isFinite(dx + dy) || Math.hypot(dx, dy) < 1e-6) return [];   // a stroke without length (the squeezing of a pair can collapse one)
   let kind;
   if (f[0] === 1) kind = ay < ax * 0.3 ? "h" : ax < ay * 0.3 ? "v" : dx < 0 ? "pie" : "na";
   else kind = f[1] === 7 ? "arc" : dx < 0 ? "pie" : "na";
-  if (kind === "h") return horizontal(p0, p1, W, !touches(p0, others, W), !touches(p1, others, W));
+  if (kind === "h") return horizontal(p0, p1, W, !touches(p0, others, W, d0), !touches(p1, others, W, d1));
   if (kind === "v" && Math.hypot(dx, dy) >= 4 * W) {
     let [top, bottom] = p0[1] <= p1[1] ? [p0, p1] : [p1, p0];
-    const free0 = !touches(top, others, W), free1 = !touches(bottom, others, W);
+    const free0 = !touches(top, others, W, top === p0 ? d0 : d1), free1 = !touches(bottom, others, W, bottom === p0 ? d0 : d1);
     if (!free1) for (const o of others) {                // it ends on a horizontal: end on its line (the data may reach past it, and the Kaiti horizontal is thin below its line)
       if (o[0] !== 1) continue;
       const q0 = [o[3], o[4]], q1 = [o[o.length - 2], o[o.length - 1]];
@@ -186,9 +189,9 @@ function stroke(line, W, others) {
     }
     return vertical(top, bottom, W, free0, free1);
   }   // a very short one (a tick of a mark) keeps the simple form
-  if (kind === "pie" && Math.hypot(dx, dy) >= 3 * W) return falling(f, W, !touches(p0, others, W));
-  if ((kind === "na" || kind === "arc") && dx > 0 && dy > 0 && Math.hypot(dx, dy) >= 4 * W) return rightFalling(f, W, !touches(p0, others, W));   // the KAGE data draws it as a curve of type 7 (as its dots)
-  const free0 = !touches(p0, others, W), free1 = !touches(p1, others, W);
+  if (kind === "pie" && Math.hypot(dx, dy) >= 3 * W) return falling(f, W, !touches(p0, others, W, d0));
+  if ((kind === "na" || kind === "arc") && dx > 0 && dy > 0 && Math.hypot(dx, dy) >= 4 * W) return rightFalling(f, W, !touches(p0, others, W, d0));   // the KAGE data draws it as a curve of type 7 (as its dots)
+  const free0 = !touches(p0, others, W, d0), free1 = !touches(p1, others, W, d1);
   const rise = kind === "h" ? Math.min(Math.hypot(dx, dy) * 0.05, 3) : 0;
   const { pts: pts0, len } = centreline(f, 0);
   const sgn = dx >= 0 ? 1 : -1;
