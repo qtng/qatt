@@ -70,7 +70,9 @@ Opened as a plain file (without this viewer) the page reads its data-src with fe
     }
     await Promise.all(jobs);
     const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-    document.open(); document.write(html); document.close();
+    // navigation.js ran here already and does not start again while Lang and Theme exist: the page needs its theme and its translation
+    delete window.Lang; delete window.Theme;
+        document.open(); document.write(html); document.close();
   }
 
   async function list() {
