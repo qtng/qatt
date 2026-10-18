@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tone offsets</title>
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../css/site.css">
+  <script src="../../js/navigation.js"></script>
+  <style>
+    main { max-width: 52rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+    li { margin-bottom: .35rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1 class="h3">Tone offsets</h1>
+  <p class="text-muted">Not built yet: this page only holds the plan.</p>
+
+  <h2 class="h5 mt-4">Goal</h2>
+  <p>Fine-tune the place of the small tone marks per letter (Khai first). A tone mark lies over the cell before it, at one place
+    for all letters; where a letter reaches too close to the mark, a small offset for that letter moves the mark away.</p>
+
+  <h2 class="h5 mt-4">Plan</h2>
+  <ol>
+    <li><b>Data</b>: a JSON file, e.g. <code>fonts/tone-offsets.json</code>, per font and tone corner:
+      <code>{ "khai": { "upper-right": { "104": [dx, dy], … }, "upper-left": { "22": [dx, dy], … }, … } }</code>.
+      The key of a right corner is the rhyme letter (the letter right before the tone), of a left corner the onset letter
+      (two glyphs before the tone). Values in font units; missing = 0.</li>
+    <li><b>Page</b>: a grid of all 154 letter forms, one cell per syllable (onset 63 + the letter as rhyme for the right corners,
+      the letter as onset + rhyme 61 for the left corners), drawn with the font <i>without</i> its tone marks. The tone mark
+      is drawn on top as an SVG of its outline from the font (read with opentype.js, or exported as JSON by the build), at the
+      global place plus the offset of the JSON, so that the page shows exactly what the font will show.</li>
+    <li><b>Adjusting</b>: choose a corner and a tone (circle / half ring); click a cell and move the mark with the arrow keys
+      (1 unit, Shift 10) or by dragging; the cell shows its offset and the distance to the letter (red when they touch).</li>
+    <li><b>Export</b>: a button copies the JSON of all offsets (only the non-zero ones) to hand over; the page can also load
+      a JSON to continue.</li>
+    <li><b>Font</b>: <code>tools/build_font.py</code> reads the JSON and writes a contextual positioning (GPOS) of the mark
+      after those letters (no new glyphs). The right corners look at the rhyme glyph before the tone, the left corners at the
+      onset two glyphs before. Stacks (Tham Thư) and pairs (<code>.markw</code>) are cases of their own.</li>
+    <li><b>Elsewhere</b>: <code>js/qatt.js</code> (SVG drawing) has no such rules; if it should follow, it reads the same JSON.</li>
+  </ol>
+</main>
+</body>
+</html>

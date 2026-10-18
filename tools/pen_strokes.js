@@ -24,8 +24,10 @@ function centreline(f, bow) {                  // the points of a stroke, sample
 }
 const ease = x => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
 
-// does the point touch another stroke (a junction: no press or bulge there)?
-function touches(pt, others, W) {
+// does the point touch another stroke (a junction: no press or bulge there)? dir (Kaiti): the direction in which the stroke leaves at this end;
+// then a stroke beside the end does not count, only one ahead of it or on it (closer than 0.5 W), so a stroke that merely passes close by
+// (in a squeezed half) does not cut this end flat
+function touches(pt, others, W, dir) {
   for (const o of others) {
     const q = []; for (let i = 3; i + 1 < o.length; i += 2) q.push([o[i], o[i + 1]]);
     const m = o[0] === 2 && q.length === 3 ? 12 : 1;
@@ -33,7 +35,8 @@ function touches(pt, others, W) {
       const t0 = k / m, t1 = (k + 1) / m, at = t => { const u = 1 - t; return o[0] === 2 && q.length === 3 ? [u * u * q[0][0] + 2 * u * t * q[1][0] + t * t * q[2][0], u * u * q[0][1] + 2 * u * t * q[1][1] + t * t * q[2][1]] : [lerp(q[0][0], q[q.length - 1][0], t), lerp(q[0][1], q[q.length - 1][1], t)]; };
       const a = at(t0), b = at(t1), vx = b[0] - a[0], vy = b[1] - a[1], l2 = vx * vx + vy * vy || 1;
       const t = Math.max(0, Math.min(1, ((pt[0] - a[0]) * vx + (pt[1] - a[1]) * vy) / l2));
-      if (Math.hypot(a[0] + t * vx - pt[0], a[1] + t * vy - pt[1]) < 1.3 * W) return true;
+      const ex = a[0] + t * vx - pt[0], ey = a[1] + t * vy - pt[1], dist = Math.hypot(ex, ey);
+      if (dist < 1.3 * W && (!dir || dist < 0.5 * W || Math.abs(ex * dir[1] - ey * dir[0]) < 0.7 * W)) return true;
     }
   }
   return false;

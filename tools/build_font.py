@@ -98,6 +98,9 @@ EXTRA_X, EXTRA_Y = PLACE[0] - (1 - GROW) * 50, PLACE[1] - (1 - GROW) * 50   # wh
 PAIR_GROW = GROW
 
 data = json.load(open(SRC))  # fonts/glyphs.json
+import brush_tones
+# tones drawn as brush strokes, for a style that has them in fonts/tones.json (Khai): {code point: (standalone, mark)}, at their own places (no keep_inside, tone_x)
+BRUSH_TONES = brush_tones.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'fonts', 'tones.json'), KAGE_STYLE + ('-cut' if CUT else ''), BOLD) if KAGE else {}
 BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
 JOBS, RESULTS = {}, {}         # brush outlines: requested on a first run over the glyphs, made by brush_outlines.js, used on the second
 
@@ -244,8 +247,10 @@ def make_glyphs():
             frame.simplify(fix_winding=True)
             frame.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         else:
-            path = outline(ids, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
-            if tone: path = tone_x(keep_inside(path, 0, ADV), 500)
+            if BASE + o in BRUSH_TONES: path = BRUSH_TONES[BASE + o][0]
+            else:
+                path = outline(ids, STROKE_TONE if tone else STROKE, grow=1.0 if tone else GROW)
+                if tone: path = tone_x(keep_inside(path, 0, ADV), 500)
             path.draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
         name = 'u%05X' % (BASE + o)
         glyphs[name] = pen.glyph(); cmap[BASE + o] = name; order.append(name)
@@ -281,7 +286,7 @@ def make_glyphs():
                 add(name + '.rightlow', outline(letter_ids(g, 'right'), STROKE_LOW, PAIR_K, 0, GROW, 1 - STACK_UP, STACK_BOTTOM, pair), ADV // 2)
         if tone:                                    # zero-width variant that lies over the cell to its left, in the smaller size qatt.js uses on a cluster
             pen = TTGlyphPen(None)
-            tone_x(keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -500), -ADV, 0), -500).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
+            (BRUSH_TONES[BASE + o][1] if BASE + o in BRUSH_TONES else tone_x(keep_inside(outline(one(g['dm']), STROKE_MARK, 1.0, -500), -ADV, 0), -500)).draw(Cu2QuPen(pen, 1.0, reverse_direction=True))
             glyphs[name + '.mark'] = pen.glyph(); adv[name + '.mark'] = 0; order.append(name + '.mark')
             if WIDE != 1.0:                         # and over a pair: in the corners of the wide cell
                 pen = TTGlyphPen(None)

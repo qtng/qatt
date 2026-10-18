@@ -27,7 +27,7 @@ FONTS = {   # file name: arguments of build_font.py before the data files
     'qatt-pencut-light': KAGE + ['--pen', '--cut', '--weight', '1.0', '--label', 'Light'],
     'qatt-pencut': KAGE + ['--pen', '--cut', '--weight', '1.6'],
     'qatt-pencut-medium': KAGE + ['--pen', '--cut', '--weight', '2.4', '--label', 'Medium'],
-    'qatt-khai': KAGE + ['--kaiti', '--weight', '2.0'],
+    'qatt-khai': KAGE + ['--kaiti', '--weight', '2.15'],
 }
 
 
