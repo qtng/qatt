@@ -29,6 +29,7 @@
     .pad { display: grid; grid-template-columns: repeat(3, 2.4rem); gap: .25rem; }
     .pad .btn { padding: .15rem 0; }
     .num { width: 5rem; }
+    .vbox { border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; padding: .4rem .6rem; margin-top: .6rem; }
     textarea { font: .78rem ui-monospace, Menlo, monospace; }
     .hit-t { color: #d33; } .near-t { color: #c07a00; }
   </style>
@@ -36,14 +37,20 @@
 <body>
 <main>
   <h1 class="h3">Tone offsets</h1>
-  <p class="note mb-2">Moves the small tone mark after a pair per letter: a tone at the right follows the rhyme (the right half), a tone at the left
-    the onset (the left half). The page draws the letters with the font and the mark from its outline at the global place plus the offset, as the
-    font will show it once it is built with the offsets. Offsets are per style (all weights of a font share them), in font units, y up.
-    Select a cell, then move the mark with the arrow keys (Shift: 10 units) or by dragging it in the large view. Red: the mark overlaps the letter;
-    orange: closer than 20 units. Hand the export over to be committed as <code>fonts/tone-offsets.json</code> and built
-    (<code>tools/tone_offsets.py</code>); single letters, stacks and the wide font keep the global place.</p>
+  <p class="note mb-2">Where the small tone marks sit, per font (all weights of a font share the values). <b>Horizontal</b>: an offset per
+    letter moves the mark after a pair; a tone at the right follows the rhyme (the right half), a tone at the left the onset (the left half).
+    <b>Vertical</b>: the tone is moved into its cell, <i>y</i> units inside its top or bottom edge and <i>side</i> units out from the middle of
+    the column, for the font or per tone, and an offset per letter on top. The page draws the letters with the font and the mark from its
+    outline, as the font will show it once it is built with these values. Font units, y up. Select a cell, then move the mark with the arrow
+    keys (Shift: 10 units) or by dragging it in the large view. Red: the mark overlaps the letter; orange: closer than 20 units. Lines in the
+    large view: grey the edge of the line (880 / −120, hhea and sTypo), red where Windows cuts off (1160 / −288, usWin); in vertical text the
+    square is the cell. Hand the export over to be committed as <code>fonts/tone-offsets.json</code> and built (<code>tools/tone_offsets.py</code>);
+    single letters, stacks and the wide font have no offsets per letter.</p>
 
   <div class="bar">
+    <div class="btn-group btn-group-sm" role="group">
+      <button class="btn btn-quiet" id="modeH">Horizontal</button><button class="btn btn-quiet" id="modeV">Vertical</button>
+    </div>
     <label>Font <select id="font" class="form-select form-select-sm"></select></label>
     <label>Partner <input id="partner" type="number" min="0" max="153" class="form-control form-control-sm num" title="the other half of the pair"></label>
     <label>Show <select id="filter" class="form-select form-select-sm">
@@ -51,15 +58,25 @@
     <span id="stats" class="note"></span>
   </div>
   <div class="tones mt-2" id="tones"></div>
+  <div class="vbox bar" id="vbox">
+    <b>Vertical</b>
+    <span>Font:</span>
+    <label>side <input id="vSide" type="number" class="form-control form-control-sm num"></label>
+    <label>y <input id="vY" type="number" class="form-control form-control-sm num"></label>
+    <span class="ms-2" id="vToneName"></span>
+    <label><input id="vOwn" type="checkbox" class="form-check-input"> own values</label>
+    <label>side <input id="vtSide" type="number" class="form-control form-control-sm num"></label>
+    <label>y <input id="vtY" type="number" class="form-control form-control-sm num"></label>
+  </div>
 
   <div class="layout">
     <div class="grid" id="grid"></div>
     <div class="side">
-      <canvas id="big" class="big" width="520" height="600"></canvas>
+      <canvas id="big" class="big" width="520"></canvas>
       <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
         <div class="pad">
           <span></span><button class="btn btn-quiet btn-sm" data-move="0,1">↑</button><span></span>
-          <button class="btn btn-quiet btn-sm" data-move="-1,0">←</button><button class="btn btn-quiet btn-sm" id="zero" title="back to the global place">0</button><button class="btn btn-quiet btn-sm" data-move="1,0">→</button>
+          <button class="btn btn-quiet btn-sm" data-move="-1,0">←</button><button class="btn btn-quiet btn-sm" id="zero" title="no offset for this letter">0</button><button class="btn btn-quiet btn-sm" data-move="1,0">→</button>
           <span></span><button class="btn btn-quiet btn-sm" data-move="0,-1">↓</button><span></span>
         </div>
         <div>
@@ -82,7 +99,7 @@
         <button class="btn btn-quiet btn-sm" id="discard">Discard draft</button>
         <span id="draft" class="note"></span>
       </div>
-      <textarea id="io" class="form-control mt-2 d-none" rows="6" placeholder="Paste the JSON of the offsets, then Load JSON again"></textarea>
+      <textarea id="io" class="form-control mt-2 d-none" rows="8" placeholder="Paste the JSON of the offsets, then Load JSON again"></textarea>
     </div>
   </div>
 </main>
@@ -98,43 +115,61 @@
     ['9F', 'Circle upper left', false, '9E'], ['9E', 'Half ring upper left', false, '9F'], ['A1', 'Circle upper right', true, 'A0'], ['A0', 'Half ring upper right', true, 'A1'],
     ['9D', 'Circle lower left', false, '9C'], ['9C', 'Half ring lower left', false, '9D'], ['A3', 'Circle lower right', true, 'A2'], ['A2', 'Half ring lower right', true, 'A3'],
   ];
-  const N = 154, PARTNER = { right: 63, left: 61 }, NEAR = 20, KEY = 'qattToneOffsets1';
-  const X0 = -150, X1 = 1150, Y0 = -330, Y1 = 1180;   // the part of a cell that is drawn (font units)
+  const N = 154, NEAR = 20, KEY = 'qattToneOffsets1';
+  const SIDE = 140, Y = 0;                 // side and y of vertical text when the font has none (tools/tone_offsets.py)
+  const ASC = 880, DESC = -120, EM = 1000; // the line (hhea, sTypo) and the em of the fonts
+  const X0 = -150, X1 = 1150, Y0 = -330, Y1 = 1200;   // the part of a cell that is drawn (font units)
   const $ = id => document.getElementById(id);
   const ch = n => String.fromCodePoint(0xF0000 + n);
   const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
 
-  let repo = {}, data = {}, names = {}, marks = null, family = '', font = FONTS[0], tone = TONES[2], sel = null, results = [], partner = { ...PARTNER };
-  const loaded = {};
+  let repo = {}, data = {}, names = {}, cur = null, family = '', font = FONTS[0], tone = TONES[2], sel = null, results = [], mode = 'h';
+  const partner = { right: 63, left: 61 }, loaded = {};
+  const st = () => data[font[2]] = data[font[2]] || {};
+  const vert = () => st().vertical = st().vertical || {};
 
-  const off = (t = tone[0], n = sel) => ((data[font[2]] || {})[t] || {})[n] || [0, 0];
+  // the offset of a letter in the current mode, and where the mark sits without it
+  const letters = (t = tone[0]) => mode === 'h' ? (data[font[2]] || {})[t] : (((data[font[2]] || {}).vertical || {}).letters || {})[t];
+  const off = (t = tone[0], n = sel) => (letters(t) || {})[n] || [0, 0];
   function setOff(n, d, t = tone[0]) {
-    const s = data[font[2]] = data[font[2]] || {}, m = s[t] = s[t] || {};
+    let m;
+    if (mode === 'h') m = st()[t] = st()[t] || {};
+    else { const L = vert().letters = vert().letters || {}; m = L[t] = L[t] || {}; }
     if (d[0] || d[1]) m[n] = d; else delete m[n];
-    if (!Object.keys(m).length) delete s[t];
-    if (!Object.keys(s).length) delete data[font[2]];
-    save();
+    data = prune(data); save();
   }
-  const clean = o => JSON.stringify(sortObj(o));
-  function sortObj(o) {
+  function sideY(t = tone[0]) {
+    const v = (data[font[2]] || {}).vertical || {}, o = (v.tones || {})[t] || {};
+    return [o.side ?? v.side ?? SIDE, o.y ?? v.y ?? Y];
+  }
+  function base(t = tone[0]) {   // as tone_offset of tools/font_vertical.py (the move back into the cell cancels out against the horizontal place)
+    if (mode === 'h' || !cur.bounds || !cur.bounds[t]) return [0, 0];
+    const [xMin, yMin, xMax, yMax] = cur.bounds[t], [side, y] = sideY(t);
+    const dx = (xMin + xMax) / 2 + EM / 2 > 0 ? side : -side;
+    const dy = yMin > ASC / 2 ? ASC - y - yMax : ASC - EM + y - yMin;
+    return [dx, Math.round(dy)];
+  }
+  const place = (t, n) => { const b = base(t), d = off(t, n); return [b[0] + d[0], b[1] + d[1]]; };
+
+  // the JSON: no zero offsets, no empty objects, sorted
+  function prune(o) {
+    if (Array.isArray(o) || typeof o !== 'object' || o === null) return o;
     const out = {};
-    for (const st of Object.keys(o).sort()) for (const t of Object.keys(o[st]).sort()) for (const n of Object.keys(o[st][t]).sort((a, b) => a - b)) {
-      const d = o[st][t][n]; if (!d[0] && !d[1]) continue;
-      ((out[st] = out[st] || {})[t] = out[st][t] || {})[n] = d;
+    for (const k of Object.keys(o).sort((a, b) => (+a - +b) || (a < b ? -1 : a > b ? 1 : 0))) {
+      const v = o[k];
+      if (Array.isArray(v)) { if (v[0] || v[1]) out[k] = v; continue; }
+      if (v && typeof v === 'object') { const p = prune(v); if (Object.keys(p).length) out[k] = p; continue; }
+      if (v !== undefined && v !== null && v !== '') out[k] = v;
     }
     return out;
   }
   function save() {
-    const same = clean(data) === clean(repo);
+    const same = JSON.stringify(prune(data)) === JSON.stringify(prune(repo));
     store.set(KEY, same ? null : JSON.stringify(data));
-    const count = Object.values(data).reduce((a, s) => a + Object.values(s).reduce((b, m) => b + Object.keys(m).length, 0), 0);
+    let count = 0; const walk = o => { for (const v of Object.values(o)) Array.isArray(v) ? count++ : v && typeof v === 'object' && walk(v); }; walk(data);
     $('draft').textContent = `${count} offsets` + (same ? ', as in the repository' : ', draft (not in the repository yet)');
   }
-  function exportJson() {
-    const o = sortObj(data);
-    const lines = Object.entries(o).map(([st, ts]) => ` ${JSON.stringify(st)}: {\n` + Object.entries(ts).map(([t, m]) => `  ${JSON.stringify(t)}: ${JSON.stringify(m)}`).join(',\n') + '\n }');
-    return lines.length ? '{\n' + lines.join(',\n') + '\n}\n' : '{}\n';
-  }
+  const exportJson = () => JSON.stringify(prune(data), null, 1).replace(/\[\s+(-?\d+),\s+(-?\d+)\s+\]/g, '[$1, $2]') + '\n';
 
   async function loadFont() {
     const [, file] = font;
@@ -144,31 +179,41 @@
         fetch(`/fonts/${file}.marks.json`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null)]);
       const fam = 'ToneOffsets-' + file;
       const face = new FontFace(fam, buf); await face.load(); document.fonts.add(face);
-      loaded[file] = { fam, marks: mk && Object.fromEntries(Object.entries(mk.marks).map(([t, d]) => [t, new Path2D(d)])), meta: mk };
+      loaded[file] = { fam, marks: mk ? Object.fromEntries(Object.entries(mk.marks).map(([t, d]) => [t, new Path2D(d)])) : {}, bounds: mk && mk.bounds };
     }
-    family = loaded[file].fam; marks = loaded[file].marks;
+    cur = loaded[file]; family = cur.fam;
   }
 
-  // a cell: the pair of the letter n with the partner; the mark of the tone at the global place + d. k = px per font unit
+  // a cell: the pair of the letter n with the partner; the mark at the place d (on top of its place in horizontal text). k = px per font unit
   function textOf(n) { return tone[2] ? ch(partner.right) + ch(0x9A) + ch(n) : ch(n) + ch(0x9A) + ch(partner.left); }
   function draw(ctx, n, k, d, opts = {}) {
-    const W = (X1 - X0) * k, H = (Y1 - Y0) * k, base = Y1 * k;
+    const W = (X1 - X0) * k, H = (Y1 - Y0) * k, base0 = Y1 * k, x0 = -X0 * k;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+    const yy = y => base0 - y * k;
+    ctx.lineWidth = 1;
+    if (mode === 'v') { ctx.strokeStyle = 'rgba(128,128,128,.55)'; ctx.setLineDash([]); ctx.strokeRect(x0, yy(ASC), EM * k, EM * k); }
     if (opts.guides) {
-      ctx.strokeStyle = 'rgba(128,128,128,.35)'; ctx.lineWidth = 1;
-      const hl = (y, dash) => { ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(0, base - y * k); ctx.lineTo(W, base - y * k); ctx.stroke(); };
-      hl(0); hl(880, [4, 4]); ctx.strokeStyle = 'rgba(210,50,50,.6)'; hl(-288, [6, 4]); ctx.setLineDash([]);
-      ctx.strokeStyle = 'rgba(128,128,128,.35)'; ctx.strokeRect(-X0 * k, base - 880 * k, 1000 * k, 1000 * k);
+      const hl = (y, col, label) => {
+        ctx.strokeStyle = col; ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(0, yy(y)); ctx.lineTo(W, yy(y)); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = col; ctx.font = '11px system-ui, sans-serif'; ctx.fillText(label, 4, yy(y) - 3);
+      };
+      ctx.strokeStyle = 'rgba(128,128,128,.25)'; ctx.beginPath(); ctx.moveTo(0, yy(0)); ctx.lineTo(W, yy(0)); ctx.stroke();
+      if (mode === 'h') {
+        hl(ASC, 'rgba(110,110,110,.8)', 'line 880'); hl(DESC, 'rgba(110,110,110,.8)', 'line −120');
+        hl(1160, 'rgba(210,50,50,.75)', 'Windows clip 1160'); hl(-288, 'rgba(210,50,50,.75)', 'Windows clip −288');
+      } else {
+        ctx.fillStyle = 'rgba(110,110,110,.8)'; ctx.font = '11px system-ui, sans-serif'; ctx.fillText('cell', x0 + 3, yy(ASC) - 3);
+      }
     }
-    ctx.font = `${1000 * k}px "${family}"`; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = opts.ink || '#000';
-    ctx.fillText(textOf(n), -X0 * k, base);
-    const end = -X0 * k + ctx.measureText(textOf(n)).width;
-    const p = marks && marks[tone[0]];
+    ctx.font = `${EM * k}px "${family}"`; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = opts.ink || '#000';
+    ctx.fillText(textOf(n), x0, base0);
+    const end = x0 + ctx.measureText(textOf(n)).width;
+    const p = cur.marks[tone[0]];
     if (!p) return;
-    if (opts.ghost && (d[0] || d[1])) {
-      ctx.setTransform(k, 0, 0, -k, end, base); ctx.fillStyle = 'rgba(128,128,128,.28)'; ctx.fill(p);
+    if (opts.ghost) {
+      ctx.setTransform(k, 0, 0, -k, end + opts.ghost[0] * k, base0 - opts.ghost[1] * k); ctx.fillStyle = 'rgba(128,128,128,.28)'; ctx.fill(p);
     }
-    ctx.setTransform(k, 0, 0, -k, end + d[0] * k, base - d[1] * k);
+    ctx.setTransform(k, 0, 0, -k, end + d[0] * k, base0 - d[1] * k);
     ctx.fillStyle = opts.mark || '#000'; ctx.fill(p);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -178,13 +223,13 @@
   const cvL = Object.assign(document.createElement('canvas'), { width: aw, height: ah }), cvM = Object.assign(document.createElement('canvas'), { width: aw, height: ah });
   const cL = cvL.getContext('2d', { willReadFrequently: true }), cM = cvM.getContext('2d', { willReadFrequently: true });
   function analyse(n, d) {
-    const base = Y1 * AK;
+    const base0 = Y1 * AK;
     cL.setTransform(1, 0, 0, 1, 0, 0); cL.clearRect(0, 0, aw, ah);
-    cL.font = `${1000 * AK}px "${family}"`; cL.fillStyle = '#000'; cL.fillText(textOf(n), -X0 * AK, base);
+    cL.font = `${EM * AK}px "${family}"`; cL.fillStyle = '#000'; cL.fillText(textOf(n), -X0 * AK, base0);
     const end = -X0 * AK + cL.measureText(textOf(n)).width;
     cM.setTransform(1, 0, 0, 1, 0, 0); cM.clearRect(0, 0, aw, ah);
-    const p = marks && marks[tone[0]]; if (!p) return { overlap: 0, gap: Infinity };
-    cM.setTransform(AK, 0, 0, -AK, end + d[0] * AK, base - d[1] * AK); cM.fill(p);
+    const p = cur.marks[tone[0]]; if (!p) return { overlap: 0, gap: Infinity };
+    cM.setTransform(AK, 0, 0, -AK, end + d[0] * AK, base0 - d[1] * AK); cM.fill(p);
     const L = cL.getImageData(0, 0, aw, ah).data, M = cM.getImageData(0, 0, aw, ah).data;
     let overlap = 0, x0 = aw, y0 = ah, x1 = -1, y1 = -1;
     for (let y = 0; y < ah; y++) for (let x = 0; x < aw; x++) {
@@ -215,25 +260,34 @@
     el.hidden = f === 'bad' ? !(r.overlap || r.gap < NEAR) && n !== sel : f === 'set' ? !(d[0] || d[1]) && n !== sel : false;
   }
   function redrawCell(n) {
-    const cv = $('grid').children[n].querySelector('canvas');
-    draw(cv.getContext('2d'), n, cv.width / (X1 - X0), off(tone[0], n), { ink: ink(), mark: MARK });
-    results[n] = analyse(n, off(tone[0], n));
+    const cv = $('grid').children[n].querySelector('canvas'), d = place(tone[0], n);
+    draw(cv.getContext('2d'), n, cv.width / (X1 - X0), d, { ink: ink(), mark: MARK });
+    results[n] = analyse(n, d);
     cellState(n);
   }
   function stats() {
     const hit = results.filter(r => r.overlap).length, near = results.filter(r => !r.overlap && r.gap < NEAR).length;
-    $('stats').innerHTML = `${tone[1]}: <span class="hit-t">${hit} overlapping</span>, <span class="near-t">${near} closer than ${NEAR}</span>`;
+    $('stats').innerHTML = `${tone[1]}${mode === 'v' ? ', vertical' : ''}: <span class="hit-t">${hit} overlapping</span>, <span class="near-t">${near} closer than ${NEAR}</span>`;
   }
   function redrawAll() { for (let n = 0; n < N; n++) redrawCell(n); stats(); redrawBig(); }
+  let pending = 0;
+  const redrawSoon = () => { if (!pending) pending = requestAnimationFrame(() => { pending = 0; redrawAll(); }); };
   function redrawBig() {
     const cv = $('big'), ctx = cv.getContext('2d');
     if (sel == null) { ctx.clearRect(0, 0, cv.width, cv.height); $('selname').textContent = 'Select a letter'; $('selinfo').textContent = ''; return; }
     const k = cv.width / (X1 - X0), d = off();
-    draw(ctx, sel, k, d, { ink: ink(), mark: MARK, guides: true, ghost: true });
+    draw(ctx, sel, k, place(tone[0], sel), { ink: ink(), mark: MARK, guides: true, ghost: (d[0] || d[1]) ? base() : null });
     $('selname').textContent = `${sel} ${names[sel] || ''}` + (tone[2] ? ' (rhyme)' : ' (onset)');
     $('dx').value = d[0]; $('dy').value = d[1];
     const r = results[sel];
-    $('selinfo').innerHTML = r.overlap ? `<span class="hit-t">overlaps (${r.overlap} px)</span>` : r.gap === Infinity ? 'free' : `gap ≈ ${Math.round(r.gap)} units`;
+    let info = r.overlap ? `<span class="hit-t">overlaps (${r.overlap} px)</span>` : r.gap === Infinity ? 'free' : `gap ≈ ${Math.round(r.gap)} units`;
+    const b = cur.bounds && cur.bounds[tone[0]];
+    if (b && mode === 'h') {
+      const p = place(tone[0], sel), top = b[3] + p[1], bottom = b[1] + p[1];
+      if (top > 1160 || bottom < -288) info += ' · <span class="hit-t">cut off under Windows</span>';
+      else if (top > ASC || bottom < DESC) info += ` · reaches ${top > ASC ? Math.round(top - ASC) + ' over' : Math.round(DESC - bottom) + ' under'} the line`;
+    }
+    $('selinfo').innerHTML = info;
   }
   function select(n) {
     const g = $('grid'); if (sel != null) g.children[sel].classList.remove('sel');
@@ -259,33 +313,63 @@
     const box = $('tones'); box.innerHTML = '';
     for (const t of TONES) {
       const b = document.createElement('button'); b.className = 'btn btn-sm ' + (t === tone ? 'btn-cinnabar' : 'btn-quiet'); b.textContent = t[1];
-      b.addEventListener('click', () => { tone = t; buildTones(); $('partner').value = partner[t[2] ? 'right' : 'left']; redrawAll(); });
+      b.addEventListener('click', () => { tone = t; buildTones(); $('partner').value = partner[t[2] ? 'right' : 'left']; showV(); redrawAll(); });
       box.appendChild(b);
     }
+  }
+  function showMode() {
+    $('modeH').className = 'btn ' + (mode === 'h' ? 'btn-cinnabar' : 'btn-quiet');
+    $('modeV').className = 'btn ' + (mode === 'v' ? 'btn-cinnabar' : 'btn-quiet');
+    $('vbox').hidden = mode !== 'v';
+    showV();
+  }
+  function showV() {   // the inputs of side and y: the font's, and the own ones of the tone
+    const v = (data[font[2]] || {}).vertical || {}, o = (v.tones || {})[tone[0]];
+    $('vSide').value = v.side ?? SIDE; $('vY').value = v.y ?? Y;
+    $('vToneName').textContent = tone[1] + ':';
+    $('vOwn').checked = !!o; $('vtSide').disabled = $('vtY').disabled = !o;
+    const [s, y] = sideY(); $('vtSide').value = s; $('vtY').value = y;
+  }
+  function setV(key, value, ownTone) {
+    if (ownTone) { const T = vert().tones = vert().tones || {}; (T[tone[0]] = T[tone[0]] || {})[key] = value; }
+    else vert()[key] = value;
+    data = prune(data); save(); showV(); redrawSoon();
   }
 
   async function init() {
     for (const [label, file] of FONTS) $('font').add(new Option(label, file));
+    const big = $('big'); big.height = Math.round(big.width * (Y1 - Y0) / (X1 - X0));
     const [rj, gj] = await Promise.all([fetch('/fonts/tone-offsets.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetch('/fonts/glyphs.json').then(r => r.json()).catch(() => [])]);
     repo = rj; for (const g of gj) names[g.o] = g.n;
     try { data = JSON.parse(store.get(KEY)) || JSON.parse(JSON.stringify(repo)); } catch (e) { data = JSON.parse(JSON.stringify(repo)); }
-    save(); buildTones(); buildGrid();
+    save(); buildTones(); buildGrid(); showMode();
     $('partner').value = partner.right;
     await loadFont(); redrawAll(); select(0);
   }
 
-  $('font').addEventListener('change', async e => { font = FONTS.find(f => f[1] === e.target.value); await loadFont(); redrawAll(); });
+  $('modeH').addEventListener('click', () => { mode = 'h'; showMode(); redrawAll(); });
+  $('modeV').addEventListener('click', () => { mode = 'v'; showMode(); redrawAll(); });
+  $('font').addEventListener('change', async e => { font = FONTS.find(f => f[1] === e.target.value); await loadFont(); showV(); redrawAll(); });
   $('partner').addEventListener('change', e => { const v = Math.max(0, Math.min(N - 1, +e.target.value || 0)); partner[tone[2] ? 'right' : 'left'] = v; e.target.value = v; redrawAll(); });
   $('filter').addEventListener('change', () => { for (let n = 0; n < N; n++) cellState(n); });
+  $('vSide').addEventListener('input', e => setV('side', Math.round(+e.target.value || 0)));
+  $('vY').addEventListener('input', e => setV('y', Math.round(+e.target.value || 0)));
+  $('vtSide').addEventListener('input', e => setV('side', Math.round(+e.target.value || 0), true));
+  $('vtY').addEventListener('input', e => setV('y', Math.round(+e.target.value || 0), true));
+  $('vOwn').addEventListener('change', e => {
+    const T = vert().tones = vert().tones || {};
+    if (e.target.checked) { const [s, y] = sideY(); T[tone[0]] = { side: s, y }; } else delete T[tone[0]];
+    data = prune(data); save(); showV(); redrawSoon();
+  });
   for (const b of document.querySelectorAll('[data-move]')) b.addEventListener('click', e => { const [x, y] = b.dataset.move.split(',').map(Number); const m = e.shiftKey ? 10 : 1; move(x * m, y * m); });
   $('zero').addEventListener('click', () => move(0, 0, true));
   $('dx').addEventListener('change', () => move(+$('dx').value || 0, off()[1], true));
   $('dy').addEventListener('change', () => move(off()[0], +$('dy').value || 0, true));
   $('copyOther').addEventListener('click', () => { if (sel == null) return; setOff(sel, off(), tone[3]); $('selinfo').textContent = 'copied to ' + TONES.find(t => t[0] === tone[3])[1]; });
   function next() {
-    const order = [...Array(N).keys()], start = sel == null ? 0 : sel + 1;
-    const n = order.map(i => (start + i) % N).find(i => results[i].overlap || results[i].gap < NEAR);
+    const start = sel == null ? 0 : sel + 1;
+    const n = [...Array(N).keys()].map(i => (start + i) % N).find(i => results[i].overlap || results[i].gap < NEAR);
     if (n != null) { select(n); $('grid').children[n].scrollIntoView({ block: 'nearest' }); }
   }
   $('next').addEventListener('click', next);
@@ -314,9 +398,9 @@
   $('import').addEventListener('click', () => {
     const io = $('io');
     if (io.classList.contains('d-none') || !io.value.trim()) { io.classList.remove('d-none'); io.value = ''; io.focus(); return; }
-    try { data = JSON.parse(io.value); save(); redrawAll(); io.classList.add('d-none'); } catch (e) { $('draft').textContent = 'not valid JSON: ' + e.message; }
+    try { data = JSON.parse(io.value); save(); showV(); redrawAll(); io.classList.add('d-none'); } catch (e) { $('draft').textContent = 'not valid JSON: ' + e.message; }
   });
-  $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to the offsets of the repository?')) return; data = JSON.parse(JSON.stringify(repo)); save(); redrawAll(); });
+  $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to the values of the repository?')) return; data = JSON.parse(JSON.stringify(repo)); save(); showV(); redrawAll(); });
 
   init();
 })();

@@ -308,16 +308,18 @@ cname = 'u%05X' % (BASE + COMBINER)
 glyphs[cname + '.zw'] = TTGlyphPen(None).glyph(); adv[cname + '.zw'] = 0; order.append(cname + '.zw')
 glyphs[jname + '.zw'] = TTGlyphPen(None).glyph(); adv[jname + '.zw'] = 0; order.append(jname + '.zw')
 
+STYLE = KAGE_STYLE + ('-cut' if CUT else '') if KAGE else 'brush' if BRUSH else 'prototype'   # the style of tones.json and tone-offsets.json
+
 def build_info():
     """Name ID 10 (description): the parameters this font was built with and the commit of the tools, so that it can be built again (tools/build_all.py)"""
-    import datetime, font_vertical
+    import datetime, tone_offsets
     here = os.path.dirname(os.path.abspath(__file__))
     try:
         git = lambda *args: subprocess.run(['git', '-C', here] + list(args), capture_output=True, text=True, check=True).stdout.strip()
         commit = git('rev-parse', '--short', 'HEAD') + ('+changes' if git('status', '--porcelain', '--', '.', ':!../fonts') else '')   # uncommitted changes of the tools
     except (OSError, subprocess.CalledProcessError): commit = 'unknown'
-    p = [('style', KAGE_STYLE + ('-cut' if CUT else '') if KAGE else 'brush' if BRUSH else 'prototype'), ('weight', BOLD), ('light', int(light)), ('wide', WIDE),
-         ('VS', VS), ('VC', VC), ('HS', HS), ('PAIR_M', PAIR_M), ('PAIR_K', round(PAIR_K, 4)), ('TV', TV), ('TH', TH), ('SY', SY), ('SX', SX), ('TONE_SIDE', font_vertical.TONE_SIDE), ('TONE_Y', font_vertical.TONE_Y)]
+    p = [('style', STYLE), ('weight', BOLD), ('light', int(light)), ('wide', WIDE),
+         ('VS', VS), ('VC', VC), ('HS', HS), ('PAIR_M', PAIR_M), ('PAIR_K', round(PAIR_K, 4)), ('TV', TV), ('TH', TH), ('SY', SY), ('SX', SX), ('TONE_SIDE', tone_offsets.vertical(STYLE)['side']), ('TONE_Y', tone_offsets.vertical(STYLE)['y'])]
     return 'Built %s with tools/build_font.py of the repository qtng/qatt, commit %s: %s' % (datetime.date.today().isoformat(), commit, ', '.join('%s %s' % kv for kv in p))
 
 fb = FontBuilder(UPM, isTTF=True)
@@ -427,10 +429,10 @@ fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont
 f = TTFont(OUT + '.ttf')
 import tone_offsets   # the offsets of the small tone marks per letter (fonts/tone-offsets.json) as GPOS; the outlines of the marks for admin/font/tone-offsets.html
-offsets_fea = tone_offsets.fea(f, KAGE_STYLE + ('-cut' if CUT else '')) if KAGE else ''
+offsets_fea = tone_offsets.fea(f, STYLE) if KAGE else ''
 if VERTICAL:
     import font_vertical
-    font_vertical.apply(f, offsets_fea); f.save(OUT + '.ttf')
+    font_vertical.apply(f, offsets_fea, STYLE); f.save(OUT + '.ttf')
 elif offsets_fea:
     addOpenTypeFeaturesFromString(f, offsets_fea, tables=['GPOS']); f.save(OUT + '.ttf')
 if KAGE: tone_offsets.marks(f, OUT + '.marks.json')
