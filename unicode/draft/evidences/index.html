@@ -21,15 +21,20 @@
     .table-wrap { overflow-x: auto; }
     code, pre { font-size: .85rem; }
     pre { background: #f7efdc; padding: .75rem 1rem; overflow-x: auto; }
+    .anchor { margin-left: .4rem; opacity: 0; color: #a8362a; text-decoration: none; vertical-align: -.1em; }
+    .anchor svg { width: .75em; height: .75em; fill: currentColor; }
+    h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; }
+    @media (hover: none) { .anchor { opacity: .45; } }
+    h1, h2, h3, h4 { scroll-margin-top: 4.5rem; }
     .scans { columns: 2; list-style: none; padding: 0; }
   </style>
 </head>
 <body>
   <main class="container py-4">
 <p><a href="../index.html">Proposal</a></p>
-<h1 id="evidence">Evidence</h1>
+<h1 id="evidence">Evidence<a class="anchor" href="#evidence" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h1>
 <p>One Markdown file per claim in the proposal that needs a source citation: <code>E01.md</code>, <code>E02.md</code>, … Each file shows the images of the passage, followed by the transcription, the translation and notes. Appendix B of the proposal and the overview below are generated from these files with <code>python tools/make_appendix.py</code>.</p>
-<h2 id="format">Format</h2>
+<h2 id="format">Format<a class="anchor" href="#format" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
 <pre><code class="language-markdown">---
 id: E04
 claim: &quot;The statement in the proposal that the passage supports&quot;
@@ -96,7 +101,7 @@ status: located
 <p>Cite Source 1, and add Source 2 only where it differs or where its reading matters. Both witnesses share the page numbering and the layout of the columns. The proposal cites by page only, for example (p. <a href="../pages/S1-p2.jpg" target="_blank">2</a>), and names a source only where it matters.</p>
 <p>Full pages are in <code>pages/</code>: <code>S1-p1.jpg</code> … <code>S1-p8.jpg</code> for Source 1 and <code>S2-p1.jpg</code> … <code>S2-p8.jpg</code> for Source 2, extracted unchanged from the scan of the volume (folios 3–18, 785 × 1525 pixels each). An entry can show a full page by giving its path, for example <code>image: [pages/S1-p4.jpg]</code>.</p>
 <p>Cut-outs go in <code>images/</code>. They are cut from the full pages by <code>python tools/make_crops.py</code>, using the page and the pixel box (left, top, right, bottom) listed for each image in <code>crops.csv</code>; to change a cut-out, edit its box and run the script again. The optional column <code>strike</code> lists boxes (left top right bottom, separated by semicolons) that are not relevant to the evidence; they are framed with a red rectangle and crossed out, so that a full page can be shown with the relevant columns only. Cut-outs are named after the entry id, for example <code>E08-1.png</code> (Source 1) and <code>E08-2.png</code> (Source 2). Publish scans only where the holding institution permits it.</p>
-<h2 id="overview">Overview</h2>
+<h2 id="overview">Overview<a class="anchor" href="#overview" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
 <!-- overview:start -->
 <div class="table-wrap"><table>
 <thead>
@@ -378,7 +383,7 @@ status: located
 </tbody>
 </table></div>
 <!-- overview:end -->
-<h2 id="corrections">Corrections</h2>
+<h2 id="corrections">Corrections<a class="anchor" href="#corrections" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
 <p><code>corrections.csv</code> lists the places where Source 2 differs from Source 1: corrections of characters that are unclear or wrong in Source 1, and local rewrites where the scribe of Source 2 struck out and rewrote his own unclear character.</p>
 <div class="table-wrap"><table>
 <thead>
