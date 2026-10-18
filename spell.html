@@ -133,13 +133,10 @@
     html[data-theme] dialog.ask :is(h2, p) { color: var(--ink); text-shadow: none; }   /* a theme (the dark one) must not colour the texts of the light box */
     dialog.ask::backdrop { background: rgba(43, 33, 24, .45); }
     dialog.ask.intro::backdrop { background: rgba(43, 33, 24, .28); }   /* the loaded game shows through */
-    dialog.ask.intro { max-width: 27rem; padding: 1.6rem 1.5rem 1.4rem; text-align: center; }
+    dialog.ask.intro { max-width: 22rem; padding: 1.8rem 1.5rem 1.8rem; text-align: center; }
     dialog.ask.intro h2 { font: 400 2.3rem Georgia, "Times New Roman", serif; margin: 0; }
-    dialog.ask.intro .stamp { display: block; width: 3.2rem; height: .3rem; margin: .7rem auto 1.1rem; background: var(--cinnabar); }
-    dialog.ask.intro ul { list-style: none; padding: 0; margin: 0 0 1.4rem; text-align: left; display: grid; gap: .7rem; }
-    dialog.ask.intro li { display: flex; gap: .65rem; align-items: flex-start; }
-    dialog.ask.intro li .bi { color: var(--cinnabar); font-size: 1.2rem; flex: none; margin-top: .1rem; }
-    dialog.ask.intro .intro-start { font-size: 1.15rem; padding: .5rem 2rem; }
+    dialog.ask.intro .stamp { display: block; width: 3.2rem; height: .3rem; margin: .7rem auto 1.6rem; background: var(--cinnabar); }
+    dialog.ask.intro .intro-start { font-size: 1.3rem; padding: .6rem 2.6rem; }
     dialog.ask.intro .intro-start:disabled { opacity: .55; }
     dialog.ask h2 { font: 700 1.3rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     dialog.ask p { margin: 0 0 1rem; }
@@ -181,13 +178,8 @@
 
 <main class="container py-3" id="content">
 <dialog class="ask intro" id="intro" aria-labelledby="introTitle">   <!-- opens over the loaded game: nothing runs, and nothing can be clicked, before Start -->
-  <h2 id="introTitle"><span data-vi="Đánh vần!">Spell it!</span></h2>
+  <h2 id="introTitle"><span data-vi="Sẵn sàng?">Ready?</span></h2>
   <span class="stamp" aria-hidden="true"></span>
-  <ul>
-    <li><i class="bi bi-grid-3x2-gap"></i><span data-vi="Chọn hai hình của từ, âm đầu và vần, rồi thanh điệu">Pick the two shapes of the word, onset and rhyme, then the tone</span></li>
-    <li><i class="bi bi-stopwatch"></i><span data-vi="Mỗi từ có một phút; đồng hồ chạy khi bạn bấm Bắt đầu">One minute per word; the clock starts with Start</span></li>
-    <li><i class="bi bi-star-fill"></i><span data-vi="Chọn đúng được điểm, chọn sai bị trừ; giải nhanh được thưởng">Right choices score, wrong ones cost; quick words bring a bonus</span></li>
-  </ul>
   <div class="text-center"><button type="button" class="btn btn-cinnabar btn-pill intro-start" id="startGame" disabled><i class="bi bi-play-fill"></i> <span data-vi="Bắt đầu">Start</span></button></div>
 </dialog>
 <div class="game mx-auto">
