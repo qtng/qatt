@@ -140,7 +140,7 @@
   <h3>Töne und Zellen</h3>
   <dl>
     <dt>Verschieben</dt><dd>Erst wenn man irgendwo auf der Ansicht länger als eine halbe Sekunde still drückt (Long Press), färbt sie sich leicht grün; dann
-      verschiebt Ziehen den Ton. Ohne Long Press geht jede Wischgeste an den Browser (auf dem Handy scrollt die Seite). Nach dem Loslassen ist wieder gesperrt.</dd>
+      verschiebt Ziehen den Ton; der Offset rastet auf Vielfache von 5 ein (105, 110, 115; mit Alt frei). Ohne Long Press geht jede Wischgeste an den Browser (auf dem Handy scrollt die Seite). Nach dem Loslassen ist wieder gesperrt.</dd>
     <dt><b>schwarzer Ton</b></dt><dd>Der Ton an der Stelle, die er mit diesen Werten in der Schrift bekommt.</dd>
     <dt><span class="text-secondary">grauer Ton</span></dt><dd>„without the offset“: wo der Ton ohne den Offset dieses Buchstabens säße.</dd>
     <dt>roter Rand, ✕n</dt><dd>Der Ton überschneidet den Buchstaben (n: überlappende Pixel, bei 4 Einheiten pro Pixel).</dd>
@@ -407,7 +407,10 @@
     repo = rj; for (const g of gj) names[g.o] = g.n;
     try { data = JSON.parse(store.get(KEY)) || JSON.parse(JSON.stringify(repo)); } catch (e) { data = JSON.parse(JSON.stringify(repo)); }
     save(); buildTones(); buildGrid(); showMode();
-    for (let n = 0; n < N; n++) $('partner').add(new Option(`${n} ${names[n] || ''}`, n));
+    const ps = $('partner'), grp = l => Object.assign(document.createElement('optgroup'), { label: l });
+    const gu = grp('Unmarked'), ga = grp('All');
+    for (let n = 0; n < N; n++) { const t = `${n} ${names[n] || ''}`; if (/UNMARKED/.test(names[n] || '')) gu.append(new Option(t, n)); ga.append(new Option(t, n)); }
+    ps.append(gu, ga);
     $('partner').value = partner.right;
     await loadFont(); redrawAll(); select(0);
   }
@@ -461,7 +464,8 @@
     if (!drag.unlocked) { if (drag.timer && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) >= STILL_PX) { clearTimeout(drag.timer); drag.timer = 0; } return; }
     e.preventDefault();
     const u = (X1 - X0) / big.getBoundingClientRect().width;
-    const d = [Math.round(drag.d[0] + (e.clientX - drag.x) * u), Math.round(drag.d[1] - (e.clientY - drag.y) * u)];
+    const g = v => e.altKey ? Math.round(v) : Math.round(v / 5) * 5;   // the offset on an absolute grid of 5 (105, 110, 115), Alt: free
+    const d = [g(drag.d[0] + (e.clientX - drag.x) * u), g(drag.d[1] - (e.clientY - drag.y) * u)];
     const c = off(); if (d[0] !== c[0] || d[1] !== c[1]) move(d[0], d[1], true);
   });
   // a touch that began with a long press must not scroll the page (the finger was still, so the browser has not begun to scroll)
