@@ -33,15 +33,17 @@
     .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; touch-action: none; user-select: none; }
     .big .bg { fill: currentColor; opacity: .16; }
     .big .guide { stroke: currentColor; opacity: .35; stroke-width: .3; stroke-dasharray: 2 2; fill: none; }
-    .big .p { fill: none; stroke-width: .9; stroke-linecap: round; }
+    .big.locked { touch-action: auto; }
+    .big .orig { fill: none; stroke: #888; stroke-opacity: .45; stroke-width: 3.2; stroke-linecap: round; }
+    .big .p { fill: none; stroke-width: 1; stroke-linecap: round; }
     .big .p.s { stroke: #2b6cb0; } .big .p.m { stroke: #c8372d; } .big .p.off { opacity: .35; }
-    .big .p.sel { stroke-width: 1.8; }
-    .big .hit { fill: none; stroke: transparent; stroke-width: 6; stroke-linecap: round; cursor: move; }
-    .big .hit:hover { stroke: rgba(128, 128, 128, .15); }
-    .big .tan { stroke: currentColor; opacity: .5; stroke-width: .35; stroke-dasharray: 1.5 1.5; }
-    .big .h { stroke: #fff; stroke-width: .7; cursor: grab; }
-    .big .h.s { fill: #2b6cb0; } .big .h.m { fill: #c8372d; } .big .h.c { fill: #e69500; }
-    .big .h.sel { stroke: #000; stroke-width: 1; }
+    .big .p.sel { stroke-width: 2.4; }
+    .big .tan { stroke: currentColor; opacity: .5; stroke-width: .4; stroke-dasharray: 1.5 1.5; }
+    .big .h { stroke: #fff; stroke-width: .9; }
+    .big .h.s { fill: #2b6cb0; } .big .h.m { fill: #c8372d; } .big .h.c { fill: #e69500; } .big .h.off { opacity: .4; }
+    .big .ring { fill: none; stroke: #111; stroke-width: 1.4; }
+    .tools { display: flex; flex-wrap: wrap; gap: .4rem .8rem; align-items: center; font-size: .82rem; margin-bottom: .35rem; }
+    .tools .btn-group .btn { padding: .1rem .5rem; }
     .big .lbl { font: 5px system-ui, sans-serif; fill: currentColor; opacity: .7; }
     .views { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-top: .4rem; }
     .views div { text-align: center; font-size: .72rem; color: var(--muted, #7b6c58); }
@@ -84,10 +86,23 @@
       <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
         <b id="title" class="small"></b>
         <span class="d-flex gap-1">
-          <button class="btn btn-quiet btn-sm" id="free" aria-pressed="false" title="Let horizontal and vertical lines be tilted (Alt does the same while dragging)">Unlock axes</button>
           <button class="btn btn-quiet btn-sm" id="single" title="No own form: the fonts take the single form">Use the single form</button>
           <button class="btn btn-quiet btn-sm" id="resetForm" title="Back to the form in the repository">Reset</button>
         </span>
+      </div>
+      <div class="tools">
+        <span>Move</span>
+        <div class="btn-group btn-group-sm" role="group" id="moveMode">
+          <button class="btn" data-m="free" title="Swiping moves the selection in any direction">Free</button>
+          <button class="btn" data-m="h" title="Swiping moves the selection only horizontally">Horizontal</button>
+          <button class="btn" data-m="v" title="Swiping moves the selection only vertically">Vertical</button>
+          <button class="btn" data-m="lock" title="Swiping moves nothing (to scroll safely); tapping still selects">Locked</button>
+        </div>
+        <span>Align</span>
+        <div class="btn-group btn-group-sm" role="group">
+          <button class="btn btn-quiet" id="alignH" title="The selected point gets the height (y) of the other end of its path (a control point: of the nearer end)">Horizontal</button>
+          <button class="btn btn-quiet" id="alignV" title="The selected point gets the x of the other end of its path (a control point: of the nearer end)">Vertical</button>
+        </div>
       </div>
       <svg id="big" class="big" viewBox="-12 -12 224 224" xmlns="http://www.w3.org/2000/svg"></svg>
       <div id="info" class="note"></div>
@@ -119,9 +134,18 @@
   </dl>
   <h3>Bedienung</h3>
   <dl>
-    <dt>Ziehen</dt><dd>Einen Punkt, einen Kontrollpunkt oder den Pfad selbst (dann verschiebt sich der ganze Pfad). Es rastet auf halbe Einheiten ein; mit Alt frei.</dd>
-    <dt>Achsen</dt><dd>Ein waagrechter oder senkrechter gerader Strich bleibt waagrecht oder senkrecht. „Unlock axes“ oder Alt hebt das auf.</dd>
-    <dt>Pfeiltasten</dt><dd>Verschieben den gewählten Punkt oder Pfad um 0,5 (Shift: 5).</dd>
+    <dt>Antippen</dt><dd>Wählt einen Punkt (Endpunkt oder Kontrollpunkt) oder, neben den Punkten, einen ganzen Pfad. Liegen mehrere Punkte übereinander, wählt
+      erneutes Antippen der Reihe nach den nächsten. Antippen einer leeren Stelle hebt die Auswahl auf. Der gewählte Punkt bekommt einen schwarzen Ring,
+      der gewählte Pfad wird dick.</dd>
+    <dt>Wischen</dt><dd>Irgendwo auf der Fläche verschiebt immer das Gewählte, den Punkt oder den ganzen Pfad, um die Strecke des Wischens. Es rastet auf
+      halbe Einheiten ein; mit Alt frei.</dd>
+    <dt>Move</dt><dd>Free: in jede Richtung; Horizontal / Vertical: nur waagrecht oder nur senkrecht; Locked: Wischen verschiebt nichts (zum gefahrlosen
+      Scrollen), Antippen wählt weiter.</dd>
+    <dt>Align</dt><dd>Horizontal gibt dem gewählten Punkt die Höhe (y) des anderen Endpunkts seines Pfads, Vertical dessen x. Bei einem Kontrollpunkt gilt der
+      nähere Endpunkt.</dd>
+    <dt>grau dick</dt><dd>Die Pfade, wie sie beim Öffnen der Form waren. Sie bleiben beim Bearbeiten stehen; unter der Ansicht steht, wie weit das Gewählte davon
+      weg ist.</dd>
+    <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Wischen mit Move.</dd>
     <dt>Strg+Z</dt><dd>Rückgängig.</dd>
     <dt>Gerade / Kurve</dt><dd>In der Liste: „Curve“ macht aus einer Geraden eine Kurve (Kontrollpunkt in der Mitte), „Straight“ umgekehrt.</dd>
     <dt>Type</dt><dd>Die KAGE-Art des Strichs: wie Anfang und Ende gezeichnet werden. „auto“ leitet sie aus dem Pfad ab (in Klammern, was dabei herauskommt):
@@ -155,7 +179,7 @@
   let data;
   try { data = JSON.parse(store.get(KEY)) || clone(repo); } catch (e) { data = clone(repo); }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
-  let form = 'v2c-', sym = SHAPES[0], marksOn = new Set(), style = STYLES[0], sel = null, free = false;
+  let form = 'v2c-', sym = SHAPES[0], marksOn = new Set(), style = STYLES[0], sel = null, mode = 'free', orig = null;
   const undoStack = [];
 
   const idOf = (s = sym) => form + s;
@@ -199,28 +223,33 @@
         <div class="lab"><span>${s === '_' ? 'z' : s}</span><span class="note">${mark}</span><span class="ed">${changed(id) ? '●' : ''}</span></div></div>`;
     }).join('');
   }
+  const dPath = pts => pts.length === 2 ? `M${pts[0]}L${pts[1]}` : `M${pts[0]}Q${pts[1]} ${pts[2]}`;
+  const isOff = x => x.kind === 'm' && !marksOn.has(x.i);
+  function openForm() { orig = clone(formOf(idOf())); sel = null; }   // the paths as they were when the form was opened: the grey ones in the background
   function renderBig() {
-    const id = idOf(), f = formOf(id), all = new Set([0, 1, 2, 3, 4, 5]);
+    const id = idOf(), f = formOf(id);
     let h = `<rect x="0" y="0" width="200" height="200" class="guide"/><path class="guide" d="M100 0V200M0 100H200"/>`;
     h += `<g transform="scale(${S})"><path class="bg" d="${outline(f, style, marksOn)}"/></g>`;
+    if (orig) h += items(orig).map(x => `<path class="orig" d="${dPath(P.points(dOf(x.it)))}"/>`).join('');
     const list = items(f);
-    let paths = '', handles = '';
+    let paths = '', handles = '', ring = '';
     list.forEach((x, n) => {
-      const pts = P.points(dOf(x.it)), isSel = sel && sel.n === n, off = x.kind === 'm' && !marksOn.has(x.i) ? ' off' : '';
-      const d = pts.length === 2 ? `M${pts[0]}L${pts[1]}` : `M${pts[0]}Q${pts[1]} ${pts[2]}`;
-      paths += `<path class="p ${x.kind}${off}${isSel ? ' sel' : ''}" d="${d}"/><path class="hit" data-n="${n}" data-k="all" d="${d}"/>`;
+      const pts = P.points(dOf(x.it)), isSel = sel && sel.n === n, off = isOff(x) ? ' off' : '';
+      paths += `<path class="p ${x.kind}${off}${isSel && sel.k === 'all' ? ' sel' : ''}" d="${dPath(pts)}"/>`;
       if (pts.length === 3) handles += `<path class="tan" d="M${pts[0]}L${pts[1]}L${pts[2]}"/>`;
       pts.forEach((p, k) => {
-        const c = pts.length === 3 && k === 1 ? 'c' : x.kind, on = isSel && (sel.k === k || sel.k === 'all');
-        handles += `<circle class="h ${c}${on ? ' sel' : ''}" data-n="${n}" data-k="${k}" cx="${p[0]}" cy="${p[1]}" r="${c === 'c' ? 2 : 2.6}"/>`;
+        const c = pts.length === 3 && k === 1 ? 'c' : x.kind;
+        handles += `<circle class="h ${c}${off}" cx="${p[0]}" cy="${p[1]}" r="${c === 'c' ? 3.6 : 4.4}"/>`;
+        if (isSel && sel.k === k) ring = `<circle class="ring" cx="${p[0]}" cy="${p[1]}" r="7"/>`;
       });
       const a = pts[0];
-      handles += `<text class="lbl" x="${a[0] + 3}" y="${a[1] - 3}">${x.kind === 's' ? 'S' + (x.i + 1) : 'M' + (x.i + 1)}</text>`;
+      handles += `<text class="lbl" x="${a[0] + 5}" y="${a[1] - 5}">${x.kind === 's' ? 'S' + (x.i + 1) : 'M' + (x.i + 1)}</text>`;
     });
-    $('big').innerHTML = h + paths + handles;
+    $('big').innerHTML = h + paths + handles + ring;
     $('title').textContent = `${id} (${sym === '_' ? 'z' : sym})` + (derived(id) ? ': no own form, the single form is shown; a change makes an own one' : '');
     $('single').hidden = !(isLR(id) && data.forms[id]);
     $('views').innerHTML = STYLES.map(st => `<div><svg viewBox="0 0 200 200">${glyph(f, st, marksOn)}</svg>${st[0]}</div>`).join('');
+    $('alignH').disabled = $('alignV').disabled = !sel || sel.k === 'all';
     renderItems(f, list);
   }
   function renderItems(f, list) {
@@ -239,7 +268,13 @@
   function renderInfo() {
     if (!sel) { $('info').textContent = 'Select a path or a point.'; return; }
     const x = items(formOf(idOf()))[sel.n], pts = P.points(dOf(x.it));
-    $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + (sel.k === 'all' ? '' : ` · point ${sel.k + 1}`);
+    const o = orig && items(orig).find(y => y.kind === x.kind && y.i === x.i), op = o && P.points(dOf(o.it));
+    let moved = '';
+    if (op && op.length === pts.length) {
+      const k = sel.k === 'all' ? 0 : sel.k, dx = Math.round((pts[k][0] - op[k][0]) * 100) / 100, dy = Math.round((pts[k][1] - op[k][1]) * 100) / 100;
+      moved = sel.k === 'all' && pts.some((p, i) => p[0] - op[i][0] !== dx || p[1] - op[i][1] !== dy) ? ' · changed against the original' : (dx || dy ? ` · moved ${dx}, ${dy} against the original` : ' · as the original');
+    }
+    $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + (sel.k === 'all' ? ' (whole path)' : ` · ${pts.length === 3 && sel.k === 1 ? 'control point' : 'point ' + (sel.k === 0 ? 1 : 2)}`) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + moved;
   }
   function renderAll() { renderGrid(); renderBig(); renderInfo(); }
   function update() { save(); renderBig(); renderInfo(); renderGrid(); }
@@ -251,51 +286,87 @@
     setItem(f, x, withD(x.it, P.path(pts)));
   }
   const snap = (v, alt) => alt ? Math.round(v * 100) / 100 : Math.round(v * 2) / 2;
-  function movePts(pts0, k, dx, dy, alt) {
+  function movePts(pts0, k, dx, dy, alt) {   // the selection moved by dx, dy: one point or (k 'all') the whole path
+    if (mode === 'h') dy = 0; else if (mode === 'v') dx = 0;
     const pts = pts0.map(p => p.slice());
-    if (k === 'all') pts.forEach(p => { p[0] = snap(p[0] + dx, alt); p[1] = snap(p[1] + dy, alt); });
-    else {
-      const p = pts[k]; p[0] = snap(p[0] + dx, alt); p[1] = snap(p[1] + dy, alt);
-      if (!alt && !free && pts.length === 2) {   // a horizontal or vertical straight stroke stays so: the other end follows
-        if (Math.abs(pts0[0][1] - pts0[1][1]) < 0.05) pts[1 - k][1] = p[1];
-        else if (Math.abs(pts0[0][0] - pts0[1][0]) < 0.05) pts[1 - k][0] = p[0];
-      }
-    }
+    for (const p of k === 'all' ? pts : [pts[k]]) { p[0] = snap(p[0] + dx, alt); p[1] = snap(p[1] + dy, alt); }
     return pts;
   }
+  // the reference of a point for Align: the other end of its path; for a control point the nearer end
+  function reference(pts, k) {
+    if (pts.length === 2) return pts[1 - k];
+    if (k !== 1) return pts[2 - k];
+    const d = q => Math.hypot(q[0] - pts[1][0], q[1] - pts[1][1]);
+    return d(pts[0]) <= d(pts[2]) ? pts[0] : pts[2];
+  }
+  function align(axis) {   // axis 1: horizontal (same y), 0: vertical (same x)
+    if (!sel || sel.k === 'all') return;
+    checkpoint();
+    change(sel.n, pts => { const r = reference(pts, sel.k); pts[sel.k][axis] = r[axis]; return pts; });
+    update();
+  }
+  $('alignH').addEventListener('click', () => align(1));
+  $('alignV').addEventListener('click', () => align(0));
 
-  // dragging in the large view
-  let drag = null;
+  // the large view: a tap selects a point or a path, a swipe anywhere moves the selection
   const big = $('big');
   const svgPt = e => { const m = big.getScreenCTM().inverse(); const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m); return [q.x, q.y]; };
+  const unitsPerPx = () => 224 / big.getBoundingClientRect().width;
+  function distToPath(q, pts) {   // the distance of q to a straight stroke or a curve (sampled)
+    const seg = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((q[0] - a[0]) * dx + (q[1] - a[1]) * dy) / l2)); return Math.hypot(a[0] + t * dx - q[0], a[1] + t * dy - q[1]); };
+    if (pts.length === 2) return seg(pts[0], pts[1]);
+    let best = Infinity, prev = pts[0];
+    for (let i = 1; i <= 24; i++) { const t = i / 24, u = 1 - t, p = [u * u * pts[0][0] + 2 * u * t * pts[1][0] + t * t * pts[2][0], u * u * pts[0][1] + 2 * u * t * pts[1][1] + t * t * pts[2][1]]; best = Math.min(best, seg(prev, p)); prev = p; }
+    return best;
+  }
+  function pick(q) {   // a point near q (the next one at each tap when several lie there), else a path near q, else nothing
+    const list = items(formOf(idOf())), u = unitsPerPx(), rank = (x, d) => (isOff(x) ? 1000 : 0) + d;
+    const pts = [];
+    list.forEach((x, n) => P.points(dOf(x.it)).forEach((p, k) => { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < 16 * u) pts.push({ n, k, r: rank(x, d) }); }));
+    const paths = list.map((x, n) => ({ n, k: 'all', r: rank(x, distToPath(q, P.points(dOf(x.it)))) })).filter(c => c.r % 1000 < 11 * u);
+    const cands = (pts.length ? pts : paths).sort((a, b) => a.r - b.r);
+    if (!cands.length) return null;
+    const i = sel ? cands.findIndex(c => c.n === sel.n && c.k === sel.k) : -1;
+    return cands[(i + 1) % cands.length];
+  }
+  let drag = null;
   big.addEventListener('pointerdown', e => {
-    const t = e.target.closest('[data-n]');
-    if (!t) { sel = null; renderBig(); renderInfo(); return; }
-    const n = +t.dataset.n, k = t.dataset.k === 'all' ? 'all' : +t.dataset.k;
-    sel = { n, k };
-    const x = items(formOf(idOf()))[n];
-    drag = { n, k, q0: svgPt(e), pts0: P.points(dOf(x.it)), snap: JSON.stringify(data), moved: false };
-    big.setPointerCapture(e.pointerId); e.preventDefault(); renderBig(); renderInfo();
+    drag = { q0: svgPt(e), x0: e.clientX, y0: e.clientY, moved: false, snap: JSON.stringify(data) };
+    if (sel) drag.pts0 = P.points(dOf(items(formOf(idOf()))[sel.n].it));
+    if (mode !== 'lock') { big.setPointerCapture(e.pointerId); e.preventDefault(); }
   });
   big.addEventListener('pointermove', e => {
-    if (!drag) return;
-    const q = svgPt(e), dx = q[0] - drag.q0[0], dy = q[1] - drag.q0[1];
-    if (!drag.moved) { if (Math.hypot(dx, dy) < 0.3) return; if (undoStack[undoStack.length - 1] !== drag.snap) undoStack.push(drag.snap); $('undo').disabled = false; drag.moved = true; }
-    change(drag.n, () => movePts(drag.pts0, drag.k, dx, dy, e.altKey));
+    if (!drag || mode === 'lock' || !sel || !drag.pts0) return;
+    if (!drag.moved) {
+      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return;   // a tap until the finger has moved 4 px
+      if (undoStack[undoStack.length - 1] !== drag.snap) undoStack.push(drag.snap); $('undo').disabled = false; drag.moved = true;
+    }
+    const q = svgPt(e);
+    change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey));
     save(); renderBig(); renderInfo();
   });
-  const endDrag = () => { if (drag && drag.moved) renderGrid(); drag = null; };
-  big.addEventListener('pointerup', endDrag); big.addEventListener('pointercancel', endDrag);
+  big.addEventListener('pointerup', e => {
+    if (!drag) return;
+    if (drag.moved) renderGrid();
+    else if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) { sel = pick(drag.q0); renderBig(); renderInfo(); }
+    drag = null;
+  });
+  big.addEventListener('pointercancel', () => { drag = null; });
 
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); undo(); return; }
-    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || !sel) return;
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || !sel || mode === 'lock') return;
     const m = e.shiftKey ? 5 : 0.5, v = { ArrowLeft: [-m, 0], ArrowRight: [m, 0], ArrowUp: [0, -m], ArrowDown: [0, m] }[e.key];
-    if (!v) return;
+    if (!v || (mode === 'h' && v[1]) || (mode === 'v' && v[0])) return;
     e.preventDefault(); checkpoint();
     change(sel.n, pts => movePts(pts, sel.k, v[0], v[1], false));
     update();
   });
+  function showMode() {
+    for (const b of $('moveMode').children) b.className = 'btn ' + (b.dataset.m === mode ? 'btn-cinnabar' : 'btn-quiet');
+    big.classList.toggle('locked', mode === 'lock');
+  }
+  $('moveMode').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { mode = b.dataset.m; showMode(); } });
 
   // the list of paths: select, edit the path text, the type, straight / curve
   $('items').addEventListener('click', e => {
@@ -322,8 +393,8 @@
     sel = { n, k: 'all' }; update();
   });
 
-  $('grid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (!c) return; sym = c.dataset.s; sel = null; renderAll(); });
-  $('form').addEventListener('change', e => { form = e.target.value; sel = null; renderAll(); });
+  $('grid').addEventListener('click', e => { const c = e.target.closest('.cell'); if (!c) return; sym = c.dataset.s; openForm(); renderAll(); });
+  $('form').addEventListener('change', e => { form = e.target.value; openForm(); renderAll(); });
   for (const st of STYLES) $('style').add(new Option(st[0], st[1]));
   $('style').addEventListener('change', e => { style = STYLES.find(s => s[1] === e.target.value); renderAll(); });
   $('marks').innerHTML = [0, 1, 2, 3, 4, 5].map(i => `<button class="btn btn-quiet btn-sm" data-i="${i}">${i + 1}</button>`).join('');
@@ -332,7 +403,6 @@
     const i = +b.dataset.i; marksOn.has(i) ? marksOn.delete(i) : marksOn.add(i);
     b.className = 'btn btn-sm ' + (marksOn.has(i) ? 'btn-cinnabar' : 'btn-quiet'); renderAll();
   });
-  $('free').addEventListener('click', e => { free = !free; e.currentTarget.className = 'btn btn-sm ' + (free ? 'btn-cinnabar' : 'btn-quiet'); });
   $('single').addEventListener('click', () => { checkpoint(); delete data.forms[idOf()]; sel = null; save(); renderAll(); });
   $('resetForm').addEventListener('click', () => {
     const id = idOf(); checkpoint();
@@ -351,12 +421,12 @@
   $('import').addEventListener('click', () => {
     const io = $('io');
     if (io.classList.contains('d-none') || !io.value.trim()) { io.classList.remove('d-none'); io.value = ''; io.focus(); return; }
-    try { const j = JSON.parse(io.value); P.toKage(j); checkpoint(); data = j; save(); renderAll(); io.classList.add('d-none'); }
+    try { const j = JSON.parse(io.value); P.toKage(j); checkpoint(); data = j; openForm(); save(); renderAll(); io.classList.add('d-none'); }
     catch (e) { $('draft').textContent = 'not a paths.json: ' + e.message; }
   });
-  $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to fonts/paths.json of the repository?')) return; checkpoint(); data = clone(repo); sel = null; save(); renderAll(); });
+  $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to fonts/paths.json of the repository?')) return; checkpoint(); data = clone(repo); openForm(); save(); renderAll(); });
 
-  save(); renderAll();
+  save(); openForm(); showMode(); renderAll();
 })();
 </script>
 </body>
