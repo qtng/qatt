@@ -112,36 +112,37 @@
     </div>
   </div>
 </main>
-<dialog class="help" id="help">
-  <div class="d-flex justify-content-between align-items-start"><h2>Lines, boxes and colours</h2>
-    <button class="btn-close" id="helpClose" aria-label="Close"></button></div>
-  <p class="note mb-1">Font units: the em is 1000, y up, 0 is the baseline. The large view shows the selected letter; its lines are labelled there.</p>
-  <h3>Horizontal text</h3>
+<dialog class="help" id="help" lang="de">
+  <div class="d-flex justify-content-between align-items-start"><h2>Linien, Kästen und Farben</h2>
+    <button class="btn-close" id="helpClose" aria-label="Schließen"></button></div>
+  <p class="note mb-1">Maße in Schrifteinheiten: Der Geviertkasten (em) ist 1000 hoch, y zählt nach oben, 0 ist die Grundlinie. Die große Ansicht zeigt den gewählten
+    Buchstaben; ihre Linien sind dort beschriftet.</p>
+  <h3>Waagrechter Text</h3>
   <dl>
-    <dt>baseline 0</dt><dd>The baseline of the letters (thin grey line).</dd>
-    <dt><span class="sw" style="color:#6e6e6e"></span>line 880 / −120</dt><dd>The edge of the line: the ascent and descent of the font (<code>hhea</code> and <code>OS/2 sTypo</code>, both 880 / −120, together 1 em).
-      With a line height of 1 the next line starts right here; what reaches beyond it (the tones do) needs more line height, about 1.1–1.3.
-      The line height "normal" of Chrome and Safari is 1.0; Firefox on Windows takes the Windows values below (1.45).</dd>
-    <dt><span class="sw" style="color:#d23232"></span>Windows clip 1160 / −288</dt><dd><code>OS/2 usWinAscent</code> and <code>usWinDescent</code>:
-      Windows (older programs, Word, some PDF tools) cuts off what lies beyond them. Browsers do not, but a mark should stay inside.</dd>
-    <dt>pair box</dt><dd>The cell of the syllable, 1000 wide (the left and the right half, 500 each), from −120 to 880.</dd>
+    <dt>baseline 0</dt><dd>Die Grundlinie der Buchstaben (dünne graue Linie).</dd>
+    <dt><span class="sw" style="color:#6e6e6e"></span>line 880 / −120</dt><dd>Der Rand der Zeile: Oberlänge und Unterlänge der Schrift (<code>hhea</code> und <code>OS/2 sTypo</code>,
+      beide 880 / −120, zusammen 1 em). Bei Zeilenhöhe 1 beginnt die nächste Zeile genau hier. Was darüber hinausragt (die Töne tun das), braucht mehr Zeilenhöhe,
+      etwa 1,1 bis 1,3. Die Zeilenhöhe „normal“ ist in Chrome und Safari 1,0; Firefox unter Windows nimmt die Windows-Werte weiter unten (1,45).</dd>
+    <dt><span class="sw" style="color:#d23232"></span>Windows clip 1160 / −288</dt><dd><code>OS/2 usWinAscent</code> und <code>usWinDescent</code>:
+      Windows (ältere Programme, Word, manche PDF-Werkzeuge) schneidet ab, was darüber hinausragt. Browser tun das nicht, ein Ton sollte aber innerhalb bleiben.</dd>
+    <dt>pair box</dt><dd>Die Zelle der Silbe, 1000 breit (linke und rechte Hälfte zu je 500), von −120 bis 880.</dd>
   </dl>
-  <h3>Vertical text</h3>
+  <h3>Senkrechter Text</h3>
   <dl>
-    <dt>cell (1 em)</dt><dd>The square of the syllable in a column, 1000 × 1000 (880 to −120). The tones of horizontal text hang over and under it, which in a column
-      lies on the neighbours, so they are moved into it.</dd>
-    <dt>column middle</dt><dd>The middle of the column (x 500). <b>side</b> moves a tone this many units further out, to the side it stands on.</dd>
-    <dt>y from the edge</dt><dd>An upper tone ends <b>y</b> units under the top of the cell, a lower one <b>y</b> units over its bottom (0: it touches the edge).
-      The line is drawn for the tone shown.</dd>
-    <dt>side, y</dt><dd>For the whole font, or for one tone with "own values"; the offset per letter comes on top.</dd>
+    <dt>cell (1 em)</dt><dd>Das Quadrat der Silbe in einer Spalte, 1000 × 1000 (880 bis −120). Die Töne des waagrechten Textes hängen über und unter der Zelle, was in einer Spalte
+      auf den Nachbarn liegt; deshalb werden sie in die Zelle hineingeschoben.</dd>
+    <dt>column middle</dt><dd>Die Mitte der Spalte (x 500). <b>side</b> schiebt einen Ton um so viele Einheiten weiter nach außen, auf die Seite, auf der er steht.</dd>
+    <dt>y from the edge</dt><dd>Ein oberer Ton endet <b>y</b> Einheiten unter dem Rand der Zelle oben, ein unterer <b>y</b> Einheiten über dem unteren Rand (0: er berührt den Rand).
+      Die Linie wird für den gezeigten Ton gezeichnet.</dd>
+    <dt>side, y</dt><dd>Für die ganze Schrift, oder für einen Ton mit „own values“ (eigene Werte); der Offset pro Buchstabe kommt noch dazu.</dd>
   </dl>
-  <h3>Marks and cells</h3>
+  <h3>Töne und Zellen</h3>
   <dl>
-    <dt><span style="color:#c8372d">red mark</span></dt><dd>The tone at the place it gets in the font with these values.</dd>
-    <dt><span class="text-secondary">grey mark</span></dt><dd>"without the offset": where the tone sits without the offset of this letter.</dd>
-    <dt>red border, ✕n</dt><dd>The mark overlaps the letter (n: overlapping pixels at 4 units per pixel).</dd>
-    <dt>orange border</dt><dd>The gap to the letter is under 20 units. The number in the middle of a cell is the gap in units (shown up to 60).</dd>
-    <dt>dx,dy (red)</dt><dd>The offset of this letter, in the bottom right corner of a cell.</dd>
+    <dt><span style="color:#c8372d">roter Ton</span></dt><dd>Der Ton an der Stelle, die er mit diesen Werten in der Schrift bekommt.</dd>
+    <dt><span class="text-secondary">grauer Ton</span></dt><dd>„without the offset“: wo der Ton ohne den Offset dieses Buchstabens säße.</dd>
+    <dt>roter Rand, ✕n</dt><dd>Der Ton überschneidet den Buchstaben (n: überlappende Pixel, bei 4 Einheiten pro Pixel).</dd>
+    <dt>oranger Rand</dt><dd>Der Abstand zum Buchstaben ist kleiner als 20 Einheiten. Die Zahl in der Mitte einer Zelle ist der Abstand in Einheiten (bis 60 gezeigt).</dd>
+    <dt>dx,dy (rot)</dt><dd>Der Offset dieses Buchstabens, unten rechts in der Zelle.</dd>
   </dl>
 </dialog>
 <script>
