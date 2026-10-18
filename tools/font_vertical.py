@@ -36,8 +36,9 @@ def tone_offset(g, glyf, centre):
     return dx, round(dy)
 
 
-def apply(font):
-    """Add the vertical metrics and the vert rule to a loaded TTFont (an old GPOS, vhea and vmtx are replaced: the fonts have no other positioning)."""
+def apply(font, extra=''):
+    """Add the vertical metrics and the vert rule to a loaded TTFont (an old GPOS, vhea and vmtx are replaced: the fonts have no other positioning
+    than `extra`, the feature code of the tone offsets of tone_offsets.py, which goes into the same GPOS)."""
     for tag in ('GPOS', 'vhea', 'vmtx'):
         if tag in font: del font[tag]
     order = font.getGlyphOrder()
@@ -58,7 +59,7 @@ def apply(font):
         for n in names:
             dx, dy = tone_offset(glyf[n], glyf, centre)
             fea += f'    pos {n} <{centre + dx} {EM + dy} 0 {-EM}>;\n'
-    fea += '} vert;\n'
+    fea += '} vert;\n' + extra
     addOpenTypeFeaturesFromString(font, fea, tables=['GPOS'])
     # vertical metrics: every glyph 1 em high, its top (the vertical origin) at the ascent like the horizontal drawing
     def tsb(name):

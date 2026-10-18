@@ -426,8 +426,13 @@ fb.font['BASE'] = _base
 fb.save(OUT + '.ttf')
 from fontTools.ttLib import TTFont
 f = TTFont(OUT + '.ttf')
+import tone_offsets   # the offsets of the small tone marks per letter (fonts/tone-offsets.json) as GPOS; the outlines of the marks for admin/font/tone-offsets.html
+offsets_fea = tone_offsets.fea(f, KAGE_STYLE + ('-cut' if CUT else '')) if KAGE else ''
 if VERTICAL:
     import font_vertical
-    font_vertical.apply(f); f.save(OUT + '.ttf')
+    font_vertical.apply(f, offsets_fea); f.save(OUT + '.ttf')
+elif offsets_fea:
+    addOpenTypeFeaturesFromString(f, offsets_fea, tables=['GPOS']); f.save(OUT + '.ttf')
+if KAGE: tone_offsets.marks(f, OUT + '.marks.json')
 f.flavor = 'woff2'; f.save(OUT + '.woff2')
 print(len(order) - 1, 'glyphs')

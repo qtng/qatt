@@ -150,6 +150,13 @@ right-falling strokes swell to a foot (the horizontal, the vertical (longer than
 
 **Brush tones.** A style can draw its tones as brush strokes instead of the stroked circles of qatt.js: `fonts/tones.json` holds them per KAGE style (`kaiti`; `pen` (Pen) and `pen-cut` (Pen Cut, `--pen --cut`) take the same tones by naming `"kaiti"`; a style without an entry keeps the circles). `tools/brush_tones.py` draws them: the circles as a brush ring (`ring`: clockwise from the top, a pressed start, the brush at 30°), the half circles as a curved stroke that ends in a little hook (`hook`; its settings under `"hook"`). The stroke widths are drawn for `"weight"` (2.0) and follow `--weight` in proportion. Each tone (key: the code point after U+F0000 in hex) gives its shape, side, turn (`rot`, degrees anticlockwise: the upper half circles 12.5°, the lower ones 90° to their side) and two ellipses `[cx, cy, rx, ry, stroke]` in font units: the standalone glyph and the small form `.mark` over the cell before (x −1000..0). The places are absolute: `keep_inside` and `tone_x` do not move them. The small forms: circles above at y 905 (rx 65, ry 50), below at −240 and smaller (50, 38), so that they end at −286 (inside `usWinDescent` 288); the half circles larger (×1.55), above at 860 and 55 further out, below at −186 and 70 further out (halfway as small as the lower circles). Changes to the letters made for the tones are in `fonts/letter-changes.md`.
 
+**Tone offsets.** The small tone mark after a pair can be moved per letter: `fonts/tone-offsets.json` holds `{style: {tone: {letter: [dx, dy]}}}`
+(style as in `tones.json`, tone the code point after U+F0000 in hex, letter the number of the form, font units, y up), adjusted in
+`admin/font/tone-offsets.html` (the page copies the JSON to hand over). `tools/tone_offsets.py` turns it into contextual positioning in the `kern`
+feature (horizontal text only; vertical text keeps the tones at the side): a tone at the right follows the rhyme glyph right before it
+(`.right`, `.right45`, `.right55`), a tone at the left the onset before the joiner (`.left…`). Single letters, stacks and the wide font (`.markw`) keep
+the global place. Every KAGE font also gets `fonts/<name>.marks.json` with the outlines of its small tone marks, which the page draws.
+
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
 order as the single form; `admin/font/font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make

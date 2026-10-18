@@ -8,38 +8,318 @@
   <link rel="stylesheet" href="../../css/site.css">
   <script src="../../js/navigation.js"></script>
   <style>
-    main { max-width: 52rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
-    li { margin-bottom: .35rem; }
+    main { max-width: 80rem; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+    .note { color: var(--muted, #7b6c58); font-size: .88rem; }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; font-size: .85rem; }
+    .bar label { display: flex; align-items: center; gap: .35rem; margin: 0; white-space: nowrap; }
+    .bar select, .bar input { font-size: .85rem; }
+    .tones { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 30rem; gap: 1rem; align-items: start; margin-top: .8rem; }
+    .side { position: sticky; top: 68px; }
+    @media (max-width: 991.98px) { .layout { grid-template-columns: minmax(0, 1fr); } .side { order: -1; position: static; } }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr)); gap: .35rem; }
+    .cell { border: 1px solid var(--line, #e4d9c0); border-radius: .4rem; padding: .15rem; text-align: center; cursor: pointer; position: relative; }
+    .cell canvas { display: block; width: 100%; height: auto; }
+    .cell .lab { display: flex; justify-content: space-between; font: .68rem ui-monospace, Menlo, monospace; padding: 0 .2rem; }
+    .cell.sel { outline: 3px solid var(--cinnabar, #a8362a); outline-offset: 1px; }
+    .cell.hit { border-color: #d33; border-width: 2px; }
+    .cell.near { border-color: #e69500; border-width: 2px; }
+    .cell .off { color: var(--cinnabar, #a8362a); }
+    .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; touch-action: none; cursor: grab; }
+    .pad { display: grid; grid-template-columns: repeat(3, 2.4rem); gap: .25rem; }
+    .pad .btn { padding: .15rem 0; }
+    .num { width: 5rem; }
+    textarea { font: .78rem ui-monospace, Menlo, monospace; }
+    .hit-t { color: #d33; } .near-t { color: #c07a00; }
   </style>
 </head>
 <body>
 <main>
   <h1 class="h3">Tone offsets</h1>
-  <p class="text-muted">Not built yet: this page only holds the plan.</p>
+  <p class="note mb-2">Moves the small tone mark after a pair per letter: a tone at the right follows the rhyme (the right half), a tone at the left
+    the onset (the left half). The page draws the letters with the font and the mark from its outline at the global place plus the offset, as the
+    font will show it once it is built with the offsets. Offsets are per style (all weights of a font share them), in font units, y up.
+    Select a cell, then move the mark with the arrow keys (Shift: 10 units) or by dragging it in the large view. Red: the mark overlaps the letter;
+    orange: closer than 20 units. Hand the export over to be committed as <code>fonts/tone-offsets.json</code> and built
+    (<code>tools/tone_offsets.py</code>); single letters, stacks and the wide font keep the global place.</p>
 
-  <h2 class="h5 mt-4">Goal</h2>
-  <p>Fine-tune the place of the small tone marks per letter (Khai first). A tone mark lies over the cell before it, at one place
-    for all letters; where a letter reaches too close to the mark, a small offset for that letter moves the mark away.</p>
+  <div class="bar">
+    <label>Font <select id="font" class="form-select form-select-sm"></select></label>
+    <label>Partner <input id="partner" type="number" min="0" max="153" class="form-control form-control-sm num" title="the other half of the pair"></label>
+    <label>Show <select id="filter" class="form-select form-select-sm">
+      <option value="all">all letters</option><option value="bad">touching or close</option><option value="set">with an offset</option></select></label>
+    <span id="stats" class="note"></span>
+  </div>
+  <div class="tones mt-2" id="tones"></div>
 
-  <h2 class="h5 mt-4">Plan</h2>
-  <ol>
-    <li><b>Data</b>: a JSON file, e.g. <code>fonts/tone-offsets.json</code>, per font and tone corner:
-      <code>{ "khai": { "upper-right": { "104": [dx, dy], … }, "upper-left": { "22": [dx, dy], … }, … } }</code>.
-      The key of a right corner is the rhyme letter (the letter right before the tone), of a left corner the onset letter
-      (two glyphs before the tone). Values in font units; missing = 0.</li>
-    <li><b>Page</b>: a grid of all 154 letter forms, one cell per syllable (onset 63 + the letter as rhyme for the right corners,
-      the letter as onset + rhyme 61 for the left corners), drawn with the font <i>without</i> its tone marks. The tone mark
-      is drawn on top as an SVG of its outline from the font (read with opentype.js, or exported as JSON by the build), at the
-      global place plus the offset of the JSON, so that the page shows exactly what the font will show.</li>
-    <li><b>Adjusting</b>: choose a corner and a tone (circle / half ring); click a cell and move the mark with the arrow keys
-      (1 unit, Shift 10) or by dragging; the cell shows its offset and the distance to the letter (red when they touch).</li>
-    <li><b>Export</b>: a button copies the JSON of all offsets (only the non-zero ones) to hand over; the page can also load
-      a JSON to continue.</li>
-    <li><b>Font</b>: <code>tools/build_font.py</code> reads the JSON and writes a contextual positioning (GPOS) of the mark
-      after those letters (no new glyphs). The right corners look at the rhyme glyph before the tone, the left corners at the
-      onset two glyphs before. Stacks (Tham Thư) and pairs (<code>.markw</code>) are cases of their own.</li>
-    <li><b>Elsewhere</b>: <code>js/qatt.js</code> (SVG drawing) has no such rules; if it should follow, it reads the same JSON.</li>
-  </ol>
+  <div class="layout">
+    <div class="grid" id="grid"></div>
+    <div class="side">
+      <canvas id="big" class="big" width="520" height="600"></canvas>
+      <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+        <div class="pad">
+          <span></span><button class="btn btn-quiet btn-sm" data-move="0,1">↑</button><span></span>
+          <button class="btn btn-quiet btn-sm" data-move="-1,0">←</button><button class="btn btn-quiet btn-sm" id="zero" title="back to the global place">0</button><button class="btn btn-quiet btn-sm" data-move="1,0">→</button>
+          <span></span><button class="btn btn-quiet btn-sm" data-move="0,-1">↓</button><span></span>
+        </div>
+        <div>
+          <div id="selname" class="fw-semibold small"></div>
+          <div class="bar mt-1">
+            <label>dx <input id="dx" type="number" class="form-control form-control-sm num"></label>
+            <label>dy <input id="dy" type="number" class="form-control form-control-sm num"></label>
+          </div>
+          <div id="selinfo" class="note mt-1"></div>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        <button class="btn btn-quiet btn-sm" id="next">Next touching (N)</button>
+        <button class="btn btn-quiet btn-sm" id="copyOther" title="give the other shape of this corner (circle / half ring) the same offset">Same for the other shape</button>
+      </div>
+      <hr>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button class="btn btn-cinnabar btn-sm" id="export">Copy JSON</button>
+        <button class="btn btn-quiet btn-sm" id="import">Load JSON…</button>
+        <button class="btn btn-quiet btn-sm" id="discard">Discard draft</button>
+        <span id="draft" class="note"></span>
+      </div>
+      <textarea id="io" class="form-control mt-2 d-none" rows="6" placeholder="Paste the JSON of the offsets, then Load JSON again"></textarea>
+    </div>
+  </div>
 </main>
+<script>
+(() => {
+  const FONTS = [
+    ['Khai', 'qatt-khai', 'kaiti'],
+    ['Pen ExtraLight', 'qatt-pen-extralight', 'pen'], ['Pen Light', 'qatt-pen-light', 'pen'], ['Pen', 'qatt-pen', 'pen'], ['Pen Medium', 'qatt-pen-medium', 'pen'],
+    ['Pen Cut ExtraLight', 'qatt-pencut-extralight', 'pen-cut'], ['Pen Cut Light', 'qatt-pencut-light', 'pen-cut'], ['Pen Cut', 'qatt-pencut', 'pen-cut'], ['Pen Cut Medium', 'qatt-pencut-medium', 'pen-cut'],
+    ['Serif', 'qatt-serif', 'mincho'], ['Gothic', 'qatt-gothic', 'gothic'],
+  ];
+  const TONES = [   // code after U+F0000, name, right corner?, the other shape of the corner
+    ['9F', 'Circle upper left', false, '9E'], ['9E', 'Half ring upper left', false, '9F'], ['A1', 'Circle upper right', true, 'A0'], ['A0', 'Half ring upper right', true, 'A1'],
+    ['9D', 'Circle lower left', false, '9C'], ['9C', 'Half ring lower left', false, '9D'], ['A3', 'Circle lower right', true, 'A2'], ['A2', 'Half ring lower right', true, 'A3'],
+  ];
+  const N = 154, PARTNER = { right: 63, left: 61 }, NEAR = 20, KEY = 'qattToneOffsets1';
+  const X0 = -150, X1 = 1150, Y0 = -330, Y1 = 1180;   // the part of a cell that is drawn (font units)
+  const $ = id => document.getElementById(id);
+  const ch = n => String.fromCodePoint(0xF0000 + n);
+  const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
+
+  let repo = {}, data = {}, names = {}, marks = null, family = '', font = FONTS[0], tone = TONES[2], sel = null, results = [], partner = { ...PARTNER };
+  const loaded = {};
+
+  const off = (t = tone[0], n = sel) => ((data[font[2]] || {})[t] || {})[n] || [0, 0];
+  function setOff(n, d, t = tone[0]) {
+    const s = data[font[2]] = data[font[2]] || {}, m = s[t] = s[t] || {};
+    if (d[0] || d[1]) m[n] = d; else delete m[n];
+    if (!Object.keys(m).length) delete s[t];
+    if (!Object.keys(s).length) delete data[font[2]];
+    save();
+  }
+  const clean = o => JSON.stringify(sortObj(o));
+  function sortObj(o) {
+    const out = {};
+    for (const st of Object.keys(o).sort()) for (const t of Object.keys(o[st]).sort()) for (const n of Object.keys(o[st][t]).sort((a, b) => a - b)) {
+      const d = o[st][t][n]; if (!d[0] && !d[1]) continue;
+      ((out[st] = out[st] || {})[t] = out[st][t] || {})[n] = d;
+    }
+    return out;
+  }
+  function save() {
+    const same = clean(data) === clean(repo);
+    store.set(KEY, same ? null : JSON.stringify(data));
+    const count = Object.values(data).reduce((a, s) => a + Object.values(s).reduce((b, m) => b + Object.keys(m).length, 0), 0);
+    $('draft').textContent = `${count} offsets` + (same ? ', as in the repository' : ', draft (not in the repository yet)');
+  }
+  function exportJson() {
+    const o = sortObj(data);
+    const lines = Object.entries(o).map(([st, ts]) => ` ${JSON.stringify(st)}: {\n` + Object.entries(ts).map(([t, m]) => `  ${JSON.stringify(t)}: ${JSON.stringify(m)}`).join(',\n') + '\n }');
+    return lines.length ? '{\n' + lines.join(',\n') + '\n}\n' : '{}\n';
+  }
+
+  async function loadFont() {
+    const [, file] = font;
+    if (!loaded[file]) {
+      const [buf, mk] = await Promise.all([
+        fetch(`/fonts/${file}.ttf`, { cache: 'no-store' }).then(r => r.arrayBuffer()),
+        fetch(`/fonts/${file}.marks.json`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null)]);
+      const fam = 'ToneOffsets-' + file;
+      const face = new FontFace(fam, buf); await face.load(); document.fonts.add(face);
+      loaded[file] = { fam, marks: mk && Object.fromEntries(Object.entries(mk.marks).map(([t, d]) => [t, new Path2D(d)])), meta: mk };
+    }
+    family = loaded[file].fam; marks = loaded[file].marks;
+  }
+
+  // a cell: the pair of the letter n with the partner; the mark of the tone at the global place + d. k = px per font unit
+  function textOf(n) { return tone[2] ? ch(partner.right) + ch(0x9A) + ch(n) : ch(n) + ch(0x9A) + ch(partner.left); }
+  function draw(ctx, n, k, d, opts = {}) {
+    const W = (X1 - X0) * k, H = (Y1 - Y0) * k, base = Y1 * k;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+    if (opts.guides) {
+      ctx.strokeStyle = 'rgba(128,128,128,.35)'; ctx.lineWidth = 1;
+      const hl = (y, dash) => { ctx.setLineDash(dash || []); ctx.beginPath(); ctx.moveTo(0, base - y * k); ctx.lineTo(W, base - y * k); ctx.stroke(); };
+      hl(0); hl(880, [4, 4]); ctx.strokeStyle = 'rgba(210,50,50,.6)'; hl(-288, [6, 4]); ctx.setLineDash([]);
+      ctx.strokeStyle = 'rgba(128,128,128,.35)'; ctx.strokeRect(-X0 * k, base - 880 * k, 1000 * k, 1000 * k);
+    }
+    ctx.font = `${1000 * k}px "${family}"`; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = opts.ink || '#000';
+    ctx.fillText(textOf(n), -X0 * k, base);
+    const end = -X0 * k + ctx.measureText(textOf(n)).width;
+    const p = marks && marks[tone[0]];
+    if (!p) return;
+    if (opts.ghost && (d[0] || d[1])) {
+      ctx.setTransform(k, 0, 0, -k, end, base); ctx.fillStyle = 'rgba(128,128,128,.28)'; ctx.fill(p);
+    }
+    ctx.setTransform(k, 0, 0, -k, end + d[0] * k, base - d[1] * k);
+    ctx.fillStyle = opts.mark || '#000'; ctx.fill(p);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  // overlap and gap of the mark to the letters, on a raster of 4 font units per pixel
+  const AK = 0.25, aw = Math.ceil((X1 - X0) * AK), ah = Math.ceil((Y1 - Y0) * AK);
+  const cvL = Object.assign(document.createElement('canvas'), { width: aw, height: ah }), cvM = Object.assign(document.createElement('canvas'), { width: aw, height: ah });
+  const cL = cvL.getContext('2d', { willReadFrequently: true }), cM = cvM.getContext('2d', { willReadFrequently: true });
+  function analyse(n, d) {
+    const base = Y1 * AK;
+    cL.setTransform(1, 0, 0, 1, 0, 0); cL.clearRect(0, 0, aw, ah);
+    cL.font = `${1000 * AK}px "${family}"`; cL.fillStyle = '#000'; cL.fillText(textOf(n), -X0 * AK, base);
+    const end = -X0 * AK + cL.measureText(textOf(n)).width;
+    cM.setTransform(1, 0, 0, 1, 0, 0); cM.clearRect(0, 0, aw, ah);
+    const p = marks && marks[tone[0]]; if (!p) return { overlap: 0, gap: Infinity };
+    cM.setTransform(AK, 0, 0, -AK, end + d[0] * AK, base - d[1] * AK); cM.fill(p);
+    const L = cL.getImageData(0, 0, aw, ah).data, M = cM.getImageData(0, 0, aw, ah).data;
+    let overlap = 0, x0 = aw, y0 = ah, x1 = -1, y1 = -1;
+    for (let y = 0; y < ah; y++) for (let x = 0; x < aw; x++) {
+      const i = (y * aw + x) * 4 + 3;
+      if (M[i] > 128) { if (L[i] > 128) overlap++; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    }
+    if (overlap || x1 < 0) return { overlap, gap: overlap ? 0 : Infinity };
+    const R = 15;   // look 60 units around the mark
+    let best = Infinity;
+    for (let y = Math.max(0, y0 - R); y <= Math.min(ah - 1, y1 + R); y++) for (let x = Math.max(0, x0 - R); x <= Math.min(aw - 1, x1 + R); x++) {
+      if (L[(y * aw + x) * 4 + 3] <= 128) continue;
+      for (let v = Math.max(y0, y - R); v <= Math.min(y1, y + R); v++) for (let u = Math.max(x0, x - R); u <= Math.min(x1, x + R); u++) {
+        if (M[(v * aw + u) * 4 + 3] <= 128) continue;
+        const dd = (u - x) * (u - x) + (v - y) * (v - y); if (dd < best) best = dd;
+      }
+    }
+    return { overlap: 0, gap: best === Infinity ? Infinity : Math.sqrt(best) / AK };
+  }
+
+  const ink = () => getComputedStyle(document.body).color;
+  const MARK = '#c8372d';
+  function cellState(n) {
+    const r = results[n], el = $('grid').children[n], d = off(tone[0], n);
+    el.classList.toggle('hit', r.overlap > 0); el.classList.toggle('near', !r.overlap && r.gap < NEAR);
+    el.querySelector('.st').innerHTML = r.overlap ? `<span class="hit-t">✕${r.overlap}</span>` : r.gap < 60 ? `<span class="${r.gap < NEAR ? 'near-t' : ''}">${Math.round(r.gap)}</span>` : '';
+    el.querySelector('.off').textContent = d[0] || d[1] ? `${d[0]},${d[1]}` : '';
+    const f = $('filter').value;
+    el.hidden = f === 'bad' ? !(r.overlap || r.gap < NEAR) && n !== sel : f === 'set' ? !(d[0] || d[1]) && n !== sel : false;
+  }
+  function redrawCell(n) {
+    const cv = $('grid').children[n].querySelector('canvas');
+    draw(cv.getContext('2d'), n, cv.width / (X1 - X0), off(tone[0], n), { ink: ink(), mark: MARK });
+    results[n] = analyse(n, off(tone[0], n));
+    cellState(n);
+  }
+  function stats() {
+    const hit = results.filter(r => r.overlap).length, near = results.filter(r => !r.overlap && r.gap < NEAR).length;
+    $('stats').innerHTML = `${tone[1]}: <span class="hit-t">${hit} overlapping</span>, <span class="near-t">${near} closer than ${NEAR}</span>`;
+  }
+  function redrawAll() { for (let n = 0; n < N; n++) redrawCell(n); stats(); redrawBig(); }
+  function redrawBig() {
+    const cv = $('big'), ctx = cv.getContext('2d');
+    if (sel == null) { ctx.clearRect(0, 0, cv.width, cv.height); $('selname').textContent = 'Select a letter'; $('selinfo').textContent = ''; return; }
+    const k = cv.width / (X1 - X0), d = off();
+    draw(ctx, sel, k, d, { ink: ink(), mark: MARK, guides: true, ghost: true });
+    $('selname').textContent = `${sel} ${names[sel] || ''}` + (tone[2] ? ' (rhyme)' : ' (onset)');
+    $('dx').value = d[0]; $('dy').value = d[1];
+    const r = results[sel];
+    $('selinfo').innerHTML = r.overlap ? `<span class="hit-t">overlaps (${r.overlap} px)</span>` : r.gap === Infinity ? 'free' : `gap ≈ ${Math.round(r.gap)} units`;
+  }
+  function select(n) {
+    const g = $('grid'); if (sel != null) g.children[sel].classList.remove('sel');
+    sel = n; g.children[n].classList.add('sel'); redrawBig();
+  }
+  function move(dx, dy, abs) {
+    if (sel == null) return;
+    const d = off(); setOff(sel, abs ? [dx, dy] : [d[0] + dx, d[1] + dy]);
+    redrawCell(sel); stats(); redrawBig();
+  }
+
+  function buildGrid() {
+    const g = $('grid'); g.innerHTML = '';
+    const dpr = Math.min(2, window.devicePixelRatio || 1), cw = Math.round(96 * dpr), chh = Math.round(cw * (Y1 - Y0) / (X1 - X0));
+    for (let n = 0; n < N; n++) {
+      const el = document.createElement('div'); el.className = 'cell'; el.title = `${n} ${names[n] || ''}`;
+      el.innerHTML = `<canvas width="${cw}" height="${chh}"></canvas><div class="lab"><span>${n}</span><span class="st"></span><span class="off"></span></div>`;
+      el.addEventListener('click', () => select(n));
+      g.appendChild(el);
+    }
+  }
+  function buildTones() {
+    const box = $('tones'); box.innerHTML = '';
+    for (const t of TONES) {
+      const b = document.createElement('button'); b.className = 'btn btn-sm ' + (t === tone ? 'btn-cinnabar' : 'btn-quiet'); b.textContent = t[1];
+      b.addEventListener('click', () => { tone = t; buildTones(); $('partner').value = partner[t[2] ? 'right' : 'left']; redrawAll(); });
+      box.appendChild(b);
+    }
+  }
+
+  async function init() {
+    for (const [label, file] of FONTS) $('font').add(new Option(label, file));
+    const [rj, gj] = await Promise.all([fetch('/fonts/tone-offsets.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : {}).catch(() => ({})),
+      fetch('/fonts/glyphs.json').then(r => r.json()).catch(() => [])]);
+    repo = rj; for (const g of gj) names[g.o] = g.n;
+    try { data = JSON.parse(store.get(KEY)) || JSON.parse(JSON.stringify(repo)); } catch (e) { data = JSON.parse(JSON.stringify(repo)); }
+    save(); buildTones(); buildGrid();
+    $('partner').value = partner.right;
+    await loadFont(); redrawAll(); select(0);
+  }
+
+  $('font').addEventListener('change', async e => { font = FONTS.find(f => f[1] === e.target.value); await loadFont(); redrawAll(); });
+  $('partner').addEventListener('change', e => { const v = Math.max(0, Math.min(N - 1, +e.target.value || 0)); partner[tone[2] ? 'right' : 'left'] = v; e.target.value = v; redrawAll(); });
+  $('filter').addEventListener('change', () => { for (let n = 0; n < N; n++) cellState(n); });
+  for (const b of document.querySelectorAll('[data-move]')) b.addEventListener('click', e => { const [x, y] = b.dataset.move.split(',').map(Number); const m = e.shiftKey ? 10 : 1; move(x * m, y * m); });
+  $('zero').addEventListener('click', () => move(0, 0, true));
+  $('dx').addEventListener('change', () => move(+$('dx').value || 0, off()[1], true));
+  $('dy').addEventListener('change', () => move(off()[0], +$('dy').value || 0, true));
+  $('copyOther').addEventListener('click', () => { if (sel == null) return; setOff(sel, off(), tone[3]); $('selinfo').textContent = 'copied to ' + TONES.find(t => t[0] === tone[3])[1]; });
+  function next() {
+    const order = [...Array(N).keys()], start = sel == null ? 0 : sel + 1;
+    const n = order.map(i => (start + i) % N).find(i => results[i].overlap || results[i].gap < NEAR);
+    if (n != null) { select(n); $('grid').children[n].scrollIntoView({ block: 'nearest' }); }
+  }
+  $('next').addEventListener('click', next);
+  document.addEventListener('keydown', e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    const m = e.shiftKey ? 10 : 1, k = { ArrowLeft: [-m, 0], ArrowRight: [m, 0], ArrowUp: [0, m], ArrowDown: [0, -m] }[e.key];
+    if (k) { e.preventDefault(); move(...k); } else if (e.key === 'n' || e.key === 'N') next();
+  });
+  // drag the mark in the large view
+  let drag = null;
+  const big = $('big');
+  big.addEventListener('pointerdown', e => { if (sel == null) return; big.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, d: off() }; big.style.cursor = 'grabbing'; });
+  big.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const u = (X1 - X0) / big.getBoundingClientRect().width;
+    const d = [Math.round(drag.d[0] + (e.clientX - drag.x) * u), Math.round(drag.d[1] - (e.clientY - drag.y) * u)];
+    const c = off(); if (d[0] !== c[0] || d[1] !== c[1]) move(d[0], d[1], true);
+  });
+  const end = () => { drag = null; big.style.cursor = ''; };
+  big.addEventListener('pointerup', end); big.addEventListener('pointercancel', end);
+
+  $('export').addEventListener('click', async () => {
+    const t = exportJson(); $('io').value = t; $('io').classList.remove('d-none');
+    try { await navigator.clipboard.writeText(t); $('draft').textContent = 'copied to the clipboard'; } catch (e) { $('io').select(); }
+  });
+  $('import').addEventListener('click', () => {
+    const io = $('io');
+    if (io.classList.contains('d-none') || !io.value.trim()) { io.classList.remove('d-none'); io.value = ''; io.focus(); return; }
+    try { data = JSON.parse(io.value); save(); redrawAll(); io.classList.add('d-none'); } catch (e) { $('draft').textContent = 'not valid JSON: ' + e.message; }
+  });
+  $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to the offsets of the repository?')) return; data = JSON.parse(JSON.stringify(repo)); save(); redrawAll(); });
+
+  init();
+})();
+</script>
 </body>
 </html>
