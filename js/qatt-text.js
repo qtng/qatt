@@ -1,9 +1,9 @@
 /*
 QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html and admin/font/codetable.html)
 
-  QattText.syllable("t,c5,,5")   // code of VietnameseParser.parse(...).qatt -> onset U+F009B rhyme tone, one cell
+  QattText.syllable("t,c5,,5")   // code of VietnameseParser.parse(...).qatt -> onset U+F009A rhyme tone, one cell
   QattText.syllable("v,,,0")     // no rhyme (Hợp Thư ông): the shape alone
-  QattText.syllable("v2,v,,0")   // code of VietnameseParser.parse(...).hop (Hợp Thư): marked shape U+F009B plain shape
+  QattText.syllable("v2,v,,0")   // code of VietnameseParser.parse(...).hop (Hợp Thư): marked shape U+F009A plain shape
   QattText.word("tự", parser)    // Quốc Ngữ word -> text, or null if there is no glyph for it
   QattText.cells(text)           // the cells of QATT text: [{ cell, index }] (QattText.CELL is the pattern, CELL_ANY also matches every other character)
   QattText.decode(cell)          // a cell as { onset, rhyme, tone, hop } (the reverse of syllable)
@@ -14,7 +14,7 @@ QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html
   QattText.recode(text, from, to) // every cell by its reading after the decoding of parser `from` written again after the decoding of parser `to`; all other text stays
 */
 const QattText = (() => {
-  const BASE = 0xF0000, JOINER = BASE + 155, COMBINER = BASE + 154;
+  const BASE = 0xF0000, JOINER = BASE + 154, COMBINER = BASE + 155;
   const SHAPES = "_ ng h g c l tr d n t th nh ch dz x kh s r m b v ph".split(" ");   // shape i: U+F0000 + 7 * i, with marking stroke n (1..6): U+F0000 + 7 * i + n
   const TONES = [null, 160, 157, 158, 159, 161, 162, 163, 156];                      // tone 1..8 -> offset of the tone mark
   const chr = o => String.fromCodePoint(BASE + o);

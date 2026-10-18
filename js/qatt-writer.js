@@ -197,7 +197,7 @@ const QattWriter = (() => {
 
     // ----- keeping the cells whole -----
     // A cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it.
-    const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009B, COMBINER = 0xF009A;
+    const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;
     const WINDOW = 64;
     // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
     const cellAt = (text, pos, which) => {
@@ -300,7 +300,7 @@ const QattWriter = (() => {
     function refresh() { showTham(); }
     // Tham Thư (stack): the button is on when the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the
     // rhyme of a pair, so it does not count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair,
-    // but not the upper part of a stack. A click puts the combiner U+F009A between the two letters, the cursor stays behind the same characters.
+    // but not the upper part of a stack. A click puts the combiner U+F009B between the two letters, the cursor stays behind the same characters.
     const tham = $('tham-btn');
     const thamAt = () => {
       if (!qatt || typer.selectionStart !== typer.selectionEnd) return null;
