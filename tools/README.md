@@ -120,7 +120,10 @@ marks were docked from the start; the build does not use it). `"markLength": {"h
 the editor opens, every mark gets the length of its kind (its angle stays) and a docked one the nearest place in steps of 10 %; an edited mark also gets
 an angle in steps of 5°, and docks only at its ends or a step of 10 %. So the file changes only through the editor. One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
 set a type, make a straight stroke a curve and back; the draft lives in the browser (`localStorage` `qattPaths1`), "Copy JSON" gives the whole file.
-`"checkpoints": [{id, time, message, markLength, forms}]` (optional, one per line at the end of the file): states kept with "Set checkpoint" in the
+`"styles": {"kaiti": {"forms": {id: form}}}` (optional, also `mincho`, `gothic`, `pen`, `pen-cut`): the glyphs a font has of its own, edited in
+the editor after a click on the preview of that font; in that font (all its weights; Gothic Wide is `gothic`) they take the place of the central ones
+(`QattPaths.toKage(data, style)`, called by `kage_outlines.js` with the style of the build); a left / right form of a font is its own left form, the
+central left form, its own single form, the central single form. `"checkpoints": [{id, time, message, markLength, forms, styles}]` (optional, one per line at the end of the file): states kept with "Set checkpoint" in the
 editor; the last one is the current one, the red dots of the editor (forms changed) and its grey paths compare with it. Going back to an older one copies
 it as a new checkpoint; the build does not read them.
 

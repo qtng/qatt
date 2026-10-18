@@ -17,7 +17,7 @@ const SHAPES = [...ctx.SHAPES].map(s => s === "z" ? "_" : s);
 const [kageFile, jobsFile, outFile, style = "mincho", boldArg = "1"] = process.argv.slice(2);
 const bold = +boldArg || 1;                  // build_font.py --bold: 1.7 for Gothic (the stroke), 1.8 for Mincho (the verticals; the thin horizontals stay)
 const raw = JSON.parse(fs.readFileSync(kageFile, "utf8"));
-const data = raw.format === "qatt-paths" ? require("./qatt_paths.js").toKage(raw) : raw, S = data.scale || 1.9, SYM = data.sym;
+const data = raw.format === "qatt-paths" ? require("./qatt_paths.js").toKage(raw, style) : raw, S = data.scale || 1.9, SYM = data.sym;
 const { draw: drawLines, plainEnds, ptsOf, withPts } = require("./qatt_draw.js")({ Kage, penPolygons, kaitiPolygons, S });   // the drawing, shared with the glyph editor
 const draw = (job, m) => drawLines(job, m, style, bold);
 
