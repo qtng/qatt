@@ -29,6 +29,10 @@
     .cell .lab { display: flex; justify-content: space-between; font: .72rem ui-monospace, Menlo, monospace; padding: 0 .25rem; }
     .cell.sel { outline: 3px solid var(--cinnabar, #a8362a); outline-offset: 1px; }
     .cell .ed { color: var(--cinnabar, #a8362a); }
+    .cell { position: relative; }
+    .cell .lr { position: absolute; top: .2rem; right: .25rem; display: flex; gap: .15rem; }
+    .cell .lr span { font: 600 .62rem/1 system-ui, sans-serif; color: #fff; border-radius: .2rem; padding: .12rem .22rem; }
+    .cell .lr .l { background: #2b6cb0; } .cell .lr .r { background: #2f855a; }
     svg .ink { fill: currentColor; }
     .big { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .5rem; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: background-color .15s; }
     .big .bg { fill: currentColor; opacity: .16; }
@@ -203,6 +207,7 @@
       angedockte Punkt selbst gezogen, löst er sich). „⟲ 5°“ / „⟳ 5°“ und die Pfeiltasten drehen ihn ebenso, Align macht ihn waagrecht oder senkrecht.</dd>
     <dt>grau dick</dt><dd>Die Pfade des aktuellen Haltepunkts (ohne Haltepunkt: wie in der Datei, mit der Anpassung der Zusatzstriche beim Öffnen). Sie bleiben
       beim Bearbeiten stehen und werden mit jedem neuen Haltepunkt neu gezeichnet; unter der Ansicht steht, wie weit das Gewählte davon weg ist.</dd>
+    <dt><span style="background:#2b6cb0;color:#fff;padding:0 .2rem;border-radius:.2rem">L</span> <span style="background:#2f855a;color:#fff;padding:0 .2rem;border-radius:.2rem">R</span></dt><dd>In der Übersicht oben rechts: das Symbol hat eine eigene linke (L) bzw. rechte (R) Form.</dd>
     <dt>roter Punkt</dt><dd>In der Übersicht: die Form ist seit dem letzten Haltepunkt bearbeitet (ohne Haltepunkt: anders als in der Datei).</dd>
     <dt>Pfeiltasten</dt><dd>Verschieben das Gewählte um 0,5 (Shift: 5), wie das Ziehen mit Move.</dd>
     <dt>Strg+Z</dt><dd>Rückgängig.</dd>
@@ -306,7 +311,8 @@
     $('grid').innerHTML = SHAPES.map(s => {
       const id = idOf(s), f = formOf(id);
       const mark = derived(id) ? 'single form' : isLR(id) ? 'own' : '';
-      return `<div class="cell${s === sym ? ' sel' : ''}" data-s="${s}"><svg viewBox="0 0 200 200">${glyph(f, style, marksOn)}</svg>
+      const lr = (data.forms['v2l-' + s] ? '<span class="l" title="has an own left form">L</span>' : '') + (data.forms['v2r-' + s] ? '<span class="r" title="has an own right form">R</span>' : '');
+      return `<div class="cell${s === sym ? ' sel' : ''}" data-s="${s}">${lr ? `<div class="lr">${lr}</div>` : ''}<svg viewBox="0 0 200 200">${glyph(f, style, marksOn)}</svg>
         <div class="lab"><span>${s === '_' ? 'z' : s}</span><span class="note">${mark}</span><span class="ed">${changed(id) ? '●' : ''}</span></div></div>`;
     }).join('');
   }
