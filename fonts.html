@@ -94,12 +94,7 @@
 (() => {
   const $ = s => document.querySelector(s);
   const parser = new VietnameseParser();
-  const FONTS = QATT_FONTS;   // all fonts, also those that the font lists offer only to admins (fonts.js defines the @font-face rules of the others only for admins)
-  if (!isAdmin()) {
-    const style = document.createElement('style');
-    style.textContent = FONTS.filter(f => f.admin).map(f => `@font-face { font-family: "${f.family}"; src: url(fonts/${f.file}.woff2?v=6) format("woff2"), url(fonts/${f.file}.ttf?v=6) format("truetype"); }`).join('\n');
-    document.head.append(style);
-  }
+  const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());   // the blocks come from fonts.js: a visitor sees the fonts that the font lists offer, an admin all (fonts.js defines the @font-face rules of exactly these)
   const SAMPLE = 'Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng. Lạ gì bỉ sắc tư phong, trời xanh quen thói má hồng đánh ghen.';   // Truyện Kiều, lines 1 to 6
   const SIZES = [24, 28, 32, 36, 42, 48, 56, 72, 96];   // from small to large
   const ABOUT = [   // the first entry whose name starts the family: English, Vietnamese (drafts by Claude)
