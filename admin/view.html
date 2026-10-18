@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Private pages</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
+  <style>
+    body { background: #f7efdc; color: #2b2118; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    .note { color: #7b6c58; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 50rem">
+  <h1 class="h3" id="title">Private pages</h1>
+  <p class="note" id="account"></p>
+  <p id="msg" class="note" hidden></p>
+  <div id="list" hidden>
+    <p class="note">Pages of the private repository qtng/chunom-private, kept in the database and shown to admins only. Open one as <code>view.html?f=<i>feature</i>&amp;p=<i>path</i></code>.</p>
+    <ul id="pages" class="list-unstyled"></ul>
+  </div>
+</main>
+<script>
+/*
+The viewer of the private pages (the admin pages of the features of the private repository qtng/chunom-private, see its README): view.html?f=fonts&p=admin/glyph-editor.html.
+The page and the files it needs are in the table private_files, which only admins can read (private_file() checks app_metadata.is_admin in the database). In the
+page, an address without a leading slash is a private file (relative to the folder of the page in the repository) and an address with a slash (or a domain) is
+the public site as usual:
+  script src="../lib/x.js"                          the file is read from the database and put into the tag
+  link rel="stylesheet" href="../lib/x.css"         the same, as a style tag
+  script type="text/plain" id="a" data-src="../data/a.json"   the content of the file is put into the tag (read it with textContent)
+Then the viewer replaces itself by the page (document.write), so the page has its own menu and this address stays (a reload works).
+Opened as a plain file (without this viewer) the page reads its data-src with fetch: so the files also work without the database.
+*/
+(() => {
+  const $ = id => document.getElementById(id);
+  const isPrivate = u => !!u && !/^([a-z][a-z0-9+.-]*:|\/)/i.test(u);
+  const inDir = (path, rel) => new URL(rel, 'https://private.invalid/' + path.replace(/[^/]*$/, '')).pathname.slice(1);   // rel resolved against the folder of path
+  const say = (text, cls = 'note') => { const m = $('msg'); m.hidden = false; m.className = cls; m.textContent = text; };
+  let sp;
+  const read = async (feature, path) => {
+    const { data, error } = await sp.client.rpc('private_file', { p_feature: feature, p_path: path });
+    if (error) throw new Error(path + ': ' + (error.code === 'P0002' ? 'not found' : error.code === '42501' ? 'not allowed' : error.message));
+    return data;
+  };
+  const safe = text => text.replace(/<\/(script|style)/gi, '<\\/$1');   // so that the text cannot end its tag
+
+  async function show(feature, path) {
+    const doc = new DOMParser().parseFromString(await read(feature, path), 'text/html');
+    const jobs = [];
+    for (const el of doc.querySelectorAll('script[src]')) {
+      const src = el.getAttribute('src'); if (!isPrivate(src)) continue;
+      jobs.push(read(feature, inDir(path, src)).then(t => { el.removeAttribute('src'); el.textContent = safe(t); }));
+    }
+    for (const el of doc.querySelectorAll('script[data-src]')) {
+      const src = el.getAttribute('data-src'); if (!isPrivate(src)) continue;
+      jobs.push(read(feature, inDir(path, src)).then(t => { el.textContent = safe(t); }));
+    }
+    for (const el of doc.querySelectorAll('link[rel~=stylesheet][href]')) {
+      const href = el.getAttribute('href'); if (!isPrivate(href)) continue;
+      jobs.push(read(feature, inDir(path, href)).then(t => { const s = doc.createElement('style'); s.textContent = safe(t); el.replaceWith(s); }));
+    }
+    await Promise.all(jobs);
+    const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+    document.open(); document.write(html); document.close();
+  }
+
+  async function list() {
+    const { data, error } = await sp.client.rpc('private_files_list');
+    if (error) { say(error.message, 'text-danger'); return; }
+    $('list').hidden = false;
+    $('pages').replaceChildren(...data.map(r => {
+      const li = document.createElement('li'), a = document.createElement('a');
+      a.href = 'view.html?f=' + encodeURIComponent(r.feature) + '&p=' + encodeURIComponent(r.path).replace(/%2F/g, '/'); a.textContent = r.title;
+      li.append(a, Object.assign(document.createElement('span'), { className: 'note', textContent: '  ' + r.feature + '/' + r.path }));
+      return li;
+    }));
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
+    const state = await Admin.check(sp);
+    if (state !== 'admin') { if (state === 'denied') { $('account').hidden = true; say('This page is for admins.'); } return; }
+    const q = new URLSearchParams(location.search), feature = q.get('f'), path = q.get('p');
+    if (!feature || !path) { list(); return; }
+    say('Loading ' + feature + '/' + path + ' …');
+    try { await show(feature, path); } catch (e) { say(String(e.message || e), 'text-danger'); }
+  });
+})();
+</script>
+</body>
+</html>
