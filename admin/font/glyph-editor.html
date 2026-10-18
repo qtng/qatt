@@ -54,6 +54,9 @@
     .tools { display: flex; flex-wrap: wrap; gap: .4rem .8rem; align-items: center; font-size: .82rem; margin-bottom: .35rem; }
     .tools .btn-group .btn { padding: .1rem .5rem; }
     .big .lbl { font: 5px system-ui, sans-serif; fill: currentColor; opacity: .7; }
+    .big .cl { fill: none; stroke-width: .35; } .big .cl.g { stroke: #6e6e6e; } .big .cl.r { stroke: #d23232; } .big .cl.d { stroke-dasharray: 2 1.4; }
+    .big .cl.b { stroke: #6e6e6e; opacity: .55; } .big .cl.k { stroke: currentColor; opacity: .3; stroke-dasharray: .6 1.2; }
+    .big .clt { font: 3.6px system-ui, sans-serif; } .big .clt.g { fill: #6e6e6e; } .big .clt.r { fill: #d23232; }
     .views { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-top: .4rem; }
     .views div { text-align: center; font-size: .72rem; color: var(--muted, #7b6c58); }
     .views svg { width: 100%; height: auto; border: 1px solid var(--line, #e4d9c0); border-radius: .3rem; }
@@ -105,6 +108,11 @@
         </span>
       </div>
       <div class="tools">
+        <span>View</span>
+        <div class="btn-group btn-group-sm" role="group" id="viewMode">
+          <button class="btn" data-v="kage" title="The KAGE box 0–200 the paths are edited in">KAGE box</button>
+          <button class="btn" data-v="cell" title="The form placed in the cell of the font as the build does it (font units), with the lines and boxes of the tone offsets page">Font cell</button>
+        </div>
         <span>Move</span>
         <div class="btn-group btn-group-sm" role="group" id="moveMode">
           <button class="btn" data-m="free" title="Dragging (after a long press) moves the selection in any direction">Free</button>
@@ -163,6 +171,11 @@
     <dt><span style="color:#e69500">orange Punkt</span></dt><dd>Der Kontrollpunkt einer Kurve, gestrichelt mit ihren Enden verbunden.</dd>
     <dt>grau gefüllt</dt><dd>Die Form in der gewählten Schrift, wie der Build sie zeichnet.</dd>
     <dt>Kasten, Kreuz</dt><dd>Der Rahmen 0–200 und seine Mitte (100 / 100), gestrichelt.</dd>
+    <dt>View</dt><dd>„KAGE box“ (Standard): der Rahmen 0–200, in dem die Pfade stehen. „Font cell“: die Form so in die Zelle der Schrift gesetzt, wie der Build
+      es tut (Font-Einheiten, y nach oben): die Einzelform in x um 1,3 und in y um 1,4 gestreckt, eine linke oder rechte Form in ihre Hälfte des Paars eingepasst
+      (60 Rand, 80 Abstand, Teilung 50 %; die Schrift hat auch 45 und 55 %). Dazu die Linien von „Tone offsets“: Grundlinie 0, Zeile 880 / −120 (hhea, sTypo),
+      Windows-Clip 1160 / −288, die Zelle bzw. Paarbox 1000 und der KAGE-Rahmen (gepunktet). Bearbeitet wird weiter in KAGE-Einheiten; die Info-Zeile zeigt
+      beim gewählten Punkt zusätzlich seine Font-Koordinate.</dd>
   </dl>
   <h3>Bedienung</h3>
   <dl>
@@ -300,18 +313,71 @@
   const dPath = pts => pts.length === 2 ? `M${pts[0]}L${pts[1]}` : `M${pts[0]}Q${pts[1]} ${pts[2]}`;
   const isOff = x => x.kind === 'm' && !marksOn.has(x.i);
   function openForm() { sel = null; }
+  // the view: 'kage' the KAGE box as it is; 'cell' the form placed in the cell of the font as tools/build_font.py does it (font units, y up;
+  // shown at 1/F so that the sizes of handles and lines stay). The paths stay in KAGE units; only the drawing is mapped (V, Vinv)
+  let view = 'kage', VM = { ax: 1, bx: 0, ay: 1, by: 0 }, cellM = null;
+  // the placement of tools/build_font.py (keep in step): 10 font units per svg unit (KAGE / S), PLACE [-1.7, -3.0, 103.4] (GROW 1.034 about
+  // (50, 50)), the letters stretched in y by VS 1.4 about the font y VC 577, a single form in x by HS 1.3 about the middle 500; the halves of a
+  // pair fitted (with the widths of the strokes) into PAIR_M 60 from the edge, PAIR_G 80 between them, split 50 % (also 45 and 55 in the font)
+  const B = { SY: 10, PLACE: [-1.7, -3.0, 103.4], VS: 1.4, VC: 577, HS: 1.3, PAIR_M: 60, PAIR_G: 80, PAIR_W: 1000, ASC: 880, DESC: -120 };
+  const CX0 = -150, CX1 = 1150, CY0 = -330, CY1 = 1200, F = (CX1 - CX0) / 224;   // the part of the cell shown (font units), font units per view unit
+  function cellMatrix(f, st) {   // -> {m: the matrix of qatt_draw (svg units, as kage_outlines.js gets it), u, dx: where the half lies in the pair}
+    const grow = B.PLACE[2] / 100, u = B.SY * grow, exX = B.PLACE[0] - (1 - grow) * 50, exY = B.PLACE[1] - (1 - grow) * 50;
+    const half = form === 'v2c-' ? null : form === 'v2l-' ? 'l' : 'r';
+    let kx = B.SY * grow * (half ? 1 : B.HS), fy = 880 - 50 * B.SY * (1 - grow), centre = 500;
+    if (!half) { centre += exX * B.SY; fy -= exY * B.SY; }
+    let sy = -B.SY * grow;
+    if (B.VS !== 1) { sy *= B.VS; fy = B.VS * fy + (1 - B.VS) * B.VC; }
+    let m = [kx / u, -sy / u, (centre - 50 * kx) / u, -fy / u];
+    if (!half) return { m, u, dx: 0 };
+    const H = B.PAIR_W / 2, T = B.PAIR_W - 2 * B.PAIR_M - B.PAIR_G, wl = T / 2;
+    const fit = (half === 'l' ? [B.PAIR_M, B.PAIR_M + wl] : [H - B.PAIR_M - (T - wl), H - B.PAIR_M]).map(v => v / u);
+    const k = P.kageForm(f), lines = k.strokes.concat(k.marks.filter((x, i) => x && marksOn.has(i))), job = { lines: D.plainEnds(k.strokes, k.marks.filter((x, i) => x && marksOn.has(i))).concat(k.marks.filter((x, i) => x && marksOn.has(i))), w: 1 };
+    const xs = lines.flatMap(l => D.ptsOf(l).map(p => p[0] / S)), span = Math.max(...xs) - Math.min(...xs);
+    try {   // as kage_outlines.js does it: scale and move in x until the outline spans the box
+      let r = D.draw(job, m, st[1], st[2]); m = m.slice();
+      for (let i = 0; i < 3; i++) { const extra = (r.ink[1] - r.ink[0]) - span * m[0]; m[0] = Math.max(0.05, (fit[1] - fit[0] - extra) / span); r = D.draw(job, m, st[1], st[2]); m[2] += fit[0] - r.ink[0]; r = D.draw(job, m, st[1], st[2]); }
+    } catch (e) {}
+    return { m, u, dx: half === 'r' ? H : 0 };
+  }
+  function setView(f) {
+    if (view === 'kage') { VM = { ax: 1, bx: 0, ay: 1, by: 0 }; cellM = null; big.setAttribute('viewBox', '-12 -12 224 224'); return; }
+    cellM = cellMatrix(f, style); const { m, u, dx } = cellM;
+    VM = { ax: u * m[0] / (S * F), bx: (u * m[2] + dx) / F, ay: u * m[1] / (S * F), by: u * m[3] / F };
+    big.setAttribute('viewBox', `${CX0 / F} ${-CY1 / F} ${(CX1 - CX0) / F} ${(CY1 - CY0) / F}`);
+  }
+  const V = p => [Math.round((VM.ax * p[0] + VM.bx) * 1000) / 1000, Math.round((VM.ay * p[1] + VM.by) * 1000) / 1000];
+  const Vinv = q => [(q[0] - VM.bx) / VM.ax, (q[1] - VM.by) / VM.ay];
+  const fontOf = p => { const v = V(p); return [Math.round(v[0] * F), Math.round(-v[1] * F)]; };   // the font units of a KAGE point in the cell view
+  function cellGuides() {   // the lines and boxes of admin/font/tone-offsets.html, in font units (y up)
+    const X = x => x / F, Y = y => -y / F, L = (y, c, t, d = true) => `<path class="cl ${c}${d ? ' d' : ''}" d="M${X(CX0)} ${Y(y)}H${X(CX1)}"/>` + (t ? `<text class="clt ${c}" x="${X(CX0) + 1}" y="${Y(y) - 1}">${t}</text>` : '');
+    let h = `<rect class="cl b" x="${X(0)}" y="${Y(B.ASC)}" width="${X(1000)}" height="${X(1000)}"/><text class="clt g" x="${X(1000) - 1}" y="${Y(B.DESC) - 1.2}" text-anchor="end">${form === 'v2c-' ? 'cell 1000' : 'pair box 1000'}</text>`;
+    h += L(0, 'g', 'baseline 0', false) + L(B.ASC, 'g', 'line 880 (hhea, sTypo)') + L(B.DESC, 'g', 'line −120') + L(1160, 'r', 'Windows clip 1160 (usWinAscent)') + L(-288, 'r', 'Windows clip −288 (usWinDescent)');
+    if (form !== 'v2c-') {
+      const H = B.PAIR_W / 2, T = B.PAIR_W - 2 * B.PAIR_M - B.PAIR_G, wl = T / 2, bx = [[B.PAIR_M, B.PAIR_M + wl], [H + H - B.PAIR_M - (T - wl), H + H - B.PAIR_M]];
+      h += `<path class="cl g d" d="M${X(H)} ${Y(CY1)}V${Y(CY0)}"/>` + bx.map(([a, b], i) => `<rect class="cl g d" x="${X(a)}" y="${Y(B.ASC)}" width="${X(b - a)}" height="${X(1000)}"/><text class="clt g" x="${X((a + b) / 2)}" y="${Y(B.ASC) + 4}" text-anchor="middle">${i ? 'right' : 'left'} half ${Math.round(a)}–${Math.round(b)}</text>`).join('');
+    }
+    const k0 = V([0, 0]), k1 = V([200, 200]);
+    return h + `<rect class="cl k" x="${k0[0]}" y="${k0[1]}" width="${k1[0] - k0[0]}" height="${k1[1] - k0[1]}"/><text class="clt g" x="${k0[0] + 1}" y="${k1[1] - 1}">KAGE box</text>`;
+  }
   function renderBig() {
     const id = idOf(), f = formOf(id), orig = origOf(id);
-    let h = `<rect x="0" y="0" width="200" height="200" class="guide"/><path class="guide" d="M100 0V200M0 100H200"/>`;
-    h += `<g transform="scale(${S})"><path class="bg" d="${outline(f, style, marksOn)}"/></g>`;
-    if (orig) h += items(orig).map(x => `<path class="orig" d="${dPath(P.points(dOf(x.it)))}"/>`).join('');
+    setView(f);
+    let h;
+    if (view === 'kage') h = `<rect x="0" y="0" width="200" height="200" class="guide"/><path class="guide" d="M100 0V200M0 100H200"/><g transform="scale(${S})"><path class="bg" d="${outline(f, style, marksOn)}"/></g>`;
+    else {
+      const k = P.kageForm(f), marks = k.marks.filter((m, i) => m && marksOn.has(i));
+      let d = ''; try { d = D.draw({ lines: D.plainEnds(k.strokes, marks).concat(marks), w: 1 }, cellM.m, style[1], style[2]).d; } catch (e) {}
+      h = cellGuides() + `<g transform="translate(${cellM.dx / F} 0) scale(${cellM.u / F})"><path class="bg" d="${d}"/></g>`;
+    }
+    if (orig) h += items(orig).map(x => `<path class="orig" d="${dPath(P.points(dOf(x.it)).map(V))}"/>`).join('');
     const list = items(f);
     let paths = '', handles = '', ring = '', docks = '';
     list.forEach((x, n) => {
-      const pts = P.points(dOf(x.it)), isSel = sel && sel.n === n, off = isOff(x) ? ' off' : '';
+      const pts = P.points(dOf(x.it)).map(V), isSel = sel && sel.n === n, off = isOff(x) ? ' off' : '';
       const dk = x.kind === 'm' && dockOf(x.it);
       paths += `<path class="p ${x.kind}${off}${x.kind === 'm' && !dk ? ' free' : ''}${isSel && sel.k === 'all' ? ' sel' : ''}" d="${dPath(pts)}"/>`;
-      if (dk && f.strokes[dk[0]]) { const q = endOf(P.points(dOf(f.strokes[dk[0]])), dk[1]); docks += `<path class="dock${off}" d="M${q[0]} ${q[1] - 7}l7 7l-7 7l-7 -7z"/>`; }
+      if (dk && f.strokes[dk[0]]) { const q = V(endOf(P.points(dOf(f.strokes[dk[0]])), dk[1])); docks += `<path class="dock${off}" d="M${q[0]} ${q[1] - 7}l7 7l-7 7l-7 -7z"/>`; }
       if (pts.length === 3) handles += `<path class="tan" d="M${pts[0]}L${pts[1]}L${pts[2]}"/>`;
       pts.forEach((p, k) => {
         const c = pts.length === 3 && k === 1 ? 'c' : x.kind;
@@ -356,7 +422,7 @@
       moved = sel.k === 'all' && pts.some((p, i) => r2(p[0] - op[i][0]) !== dx || r2(p[1] - op[i][1]) !== dy) ? ' · changed against the original' : (dx || dy ? ` · moved ${dx}, ${dy} against the original` : ' · as the original');
     }
     const dk = x.kind === 'm' ? dockOf(x.it) : null, dockText = x.kind === 'm' ? (dk ? ` · docked at ${pct(tOf(dk))} of it to the ${dk[1] ? 'end' : 'start'} of stroke ${dk[0] + 1}` : ' · free (not docked)') + ` · ${markInfo(x.it)}` : '';
-    $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + (sel.k === 'all' ? ' (whole path)' : ` · ${pts.length === 3 && sel.k === 1 ? 'control point' : 'point ' + (sel.k === 0 ? 1 : 2)}`) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + dockText + moved;
+    $('info').textContent = (x.kind === 's' ? 'Stroke ' : 'Mark ') + (x.i + 1) + (sel.k === 'all' ? ' (whole path)' : ` · ${pts.length === 3 && sel.k === 1 ? 'control point' : 'point ' + (sel.k === 0 ? 1 : 2)}`) + ': ' + pts.map(p => `(${p[0]}, ${p[1]})`).join(' – ') + (view === 'cell' && sel.k !== 'all' ? ` · font ${fontOf(pts[sel.k]).join(', ')}` : '') + dockText + moved;
   }
   function renderAll() { renderGrid(); renderBig(); renderInfo(); renderCheckpoints(); }
   const when = t => new Date(t).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
@@ -523,7 +589,8 @@
   // the large view: a tap selects a point or a path, a swipe anywhere moves the selection
   const big = $('big');
   const svgPt = e => { const m = big.getScreenCTM().inverse(); const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m); return [q.x, q.y]; };
-  const unitsPerPx = () => 224 / big.getBoundingClientRect().width;
+  const unitsPerPx = () => 224 / big.getBoundingClientRect().width;   // view units (both views are 224 wide)
+  const kagePerPx = () => unitsPerPx() / Math.abs(VM.ax);
   function distToPath(q, pts) {   // the distance of q to a straight stroke or a curve (sampled)
     const seg = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((q[0] - a[0]) * dx + (q[1] - a[1]) * dy) / l2)); return Math.hypot(a[0] + t * dx - q[0], a[1] + t * dy - q[1]); };
     if (pts.length === 2) return seg(pts[0], pts[1]);
@@ -536,14 +603,14 @@
   function pick(q) {
     const list = items(formOf(idOf())), u = unitsPerPx(), rank = (x, d) => (isOff(x) ? 1000 : 0) + d;
     const pts = [];
-    list.forEach((x, n) => P.points(dOf(x.it)).forEach((p, k) => { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < 16 * u) pts.push({ n, k, r: rank(x, d) }); }));
+    list.forEach((x, n) => P.points(dOf(x.it)).map(V).forEach((p, k) => { const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (d < 16 * u) pts.push({ n, k, r: rank(x, d) }); }));
     if (pts.length) {
       pts.sort((a, b) => a.r - b.r);
       if (sel && sel.k !== 'all' && pts.some(c => c.n === sel.n && c.k === sel.k)) return sel;
       const p = sel && sel.k === 'all' && pts.find(c => c.n === sel.n);
       return p ? { n: p.n, k: p.k } : { n: pts[0].n, k: 'all' };
     }
-    const cands = list.map((x, n) => ({ n, k: 'all', r: rank(x, distToPath(q, P.points(dOf(x.it)))) })).filter(c => c.r % 1000 < 11 * u).sort((a, b) => a.r - b.r);
+    const cands = list.map((x, n) => ({ n, k: 'all', r: rank(x, distToPath(q, P.points(dOf(x.it)).map(V))) })).filter(c => c.r % 1000 < 11 * u).sort((a, b) => a.r - b.r);
     if (!cands.length) return null;
     const i = sel ? cands.findIndex(c => c.n === sel.n && c.k === sel.k) : -1;
     return cands[(i + 1) % cands.length];
@@ -573,10 +640,10 @@
       if (undoStack[undoStack.length - 1] !== drag.snap) undoStack.push(drag.snap); $('undo').disabled = false; drag.moved = true;
     }
     e.preventDefault();
-    const q = svgPt(e);
+    const q = Vinv(svgPt(e)), q0 = Vinv(drag.q0);   // in KAGE units
     const x = items(formOf(idOf()))[sel.n];
-    if (x.kind === 'm' && sel.k !== 'all') change(sel.n, null, { op: 'rotate', k: sel.k, from: drag.pts0, target: movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], true)[sel.k] });
-    else change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - drag.q0[0], q[1] - drag.q0[1], e.altKey, true), { op: 'move', tol: 10 * unitsPerPx() });
+    if (x.kind === 'm' && sel.k !== 'all') change(sel.n, null, { op: 'rotate', k: sel.k, from: drag.pts0, target: movePts(drag.pts0, sel.k, q[0] - q0[0], q[1] - q0[1], true)[sel.k] });
+    else change(sel.n, () => movePts(drag.pts0, sel.k, q[0] - q0[0], q[1] - q0[1], e.altKey, true), { op: 'move', tol: 10 * kagePerPx() });
     save(); renderBig(); renderInfo();
   });
   // a touch that began with a long press must not scroll the page (touch-action cannot change during a touch, but a touchmove can be cancelled
@@ -603,6 +670,8 @@
     else change(sel.n, pts => movePts(pts, sel.k, v[0], v[1], false), { op: 'move', tol: DOCKED });
     update();
   });
+  function showView() { for (const b of $('viewMode').children) b.className = 'btn ' + (b.dataset.v === view ? 'btn-cinnabar' : 'btn-quiet'); }
+  $('viewMode').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { view = b.dataset.v; showView(); renderBig(); } });
   function showMode() {
     for (const b of $('moveMode').children) b.className = 'btn ' + (b.dataset.m === mode ? 'btn-cinnabar' : 'btn-quiet');
   }
@@ -671,7 +740,7 @@
   });
   $('discard').addEventListener('click', () => { if (!confirm('Discard the draft and go back to fonts/paths.json of the repository?')) return; snapshot(); data = normalizeMarks(clone(repo)); rebase(); openForm(); save(); showLengths(); renderAll(); });
 
-  normalizeMarks(data); rebase(); save(); openForm(); showMode(); showLengths(); renderAll();
+  normalizeMarks(data); rebase(); save(); openForm(); showView(); showMode(); showLengths(); renderAll();
 })();
 </script>
 </body>
