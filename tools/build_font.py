@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Build a monospace web font from the QATT stroke glyphs (fonts/glyphs.json, made from the rendered qatt.js glyphs by extract_glyphs.js).
+"""Build a monospace web font of QATT: the list of the characters and the circles of the tones from fonts/glyphs.json (once made from the rendered
+qatt.js glyphs by extract_glyphs.js), the letters with --kage from the open paths of fonts/paths.json (edited in admin/font/glyph-editor.html),
+without --kage from the qatt.js paths (the Prototype font).
 Standalone, the two format characters are drawn as the ideographic description characters, half a cell wide: the combiner as U+2FF1 (two boxes above each other), the joiner as U+2FF0 (side by side).
 
 Component joiner: "A joiner B" (A, B any Can/Chi form) is shown as one square cell like a syllable of qatt.js: A in the
@@ -26,7 +28,7 @@ if light: sys.argv.remove('--light')
 # --bold (KAGE fonts): Gothic strokes 1.7 times the standard (2.4, the maximum of the glyph editor, closes the gaps of dense glyphs); Serif verticals 1.8 times, its thin horizontals stay as they are; tones and marks 1.5 times
 BOLD_ON = '--bold' in sys.argv
 if BOLD_ON: sys.argv.remove('--bold')
-KAGE = KAGE_STYLE = None      # --kage fonts/kage.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Serif (KAGE style mincho) or Gothic
+KAGE = KAGE_STYLE = None      # --kage fonts/paths.json [--gothic]: the letters drawn by the KAGE engine (tools/kage_outlines.js), Serif (KAGE style mincho) or Gothic
 if '--kage' in sys.argv:
     i = sys.argv.index('--kage'); KAGE = sys.argv[i + 1]; del sys.argv[i:i + 2]
     KAGE_STYLE = 'gothic' if '--gothic' in sys.argv else 'pen' if '--pen' in sys.argv else 'kaiti' if '--kaiti' in sys.argv else 'mincho'
@@ -80,19 +82,12 @@ COMBINER = 155                 # offset of the Tham Thu combiner
 STACK_UP, STACK_TOP, STACK_BOTTOM = 0.45, 19, 94   # share of the height for the glyph above; svg y of the top and bottom edge of the area (a bit lower than a single glyph)
 STACK_UP_X = 0.88                                  # the upper glyph is a bit narrower than the lower one
 STROKE_UP, STROKE_LOW = 46, 46                    # strokes of the squeezed upper and lower glyph
-BRUSH_WEIGHT = 0.8             # the brush font: weight of the brush.html export times this
 if light:
     STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW = (round(w * LIGHT) for w in (STROKE, STROKE_TONE, STROKE_HALF, STROKE_MARK, STROKE_UP, STROKE_LOW))
-    BRUSH_WEIGHT *= LIGHT
 if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti'): STROKE_TONE, STROKE_MARK = round(STROKE_TONE * 1.5), round(STROKE_MARK * 1.5)
-# Placement of the letters in the cell (as in brush2.html): svg x, y -> offset + scale * (x, y); the letters of qatt.js lie in 0..100, the ink of all brush forms is 7..95.6 high and the ICF box is 4.2..95.8 (scale 1.034, offset -1.7 / -3.0).
-# It is done as GROW around the point (50, 50) plus the rest of the offset; a brush2 export can hold its own "place" (x, y, s in per cent). Tones keep their size and corner positions.
+# Placement of the letters in the cell: svg x, y -> offset + scale * (x, y); the letters of qatt.js lie in 0..100, the ICF box is 4.2..95.8 (scale 1.034, offset -1.7 / -3.0).
+# It is done as GROW around the point (50, 50) plus the rest of the offset. Tones keep their size and corner positions.
 PLACE = [-1.7, -3.0, 103.4]
-if len(sys.argv) > 3:
-    try:
-        _p = json.load(open(sys.argv[3])).get('place') or {}
-        PLACE = [float(_p.get(k, d)) for k, d in zip('xys', PLACE)]
-    except (OSError, ValueError, AttributeError): pass
 GROW, GROW_Y = PLACE[2] / 100, 50
 EXTRA_X, EXTRA_Y = PLACE[0] - (1 - GROW) * 50, PLACE[1] - (1 - GROW) * 50   # what is left of the offset, svg units
 PAIR_GROW = GROW
@@ -101,8 +96,7 @@ data = json.load(open(SRC))  # fonts/glyphs.json
 import brush_tones
 # tones drawn as brush strokes, for a style that has them in fonts/tones.json (Khai): {code point: (standalone, mark)}, at their own places (no keep_inside, tone_x)
 BRUSH_TONES = brush_tones.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'fonts', 'tones.json'), KAGE_STYLE + ('-cut' if CUT else ''), BOLD) if KAGE else {}
-BRUSH = sys.argv[3] if len(sys.argv) > 3 else None
-JOBS, RESULTS = {}, {}         # brush outlines: requested on a first run over the glyphs, made by brush_outlines.js, used on the second
+JOBS, RESULTS = {}, {}         # KAGE outlines: requested on a first run over the glyphs, made by kage_outlines.js, used on the second
 
 # the qatt.js paths: id -> path data, and path data -> ids (glyphs.json holds the data; a few marks of different shapes share it)
 _src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'js', 'qatt.js')).read()
@@ -142,19 +136,12 @@ def outline_raw(ids, width, k=1.0, centre=500, grow=1.0, v=1.0, anchor=None, cx=
     if VS != 1.0 and not ids[0].startswith('q'):   # the letters are stretched in y around the font y VC, before they are stroked (the stroke widths stay), the tones are not
         sy, f = sy * VS, VS * f + (1 - VS) * VC
     matrix = (kx, 0, 0, sy, centre - cx * kx, f)
-    if BRUSH and ids[0].startswith('q'):   # tones: narrower than the letters (see TONE_X), the middle of the tone stays where it is
-        bs = []
-        for i in ids:
-            bp = pathops.Path(); parse_path(PATHS[i], bp.getPen()); bs.append(bp.bounds)
-        cxt = (min(b[0] for b in bs) + max(b[2] for b in bs)) / 2
-        matrix = (kx * TONE_X, 0, 0, matrix[3], matrix[4] + cxt * kx * (1 - TONE_X), f)
-        kx = matrix[0]
-    if BRUSH or (KAGE and not ids[0].startswith('q')):   # the tones keep their stroked circles in the KAGE font
-        # the squeeze and the move are done on the centre lines (in svg units), then the brush is laid on them and the
+    if KAGE and not ids[0].startswith('q'):   # the tones keep their stroked circles in the KAGE font
+        # the squeeze and the move are done on the centre lines (in svg units), then KAGE draws the strokes on them and the
         # outline is only scaled evenly, so the stroke widths stay; the weight follows the stroke width of the variant
         ids, u = tuple(ids), SY * grow
         key = (ids, round(kx / u, 6), round(-matrix[3] / u, 6), round(matrix[4] / u, 6), round(-f / u, 6),
-               round(width / STROKE if KAGE else BRUSH_WEIGHT * width / (STROKE_TONE if ids[0].startswith('q') else STROKE), 6))
+               round(width / STROKE, 6))
         if fit: key += (round(fit[0] / u, 4), round(fit[1] / u, 4))
         if ink: key += ('ink',)
         if key not in RESULTS:
@@ -260,7 +247,7 @@ def make_glyphs():
             # syllable of qatt.js; each is half a cell wide, so the right one is drawn half a cell to the left of its origin
             pair = (PAIR_X0 + PAIR_X1) / 2
             if KAGE:
-                # the halves are made from the single form (or from the left / right form of the symbol if kage.json has one): KAGE draws it fitted into a box of the left or right half of the cell, in
+                # the halves are made from the single form (or from the left / right form of the symbol if paths.json has one): KAGE draws it fitted into a box of the left or right half of the cell, in
                 # three splits (left half 45, 50 or 55 % of what the halves share); the font picks the split by the widths of both letters
                 mids = letter_ids(g, 'single')
                 master_w[name] = outline(mids, STROKE, grow=GROW, ink=True)
@@ -295,12 +282,12 @@ def make_glyphs():
             tones.append(name)
 
 make_glyphs()
-if BRUSH or KAGE:   # the outlines requested by the first run, then the glyphs again with them
+if KAGE:   # the outlines requested by the first run, then the glyphs again with them
     with tempfile.TemporaryDirectory() as tmp:
         jobs, out = os.path.join(tmp, 'jobs.json'), os.path.join(tmp, 'out.json')
         json.dump(list(JOBS.values()), open(jobs, 'w'))
         here = os.path.dirname(os.path.abspath(__file__))
-        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE + ('-cut' if CUT else ''), str(BOLD)] if KAGE else ['node', os.path.join(here, 'brush_outlines.js'), BRUSH, jobs, out], check=True)
+        subprocess.run(['node', os.path.join(here, 'kage_outlines.js'), KAGE, jobs, out, KAGE_STYLE + ('-cut' if CUT else ''), str(BOLD)], check=True)
         RESULTS.update(zip(JOBS.keys(), json.load(open(out))))
     make_glyphs()
 jname = 'u%05X' % (BASE + JOINER)
@@ -308,7 +295,7 @@ cname = 'u%05X' % (BASE + COMBINER)
 glyphs[cname + '.zw'] = TTGlyphPen(None).glyph(); adv[cname + '.zw'] = 0; order.append(cname + '.zw')
 glyphs[jname + '.zw'] = TTGlyphPen(None).glyph(); adv[jname + '.zw'] = 0; order.append(jname + '.zw')
 
-STYLE = KAGE_STYLE + ('-cut' if CUT else '') if KAGE else 'brush' if BRUSH else 'prototype'   # the style of tones.json and tone-offsets.json
+STYLE = KAGE_STYLE + ('-cut' if CUT else '') if KAGE else 'prototype'   # the style of tones.json and tone-offsets.json
 
 def build_info():
     """Name ID 10 (description): the parameters this font was built with and the commit of the tools, so that it can be built again (tools/build_all.py)"""
@@ -334,7 +321,7 @@ def lsb(n):
     return gl.xMin
 fb.setupHorizontalMetrics({n: (adv.get(n, ADV), lsb(n)) for n in order})
 fb.setupHorizontalHeader(ascent=880, descent=-120)
-fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif', 'kaiti': 'Khai'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Brush' if BRUSH else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti') else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), description=build_info()))   # with copyright, licence and the build parameters, see tools/font_names.py
+fb.setupNameTable(font_names.names(('QATT ' + {'mincho': 'Serif', 'kaiti': 'Khai'}.get(KAGE_STYLE, KAGE_STYLE.capitalize()) if KAGE else 'QATT Prototype') + (' Cut' if CUT else '') + (' Light' if light else '') + (' Bold' if BOLD != 1.0 and KAGE_STYLE not in ('pen', 'kaiti') else '') + LABEL + (' Wide' if WIDE != 1.0 else ''), description=build_info()))   # with copyright, licence and the build parameters, see tools/font_names.py
 fb.setupOS2(sTypoAscender=880, sTypoDescender=-120, sTypoLineGap=0, usWinAscent=1160, usWinDescent=288)   # as Noto Sans CJK
 fb.setupPost(isFixedPitch=1)
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
