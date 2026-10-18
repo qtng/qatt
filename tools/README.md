@@ -118,7 +118,7 @@ standard stroke library of the brush editor (this overwrites hand edits). Edits 
 
 **KAGE font.** With `--kage fonts/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
 `js/kage-engine.min.js` in Node.js) from the KAGE data refined in `admin/font/font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
-their stroke widths. The tones stay stroked circles (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js). `--gothic` selects the Gothic style (family "QATT Khai", `fonts/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
+their stroke widths. The tones stay stroked circles (Khai: brush tones, below) (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js). `--gothic` selects the Gothic style (family "QATT Khai", `fonts/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
 
 ```sh
 python3 tools/build_font.py --kage fonts/kage.json fonts/glyphs.json fonts/qatt-serif     # writes fonts/qatt-serif.ttf / .woff2
@@ -147,6 +147,8 @@ python3 tools/build_font.py --kage fonts/kage.json --pen --weight 2.4 --label Me
 horizontals rise a little and are thin with a pressed start and a bulge where they stop, verticals are pressed at the start and thinner towards a round end, left-falling strokes taper to a point,
 right-falling strokes swell to a foot (the horizontal, the vertical (longer than 4 W), the left-falling stroke (longer than 3 W) and the right-falling stroke (longer than 4 W, in the KAGE data a curve of type 7) follow templates, its outline is a smooth Bezier spline: `poly.smooth` in `outlineOf`). It builds on the Pen module (`pen_strokes.js` exports its helpers) and takes `--weight` like Pen. The family is `QATT Khai`; a first draft (weight 2.0) is committed as `fonts/qatt-khai`:
 `python3 tools/build_font.py --kage fonts/kage.json --kaiti --weight 2.0 fonts/glyphs.json fonts/qatt-khai`.
+
+**Brush tones.** A style can draw its tones as brush strokes instead of the stroked circles of qatt.js: `fonts/tones.json` holds them per KAGE style (for now only `kaiti`, so only Khai has them; a style without an entry keeps the circles). `tools/brush_tones.py` draws them: the circles as a brush ring (`ring`: clockwise from the top, a pressed start, the brush at 30°), the half circles as a curved stroke that ends in a little hook (`hook`; its settings under `"hook"`). Each tone (key: the code point after U+F0000 in hex) gives its shape, side, turn (`rot`, degrees anticlockwise: the upper half circles 12.5°, the lower ones 90° to their side) and two ellipses `[cx, cy, rx, ry, stroke]` in font units: the standalone glyph and the small form `.mark` over the cell before (x −1000..0). The places are absolute: `keep_inside` and `tone_x` do not move them. The small forms: circles above at y 905 (rx 65, ry 50), below at −240 and smaller (50, 38), so that they end at −286 (inside `usWinDescent` 288); the half circles larger (×1.55), above at 860 and 55 further out, below at −186 and 70 further out (halfway as small as the lower circles). Changes to the letters made for the tones are in `fonts/letter-changes.md`.
 
 **Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
 different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
