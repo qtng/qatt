@@ -121,7 +121,7 @@ async function hit(userId: string): Promise<number | null> {
 // of the sentence) in Quốc Ngữ and the characters chosen for them, as arrays, and idx = the place of the word in these arrays (from 1). The page sets `context`
 // in its request (MIN_CONTEXT to MAX_CONTEXT, default DEFAULT_CONTEXT; one word on each side is always stored), so the window can change without a change of the table or of this function. Also its position and the
 // length of the sentence in words; n_options = how many options the page sent for the word (0: the dictionary has nothing for it). The rest of the sentence is not stored.
-const MIN_CONTEXT = 1, DEFAULT_CONTEXT = 3, MAX_CONTEXT = 3;
+const MIN_CONTEXT = 1, DEFAULT_CONTEXT = 2, MAX_CONTEXT = 2;
 type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: string[]; ctx_chars: string[]; idx: number; pos: number; n_words: number; model: string | null };
 // A cheap check that a word can be Quốc Ngữ at all, so that English words, names, URLs, Chinese text and typos do not fill the table of gaps. Every syllable is
 // onset + vowels + ending, each part optional except the vowels: the onsets of Vietnamese (b c ch d đ g gh h k kh l m n ng ngh nh p ph q r s t th tr v x; "gi" is g + the vowel i,
@@ -129,7 +129,7 @@ type Gap = { word_qn: string; word_char: string; n_options: number; ctx_qn: stri
 // between two vowels, nothing but the letters of the Vietnamese alphabet (no f j w z, no digits, no other script; the tokenizer of pipeline.js already cuts the words at digits
 // and special characters). It does not catch every foreign word that looks like a syllable ("you"). A gap is only stored when the word and the CHECK_CONTEXT words on each
 // side of it pass the check, however few of them are stored: a sentence of English or of mangled text ("all ò thí í fake cỏp") then leaves nothing, a Vietnamese sentence keeps its gaps.
-const CHECK_CONTEXT = 3;
+const CHECK_CONTEXT = 2;
 const VOWELS = 'aăâeêioôơuưyàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ';
 const SYLLABLE = new RegExp(`^(?:ngh|ng|nh|ph|th|tr|ch|kh|gh|[bcdđghklmnpqrstvx])?[${VOWELS}]{1,3}(?:ng|nh|ch|[cmnpt])?$`);
 const vietnamese = (qn: string) => qn.normalize('NFC').split(' ').every(s => SYLLABLE.test(s));
