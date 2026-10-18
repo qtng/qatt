@@ -1,4 +1,4 @@
-"""The logo and the icons of qatt.org: the syllable "tân" (the big symbol of the home page, U+F003F U+F009B U+F003D) in QATT Khai, light on the red tile.
+"""The logo and the icons of qatt.org: the syllable "tân" (the big symbol of the home page, U+F003F U+F009A U+F003D) in QATT Khai, light on the red tile.
 
   python3 tools/make_logo.py        # writes img/logo.svg, img/favicon.svg and img/apple-touch-icon.png (Playwright for node renders the PNG)
 
@@ -13,7 +13,7 @@ from fontTools.pens.boundsPen import BoundsPen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONT = os.path.join(ROOT, 'fonts', 'qatt-khai.ttf')
-TEXT = '\U000F003F\U000F009B\U000F003D'      # tân
+TEXT = '\U000F003F\U000F009A\U000F003D'      # tân
 RED, CREAM = '#a8362a', '#f7efdc'
 TILE = 512
 

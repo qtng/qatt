@@ -31,7 +31,7 @@ Playwright. Only requests to the local server are allowed (no CDN), the paths do
 
 ### Logo and icons: `make_logo.py`
 
-`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009B U+F003D) in QATT Khai: `img/logo.svg` (340 high on the red tile with the thin frame, the lines as bold as in the icon; used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-khai.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
+`python3 tools/make_logo.py` draws the logo and the icons of qatt.org from the big symbol of the home page, the syllable "tân" (U+F003F U+F009A U+F003D) in QATT Khai: `img/logo.svg` (340 high on the red tile with the thin frame, the lines as bold as in the icon; used in the menu bar), `img/favicon.svg` (bigger and a little bolder, for 16 to 32 pixels) and `img/apple-touch-icon.png` (180 x 180, a full square: the phone rounds it). The outlines are shaped with HarfBuzz out of `fonts/qatt-khai.ttf` and written as paths, so the logo does not need the font. The PNG is rendered with Playwright for node (`NODE_PATH` to its `node_modules`, `--no-png` leaves it out).
 
 ### All fonts at once: `build_all.py`
 
@@ -78,10 +78,10 @@ Tham Thư (`STACK_UP`, `STACK_UP_X`) and the extent of a joined pair (`PAIR_X0`,
 
 **What the font does** (OpenType `ccmp`, in `build_font.py`):
 
-- *A* `U+F009B` *B* (component joiner): one cell like a syllable of `qatt.js`, the joiner has no width; *A* becomes its
+- *A* `U+F009A` *B* (component joiner): one cell like a syllable of `qatt.js`, the joiner has no width; *A* becomes its
   onset form in the left half (`.left`, a mark of *A* moved from the rhyme form onto the onset form), *B* its rhyme form in
   the right half (`.right`).
-- *A* `U+F009A` *B* (Tham Thư combiner): *A* (a single form or a joined pair) goes into the lower 55 %, *B* into the upper
+- *A* `U+F009B` *B* (Tham Thư combiner): *A* (a single form or a joined pair) goes into the lower 55 %, *B* into the upper
   45 % of the cell; the combiner has no width.
 - A tone mark after any character becomes a zero-width variant (the small form of `qatt.js`) that lies over the preceding cell.
 - Standalone, the combiner is drawn as U+2FF1 (a frame with a line across, two boxes above each other) and the joiner as U+2FF0 (a frame with a line down the middle), both half a cell wide; a tone is the large form.
@@ -94,9 +94,9 @@ in `unicode.html`.
 ```python
 import uharfbuzz as hb
 font = hb.Font(hb.Face(hb.Blob.from_file_path('fonts/qatt-khai.ttf')))
-buf = hb.Buffer(); buf.add_str('\U000F0001\U000F009B\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
+buf = hb.Buffer(); buf.add_str('\U000F0001\U000F009A\U000F0000'); buf.guess_segment_properties(); hb.shape(font, buf)
 print([(font.glyph_to_string(i.codepoint), p.x_advance) for i, p in zip(buf.glyph_infos, buf.glyph_positions)])
-# [('uF0001.left', 500), ('uF009B.zw', 0), ('uF0000.right', 500)]
+# [('uF0001.left', 500), ('uF009A.zw', 0), ('uF0000.right', 500)]
 ```
 
 ## Character data (`unicode.html`): `update_unicode_data.py`
@@ -171,7 +171,7 @@ python3 tools/build_font.py --kage fonts/kage.json --gothic --wide fonts/glyphs.
 ## Shared pieces of the pages
 
 - `js/fonts.js`: the list of fonts (family, file) and the sizes. `admin/font/codetable.html` takes its `<select data-qatt-fonts>` / `<select data-qatt-sizes>`, `editor.html` the fonts and the `@font-face` rules from it.html`).
-- `js/qatt-text.js`: code of `parser.js` (`parsed.qatt`, e.g. `t,c5,,5`) to text of the QATT block: onset `U+F009B` rhyme tone mark, one cell. Used by `editor.html` (typing Quốc Ngữ turns into font text when a word is finished).
+- `js/qatt-text.js`: code of `parser.js` (`parsed.qatt`, e.g. `t,c5,,5`) to text of the QATT block: onset `U+F009A` rhyme tone mark, one cell. Used by `editor.html` (typing Quốc Ngữ turns into font text when a word is finished).
 
 ## Libraries (`vendor/`)
 
