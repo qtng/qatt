@@ -1,4 +1,4 @@
-// The Pen stroke drawing (a felt-tip or ballpoint pen with a touch of clerical script) for the font build (kage_outlines.js, style "pen"): the KAGE lines of fonts/kage.json (straight 1 and
+// The Pen stroke drawing (a felt-tip or ballpoint pen with a touch of clerical script) for the font build (kage_outlines.js, style "pen"): the KAGE lines (from fonts/paths.json, tools/qatt_paths.js) (straight 1 and
 // quadratic 2 strokes) are drawn as pen strokes of varying width instead of by the KAGE engine, which only knows Mincho and Gothic.
 //   horizontal: slightly bowed upwards, a press at the start (a cut slanted like the brush entering), a rounded bulge where it stops, thinner than the verticals
 //   vertical:   a press at the start, round "dewdrop" end (垂露)

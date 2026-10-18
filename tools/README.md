@@ -6,17 +6,24 @@
 copyright, licence, version, maker, full and PostScript name into the name table (`tools/font_names.py`); `python3 tools/font_names.py fonts/qatt-*.ttf`
 gives fonts that are already built the same entries (and writes their `.woff2` again) without building them again.
 
-The font is built from the strokes that `qatt.js` draws, in two steps. Both outputs are checked in, so the font only has
-to be rebuilt when `qatt.js`, the character data or the font design changes.
+**Where the fonts come from.** The letters are open paths (straight strokes and curves with one control point) in `fonts/paths.json`,
+edited in `admin/font/glyph-editor.html`; it is the one source of the letters of all fonts that are built (Serif, Gothic, Pen, Pen Cut, Khai):
 
 ```
-unicode.html + qatt.js  --extract_glyphs.js-->  fonts/glyphs.json  --build_font.py-->  fonts/qatt-prototype.ttf / .woff2
+fonts/paths.json  --qatt_paths.js (KAGE lines)-->  kage_outlines.js + qatt_draw.js (strokes of the style)  --build_font.py-->  fonts/qatt-*.ttf / .woff2
+fonts/glyphs.json (the list of the characters, the circles of the tones), fonts/tones.json, fonts/tone-offsets.json  ----^
 ```
 
-### 1. Extract the glyph paths: `extract_glyphs.js`
+How a stroke is drawn (its widths, its ends, the style) is code: `qatt_draw.js` (the KAGE engine for Serif and Gothic, `pen_strokes.js`,
+`kaiti_strokes.js`), `brush_tones.py`, the constants of `build_font.py` and the list of `build_all.py`. The editor uses the same `qatt_paths.js`
+and `qatt_draw.js`, so it shows what the build makes. Brush and Prototype (built from the paths of `qatt.js` and the brush model of the former brush
+editors) are no longer built; their files stay as they are.
 
-Reads the stroke paths of all 164 characters from the rendered `unicode.html` (which draws them with `qatt.js`), including
-the smaller combining form of the tone marks, and writes `fonts/glyphs.json`.
+### The list of the characters: `extract_glyphs.js`
+
+`fonts/glyphs.json` was made once from the rendered `unicode.html` (which draws with `qatt.js`): the 164 characters with their names and kinds, and
+the paths of `qatt.js` (the build takes the circles of the tones of Serif and Gothic from it, and the Prototype font all paths). It only has to be made
+again when that list or those circles change:
 
 Needs Node.js with [Playwright](https://playwright.dev) and a Chromium. Serve the repository first:
 
@@ -35,7 +42,7 @@ Playwright. Only requests to the local server are allowed (no CDN), the paths do
 
 ### All fonts at once: `build_all.py`
 
-`python3 tools/build_all.py` builds all 14 fonts (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. The Serif and Gothic files that were in `fonts/` before 2026-10-17 could not be built again (they came from a state of the data that is not in the repository), so all fonts were built anew.
+`python3 tools/build_all.py` builds the 12 KAGE fonts (Brush and Prototype are no longer built) (`fonts/qatt-*.ttf` and `.woff2`, with the name table and the vertical metrics) in about a minute; `--out DIR` builds into another folder, e.g. to compare with `fonts/` first, and words select fonts (`python3 tools/build_all.py serif pen`). The list in the script is the one place that has the call of every font. The Serif and Gothic files that were in `fonts/` before 2026-10-17 could not be built again (they came from a state of the data that is not in the repository), so all fonts were built anew.
 
 ### Size and baseline of the letters (compared with Han characters)
 
@@ -53,7 +60,7 @@ writes TrueType and WOFF2 with the OpenType rules for the combining characters.
 ```sh
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r tools/requirements.txt
-python3 tools/build_font.py fonts/glyphs.json fonts/qatt-prototype      # writes .ttf and .woff2
+python3 tools/build_font.py fonts/glyphs.json fonts/qatt-prototype      # writes .ttf and .woff2 (Prototype, not built any more)
 ```
 
 
@@ -61,15 +68,6 @@ python3 tools/build_font.py fonts/glyphs.json fonts/qatt-prototype      # writes
 
 ```sh
 python3 tools/build_font.py --light fonts/glyphs.json fonts/qatt-prototype-light   # family "QATT Prototype Light"
-```
-
-**Brush variant.** With the export of `admin/font/brush.html` (`fonts/brush.json`) as a third argument, the glyphs get its brush
-instead of stroked centre lines; an export of `admin/font/brush2.html` (version 3, `js/brush2.js` and `js/brush2-model.js`) works the same way.
-`tools/brush_outlines.js` (Node.js, uses `js/brush.js` and `js/brush-model.js` like the editor) lays the brush on the centre lines after they are squeezed and moved into place, so the half-width and stacked
-variants keep their stroke widths; the stroke width constants only scale the brush weight per variant:
-
-```sh
-python3 tools/build_font.py fonts/glyphs.json fonts/qatt-brush fonts/brush.json     # writes fonts/qatt-brush.ttf / .woff2
 ```
 
 **Design constants** at the top of `build_font.py`: glyph size (`SY`, `GROW`), position (`Y0`), stroke widths
@@ -110,43 +108,50 @@ python3 tools/update_unicode_data.py PATH/TO/qatt-unicode            # unicode.h
 
 If the data changes (new characters or offsets), run the font steps above again.
 
-## KAGE prototype
+## The KAGE fonts
 
-`admin/font/font-editor.html` draws the QATT symbols with the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see `js/kage-engine.COPYING`)
-next to the brush outlines. `fonts/kage.json` holds the KAGE data (one line per stroke and mark); `node tools/kage_seed.js --force` regenerates it from the
-standard stroke library of the brush editor (this overwrites hand edits). Edits in `admin/font/font-editor.html` live in the browser (`localStorage` `qatt-kage-v1`) and can be exported as JSON.
+**The paths.** `fonts/paths.json`: `{format: "qatt-paths", version: 1, box: 200, forms: {id: {strokes: [item], marks: [item]}}}`, id `v2c-X` the single form
+of the symbol X, `v2l-X` / `v2r-X` its own left / right form (optional); the marks 1–6 in their order; an item is `"M x y L x y"` (straight) or
+`"M x y Q cx cy x y"` (a curve with one control point) in the KAGE box of 200 × 200 (y down), or `{"d": ..., "type": "1:0:2"}` with a KAGE line type set
+by hand. One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
+set a type, make a straight stroke a curve and back; the draft lives in the browser (`localStorage` `qattPaths1`), "Copy JSON" gives the whole file.
 
-**KAGE font.** With `--kage fonts/kage.json` the letters are drawn by the KAGE engine (`tools/kage_outlines.js` loads
-`js/kage-engine.min.js` in Node.js) from the KAGE data refined in `admin/font/font-editor.html`; the lines are squeezed and moved first, so the half-width and stacked variants keep
+**The line types.** `tools/qatt_paths.js` turns the paths into KAGE lines (`toKage`). Without a type set by hand, the type follows from the path: nearly
+horizontal 1:0:2 for a mark or a stroke that ends on another stroke (a plain end) else 1:0:0 (the triangle of Mincho); a curve that is nearly vertical
+2:0:0; nearly vertical 1:0:0; slanted 2:0:7 down to the left (a left sweep), 2:7:8 down to the right. These are the rules by which the first KAGE data
+was made from `qatt.js`; they give the types of all 234 strokes of that data. A straight stroke of a curve type gets its control point in the middle.
+
+**KAGE font.** With `--kage fonts/paths.json` the letters are drawn by the [KAGE engine](https://github.com/kurgm/kage-engine) (`js/kage-engine.min.js`, GPL-3.0, see
+`js/kage-engine.COPYING`; `tools/kage_outlines.js` loads it in Node.js) or by the stroke drawing of the style (`tools/qatt_draw.js`); the lines are squeezed and moved first, so the half-width and stacked variants keep
 their stroke widths. The tones stay stroked circles (Khai: brush tones, below) (drawn narrower than the letters, `TONE_X` in `build_font.py`, so that they have the proportions of qatt.js). `--gothic` selects the Gothic style (family "QATT Khai", `fonts/qatt-gothic`), the default is Serif (the KAGE style "mincho"):
 
 ```sh
-python3 tools/build_font.py --kage fonts/kage.json fonts/glyphs.json fonts/qatt-serif     # writes fonts/qatt-serif.ttf / .woff2
+python3 tools/build_font.py --kage fonts/paths.json fonts/glyphs.json fonts/qatt-serif     # writes fonts/qatt-serif.ttf / .woff2
 ```
 
-**Pen font.** `--kage fonts/kage.json --pen` draws the same KAGE lines as strokes of a felt-tip or ballpoint pen instead of with the KAGE engine
+**Pen font.** `--kage fonts/paths.json --pen` draws the same KAGE lines as strokes of a felt-tip or ballpoint pen instead of with the KAGE engine
 (`tools/pen_strokes.js`, called by `kage_outlines.js`): horizontals are bowed a little and have a slanted press at the start and a round bulge where they stop,
 verticals a press and a round "dewdrop" end, falling curves have a press and keep their width (no taper). Where a stroke ends on another one (a junction) it has no press or bulge.
 
 `--weight F` sets the stroke width (F times the standard) and `--label Name` is added to the family name:
 
 ```
-python3 tools/build_font.py --kage fonts/kage.json --pen --weight 0.6 --label ExtraLight fonts/glyphs.json fonts/qatt-pen-extralight
-python3 tools/build_font.py --kage fonts/kage.json --pen --weight 1.0 --label Light      fonts/glyphs.json fonts/qatt-pen-light
-python3 tools/build_font.py --kage fonts/kage.json --pen --weight 1.6 fonts/glyphs.json fonts/qatt-pen                       # Regular
-python3 tools/build_font.py --kage fonts/kage.json --pen --weight 2.4 --label Medium     fonts/glyphs.json fonts/qatt-pen-medium
+python3 tools/build_font.py --kage fonts/paths.json --pen --weight 0.6 --label ExtraLight fonts/glyphs.json fonts/qatt-pen-extralight
+python3 tools/build_font.py --kage fonts/paths.json --pen --weight 1.0 --label Light      fonts/glyphs.json fonts/qatt-pen-light
+python3 tools/build_font.py --kage fonts/paths.json --pen --weight 1.6 fonts/glyphs.json fonts/qatt-pen                       # Regular
+python3 tools/build_font.py --kage fonts/paths.json --pen --weight 2.4 --label Medium     fonts/glyphs.json fonts/qatt-pen-medium
 ```
 
 **Vertical text** (`tools/font_vertical.py`, in all fonts). Without vertical metrics every glyph is 1 em high in vertical text, so the two halves of a syllable lie on top of each other, the joiner takes a whole em and so does a tone mark (a syllable 3 to 4 em high and 1 em wide). `font_vertical.py` gives a built font `vhea`/`vmtx` (1 em, origin at the ascent as in horizontal text) and a `vert` rule (GPOS) that gives the pieces of a syllable their horizontal arrangement back: left half half a half-cell to the left of the column middle without moving the pen, right half half a half-cell to the right and 1 em on, joiner and combiner no advance, the upper glyph of a stack no advance and moved to the middle of the cell it follows, up by 1 em; a tone mark the same, then further into the cell in y (in horizontal text the tones hang over and under the cell, in a column that lies on the neighbours) and `TONE_SIDE` out to the side it stands on, at the edge of the letters (`side` and `y` of the style in `fonts/tone-offsets.json`, see Tone offsets; for a style without them the environment variables `QATT_TONE_SIDE`, default 140, and `QATT_TONE_Y`, default 0: how far inside the top or bottom edge of the cell the tone stays; they count for `font_vertical.py` (which reads the style from the build parameters in the name table) and for `build_font.py --vertical`, e.g. `QATT_TONE_SIDE=100 python3 tools/font_vertical.py fonts/qatt-*.ttf`; `build_font.py` writes both into the name table with the other build parameters). A syllable is then one square in a vertical field (`writing-mode: vertical-rl`; the editor has the switch "Vertical"). Horizontal text is unchanged. A vertical advance is *taken away* from the 1 em that points down, so "no advance" is `-1000`. `python3 tools/font_vertical.py fonts/qatt-*.ttf` adds it to the finished fonts (also those that are not built again, like `font_names.py`; running it twice does no harm); `build_font.py --vertical` does it for a font it builds.
 
 **Pen Cut.** `--pen --cut` is a variant of the Pen font with flat stroke ends cut at a slant, as in Song: thin horizontals with a small flare where they stop, heavy verticals
 (`style "pen-cut"` in `tools/pen_strokes.js`). The same six weights, files `fonts/qatt-pencut[-extralight|-light|-medium|-bold|-heavy]`, family `QATT Pen Cut ...`
-(`python3 tools/build_font.py --kage fonts/kage.json --pen --cut --weight 1.6 fonts/glyphs.json fonts/qatt-pencut`).
+(`python3 tools/build_font.py --kage fonts/paths.json --pen --cut --weight 1.6 fonts/glyphs.json fonts/qatt-pencut`).
 
 **Kaiti (Khai, draft).** `--kaiti` (with `--kage`) draws the KAGE lines as brush strokes of regular script (`tools/kaiti_strokes.js`, style "kaiti" in `kage_outlines.js`, family `QATT Khai`):
 horizontals rise a little and are thin with a pressed start and a bulge where they stop, verticals are pressed at the start and thinner towards a round end, left-falling strokes taper to a point,
 right-falling strokes swell to a foot (the horizontal, the vertical (longer than 4 W), the left-falling stroke (longer than 3 W) and the right-falling stroke (longer than 4 W, in the KAGE data a curve of type 7) follow templates, its outline is a smooth Bezier spline: `poly.smooth` in `outlineOf`). It builds on the Pen module (`pen_strokes.js` exports its helpers) and takes `--weight` like Pen. The family is `QATT Khai`; a first draft (weight 2.15) is committed as `fonts/qatt-khai`:
-`python3 tools/build_font.py --kage fonts/kage.json --kaiti --weight 2.15 fonts/glyphs.json fonts/qatt-khai`.
+`python3 tools/build_font.py --kage fonts/paths.json --kaiti --weight 2.15 fonts/glyphs.json fonts/qatt-khai`.
 
 **Brush tones.** A style can draw its tones as brush strokes instead of the stroked circles of qatt.js: `fonts/tones.json` holds them per KAGE style (`kaiti`; `pen` (Pen) and `pen-cut` (Pen Cut, `--pen --cut`) take the same tones by naming `"kaiti"`; a style without an entry keeps the circles). `tools/brush_tones.py` draws them: the circles as a brush ring (`ring`: clockwise from the top, a pressed start, the brush at 30°), the half circles as a curved stroke that ends in a little hook (`hook`; its settings under `"hook"`). The stroke widths are drawn for `"weight"` (2.0) and follow `--weight` in proportion. Each tone (key: the code point after U+F0000 in hex) gives its shape, side, turn (`rot`, degrees anticlockwise: the upper half circles 12.5°, the lower ones 90° to their side) and two ellipses `[cx, cy, rx, ry, stroke]` in font units: the standalone glyph and the small form `.mark` over the cell before (x −1000..0). The places are absolute: `keep_inside` and `tone_x` do not move them. The small forms: circles above at y 905 (rx 65, ry 50), below at −240 and smaller (50, 38), so that they end at −286 (inside `usWinDescent` 288); the half circles larger (×1.55), above at 860 and 55 further out, below at −186 and 70 further out (halfway as small as the lower circles). Changes to the letters made for the tones are in `fonts/letter-changes.md`.
 
@@ -166,15 +171,16 @@ a tone at the left the onset before the joiner (`.left…`); horizontal in the `
 of `vert`. Single letters, stacks and the wide font (`.markw`) have no offsets per letter. Every KAGE font also gets `fonts/<name>.marks.json`
 with the outlines and bounds of its small tone marks, which the page draws.
 
-**Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/kage.json`). A symbol that has to look
-different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half) in `kage.json`, with the marks in the same
-order as the single form; `admin/font/font-editor.html` offers them as "Left (optional)" and "Right (optional)" (without data they show the single form; edit it to make
-one); "Use the single form" removes an own form again (also one that `kage.json` ships). The stack (Tham Thư) takes its lower pair from the same left and right forms. `kage_seed.js` starts ong, dong, hong and bong with a left form whose lowest horizontal stroke is sloped up to its right end.
+**Left and right forms.** The halves of a joined pair are made from the single form (`v2c-X` in `fonts/paths.json`). A symbol that has to look
+different on the left or on the right gets its own form: `v2l-X` (left half) and/or `v2r-X` (right half), with the marks in the same
+order as the single form; `admin/font/glyph-editor.html` offers them as "Left" and "Right" (without data they show the single form; a change makes
+an own one); "Use the single form" removes an own form again. The stack (Tham Thư) takes its lower pair from the same left and right forms. Ong, dong,
+hong and bong have a left form whose lowest horizontal stroke is sloped up to its right end.
 
-**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times (the glyph editor slider allows up to 2.4 times, which closes the gaps of dense glyphs), Serif only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Khai Bold" and "QATT Mincho Bold":
+**Bold.** `--bold` (with `--kage`) makes the strokes heavier: Gothic all strokes 1.7 times, Serif only the verticals, 1.8 times (the thick strokes of the normal Mincho are 0.85 of the engine's standard) (the thin horizontals and the triangles stay as in the normal Mincho); tones and marks get 1.5 times. The families are "QATT Khai Bold" and "QATT Mincho Bold":
 
 ```sh
-python3 tools/build_font.py --kage fonts/kage.json --gothic --bold fonts/glyphs.json fonts/qatt-gothic-bold
+python3 tools/build_font.py --kage fonts/paths.json --gothic --bold fonts/glyphs.json fonts/qatt-gothic-bold
 ```
 # (the Bold file is no longer kept; this is how it was made)
 
@@ -183,7 +189,7 @@ The bold Serif font is not published any more (`--bold` without `--gothic` still
 **Wide.** `--wide` (with `--kage`) makes a joined pair 1.25 cells wide (each half 625 units instead of 500), so its halves are squeezed less; a single character stays one square cell. The upper glyph of a stack over a pair and a tone after a pair are centred on the wide cell (`.upw`, `.markw`). The family is "QATT Khai Wide":
 
 ```sh
-python3 tools/build_font.py --kage fonts/kage.json --gothic --wide fonts/glyphs.json fonts/qatt-gothic-wide
+python3 tools/build_font.py --kage fonts/paths.json --gothic --wide fonts/glyphs.json fonts/qatt-gothic-wide
 ```
 
 ## Shared pieces of the pages

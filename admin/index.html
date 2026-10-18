@@ -66,10 +66,7 @@
       ['AI models', 'models.html', 'Gemini: tries, quota and overload, speed and quality per model'],
     ]],
     ['Fonts and symbols', 'bi-fonts', 'The tools of the QATT fonts', [
-      ['Glyph editor', 'font/font-editor.html', 'KAGE lines of the symbols (fonts/kage.json)'],
-      ['Brush', 'font/brush.html', 'brush model of the strokes (fonts/brush.json)'],
-      ['Brush 2', 'font/brush2.html', 'the second brush editor'],
-      ['qatt.js editor', 'font/qatt-editor.html', 'the former editor with two panes, drawn by qatt.js'],
+      ['Glyph editor', 'font/glyph-editor.html', 'the letters as open paths (fonts/paths.json), for all KAGE fonts'],
       ['Build process', 'font/build.html', 'how the fonts are built and what the build numbers do'],
       ['Code table', 'font/codetable.html', 'reference font: all 164 characters of the draft block'],
       ['Tone offsets', 'font/tone-offsets.html', 'the place of the small tone marks per letter (fonts/tone-offsets.json)'],
@@ -89,7 +86,7 @@
   const THEMES = 'classic retro popart editorial swiss glass clay boho pixel vector neobrutal vietnam future'.split(' ');
   const CH = 'https://chunom.org/chunom/';
   const FILES = [
-    ['JavaScript, qatt.org', 'brush-editor brush-model brush brush2-editor brush2-model brush2 fonts login navigation parser qatt-text qatt supabase kage-engine.min'.split(' ').map(n => ['js/' + n + '.js', '../js/' + n + '.js'])],
+    ['JavaScript, qatt.org', 'fonts login navigation parser qatt-text qatt supabase kage-engine.min'.split(' ').map(n => ['js/' + n + '.js', '../js/' + n + '.js'])],
     ['JavaScript, chunom.org', [['js/detail.js', 'js/detail.js'], ['js/ime.js', 'js/ime.js'], ['js/ipa.js', 'js/ipa.js'], ['js/practice.js', 'js/practice.js'], ['dict/viewer.js', 'dict/viewer.js'], ['dict/collate.js', 'dict/collate.js'], ['dict/dictionaries.js', 'dict/dictionaries.js'], ['decks/audiomanager.js', 'decks/audiomanager.js'], ['decks/deck-cover.js', 'decks/deck-cover.js']].map(([n, p]) => [n, CH + p])],
     ['CSS, qatt.org', [['css/site.css', '../css/site.css']].concat(THEMES.map(t => ['css/theme-' + t + '.css', '../css/theme-' + t + '.css']))],
     ['CSS, chunom.org', [['css/practice.css', CH + 'css/practice.css'], ['dict/dict.css', CH + 'dict/dict.css']]],

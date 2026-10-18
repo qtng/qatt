@@ -40,11 +40,11 @@
 <main>
   <p class="note mb-1"><a href="../index.html">Admin</a> / Fonts</p>
   <h1>How the QATT fonts are built</h1>
-  <p class="lead">The fonts are not drawn by hand letter by letter. A script builds them from stroke data, so a change of one number (the height of the letters, the place of the tones) can be applied to all 14 fonts at once. This page explains the steps and what the numbers do.</p>
+  <p class="lead">The fonts are not drawn by hand letter by letter. A script builds them from stroke data, so a change of one number (the height of the letters, the place of the tones) can be applied to all fonts at once. This page explains the steps and what the numbers do.</p>
 
   <h2>The process in short</h2>
   <ol class="steps">
-    <li><b>Stroke data</b>The shapes of the symbols are kept as lines, not as finished outlines: <code>fonts/glyphs.json</code> (the 164 characters as drawn by <code>qatt.js</code>), <code>fonts/kage.json</code> (the shapes of the Glyph editor, used by Serif, Gothic, Pen and Khai) and <code>fonts/brush.json</code> (the brush model of the Brush editor). You change them in the editors of this admin area.</li>
+    <li><b>Stroke data</b>The shapes of the symbols are kept as lines, not as finished outlines: <code>fonts/paths.json</code> (the letters as open paths, straight strokes and curves, edited in the <a href="glyph-editor.html">Glyph editor</a>, used by Serif, Gothic, Pen, Pen Cut and Khai), <code>fonts/glyphs.json</code> (the list of the 164 characters and the circles of the tones, once taken from <code>qatt.js</code>), <code>fonts/tones.json</code> and <code>fonts/tone-offsets.json</code> (the tones; <a href="tone-offsets.html">Tone offsets</a>). Brush and Prototype are no longer built; their files stay as they are.</li>
     <li><b>Outlines: <code>build_font.py</code></b>Turns the lines into letters: gives them a stroke width, stretches them to the size of a Chinese character, puts them in their cell and adds the rules that join onset, rhyme and tone into one syllable.</li>
     <li><b>Vertical text: <code>font_vertical.py</code></b>Adds a second set of positions for vertical writing, so that a syllable is one square in a column and the tones stand at the side.</li>
     <li><b>Name and numbers: <code>font_names.py</code></b>Writes copyright, licence and the numbers used for the build into the font (see "Read the numbers out of a font").</li>
