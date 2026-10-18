@@ -112,12 +112,13 @@ If the data changes (new characters or offsets), run the font steps above again.
 
 **The paths.** `fonts/paths.json`: `{format: "qatt-paths", version: 1, box: 200, forms: {id: {strokes: [item], marks: [item]}}}`, id `v2c-X` the single form
 of the symbol X, `v2l-X` / `v2r-X` its own left / right form (optional); the marks 1–6 in their order; an item is `"M x y L x y"` (straight) or
-`"M x y Q cx cy x y"` (a curve with one control point) in the KAGE box of 200 × 200 (y down), or `{"d": ..., "type": "1:0:2", "dock": [1, 0, "mid"]}` with a KAGE line type set
-by hand and/or, for a mark (always straight), the end of a stroke it is docked to (`[index of the stroke, 0 its start / 1 its end, the point of the mark
-on it: "start", "mid" or "end"]`; the editor moves it along with that end, its angle stays; 132 of the 156 marks were docked by their middle from the
-start; the build does not use it). `"markLength": {"h", "v", "d"}` (optional): the length the editor gives a mark it changes, horizontal, vertical and
-slanted; without it 1/5 of the width of the box, 1/5 of its height and their mean (40 each). A mark the editor changes gets an angle in steps of 5° and
-the length of its kind; marks not touched keep their geometry. One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
+`"M x y Q cx cy x y"` (a curve with one control point) in the KAGE box of 200 × 200 (y down), or `{"d": ..., "type": "1:0:2", "dock": [1, 0, 0.4]}` with a KAGE line type set
+by hand and/or, for a mark (always straight), the end of a stroke it is docked to (`[index of the stroke, 0 its start / 1 its end, the place of the mark
+on it, 0..1 from its start]`; without the place the editor finds it; the editor moves a docked mark along with that end, its angle stays; 132 of the 156
+marks were docked from the start; the build does not use it). `"markLength": {"h", "v", "d"}`: the length of the marks, horizontal, vertical and slanted
+(in the file: the mean of the marks of each kind, 44.87, 30.4, 34.23; without it 1/5 of the width of the box, 1/5 of its height and their mean). When
+the editor opens, every mark gets the length of its kind (its angle stays) and a docked one the nearest place in steps of 10 %; an edited mark also gets
+an angle in steps of 5°, and docks only at its ends or a step of 10 %. So the file changes only through the editor. One path per line in the file (`QattPaths.stringify`). `admin/font/glyph-editor.html` edits it: drag points, control points and whole paths,
 set a type, make a straight stroke a curve and back; the draft lives in the browser (`localStorage` `qattPaths1`), "Copy JSON" gives the whole file.
 
 **The line types.** `tools/qatt_paths.js` turns the paths into KAGE lines (`toKage`). Without a type set by hand, the type follows from the path: nearly
