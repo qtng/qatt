@@ -70,7 +70,7 @@
   .scr-slide p { margin: .2em .45em; line-height: 1; white-space: nowrap; font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-family: "QATT Pen Medium", "QATT Pen", sans-serif; }
   .scr-slide p { position: relative; }
   .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
-  .scr-slide p.latin { font-family: Georgia, serif; }
+  .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
   .host { display: grid; place-items: center; min-height: 15.5rem; }
   .gridhost { display: grid; gap: .1rem; max-width: 34rem; margin: 0 auto; }
   .gcell { font-size: clamp(1.4rem, 5.2vw, 2.1rem); text-align: center; cursor: pointer; padding: .15rem 0; user-select: none; }
@@ -620,7 +620,7 @@
     const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');   // 'quốc âm' -> one letter per syllable
     const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
     const GL = POOL.map(w => toks(w));
-    const CHARS = GL.join('');
+    const CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');   // the cursor of the reveal wave: three syllables, not block characters (the Pen font has no blocks, no ASCII)
     const pick = () => GL[Math.floor(Math.random() * GL.length)];
     const cell = (text, cls, color) => { const p = document.createElement('p'); if (cls) p.className = cls; if (color) p.style.color = color; p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = text; p.firstChild.textContent = show(text); return p; };
     const s1 = $('scr1'), s2 = $('scr2'), s3 = $('scr3');
@@ -635,10 +635,10 @@
     const px = sel => sel + ' .px';
     tl.add('#scr1', { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
     tl.add('#scr1 p.center', { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
-    tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: '░▒▓' }) }, '<<');
+    tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
     tl.add('#scr1 p:not(.center)', { scale: { from: .75 }, color: { to: '#e0524a' } }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
-    tl.add(px('#scr1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: '░▒▓', perturbation: .25 }) }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
-    tl.add(px('#scr1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'center', ease: 'outQuad', reversed: true, duration: 800, cursor: '░▒▓' }) }, '<+=150');
+    tl.add(px('#scr1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: CUR, perturbation: .25 }) }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
+    tl.add(px('#scr1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'center', ease: 'outQuad', reversed: true, duration: 800, cursor: CUR }) }, '<+=150');
     tl.add('#scr1 p.center', { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '<<');
     tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
     tl.add('#scr1 p.center', { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
@@ -646,14 +646,14 @@
     tl.call(() => center.classList.add('latin'), '<<');
     tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=500');
     tl.set('#scr2', { opacity: 1 }, '<<');
-    tl.add(px('#scr2 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: '░▒▓', perturbation: .5 }) }, A.stagger([0, 1000], { grid: true, from: 'center', ease: 'out(3)', start: '<<+=250', reversed: true }));
+    tl.add(px('#scr2 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: CUR, perturbation: .5 }) }, A.stagger([0, 1000], { grid: true, from: 'center', ease: 'out(3)', start: '<<+=250', reversed: true }));
     tl.add('#scr2 p', { scale: [.8, 1] }, A.stagger([0, 150], { grid: true, from: 'center', ease: 'out(3)', start: '<<', reversed: true }));
-    tl.add(px('#scr2 p'), { innerHTML: SC({ chars: CHARS, text: '&nbsp;', override: false, from: 'center', reversed: true, duration: 500, cursor: '░▒▓' }) }, A.stagger([0, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<+=1500' }));
+    tl.add(px('#scr2 p'), { innerHTML: SC({ chars: CHARS, text: '&nbsp;', override: false, from: 'center', reversed: true, duration: 500, cursor: CUR }) }, A.stagger([0, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<+=1500' }));
     tl.set('#scr3', { opacity: 1 }, '<<');
     tl.add('#scr3 p', { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '-=250');
     tl.add(px('#scr3 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
     tl.add('#scr3 p', { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
-    tl.add(px('#scr3 p'), { innerHTML: SC({ chars: '#!%░▒▓_01', text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
+    tl.add(px('#scr3 p'), { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
     tl.call(() => { center.classList.remove('latin'); center.lastChild.textContent = pick(); }, '<<');
     tl.init();
     let on = false, vis = false;
