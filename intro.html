@@ -68,6 +68,9 @@
   .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
   .host { display: grid; place-items: center; min-height: 15.5rem; }
   .namehost { display: flex; justify-content: center; gap: clamp(.4rem, 2vw, 1.2rem); perspective: 700px; min-height: 10rem; cursor: pointer; }
+  .name2-ctl { display: flex; justify-content: center; gap: .6rem; margin-top: .6rem; }
+  .name2-ctl input { max-width: 7rem; text-align: center; }
+  .name2-rng { display: block; max-width: 22rem; margin: .8rem auto 0; }
   .nchar { text-align: center; }
   .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
   .nchar small { display: block; font-family: Georgia, serif; opacity: .6; }
@@ -121,6 +124,14 @@
     <section class="show-card scr" data-run="scramble4"><h2><span data-vi="Xáo chữ, một dòng">Scramble, one line</span></h2>
       <div class="scr-stage short"><div class="scr-slide"></div></div></section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
+    <section class="show-card" data-run="name2"><h2><span data-vi="Tên, hai chữ">Name, two characters</span></h2>
+      <div class="namehost" id="name2Host"></div>
+      <div class="name2-ctl">
+        <input type="text" class="form-control form-control-sm" id="name2A" value="quốc" aria-label="1" autocomplete="off" spellcheck="false">
+        <input type="text" class="form-control form-control-sm" id="name2B" value="âm" aria-label="2" autocomplete="off" spellcheck="false">
+      </div>
+      <label class="name2-rng"><span><span data-vi="Vòng quay">Turn</span>: <output id="name2Val">100%</output></span><input type="range" class="form-range" id="name2Rng" min="0" max="100" value="100"></label>
+    </section>
   </div>
 </main>
 <script>
@@ -433,6 +444,33 @@
     }
     host.addEventListener('click', play);
     (async () => { for (;;) { await ok(); play(); await sleep(7000); } })();
+  })();
+
+  // 5b. a copy of 5 with two characters (typed in the fields) and a slider: how far the turn goes (0 to 100% of the full turn; the count starts where the turn starts)
+  (() => {
+    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B');
+    let els = [], tl = null;
+    function build() {
+      host.textContent = ''; els = [];
+      for (const w of [inA.value.trim(), inB.value.trim()]) {
+        const d = document.createElement('div'); d.className = 'nchar';
+        d.innerHTML = `<div class="qg"></div><small></small>`; d.firstChild.textContent = (w && QattText.word(w, parser)) || ''; d.lastChild.textContent = w;
+        host.append(d); els.push(d);
+      }
+    }
+    function play() {
+      tl && tl.pause();
+      const f = +rng.value / 100; $('name2Val').textContent = rng.value + '%';
+      tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
+      tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
+        .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
+        .add(els, { rotateY: [0, 360 * f], duration: 1400, ease: 'inOutCubic' }, stagger(140, { start: 400 }));
+    }
+    const again = () => { build(); play(); };
+    rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again);
+    host.addEventListener('click', again);
+    build();
+    (async () => { await ok(); play(); })();
   })();
 
   // 6. scramble text (the effect of Julian Garnier's CodePen "Anime.js Scramble Text timeline", MIT): the letters flicker through random QATT syllables before they settle.
