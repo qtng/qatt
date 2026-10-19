@@ -46,6 +46,7 @@
 </main>
 <script>
   const $ = id => document.getElementById(id);
+  const DECK_PAGE = 'https://chunom.org/chunom/decks/deck.html?id=';
   const stamp = t => t ? t.slice(0, 16).replace('T', ' ') : '';
   const COLUMNS = [   // [key, title, numeric]
     ['title', 'Title', false], ['words', 'Words', true], ['username', 'Owner', false], ['taken_over', 'Taken over', true], ['published_at', 'Published', false], ['is_official', 'Official', false],
@@ -86,7 +87,8 @@
     $('tbl').tBodies[0].replaceChildren(...list.map(r => {
       const tr = document.createElement('tr');
       const cell = (text, num) => { const td = document.createElement('td'); td.textContent = text; if (num) td.className = 'num'; tr.append(td); return td; };
-      cell(r.title);
+      const t = cell('');   // the title opens the deck on chunom.org (deck.html?id=…)
+      t.append(Object.assign(document.createElement('a'), { href: DECK_PAGE + encodeURIComponent(r.id), target: '_blank', rel: 'noopener', textContent: r.title, title: 'Open the deck on chunom.org' }));
       cell(r.words, true);
       const owner = cell(r.username || '');
       if (!r.username) owner.append(Object.assign(document.createElement('span'), { className: 'muted', textContent: '–' }));
