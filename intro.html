@@ -133,7 +133,7 @@
         <input type="text" class="form-control form-control-sm" id="name2C" value="tự" aria-label="3" autocomplete="off" spellcheck="false">
       </div>
       <label class="name2-rng"><span><span data-vi="Vòng quay">Turn</span>: <output id="name2Val">100%</output></span><input type="range" class="form-range" id="name2Rng" min="0" max="100" value="100"></label>
-      <label class="name2-rng"><span><span data-vi="Tốc độ quay">Speed of the turn</span>: <output id="name2SpdVal">100%</output></span><input type="range" class="form-range" id="name2Spd" min="25" max="300" step="5" value="100"></label>
+      <label class="name2-rng"><span><span data-vi="Thời gian quay">Duration of the turn</span>: <output id="name2SpdVal">1000 ms</output></span><input type="range" class="form-range" id="name2Spd" min="0" max="1000" step="10" value="1000"></label>
       <label class="name2-rng"><span><span data-vi="Thời gian chờ">Wait before the turn</span>: <output id="name2WaitVal">0 s</output></span><input type="range" class="form-range" id="name2Wait" min="0" max="3000" step="100" value="0"></label>
       <label class="name2-rng"><span><span data-vi="Thời gian chuyển mờ">Cross-fade</span>: <output id="name2FadeVal">0.5 s</output></span><input type="range" class="form-range" id="name2Fade" min="100" max="2000" step="100" value="500"></label>
     </section>
@@ -467,8 +467,8 @@
     }
     function play() {
       tl && tl.pause();
-      const f = +rng.value / 100, D = 1400 * 100 / +spd.value, W = 1300 + +wt.value, M = Math.max(D * f, 30), FADE = +fd.value * D / 1400;   // D: the full turn (a slower speed, a longer turn and fade), W: the start of the turn (after the fly-in and the wait), M: the move together
-      $('name2Val').textContent = rng.value + '%'; $('name2SpdVal').textContent = spd.value + '%'; $('name2WaitVal').textContent = (wt.value / 1000).toFixed(1) + ' s'; $('name2FadeVal').textContent = (fd.value / 1000).toFixed(1) + ' s';
+      const f = +rng.value / 100, D = Math.max(+spd.value, 30), W = 1300 + +wt.value, M = Math.max(D * f, 30), FADE = +fd.value * D / 1000;   // D: the full turn in ms (the fade scales with it, 1 s = the set fade), W: the start of the turn (after the fly-in and the wait), M: the move together
+      $('name2Val').textContent = rng.value + '%'; $('name2SpdVal').textContent = spd.value + ' ms'; $('name2WaitVal').textContent = (wt.value / 1000).toFixed(1) + ' s'; $('name2FadeVal').textContent = (fd.value / 1000).toFixed(1) + ' s';
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
