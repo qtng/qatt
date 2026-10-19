@@ -142,7 +142,7 @@ const QattWriter = (() => {
     // the fonts of the list of qatt.org (js/fonts.js defines their @font-face rules; admins also get the fonts marked admin)
     const admin = () => typeof isAdmin === 'function' && isAdmin();
     const FONTS = typeof QATT_FONTS !== 'undefined' ? QATT_FONTS.filter(f => !f.admin || admin()).map(f => [f.family, f.label]) : [];
-    const DEFAULT_FONT = 'QATT Pen';
+    const DEFAULT_FONT = 'QATT Pen Medium';
     const decoding = $('decoding'), font = $('font'), size = $('size');
     for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) decoding.append(new Option(label, name, name === 'qatt', name === 'qatt'));
     for (const [family, label] of FONTS) font.append(new Option(label, family, family === DEFAULT_FONT, family === DEFAULT_FONT));
