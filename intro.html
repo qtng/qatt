@@ -136,6 +136,7 @@
       <label class="name2-rng"><span><span data-vi="Tốc độ quay">Speed of the turn</span>: <output id="name2SpdVal">300%</output></span><input type="range" class="form-range" id="name2Spd" min="25" max="1000" step="5" value="300"></label>
       <label class="name2-rng"><span><span data-vi="Thời gian chờ">Wait before the turn</span>: <output id="name2WaitVal">1.0 s</output></span><input type="range" class="form-range" id="name2Wait" min="0" max="3000" step="100" value="1000"></label>
       <label class="name2-rng"><span><span data-vi="Thời gian chuyển mờ">Cross-fade</span>: <output id="name2FadeVal">0.2 s</output></span><input type="range" class="form-range" id="name2Fade" min="100" max="2000" step="100" value="200"></label>
+      <label class="name2-rng"><span><span data-vi="Khoảng cách">Distance</span>: <output id="name2DistVal">20 px</output></span><input type="range" class="form-range" id="name2Dist" min="0" max="300" step="5" value="20"></label>
     </section>
   </div>
 </main>
@@ -453,10 +454,10 @@
 
   // 5b. a copy of 5 with two characters (typed in the fields) and a slider: how far the turn goes (0 to 100% of the full turn; the count starts where the turn starts)
   (() => {
-    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C'), spd = $('name2Spd'), wt = $('name2Wait'), fd = $('name2Fade');
+    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C'), spd = $('name2Spd'), wt = $('name2Wait'), fd = $('name2Fade'), dist = $('name2Dist');
     let els = [], tl = null, gap = 0;
     function build() {
-      host.textContent = ''; els = [];
+      host.textContent = ''; els = []; host.style.gap = dist.value + 'px'; $('name2DistVal').textContent = dist.value + ' px';
       for (const w of [inA.value.trim(), inB.value.trim()]) {
         const d = document.createElement('div'); d.className = 'nchar';
         d.innerHTML = `<div class="qg"></div><small></small>`; d.firstChild.textContent = (w && QattText.word(w, parser)) || ''; d.lastChild.textContent = w;
@@ -482,7 +483,7 @@
         }, W + 140 + M - FADE / 2);
     }
     const again = () => { build(); play(); };
-    rng.addEventListener('input', again); spd.addEventListener('input', again); wt.addEventListener('input', again); fd.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
+    rng.addEventListener('input', again); spd.addEventListener('input', again); wt.addEventListener('input', again); fd.addEventListener('input', again); dist.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
     host.addEventListener('click', again);
     build();
     (async () => { await ok(); play(); })();
