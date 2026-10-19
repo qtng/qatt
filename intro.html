@@ -70,7 +70,7 @@
   .namehost { display: flex; justify-content: center; gap: clamp(.4rem, 2vw, 1.2rem); perspective: 700px; min-height: 10rem; cursor: pointer; }
   .name2-ctl { display: flex; justify-content: center; gap: .6rem; margin-top: .6rem; }
   .name2-ctl input { max-width: 7rem; text-align: center; }
-  .name2-rng { display: block; max-width: 22rem; margin: .8rem auto 0; }
+  .name2-rng, .scr-rng { display: block; max-width: 22rem; margin: .8rem auto 0; }
   .nchar { text-align: center; position: relative; }
   .nchar .n3 { position: absolute; inset: 0; opacity: 0; }
   .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
@@ -119,11 +119,13 @@
         <div class="scr-slide" id="scr1"></div><div class="scr-slide" id="scr2"></div><div class="scr-slide" id="scr3"></div>
       </div></section>
     <section class="show-card scr" data-run="scramble2"><h2><span data-vi="Xáo chữ, rút gọn">Scramble, short</span></h2>
-      <div class="scr-stage short"><div class="scr-slide"></div></div></section>
-    <section class="show-card" data-run="scramble3"><h2><span data-vi="Xáo chữ, rút gọn, bản sáng">Scramble, short, light</span></h2>
-      <div class="scr-stage short"><div class="scr-slide"></div></div></section>
+      <div class="scr-stage short"><div class="scr-slide"></div></div>
+      <label class="scr-rng"><span><span data-vi="Tốc độ">Speed</span>: <output>100%</output></span><input type="range" class="form-range" min="25" max="400" step="5" value="100" aria-label="Speed"></label>
+    </section>
     <section class="show-card scr" data-run="scramble4"><h2><span data-vi="Xáo chữ, một dòng">Scramble, one line</span></h2>
-      <div class="scr-stage short"><div class="scr-slide"></div></div></section>
+      <div class="scr-stage short"><div class="scr-slide"></div></div>
+      <label class="scr-rng"><span><span data-vi="Tốc độ">Speed</span>: <output>100%</output></span><input type="range" class="form-range" min="25" max="400" step="5" value="100" aria-label="Speed"></label>
+    </section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
     <section class="show-card" data-run="name2"><h2><span data-vi="Tên, hai chữ">Name, two characters</span></h2>
       <div class="namehost" id="name2Host"></div>
@@ -541,12 +543,17 @@
     new IntersectionObserver(e => { vis = e[0].isIntersecting; if (vis && !on) { tl.play(); on = true; } if (!vis && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   })();
 
+  // the speed slider of a scramble card: 100% is the timing as drawn, the timeline runs at the chosen speed (anime.js timeline speed)
+  function speedSlider(root, tl) {
+    const rng = root.querySelector('.scr-rng input'), out = root.querySelector('.scr-rng output');
+    rng.addEventListener('input', () => { tl.speed = rng.value / 100; out.textContent = rng.value + '%'; });
+  }
   // 6b. a short clone of the scramble card, once dark and once light (boho colours): the name in QATT (one syllable per word), then in Latin letters (a colour per word), then qatt.org.
   // Same technique as above: scrambleText works on one private-use letter per syllable in a hidden copy, the page shows the real glyphs.
   function shortScramble(run, pal) {
     if (!A.scrambleText) return;
     const SC = A.scrambleText, root = card(run), slide = root.querySelector('.scr-slide');
-    const WORDS = ['quốc', 'âm', 'tân', 'tự'], LAT = ['Quốc', 'Âm', 'Tân', 'Tự'];
+    const WORDS = ['tân', 'tự'], LAT = ['Tân', 'Tự'];
     const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
     const rev = [], reg = new Map();
     const tok = w => { const g = QattText.word(w, parser) || w; if (!reg.has(g)) { reg.set(g, String.fromCharCode(0xE000 + rev.length)); rev.push(g); } return reg.get(g); };
@@ -573,12 +580,12 @@
     tl.add(end, { color: pal.last, scale: 2, ease: 'inOutExpo', duration: 750 }, '+=1300');
     tl.add(endPx, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
     tl.init();
+    speedSlider(root, tl);
     let on = false;
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   }
-  // the colours of the scramble card: orange for the QATT name, green, blue, red and purple for the Latin words
-  shortScramble('scramble2', { start: '#ffd84a', qatt: '#e0a020', words: ['#9be15d', '#2a9fd8', '#e0524a', '#c07ad8'], end: '#f3ede2', last: '#ffd84a' });
-  shortScramble('scramble3', { start: '#d99a3e', qatt: '#b85c38', words: ['#b85c38', '#7a7d45', '#d99a3e', '#c98a7a'], end: '#b85c38', last: '#d99a3e' });
+  // the colours of the scramble card: the Latin words white, the QATT name orange, the end in white and yellow
+  shortScramble('scramble2', { start: '#ffd84a', qatt: '#e0a020', words: ['#f3ede2', '#f3ede2'], end: '#f3ede2', last: '#ffd84a' });
   // 6c. a clone of the first scramble card, only its middle: one line that becomes quốc, quốc âm tân tự in QATT, the name in Latin letters and qatt.org (no diamond, no slide of several lines), with the colours and the timing of the original
   (() => {
     if (!A.scrambleText) return;
@@ -611,6 +618,7 @@
     tl.call(() => p.classList.remove('latin'), '<<');
     tl.call(() => { px.textContent = TAN; bg.lastChild.textContent = ' '; mirror(); }, '+=800');
     tl.init();
+    speedSlider(root, tl);
     let on = false;
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   })();
