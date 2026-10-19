@@ -441,7 +441,7 @@
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, stagger(140, { start: 400 }));
+        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'linear' }, stagger(140, { start: 400 }));
     }
     host.addEventListener('click', play);
     (async () => { for (;;) { await ok(); play(); await sleep(7000); } })();
@@ -466,8 +466,8 @@
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, stagger(140, { start: 1300 }))
-        .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'inOutCubic' }, stagger(140, { start: 1300 }))   // the turn starts when the fly-in is over, the move together with it; the two meet when the slider value of the time is reached
+        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'linear' }, stagger(140, { start: 1300 }))
+        .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'linear' }, stagger(140, { start: 1300 }))   // the turn starts when the fly-in is over, the move together with it; the two meet when the slider value of the time is reached
         .call(() => {   // they overlap: the first becomes the third character, the second is gone, the turn goes on to the end
           const w = inC.value.trim(), q = els[0].children;
           q[0].textContent = (w && QattText.word(w, parser)) || ''; q[1].textContent = w; els[1].style.visibility = 'hidden';
