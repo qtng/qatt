@@ -40,6 +40,9 @@
   <div id="content" hidden>
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <label for="days" class="me-1">Last</label>
+      <select id="direction" class="form-select form-select-sm w-auto" aria-label="Direction">
+        <option value="qn_to_nom" selected>Quốc Ngữ → Chữ Nôm</option><option value="nom_to_qn">Chữ Nôm → Quốc Ngữ (draft)</option>
+      </select>
       <select id="days" class="form-select form-select-sm w-auto">
         <option value="1">24 hours</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">1 year</option>
       </select>
@@ -67,7 +70,7 @@
 
     <h2>Words that are missing in the dictionary</h2>
     <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="noAdmin" checked><label class="form-check-label" for="noAdmin">Without admins (your own tests): for both tables and the number</label></div>
-    <p class="note">For these words the model had to use a character of its own, because the dictionary had none or none that fitted. <span id="gapSummary"></span></p>
+    <p class="note">For these words (in the direction Chữ Nôm → Quốc Ngữ: the Chữ Nôm word and the reading the model gave, "?" = it knew none) the model had to use a character of its own, because the dictionary had none or none that fitted. <span id="gapSummary"></span></p>
     <p class="d-flex flex-wrap gap-2"><button type="button" class="btn btn-sm btn-quiet" id="csvRows">Download as CSV</button> <a class="btn btn-sm btn-quiet" href="https://chunom.org/chunom/translate.html">Open the translator</a></p>
 
     <h3 class="h6">Most frequent</h3>
@@ -142,8 +145,8 @@
     let allowed = false;
     async function load() {
       if (!allowed) return;
-      const days = Number($('days').value);
-      const [lang, list] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days }), sp.client.rpc('admin_gap_export', { p_days: days })]);
+      const days = Number($('days').value), dir = $('direction').value;
+      const [lang, list] = await Promise.all([sp.client.rpc('admin_languages', { p_days: days, p_direction: dir }), sp.client.rpc('admin_gap_export', { p_days: days, p_direction: dir })]);
       const error = lang.error || list.error;
       if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
       $('denied').hidden = true; $('content').hidden = false;
@@ -154,7 +157,8 @@
       fill('langModel', L.by_lang_model.map(r => [r.lang, { v: r.model, cls: 'l' }, r.calls, r.errors, r.fallback, sec(r.avg_ms)]));
       drawLang(L.daily);
 
-      recentRows = list.data;   // all rows of the time (at most 5000), newest first: the list below shows them 50 at a time, the CSV has all
+      // Chữ Nôm → Quốc Ngữ: the table has the Chữ Nôm word in word_char and the reading of the model in word_qn: turned around so that the word comes first, as above
+      recentRows = dir === 'nom_to_qn' ? list.data.map(r => ({ ...r, word_qn: r.word_char, word_char: r.word_qn, ctx_qn: r.ctx_chars, ctx_chars: r.ctx_qn })) : list.data;   // all rows of the time (at most 5000), newest first: the list below shows them 50 at a time, the CSV has all
       shown = PAGE;
       showGaps();
       showRecent();
@@ -193,6 +197,7 @@
         data.map(r => [r.at, r.word_qn, r.word_char, r.n_options, (r.ctx_qn || []).join(' | '), (r.ctx_chars || []).join(' | '), r.idx, r.pos, r.n_words, r.model, r.is_admin ? 'yes' : '']));
     });
     $('days').addEventListener('change', load);
+    $('direction').addEventListener('change', load);
     $('noAdmin').addEventListener('change', () => { shown = PAGE; showGaps(); showRecent(); });
     $('moreRecent').addEventListener('click', () => { shown += PAGE; showRecent(); });
     $('reload').addEventListener('click', load);
