@@ -42,22 +42,19 @@
     @font-face { font-family: "QATT Khai"; src: url(fonts/qatt-khai.woff2?v=6) format("woff2"), url(fonts/qatt-khai.ttf?v=6) format("truetype"); }
     @font-face { font-family: "QATT Serif"; src: url(fonts/qatt-serif.woff2?v=6) format("woff2"), url(fonts/qatt-serif.ttf?v=6) format("truetype"); }
     section.block#name { border-top: 0; padding-block: 1rem 3rem; }
-    .name-stage { position: relative; overflow: hidden; border-radius: 1.2rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.2rem, 4vw, 2rem); text-align: center; color: #f3ede2; background: radial-gradient(ellipse at 50% 35%, #25202f, #0a0a10 75%); box-shadow: 0 .6rem 1.6rem rgba(43, 33, 24, .28), inset 0 0 0 1px rgba(255, 255, 255, .06); perspective: 700px; cursor: pointer; user-select: none; }
+    /* the animated name: fixed boho look (terracotta, rays of the sun, dashed frame, woven stripe) */
+    .name-stage { position: relative; overflow: hidden; border-radius: 2.4rem .7rem 2.4rem .7rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.4rem, 4vw, 2.2rem); text-align: center; color: #f8ecd6; cursor: pointer; user-select: none; perspective: 700px;
+      box-shadow: 0 .5rem 1.4rem rgba(120, 70, 30, .28);
+      background: repeating-linear-gradient(90deg, #b85c38 0 18px, #d99a3e 18px 36px, #7a7d45 36px 54px, #c98a7a 54px 72px) bottom / 100% 8px no-repeat, radial-gradient(ellipse at 50% 32%, #7a4128, #3a1d12 78%); }
+    .name-stage::before { content: ""; position: absolute; inset: -60% -20% -20%; pointer-events: none; background: repeating-conic-gradient(from 0deg at 50% 52%, rgba(217, 154, 62, .13) 0 6deg, transparent 6deg 12deg); mask-image: radial-gradient(circle at 50% 52%, #000 0, transparent 55%); }
+    .name-stage::after { content: ""; position: absolute; inset: .7rem .7rem 1.2rem; pointer-events: none; border: 1px dashed rgba(217, 154, 62, .5); border-radius: 1.9rem .4rem 1.9rem .4rem; }
+    .name-row, .name-latin { position: relative; z-index: 1; }
     .name-row { display: flex; justify-content: center; gap: clamp(.4rem, 2.4vw, 1.4rem); min-height: clamp(6rem, 20vw, 9rem); }
     .name-row .nc { text-align: center; }
     .name-row .nc .g { font: clamp(3.2rem, 13vw, 6rem)/1 "QATT Pen Medium", sans-serif; }
-    .name-row .nc small { display: block; margin-top: .3rem; font: .9rem Georgia, serif; letter-spacing: .08em; opacity: .55; }
-    .name-latin { margin-top: .8rem; font: 400 clamp(1.1rem, 3.4vw, 1.5rem) Georgia, serif; letter-spacing: .22em; text-transform: uppercase; color: #e0a020; opacity: 0; }
-    /* index.html: the panel with the animated name: deep terracotta, rays of the sun behind the glyphs, a dashed inner frame, the woven stripe along the bottom, the Latin name in the italic serif between two stars */
-    html[data-theme="boho"] .name-stage { border: 0; border-radius: 2.4rem .7rem 2.4rem .7rem; color: #f8ecd6; box-shadow: 0 .5rem 1.4rem rgba(120, 70, 30, .28);
-      background: repeating-linear-gradient(90deg, #b85c38 0 18px, #d99a3e 18px 36px, #7a7d45 36px 54px, #c98a7a 54px 72px) bottom / 100% 8px no-repeat, radial-gradient(ellipse at 50% 32%, #7a4128, #3a1d12 78%); }
-    html[data-theme="boho"] .name-stage::before { content: ""; position: absolute; inset: -60% -20% -20%; pointer-events: none; background: repeating-conic-gradient(from 0deg at 50% 52%, rgba(217, 154, 62, .13) 0 6deg, transparent 6deg 12deg);
-      -webkit-mask-image: radial-gradient(circle at 50% 52%, #000 0, transparent 55%); mask-image: radial-gradient(circle at 50% 52%, #000 0, transparent 55%); }
-    html[data-theme="boho"] .name-stage::after { content: ""; position: absolute; inset: .7rem .7rem 1.2rem; pointer-events: none; border: 1px dashed rgba(217, 154, 62, .5); border-radius: 1.9rem .4rem 1.9rem .4rem; }
-    html[data-theme="boho"] .name-row, html[data-theme="boho"] .name-latin { position: relative; z-index: 1; }
-    html[data-theme="boho"] .name-row .nc small { font-family: var(--boho-serif); font-style: italic; font-size: 1.05rem; letter-spacing: .04em; color: #f0c070; opacity: .85; }
-    html[data-theme="boho"] .name-latin { font-family: var(--boho-serif); font-style: italic; font-weight: 600; font-size: clamp(1.5rem, 5vw, 2.2rem); letter-spacing: .06em; text-transform: none; color: #f0c070; }
-    html[data-theme="boho"] .name-latin::before, html[data-theme="boho"] .name-latin::after { content: " ✦ "; color: #d99a3e; font-size: .6em; vertical-align: middle; letter-spacing: 0; }
+    .name-row .nc small { display: block; margin-top: .3rem; font: italic 1.05rem Georgia, serif; letter-spacing: .04em; color: #f0c070; opacity: .85; }
+    .name-latin { margin-top: .8rem; font: italic 600 clamp(1.5rem, 5vw, 2.2rem) Georgia, serif; letter-spacing: .06em; color: #f0c070; opacity: 0; }
+    .name-latin::before, .name-latin::after { content: " ✦ "; color: #d99a3e; font-size: .6em; vertical-align: middle; letter-spacing: 0; }
     section.block#specimen { border-top: 0; padding-block: 1rem 2rem; }
     .weights { display: grid; grid-template-columns: repeat(7, 1fr); max-width: 35rem; margin-inline: auto; text-align: center; font-size: clamp(2rem, 8vw, 3.5rem); line-height: 1.12; color: var(--ink); user-select: none; }
     .weights span:nth-child(7n + 1) { font-family: "QATT Serif"; }

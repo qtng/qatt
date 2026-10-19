@@ -144,6 +144,10 @@
       <div class="scr-stage" id="scrStage">
         <div class="scr-slide" id="scr1"></div><div class="scr-slide" id="scr2"></div><div class="scr-slide" id="scr3"></div>
       </div></section>
+    <section class="show-card scr" data-run="scramble2"><h2><span data-vi="Xáo chữ, rút gọn">Scramble, short</span></h2>
+      <div class="scr-stage" id="sqStage">
+        <div class="scr-slide" id="sq1"></div><div class="scr-slide" id="sq3"></div>
+      </div></section>
     <section class="show-card" data-run="scrboho"><h2><span data-vi="Xáo chữ, bản sáng">Scramble, light</span></h2>
       <div class="sb-stage" id="sbStage"></div></section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
@@ -665,6 +669,51 @@
     tl.add(px('#scr3 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
     tl.add('#scr3 p', { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
     tl.add(px('#scr3 p'), { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
+    tl.call(() => { center.classList.remove('latin'); center.lastChild.textContent = pick(); }, '<<');
+    tl.init();
+    let on = false, vis = false;
+    new IntersectionObserver(e => { vis = e[0].isIntersecting; if (vis && !on) { tl.play(); on = true; } if (!vis && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
+  })();
+
+  // 6b. a clone of the scramble card without the slide of several lines of text: the diamond, the name in Latin letters, qatt.org. Scramble text (the effect of Julian Garnier's CodePen "Anime.js Scramble Text timeline", MIT): the letters flicker through random QATT syllables before they settle.
+  // The QATT glyphs lie outside the BMP (two UTF-16 units), which scrambleText would cut in half; so it scrambles one private-use letter per syllable
+  // (U+E000...) in a hidden copy of every text, and the page shows the same text with the real glyphs.
+  (() => {
+    if (!A.scrambleText) return;
+    const SC = A.scrambleText, root = card('scramble2'), st = $('sqStage');
+    const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
+    const rev = [], reg = new Map();
+    const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
+    const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');   // 'quốc âm' -> one letter per syllable
+    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
+    const GL = POOL.map(w => toks(w));
+    const CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');   // the cursor of the reveal wave: three syllables, not block characters (the Pen font has no blocks, no ASCII)
+    const pick = () => GL[Math.floor(Math.random() * GL.length)];
+    const cell = (text, cls, color) => { const p = document.createElement('p'); if (cls) p.className = cls; if (color) p.style.color = color; p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = text; p.firstChild.textContent = show(text); return p; };
+    const s1 = $('sq1'), s3 = $('sq3');
+    [2, 3, 4, 5, 4, 3, 2].forEach((n, r) => { const row = document.createElement('div'); row.className = 'scr-row'; for (let i = 0; i < n; i++) row.append(cell(pick(), r === 3 && i === 2 ? 'center' : '')); s1.append(row); });
+    s3.innerHTML = ''; const endRow = document.createElement('div'); endRow.className = 'scr-row'; const end = cell(' ', 'latin end'); endRow.append(end); s3.append(endRow);
+    const center = s1.querySelector('p.center');
+    const mirror = () => st.querySelectorAll('p').forEach(p => { const t = show(p.lastChild.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; });
+    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+    const px = sel => sel + ' .px';
+    tl.add('#sq1', { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
+    tl.add('#sq1 p.center', { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(px('#sq1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
+    tl.add('#sq1 p:not(.center)', { scale: { from: .75 }, color: { to: '#e0524a' } }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
+    tl.add(px('#sq1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: CUR, perturbation: .25 }) }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
+    tl.add(px('#sq1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'center', ease: 'outQuad', reversed: true, duration: 800, cursor: CUR }) }, '<+=150');
+    tl.add('#sq1 p.center', { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '<<');
+    tl.add(px('#sq1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
+    tl.add('#sq1 p.center', { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
+    tl.add(px('#sq1 p.center'), { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
+    tl.call(() => center.classList.add('latin'), '<<');
+    tl.add(px('#sq1 p.center'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=500');
+    tl.set('#sq3', { opacity: 1 }, '+=400');
+    tl.add('#sq3 p', { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '-=250');
+    tl.add(px('#sq3 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
+    tl.add('#sq3 p', { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
+    tl.add(px('#sq3 p'), { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
     tl.call(() => { center.classList.remove('latin'); center.lastChild.textContent = pick(); }, '<<');
     tl.init();
     let on = false, vis = false;
