@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Qatt.org – Quốc Âm Tân Tự</title>
-  <meta name="description" content="Quốc Âm Tân Tự (QATT), a Vietnamese script from Hán Nôm texts: introduction, Unicode proposal and decodings.">
+  <meta name="description" content="Quốc Âm Tân Tự (QATT), a Vietnamese script from Hán Nôm texts: introduction and the symbols.">
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/navigation.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
   <style>
     :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
@@ -38,6 +41,13 @@
     @font-face { font-family: "QATT Pen ExtraLight"; src: url(fonts/qatt-pen-extralight.woff2?v=6) format("woff2"), url(fonts/qatt-pen-extralight.ttf?v=6) format("truetype"); }
     @font-face { font-family: "QATT Khai"; src: url(fonts/qatt-khai.woff2?v=6) format("woff2"), url(fonts/qatt-khai.ttf?v=6) format("truetype"); }
     @font-face { font-family: "QATT Serif"; src: url(fonts/qatt-serif.woff2?v=6) format("woff2"), url(fonts/qatt-serif.ttf?v=6) format("truetype"); }
+    section.block#name { border-top: 0; padding-block: 1rem 3rem; }
+    .name-stage { position: relative; overflow: hidden; border-radius: 1.2rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.2rem, 4vw, 2rem); text-align: center; color: #f3ede2; background: radial-gradient(ellipse at 50% 35%, #25202f, #0a0a10 75%); box-shadow: 0 .6rem 1.6rem rgba(43, 33, 24, .28), inset 0 0 0 1px rgba(255, 255, 255, .06); perspective: 700px; cursor: pointer; user-select: none; }
+    .name-row { display: flex; justify-content: center; gap: clamp(.4rem, 2.4vw, 1.4rem); min-height: clamp(6rem, 20vw, 9rem); }
+    .name-row .nc { text-align: center; }
+    .name-row .nc .g { font: clamp(3.2rem, 13vw, 6rem)/1 "QATT Pen Medium", sans-serif; }
+    .name-row .nc small { display: block; margin-top: .3rem; font: .9rem Georgia, serif; letter-spacing: .08em; opacity: .55; }
+    .name-latin { margin-top: .8rem; font: 400 clamp(1.1rem, 3.4vw, 1.5rem) Georgia, serif; letter-spacing: .22em; text-transform: uppercase; color: #e0a020; opacity: 0; }
     section.block#specimen { border-top: 0; padding-block: 1rem 2rem; }
     .weights { display: grid; grid-template-columns: repeat(7, 1fr); max-width: 35rem; margin-inline: auto; text-align: center; font-size: clamp(2rem, 8vw, 3.5rem); line-height: 1.12; color: var(--ink); user-select: none; }
     .weights span:nth-child(7n + 1) { font-family: "QATT Serif"; }
@@ -60,6 +70,32 @@
     // the weights: row r shows the form r of the letters (0 unmarked, 1 marked, 2 to 6 the five Chi forms: more and more strokes), column c one weight (two Serif columns, then Khai, then Pen from medium to extra light)
     const weights = document.getElementById('weights');
     for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) weights.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * (r === 3 && c === 2 ? 6 : r === 4 && c === 2 ? 7 : (r * 7 + c) * 5 % 22) + r) }));   // (the 4th and 5th of the Khai column: other shapes than the grid gives)
+  });
+</script>
+
+<script>
+  // the name flies in with a spring, waves and turns once; plays when the section comes into view, again every few seconds and on a click
+  document.addEventListener('DOMContentLoaded', () => {
+    const A = window.anime, row = document.getElementById('nameRow'), latin = document.getElementById('nameLatin'), stage = document.getElementById('nameStage');
+    const parser = new VietnameseParser();
+    const els = ['quốc', 'âm', 'tân', 'tự'].map(w => {
+      const d = document.createElement('div'); d.className = 'nc'; d.innerHTML = '<div class="g"></div><small></small>';
+      d.firstChild.textContent = QattText.word(w, parser) || ''; d.lastChild.textContent = w; row.append(d); return d;
+    });
+    if (!A || matchMedia('(prefers-reduced-motion: reduce)').matches) { latin.style.opacity = 1; return; }
+    let tl = null, visible = false, timer = null;
+    function play() {
+      clearTimeout(timer); tl && tl.pause();
+      latin.style.opacity = 0;
+      tl = A.createTimeline({ defaults: { ease: 'outBack(2.2)' } });
+      tl.add(els, { translateY: [-200, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, A.stagger(160))
+        .add(els, { translateY: [0, -16, 0], duration: 900, ease: 'inOutSine' }, A.stagger(110, { start: 400 }))
+        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, A.stagger(140, { start: 400 }))
+        .add(latin, { opacity: [0, 1], translateY: [10, 0], duration: 900, ease: 'outQuad' }, 2200);
+      timer = setTimeout(() => visible && play(), 9000);
+    }
+    new IntersectionObserver(e => { visible = e[0].isIntersecting; if (visible) play(); else { clearTimeout(timer); tl && tl.pause(); } }, { threshold: .5 }).observe(stage);
+    stage.addEventListener('click', play);
   });
 </script>
 
@@ -89,30 +125,11 @@
     <div class="weights" id="weights" role="img" aria-label="The script in Serif, Khai and in four weights of Pen"></div>
   </section>
 
-  <section class="block" id="unicode">
-    <h2 class="h3" data-vi="Đề xuất Unicode">Unicode proposal</h2>
-    <div class="row g-4">
-      <div class="col-lg-7">
-        <p data-vi="Unicode giúp mọi chữ viết hiển thị được trên mọi thiết bị. QATT chưa có trong Unicode. Một bản đề xuất dự thảo bổ sung 164 ký tự: các hình làm khối dựng chữ và một ký tự nối ghép chúng thành một chữ.">Unicode lets every script be shown on every device. QATT is not part of it yet. A draft proposal adds 164 characters: the shapes as building blocks and a joining character that puts them together.</p>
-        <p class="mb-0"><a class="btn btn-primary btn-pill" href="unicode.html" data-vi="Xem bản dự thảo">View the draft</a></p>
-      </div>
-      <div class="col-lg-5">
-        <div class="card h-100">
-          <div class="card-body">
-            <dl class="facts row mb-0">
-              <dt class="col-5" data-vi="Số ký tự">Characters</dt><dd class="col-7">164</dd>
-              <dt class="col-5" data-vi="Trạng thái">Status</dt><dd class="col-7 mb-0" data-vi="Dự thảo, chưa thuộc Unicode">Draft, not yet part of Unicode</dd>
-            </dl>
-          </div>
-        </div>
-      </div>
+  <section class="block" id="name">
+    <div class="name-stage" id="nameStage" role="img" aria-label="Quốc Âm Tân Tự in QATT">
+      <div class="name-row" id="nameRow"></div>
+      <div class="name-latin" id="nameLatin" aria-hidden="true">Quốc Âm Tân Tự</div>
     </div>
-  </section>
-
-  <section class="block" id="decodings">
-    <h2 class="h3" data-vi="Giải mã">Decodings</h2>
-    <p data-vi="Nguồn duy nhất giải thích chữ bằng một bảng viết bằng chữ Nôm. Nhiều chỉ dẫn trong đó không rõ hoặc đã mất, nên âm của các ký hiệu chỉ có thể dựng lại dựa trên một số giả định. Bảng giải mã cho thấy kết quả và so sánh cách đọc của trang này với cách đọc trên Omniglot.">The only source explains the script with a table in Chữ Nôm. Many of its hints are unclear or lost, so the sounds of the symbols can only be reconstructed with some assumptions. The decodings show the result and compare the reading of this site with the one on Omniglot.</p>
-    <p class="mb-0"><a class="btn btn-primary" href="decodings.html" data-vi="Mở bảng giải mã">Open the decodings</a></p>
   </section>
 
 </main>
