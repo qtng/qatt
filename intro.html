@@ -465,7 +465,7 @@
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360 * f], translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'inOutCubic' }, stagger(140, { start: 400 }));   // the two meet exactly when the turn has reached the slider value
+        .add(els, { rotateY: [0, 360 * f], translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'inOutCubic' }, stagger(140, { start: 1300 }));   // the turn starts when the fly-in is over, and the move together with it; the two meet exactly when the turn has reached the slider value
     }
     const again = () => { build(); play(); };
     rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again);
