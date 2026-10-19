@@ -12,7 +12,7 @@
   <script src="js/qatt-text.js"></script>
   <script defer src="js/fonts.js"></script>
   <style>
-    :root { --qfont: "QATT Pen"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    :root { --qfont: "QATT Pen Medium"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
     .hero {
       background:
         radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
@@ -315,8 +315,8 @@
       dlg.showModal();
       dlg.focus();   // not the close button (it would show a focus ring)
     }));
-    const font = document.getElementById('font');   // the page starts in Pen
-    font.value = 'QATT Pen';
+    const font = document.getElementById('font');   // the page starts in Pen medium
+    font.value = 'QATT Pen Medium';
     font.dispatchEvent(new Event('change'));
   });
 </script>
