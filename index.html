@@ -26,7 +26,7 @@
     .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
     @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
     .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; transition: opacity .15s, color .15s; }   /* heavier strokes, as strong as the big glyphs of the name below */
-    .glyph-strip a { color: inherit; text-decoration: none; }
+    .glyph-strip a { color: inherit !important; text-decoration: none !important; }   /* also against the link colour of a theme, now that the strip is in the main part */
     .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
@@ -36,9 +36,9 @@
     .facts dt { font-weight: 600; }
     /* the fonts as a grid of characters (made of text, no image): the weight falls from the left to the right column, the number of strokes grows from the top to the bottom row */
     @font-face { font-family: "QATT Pen Medium"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); }
-    section.block#name { border-top: 0; padding-block: 1rem 3rem; }
+    section.block#name { border-top: 0; padding-block: 1.8rem 1.4rem; }
     /* the animated name: fixed boho look (terracotta, rays of the sun, dashed frame, woven stripe) */
-    .name-stage { position: relative; overflow: hidden; border-radius: 2.4rem .7rem 2.4rem .7rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.4rem, 4vw, 2.2rem); text-align: center; color: #f8ecd6; cursor: pointer; user-select: none; perspective: 700px;
+    .name-stage { position: relative; overflow: hidden; border-radius: 2.4rem .7rem 2.4rem .7rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.2rem, 3.4vw, 1.8rem); text-align: center; color: #f8ecd6; cursor: pointer; user-select: none; perspective: 700px;
       box-shadow: 0 .5rem 1.4rem rgba(120, 70, 30, .28);
       background: repeating-linear-gradient(90deg, #b85c38 0 18px, #d99a3e 18px 36px, #7a7d45 36px 54px, #c98a7a 54px 72px) bottom / 100% 8px no-repeat, radial-gradient(ellipse at 50% 32%, #7a4128, #3a1d12 78%); }
     .name-stage::before { content: ""; position: absolute; inset: -60% -20% -20%; pointer-events: none; background: repeating-conic-gradient(from 0deg at 50% 52%, rgba(217, 154, 62, .13) 0 6deg, transparent 6deg 12deg); mask-image: radial-gradient(circle at 50% 52%, #000 0, transparent 55%); }
@@ -48,7 +48,7 @@
     .name-row .nc { text-align: center; }
     .name-row .nc .g { font: clamp(3.2rem, 13vw, 6rem)/1 "QATT Pen Medium", sans-serif; }
     .name-row .nc small { display: block; margin-top: .3rem; font: italic 1.05rem Georgia, serif; letter-spacing: .04em; color: #f0c070; opacity: .85; }
-    .name-latin { margin-top: .8rem; font: italic 600 clamp(1.5rem, 5vw, 2.2rem) Georgia, serif; letter-spacing: .06em; color: #f0c070; opacity: 0; }
+    .name-latin { margin-top: -.5rem; font: italic 600 clamp(1.5rem, 5vw, 2.2rem) Georgia, serif; letter-spacing: .06em; color: #f0c070; opacity: 0; }
     .name-latin::before, .name-latin::after { content: " ✦ "; color: #d99a3e; font-size: .6em; vertical-align: middle; letter-spacing: 0; }
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
@@ -93,16 +93,21 @@
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">Quốc Âm Tân Tự</h1>
     <p class="lead mx-auto mb-4" data-vi="Một lối chữ viết tiếng Việt sáng tạo từ thập niên 1840.">A forgotten Vietnamese script from the 1840s, built from just 22 shapes.</p>
-    <div class="d-flex flex-wrap justify-content-center gap-2 mb-5">
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-1">
       <a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Bảng chữ">Symbol table</a>
       <a class="btn btn-ink btn-pill" href="editor.html" data-vi="Gõ chữ">Type it</a>
     </div>
-    <div class="rule" aria-hidden="true" data-vi="22 Cán">22 base shapes</div>
-    <div class="glyph-strip" id="glyph-strip" aria-label="22 base shapes of the script"></div>
   </div>
 </header>
 
 <main class="container py-2">
+
+  <section class="block" id="name">
+    <div class="name-stage" id="nameStage" role="img" aria-label="Quốc Âm Tân Tự in QATT">
+      <div class="name-row" id="nameRow"></div>
+      <div class="name-latin" id="nameLatin" aria-hidden="true">Quốc Âm Tân Tự</div>
+    </div>
+  </section>
 
   <section class="block" id="script">
     <h2 class="h3" data-vi="Chữ viết">The script</h2>
@@ -110,12 +115,9 @@
     <p data-vi="Chữ gồm 22 hình cơ bản, mỗi hình ba nét. Thêm một nét nhỏ ở một trong sáu vị trí thì có thêm sáu dạng. Hai hình đặt cạnh nhau làm thành một âm tiết: bên trái là phần đầu, bên phải là phần vần. Vòng tròn và nửa vòng tròn nhỏ ở các góc ghi tám thanh điệu.">The script has 22 basic shapes of three strokes each. A small extra stroke in one of six places gives six more forms. Two shapes side by side make one syllable: the left one is its beginning, the right one its ending. Small circles and half circles in the corners mark the eight tones.</p>
   </section>
 
-
-  <section class="block" id="name">
-    <div class="name-stage" id="nameStage" role="img" aria-label="Quốc Âm Tân Tự in QATT">
-      <div class="name-row" id="nameRow"></div>
-      <div class="name-latin" id="nameLatin" aria-hidden="true">Quốc Âm Tân Tự</div>
-    </div>
+  <section class="block" id="shapes">
+    <div class="rule" aria-hidden="true" data-vi="22 Cán">22 base shapes</div>
+    <div class="glyph-strip text-dark" id="glyph-strip" aria-label="22 base shapes of the script"></div>
   </section>
 
 </main>
