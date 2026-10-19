@@ -133,6 +133,8 @@
         <input type="text" class="form-control form-control-sm" id="name2C" value="tự" aria-label="3" autocomplete="off" spellcheck="false">
       </div>
       <label class="name2-rng"><span><span data-vi="Vòng quay">Turn</span>: <output id="name2Val">100%</output></span><input type="range" class="form-range" id="name2Rng" min="0" max="100" value="100"></label>
+      <label class="name2-rng"><span><span data-vi="Tốc độ quay">Speed of the turn</span>: <output id="name2SpdVal">100%</output></span><input type="range" class="form-range" id="name2Spd" min="25" max="300" step="5" value="100"></label>
+      <label class="name2-rng"><span><span data-vi="Thời gian chờ">Wait before the turn</span>: <output id="name2WaitVal">0 s</output></span><input type="range" class="form-range" id="name2Wait" min="0" max="3000" step="100" value="0"></label>
     </section>
   </div>
 </main>
@@ -450,7 +452,7 @@
 
   // 5b. a copy of 5 with two characters (typed in the fields) and a slider: how far the turn goes (0 to 100% of the full turn; the count starts where the turn starts)
   (() => {
-    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C');
+    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C'), spd = $('name2Spd'), wt = $('name2Wait');
     let els = [], tl = null, gap = 0;
     function build() {
       host.textContent = ''; els = [];
@@ -464,21 +466,22 @@
     }
     function play() {
       tl && tl.pause();
-      const f = +rng.value / 100; $('name2Val').textContent = rng.value + '%';
+      const f = +rng.value / 100, D = 1400 * 100 / +spd.value, W = 1300 + +wt.value, M = Math.max(D * f, 30), FADE = 500 * D / 1400;   // D: the full turn (a slower speed, a longer turn and fade), W: the start of the turn (after the fly-in and the wait), M: the move together
+      $('name2Val').textContent = rng.value + '%'; $('name2SpdVal').textContent = spd.value + '%'; $('name2WaitVal').textContent = (wt.value / 1000).toFixed(1) + ' s';
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'outQuad' }, stagger(140, { start: 1300 }))
-        .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'outQuad' }, stagger(140, { start: 1300 }))   // the turn starts when the fly-in is over, the move together with it; the two meet when the slider value of the time is reached
+        .add(els, { rotateY: [0, 360], duration: D, ease: 'outQuad' }, stagger(140, { start: W }))
+        .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: M, ease: 'outQuad' }, stagger(140, { start: W }))   // the turn starts when the fly-in and the wait are over, the move together with it; the two meet when the slider value of the time is reached
         .call(() => {   // they overlap: the first fades into the third character and the second fades out, the turn goes on to the end
           const w = inC.value.trim(), ov = els[0].querySelector('.n3'), q = els[0].children;
           ov.children[0].textContent = (w && QattText.word(w, parser)) || ''; ov.children[1].textContent = w;
-          const o = { duration: 500, ease: 'inOutSine' };
+          const o = { duration: FADE, ease: 'inOutSine' };
           animate([q[0], q[1], els[1]], { opacity: 0, ...o }); animate(ov, { opacity: 1, ...o });
-        }, 1300 + 140 + Math.max(1400 * f, 30) - 250);
+        }, W + 140 + M - FADE / 2);
     }
     const again = () => { build(); play(); };
-    rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
+    rng.addEventListener('input', again); spd.addEventListener('input', again); wt.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
     host.addEventListener('click', again);
     build();
     (async () => { await ok(); play(); })();
