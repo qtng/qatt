@@ -129,6 +129,7 @@
       <div class="name2-ctl">
         <input type="text" class="form-control form-control-sm" id="name2A" value="quốc" aria-label="1" autocomplete="off" spellcheck="false">
         <input type="text" class="form-control form-control-sm" id="name2B" value="âm" aria-label="2" autocomplete="off" spellcheck="false">
+        <input type="text" class="form-control form-control-sm" id="name2C" value="tự" aria-label="3" autocomplete="off" spellcheck="false">
       </div>
       <label class="name2-rng"><span><span data-vi="Vòng quay">Turn</span>: <output id="name2Val">100%</output></span><input type="range" class="form-range" id="name2Rng" min="0" max="100" value="100"></label>
     </section>
@@ -448,7 +449,7 @@
 
   // 5b. a copy of 5 with two characters (typed in the fields) and a slider: how far the turn goes (0 to 100% of the full turn; the count starts where the turn starts)
   (() => {
-    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B');
+    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C');
     let els = [], tl = null, gap = 0;
     function build() {
       host.textContent = ''; els = [];
@@ -465,10 +466,15 @@
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360 * f], translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'inOutCubic' }, stagger(140, { start: 1300 }));   // the turn starts when the fly-in is over, and the move together with it; the two meet exactly when the turn has reached the slider value
+        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, stagger(140, { start: 1300 }))
+        .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'inOutCubic' }, stagger(140, { start: 1300 }))   // the turn starts when the fly-in is over, the move together with it; the two meet when the slider value of the time is reached
+        .call(() => {   // they overlap: the first becomes the third character, the second is gone, the turn goes on to the end
+          const w = inC.value.trim(), q = els[0].children;
+          q[0].textContent = (w && QattText.word(w, parser)) || ''; q[1].textContent = w; els[1].style.visibility = 'hidden';
+        }, 1300 + 140 + Math.max(1400 * f, 30));
     }
     const again = () => { build(); play(); };
-    rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again);
+    rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
     host.addEventListener('click', again);
     build();
     (async () => { await ok(); play(); })();
