@@ -71,7 +71,8 @@
   .name2-ctl { display: flex; justify-content: center; gap: .6rem; margin-top: .6rem; }
   .name2-ctl input { max-width: 7rem; text-align: center; }
   .name2-rng { display: block; max-width: 22rem; margin: .8rem auto 0; }
-  .nchar { text-align: center; }
+  .nchar { text-align: center; position: relative; }
+  .nchar .n3 { position: absolute; inset: 0; opacity: 0; }
   .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
   .nchar small { display: block; font-family: Georgia, serif; opacity: .6; }
   @media (prefers-reduced-motion: reduce) { .pop, .ring { animation: none; } }
@@ -458,6 +459,7 @@
         d.innerHTML = `<div class="qg"></div><small></small>`; d.firstChild.textContent = (w && QattText.word(w, parser)) || ''; d.lastChild.textContent = w;
         host.append(d); els.push(d);
       }
+      els[0].insertAdjacentHTML('beforeend', '<div class="n3"><div class="qg"></div><small></small></div>');   // the third character, laid over the first
       const r = els.map(e => e.getBoundingClientRect()); gap = r[1].left + r[1].width / 2 - (r[0].left + r[0].width / 2);   // distance of the centres
     }
     function play() {
@@ -468,10 +470,12 @@
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
         .add(els, { rotateY: [0, 360], duration: 1400, ease: 'outQuad' }, stagger(140, { start: 1300 }))
         .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'outQuad' }, stagger(140, { start: 1300 }))   // the turn starts when the fly-in is over, the move together with it; the two meet when the slider value of the time is reached
-        .call(() => {   // they overlap: the first becomes the third character, the second is gone, the turn goes on to the end
-          const w = inC.value.trim(), q = els[0].children;
-          q[0].textContent = (w && QattText.word(w, parser)) || ''; q[1].textContent = w; els[1].style.visibility = 'hidden';
-        }, 1300 + 140 + Math.max(1400 * f, 30));
+        .call(() => {   // they overlap: the first fades into the third character and the second fades out, the turn goes on to the end
+          const w = inC.value.trim(), ov = els[0].querySelector('.n3'), q = els[0].children;
+          ov.children[0].textContent = (w && QattText.word(w, parser)) || ''; ov.children[1].textContent = w;
+          const o = { duration: 500, ease: 'inOutSine' };
+          animate([q[0], q[1], els[1]], { opacity: 0, ...o }); animate(ov, { opacity: 1, ...o });
+        }, 1300 + 140 + Math.max(1400 * f, 30) - 250);
     }
     const again = () => { build(); play(); };
     rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
