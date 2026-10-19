@@ -37,6 +37,9 @@
   <div id="content" hidden>
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <label for="days" class="me-1">Last</label>
+      <select id="direction" class="form-select form-select-sm w-auto" aria-label="Direction">
+        <option value="qn_to_nom" selected>Quốc Ngữ → Chữ Nôm</option><option value="nom_to_qn">Chữ Nôm → Quốc Ngữ (draft)</option>
+      </select>
       <select id="days" class="form-select form-select-sm w-auto">
         <option value="1">24 hours</option><option value="7" selected>7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="180">6 months</option>
       </select>
@@ -104,7 +107,7 @@
     let allowed = false;
     async function load() {
       if (!allowed) return;
-      const { data, error } = await sp.client.rpc('admin_models', { p_days: Number($('days').value) });
+      const { data, error } = await sp.client.rpc('admin_models', { p_days: Number($('days').value), p_direction: $('direction').value });
       if (error) return denied(error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + error.message);
       $('denied').hidden = true; $('content').hidden = false;
       $('at').textContent = 'as of ' + new Date().toLocaleTimeString();
@@ -127,6 +130,7 @@
     }
 
     $('days').addEventListener('change', load);
+    $('direction').addEventListener('change', load);
     $('reload').addEventListener('click', load);
     const state = await Admin.check(sp);
     if (state === 'admin') { allowed = true; load(); }
