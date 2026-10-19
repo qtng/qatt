@@ -74,7 +74,7 @@
     const px = p.lastChild, mirror = () => [p, bg].forEach(e => { const t = show(e.lastChild.textContent); if (e.firstChild.textContent !== t) e.firstChild.textContent = t; });
     const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
     tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
-    tl.add(p, { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(p, { scale: { from: 6 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
     tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
     tl.add(p, { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '+=900');
     tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
