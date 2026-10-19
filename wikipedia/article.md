@@ -59,7 +59,7 @@ Quốc Âm Tân Tự is built on 22 base components called Cán (幹). Each cons
 The manuscript lists the 22 Cán in the section 幹音二十二字 ("the twenty-two characters of the trunk sounds"), each annotated with its name in chữ Nôm. [MS p. 2] The three strokes of each Cán form a distinctive geometric configuration, which all forms derived from it share. Each configuration fills a square cell. Where a configuration contains two parallel lines joined by a third, the two are evenly spaced across the cell and set in from its edges rather than lying on them, while the joining line runs along the edge of the cell and spans its full width or height. The 22 configurations can be grouped by their underlying geometry as follows:
 
 - **Diagonal cross (X) variants** (4 symbols): An X shape with a separate straight line running alongside one of its four sides, parallel to that side and slightly apart from the X without touching it, much like the two strokes of "ll": top (mông), right (phông), bottom (bông) or left (vông). The X is narrowed accordingly so that both together fill the cell.
-- **Orthogonal cross (+) variants** (4 symbols): A + shape with an extra line across the end of one of its four arms, perpendicular to that arm and as long as the crossing arm: top (trông), right (nông), bottom (đông) or left (tông).
+- **Orthogonal cross (+) variants** (4 symbols): A + shape with an extra line across the end of one of its four arms, perpendicular to that arm and as long as the crossing arm: top (trông), left (nông), bottom (đông) or right (tông).
 - **Two parallel horizontals** (2 symbols): Two evenly spaced horizontal lines, joined by a full-height vertical line along the left edge (gông) or the right edge (công).
 - **Two parallel verticals** (2 symbols): Two evenly spaced vertical lines, joined by a full-width horizontal line along the top edge (ngông, resembling π) or the bottom edge (hông).
 - **Triple parallels** (2 symbols): Three evenly spaced horizontal lines filling the cell, closely resembling the character 三 (ông), or three evenly spaced vertical lines filling the cell (lông).
@@ -70,6 +70,10 @@ The manuscript lists the 22 Cán in the section 幹音二十二字 ("the twenty-
 ### Forms of each base
 
 The marking stroke always sits at the end of one of the three strokes. Since each stroke has two ends, there are six possible positions. In the form shown in the list of the 22 Cán, the marking stroke occupies the start position, upper left or upper middle depending on the shape [MS p. 2]; this form is referred to here as the marked Cán. Moving the marking stroke counter-clockwise from one stroke end to the next yields, in order, the five Chi (枝) of the base. Without a marking stroke, the base appears as the unmarked Cán. The manuscript has no separate name for this form: it calls both the marked and the unmarked form simply Cán (幹). [MS p. 8] Each base therefore has seven forms — the marked Cán, five Chi and the unmarked Cán — giving 22 marked Cán, 110 Chi and 22 unmarked Cán in total.
+
+### Position of the marking stroke in the marked Cán
+
+In the marked Cán the marking stroke sits at position 1, always in the upper left or the upper middle of the shape. It crosses the end of one line: the left end of the top horizontal line in ông, ngông, trông, xông, không and mông; the left end of the upper horizontal line in công; the top end of a vertical line in hông, gông, lông, đông, nông, tông, thông, nhông, chông, dông, sông, rông and vông; and the upper left end of the diagonal line in bông and phông. [MS p. 2] The numbering of the six positions runs counter-clockwise: from the top down the left side, along the bottom, up the right side and back to the top right. [?S13]
 
 ### Cán
 
@@ -144,6 +148,8 @@ Alle Punkte erledigt.
 - **S4** – Kolophon ist in der Handschrift belegt (S. 2, Sp. 5). Spekulativ bleibt nur die astronomische Deutung (Konjunktion 7. Januar 1842, letzter Absatz unter Dating); Planeten nahe der Sonne sind zudem unsichtbar.
 - **S5** – „climate of crisis … scholars sought …“, „envisioned … popular literacy“: Absichtszuschreibung ohne Quelle.
 - **S6** – „no calligraphic tradition behind it“: Wertung. (Die falsche Angabe „augmented with circles and semicircles“ ist mit W5 entfallen; Kreise/Halbkreise sind Tonzeichen.)
+- **S13 – Position des Markierungsstrichs.** Aus den SVG-Definitionen von qatt/js/qatt.js (Markierungen 1–6 je Basis) abgeleitet und mit der Liste S. 2 verglichen; Handschrift-Beleg je Basis noch nicht einzeln geprüft.
+- **nông/tông.** Beschreibung geändert auf nông = Linie links, tông = Linie rechts (Abgleich mit Scan S. 2 und qatt.js; widerspricht der früheren mündlichen Zuordnung). Bitte bestätigen.
 - **E01 – Formen.** Beleg: Handschrift S. 2, Liste 幹音二十二字 (im Text als [MS p. 2] eingetragen). Alle 22 Formen und Namen mit dem Scan (Quelle 1) abgeglichen: stimmen mit der Beschreibung überein.
 - **P1 – Preface.** Zusammenfassung nach der Lesung der Proposal-Session; am Original zu prüfen, vor allem 鄙陋不通, 或諧聲或繹義 und der Schlusssatz (abgeleitet aus 一箇簡易之格 / 以便私記). Die Einordnung als Nachahmung von Xu Shens 說文解字敘 bewusst weggelassen (WP:NOR). Spaltenangaben nach eigener Zählung (Titel = Sp. 1).
 - **S10** – „can reasonably be assumed to support the same range of writing directions“: Repo: nur vertikal belegt, horizontale Nutzung reine Annahme.
