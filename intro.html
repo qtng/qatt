@@ -11,7 +11,7 @@
 <script src="/js/parser.js"></script>
 <script src="/js/qatt.js"></script>
 <script src="/js/qatt-text.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/animejs@4.0.2/lib/anime.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
 <script>window.splash = new Promise(r => window.splashEnd = r); document.documentElement.classList.add('splashing');</script>
 <style>
   html.splashing { overflow: hidden; }
@@ -62,6 +62,15 @@
   .orbit .core { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6.2rem; }
   .orbit .tok { position: absolute; left: 50%; top: 50%; font-size: 2.6rem; width: 3.4rem; height: 3.4rem; margin: -1.7rem; display: grid; place-items: center; color: #2a7fb8; border-radius: 50%; background: color-mix(in srgb, #2a7fb8 12%, transparent); transition: opacity .6s; }
   .orbit .path { position: absolute; inset: 6%; border-radius: 50%; border: 1px dashed color-mix(in srgb, currentColor 25%, transparent); }
+  .scr { background: radial-gradient(ellipse at 50% 40%, #1d1a28, #07080d 75%); color: #f3ede2; border-color: #2a2738; }
+  .scr h2 { color: #f3ede2; }
+  .scr-stage { position: relative; aspect-ratio: 16 / 10; max-width: 36rem; margin: 0 auto; }
+  .scr-slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; }
+  .scr-row { display: flex; justify-content: center; }
+  .scr-slide p { margin: .2em .45em; line-height: 1; white-space: nowrap; font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-family: "QATT Pen Medium", "QATT Pen", sans-serif; }
+  .scr-slide p { position: relative; }
+  .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
+  .scr-slide p.latin { font-family: Georgia, serif; }
   .host { display: grid; place-items: center; min-height: 15.5rem; }
   .gridhost { display: grid; gap: .1rem; max-width: 34rem; margin: 0 auto; }
   .gcell { font-size: clamp(1.4rem, 5.2vw, 2.1rem); text-align: center; cursor: pointer; padding: .15rem 0; user-select: none; }
@@ -122,6 +131,10 @@
     <section class="show-card" data-run="morph"><h2><span data-vi="Biến hình">Morph</span></h2><div class="host" id="morphHost"></div><div class="cap" id="morphCap"></div></section>
     <section class="show-card" data-run="grid"><h2><span data-vi="Sóng">Ripple</span></h2><div class="gridhost" id="gridHost"></div></section>
     <section class="show-card" data-run="comet"><h2><span data-vi="Sao chổi">Comet</span></h2><div class="host" id="cometHost"></div><div class="cap" id="cometCap"></div></section>
+    <section class="show-card scr" data-run="scramble"><h2><span data-vi="Xáo chữ">Scramble</span></h2>
+      <div class="scr-stage" id="scrStage">
+        <div class="scr-slide" id="scr1"></div><div class="scr-slide" id="scr2"></div><div class="scr-slide" id="scr3"></div>
+      </div></section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
   </div>
 </main>
@@ -520,8 +533,8 @@
     const host = $('morphHost'), ok = whenVisible(card('morph')), words = ['bán', 'xa', 'người', 'mẹ', 'tự', 'quốc'];
     const ds = words.map(w => dOf(codeOf(w))), s = glyphSvg(host, 14), P = {};
     const park = mk('g', { display: 'none' }, s), targets = [];
-    for (const k of ['onset', 'rhyme', 'tone']) P[k] = mk('path', { d: ds[0][k] || 'M60 -6 l.01 0', stroke: COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
-    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = mk('path', { d: d[k] || 'M60 -6 l.01 0' }, park); return o; });
+    for (const k of ['onset', 'rhyme', 'tone']) P[k] = mk('path', { d: ds[0][k] || 'M56 -6 l8 0', stroke: COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
+    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = mk('path', { d: d[k] || 'M56 -6 l8 0' }, park); return o; });
     const cap = $('morphCap');
     for (let n = 0; ; n = (n + 1) % words.length) {
       cap.textContent = words[n];
@@ -593,6 +606,58 @@
     }
     host.addEventListener('click', play);
     (async () => { for (;;) { await ok(); play(); await sleep(7000); } })();
+  })();
+
+  // 6. scramble text (the effect of Julian Garnier's CodePen "Anime.js Scramble Text timeline", MIT): the letters flicker through random QATT syllables before they settle.
+  // The QATT glyphs lie outside the BMP (two UTF-16 units), which scrambleText would cut in half; so it scrambles one private-use letter per syllable
+  // (U+E000...) in a hidden copy of every text, and the page shows the same text with the real glyphs.
+  (() => {
+    if (!A.scrambleText) return;
+    const SC = A.scrambleText, root = card('scramble'), st = $('scrStage');
+    const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
+    const rev = [], reg = new Map();
+    const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
+    const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');   // 'quốc âm' -> one letter per syllable
+    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
+    const GL = POOL.map(w => toks(w));
+    const CHARS = GL.join('');
+    const pick = () => GL[Math.floor(Math.random() * GL.length)];
+    const cell = (text, cls, color) => { const p = document.createElement('p'); if (cls) p.className = cls; if (color) p.style.color = color; p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = text; p.firstChild.textContent = show(text); return p; };
+    const s1 = $('scr1'), s2 = $('scr2'), s3 = $('scr3');
+    [2, 3, 4, 5, 4, 3, 2].forEach((n, r) => { const row = document.createElement('div'); row.className = 'scr-row'; for (let i = 0; i < n; i++) row.append(cell(pick(), r === 3 && i === 2 ? 'center' : '')); s1.append(row); });
+    const COL = ['#2a9fd8', '#e0524a', '#e0a020', '#5fc77a', '#c07ad8'];
+    let ci = 0;
+    [['quốc âm', 'tân tự'], ['người nước việt', 'nam'], ['âm đầu', 'vần', 'thanh']].forEach(words => { const row = document.createElement('div'); row.className = 'scr-row'; words.forEach(w => row.append(cell(toks(w), '', COL[ci++ % COL.length]))); s2.append(row); });
+    s3.innerHTML = ''; const endRow = document.createElement('div'); endRow.className = 'scr-row'; const end = cell(' ', 'latin end'); endRow.append(end); s3.append(endRow);
+    const center = s1.querySelector('p.center');
+    const mirror = () => st.querySelectorAll('p').forEach(p => { const t = show(p.lastChild.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; });
+    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+    const px = sel => sel + ' .px';
+    tl.add('#scr1', { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
+    tl.add('#scr1 p.center', { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: '░▒▓' }) }, '<<');
+    tl.add('#scr1 p:not(.center)', { scale: { from: .75 }, color: { to: '#e0524a' } }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
+    tl.add(px('#scr1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: '░▒▓', perturbation: .25 }) }, A.stagger([250, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<<' }));
+    tl.add(px('#scr1 p:not(.center)'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'center', ease: 'outQuad', reversed: true, duration: 800, cursor: '░▒▓' }) }, '<+=150');
+    tl.add('#scr1 p.center', { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '<<');
+    tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
+    tl.add('#scr1 p.center', { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
+    tl.add(px('#scr1 p.center'), { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
+    tl.call(() => center.classList.add('latin'), '<<');
+    tl.add(px('#scr1 p.center'), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=500');
+    tl.set('#scr2', { opacity: 1 }, '<<');
+    tl.add(px('#scr2 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', duration: 500, revealDelay: 250, cursor: '░▒▓', perturbation: .5 }) }, A.stagger([0, 1000], { grid: true, from: 'center', ease: 'out(3)', start: '<<+=250', reversed: true }));
+    tl.add('#scr2 p', { scale: [.8, 1] }, A.stagger([0, 150], { grid: true, from: 'center', ease: 'out(3)', start: '<<', reversed: true }));
+    tl.add(px('#scr2 p'), { innerHTML: SC({ chars: CHARS, text: '&nbsp;', override: false, from: 'center', reversed: true, duration: 500, cursor: '░▒▓' }) }, A.stagger([0, 750], { grid: true, from: 'center', ease: 'out(3)', start: '<+=1500' }));
+    tl.set('#scr3', { opacity: 1 }, '<<');
+    tl.add('#scr3 p', { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '-=250');
+    tl.add(px('#scr3 p'), { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
+    tl.add('#scr3 p', { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
+    tl.add(px('#scr3 p'), { innerHTML: SC({ chars: '#!%░▒▓_01', text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
+    tl.call(() => { center.classList.remove('latin'); center.lastChild.textContent = pick(); }, '<<');
+    tl.init();
+    let on = false, vis = false;
+    new IntersectionObserver(e => { vis = e[0].isIntersecting; if (vis && !on) { tl.play(); on = true; } if (!vis && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   })();
   window.FX2 = { dOf, mk, glyphSvg, COLORS };
 })();
@@ -696,8 +761,8 @@
   async function morph() {
     const ws = [...WORDS].sort(() => Math.random() - .5).slice(0, 3), ds = ws.map(w => G.dOf(F.codeOf(w))), s = G.glyphSvg(host, glyphBox()), P = {};
     const park = G.mk('g', { display: 'none' }, s);
-    for (const k of ['onset', 'rhyme', 'tone']) P[k] = G.mk('path', { d: ds[0][k] || 'M60 -6 l.01 0', stroke: G.COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
-    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = G.mk('path', { d: d[k] || 'M60 -6 l.01 0' }, park); return o; });
+    for (const k of ['onset', 'rhyme', 'tone']) P[k] = G.mk('path', { d: ds[0][k] || 'M56 -6 l8 0', stroke: G.COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
+    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = G.mk('path', { d: d[k] || 'M56 -6 l8 0' }, park); return o; });
     word(ws[0]); await sleep(1300);
     for (let m = 1; m < ws.length; m++) {
       cap.style.opacity = .2;
