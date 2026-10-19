@@ -379,7 +379,7 @@ window.Theme = window.Theme || (function() {
         if (!/^\/admin\//.test(location.pathname) && !onChunom) {
             const sep = document.createTextNode(' · ');
             const shapes = document.createElement('a');
-            shapes.href = '/' + encodeURIComponent('Quốc_Âm_Tân_Tự.html');
+            shapes.href = '/qatt.html';
             shapes.textContent = '22 base shapes';
             shapes.setAttribute('data-vi', '22 hình cơ bản');
             footer.append(sep, shapes);
