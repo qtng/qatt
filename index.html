@@ -37,19 +37,13 @@
     /* the fonts as a grid of characters (made of text, no image): the weight falls from the left to the right column, the number of strokes grows from the top to the bottom row */
     @font-face { font-family: "QATT Pen Medium"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); }
     section.block#name { border-top: 0; padding-block: 1.8rem 1.4rem; }
-    /* the animated name: fixed boho look (terracotta, rays of the sun, dashed frame, woven stripe) */
-    .name-stage { position: relative; overflow: hidden; border-radius: 2.4rem .7rem 2.4rem .7rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.2rem, 3.4vw, 1.8rem); text-align: center; color: #f8ecd6; cursor: pointer; user-select: none; perspective: 700px;
-      box-shadow: 0 .5rem 1.4rem rgba(120, 70, 30, .28);
-      background: repeating-linear-gradient(90deg, #b85c38 0 18px, #d99a3e 18px 36px, #7a7d45 36px 54px, #c98a7a 54px 72px) bottom / 100% 8px no-repeat, radial-gradient(ellipse at 50% 32%, #7a4128, #3a1d12 78%); }
-    .name-stage::before { content: ""; position: absolute; inset: -60% -20% -20%; pointer-events: none; background: repeating-conic-gradient(from 0deg at 50% 52%, rgba(217, 154, 62, .13) 0 6deg, transparent 6deg 12deg); mask-image: radial-gradient(circle at 50% 52%, #000 0, transparent 55%); }
-    .name-stage::after { content: ""; position: absolute; inset: .7rem .7rem 1.2rem; pointer-events: none; border: 1px dashed rgba(217, 154, 62, .5); border-radius: 1.9rem .4rem 1.9rem .4rem; }
-    .name-row, .name-latin { position: relative; z-index: 1; }
-    .name-row { display: flex; justify-content: center; gap: clamp(.4rem, 2.4vw, 1.4rem); min-height: clamp(6rem, 20vw, 9rem); }
-    .name-row .nc { text-align: center; }
-    .name-row .nc .g { font: clamp(3.2rem, 13vw, 6rem)/1 "QATT Pen Medium", sans-serif; }
-    .name-row .nc small { display: block; margin-top: .3rem; font: italic 1.05rem Georgia, serif; letter-spacing: .04em; color: #f0c070; opacity: .85; }
-    .name-latin { margin-top: -.5rem; font: italic 600 clamp(1.5rem, 5vw, 2.2rem) Georgia, serif; letter-spacing: .06em; color: #f0c070; opacity: 0; }
-    .name-latin::before, .name-latin::after { content: " ✦ "; color: #d99a3e; font-size: .6em; vertical-align: middle; letter-spacing: 0; }
+    /* the one-line scramble: the name turns into QATT, Latin letters and qatt.org (dark box, fixed look) */
+    .scr-box { border-radius: 1rem; padding: 1rem; color: #f3ede2; border: 1px solid #2a2738; background: radial-gradient(ellipse at 50% 40%, #1d1a28, #07080d 75%); overflow: hidden; }
+    .scr-stage { position: relative; aspect-ratio: 16 / 5; max-width: 36rem; margin: 0 auto; }
+    .scr-slide { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; opacity: 0; }
+    .scr-slide p { position: relative; margin: 0; line-height: 1; white-space: nowrap; font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-family: "QATT Pen Medium", sans-serif; }
+    .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
+    .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
@@ -63,28 +57,39 @@
 </script>
 
 <script>
-  // the name flies in with a spring, waves and turns once; plays when the section comes into view, again every few seconds and on a click
+  // the one-line scramble: quốc, quốc âm tân tự in QATT, the name in Latin letters and qatt.org; runs while the box is on screen
   document.addEventListener('DOMContentLoaded', () => {
-    const A = window.anime, row = document.getElementById('nameRow'), latin = document.getElementById('nameLatin'), stage = document.getElementById('nameStage');
-    const parser = new VietnameseParser();
-    const els = ['quốc', 'âm', 'tân', 'tự'].map(w => {
-      const d = document.createElement('div'); d.className = 'nc'; d.innerHTML = '<div class="g"></div><small></small>';
-      d.firstChild.textContent = QattText.word(w, parser) || ''; d.lastChild.textContent = w; row.append(d); return d;
-    });
-    if (!A || matchMedia('(prefers-reduced-motion: reduce)').matches) { latin.style.opacity = 1; return; }
-    let tl = null, visible = false, timer = null;
-    function play() {
-      clearTimeout(timer); tl && tl.pause();
-      latin.style.opacity = 0;
-      tl = A.createTimeline({ defaults: { ease: 'outBack(2.2)' } });
-      tl.add(els, { translateY: [-200, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, A.stagger(160))
-        .add(els, { translateY: [0, -16, 0], duration: 900, ease: 'inOutSine' }, A.stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, A.stagger(140, { start: 400 }))
-        .add(latin, { opacity: [0, 1], translateY: [10, 0], duration: 900, ease: 'outQuad' }, 2200);
-      timer = setTimeout(() => visible && play(), 9000);
-    }
-    new IntersectionObserver(e => { visible = e[0].isIntersecting; if (visible) play(); else { clearTimeout(timer); tl && tl.pause(); } }, { threshold: .5 }).observe(stage);
-    stage.addEventListener('click', play);
+    const A = window.anime, $ = id => document.getElementById(id), parser = new VietnameseParser();
+    const root = $('scrBox'), slide = root.querySelector('.scr-slide'), SC = A && A.scrambleText;
+    if (!SC || matchMedia('(prefers-reduced-motion: reduce)').matches) { slide.style.opacity = 1; slide.innerHTML = '<p></p>'; slide.firstChild.textContent = ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || w).join(' '); return; }
+    const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
+    const rev = [], reg = new Map();
+    const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
+    const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');
+    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
+    const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
+    const TAN = toks('tân');   // a loop starts with tân (yellow, big), which scrambles into quốc, as in the first scramble card
+    const p = document.createElement('p'); p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = TAN; slide.append(p);
+    const px = p.lastChild, mirror = () => { const t = show(px.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; };
+    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+    tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
+    tl.add(p, { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
+    tl.add(p, { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '+=900');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
+    tl.add(p, { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
+    tl.call(() => p.classList.add('latin'), '<<');
+    tl.add(px, { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=1500');
+    tl.add(p, { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '+=250');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
+    tl.add(p, { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
+    tl.call(() => p.classList.remove('latin'), '<<');
+    tl.call(() => { px.textContent = TAN; mirror(); }, '+=800');
+    tl.init();
+    let on = false;
+    new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   });
 </script>
 
@@ -103,9 +108,8 @@
 <main class="container py-2">
 
   <section class="block" id="name">
-    <div class="name-stage" id="nameStage" role="img" aria-label="Quốc Âm Tân Tự in QATT">
-      <div class="name-row" id="nameRow"></div>
-      <div class="name-latin" id="nameLatin" aria-hidden="true">Quốc Âm Tân Tự</div>
+    <div class="scr-box" id="scrBox" role="img" aria-label="Quốc Âm Tân Tự in QATT">
+      <div class="scr-stage"><div class="scr-slide"></div></div>
     </div>
   </section>
 
