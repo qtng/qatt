@@ -71,6 +71,14 @@
   .scr-slide p { position: relative; }
   .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
   .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
+  /* scramble on a light ground: four syllables in QATT with their reading beneath, in the colours of the boho theme */
+  .sb-stage { display: flex; justify-content: center; gap: clamp(.5rem, 3vw, 1.6rem); min-height: 12rem; padding: .6rem 0 .4rem; }
+  .sb-cell { text-align: center; min-width: 3.2rem; }
+  .sb-cell p { position: relative; margin: 0; white-space: nowrap; }
+  .sb-cell .q { font: clamp(3.2rem, 13vw, 5.6rem)/1.05 "QATT Pen Medium", sans-serif; color: var(--sb-c); }
+  .sb-cell .l { font: italic 600 clamp(1.3rem, 4.6vw, 1.8rem)/1.4 var(--boho-serif, "Cormorant Garamond", Georgia, serif); color: var(--ink, #3b2a20); margin-top: .3rem; }
+  .sb-cell .l::before { content: ""; display: block; width: 1.6rem; height: 2px; margin: 0 auto .5rem; border-radius: 2px; background: var(--sb-c); opacity: .8; }
+  .sb-cell p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
   .host { display: grid; place-items: center; min-height: 15.5rem; }
   .gridhost { display: grid; gap: .1rem; max-width: 34rem; margin: 0 auto; }
   .gcell { font-size: clamp(1.4rem, 5.2vw, 2.1rem); text-align: center; cursor: pointer; padding: .15rem 0; user-select: none; }
@@ -135,6 +143,8 @@
       <div class="scr-stage" id="scrStage">
         <div class="scr-slide" id="scr1"></div><div class="scr-slide" id="scr2"></div><div class="scr-slide" id="scr3"></div>
       </div></section>
+    <section class="show-card" data-run="scrboho"><h2><span data-vi="Xáo chữ, bản sáng">Scramble, light</span></h2>
+      <div class="sb-stage" id="sbStage"></div></section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
   </div>
 </main>
@@ -658,6 +668,36 @@
     tl.init();
     let on = false, vis = false;
     new IntersectionObserver(e => { vis = e[0].isIntersecting; if (vis && !on) { tl.play(); on = true; } if (!vis && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
+  })();
+
+  // 7. the scramble on a light ground: own sequence, four syllables that change into four others (seasons, landscape, people), light background, boho colours
+  (() => {
+    if (!A.scrambleText) return;
+    const SC = A.scrambleText, root = card('scrboho'), st = $('sbStage');
+    const PH = [['quốc', 'âm', 'tân', 'tự'], ['xuân', 'hạ', 'thu', 'đông'], ['trời', 'gió', 'sông', 'núi'], ['người', 'việt', 'nam', 'nhà']];
+    const POOL = [...new Set(PH.flat().concat('bạn tôi đẹp hoa sách chữ nôm thơ lòng thương sáng chiều đêm biển cá gà mèo'.split(' ')))];
+    const rev = [], reg = new Map();
+    const tok = w => { const g = QattText.word(w, parser) || w; if (!reg.has(g)) { reg.set(g, String.fromCharCode(0xE000 + rev.length)); rev.push(g); } return reg.get(g); };
+    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
+    const CHARS = POOL.map(tok).join(''), CUR = [...CHARS].slice(0, 2).join('');
+    const COL = ['#b85c38', '#7a7d45', '#d99a3e', '#c98a7a'];
+    const mkp = (cls, text) => { const p = document.createElement('p'); p.className = cls; p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = text; p.firstChild.textContent = show(text); return p; };
+    const cells = PH[0].map((w, i) => { const c = document.createElement('div'); c.className = 'sb-cell'; c.style.setProperty('--sb-c', COL[i]); const q = mkp('q', ' '), l = mkp('l', ' '); c.append(q, l); st.append(c); return c; });
+    const mirror = () => st.querySelectorAll('p').forEach(p => { const t = show(p.lastChild.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; });
+    const stag = o => A.stagger([0, 600], { grid: false, from: 'center', ease: 'out(2)', ...o });
+    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+    PH.forEach((ph, n) => {
+      const first = n === 0, at = first ? 0 : '+=1900';
+      tl.add('#sbStage .q .px', { innerHTML: SC({ chars: CHARS, text: ph.map ? '' : '', override: first ? ' ' : false, from: 'center', duration: 900, cursor: CUR, perturbation: .3, text: (el, i) => tok(ph[i]) }) }, stag({ start: at }));
+      tl.add('#sbStage .l .px', { innerHTML: SC({ text: (el, i) => ph[i], override: first ? ' ' : false, from: 'center', duration: 900, cursor: '·', perturbation: .25 }) }, stag({ start: first ? 250 : '<<+=250' }));
+      tl.add('#sbStage .sb-cell', { scale: [1, 1.07, 1], duration: 700, ease: 'inOutSine' }, stag({ start: '<<+=300' }));
+    });
+    tl.add('#sbStage .q .px', { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'center', reversed: true, duration: 800, cursor: CUR }) }, stag({ start: '+=1900' }));
+    tl.add('#sbStage .l .px', { innerHTML: SC({ text: '', override: false, from: 'center', reversed: true, duration: 800, cursor: '·' }) }, stag({ start: '<<' }));
+    tl.add({}, { duration: 500 });
+    tl.init();
+    let on = false;
+    new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   })();
   window.FX2 = { dOf, mk, glyphSvg, COLORS };
 })();
