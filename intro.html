@@ -118,6 +118,8 @@
       <div class="scr-stage short"><div class="scr-slide"></div></div></section>
     <section class="show-card" data-run="scramble3"><h2><span data-vi="Xáo chữ, rút gọn, bản sáng">Scramble, short, light</span></h2>
       <div class="scr-stage short"><div class="scr-slide"></div></div></section>
+    <section class="show-card scr" data-run="scramble4"><h2><span data-vi="Xáo chữ, một dòng">Scramble, one line</span></h2>
+      <div class="scr-stage short"><div class="scr-slide"></div></div></section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
   </div>
 </main>
@@ -523,6 +525,37 @@
   // the colours of the scramble card: orange for the QATT name, green, blue, red and purple for the Latin words
   shortScramble('scramble2', { start: '#ffd84a', qatt: '#e0a020', words: ['#9be15d', '#2a9fd8', '#e0524a', '#c07ad8'], end: '#f3ede2', last: '#ffd84a' });
   shortScramble('scramble3', { start: '#d99a3e', qatt: '#b85c38', words: ['#b85c38', '#7a7d45', '#d99a3e', '#c98a7a'], end: '#b85c38', last: '#d99a3e' });
+  // 6c. a clone of the first scramble card, only its middle: one line that becomes quốc, quốc âm tân tự in QATT, the name in Latin letters and qatt.org (no diamond, no slide of several lines), with the colours and the timing of the original
+  (() => {
+    if (!A.scrambleText) return;
+    const SC = A.scrambleText, root = card('scramble4'), slide = root.querySelector('.scr-slide');
+    const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
+    const rev = [], reg = new Map();
+    const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
+    const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');
+    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
+    const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
+    const p = document.createElement('p'); p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = ' '; slide.append(p);
+    const px = p.lastChild, mirror = () => { const t = show(px.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; };
+    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+    tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
+    tl.add(p, { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
+    tl.add(p, { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '+=900');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
+    tl.add(p, { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
+    tl.call(() => p.classList.add('latin'), '<<');
+    tl.add(px, { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=1500');
+    tl.add(p, { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '+=250');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
+    tl.add(p, { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
+    tl.call(() => p.classList.remove('latin'), '<<');
+    tl.init();
+    let on = false;
+    new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
+  })();
 })();
 </script>
 </body>
