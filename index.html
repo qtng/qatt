@@ -26,7 +26,7 @@
     .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
     @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
     .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; transition: opacity .15s, color .15s; }   /* heavier strokes, as strong as the big glyphs of the name below */
-    .glyph-strip a { color: var(--ink) !important; text-decoration: none !important; }   /* also against the link colour of a theme, now that the strip is in the main part */
+    .glyph-strip a { color: inherit !important; text-decoration: none !important; }   /* also against the link colour of a theme, now that the strip is in the main part */
     .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
@@ -117,7 +117,7 @@
 
   <section class="block" id="shapes">
     <div class="rule" aria-hidden="true" data-vi="22 Cán">22 base shapes</div>
-    <div class="glyph-strip" id="glyph-strip" aria-label="22 base shapes of the script"></div>
+    <div class="glyph-strip text-dark" id="glyph-strip" aria-label="22 base shapes of the script"></div>
   </section>
 
 </main>
