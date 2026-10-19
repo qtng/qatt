@@ -10,21 +10,21 @@ The script defines the @font-face rules itself and fills these selects when it r
 The font files are found next to the script (../fonts/), so other sites can load it too (the Writer of chunom.org: https://qatt.org/js/fonts.js).
 */
 const QATT_FONTS = [
-  { family: "QATT Serif",          label: "Serif",          file: "qatt-serif", default: true },
-  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic" },
-  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
+  { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
+  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic", admin: true },
+  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", admin: true },
   { family: "QATT Pen ExtraLight",   label: "Pen extra light",     file: "qatt-pen-extralight", admin: true },
   { family: "QATT Pen Light",        label: "Pen light",           file: "qatt-pen-light", admin: true },
-  { family: "QATT Pen",              label: "Pen",                 file: "qatt-pen" },
-  { family: "QATT Pen Medium",       label: "Pen medium",          file: "qatt-pen-medium" },
+  { family: "QATT Pen",              label: "Pen",                 file: "qatt-pen", admin: true },
+  { family: "QATT Pen Medium",       label: "Pen medium",          file: "qatt-pen-medium", default: true },
   { family: "QATT Pen Cut ExtraLight", label: "Pen cut extra light", file: "qatt-pencut-extralight", admin: true },
   { family: "QATT Pen Cut Light",    label: "Pen cut light",       file: "qatt-pencut-light", admin: true },
   { family: "QATT Pen Cut",          label: "Pen cut",             file: "qatt-pencut", admin: true },
   { family: "QATT Pen Cut Medium",   label: "Pen cut medium",      file: "qatt-pencut-medium", admin: true },
   { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
-  { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light" },
-  { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush" },
+  { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
+  { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
 const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], [51, "150%"], [68, "200%"], [102, "300%"], [136, "400%"]];
 
