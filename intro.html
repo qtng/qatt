@@ -663,7 +663,7 @@
 })();
 </script>
 <script>
-// the entrance: a dark screen with one of the animations that run by themselves, chosen at random (no click needed); after it ends 3 s of waiting, then the page fades in
+// the entrance: a dark screen with the name animation; after it ends 1 s of waiting, then the page fades in
 (() => {
   const el = $('splash'), host = $('splashHost'), cap = $('splashCap');
   const F = window.FX, G = window.FX2, A = window.anime;
@@ -678,119 +678,24 @@
   const canvas = () => { const c = document.createElement('canvas'); c.style.cssText = 'position:absolute;inset:0;width:100%;height:100%'; host.append(c); const d = devicePixelRatio || 1, W = innerWidth, H = innerHeight; c.width = W * d; c.height = H * d; const x = c.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0); return { x, W, H }; };
   const word = (w) => { cap.textContent = w; cap.style.opacity = 1; };
 
-  // 1. swarm: particles gather, slide together, burst
-  async function swarm() {
-    const w = pick(WORDS), { x, W, H } = canvas(), st = F.strokesOf(F.codeOf(w), W < 600 ? 1.2 : .9), b = F.box(W, H), sep = b.Wc * .85, R = Math.max(W, H) * .8, ps = [], sparks = [];
-    for (const k of ['onset', 'rhyme', 'tone']) for (const s of st[k]) for (const pt of s) for (let j = 0; j < (k === 'tone' ? 5 : 3); j++) {
-      const B = F.place(b, [pt[0] + F.rnd(-.9, .9), pt[1] + F.rnd(-.9, .9)]), a = F.rnd(0, 6.283);
-      ps.push({ k, B, A: k === 'onset' ? [B[0] - sep, B[1]] : k === 'rhyme' ? [B[0] + sep, B[1]] : B, S: [W / 2 + Math.cos(a) * R, H / 2 + Math.sin(a) * R * .7], d: F.rnd(0, 500), sw: F.rnd(-1, 1) * 160, ph: F.rnd(0, 6.28), s: F.rnd(1.6, 2.8) });
-    }
-    let flashed = false;
-    await loop(t => {
-      x.clearRect(0, 0, W, H);
-      const u = F.clamp((t - 3100) / 900);
-      if (t > 3050 && !flashed) { flashed = true; for (let i = 0; i < 160; i++) sparks.push({ a: F.rnd(0, 6.283), v: F.rnd(.1, .55), c: pick([F.COL.tone, F.COL.onset, F.COL.rhyme]) }); }
-      if (t > 3100) word(w);
-      for (const p of ps) {
-        let px, py, al = 1;
-        if (p.k === 'tone') { if (t < 2900) continue; const e = F.clamp((t - 2900) / 700); px = p.B[0]; py = p.B[1] - (1 - F.easeOut(e)) * H * .5; al = F.clamp(e * 3); }
-        else if (t < 1400) { const e = F.easeOut((t - p.d) / 900); px = p.S[0] + (p.A[0] - p.S[0]) * e; py = p.S[1] + (p.A[1] - p.S[1]) * e; const sw = Math.sin(e * Math.PI) * p.sw; px += sw * (p.A[1] - p.S[1]) / 600; py -= sw * (p.A[0] - p.S[0]) / 600; al = F.clamp((t - p.d) / 250); }
-        else if (t < 2300) { px = p.A[0] + Math.sin(t * .008 + p.ph) * 1.4; py = p.A[1] + Math.cos(t * .007 + p.ph) * 1.4; }
-        else if (t < 3100) { const e = F.easeIO((t - 2300) / 800); px = p.A[0] + (p.B[0] - p.A[0]) * e; py = p.A[1] + (p.B[1] - p.A[1]) * e; }
-        else { px = p.B[0] + Math.sin(t * .006 + p.ph) * .5; py = p.B[1] + Math.cos(t * .005 + p.ph) * .5; }
-        const c = F.mix(F.COL[p.k], INK, u);
-        x.fillStyle = F.rgb(c, al * .18); x.fillRect(px - p.s * 2, py - p.s * 2, p.s * 4, p.s * 4);
-        x.fillStyle = F.rgb(c, al); x.fillRect(px - p.s / 2, py - p.s / 2, p.s, p.s);
-      }
-      if (flashed && t < 4400) {
-        const e = F.clamp((t - 3050) / 800);
-        x.lineWidth = 3 * (1 - e); x.strokeStyle = F.rgb(F.COL.tone, 1 - e); x.beginPath(); x.arc(W / 2, H / 2, e * b.Hc * .9, 0, 6.283); x.stroke();
-        for (const s of sparks) { const d = (t - 3050) * s.v * .45; x.fillStyle = F.rgb(s.c, (1 - e) * .9); x.fillRect(W / 2 + Math.cos(s.a) * d, H / 2 + Math.sin(s.a) * d + e * e * 30, 2.5, 2.5); }
-      }
-      return t > 4600;
-    });
+  // the name flies in with a spring, waves and turns once (the card "Name" below, the same effect)
+  async function name() {
+    const row = document.createElement('div'); row.className = 'namehost'; row.style.minHeight = '0'; host.append(row);
+    const els = ['quốc', 'âm', 'tân', 'tự'].map(w => { const d = document.createElement('div'); d.className = 'nchar'; d.innerHTML = '<div class="qg"></div><small></small>'; d.firstChild.textContent = QattText.word(w, parser) || ''; d.lastChild.textContent = w; row.append(d); return d; });
+    els.forEach(e => e.style.opacity = 0);
+    row.style.transform = 'scale(1.25)';
+    const tl = A.createTimeline({ defaults: { ease: 'outBack(2.2)' } });
+    tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, A.stagger(160))
+      .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, A.stagger(110, { start: 400 }))
+      .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, A.stagger(140, { start: 400 }));
+    await tl;
   }
 
-  // 2. brush: the tip writes the strokes, then the seal
-  async function brush() {
-    const w = pick(WORDS), { x, W, H } = canvas(), st = F.strokesOf(F.codeOf(w), 1.4), b = F.box(W, H), MS = 11, GAP = 160, segs = [];
-    let total = 0;
-    for (const k of ['onset', 'rhyme', 'tone']) for (const s of st[k]) { segs.push({ k, pts: s, start: total }); total += s.length * MS + GAP; }
-    x.lineCap = x.lineJoin = 'round';
-    await loop(t => {
-      x.clearRect(0, 0, W, H);
-      const done = F.clamp((t - (total + 200)) / 700); let tip = null;
-      for (const sg of segs) {
-        if (t < sg.start) continue;
-        const k = F.clamp((t - sg.start) / MS | 0, 0, sg.pts.length - 1), col = F.mix(F.COL[sg.k], INK, done);
-        for (let i = 1; i <= k; i++) {
-          const a = F.place(b, sg.pts[i - 1]), c = F.place(b, sg.pts[i]), s = i / sg.pts.length, lw = b.Hc * (.009 + .011 * Math.sin(Math.PI * Math.min(1, s * 1.15)) + .004 * (1 - s));
-          x.strokeStyle = F.rgb(col, .16); x.lineWidth = lw * 2.4; x.beginPath(); x.moveTo(...a); x.lineTo(...c); x.stroke();
-          x.strokeStyle = F.rgb(col, .95); x.lineWidth = lw; x.beginPath(); x.moveTo(...a); x.lineTo(...c); x.stroke();
-        }
-        if (k < sg.pts.length - 1 || t - sg.start < sg.pts.length * MS + 80) tip = { p: F.place(b, sg.pts[k]), col };
-      }
-      if (tip && t < total) { const g = x.createRadialGradient(...tip.p, 0, ...tip.p, 28); g.addColorStop(0, F.rgb(tip.col, .9)); g.addColorStop(1, F.rgb(tip.col, 0)); x.fillStyle = g; x.beginPath(); x.arc(...tip.p, 28, 0, 6.283); x.fill(); }
-      const se = F.clamp((t - (total + 700)) / 450);
-      if (se > 0) {
-        const sz = b.Hc * .2 * (1 + (1 - F.easeOut(se)) * .8), sx = b.x + b.Wc * 1.02, sy = b.y + b.Hc * .95 - sz;
-        x.save(); x.globalAlpha = se; x.translate(sx + sz / 2, sy + sz / 2); x.rotate(-.06); x.fillStyle = '#b8332a'; x.beginPath(); x.roundRect(-sz / 2, -sz / 2, sz, sz, sz * .12); x.fill();
-        x.fillStyle = '#fff'; x.font = `${sz * .42}px Georgia, serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(w, 0, 0); x.restore();
-      }
-      return t > total + 1400;
-    });
-  }
 
-  const svgSize = () => Math.min(innerHeight * .062, innerWidth * .05, 26) * 1;   // rem-like height: the glyph is about 60% of the screen height
-  const glyphBox = () => { const h = Math.min(innerHeight * .6, innerWidth * .8 * 15 / 13) / 16; return h; };
-
-  // 3. line drawing
-  async function draw() {
-    const w = pick(WORDS), d = G.dOf(F.codeOf(w)), s = G.glyphSvg(host, glyphBox()), els = [];
-    s.style.filter = 'drop-shadow(0 0 6px rgba(255,255,255,.18))';
-    for (const k of ['onset', 'rhyme', 'tone']) if (d[k]) els.push(G.mk('path', { d: d[k], stroke: G.COLORS[k] }, s));
-    const dr = A.svg.createDrawable(els);
-    await A.animate(dr, { draw: ['0 0', '0 1'], duration: 1200, delay: A.stagger(700), ease: 'inOutSine' });
-    word(w);
-    A.animate(els, { stroke: INKCSS, duration: 900, ease: 'inOutQuad' });
-    A.animate(s, { scale: [1, 1.06, 1], duration: 900, ease: 'outElastic(1, .5)' });
-    await sleep(1000);
-  }
-
-  // 4. morph: three syllables turn into each other
-  async function morph() {
-    const ws = [...WORDS].sort(() => Math.random() - .5).slice(0, 3), ds = ws.map(w => G.dOf(F.codeOf(w))), s = G.glyphSvg(host, glyphBox()), P = {};
-    const park = G.mk('g', { display: 'none' }, s);
-    for (const k of ['onset', 'rhyme', 'tone']) P[k] = G.mk('path', { d: ds[0][k] || 'M56 -6 l8 0', stroke: G.COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
-    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = G.mk('path', { d: d[k] || 'M56 -6 l8 0' }, park); return o; });
-    word(ws[0]); await sleep(1300);
-    for (let m = 1; m < ws.length; m++) {
-      cap.style.opacity = .2;
-      for (const k of ['onset', 'rhyme', 'tone']) A.animate(P[k], { d: A.svg.morphTo(hid[m][k]), opacity: ds[m][k] ? 1 : 0, duration: 1400, delay: k === 'rhyme' ? 120 : k === 'tone' ? 260 : 0, ease: 'inOutCubic' });
-      await sleep(1700); word(ws[m]); await sleep(m < ws.length - 1 ? 700 : 600);
-    }
-    for (const k in P) A.animate(P[k], { stroke: INKCSS, duration: 800 });
-    await sleep(900);
-  }
-
-  // 5. comet: a string of lights writes the syllable
-  async function comet() {
-    const w = pick(WORDS), d = G.dOf(F.codeOf(w)), s = G.glyphSvg(host, glyphBox());
-    const trace = G.mk('path', { d: [d.onset, d.rhyme, d.tone].filter(Boolean).join(' '), stroke: INKCSS, opacity: .1 }, s);
-    const N = 16, dots = [];
-    for (let i = 0; i < N; i++) dots.push(G.mk('circle', { r: 5.5 - i * .28, fill: i % 2 ? G.COLORS.onset : G.COLORS.rhyme, opacity: 1 - i / N, stroke: 'none' }, s));
-    await A.animate(dots, { ...A.svg.createMotionPath(trace), duration: 5200, delay: A.stagger(95), ease: 'linear' });
-    dots.forEach(c => c.remove());
-    A.animate(trace, { opacity: 1, duration: 900 });
-    word(w); await sleep(900);
-  }
-
-  const SHOWS = { swarm, brush, draw, morph, comet };
   (async () => {
     const forced = new URLSearchParams(location.search).get('intro');
     if (forced === '0') { done(); return; }
-    const name = SHOWS[forced] ? forced : pick(Object.keys(SHOWS));
-    try { await SHOWS[name](); await sleep(3000); } catch (e) { console.error(e); }
+    try { await name(); await sleep(1000); } catch (e) { console.error(e); }
     el.style.opacity = 0;
     await sleep(900);
     done();
