@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Published decks</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <script src="../js/navigation.js"></script>
+  <script src="../vendor/supabase/supabase.min.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/login.js"></script>
+  <script src="admin.js"></script>
+  <style>
+    body { background: #f7efdc; color: #2b2118; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    .note { color: #7b6c58; font-size: .85rem; }
+    .scroll { overflow-x: auto; background: #fffdf8; border: 1px solid #dccfb2; border-radius: .6rem; }
+    table { font-size: .9rem; margin: 0; white-space: nowrap; }
+    th { font-weight: 600; color: #5b4d3d; cursor: pointer; user-select: none; background: #fffdf8; }
+    th.sorted::after { content: " ▾"; } th.sorted.asc::after { content: " ▴"; }
+    td.num, th.num { text-align: right; }
+    td { vertical-align: middle; }
+    .badge-official { font-size: .7rem; border: 1px solid #2b2118; border-radius: .3rem; padding: 0 .35rem; background: #ffc107; color: #111; }
+    .muted { color: #a89877; }
+  </style>
+</head>
+<body>
+<main class="container-fluid py-4" style="max-width: 70rem">
+  <h1 id="title" hidden>Published decks</h1>
+  <p class="note" id="account" hidden></p>
+
+  <div id="content" hidden>
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+      <input type="search" id="q" class="form-control form-control-sm w-auto" placeholder="Search title or owner" style="min-width: 15rem">
+      <select id="kind" class="form-select form-select-sm w-auto" aria-label="Filter">
+        <option value="">All published decks</option><option value="official">Official (chunom.org)</option><option value="user">By users</option>
+      </select>
+      <button type="button" class="btn btn-sm btn-quiet" id="reload">Reload</button>
+      <span class="note ms-2" id="count"></span>
+    </div>
+    <div class="scroll"><table class="table table-sm table-hover" id="tbl"><thead></thead><tbody></tbody></table></div>
+    <p class="note mt-2"><b>Make official</b> gives a published deck the mark chunom.org in the catalog of the decks (the decks of the site itself have it; the limit of 10 published decks within 180 days of a user does not count them). Only an admin can set or remove it, the owner cannot. The deck stays with its owner and can still be taken back by them.</p>
+  </div>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const DECK_PAGE = 'https://chunom.org/chunom/decks/deck.html?id=';
+  const stamp = t => t ? t.slice(0, 16).replace('T', ' ') : '';
+  const COLUMNS = [   // [key, title, numeric]
+    ['title', 'Title', false], ['words', 'Words', true], ['username', 'Owner', false], ['taken_over', 'Taken over', true], ['published_at', 'Published', false], ['is_official', 'Official', false],
+  ];
+  let sp, allowed = false, rows = [], sortKey = 'published_at', asc = false;
+
+  function visible() {
+    const q = $('q').value.trim().toLowerCase(), kind = $('kind').value;
+    const list = rows.filter(r => (!kind || (kind === 'official') === r.is_official) && (!q || (r.title || '').toLowerCase().includes(q) || (r.username || '').toLowerCase().includes(q)));
+    const col = COLUMNS.find(c => c[0] === sortKey);
+    list.sort((a, b) => {
+      const x = a[sortKey] ?? '', y = b[sortKey] ?? '';
+      const d = col[2] || typeof x === 'boolean' ? Number(x) - Number(y) : String(x).localeCompare(String(y));
+      return asc ? d : -d;
+    });
+    return list;
+  }
+
+  async function setOfficial(deck, official) {
+    const text = official
+      ? `Make "${deck.title}" an official deck? It gets the mark chunom.org in the catalog.`
+      : `Remove the mark chunom.org from "${deck.title}"?`;
+    if (!confirm(text)) return;
+    const { error } = await sp.client.rpc('admin_set_official', { p_deck: deck.id, p_official: official });
+    if (error) { alert('Not changed: ' + error.message); return; }
+    deck.is_official = official;
+    render();
+  }
+
+  function render() {
+    const list = visible();
+    $('tbl').tHead.replaceChildren(document.createElement('tr'));
+    $('tbl').tHead.rows[0].append(...COLUMNS.map(([key, title, num]) => {
+      const th = Object.assign(document.createElement('th'), { textContent: title, className: (num ? 'num ' : '') + (key === sortKey ? 'sorted' + (asc ? ' asc' : '') : '') });
+      th.onclick = () => { asc = key === sortKey ? !asc : false; sortKey = key; render(); };
+      return th;
+    }), document.createElement('th'));
+    $('tbl').tBodies[0].replaceChildren(...list.map(r => {
+      const tr = document.createElement('tr');
+      const cell = (text, num) => { const td = document.createElement('td'); td.textContent = text; if (num) td.className = 'num'; tr.append(td); return td; };
+      const t = cell('');   // the title opens the deck on chunom.org (deck.html?id=…)
+      t.append(Object.assign(document.createElement('a'), { href: DECK_PAGE + encodeURIComponent(r.id), target: '_blank', rel: 'noopener', textContent: r.title, title: 'Open the deck on chunom.org' }));
+      cell(r.words, true);
+      const owner = cell(r.username || '');
+      if (!r.username) owner.append(Object.assign(document.createElement('span'), { className: 'muted', textContent: '–' }));
+      cell(r.taken_over || '', true);
+      cell(stamp(r.published_at));
+      const flag = cell('');
+      if (r.is_official) flag.append(Object.assign(document.createElement('span'), { className: 'badge-official', textContent: 'chunom.org' }));
+      const act = document.createElement('td');
+      const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'btn btn-sm ' + (r.is_official ? 'btn-quiet' : 'btn-cinnabar'), textContent: r.is_official ? 'Remove official' : 'Make official' });
+      btn.onclick = () => setOfficial(r, !r.is_official);
+      act.append(btn); tr.append(act);
+      return tr;
+    }));
+    $('count').textContent = list.length + ' shown of ' + rows.length + ' published, ' + rows.filter(r => r.is_official).length + ' official';
+  }
+
+  async function load() {
+    if (!allowed) return;
+    const { data, error } = await sp.client.rpc('admin_decks');
+    if (error) { $('count').textContent = error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the decks: ' + error.message; return; }
+    rows = data;
+    render();
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
+    const state = await Admin.check(sp);
+    allowed = state === 'admin';
+    $('title').hidden = !allowed; $('content').hidden = !allowed; $('account').hidden = state === 'denied';
+    ['q', 'kind'].forEach(id => $(id).addEventListener('input', render));
+    $('reload').onclick = load;
+    load();
+  });
+</script>
+</body>
+</html>
