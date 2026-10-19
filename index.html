@@ -23,7 +23,7 @@
     .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
     @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
     @font-face { font-family: "QATT Pen"; src: url(fonts/qatt-pen.woff2?v=6) format("woff2"), url(fonts/qatt-pen.ttf?v=6) format("truetype"); }
-    .glyph-strip tt { font-family: "QATT Pen", sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
+    .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
     .glyph-strip a { color: inherit; text-decoration: none; }
     .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
@@ -48,19 +48,6 @@
     .weights span:nth-child(7n + 6) { font-family: "QATT Pen Light"; }
     .weights span:nth-child(7n) { font-family: "QATT Pen ExtraLight"; }
     .weights span:nth-child(7n + 1), .weights span:nth-child(7n + 2) { font-size: .84em; }   /* the Serif glyphs fill their cell more than the Pen glyphs */
-    /* the font comparison: three cards, one per font, made of text (no image) */
-    @font-face { font-family: "QATT Gothic"; src: url(fonts/qatt-gothic.woff2?v=6) format("woff2"), url(fonts/qatt-gothic.ttf?v=6) format("truetype"); }
-    section.block#compare { padding-block: 2rem 2.5rem; }
-    .specimen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-    @media (max-width: 575.98px) { .specimen { grid-template-columns: 1fr; } }
-    .specimen .big { margin-top: auto; }   /* the samples in the middle of the space above the name */
-    .specimen .name { margin-top: auto; padding-top: 1rem; font: .9rem system-ui, -apple-system, sans-serif; opacity: .8; }   /* the name of the font, always at the bottom edge */
-    .specimen .card-font { display: flex; flex-direction: column; align-items: center; border-radius: 1rem; padding: 1.2rem 1rem 1rem; text-align: center; overflow: hidden; user-select: none; }
-    .specimen .big { font-size: calc(clamp(6rem, 17vw, 10rem) * var(--k, 1)); line-height: 1.05; }
-    .specimen .small { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); font-size: calc(clamp(1.1rem, 2.6vw, 1.7rem) * var(--k, 1)); line-height: 1.3; margin-top: .6rem; opacity: .85; }
-    .specimen .f-serif { background: #f7efdc; color: #2b2118; font-family: "QATT Serif"; }
-    .specimen .f-pen { background: #a8362a; color: #fffdf8; font-family: "QATT Pen Light"; --k: 1.2; }   /* the Pen glyphs are drawn smaller in their cell: 1.2 times to look as big as the others */
-    .specimen .f-gothic { background: #2b2118; color: #f7efdc; font-family: "QATT Gothic"; }
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
@@ -73,12 +60,6 @@
     // the weights: row r shows the form r of the letters (0 unmarked, 1 marked, 2 to 6 the five Chi forms: more and more strokes), column c one weight (two Serif columns, then Khai, then Pen from medium to extra light)
     const weights = document.getElementById('weights');
     for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) weights.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * (r === 3 && c === 2 ? 6 : r === 4 && c === 2 ? 7 : (r * 7 + c) * 5 % 22) + r) }));   // (the 4th and 5th of the Khai column: other shapes than the grid gives)
-    // the font comparison: the same big syllable and the 22 base shapes in each font
-    document.querySelectorAll('.specimen .card-font').forEach(card => {
-      card.querySelector('.big').textContent = String.fromCodePoint(0xF003F, 0xF009A, 0xF003D);   // the syllable tân (QattText.word('tân'))
-      const small = card.querySelector('.small');
-      for (let i = 0; i < 22; i++) small.append(Object.assign(document.createElement('span'), { textContent: String.fromCodePoint(0xF0000 + 7 * i) }));
-    });
   });
 </script>
 
@@ -106,7 +87,6 @@
 
   <section class="block" id="specimen">
     <div class="weights" id="weights" role="img" aria-label="The script in Serif, Khai and in four weights of Pen"></div>
-    <p class="text-center mt-4 mb-0"><a class="btn btn-cinnabar btn-pill" href="fonts.html" data-vi="Tất cả phông chữ">All fonts</a></p>
   </section>
 
   <section class="block" id="unicode">
@@ -135,13 +115,6 @@
     <p class="mb-0"><a class="btn btn-primary" href="decodings.html" data-vi="Mở bảng giải mã">Open the decodings</a></p>
   </section>
 
-  <section class="block" id="compare" role="img" aria-label="The script in three fonts: Serif, Pen and Gothic">
-    <div class="specimen" aria-hidden="true">
-      <div class="card-font f-serif"><div class="big"></div><div class="small"></div><div class="name">QATT Serif</div></div>
-      <div class="card-font f-pen"><div class="big"></div><div class="small"></div><div class="name">QATT Pen Light</div></div>
-      <div class="card-font f-gothic"><div class="big"></div><div class="small"></div><div class="name">QATT Gothic</div></div>
-    </div>
-  </section>
 </main>
 <div class="pb-4"></div>
 </body>
