@@ -449,7 +449,7 @@
   // 5b. a copy of 5 with two characters (typed in the fields) and a slider: how far the turn goes (0 to 100% of the full turn; the count starts where the turn starts)
   (() => {
     const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B');
-    let els = [], tl = null;
+    let els = [], tl = null, gap = 0;
     function build() {
       host.textContent = ''; els = [];
       for (const w of [inA.value.trim(), inB.value.trim()]) {
@@ -457,6 +457,7 @@
         d.innerHTML = `<div class="qg"></div><small></small>`; d.firstChild.textContent = (w && QattText.word(w, parser)) || ''; d.lastChild.textContent = w;
         host.append(d); els.push(d);
       }
+      const r = els.map(e => e.getBoundingClientRect()); gap = r[1].left + r[1].width / 2 - (r[0].left + r[0].width / 2);   // distance of the centres
     }
     function play() {
       tl && tl.pause();
@@ -464,7 +465,7 @@
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
-        .add(els, { rotateY: [0, 360 * f], duration: 1400, ease: 'inOutCubic' }, stagger(140, { start: 400 }));
+        .add(els, { rotateY: [0, 360 * f], translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: Math.max(1400 * f, 30), ease: 'inOutCubic' }, stagger(140, { start: 1300 }));   // the turn starts when the fly-in is over, and the move together with it; the two meet exactly when the turn has reached the slider value
     }
     const again = () => { build(); play(); };
     rng.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again);
