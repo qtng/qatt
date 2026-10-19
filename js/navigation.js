@@ -375,6 +375,15 @@ window.Theme = window.Theme || (function() {
         ['pointerdown', 'focus', 'touchstart', 'contextmenu'].forEach(t => link.addEventListener(t, update));
         window.addEventListener('load', update);
         footer.appendChild(link);
+        // the page about the 22 base shapes, on every page of qatt.org except the admin area
+        if (!/^\/admin\//.test(location.pathname) && !onChunom) {
+            const sep = document.createTextNode(' · ');
+            const shapes = document.createElement('a');
+            shapes.href = '/' + encodeURIComponent('Quốc_Âm_Tân_Tự.html');
+            shapes.textContent = '22 base shapes';
+            shapes.setAttribute('data-vi', '22 hình cơ bản');
+            footer.append(sep, shapes);
+        }
         document.body.appendChild(footer);
     }
 
