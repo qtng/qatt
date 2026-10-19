@@ -591,12 +591,12 @@
     const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
     const TAN = toks('tân');   // a loop starts with tân (yellow, big), which scrambles into quốc, as in the first scramble card
     const mk = txt => { const e = document.createElement('p'); e.innerHTML = '<span class="vis"></span><span class="px"></span>'; e.lastChild.textContent = txt; return e; };
-    const bg = mk(' '), p = mk(TAN); bg.style.position = 'absolute'; bg.style.fontSize = 'clamp(3rem, 12.8vw, 5rem)'; slide.append(bg, p);   // bg: the small white syllable behind the sentence that scrambles away at the end, as the middle cell of the first scramble card
+    const bg = mk(' '), p = mk(TAN); bg.style.position = 'absolute'; slide.append(bg, p);   // bg: the small white syllable behind the sentence that scrambles away at the end, as the middle cell of the first scramble card
     const px = p.lastChild, mirror = () => [p, bg].forEach(e => { const t = show(e.lastChild.textContent); if (e.firstChild.textContent !== t) e.firstChild.textContent = t; });
     const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
     tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
-    tl.add(p, { scale: { from: 4 }, color: { from: '#ffd84a', to: '#f3ede2' }, duration: 1800 }, '<<');   // tân, big and yellow, for a little longer
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<+=1100');
+    tl.add(p, { scale: { from: 3 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
     tl.add(p, { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '+=900');
     tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
     tl.add(p, { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
