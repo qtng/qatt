@@ -68,8 +68,8 @@
     const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');
     const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
     const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
-    const pick = () => GL[Math.floor(Math.random() * GL.length)];   // a loop starts with a random syllable (yellow, big) that scrambles into quốc
-    const p = document.createElement('p'); p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = pick(); slide.append(p);
+    const TAN = toks('tân');   // a loop starts with tân (yellow, big), which scrambles into quốc, as in the first scramble card
+    const p = document.createElement('p'); p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = TAN; slide.append(p);
     const px = p.lastChild, mirror = () => { const t = show(px.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; };
     const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
     tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
@@ -86,7 +86,7 @@
     tl.add(p, { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
     tl.add(px, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
     tl.call(() => p.classList.remove('latin'), '<<');
-    tl.call(() => { px.textContent = pick(); mirror(); }, '+=800');
+    tl.call(() => { px.textContent = TAN; mirror(); }, '+=800');
     tl.init();
     let on = false;
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
