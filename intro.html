@@ -11,6 +11,7 @@
 <script src="/js/parser.js"></script>
 <script src="/js/qatt.js"></script>
 <script src="/js/qatt-text.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.0.2/lib/anime.umd.min.js"></script>
 <style>
   .intro { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1rem 3rem; text-align: center; }
   .intro h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 6vw, 2.8rem); margin-bottom: .3rem; }
@@ -56,6 +57,13 @@
   .orbit .core { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6.2rem; }
   .orbit .tok { position: absolute; left: 50%; top: 50%; font-size: 2.6rem; width: 3.4rem; height: 3.4rem; margin: -1.7rem; display: grid; place-items: center; color: #2a7fb8; border-radius: 50%; background: color-mix(in srgb, #2a7fb8 12%, transparent); transition: opacity .6s; }
   .orbit .path { position: absolute; inset: 6%; border-radius: 50%; border: 1px dashed color-mix(in srgb, currentColor 25%, transparent); }
+  .host { display: grid; place-items: center; min-height: 15.5rem; }
+  .gridhost { display: grid; gap: .1rem; max-width: 34rem; margin: 0 auto; }
+  .gcell { font-size: clamp(1.4rem, 5.2vw, 2.1rem); text-align: center; cursor: pointer; padding: .15rem 0; user-select: none; }
+  .namehost { display: flex; justify-content: center; gap: clamp(.4rem, 2vw, 1.2rem); perspective: 700px; min-height: 10rem; cursor: pointer; }
+  .nchar { text-align: center; }
+  .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
+  .nchar small { display: block; font-family: Georgia, serif; opacity: .6; }
   @media (prefers-reduced-motion: reduce) { .pop, .ring { animation: none; } }
 </style>
 <script defer src="/js/fonts.js"></script>
@@ -103,6 +111,12 @@
       <div class="orbit" id="orbit"><div class="path"></div><div class="core qg" id="core"></div></div>
       <div class="cap" id="orbitCap"></div>
     </section>
+
+    <section class="show-card" data-run="draw"><h2><span data-vi="Nét vẽ">Line drawing</span></h2><div class="host" id="drawHost"></div><div class="cap" id="drawCap"></div></section>
+    <section class="show-card" data-run="morph"><h2><span data-vi="Biến hình">Morph</span></h2><div class="host" id="morphHost"></div><div class="cap" id="morphCap"></div></section>
+    <section class="show-card" data-run="grid"><h2><span data-vi="Sóng">Ripple</span></h2><div class="gridhost" id="gridHost"></div></section>
+    <section class="show-card" data-run="comet"><h2><span data-vi="Sao chổi">Comet</span></h2><div class="host" id="cometHost"></div><div class="cap" id="cometCap"></div></section>
+    <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
   </div>
 </main>
 <script>
@@ -438,6 +452,140 @@
       requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
+  })();
+})();
+</script>
+<script>
+// five typical anime.js effects (https://animejs.com), each with QATT glyphs: line drawing, morphing, a stagger grid, a comet on a motion path, springy letters
+(() => {
+  const A = window.anime;
+  if (!A) return;
+  const { animate, stagger, svg, createTimeline } = A;
+  const COLORS = { onset: '#2a7fb8', rhyme: '#c0392b', tone: '#d08a12' };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const codeOf = w => { const r = parser.parse(w); return r && r.qatt; };
+
+  // the path data of a syllable by part, from the SVG definitions of qatt.js
+  function dOf(code) {
+    const h = document.createElement('div');
+    qatt.render(code, h);
+    const p = parts(h.querySelector('svg'), code), o = {};
+    for (const k of ['onset', 'rhyme', 'tone']) o[k] = p[k].map(u => qatt._getDefById(u.getAttribute('href').slice(1))).filter(Boolean).map(e => e.getAttribute('d')).join(' ');
+    return o;
+  }
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.append(e); return e; };
+  function glyphSvg(host, width = 15) {   // a box like the one of qatt.js: 13 wide to 15 high
+    host.innerHTML = '';
+    const s = mk('svg', { viewBox: '-12.5 -12.5 125 125', preserveAspectRatio: 'none', fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': 3.4 }, host);
+    s.style.cssText = `width:${width * 13 / 15}rem;height:${width}rem;overflow:visible`;
+    return s;
+  }
+  // runs the loop only while the card is on screen
+  function whenVisible(el) {
+    let vis = false, wake = null;
+    new IntersectionObserver(e => { vis = e[0].isIntersecting; if (vis && wake) { wake(); wake = null; } }, { threshold: .25 }).observe(el);
+    return async () => { while (!vis || document.hidden) await new Promise(r => { wake = r; setTimeout(r, 600); }); };
+  }
+  const card = n => document.querySelector(`[data-run=${n}]`);
+
+  // 1. line drawing: createDrawable draws every stroke in turn
+  (async () => {
+    const host = $('drawHost'), ok = whenVisible(card('draw')), words = ['quốc', 'âm', 'tân', 'tự', 'người', 'mẹ'];
+    for (let n = 0; ; n = (n + 1) % words.length) {
+      await ok();
+      const d = dOf(codeOf(words[n])), s = glyphSvg(host, 14), els = [];
+      for (const k of ['onset', 'rhyme', 'tone']) if (d[k]) els.push(mk('path', { d: d[k], stroke: COLORS[k], class: 'draw-' + k }, s));
+      $('drawCap').textContent = '';
+      const dr = svg.createDrawable(els);
+      await animate(dr, { draw: ['0 0', '0 1'], duration: reduced ? 1 : 1100, delay: stagger(reduced ? 0 : 650), ease: 'inOutSine' });
+      $('drawCap').textContent = words[n];
+      animate(els, { stroke: getComputedStyle(document.body).color, duration: 900, ease: 'inOutQuad' });
+      animate(s, { scale: [1, 1.06, 1], duration: 900, ease: 'outElastic(1, .5)' });
+      await sleep(1800);
+      await animate(dr, { draw: ['0 1', '1 1'], duration: 700, delay: stagger(120), ease: 'inQuad' });
+    }
+  })();
+
+  // 2. morph: the three parts of one syllable turn into the parts of the next
+  (async () => {
+    const host = $('morphHost'), ok = whenVisible(card('morph')), words = ['bán', 'xa', 'người', 'mẹ', 'tự', 'quốc'];
+    const ds = words.map(w => dOf(codeOf(w))), s = glyphSvg(host, 14), P = {};
+    const park = mk('g', { display: 'none' }, s), targets = [];
+    for (const k of ['onset', 'rhyme', 'tone']) P[k] = mk('path', { d: ds[0][k] || 'M60 -6 l.01 0', stroke: COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
+    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = mk('path', { d: d[k] || 'M60 -6 l.01 0' }, park); return o; });
+    const cap = $('morphCap');
+    for (let n = 0; ; n = (n + 1) % words.length) {
+      cap.textContent = words[n];
+      await sleep(1700); await ok();
+      const m = (n + 1) % words.length;
+      cap.style.opacity = .25;
+      for (const k of ['onset', 'rhyme', 'tone']) animate(P[k], { d: svg.morphTo(hid[m][k]), opacity: ds[m][k] ? 1 : 0, duration: reduced ? 1 : 1300, delay: k === 'rhyme' ? 120 : k === 'tone' ? 260 : 0, ease: 'inOutCubic' });
+      await sleep(1450); cap.style.opacity = 1;
+    }
+  })();
+
+  // 3. stagger grid: a ripple through the table of syllables, from the cell you click
+  (() => {
+    const grid = $('gridHost'), ok = whenVisible(card('grid'));
+    const ONS = ['b', 'c', 'đ', 'l', 'm', 'n', 't'], RHY = ['a', 'an', 'ang', 'am', 'ai', 'ao', 'e', 'en', 'o'];
+    const cells = [];
+    for (const o of ONS) for (const r of RHY) {
+      const c = codeOf(o + r), d = document.createElement('div');
+      d.className = 'gcell qg'; d.textContent = c ? QattText.syllable(c) : ''; d.title = o + r; grid.append(d); cells.push(d);
+    }
+    grid.style.gridTemplateColumns = `repeat(${RHY.length}, 1fr)`;
+    let running = null;
+    function ripple(from) {
+      running && running.pause();
+      running = animate(cells, {
+        scale: [{ to: 1.9, ease: 'outQuad', duration: 280 }, { to: 1, ease: 'outElastic(1, .6)', duration: 700 }],
+        rotate: [{ to: 25, duration: 280 }, { to: 0, duration: 700 }],
+        color: [{ to: '#c0392b', duration: 280 }, { to: 'currentColor', duration: 900 }],
+        delay: stagger(45, { grid: [RHY.length, ONS.length], from }),
+      });
+    }
+    cells.forEach((c, i) => c.addEventListener('click', () => ripple(i)));
+    (async () => { for (;;) { await ok(); ripple(Math.floor(Math.random() * cells.length)); await sleep(3200); } })();
+  })();
+
+  // 4. comet: a string of lights follows the strokes of a syllable (motion path)
+  (async () => {
+    const host = $('cometHost'), ok = whenVisible(card('comet')), words = ['người', 'quốc', 'tân'];
+    for (let n = 0; ; n = (n + 1) % words.length) {
+      await ok();
+      const d = dOf(codeOf(words[n])), s = glyphSvg(host, 14);
+      const all = [d.onset, d.rhyme, d.tone].filter(Boolean).join(' ');
+      const trace = mk('path', { d: all, stroke: 'currentColor', opacity: .12 }, s);
+      const N = 16, dots = [];
+      for (let i = 0; i < N; i++) dots.push(mk('circle', { r: 5.5 - i * .28, fill: i % 2 ? COLORS.onset : COLORS.rhyme, opacity: 1 - i / N, stroke: 'none' }, s));
+      const mp = svg.createMotionPath(trace);
+      $('cometCap').textContent = words[n];
+      await animate(dots, { ...mp, duration: reduced ? 1 : 5200, delay: stagger(95), ease: "linear", loop: 1 });
+      dots.forEach(c => c.remove());
+    }
+  })();
+
+  // 5. springy letters: the name flies in, then waves
+  (() => {
+    const host = $('nameHost'), ok = whenVisible(card('name'));
+    const NAME = ['quốc', 'âm', 'tân', 'tự'], els = [];
+    for (const w of NAME) {
+      const d = document.createElement('div'); d.className = 'nchar';
+      d.innerHTML = `<div class="qg"></div><small></small>`; d.firstChild.textContent = QattText.word(w, parser) || ''; d.lastChild.textContent = w;
+      host.append(d); els.push(d);
+    }
+    let tl = null;
+    function play() {
+      tl && tl.pause();
+      tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
+      tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
+        .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
+        .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, stagger(140, { start: 400 }));
+    }
+    host.addEventListener('click', play);
+    (async () => { for (;;) { await ok(); play(); await sleep(7000); } })();
   })();
 })();
 </script>
