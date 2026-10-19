@@ -12,12 +12,7 @@
 <script src="/js/qatt.js"></script>
 <script src="/js/qatt-text.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
-<script>window.splash = new Promise(r => window.splashEnd = r); document.documentElement.classList.add('splashing');</script>
 <style>
-  html.splashing { overflow: hidden; }
-  #splash { position: fixed; inset: 0; z-index: 3000; background: radial-gradient(ellipse at 50% 40%, #181520, #05060a 70%); color: #f3ede2; transition: opacity .9s ease; overflow: hidden; }
-  #splashHost { position: absolute; inset: 0; display: grid; place-items: center; }
-  #splashCap { position: absolute; left: 0; right: 0; bottom: 8vh; text-align: center; font: 400 clamp(1.6rem, 5vw, 2.4rem) Georgia, serif; letter-spacing: .04em; opacity: 0; transition: opacity .6s; }
   .intro { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1rem 3rem; text-align: center; }
   .intro h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 6vw, 2.8rem); margin-bottom: .3rem; }
   .intro .lead { color: var(--muted, #6c757d); margin-bottom: 1.5rem; }
@@ -57,11 +52,6 @@
   @keyframes pop { 0% { transform: scale(.2) rotate(-12deg); opacity: 0; filter: blur(6px); } 100% { transform: none; opacity: 1; filter: none; } }
   .ring { position: absolute; left: 50%; top: 50%; width: 1rem; height: 1rem; margin: -.5rem; border-radius: 50%; border: 3px solid #d08a12; pointer-events: none; animation: ring .9s ease-out forwards; }
   @keyframes ring { to { transform: scale(14); opacity: 0; } }
-  /* the orbit */
-  .orbit { position: relative; width: min(22rem, 86vw); aspect-ratio: 1; margin: 0 auto; }
-  .orbit .core { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6.2rem; }
-  .orbit .tok { position: absolute; left: 50%; top: 50%; font-size: 2.6rem; width: 3.4rem; height: 3.4rem; margin: -1.7rem; display: grid; place-items: center; color: #2a7fb8; border-radius: 50%; background: color-mix(in srgb, #2a7fb8 12%, transparent); transition: opacity .6s; }
-  .orbit .path { position: absolute; inset: 6%; border-radius: 50%; border: 1px dashed color-mix(in srgb, currentColor 25%, transparent); }
   .scr { background: radial-gradient(ellipse at 50% 40%, #1d1a28, #07080d 75%); color: #f3ede2; border-color: #2a2738; }
   .scr h2 { color: #f3ede2; }
   .scr-stage { position: relative; aspect-ratio: 16 / 10; max-width: 36rem; margin: 0 auto; }
@@ -71,21 +61,12 @@
   .scr-slide p { position: relative; }
   .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
   .scr-stage.short { aspect-ratio: 16 / 5; }
-  .scr-slide p.solo { font-size: clamp(2.2rem, 9vw, 3.8rem); margin: 0; }
+  .scr-slide.stack { display: grid; place-items: center; }
+  .scr-slide.stack > * { grid-area: 1 / 1; }
+  .scr-slide p.solo { font-size: clamp(2rem, 8vw, 3.4rem); margin: 0 .35em; }
   .show-card:not(.scr) .scr-slide p.latin { font: italic 600 clamp(2rem, 8vw, 3.4rem)/1.1 var(--boho-serif, "Cormorant Garamond", Georgia, serif); }
   .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
-  /* scramble on a light ground: a circle of QATT syllables (rings of 1, 6, 12, 18, 24) in the boho colours, then the name in Latin letters */
-  .sb-stage { position: relative; width: min(34rem, 100%); aspect-ratio: 1; margin: 0 auto; }
-  .sb-cell { position: absolute; transform: translate(-50%, -50%); width: 3rem; height: 3rem; display: grid; place-items: center; }
-  .sb-cell p { position: relative; margin: 0; white-space: nowrap; font: clamp(1.5rem, 5.2vw, 2.5rem)/1 "QATT Pen Medium", sans-serif; }
-  .sb-cell.c0 p { font-size: clamp(3.6rem, 12vw, 5.6rem); }
-  .sb-cell p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
-  .sb-line { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none; }
-  .sb-line p { position: relative; display: inline-block; margin: 0; white-space: nowrap; font: italic 600 clamp(1.6rem, 5.6vw, 2.8rem)/1.1 var(--boho-serif, "Cormorant Garamond", Georgia, serif); color: var(--accent, #b85c38); }
-  .sb-line p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
   .host { display: grid; place-items: center; min-height: 15.5rem; }
-  .gridhost { display: grid; gap: .1rem; max-width: 34rem; margin: 0 auto; }
-  .gcell { font-size: clamp(1.4rem, 5.2vw, 2.1rem); text-align: center; cursor: pointer; padding: .15rem 0; user-select: none; }
   .namehost { display: flex; justify-content: center; gap: clamp(.4rem, 2vw, 1.2rem); perspective: 700px; min-height: 10rem; cursor: pointer; }
   .nchar { text-align: center; }
   .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
@@ -95,7 +76,6 @@
 <script defer src="/js/fonts.js"></script>
 </head>
 <body>
-<div id="splash"><div id="splashHost"></div><div id="splashCap"></div></div>
 <main class="intro">
   <h1><span data-vi="Âm đầu + vần = âm tiết">Onset + rhyme = syllable</span></h1>
   <p class="lead"><span data-vi="Hai phần ghép lại thành một chữ.">Two parts join into one character.</span></p>
@@ -115,11 +95,6 @@
   </div>
 
   <div class="show">
-    <section class="show-card" data-run="swarm">
-      <h2><span data-vi="Bầy hạt">Swarm</span></h2>
-      <canvas id="swarm"></canvas>
-      <div class="cap" id="swarmCap"></div>
-    </section>
 
     <section class="show-card" data-run="slot">
       <h2><span data-vi="Quay số">Spin</span></h2>
@@ -133,16 +108,8 @@
       <canvas id="brush"></canvas>
     </section>
 
-    <section class="show-card" data-run="orbit">
-      <h2><span data-vi="Quỹ đạo">Orbit</span></h2>
-      <div class="orbit" id="orbit"><div class="path"></div><div class="core qg" id="core"></div></div>
-      <div class="cap" id="orbitCap"></div>
-    </section>
 
     <section class="show-card" data-run="draw"><h2><span data-vi="Nét vẽ">Line drawing</span></h2><div class="host" id="drawHost"></div><div class="cap" id="drawCap"></div></section>
-    <section class="show-card" data-run="morph"><h2><span data-vi="Biến hình">Morph</span></h2><div class="host" id="morphHost"></div><div class="cap" id="morphCap"></div></section>
-    <section class="show-card" data-run="grid"><h2><span data-vi="Sóng">Ripple</span></h2><div class="gridhost" id="gridHost"></div></section>
-    <section class="show-card" data-run="comet"><h2><span data-vi="Sao chổi">Comet</span></h2><div class="host" id="cometHost"></div><div class="cap" id="cometCap"></div></section>
     <section class="show-card scr" data-run="scramble"><h2><span data-vi="Xáo chữ">Scramble</span></h2>
       <div class="scr-stage" id="scrStage">
         <div class="scr-slide" id="scr1"></div><div class="scr-slide" id="scr2"></div><div class="scr-slide" id="scr3"></div>
@@ -151,8 +118,6 @@
       <div class="scr-stage short"><div class="scr-slide"></div></div></section>
     <section class="show-card" data-run="scramble3"><h2><span data-vi="Xáo chữ, rút gọn, bản sáng">Scramble, short, light</span></h2>
       <div class="scr-stage short"><div class="scr-slide"></div></div></section>
-    <section class="show-card" data-run="scrboho"><h2><span data-vi="Xáo chữ, bản sáng">Scramble, light</span></h2>
-      <div class="sb-stage" id="sbStage"></div></section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
   </div>
 </main>
@@ -243,7 +208,7 @@
     document.getAnimations().forEach(a => paused ? a.pause() : a.play());
     if (!paused && resume) { resume(); resume = null; }
   });
-  window.splash.then(loop);
+  loop();
 </script>
 <script>
 (() => {
@@ -296,60 +261,6 @@
   }
   const box = (W, H) => { const Hc = Math.min(H * .72, W * .62 * 15 / 13), Wc = Hc * 13 / 15; return { Hc, Wc, x: (W - Wc) / 2, y: (H - Hc) / 2 }; };
   const place = (b, pt, dx = 0) => [b.x + (pt[0] + 12.5) / 125 * b.Wc + dx, b.y + (pt[1] + 12.5) / 125 * b.Hc];
-
-  // ================= 1. swarm: particles gather into the onset and the rhyme, slide together, a burst, one ink
-  const WORDS1 = ['quốc', 'âm', 'tân', 'tự', 'người', 'mẹ'];
-  const swarm = (() => {
-    const card = document.querySelector('[data-run=swarm]'), canvas = $('swarm'), cap = $('swarmCap');
-    let n = -1, ps = [], sparks = [], t = 1e9, T = 6800, W0 = 0, flashed = false, wordText = '';
-    function next(W, H) {
-      n = (n + 1) % WORDS1.length; wordText = WORDS1[n];
-      const st = strokesOf(codeOf(wordText), .9), b = box(W, H), sep = b.Wc * .85;
-      ps = []; sparks = []; flashed = false;
-      const R = Math.max(W, H) * .8;
-      for (const k of ['onset', 'rhyme', 'tone']) for (const stroke of st[k]) for (const pt of stroke) for (let j = 0; j < (k === 'tone' ? 5 : 3); j++) {
-        const jx = rnd(-.9, .9), jy = rnd(-.9, .9);
-        const B = place(b, [pt[0] + jx, pt[1] + jy]);
-        const A = k === 'onset' ? [B[0] - sep, B[1]] : k === 'rhyme' ? [B[0] + sep, B[1]] : [B[0], B[1] - H * .55];
-        const a = rnd(0, 6.283);
-        ps.push({ k, A, B, S: [W / 2 + Math.cos(a) * R, H / 2 + Math.sin(a) * R * .7], d: rnd(0, 500), sw: rnd(-1, 1) * 160, ph: rnd(0, 6.28), vx: rnd(-1, 1), vy: rnd(-1.4, .4), s: rnd(1.6, 2.8) });
-      }
-      t = 0; W0 = W;
-    }
-    stage(card, canvas, (ctx, W, H, dt) => {
-      if (reduced) t = 4200; else t += dt;
-      if (t > T || !ps.length) next(W, H);
-      const ink = inkOf(), b = box(W, H);
-      const u = clamp((t - 3100) / 900);   // colour into ink
-      if (t > 3050 && !flashed) { flashed = true; for (let i = 0; i < 160; i++) { const a = rnd(0, 6.283), v = rnd(.1, .55); sparks.push({ a, v, c: Math.random() < .5 ? COL.tone : Math.random() < .5 ? COL.onset : COL.rhyme }); } }
-      cap.textContent = t > 3100 ? wordText : '';
-      cap.style.opacity = clamp((t - 3100) / 500);
-      for (const p of ps) {
-        let x, y, al = 1;
-        if (p.k === 'tone') {
-          if (t < 2900) continue;
-          const e = clamp((t - 2900) / 700), o = 1 + Math.sin(clamp(e) * 3.14) * 0;
-          x = p.B[0]; y = p.B[1] - (1 - easeOut(e)) * H * .55; al = clamp(e * 3);
-        } else if (t < 1400) {
-          const e = easeOut((t - p.d) / 900);
-          x = p.S[0] + (p.A[0] - p.S[0]) * e; y = p.S[1] + (p.A[1] - p.S[1]) * e;
-          const w = Math.sin(e * Math.PI) * p.sw; x += w * (p.A[1] - p.S[1]) / 600; y -= w * (p.A[0] - p.S[0]) / 600;
-          al = clamp((t - p.d) / 250);
-        } else if (t < 2300) { x = p.A[0] + Math.sin(t * .008 + p.ph) * 1.4; y = p.A[1] + Math.cos(t * .007 + p.ph) * 1.4; }
-        else if (t < 3100) { const e = easeIO((t - 2300) / 800); x = p.A[0] + (p.B[0] - p.A[0]) * e; y = p.A[1] + (p.B[1] - p.A[1]) * e; }
-        else { x = p.B[0] + Math.sin(t * .006 + p.ph) * .5; y = p.B[1] + Math.cos(t * .005 + p.ph) * .5; }
-        if (t > 5600) { const d = (t - 5600) / 1100; x += p.vx * d * 160; y += p.vy * d * 90 + d * d * 220; al *= 1 - clamp(d); }
-        const c = mix(COL[p.k], ink, u);
-        ctx.fillStyle = rgb(c, al * .16); ctx.fillRect(x - p.s * 2, y - p.s * 2, p.s * 4, p.s * 4);
-        ctx.fillStyle = rgb(c, al); ctx.fillRect(x - p.s / 2, y - p.s / 2, p.s, p.s);
-      }
-      if (flashed && t < 4400) {
-        const e = clamp((t - 3050) / 800), cx = W / 2, cy = H / 2;
-        ctx.lineWidth = 3 * (1 - e); ctx.strokeStyle = rgb(COL.tone, 1 - e); ctx.beginPath(); ctx.arc(cx, cy, e * b.Hc * .9, 0, 6.283); ctx.stroke();
-        for (const s of sparks) { const d = (t - 3050) * s.v * .45; ctx.fillStyle = rgb(s.c, (1 - e) * .9); ctx.fillRect(cx + Math.cos(s.a) * d, cy + Math.sin(s.a) * d + e * e * 30, 2.5, 2.5); }
-      }
-    });
-  })();
 
   // ================= 2. brush: the strokes are written one by one by a glowing tip, then a seal
   const WORDS2 = ['quốc', 'âm', 'tân', 'tự'];
@@ -446,55 +357,10 @@
     new IntersectionObserver((e, o) => { if (e[0].isIntersecting) { o.disconnect(); setTimeout(spin, 500); } }, { threshold: .6 }).observe(document.querySelector('[data-run=slot]'));
   })();
 
-  // ================= 4. orbit: one rhyme in the middle, the onsets circle it and are caught one by one
-  const orbit = (() => {
-    const el = $('orbit'), core = $('core'), cap = $('orbitCap');
-    const ONSETS = ['b', 'c', 'l', 'm', 't', 'đ', 'n', 'h'], RHYME = 'an';
-    const rhymeCode = codeOf('an'), rh = rhymeCode.split(',')[1];
-    const toks = ONSETS.map((o, i) => {
-      const code = codeOf(o + RHYME), d = document.createElement('div');
-      d.className = 'tok qg'; d.textContent = QattText.syllable(code.split(',')[0] + ',,,0'); el.append(d);
-      return { o, code, d, a: i / ONSETS.length * 6.283, gone: 0 };
-    });
-    core.textContent = QattText.syllable(',' + rh + ',,0');
-    let vis = false, last = performance.now(), nextCatch = 1200, i = 0;
-    new IntersectionObserver(e => vis = e[0].isIntersecting, { threshold: .2 }).observe(el);
-    function catchOne() {
-      // the token nearest to the left side of the circle flies in
-      let best = null, bd = 9;
-      for (const t of toks) { if (t.gone) continue; const d = Math.abs(((t.ang - Math.PI + 9.42) % 6.283) - 3.14); if (d < bd) { bd = d; best = t; } }
-      if (!best) return;
-      best.gone = 1; best.d.style.transition = 'transform .7s cubic-bezier(.5,0,.2,1), opacity .7s'; best.fly = 1;
-      best.d.style.opacity = 0;
-      core.textContent = QattText.syllable(best.code);
-      core.animate([{ transform: 'scale(.7) rotate(-6deg)', filter: 'blur(5px)' }, { transform: 'none', filter: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,1.6,.4,1)' });
-      cap.textContent = best.o + RHYME;
-      const ring = document.createElement('i'); ring.className = 'ring'; ring.style.borderColor = '#2a7fb8'; el.append(ring); setTimeout(() => ring.remove(), 900);
-      setTimeout(() => { best.d.style.transition = 'opacity .8s'; best.d.style.opacity = 1; best.gone = 0; best.fly = 0; }, 1800);
-    }
-    const frame = now => {
-      const dt = now - last; last = now;
-      if (vis && !document.hidden) {
-        const r = el.getBoundingClientRect().width * .44;
-        for (const t of toks) {
-          if (!reduced) t.a += dt * .00045;
-          t.ang = t.a % 6.283;
-          const pull = t.fly ? 0 : 1, k = .45 * r * 0;   // a flying token goes to the middle
-          const rr = t.fly ? r * .08 : r;
-          t.d.style.transform = `translate(${Math.cos(t.a) * rr}px, ${Math.sin(t.a) * rr}px) scale(${t.fly ? 1.1 : 1})`;
-        }
-        nextCatch -= dt;
-        if (nextCatch < 0) { nextCatch = 2600; catchOne(); }
-      }
-      requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-  })();
-  window.FX = { COL, rgb, mix, clamp, easeOut, easeIO, rnd, strokesOf, codeOf, box, place };
 })();
 </script>
 <script>
-// five typical anime.js effects (https://animejs.com), each with QATT glyphs: line drawing, morphing, a stagger grid, a comet on a motion path, springy letters
+// anime.js effects (https://animejs.com) with QATT glyphs: line drawing, springy letters, scramble text
 (() => {
   const A = window.anime;
   if (!A) return;
@@ -543,65 +409,6 @@
       animate(s, { scale: [1, 1.06, 1], duration: 900, ease: 'outElastic(1, .5)' });
       await sleep(1800);
       await animate(dr, { draw: ['0 1', '1 1'], duration: 700, delay: stagger(120), ease: 'inQuad' });
-    }
-  })();
-
-  // 2. morph: the three parts of one syllable turn into the parts of the next
-  (async () => {
-    const host = $('morphHost'), ok = whenVisible(card('morph')), words = ['bán', 'xa', 'người', 'mẹ', 'tự', 'quốc'];
-    const ds = words.map(w => dOf(codeOf(w))), s = glyphSvg(host, 14), P = {};
-    const park = mk('g', { display: 'none' }, s), targets = [];
-    for (const k of ['onset', 'rhyme', 'tone']) P[k] = mk('path', { d: ds[0][k] || 'M56 -6 l8 0', stroke: COLORS[k], opacity: ds[0][k] ? 1 : 0 }, s);
-    const hid = ds.map(d => { const o = {}; for (const k in d) o[k] = mk('path', { d: d[k] || 'M56 -6 l8 0' }, park); return o; });
-    const cap = $('morphCap');
-    for (let n = 0; ; n = (n + 1) % words.length) {
-      cap.textContent = words[n];
-      await sleep(1700); await ok();
-      const m = (n + 1) % words.length;
-      cap.style.opacity = .25;
-      for (const k of ['onset', 'rhyme', 'tone']) animate(P[k], { d: svg.morphTo(hid[m][k]), opacity: ds[m][k] ? 1 : 0, duration: reduced ? 1 : 1300, delay: k === 'rhyme' ? 120 : k === 'tone' ? 260 : 0, ease: 'inOutCubic' });
-      await sleep(1450); cap.style.opacity = 1;
-    }
-  })();
-
-  // 3. stagger grid: a ripple through the table of syllables, from the cell you click
-  (() => {
-    const grid = $('gridHost'), ok = whenVisible(card('grid'));
-    const ONS = ['b', 'c', 'đ', 'l', 'm', 'n', 't'], RHY = ['a', 'an', 'ang', 'am', 'ai', 'ao', 'e', 'en', 'o'];
-    const cells = [];
-    for (const o of ONS) for (const r of RHY) {
-      const c = codeOf(o + r), d = document.createElement('div');
-      d.className = 'gcell qg'; d.textContent = c ? QattText.syllable(c) : ''; d.title = o + r; grid.append(d); cells.push(d);
-    }
-    grid.style.gridTemplateColumns = `repeat(${RHY.length}, 1fr)`;
-    let running = null;
-    function ripple(from) {
-      running && running.pause();
-      running = animate(cells, {
-        scale: [{ to: 1.9, ease: 'outQuad', duration: 280 }, { to: 1, ease: 'outElastic(1, .6)', duration: 700 }],
-        rotate: [{ to: 25, duration: 280 }, { to: 0, duration: 700 }],
-        color: [{ to: '#c0392b', duration: 280 }, { to: 'currentColor', duration: 900 }],
-        delay: stagger(45, { grid: [RHY.length, ONS.length], from }),
-      });
-    }
-    cells.forEach((c, i) => c.addEventListener('click', () => ripple(i)));
-    (async () => { for (;;) { await ok(); ripple(Math.floor(Math.random() * cells.length)); await sleep(3200); } })();
-  })();
-
-  // 4. comet: a string of lights follows the strokes of a syllable (motion path)
-  (async () => {
-    const host = $('cometHost'), ok = whenVisible(card('comet')), words = ['người', 'quốc', 'tân'];
-    for (let n = 0; ; n = (n + 1) % words.length) {
-      await ok();
-      const d = dOf(codeOf(words[n])), s = glyphSvg(host, 14);
-      const all = [d.onset, d.rhyme, d.tone].filter(Boolean).join(' ');
-      const trace = mk('path', { d: all, stroke: 'currentColor', opacity: .12 }, s);
-      const N = 16, dots = [];
-      for (let i = 0; i < N; i++) dots.push(mk('circle', { r: 5.5 - i * .28, fill: i % 2 ? COLORS.onset : COLORS.rhyme, opacity: 1 - i / N, stroke: 'none' }, s));
-      const mp = svg.createMotionPath(trace);
-      $('cometCap').textContent = words[n];
-      await animate(dots, { ...mp, duration: reduced ? 1 : 5200, delay: stagger(95), ease: "linear", loop: 1 });
-      dots.forEach(c => c.remove());
     }
   })();
 
@@ -678,133 +485,44 @@
     new IntersectionObserver(e => { vis = e[0].isIntersecting; if (vis && !on) { tl.play(); on = true; } if (!vis && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   })();
 
-  // 6b. a short clone of the scramble card, once dark and once light (boho colours): the name in QATT, then in Latin letters, then qatt.org, each in one line.
+  // 6b. a short clone of the scramble card, once dark and once light (boho colours): the name in QATT (one syllable per word), then in Latin letters (a colour per word), then qatt.org.
   // Same technique as above: scrambleText works on one private-use letter per syllable in a hidden copy, the page shows the real glyphs.
   function shortScramble(run, pal) {
     if (!A.scrambleText) return;
     const SC = A.scrambleText, root = card(run), slide = root.querySelector('.scr-slide');
-    const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
-    const rev = [], reg = new Map();
-    const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
-    const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');
-    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
-    const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
-    const p = document.createElement('p'); p.className = 'solo'; p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = ' '; slide.append(p);
-    const px = p.lastChild, mirror = () => { const t = show(px.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; };
-    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
-    tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
-    tl.add(p, { scale: [{ from: 3, to: 1.25, duration: 1500, ease: 'inOut(3)' }], color: { from: pal.start, to: pal.qatt } }, '<<');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: ' ', ease: 'inQuad', duration: 1300, settleDuration: 900, from: 'center', perturbation: .25, cursor: CUR }) }, '<<');
-    tl.call(() => p.classList.add('latin'), '+=900');
-    tl.add(p, { scale: 1, color: pal.latin, ease: 'inOutExpo', duration: 1150 }, '<<');
-    tl.add(px, { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
-    tl.add(px, { innerHTML: SC({ text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '+=1100');
-    tl.add(p, { scale: 1.3, color: pal.end, ease: 'inOutExpo', duration: 1000 }, '+=250');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 600, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
-    tl.add(p, { color: pal.last, scale: 2, ease: 'inOutExpo', duration: 750 }, '+=1300');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
-    tl.call(() => p.classList.remove('latin'), '<<');
-    tl.init();
-    let on = false;
-    new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
-  }
-  shortScramble('scramble2', { start: '#ffd84a', qatt: '#f3ede2', latin: '#9be15d', end: '#f3ede2', last: '#ffd84a' });
-  shortScramble('scramble3', { start: '#d99a3e', qatt: '#b85c38', latin: '#7a7d45', end: '#b85c38', last: '#d99a3e' });
-
-  // 7. the scramble on a light ground: a circle of QATT syllables flickers in from the middle (the rings one after the other, growing as they settle), clears from the outside in,
-  // then the name in Latin letters scrambles in the middle. The same technique as the dark card (one private-use letter per syllable in a hidden copy).
-  (() => {
-    if (!A.scrambleText) return;
-    const SC = A.scrambleText, root = card('scrboho'), st = $('sbStage');
+    const WORDS = ['quốc', 'âm', 'tân', 'tự'], LAT = ['Quốc', 'Âm', 'Tân', 'Tự'];
     const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
     const rev = [], reg = new Map();
     const tok = w => { const g = QattText.word(w, parser) || w; if (!reg.has(g)) { reg.set(g, String.fromCharCode(0xE000 + rev.length)); rev.push(g); } return reg.get(g); };
     const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
     const GL = POOL.map(tok), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
-    const pick = () => GL[Math.floor(Math.random() * GL.length)];
-    const COL = ['#b85c38', '#d99a3e', '#7a7d45', '#c98a7a', '#b85c38'];
-    const mkp = text => { const p = document.createElement('p'); p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = text; p.firstChild.textContent = show(text); return p; };
-    const rings = [[0, 1], [.2, 6], [.34, 12], [.1 + .34, 18], [.1 + .44, 24]].map(([r, n], k) => ({ r, n, k }));
-    rings[3].r = .38 + .0; rings[1].r = .115; rings[2].r = .235; rings[3].r = .355; rings[4].r = .46;
-    const R = rings.map(({ r, n, k }) => Array.from({ length: n }, (_, i) => {
-      const a = (i / n) * 6.283 - 1.5708 + (k % 2) * (3.1416 / n), cell = document.createElement('div'), p = mkp(' ');
-      cell.className = 'sb-cell c' + k; cell.style.left = (50 + Math.cos(a) * r * 100) + '%'; cell.style.top = (50 + Math.sin(a) * r * 100) + '%'; p.style.color = COL[k];
-      cell.append(p); st.append(cell); return p;
-    }));
-    const line = document.createElement('div'); line.className = 'sb-line'; const lp = mkp(' '); line.append(lp); st.append(line);
-    const px = ps => ps.map(p => p.lastChild);
-    const mirror = () => st.querySelectorAll('p').forEach(p => { const t = show(p.lastChild.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; });
-    const final = R.map(ring => ring.map(() => pick()));
+    const mk = () => { const p = document.createElement('p'); p.className = 'solo'; p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = ' '; return p; };
+    const row = document.createElement('div'); row.className = 'scr-row'; slide.classList.add('stack');
+    const ws = WORDS.map(() => mk()); row.append(...ws);
+    const end = mk(); end.classList.add('latin'); slide.append(row, end);
+    const all = [...ws, end], pxs = ws.map(p => p.lastChild), endPx = end.lastChild;
+    const mirror = () => all.forEach(p => { const t = show(p.lastChild.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; });
     const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
-    const at = (ms) => ms;
-    // the middle: grows from 3 times, ochre to terracotta
-    tl.add(R[0], { scale: { from: 3 }, color: { from: '#d99a3e', to: COL[0] }, duration: 900, ease: 'inOut(3)' }, 0);
-    tl.add(px(R[0]), { innerHTML: SC({ chars: CHARS, text: tok('quốc'), override: ' ', ease: 'inQuad', duration: 900, settleDuration: 900, from: 'center', cursor: CUR }) }, 0);
-    // the rings, one after the other: each cell flickers for a long time, starts small and grows
-    [1, 2, 3, 4].forEach(k => {
-      const start = 350 + k * 380;
-      tl.add(R[k], { scale: [{ from: .5, to: 1.25, duration: 500, ease: 'outQuad' }, { to: 1, duration: 700, ease: 'outElastic(1, .6)' }], rotate: [{ from: -50, to: 0, duration: 1100, ease: 'outCubic' }], opacity: [{ from: .0, to: 1, duration: 300, ease: 'linear' }], delay: (el, i) => i * 28 }, start);
-      tl.add(px(R[k]), { innerHTML: SC({ chars: CHARS, text: (el, i) => final[k][i], override: ' ', from: 'center', duration: 1300, settleDuration: 1000, revealRate: 40, perturbation: .45, cursor: CUR, delay: (el, i) => i * 28 }) }, start);
-    });
-    // a pulse through the rings, from the middle out
-    [0, 1, 2, 3, 4].forEach(k => tl.add(R[k], { scale: [1, 1.3, 1], duration: 700, ease: 'inOutSine' }, 3700 + k * 160));
-    // out again, from the edge to the middle
-    [4, 3, 2, 1].forEach((k, j) => tl.add(px(R[k]), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'center', reversed: true, duration: 800, settleDuration: 700, cursor: CUR, perturbation: .4 }) }, 5000 + j * 220));
-    tl.add(px(R[0]), { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 700, cursor: CUR }) }, 5800);
-    // the name in Latin letters
-    tl.add(lp, { scale: [{ from: 1.6, to: 1, duration: 1300, ease: 'inOutExpo' }], color: [{ from: '#d99a3e', to: '#b85c38', duration: 1300 }] }, 6300);
-    tl.add(px([lp]), { innerHTML: SC({ text: 'Quốc Âm Tân Tự', override: ' ', from: 'center', duration: 1200, settleDuration: 800, perturbation: .3, ease: 'inQuad' }) }, 6300);
-    tl.add(px([lp]), { innerHTML: SC({ text: 'chữ nước Nam', override: false, from: 'right', duration: 1100, settleDuration: 500, ease: 'inOut' }) }, 8300);
-    tl.add(lp, { scale: 1.2, color: '#7a7d45', duration: 1100, ease: 'inOutExpo' }, 8300);
-    tl.add(px([lp]), { innerHTML: SC({ text: 'qatt.org', override: false, from: 'center', duration: 1000, settleDuration: 600, perturbation: .3 }) }, 10000);
-    tl.add(lp, { scale: 1.9, color: '#d99a3e', duration: 900, ease: 'inOutExpo' }, 10000);
-    tl.add(px([lp]), { innerHTML: SC({ text: '', override: false, from: 'random', reversed: true, duration: 900, perturbation: .5 }) }, 11600);
-    tl.add({}, { duration: 300 }, 12700);
+    const st = o => A.stagger([0, 450], { from: 'center', ease: 'out(2)', ...o });
+    tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
+    tl.add(ws, { scale: [{ from: 3, to: 1.1, duration: 1500, ease: 'inOut(3)' }], color: { from: pal.start, to: pal.qatt } }, st({ start: '<<' }));
+    tl.add(pxs, { innerHTML: SC({ chars: CHARS, text: (el, i) => tok(WORDS[i]), override: ' ', ease: 'inQuad', duration: 1300, settleDuration: 900, from: 'center', perturbation: .25, cursor: CUR }) }, st({ start: '<<' }));
+    tl.call(() => ws.forEach(p => p.classList.add('latin')), '+=900');
+    tl.add(ws, { scale: 1, color: (el, i) => pal.words[i], ease: 'inOutExpo', duration: 1150 }, st({ start: '<<' }));
+    tl.add(pxs, { innerHTML: SC({ override: false, text: (el, i) => LAT[i], from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, st({ start: '<<' }));
+    tl.add(pxs, { innerHTML: SC({ text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, st({ start: '+=1500' }));
+    tl.call(() => ws.forEach(p => p.classList.remove('latin')), '<<');
+    tl.add(end, { scale: 1.3, color: pal.end, ease: 'inOutExpo', duration: 1000 }, '+=250');
+    tl.add(endPx, { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 600, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
+    tl.add(end, { color: pal.last, scale: 2, ease: 'inOutExpo', duration: 750 }, '+=1300');
+    tl.add(endPx, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
     tl.init();
     let on = false;
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
-  })();
-  window.FX2 = { dOf, mk, glyphSvg, COLORS };
-})();
-</script>
-<script>
-// the entrance: a dark screen with the name animation; after it ends 1 s of waiting, then the page fades in
-(() => {
-  const el = $('splash'), host = $('splashHost'), cap = $('splashCap');
-  const F = window.FX, G = window.FX2, A = window.anime;
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const done = () => { document.documentElement.classList.remove('splashing'); el.remove(); window.splashEnd(); };
-  if (!F || !G || !A || reducedMotion) { done(); return; }
-  const INK = [243, 237, 226], INKCSS = 'rgb(243,237,226)';
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  const WORDS = ['quốc', 'âm', 'tân', 'tự', 'người', 'mẹ', 'bán', 'xa'];
-  const pick = a => a[Math.floor(Math.random() * a.length)];
-  const loop = fn => new Promise(res => { let t = 0, last = performance.now(); const f = now => { t += Math.min(50, now - last); last = now; if (fn(t) === true) return res(); requestAnimationFrame(f); }; requestAnimationFrame(f); });
-  const canvas = () => { const c = document.createElement('canvas'); c.style.cssText = 'position:absolute;inset:0;width:100%;height:100%'; host.append(c); const d = devicePixelRatio || 1, W = innerWidth, H = innerHeight; c.width = W * d; c.height = H * d; const x = c.getContext('2d'); x.setTransform(d, 0, 0, d, 0, 0); return { x, W, H }; };
-  const word = (w) => { cap.textContent = w; cap.style.opacity = 1; };
-
-  // the name flies in with a spring, waves and turns once (the card "Name" below, the same effect)
-  async function name() {
-    const row = document.createElement('div'); row.className = 'namehost'; row.style.minHeight = '0'; host.append(row);
-    const els = ['quốc', 'âm', 'tân', 'tự'].map(w => { const d = document.createElement('div'); d.className = 'nchar'; d.innerHTML = '<div class="qg"></div><small></small>'; d.firstChild.textContent = QattText.word(w, parser) || ''; d.lastChild.textContent = w; row.append(d); return d; });
-    els.forEach(e => e.style.opacity = 0);
-    row.style.transform = 'scale(1.25)';
-    const tl = A.createTimeline({ defaults: { ease: 'outBack(2.2)' } });
-    tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, A.stagger(160))
-      .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, A.stagger(110, { start: 400 }))
-      .add(els, { rotateY: [0, 360], duration: 1400, ease: 'inOutCubic' }, A.stagger(140, { start: 400 }));
-    await tl;
   }
-
-
-  (async () => {
-    const forced = new URLSearchParams(location.search).get('intro');
-    if (forced === '0') { done(); return; }
-    try { await name(); await sleep(1000); } catch (e) { console.error(e); }
-    el.style.opacity = 0;
-    await sleep(900);
-    done();
-  })();
+  // the colours of the scramble card: orange for the QATT name, green, blue, red and purple for the Latin words
+  shortScramble('scramble2', { start: '#ffd84a', qatt: '#e0a020', words: ['#9be15d', '#2a9fd8', '#e0524a', '#c07ad8'], end: '#f3ede2', last: '#ffd84a' });
+  shortScramble('scramble3', { start: '#d99a3e', qatt: '#b85c38', words: ['#b85c38', '#7a7d45', '#d99a3e', '#c98a7a'], end: '#b85c38', last: '#d99a3e' });
 })();
 </script>
 </body>
