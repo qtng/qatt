@@ -38,7 +38,7 @@
     @font-face { font-family: "QATT Pen Medium"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); }
     section.block#name { border-top: 0; padding-block: 1rem 3rem; }
     /* the animated name: fixed boho look (terracotta, rays of the sun, dashed frame, woven stripe) */
-    .name-stage { position: relative; overflow: hidden; border-radius: 2.4rem .7rem 2.4rem .7rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.4rem, 4vw, 2.2rem); text-align: center; color: #f8ecd6; cursor: pointer; user-select: none; perspective: 700px;
+    .name-stage { position: relative; overflow: hidden; border-radius: 2.4rem .7rem 2.4rem .7rem; padding: clamp(1.6rem, 5vw, 2.8rem) 1rem clamp(1.2rem, 3.4vw, 1.8rem); text-align: center; color: #f8ecd6; cursor: pointer; user-select: none; perspective: 700px;
       box-shadow: 0 .5rem 1.4rem rgba(120, 70, 30, .28);
       background: repeating-linear-gradient(90deg, #b85c38 0 18px, #d99a3e 18px 36px, #7a7d45 36px 54px, #c98a7a 54px 72px) bottom / 100% 8px no-repeat, radial-gradient(ellipse at 50% 32%, #7a4128, #3a1d12 78%); }
     .name-stage::before { content: ""; position: absolute; inset: -60% -20% -20%; pointer-events: none; background: repeating-conic-gradient(from 0deg at 50% 52%, rgba(217, 154, 62, .13) 0 6deg, transparent 6deg 12deg); mask-image: radial-gradient(circle at 50% 52%, #000 0, transparent 55%); }
@@ -48,7 +48,7 @@
     .name-row .nc { text-align: center; }
     .name-row .nc .g { font: clamp(3.2rem, 13vw, 6rem)/1 "QATT Pen Medium", sans-serif; }
     .name-row .nc small { display: block; margin-top: .3rem; font: italic 1.05rem Georgia, serif; letter-spacing: .04em; color: #f0c070; opacity: .85; }
-    .name-latin { margin-top: .8rem; font: italic 600 clamp(1.5rem, 5vw, 2.2rem) Georgia, serif; letter-spacing: .06em; color: #f0c070; opacity: 0; }
+    .name-latin { margin-top: -.5rem; font: italic 600 clamp(1.5rem, 5vw, 2.2rem) Georgia, serif; letter-spacing: .06em; color: #f0c070; opacity: 0; }
     .name-latin::before, .name-latin::after { content: " ✦ "; color: #d99a3e; font-size: .6em; vertical-align: middle; letter-spacing: 0; }
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
