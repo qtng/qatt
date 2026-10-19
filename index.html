@@ -25,7 +25,7 @@
     .hero .lead { max-width: 38rem; color: #4a3d30; }
     .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
     @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
-    .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; opacity: .78; transition: opacity .15s, color .15s; }
+    .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; -webkit-text-stroke: .06em currentColor; paint-order: stroke fill; transition: opacity .15s, color .15s; }   /* heavier strokes, as strong as the big glyphs of the name below */
     .glyph-strip a { color: inherit; text-decoration: none; }
     .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
     .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
