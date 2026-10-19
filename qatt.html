@@ -18,18 +18,6 @@
 <script src="/js/navigation.js"></script>
 <script type="application/ld+json">[{"@context": "https://schema.org", "@type": "Article", "headline": "Quốc Âm Tân Tự: the 22 base shapes, marking strokes and character composition", "description": "The 22 base shapes of Quốc Âm Tân Tự (國音新字), a 19th-century Vietnamese phonetic script: drawings, marking strokes, Cán and Chi, and how characters combine.", "inLanguage": "en", "url": "https://qatt.org/qatt.html", "mainEntityOfPage": "https://qatt.org/qatt.html", "about": {"@type": "Thing", "name": "Quốc Âm Tân Tự", "alternateName": ["國音新字", "QATT", "Quoc Am Tan Tu"]}, "keywords": "Quốc Âm Tân Tự, 國音新字, QATT, Vietnamese script, Hán Nôm, phản thiết, hợp thư, tham thư, Cán, Chi, Thiệu Trị"}, {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What does a Quốc Âm Tân Tự character look like?", "acceptedAnswer": {"@type": "Answer", "text": "Every character is drawn inside one square cell and consists of straight strokes only. Each of the 22 bases is built from three straight strokes (for example an X plus a line, three parallel lines, or a vertical with two slanted lines) plus, in the marked forms, one short marking stroke at the end of a stroke. Tone marks are small circles or semicircles in the corners of the cell."}}, {"@type": "Question", "name": "How many basic shapes does Quốc Âm Tân Tự have?", "acceptedAnswer": {"@type": "Answer", "text": "22 bases. Each base has seven forms: the unmarked Cán (no marking stroke), the marked Cán (marking stroke at position 1) and five Chi (marking stroke at positions 2 to 6), so 22 unmarked Cán, 22 marked Cán and 110 Chi, 154 forms in total."}}, {"@type": "Question", "name": "What is the difference between Cán and Chi?", "acceptedAnswer": {"@type": "Answer", "text": "Cán (幹, “trunk”) is the name the source uses for the 22 bases, whether marked or unmarked. Chi (枝, “branch”) is the name for the five forms of a base in which the marking stroke has moved to one of the other five positions. The marked Cán has the marking stroke at the start position, the unmarked Cán has none."}}, {"@type": "Question", "name": "How are two components combined into one character?", "acceptedAnswer": {"@type": "Answer", "text": "In a phản thiết (反切) character an unmarked Cán stands on the left and a Chi of a different base on the right. In a hợp thư (合書) character a Chi stands on the left and the unmarked Cán of the same base on the right. A tham thư (參書) is a hợp thư with a third component, a single Chi, above it. All components share one square cell."}}, {"@type": "Question", "name": "Where is the script attested?", "acceptedAnswer": {"@type": "Answer", "text": "Quốc Âm Tân Tự is known from two handwritten manuscripts of one text, preserved at the Institute of Hán-Nôm Studies in Hanoi under the shelfmark AB.630. The text dates to the reign of Emperor Thiệu Trị (1841–1847) and is signed Nam Thành cư sĩ Nguyễn Tử (南城居士阮子)."}}, {"@type": "Question", "name": "Is Quốc Âm Tân Tự in Unicode?", "acceptedAnswer": {"@type": "Answer", "text": "Not yet. A Unicode encoding proposal is in preparation. Until then the characters can only be shown as images or custom fonts."}}]}]</script>
 <style>
-:root{--bg:#fbfaf7;--fg:#1d1c1a;--muted:#5f5c56;--card:#fff;--line:#e2dfd8;--accent:#8a3b12}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171716;--fg:#ecebe7;--muted:#a8a59e;--card:#222220;--line:#3a3935;--accent:#e8955a}}
-:root[data-theme="dark"]{--bg:#171716;--fg:#ecebe7;--muted:#a8a59e;--card:#222220;--line:#3a3935;--accent:#e8955a}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}
-main,.qtop,.qfoot{max-width:920px;margin:0 auto;padding:0 16px}
-.qtop{padding-top:28px}
-h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .4em}
-h2{font-size:1.35rem;margin:2.2em 0 .4em;border-bottom:1px solid var(--line);padding-bottom:.2em}
-h3{font-size:1.1rem;margin:1.8em 0 .3em} h3 small{color:var(--muted);font-weight:400}
-.lead{font-size:1.08rem} nav.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:18px 0}
-nav.toc ol{margin:.3em 0;padding-left:1.2em;columns:2} main a,.qtop a,.qfoot a{color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:10px 0}
 .card{margin:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
 .card svg{display:block;margin:0 auto 6px;width:110px;height:110px;color:var(--fg)}
@@ -40,17 +28,15 @@ svg .st line{stroke:currentColor;stroke-width:7;stroke-linecap:round} svg .cell{
 th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top} thead th{background:var(--bg)}
 details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin:8px 0} summary{cursor:pointer;font-weight:600}
 .note{border-left:3px solid var(--accent);padding:6px 12px;color:var(--muted);margin:14px 0}
-.qfoot{padding-bottom:40px;color:var(--muted);font-size:.9rem;margin-top:2.5em}
-@media (max-width:560px){nav.toc ol{columns:1}}
 </style>
 </head>
 <body>
-<header class="qtop">
+<header class="container pt-4">
 <p><a href="index.html">QATT</a> › Shapes</p>
 <h1>Quốc Âm Tân Tự (國音新字): the 22 Base Shapes, Marking Strokes and Character Composition</h1>
 <p class="lead"><strong>Quốc Âm Tân Tự</strong> (chữ Hán: 國音新字, abbreviated <abbr title="Quốc Âm Tân Tự">QATT</abbr>) is a phonetic semisyllabary for Vietnamese from the reign of Emperor Thiệu Trị (1841–1847). It is built from <strong>22 base shapes</strong>, each made of <strong>three straight strokes</strong>. A short <strong>marking stroke</strong> at the end of one stroke turns a base into a marked Cán or one of five Chi. Characters are drawn in a <strong>square cell</strong> like Hán Nôm characters. This page describes in words and drawings what every base looks like, how the marking stroke works and how components combine into characters.</p>
 </header>
-<main>
+<main class="container">
 <nav class="toc" aria-label="Contents"><strong>Contents</strong>
 <ol>
 <li><a href="#overview">Overview</a></li>
@@ -135,6 +121,6 @@ details{background:var(--card);border:1px solid var(--line);border-radius:8px;pa
 <p>Quốc Âm Tân Tự is known from one text in two handwritten copies at the Institute of Hán-Nôm Studies in Hanoi, shelfmark AB.630. The text is undated; it can be placed in the reign of Emperor Thiệu Trị (1841–1847) because the character 華 lacks its final stroke, a naming taboo for the emperor’s mother. The author signs as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子). The descriptions on this page are written from the manuscript by an independent researcher; the geometric wording is the author’s own description of the drawn forms and is not a quotation. The shapes in the first set of figures are schematic illustrations of that description; the position figures are redrawn from the project’s SVG font. Neither is a facsimile. The manuscript’s pages are not reproduced here.</p>
 <p>Related pages: <a href="intro.html">introduction</a>, <a href="codetable.html">code table</a>, <a href="rhymes.html">rhymes</a>.</p>
 </main>
-<footer class="qfoot"><p>Quốc Âm Tân Tự · 國音新字 · QATT · Vietnamese phonetic script, 19th century.</p></footer>
+<footer class="container pb-4 text-secondary small"><p>Quốc Âm Tân Tự · 國音新字 · QATT · Vietnamese phonetic script, 19th century.</p></footer>
 </body>
 </html>
