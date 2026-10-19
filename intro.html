@@ -1,313 +1,145 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quốc Âm Tân Tự - Intro</title>
+<title>Quốc Âm Tân Tự – intro</title>
+<meta name="description" content="How Quốc Âm Tân Tự writes a Vietnamese syllable: an onset and a rhyme join into one character.">
 <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="css/site.css" rel="stylesheet">
 <script src="/js/navigation.js"></script>
+<script src="/js/parser.js"></script>
 <script src="/js/qatt.js"></script>
 <style>
-  tt svg {font-size: 1em}
-  /*.rhyme-group:nth-child(2n+2) div:not(:nth-child(1)) {
-    background: #eee;
-    color: #aaa;
-  }*/
-  .rhyme-group {
-    margin-bottom: 4px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    justify-content: start;
-    > label, > div {
-      text-align: center;
-      background: #eee;
-      color: #aaa;
-      &:nth-child(2),
-      &:nth-child(2).onset-b,
-      &:nth-child(2).onset-ph,
-      &:nth-child(4).onset-ch,
-      &:nth-child(4).onset-x,
-      &:nth-child(4).onset-s {
-        background: #39b;
-        color: #fff;
-      }
-      &.coda-n,
-      &.coda-n.onset-b,
-      &.coda-n.onset-ph{
-        background: #aee;
-        color: #000;
-      }
-      &.coda-m,
-      &.coda-m.onset-b,
-      &.coda-m.onset-ph{
-        background: #eaa;
-        color: #000;
-      }
-      &.coda-g, &.coda-h {
-        background: #9ce;
-        color: #000;
-      }
-      margin-left: 2px;
-      width: 3.5em;
-      aspect-ratio: 1 / 1;
-      border-radius: 1000px;
-      svg {font-size: 1.25rem}
-      tt {margin-left: -.75em}
-      label {
-        position: relative;
-        font-size: .9em;
-        width: 100%;
-        top: -.5em;
-      }
-    }
-  }
+  .intro { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1rem 3rem; text-align: center; }
+  .intro h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 6vw, 2.8rem); margin-bottom: .3rem; }
+  .intro .lead { color: var(--muted, #6c757d); margin-bottom: 1.5rem; }
+  .stage { position: relative; margin: 0 auto; width: min(18rem, 70vw); aspect-ratio: 1; display: grid; place-items: center; }
+  .stage::before { content: ""; position: absolute; inset: 8%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--accent, #c0392b) 14%, transparent), transparent 70%); opacity: 0; transition: opacity .6s; }
+  .stage.glow::before { opacity: 1; }
+  .stage tt { font-size: min(9rem, 36vw); line-height: 1; }
+  .stage svg { stroke-width: 2.2px; }
+  .stage use { transform-box: view-box; }
+  .part-onset { color: #2a7fb8; }
+  .part-rhyme { color: #c0392b; }
+  .part-tone { color: #d08a12; }
+  .spelling { font-size: clamp(1.6rem, 6vw, 2.2rem); font-family: Georgia, serif; min-height: 3.2rem; display: flex; justify-content: center; align-items: baseline; gap: .4rem; }
+  .spelling span { opacity: .15; transition: opacity .4s, color .6s; }
+  .spelling span.on { opacity: 1; }
+  .spelling .plus { font-size: .7em; color: var(--muted, #6c757d); }
+  .spelling .word { margin-left: .4rem; font-weight: 600; }
+  .legend { display: flex; justify-content: center; gap: 1.2rem; font-size: .9rem; color: var(--muted, #6c757d); margin: .6rem 0 1.6rem; }
+  .legend i { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .35rem; vertical-align: baseline; }
+  .intro-actions { display: flex; justify-content: center; gap: .6rem; flex-wrap: wrap; }
 </style>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const qatt = new Qatt();
-    qatt.observe("tt");
-    const onsets = "l _ ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
-    const rhymeGroups = [
-                ["ơ", "anh", "ơn", "ơi", "ơm", "ơ"],
-                ["uơ", "uơng", "uơn", "uơi", "uơm", "uơ uơng uơn uơm"],
-                ["a", "ang", "an", "ai", "am", "a"],
-                ["oa", "oang", "oan", "oai", "oam", "oa"],
-                ["e", "eng", "en", "", "em", "e"],
-                ["oe", "oeng", "oen", "", "", "oe"],
-                ["ư", "ưng", "ưi", "ưn", "ưm", "ư"],
-                ["ươ", "ương", "ươi", "ươn", "ươm", "ươ"],
-                ["âu", "âng", "ây", "ân", "âm", "âu"],
-                ["uâu", "uâng", "uây", "uân", "", "uâu"],
-                ["au", "ăng", "ay", "ăn", "ăm", "au"],
-                ["oau", "oăng", "oay", "oăn", "oăm", "oau"],
-                ["", "iêng", "iê", "iên", "iêm", "iê"],
-                ["", "", "uyê", "uyên", "", "uyê"],
-                ["", "ênh", "ê", "ên", "êm", "ê"],
-                ["", "uênh", "uê", "uên", "uêm", "uê"],
-                ["", "inh", "i", "in", "im", "i"],
-                ["", "uynh", "uy", "uyn", "uym", "uy"],
-                ["ô", "ôn", "ôi", "", "ôm", "ô"],
-                ["u", "un", "ui", "", "um", "u"],
-                ["o", "on", "oi", "", "om", "o"],
-                ["uô", "uôn", "uôi", "", "uôm", "uô"]
-            ];
-    const labels = {
-      "_": "ʔ",
-      "c": "q",
-      "d": "đ",
-      "dz": "d",
-      "g": "gh",
-    }
-    const onsetChars = {...labels, "_": ""};
-    const rhymes = document.getElementById("rhymes");
-    for (let i = 0; i < onsets.length; i += 1) {
-      const onset = onsets[i];
-      const group = document.createElement("div");
-      group.className = "rhyme-group";
-      const div = document.createElement("div");
-      div.className = "bg-warning text-dark";
-      const label = document.createElement("label");
-      label.innerText = labels[onset] || onset;
-      const onsetChar = onsetChars[onset] ?? onset;
-      label.innerText = onsetChar || "ʔ/w";
-      const tt = document.createElement("tt");
-      tt.innerText = "," + onset;
-      div.append(tt);
-      div.append(label);
-      group.append(div);
-      [0, 1, 2, 3, 4, 6].forEach(j => {
-        let rhyme = rhymeGroups[i][j];
-        if (!rhymeGroups[i][5].split(" ").includes(rhyme)) return;
-        const div = document.createElement("div");
-        group.append(div);
-        if (!rhyme) {
-          div.style.visibility = "hidden";
-          return;
-        }
-        const tt = document.createElement("tt");
-        tt.innerText = "," + onset + (j+2);
-        const lbl = document.createElement("label");
-        if (onsetChar == "q") rhyme = ("u" + rhyme).replace("uo", "u")
-        lbl.append(onsetChar + rhyme);
-        div.append(tt);
-        div.append(lbl);
-        div.className = "onset-"+onsetChar+" coda-" + rhyme[rhyme.length-1];
-      });
-      rhymes.append(group);
-    }
-  });
-</script>
-<body class="m-3">
-  <h2>Introduction</h2>
-  <p>Quốc Âm Tân Tự - abbreviated QATT - is a semisyllabic writing system
-    that first appeared in historical records between 1841 and 1847.
-    The system consists of 22 base symbols that can be combined with
-    to form syllables. Words are built by combining two components to form a character.
-  </p>
-  
-  <h2>Spelling</h2>
-  <p>The left part contributes the onset, the right part contributes the rhyme.
-    In this example the left part is the onset <b>x</b>
-    and the right part is the rhyme ng<b>a</b>.
-    Together it is read <b>xa</b>.
-    There are 110 rhyme parts that can be used to write the Vietnamese language.
-  </p>
-  
-  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
-  <div class="h1 pb-3 border border-4 border-dark">
-    <tt class="me-4">,x</tt>
-    <br>X
-  </div>
-  <div class="p-2 h3">+</div>
-  <div class="h1 pb-3 border border-4 border-dark">
-    <tt class="me-4">,ng2</tt>
-    <br>Nga
-  </div>
-  <div class="p-2 h3">=</div>
-  <div class="h1 pb-3 px-4 border border-4 border-dark">
-    <tt class="ms-0">x,ng2</tt>
-    <br>Xa
-  </div>
-  </div>
-  
-  <p class="mt-2">If both sides are the same component,
-    you can leave out the left part.
-  </p>
-  
-  <h2>Tham Thư - Clustered spelling</h2>
-  Rhymes that end in a coda (e.g. sao, sen, sang) can be written in an alternative way called Tham Thư.
-  
-  This method places the coda as a separate component in the top half of the character.
-  Tham Thư is also the basis for cursive writing and calligraphy. In calligraphy the top part is often
-  reduced to a single stroke or dot and it might be placed at the side or bottom.
-  
-  <div class="mt-5 m-auto d-flex gap-1 justify-content-center align-items-center text-center">
-  <div class="h2 pb-3 px-3 border border-4 border-dark">
-    <tt class="">kh,h2</tt>
-    <br>khoa
-  </div>
-  <div class="p-2 h3">+</div>
-  <div class="h2 pb-3 border border-4 border-dark">
-    <tt class="me-4">,s4</tt>
-    <br>si
-  </div>
-  <div class="p-2 h3">=</div>
-  <div class="h2 pb-4 px-4 border border-4 border-dark">
-    <div class="d-flex flex-column align-items-center">
-      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,s4</tt>
-      <tt class="ms-0 position-relative" style="top:-10px">kh,h2</tt>
-    </div>
-    Khoai
-  </div>
-  </div>
-  
-  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
-  <div class="h2 pb-3 px-3 border border-4 border-dark">
-    <tt class="">c,ng2</tt>
-    <br>Ca
-  </div>
-  <div class="p-2 h3">+</div>
-  <div class="h2 pb-3 border border-4 border-dark">
-    <tt class="me-4">,m2</tt>
-    <br>mô
-  </div>
-  <div class="p-2 h3">=</div>
-  <div class="h2 pb-4 px-4 border border-4 border-dark">
-    <div class="d-flex flex-column align-items-center">
-      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,m2</tt>
-      <tt class="ms-0 position-relative" style="top:-10px">h,ng2</tt>
-    </div>
-    Cao
-  </div>
-  </div>
-  
-  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
-  <div class="h2 pb-3 px-3 border border-4 border-dark">
-    <tt class="">th,ng2</tt>
-    <br>Tha
-  </div>
-  <div class="p-2 h3">+</div>
-  <div class="h2 pb-3 border border-4 border-dark">
-    <tt class="me-4">,_6</tt>
-    <br>uơm
-  </div>
-  <div class="p-2 h3">=</div>
-  <div class="h2 pb-4 px-2 border border-4 border-dark">
-    <div class="d-flex align-items-center">
-      <div class="d-flex flex-column align-items-center">
-      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,_6</tt>
-      <tt class="ms-0 position-relative" style="top:-10px">th,ng2</tt>
-      </div>
-      or
-      <tt>th,ng6</tt>
-    </div>
-    Tham
-  </div>
-  </div>
-  
-  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
-  <div class="h2 pb-3 px-3 border border-4 border-dark">
-    <tt class="">s,g2</tt>
-    <br>Se
-  </div>
-  <div class="p-2 h3">+</div>
-  <div class="h2 pb-3 border border-4 border-dark">
-    <tt class="me-4">,_4</tt>
-    <br>uơn
-  </div>
-  <div class="p-2 h3">=</div>
-  <div class="h2 pb-4 px-2 border border-4 border-dark">
-    <div class="d-flex align-items-center">
-      <div class="d-flex flex-column align-items-center">
-      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,_4</tt>
-      <tt class="ms-0 position-relative" style="top:-10px">s,g2</tt>
-      </div>
-      or
-      <tt>s,g4</tt>
-    </div>
-    Sen
-  </div>
-  </div>
-  
-  <div class="m-auto d-flex gap-1 justify-content-center align-items-center text-center">
-  <div class="h3 pb-3 px-3 border border-4 border-dark">
-    <tt class="">b,v2</tt>
-    <br>Bo
-  </div>
-  <div class="p-2 h3">+</div>
-  <div class="h3 pb-3 border border-4 border-dark">
-    <tt class="me-4">,_3</tt>
-    <br>uơng
-  </div>
-  <div class="p-2 h3">=</div>
-  <div class="h3 pb-4 ps-0 border border-4 border-dark">
-    <div class="d-flex align-items-center">
-      <div class="ms-3 d-flex flex-column align-items-center">
-      <tt class="me-4 position-relative" style="bottom:-10px;transform:scale(1.2,.7)">,_3</tt>
-      <tt class="ms-0 position-relative" style="top:-10px">b,v2</tt>
-      </div>
-      or
-      <tt class="position-relative" style="left:-8px">,b2</tt>
-      <tt class="position-relative" style="left:-18px; right: -18px">b,</tt>
-    </div>
-    bong
-  </div>
+</head>
+<body>
+<main class="intro">
+  <h1><span data-vi="Âm đầu + vần = âm tiết">Onset + rhyme = syllable</span></h1>
+  <p class="lead"><span data-vi="Hai phần ghép lại thành một chữ.">Two parts join into one character.</span></p>
+
+  <div class="stage" id="stage"><tt id="glyph"></tt></div>
+  <div class="spelling" id="spelling" aria-live="polite"></div>
+  <div class="legend">
+    <span><i style="background:#2a7fb8"></i><span data-vi="Âm đầu">Onset</span></span>
+    <span><i style="background:#c0392b"></i><span data-vi="Vần">Rhyme</span></span>
+    <span><i style="background:#d08a12"></i><span data-vi="Thanh">Tone</span></span>
   </div>
 
-  <h2 class="mt-4">Level 1 Symbols</h2>
-  The listed 22 consonants and 25 rhyme symbols are sufficient for calligraphy and
-  normal writing using Tham Thư.
-  <p class="mt-3">
-    <b>Important</b>
-    <ul>
-    <li>ng/nh coda is both written with ng.</li>
-    <li>the Anh rhyme is written with lơ + ng instead of nga + ng.</li>
-    <li>The final u in nâu, tuâu, thau, nhoau is silent when a coda is added. For example thay is written tha(u)+i where the u is silent.</li>
-    </ul>
-  <div class="mt-5" id="rhymes"></div>
-  
-  
+  <div class="intro-actions">
+    <button class="btn btn-quiet btn-pill" id="pause"><span data-vi="Tạm dừng">Pause</span></button>
+    <a class="btn btn-cinnabar btn-pill" href="/spell.html"><span data-vi="Thử chơi Đánh vần!">Try Spell it!</span></a>
+    <a class="btn btn-quiet btn-pill" href="/symbols.html"><span data-vi="Bảng ký hiệu">Symbol table</span></a>
+  </div>
+</main>
+<script>
+  // The words of the show: [onset, rhyme] as written in Quốc Ngữ. First single words, then a family: one rhyme, changing onsets.
+  const SHOW = [
+    { words: [['x', 'a'], ['b', 'án'], ['t', 'ốt'], ['ng', 'ười'], ['m', 'ẹ']] },
+    { family: true, words: [['b', 'an'], ['c', 'an'], ['l', 'an'], ['m', 'an'], ['t', 'an'], ['đ', 'an']] },
+  ];
+  const parser = new VietnameseParser();
+  const qatt = new Qatt();
+  const $ = id => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  let paused = false, resume = null;
+  const gate = async ms => { await wait(ms); while (paused) await new Promise(r => resume = r); };
+
+  // the <use> elements of a character, sorted by what they stand for
+  function parts(svg, code) {
+    const onset = code.split(',')[0];
+    const out = { frame: [], onset: [], rhyme: [], tone: [] };
+    svg.querySelectorAll('use').forEach(u => {
+      const id = u.getAttribute('href').slice(1);
+      if (id === 'square') out.frame.push(u);
+      else if (/^q[ts]\d$/.test(id)) out.tone.push(u);
+      else if (onset !== '_' && id.startsWith('v2-' + onset.replace('w', '') + '-') && !id.endsWith('-medial')) out.onset.push(u);
+      else out.rhyme.push(u);
+    });
+    return out;
+  }
+
+  const anim = (els, frames, opts) => Promise.all(els.map(e => e.animate(frames, { fill: 'both', easing: 'cubic-bezier(.2,.8,.2,1)', ...opts }).finished));
+  const from = (dx, dy) => [{ opacity: 0, transform: reduce ? 'none' : `translate(${dx}px, ${dy}px)` }, { opacity: 1, transform: 'none' }];
+
+  async function play([on, rh], family, first, last) {
+    const word = on + rh;
+    const parsed = parser.parse(word);
+    const code = parsed && parsed.qatt;
+    if (!code) return;
+    const tone = +code.split(',')[3] || 0;
+    qatt.render(code, $('glyph'));
+    const svg = $('glyph').querySelector('svg');
+    const p = parts(svg, code);
+    p.onset.forEach(u => u.classList.add('part-onset'));
+    p.rhyme.forEach(u => u.classList.add('part-rhyme'));
+    p.tone.forEach(u => u.classList.add('part-tone'));
+    const all = [...p.onset, ...p.rhyme, ...p.tone];
+    all.forEach(u => u.style.opacity = 0);
+    $('stage').classList.remove('glow');
+
+    const sp = $('spelling');
+    sp.innerHTML = `<span class="part-onset">${on}</span><span class="plus">+</span><span class="part-rhyme">${rh}</span><span class="plus">=</span><span class="word">${word}</span>`;
+    const [sOn, , sRh, , sWord] = sp.children;
+    sp.querySelectorAll('.plus').forEach(s => s.classList.add('on'));
+
+    const keepRhyme = family && !first;   // in the family the rhyme stays, only the onset comes
+    if (keepRhyme) { p.rhyme.forEach(u => u.style.opacity = 1); sRh.classList.add('on'); }
+    await gate(250);
+    sOn.classList.add('on');
+    await anim(p.onset, from(-70, 0), { duration: 900 });
+    await gate(200);
+    if (!keepRhyme) {
+      sRh.classList.add('on');
+      await anim(p.rhyme, from(70, 0), { duration: 900 });
+      await gate(200);
+    }
+    if (tone) await anim(p.tone, from(0, -45), { duration: 700, easing: 'cubic-bezier(.3,1.6,.5,1)' });
+    // the fusion: the colours flow into one ink, the word is read
+    await gate(250);
+    $('stage').classList.add('glow');
+    sWord.classList.add('on');
+    all.forEach(u => u.animate([{ color: getComputedStyle(u).color }, { color: 'currentColor' }], { duration: 900, fill: 'forwards', delay: 300 }));
+    all.forEach(u => u.classList.remove('part-onset', 'part-rhyme', 'part-tone'));
+    await gate(family ? 1600 : 2400);
+    if (!family || last) await anim([svg], [{ opacity: 1 }, { opacity: 0 }], { duration: 400 });
+    else await anim(p.onset, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: reduce ? 'none' : 'translate(0, 40px)' }], { duration: 450 });
+  }
+
+  async function loop() {
+    for (;;) for (const act of SHOW) for (let i = 0; i < act.words.length; i++)
+      await play(act.words[i], act.family, i === 0, i === act.words.length - 1);
+  }
+
+  $('pause').addEventListener('click', () => {
+    paused = !paused;
+    $('pause').firstElementChild.dataset.vi = paused ? 'Phát' : 'Tạm dừng';
+    $('pause').firstElementChild.textContent = paused ? 'Play' : 'Pause';
+    document.getAnimations().forEach(a => paused ? a.pause() : a.play());
+    if (!paused && resume) { resume(); resume = null; }
+  });
+  loop();
+</script>
 </body>
 </html>
