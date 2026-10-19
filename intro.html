@@ -135,6 +135,7 @@
       <label class="name2-rng"><span><span data-vi="Vòng quay">Turn</span>: <output id="name2Val">100%</output></span><input type="range" class="form-range" id="name2Rng" min="0" max="100" value="100"></label>
       <label class="name2-rng"><span><span data-vi="Tốc độ quay">Speed of the turn</span>: <output id="name2SpdVal">100%</output></span><input type="range" class="form-range" id="name2Spd" min="25" max="300" step="5" value="100"></label>
       <label class="name2-rng"><span><span data-vi="Thời gian chờ">Wait before the turn</span>: <output id="name2WaitVal">0 s</output></span><input type="range" class="form-range" id="name2Wait" min="0" max="3000" step="100" value="0"></label>
+      <label class="name2-rng"><span><span data-vi="Thời gian chuyển mờ">Cross-fade</span>: <output id="name2FadeVal">0.5 s</output></span><input type="range" class="form-range" id="name2Fade" min="100" max="2000" step="100" value="500"></label>
     </section>
   </div>
 </main>
@@ -452,7 +453,7 @@
 
   // 5b. a copy of 5 with two characters (typed in the fields) and a slider: how far the turn goes (0 to 100% of the full turn; the count starts where the turn starts)
   (() => {
-    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C'), spd = $('name2Spd'), wt = $('name2Wait');
+    const host = $('name2Host'), ok = whenVisible(card('name2')), rng = $('name2Rng'), inA = $('name2A'), inB = $('name2B'), inC = $('name2C'), spd = $('name2Spd'), wt = $('name2Wait'), fd = $('name2Fade');
     let els = [], tl = null, gap = 0;
     function build() {
       host.textContent = ''; els = [];
@@ -466,8 +467,8 @@
     }
     function play() {
       tl && tl.pause();
-      const f = +rng.value / 100, D = 1400 * 100 / +spd.value, W = 1300 + +wt.value, M = Math.max(D * f, 30), FADE = 500 * D / 1400;   // D: the full turn (a slower speed, a longer turn and fade), W: the start of the turn (after the fly-in and the wait), M: the move together
-      $('name2Val').textContent = rng.value + '%'; $('name2SpdVal').textContent = spd.value + '%'; $('name2WaitVal').textContent = (wt.value / 1000).toFixed(1) + ' s';
+      const f = +rng.value / 100, D = 1400 * 100 / +spd.value, W = 1300 + +wt.value, M = Math.max(D * f, 30), FADE = +fd.value * D / 1400;   // D: the full turn (a slower speed, a longer turn and fade), W: the start of the turn (after the fly-in and the wait), M: the move together
+      $('name2Val').textContent = rng.value + '%'; $('name2SpdVal').textContent = spd.value + '%'; $('name2WaitVal').textContent = (wt.value / 1000).toFixed(1) + ' s'; $('name2FadeVal').textContent = (fd.value / 1000).toFixed(1) + ' s';
       tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
       tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
         .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
@@ -481,7 +482,7 @@
         }, W + 140 + M - FADE / 2);
     }
     const again = () => { build(); play(); };
-    rng.addEventListener('input', again); spd.addEventListener('input', again); wt.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
+    rng.addEventListener('input', again); spd.addEventListener('input', again); wt.addEventListener('input', again); fd.addEventListener('input', again); inA.addEventListener('input', again); inB.addEventListener('input', again); inC.addEventListener('input', again);
     host.addEventListener('click', again);
     build();
     (async () => { await ok(); play(); })();
