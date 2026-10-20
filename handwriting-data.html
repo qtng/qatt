@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>QATT Handwriting samples</title>
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/navigation.js"></script>
+  <script src="vendor/supabase/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/login.js"></script>
+  <script src="admin/admin.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script src="js/qatt.js"></script>
+  <script src="js/qatt-ink.js"></script>
+  <script src="js/qatt-pad.js"></script>
+  <script defer src="js/fonts.js"></script>
+  <style>
+    :root { --qfont: "QATT Pen Medium"; --ink: #2b2118; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    .note { color: #7b6c58; font-size: .85rem; }
+    .pad-wrap { display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: flex-start; }
+    .pad { position: relative; width: min(24rem, 92vw); aspect-ratio: 1; }
+    .pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; border: 1px solid #d8ccb2; border-radius: .6rem; background: #fffdf8; cursor: crosshair; }
+    .side { width: min(24rem, 92vw); display: flex; flex-direction: column; gap: .8rem; }
+    #target { font-family: var(--qfont), sans-serif; font-size: 6rem; line-height: 1.1; text-align: center; padding: .4rem; border: 1px solid #d8ccb2; border-radius: .6rem; background: #fffdf8; color: #2b2118; }
+    #reading { text-align: center; font-size: 1.3rem; min-height: 1.6em; }
+    .tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+    #msg { min-height: 1.4em; font-size: .9rem; }
+    #msg.err { color: #a8362a; }
+  </style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 60rem">
+  <h1 id="title" hidden>Handwriting samples</h1>
+  <p class="note" id="account" hidden></p>
+
+  <div id="content" hidden>
+    <p class="note">Write the cell shown on the right into the square in your own hand and save it; the next cell comes by itself, the ones with the fewest samples first. The tone mark, if there is one, is written last. The samples (<code>db/ink.sql</code>) are used to measure and train the recognition of <a href="handwriting.html">handwriting.html</a>.</p>
+    <div class="pad-wrap">
+      <div class="pad"><canvas id="pad" aria-label="Writing pad"></canvas></div>
+      <div class="side">
+        <div id="target" aria-live="polite"></div>
+        <div id="reading"></div>
+        <div class="tools">
+          <button class="btn btn-cinnabar btn-pill" id="save"><span data-vi="Lưu và tiếp">Save and next</span></button>
+          <button class="btn btn-quiet btn-pill" id="undo"><span data-vi="Hoàn tác nét">Undo stroke</span></button>
+          <button class="btn btn-quiet btn-pill" id="clear"><span data-vi="Xoá">Clear</span></button>
+          <button class="btn btn-quiet btn-pill" id="skip"><span data-vi="Bỏ qua">Skip</span></button>
+          <button class="btn btn-quiet btn-pill" id="takeback"><span data-vi="Thu hồi mẫu cuối">Take back last sample</span></button>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <select id="mode" class="form-select form-select-sm w-auto" aria-label="Kind of cell">
+            <option value="mixed">Letters and joined cells</option>
+            <option value="alone">Letters alone</option>
+            <option value="joined">Joined cells</option>
+          </select>
+          <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
+        </div>
+        <div id="msg" class="note" aria-live="polite"></div>
+        <div class="note" id="stats"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const parser = new VietnameseParser();
+  const S = QattInk.SHAPES;
+  let sp, pad, target = null, counts = {}, total = 0, mine = 0, session = 0, busy = false;
+
+  const reading = text => { const c = QattText.cells(text)[0]; return c ? QattText.reading(c.cell, parser) : ''; };
+  const pick = (list) => list[Math.random() * list.length | 0];
+  const MARKS = [0, 1, 2, 3, 4, 5, 6];
+  const randomCode = mode => {
+    const joined = mode === 'joined' || (mode === 'mixed' && Math.random() < .6);
+    const tone = Math.random() < .6 ? 1 + (Math.random() * 8 | 0) : 0;
+    const a = pick(S), m = pick(MARKS);
+    return joined ? a + '+' + pick(S) + (m || '') + (tone ? ' ' + tone : '') : a + (m || '') + (tone ? ' ' + tone : '');
+  };
+  // the cell asked for next: of 40 random cells with a reading the one with the fewest samples so far
+  const nextTarget = () => {
+    let best = null;
+    for (let k = 0; k < 40; k++) {
+      const code = randomCode($('mode').value), text = QattInk.text(code);
+      if (!text || reading(text) === '?') continue;
+      const n = counts[code] || 0;
+      if (!best || n < best.n) best = { code, text, n };
+    }
+    target = best;
+    $('target').textContent = target ? target.text : '?';
+    $('reading').textContent = target ? reading(target.text) : '';
+    stats();
+  };
+  const stats = () => {
+    $('stats').textContent = 'Saved in this session: ' + session + ' · yours: ' + mine + ' · all: ' + total + (target ? ' · this cell so far: ' + (counts[target.code] || 0) : '');
+  };
+  const say = (text, err) => { $('msg').textContent = text; $('msg').className = 'note' + (err ? ' err' : ''); };
+  const device = () => matchMedia('(pointer: coarse)').matches ? 'phone' : 'desktop';
+
+  const load = async () => {
+    const r = await sp.inkCounts();
+    if (r && r.error) { say(r.error.code === '42501' ? 'This account is not an admin (sign out and in again if you just became one).' : 'Could not load the numbers: ' + r.error.message, true); return; }
+    counts = r.targets || {}; total = r.total; mine = r.mine;
+  };
+  const save = async () => {
+    const strokes = pad.strokes();
+    if (busy || !target) return;
+    if (!strokes.length) { say('Write the cell first.', true); return; }
+    busy = true;
+    const data = strokes.map(s => s.map(p => [+p.x.toFixed(1), +p.y.toFixed(1), p.t]));
+    const r = await sp.inkSubmit(target.code, data, device());
+    busy = false;
+    if (r && r.error) { say('Not saved: ' + r.error.message, true); return; }
+    counts[target.code] = (counts[target.code] || 0) + 1; total++; mine++; session++;
+    say('Saved.');
+    pad.clear(); nextTarget();
+  };
+  const takeBack = async () => {
+    const r = await sp.inkUndo();
+    if (r && r.error) { say('Could not take it back: ' + r.error.message, true); return; }
+    if (!r) { say('Nothing to take back (only the last 10 minutes).'); return; }
+    await load(); session = Math.max(0, session - 1); say('Last sample taken back.'); stats();
+  };
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    sp = new SupabaseService();
+    await sp.init();
+    QattLogin.status(sp, $('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
+    const state = await Admin.check(sp);
+    const allowed = state === 'admin';
+    $('title').hidden = !allowed; $('content').hidden = !allowed; $('account').hidden = state === 'denied';
+    if (!allowed) return;
+    pad = QattPad.mount($('pad'));
+    await load();
+    nextTarget();
+    $('save').onclick = save;
+    $('undo').onclick = () => pad.undo();
+    $('clear').onclick = () => pad.clear();
+    $('skip').onclick = () => { pad.clear(); nextTarget(); };
+    $('takeback').onclick = takeBack;
+    $('mode').onchange = () => { pad.clear(); nextTarget(); };
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.target.matches('select, button')) { e.preventDefault(); save(); } });
+  });
+</script>
+</body>
+</html>

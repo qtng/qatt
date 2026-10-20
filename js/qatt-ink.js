@@ -5,6 +5,8 @@ QATT handwriting recognition (a draft): strokes drawn in the square of a cell ->
   ink.recognize(strokes, 5)                   // strokes: [[{x, y}, …], …] in the coordinates of a cell (viewBox -12.5 -12.5 125 125 of qatt.js)
                                               // -> [{ text, code, score, strokes }] best first; text is for the QATT fonts (QattText), strokes the template
   QattInk.FRAME                               // { x, y, size } of that coordinate system
+  QattInk.SHAPES                              // the 22 shapes in the order of the code points
+  QattInk.text("t+nh5 3")                     // the text of a cell for the QATT fonts from its code (the code of a result), null if it is none
 
 What it knows (no Tham Thư): a letter alone (the 22 shapes of QattText, with or without one of the 6 marking strokes, the centred
 forms v2c-…) and a joined cell (the small onset v2-<shape>-small on the left, the rhyme v2-<shape> with its marking stroke on the right),
@@ -305,6 +307,16 @@ const QattInk = (() => {
     return { recognize };
   };
 
-  return { create, FRAME, strokesOf };
+  // the text of a cell for the QATT fonts from its code ("t+nh5 3", "kh2"), the reverse of the code of a result of recognize(); null if the code is none
+  const text = code => {
+    const m = /^([a-z_]+)(?:\+([a-z_]+))?([1-6])?(?: ([1-8]))?$/.exec(code || "");
+    if (!m) return null;
+    const i = SHAPES.indexOf(m[1]), j = m[2] === undefined ? -1 : SHAPES.indexOf(m[2]), mark = +(m[3] || 0), tone = +(m[4] || 0);
+    if (i < 0 || (m[2] !== undefined && j < 0)) return null;
+    const chr = o => String.fromCodePoint(BASE + o), t = tone ? chr(TONES[tone]) : "";
+    return m[2] === undefined ? chr(7 * i + mark) + t : chr(7 * i) + chr(JOINER - BASE) + chr(7 * j + mark) + t;
+  };
+
+  return { create, FRAME, strokesOf, SHAPES, text };
 })();
 if (typeof module !== "undefined") module.exports = QattInk;
