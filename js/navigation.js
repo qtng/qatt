@@ -520,7 +520,11 @@ window.Theme = window.Theme || (function() {
         // language switch EN | VI next to the menu button; the choice is remembered (Lang.set)
         const langButtons = header.querySelectorAll('.lang-switch button');
         const markLang = () => langButtons.forEach(b => { const on = b.dataset.lang === Lang.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-        langButtons.forEach(b => b.addEventListener('click', () => Lang.set(b.dataset.lang)));
+        langButtons.forEach(b => b.addEventListener('click', () => {
+            Lang.set(b.dataset.lang);
+            // vi.html is the Vietnamese copy of the homepage: EN goes to the English one
+            if (b.dataset.lang === 'en' && document.documentElement.getAttribute('data-page-lang') === 'vi') location.href = '/index.html';
+        }));
         document.addEventListener('langchange', markLang);
         markLang();
 
