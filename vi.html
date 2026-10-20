@@ -1,60 +1,146 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-page-lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quốc Âm Tân Tự (國音新字) – chữ viết tiếng Việt từ thập niên 1840 | Qatt.org</title>
   <meta name="description" content="Quốc Âm Tân Tự (國音新字, QATT) là lối chữ viết tiếng Việt ra đời thập niên 1840 dưới triều Thiệu Trị, gồm 22 hình cơ bản. Bảng chữ, gõ chữ, phông chữ, Unicode và trò chơi Đánh vần!">
   <link rel="canonical" href="https://qatt.org/vi.html">
-  <link rel="alternate" hreflang="vi" href="https://qatt.org/vi.html">
   <link rel="alternate" hreflang="en" href="https://qatt.org/">
+  <link rel="alternate" hreflang="vi" href="https://qatt.org/vi.html">
   <link rel="alternate" hreflang="x-default" href="https://qatt.org/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Qatt.org">
   <meta property="og:locale" content="vi_VN">
   <meta property="og:title" content="Quốc Âm Tân Tự (國音新字) – chữ viết tiếng Việt từ thập niên 1840">
   <meta property="og:description" content="Lối chữ viết tiếng Việt gồm 22 hình cơ bản: bảng chữ, gõ chữ, phông chữ, Unicode.">
   <meta property="og:url" content="https://qatt.org/vi.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Qatt.org">
   <meta property="og:image" content="https://qatt.org/qatt.png">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Quốc Âm Tân Tự (國音新字)","url":"https://qatt.org/vi.html","inLanguage":"vi","about":{"@type":"Thing","name":"Quốc Âm Tân Tự","alternateName":["QATT","國音新字"]}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Qatt.org – Quốc Âm Tân Tự","alternateName":["Quốc Âm Tân Tự","QATT","國音新字"],"url":"https://qatt.org/","inLanguage":["en","vi"]}</script>
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/navigation.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
   <style>
     :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
-    .hero { background: linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
-    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
     .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
     .hero .lead { max-width: 38rem; color: #4a3d30; }
-    main p, main li { max-width: 46rem; }
+    .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
+    @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
+    .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; transition: opacity .15s, color .15s; }   /* heavier strokes, as strong as the big glyphs of the name below */
+    .glyph-strip a { color: inherit !important; text-decoration: none !important; }   /* also against the link colour of a theme, now that the strip is in the main part */
+    .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
+    .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
+    .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
+    section.block { padding-block: 2rem; }
+    section.block + section.block { border-top: var(--rule-width, 1px) solid var(--rule, var(--bs-border-color)); }   /* --rule, --rule-width: a theme can give the lines its own colour and weight */
+    .facts { font-size: .95rem; }
+    .facts dt { font-weight: 600; }
+    /* the fonts as a grid of characters (made of text, no image): the weight falls from the left to the right column, the number of strokes grows from the top to the bottom row */
+    @font-face { font-family: "QATT Pen Medium"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); }
+    section.block#name { border-top: 0; padding-block: 1.8rem 1.4rem; }
+    /* the one-line scramble: the name turns into QATT, Latin letters and qatt.org (dark box, fixed look) */
+    .scr-box { border-radius: 1rem; padding: 1rem; color: #f3ede2; border: 1px solid #2a2738; background: radial-gradient(ellipse at 50% 40%, rgba(29, 26, 40, .88), rgba(7, 8, 13, .88) 75%); overflow: hidden; }   /* a little transparent: the background of the theme tints the black */
+    .scr-stage { position: relative; aspect-ratio: 16 / 5; max-width: 36rem; margin: 0 auto; }
+    .scr-slide { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; opacity: 0; }
+    .scr-slide p { position: relative; margin: 0; line-height: 1; white-space: nowrap; font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-family: "QATT Pen Medium", sans-serif; }
+    .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
+    .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
+    @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
 <body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const strip = document.getElementById('glyph-strip');
+    // the 22 base shapes: shape i is U+F0000 + 7 * i (see js/qatt-text.js)
+    for (let i = 0; i < 22; i++) { const a = document.createElement('a'), t = document.createElement('tt'); a.href = 'symbols.html'; a.title = 'Symbol table'; a.setAttribute('data-vi-title', 'Bảng chữ'); t.textContent = String.fromCodePoint(0xF0000 + 7 * i); a.append(t); strip.append(a); }
+  });
+</script>
+
+<script>
+  // the one-line scramble: quốc, quốc âm tân tự in QATT, the name in Latin letters and qatt.org; runs while the box is on screen
+  document.addEventListener('DOMContentLoaded', () => {
+    const A = window.anime, $ = id => document.getElementById(id), parser = new VietnameseParser();
+    const root = $('scrBox'), slide = root.querySelector('.scr-slide'), SC = A && A.scrambleText;
+    if (!SC || matchMedia('(prefers-reduced-motion: reduce)').matches) { slide.style.opacity = 1; slide.innerHTML = '<p></p>'; slide.firstChild.textContent = ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || w).join(' '); return; }
+    const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
+    const rev = [], reg = new Map();
+    const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
+    const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');
+    const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
+    const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
+    const TAN = toks('tân');   // a loop starts with tân (yellow, big), which scrambles into quốc, as in the first scramble card
+    const mk = txt => { const e = document.createElement('p'); e.innerHTML = '<span class="vis"></span><span class="px"></span>'; e.lastChild.textContent = txt; return e; };
+    const bg = mk(' '), p = mk(TAN); bg.style.position = 'absolute'; slide.append(bg, p);   // bg: the small white syllable behind the sentence that scrambles away at the end, as the middle cell of the first scramble card
+    const px = p.lastChild, mirror = () => [p, bg].forEach(e => { const t = show(e.lastChild.textContent); if (e.firstChild.textContent !== t) e.firstChild.textContent = t; });
+    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+    tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
+    tl.add(p, { scale: { from: 6 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
+    tl.add(p, { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '+=900');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
+    tl.add(p, { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
+    tl.call(() => p.classList.add('latin'), '<<');
+    tl.add(px, { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=1500');
+    tl.add(p, { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '+=250');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
+    tl.add(p, { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
+    tl.add(px, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
+    tl.call(() => { bg.lastChild.textContent = TAN; mirror(); }, '<<');
+    tl.call(() => p.classList.remove('latin'), '<<');
+    tl.call(() => { px.textContent = TAN; bg.lastChild.textContent = ' '; mirror(); }, '+=800');
+    tl.speed = .8;   // 80%, the speed chosen for the scramble card of intro.html
+    tl.init();
+    let on = false;
+    new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
+  });
+</script>
+
 <header class="hero pt-5 pb-4">
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">Quốc Âm Tân Tự</h1>
-    <p class="lead mx-auto mb-4">Lối chữ viết tiếng Việt sáng tạo từ thập niên 1840, chỉ gồm 22 hình cơ bản.</p>
+    <p class="lead mx-auto mb-4" data-vi="Một lối chữ viết tiếng Việt sáng tạo từ thập niên 1840.">Một lối chữ viết tiếng Việt sáng tạo từ thập niên 1840.</p>
     <div class="d-flex flex-wrap justify-content-center gap-2 mb-1">
-      <a class="btn btn-cinnabar btn-pill" href="symbols.html">Bảng chữ</a>
-      <a class="btn btn-ink btn-pill" href="editor.html">Gõ chữ</a>
+      <a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Bảng chữ">Bảng chữ</a>
+      <a class="btn btn-ink btn-pill" href="editor.html" data-vi="Gõ chữ">Gõ chữ</a>
     </div>
   </div>
 </header>
-<main class="container py-4">
-  <h2 class="h3">Quốc Âm Tân Tự là gì?</h2>
-  <p>Quốc Âm Tân Tự (國音新字, viết tắt QATT) nghĩa là “chữ mới ghi âm tiếng nước nhà”. Chữ ra đời vào thập niên 1840, dưới triều vua Thiệu Trị. Ngày nay chỉ còn một văn bản, lưu trong hai bản chép tay ở Hà Nội.</p>
-  <h2 class="h3 mt-4">Cách cấu tạo</h2>
-  <p>Chữ gồm 22 hình cơ bản, mỗi hình ba nét. Thêm một nét nhỏ ở một trong sáu vị trí thì có thêm sáu dạng. Hai hình đặt cạnh nhau làm thành một âm tiết: bên trái là phần đầu, bên phải là phần vần. Vòng tròn và nửa vòng tròn nhỏ ở các góc ghi tám thanh điệu.</p>
-  <h2 class="h3 mt-4">Khám phá</h2>
-  <ul>
-    <li><a href="qatt.html">Giới thiệu chi tiết về Quốc Âm Tân Tự</a></li>
-    <li><a href="symbols.html">Bảng chữ</a> – 22 hình cơ bản và các dạng</li>
-    <li><a href="editor.html">Gõ chữ</a> – gõ Quốc Âm Tân Tự bằng bàn phím</li>
-    <li><a href="spell.html">Đánh vần!</a> – trò chơi ghép âm đầu, vần và thanh</li>
-    <li><a href="fonts.html">Phông chữ</a> và <a href="unicode.html">Unicode</a></li>
-  </ul>
-  <p><a href="./">English version</a></p>
+
+<main class="container py-2">
+
+  <section class="block" id="name">
+    <div class="scr-box" id="scrBox" role="img" aria-label="Quốc Âm Tân Tự in QATT">
+      <div class="scr-stage"><div class="scr-slide"></div></div>
+    </div>
+  </section>
+
+  <section class="block" id="script">
+    <h2 class="h3" data-vi="Chữ viết">Chữ viết</h2>
+    <p data-vi="Quốc Âm Tân Tự (國音新字) nghĩa là “chữ mới ghi âm tiếng nước nhà”. Chữ ra đời vào thập niên 1840, dưới triều vua Thiệu Trị. Ngày nay chỉ còn một văn bản, lưu trong hai bản chép tay ở Hà Nội.">Quốc Âm Tân Tự (國音新字) nghĩa là “chữ mới ghi âm tiếng nước nhà”. Chữ ra đời vào thập niên 1840, dưới triều vua Thiệu Trị. Ngày nay chỉ còn một văn bản, lưu trong hai bản chép tay ở Hà Nội.</p>
+    <p data-vi="Chữ gồm 22 hình cơ bản, mỗi hình ba nét. Thêm một nét nhỏ ở một trong sáu vị trí thì có thêm sáu dạng. Hai hình đặt cạnh nhau làm thành một âm tiết: bên trái là phần đầu, bên phải là phần vần. Vòng tròn và nửa vòng tròn nhỏ ở các góc ghi tám thanh điệu.">Chữ gồm 22 hình cơ bản, mỗi hình ba nét. Thêm một nét nhỏ ở một trong sáu vị trí thì có thêm sáu dạng. Hai hình đặt cạnh nhau làm thành một âm tiết: bên trái là phần đầu, bên phải là phần vần. Vòng tròn và nửa vòng tròn nhỏ ở các góc ghi tám thanh điệu.</p>
+      <p class="mb-0"><a class="btn btn-cinnabar btn-pill" href="qatt.html" data-vi="Đọc thêm">Đọc thêm</a></p>
+  </section>
+
+  <section class="block" id="shapes">
+    <div class="rule" aria-hidden="true" data-vi="22 Cán">22 Cán</div>
+    <div class="glyph-strip text-dark" id="glyph-strip" aria-label="22 base shapes of the script"></div>
+  </section>
+
 </main>
+<div class="pb-4"></div>
 </body>
 </html>
