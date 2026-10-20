@@ -16,6 +16,9 @@ s.suggestedName();                // a first suggestion from the account (first 
 await s.signInWithGoogle();
 await s.signInWithEmail(email);   // sends a link
 await s.signOut();
+await s.inkSubmit(target, strokes, device);  // admins: one handwritten cell of handwriting-data.html (db/ink.sql); gives the id, { error } otherwise
+await s.inkUndo();                // takes back the own last sample (at most 10 minutes old); gives the id or null
+await s.inkCounts();              // admins: { total, mine, targets: { target: count } }
 await s.initQuiet();               // the user if signed in for real, else null; no anonymous account is made (Spell it!: spellLoad, spellSubmit, spellLeaderboard)
 s.isAnonymous                     // true until the user has signed in (see js/login.js for the dialog)
 
@@ -199,6 +202,24 @@ class SupabaseService {
   async spellSubmit(delta, decoding, speed, device) {
     if (!this.client || !this.user) return { error: new Error('not signed in') };
     const { data, error } = await this.client.rpc('spell_submit', { p_delta: delta, p_decoding: decoding, p_speed: speed, p_device: device || null });
+    return error ? { error } : data;
+  }
+
+  async inkSubmit(target, strokes, device) {
+    if (!this.client || !this.user) return { error: new Error('not signed in') };
+    const { data, error } = await this.client.rpc('ink_submit', { p_target: target, p_strokes: strokes, p_device: device || null });
+    return error ? { error } : data;
+  }
+
+  async inkUndo() {
+    if (!this.client || !this.user) return { error: new Error('not signed in') };
+    const { data, error } = await this.client.rpc('ink_undo');
+    return error ? { error } : data;
+  }
+
+  async inkCounts() {
+    if (!this.client || !this.user) return { error: new Error('not signed in') };
+    const { data, error } = await this.client.rpc('admin_ink');
     return error ? { error } : data;
   }
 
