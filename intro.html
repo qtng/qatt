@@ -71,6 +71,14 @@
   .name2-ctl { display: flex; justify-content: center; gap: .6rem; margin-top: .6rem; }
   .name2-ctl input { max-width: 7rem; text-align: center; }
   .name2-rng, .scr-rng { display: block; max-width: 22rem; margin: .8rem auto 0; }
+  .scr-cfg { max-width: 36rem; margin: .9rem auto 0; text-align: left; font-size: .9rem; }
+  .scr-cfg-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+  .scr-cfg-head .spacer { flex: 1; }
+  .scr-ent { display: grid; grid-template-columns: 1fr auto; gap: .2rem .5rem; padding: .45rem 0; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+  .scr-ent .rngs { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: .2rem .8rem; }
+  .scr-ent .rngs label { display: block; font-size: .8rem; }
+  .scr-ent .bar { grid-column: 1 / -1; position: relative; height: .35rem; border-radius: .2rem; background: color-mix(in srgb, currentColor 12%, transparent); }
+  .scr-ent .bar i { position: absolute; top: 0; bottom: 0; border-radius: .2rem; background: #e0a020; }
   .nchar { text-align: center; position: relative; }
   .nchar .n3 { position: absolute; inset: 0; opacity: 0; }
   .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
@@ -124,6 +132,12 @@
     </section>
     <section class="show-card scr" data-run="scramble4"><h2><span data-vi="Xáo chữ, một dòng">Scramble, one line</span></h2>
       <div class="scr-stage short"><div class="scr-slide"></div></div>
+      <div class="scr-cfg">
+        <div class="scr-cfg-head"><b data-vi="Các chữ hiện ra">What is shown</b><span class="note" id="scr4Total"></span><span class="spacer"></span>
+          <button type="button" class="btn btn-quiet btn-sm btn-pill" id="scr4Reset"><span data-vi="Đặt lại">Reset</span></button>
+          <button type="button" class="btn btn-cinnabar btn-sm btn-pill" id="scr4Add"><span data-vi="Thêm">Add</span> +</button></div>
+        <div id="scr4List"></div>
+      </div>
       <label class="scr-rng"><span><span data-vi="Tốc độ">Speed</span>: <output>100%</output></span><input type="range" class="form-range" min="25" max="400" step="5" value="100" aria-label="Speed"></label>
     </section>
     <section class="show-card" data-run="name"><h2><span data-vi="Tên">Name</span></h2><div class="namehost" id="nameHost"></div></section>
@@ -586,40 +600,84 @@
   }
   // the colours of the scramble card: the Latin words white, the QATT name orange, the end in white and yellow
   shortScramble('scramble2', { start: '#ffd84a', qatt: '#e0a020', words: ['#f3ede2', '#f3ede2'], end: '#f3ede2', last: '#ffd84a' });
-  // 6c. a clone of the first scramble card, only its middle: one line that becomes quốc, quốc âm tân tự in QATT, the name in Latin letters and qatt.org (no diamond, no slide of several lines), with the colours and the timing of the original
+  // 6c. a clone of the first scramble card, only its middle: one line of texts that scramble from one into the next (no diamond, no slide of several lines).
+  // The texts are a list that can be changed: each entry has its text and the time on the timeline of TOTAL ms at which it has settled (from) and at which it starts to scramble into the next (to);
+  // the time between `to` of one entry and `from` of the next is the scramble. A lowercase text of Quốc Ngữ syllables is shown in QATT, any other text as it is typed (the Latin phase).
   (() => {
     if (!A.scrambleText) return;
     const SC = A.scrambleText, root = card('scramble4'), slide = root.querySelector('.scr-slide');
+    const TOTAL = 13.1, STEP = .1, KEY = 'introScramble4', list = $('scr4List');
+    const DEFAULT = [['tân', 0, .2], ['quốc', .5, 2.9], ['quốc âm tân tự', 4, 4.4], ['Quốc Âm Tân Tự', 5.5, 7.5], ['qatt.org', 9.7, 11.2], ['tân', 11.9, 13.1]];
+    let entries = DEFAULT.map(([text, from, to]) => ({ text, from, to }));
+    try { const k = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(k) && k.length) entries = k.map(e => ({ text: String(e.text), from: +e.from || 0, to: +e.to || 0 })); } catch (e) {}
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch (e) {} };
+
     const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
     const rev = [], reg = new Map();
     const tok = glyph => { if (!reg.has(glyph)) { reg.set(glyph, String.fromCharCode(0xE000 + rev.length)); rev.push(glyph); } return reg.get(glyph); };
     const toks = phrase => phrase.split(' ').map(w => tok(QattText.word(w, parser) || w)).join(' ');
     const show = t => [...t].map(c => { const k = c.charCodeAt(0) - 0xE000; return k >= 0 && k < rev.length ? rev[k] : c; }).join('');
-    const GL = POOL.map(toks), CHARS = GL.join(''), CUR = GL.slice(0, 3).join('');
-    const TAN = toks('tân');   // a loop starts with tân (yellow, big), which scrambles into quốc, as in the first scramble card
-    const mk = txt => { const e = document.createElement('p'); e.innerHTML = '<span class="vis"></span><span class="px"></span>'; e.lastChild.textContent = txt; return e; };
-    const bg = mk(' '), p = mk(TAN); bg.style.position = 'absolute'; slide.append(bg, p);   // bg: the small white syllable behind the sentence that scrambles away at the end, as the middle cell of the first scramble card
-    const px = p.lastChild, mirror = () => [p, bg].forEach(e => { const t = show(e.lastChild.textContent); if (e.firstChild.textContent !== t) e.firstChild.textContent = t; });
-    const tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
-    tl.add(slide, { opacity: { to: 1, duration: 250, ease: 'linear' }, scale: [{ from: .75, to: 1, duration: 1500, ease: 'inOut(3.5)' }] });
-    tl.add(p, { scale: { from: 6 }, color: { from: '#ffd84a', to: '#f3ede2' } }, '<<');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc'), override: ' ', ease: 'inQuad', duration: 500, from: 'center', cursor: CUR }) }, '<<');
-    tl.add(p, { scale: 1.5, color: { to: '#9be15d' }, ease: 'inOutExpo', duration: 1500 }, '+=900');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: toks('quốc âm tân tự'), override: false, from: 'center', duration: 1000, perturbation: .25 }) }, '<<');
-    tl.add(p, { scale: 1, color: '#f3ede2', ease: 'inOutExpo', duration: 1150 }, '<+=250');
-    tl.call(() => p.classList.add('latin'), '<<');
-    tl.add(px, { innerHTML: SC({ override: false, text: 'Quốc Âm Tân Tự', from: 'right', duration: 950, settleDuration: 500, ease: 'inOut' }) }, '<<');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: '', override: false, from: 'random', reversed: true, duration: 850, perturbation: .5 }) }, '<+=1500');
-    tl.add(p, { color: '#f3ede2', scale: 1.5, ease: 'inOutExpo' }, '+=250');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, override: ' ', from: 'center', settleDuration: 500, revealRate: 33, perturbation: .2, text: 'qatt.org' }) }, '<<');
-    tl.add(p, { color: '#ffd84a', scale: 2, ease: 'inOutExpo', duration: 750 }, '<+=1200');
-    tl.add(px, { innerHTML: SC({ chars: CHARS, text: ' ', override: false, duration: 750, ease: 'out(2)', from: 'right' }) }, '<<');
-    tl.call(() => { bg.lastChild.textContent = TAN; mirror(); }, '<<');
-    tl.call(() => p.classList.remove('latin'), '<<');
-    tl.call(() => { px.textContent = TAN; bg.lastChild.textContent = ' '; mirror(); }, '+=800');
-    tl.init();
-    speedSlider(root, tl);
-    let on = false;
+    const GL = POOL.map(toks), CHARS = GL.join('');
+    const isQatt = text => text === text.toLowerCase() && text.split(/\s+/).every(w => QattText.word(w, parser));
+    const p = document.createElement('p'); p.innerHTML = '<span class="vis"></span><span class="px"></span>'; p.lastChild.textContent = ' '; slide.append(p);
+    slide.style.opacity = 1;
+    const px = p.lastChild, mirror = () => { const t = show(px.textContent); if (p.firstChild.textContent !== t) p.firstChild.textContent = t; };
+
+    let tl = null, on = false, speed = 1;
+    const build = () => {
+      if (tl) tl.revert();
+      px.textContent = ' '; p.classList.remove('latin'); mirror();
+      const es = entries.filter(e => e.text.trim()).map(e => ({ ...e, text: e.text.trim() })).sort((x, y) => x.from - y.from);
+      tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
+      tl.speed = speed;
+      // `at` is where the previous text ends; the scramble into the next one fills the time up to its `from`
+      let at = 0;
+      const into = (text, t1) => {
+        const q = text.trim() ? isQatt(text) : false, target = q ? toks(text) : text || ' ', t0 = at * 1000, gap = t1 * 1000 - t0;
+        tl.call(() => p.classList.toggle('latin', !q), t0);
+        if (gap >= 60) tl.add(px, { innerHTML: SC({ chars: CHARS, text: target, override: false, from: 'center', duration: gap }), duration: gap, ease: 'linear' }, t0);
+        else tl.call(() => { px.textContent = target; mirror(); }, t1 * 1000);
+      };
+      es.forEach(e => { into(e.text, e.from); at = Math.max(e.to, e.from); });
+      if (es.length && at < TOTAL) into(' ', TOTAL);
+      tl.add(slide, { opacity: 1, duration: 1 }, TOTAL * 1000 - 1);   // the loop is TOTAL long whatever the last entry does
+      tl.init();
+      if (on) tl.play();
+    };
+
+    const fmt = v => v.toFixed(1).replace('.', ',') + ' s';
+    const render = () => {
+      $('scr4Total').textContent = '· ' + fmt(TOTAL);
+      list.replaceChildren(...entries.map((e, i) => {
+        const row = document.createElement('div'); row.className = 'scr-ent';
+        row.innerHTML = '<input type="text" class="form-control form-control-sm" aria-label="Text" autocomplete="off" spellcheck="false">' +
+          '<button type="button" class="btn btn-quiet btn-sm btn-pill" aria-label="Remove" data-vi-aria-label="Xoá" title="Remove" data-vi-title="Xoá">×</button>' +
+          '<div class="rngs"><label><span data-vi="Từ">From</span> <output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="From"></label>' +
+          '<label><span data-vi="Đến">To</span> <output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="To"></label></div>' +
+          '<div class="bar"><i></i></div>';
+        const [txt] = row.getElementsByTagName('input'), [rf, rt] = row.querySelectorAll('input[type=range]'), [of, ot] = row.querySelectorAll('output'), bar = row.querySelector('.bar i');
+        const paint = () => {
+          rf.value = e.from; rt.value = e.to; of.textContent = ' ' + fmt(e.from); ot.textContent = ' ' + fmt(e.to);
+          bar.style.left = e.from / TOTAL * 100 + '%'; bar.style.width = Math.max(e.to - e.from, 0) / TOTAL * 100 + '%';
+        };
+        txt.value = e.text; paint();
+        let timer = 0; const changed = () => { save(); clearTimeout(timer); timer = setTimeout(build, 150); };
+        txt.addEventListener('input', () => { e.text = txt.value; changed(); });
+        rf.addEventListener('input', () => { e.from = +rf.value; if (e.to < e.from) e.to = e.from; paint(); changed(); });
+        rt.addEventListener('input', () => { e.to = +rt.value; if (e.from > e.to) e.from = e.to; paint(); changed(); });
+        row.querySelector('button').addEventListener('click', () => { entries.splice(i, 1); save(); render(); build(); });
+        return row;
+      }));
+    };
+    $('scr4Add').addEventListener('click', () => {
+      const last = Math.max(0, ...entries.map(e => e.to)), from = Math.min(last + .5, TOTAL - .5);
+      entries.push({ text: 'tự', from: +from.toFixed(1), to: +Math.min(from + .5, TOTAL).toFixed(1) });
+      save(); render(); build();
+    });
+    $('scr4Reset').addEventListener('click', () => { entries = DEFAULT.map(([text, from, to]) => ({ text, from, to })); save(); render(); build(); });
+    const sp = root.querySelector('.scr-rng input'), out = root.querySelector('.scr-rng output');
+    sp.addEventListener('input', () => { speed = sp.value / 100; out.textContent = sp.value + '%'; if (tl) tl.speed = speed; });
+    render(); build();
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
   })();
 })();
