@@ -109,7 +109,7 @@
     tl.call(() => { bg.lastChild.textContent = TAN; mirror(); }, '<<');
     tl.call(() => p.classList.remove('latin'), '<<');
     tl.call(() => { px.textContent = TAN; bg.lastChild.textContent = ' '; mirror(); }, '+=800');
-    tl.speed = .8;   // 80%, the speed chosen for the scramble card of intro.html
+    tl.speed = .8;   // 80%, the speed chosen for the scramble card of admin/intro.html
     tl.init();
     let on = false;
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
@@ -152,7 +152,7 @@
         <div class="han h2 mb-2" aria-hidden="true" data-nosnippet>國音新字</div>
         <h3 class="h5" data-vi="Tìm hiểu chữ viết">Discover the script</h3>
         <p data-vi="Câu chuyện về Quốc Âm Tân Tự, cấu trúc của chữ và văn bản còn lại đến ngày nay.">Learn the story of QATT, its structure, and the surviving historical text.</p>
-        <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="intro.html" data-vi="Đọc phần giới thiệu">Read the introduction</a></p>
+        <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="qatt.html" data-vi="Đọc về chữ viết">Read about the script</a></p>
       </div></div></div>
       <div class="col-md-4"><div class="card h-100"><div class="card-body d-flex flex-column">
         <div class="h2 mb-2 qatt-words" id="exploreGlyphs" aria-hidden="true" data-nosnippet>ông ngông hông</div>
