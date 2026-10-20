@@ -75,9 +75,12 @@
   .scr-cfg-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
   .scr-cfg-head .spacer { flex: 1; }
   .scr-ent { display: grid; grid-template-columns: 15% 1fr 2.6rem; align-items: center; gap: .5rem; padding: .45rem 0; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
-  .scr-ent .txt { display: flex; gap: .2rem; min-width: 0; }
-  .scr-ent .txt input[type=text] { flex: 1; min-width: 0; padding-left: .3rem; padding-right: .3rem; }
-  .scr-ent .txt input[type=color] { flex: none; width: 1.5rem; height: auto; padding: 0; border: 0; background: none; cursor: pointer; }
+  .scr-ent .ttl { grid-column: 1 / -1; display: flex; align-items: center; gap: .4rem; font-size: .8rem; min-width: 0; }
+  .scr-ent .ttl b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scr-ent .ttl button { padding: 0 .4rem; line-height: 1.3; }
+  .scr-ent .opt { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+  .scr-ent .opt input[type=color] { width: 100%; height: 1.6rem; padding: 0; border: 0; background: none; cursor: pointer; }
+  .scr-ent .opt select { padding: .1rem .3rem; font-size: .8rem; background-image: none; }
   .scr-ent .rngs { display: grid; gap: .1rem; }
   .scr-ent .rngs label { display: grid; grid-template-columns: 3.6rem 1fr; align-items: center; gap: .4rem; margin: 0; font-size: .8rem; }
   .scr-ent .rngs output { text-align: right; white-space: nowrap; }
@@ -611,10 +614,11 @@
     const SC = A.scrambleText, root = card('scramble4'), slide = root.querySelector('.scr-slide');
     const TOTAL = 13.1, STEP = .1, KEY = 'introScramble4', list = $('scr4List');
     const WHITE = '#f3ede2';
-    const DEFAULT = [['tân', 0, .2, '#ffd84a'], ['quốc', .5, 2.9, '#9be15d'], ['quốc âm tân tự', 4, 4.4, WHITE], ['Quốc Âm Tân Tự', 5.5, 7.5, WHITE], ['qatt.org', 9.7, 11.2, '#ffd84a'], ['tân', 11.9, 13.1, '#ffd84a']];
-    const fresh = () => DEFAULT.map(([text, from, to, color]) => ({ text, from, to, color }));
+    const SIZES = [.5, .75, 1, 1.5, 2, 3, 4, 6];   // scale of the text
+    const DEFAULT = [['tân', 0, .2, '#ffd84a', 4], ['quốc', .5, 2.9, '#9be15d', 1.5], ['quốc âm tân tự', 4, 4.4, WHITE, 1], ['Quốc Âm Tân Tự', 5.5, 7.5, WHITE, 1], ['qatt.org', 9.7, 11.2, '#ffd84a', 2], ['tân', 11.9, 13.1, '#ffd84a', 2]];
+    const fresh = () => DEFAULT.map(([text, from, to, color, size]) => ({ text, from, to, color, size }));
     let entries = fresh();
-    try { const k = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(k) && k.length) entries = k.map(e => ({ text: String(e.text), from: +e.from || 0, to: +e.to || 0, color: /^#[0-9a-f]{6}$/i.test(e.color) ? e.color : WHITE })); } catch (e) {}
+    try { const k = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(k) && k.length) entries = k.map(e => ({ text: String(e.text), from: +e.from || 0, to: +e.to || 0, color: /^#[0-9a-f]{6}$/i.test(e.color) ? e.color : WHITE, size: SIZES.includes(+e.size) ? +e.size : 1 })); } catch (e) {}
     const save = () => { try { localStorage.setItem(KEY, JSON.stringify(entries)); } catch (e) {} };
 
     const POOL = 'quốc âm tân tự người nước việt nam nhà bạn tôi đẹp trời gió hoa sách chữ nôm thơ lòng thương xuân hạ thu đông sáng chiều đêm sông núi biển cá gà mèo'.split(' ');
@@ -631,21 +635,21 @@
     let tl = null, on = false, speed = 1;
     const build = () => {
       if (tl) tl.revert();
-      px.textContent = ' '; p.classList.remove('latin'); p.style.color = ''; mirror();
+      px.textContent = ' '; p.classList.remove('latin'); p.style.color = ''; p.style.transform = ''; mirror();
       const es = entries.filter(e => e.text.trim()).map(e => ({ ...e, text: e.text.trim() })).sort((x, y) => x.from - y.from);
       tl = A.createTimeline({ loop: true, autoplay: false, onUpdate: mirror });
       tl.speed = speed;
       // `at` is where the previous text ends; the scramble into the next one fills the time up to its `from`
       let at = 0;
-      const into = (text, t1, color) => {
+      const into = (text, t1, color, size) => {
         const q = text.trim() ? isQatt(text) : false, target = q ? toks(text) : text || ' ', t0 = at * 1000, gap = t1 * 1000 - t0;
         tl.call(() => p.classList.toggle('latin', !q), t0);
-        if (color) tl.add(p, { color, duration: Math.max(gap, 1), ease: 'linear' }, t0);
+        if (color) tl.add(p, { color, scale: size, duration: Math.max(gap, 1), ease: 'linear' }, t0);
         if (gap >= 60) tl.add(px, { innerHTML: SC({ chars: CHARS, text: target, override: false, from: 'center', duration: gap }), duration: gap, ease: 'linear' }, t0);
         else tl.call(() => { px.textContent = target; mirror(); }, t1 * 1000);
       };
-      es.forEach(e => { into(e.text, e.from, e.color); at = Math.max(e.to, e.from); });
-      if (es.length && at < TOTAL) into(' ', TOTAL);
+      es.forEach(e => { into(e.text, e.from, e.color, e.size); at = Math.max(e.to, e.from); });
+      if (es.length && at < TOTAL) into(' ', TOTAL);   // no colour and size: they stay until the next entry
       tl.add(slide, { opacity: 1, duration: 1 }, TOTAL * 1000 - 1);   // the loop is TOTAL long whatever the last entry does
       tl.init();
       if (on) tl.play();
@@ -656,27 +660,30 @@
       $('scr4Total').textContent = '· ' + fmt(TOTAL);
       list.replaceChildren(...entries.map((e, i) => {
         const row = document.createElement('div'); row.className = 'scr-ent';
-        row.innerHTML = '<div class="txt"><input type="text" class="form-control form-control-sm" aria-label="Text" autocomplete="off" spellcheck="false"><input type="color" class="form-control form-control-color" aria-label="Colour" data-vi-aria-label="Màu" title="Colour" data-vi-title="Màu"></div>' +
+        row.innerHTML = '<div class="ttl"><b></b><button type="button" class="btn btn-quiet btn-sm btn-pill" aria-label="Edit text" data-vi-aria-label="Sửa chữ" title="Edit text" data-vi-title="Sửa chữ">✎</button></div>' +
+          '<div class="opt"><input type="color" class="form-control form-control-color" aria-label="Colour" data-vi-aria-label="Màu" title="Colour" data-vi-title="Màu">' +
+          '<select class="form-select form-select-sm" aria-label="Size" data-vi-aria-label="Cỡ" title="Size" data-vi-title="Cỡ">' + SIZES.map(z => '<option value="' + z + '">×' + z + '</option>').join('') + '</select></div>' +
           '<div class="rngs"><label><output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="From"></label>' +
           '<label><output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="To"></label></div>' +
           '<button type="button" class="btn btn-quiet btn-sm btn-pill" aria-label="Remove" data-vi-aria-label="Xoá" title="Remove" data-vi-title="Xoá">×</button>';
-        const [txt, col] = row.querySelectorAll('.txt input'), [rf, rt] = row.querySelectorAll('input[type=range]'), [of, ot] = row.querySelectorAll('output');
+        const head = row.querySelector('.ttl b'), edit = row.querySelector('.ttl button'), col = row.querySelector('input[type=color]'), size = row.querySelector('select'), [rf, rt] = row.querySelectorAll('input[type=range]'), [of, ot] = row.querySelectorAll('output');
         const paint = () => {
           rf.value = e.from; rt.value = e.to; of.textContent = fmt(e.from); ot.textContent = fmt(e.to);
         };
-        txt.value = e.text; col.value = e.color; paint();
+        col.value = e.color; size.value = e.size; head.textContent = e.text.trim() || '…'; paint();
         let timer = 0; const changed = () => { save(); clearTimeout(timer); timer = setTimeout(build, 150); };
-        txt.addEventListener('input', () => { e.text = txt.value; changed(); });
+        edit.addEventListener('click', () => { const t = prompt(Lang.t('Text', 'Chữ'), e.text); if (t === null) return; e.text = t; head.textContent = t.trim() || '…'; changed(); });
+        size.addEventListener('change', () => { e.size = +size.value; changed(); });
         col.addEventListener('input', () => { e.color = col.value; changed(); });
         rf.addEventListener('input', () => { e.from = +rf.value; if (e.to < e.from) e.to = e.from; paint(); changed(); });
         rt.addEventListener('input', () => { e.to = +rt.value; if (e.from > e.to) e.from = e.to; paint(); changed(); });
-        row.querySelector('button').addEventListener('click', () => { entries.splice(i, 1); save(); render(); build(); });
+        row.querySelector(':scope > button').addEventListener('click', () => { entries.splice(i, 1); save(); render(); build(); });
         return row;
       }));
     };
     $('scr4Add').addEventListener('click', () => {
       const last = Math.max(0, ...entries.map(e => e.to)), from = Math.min(last + .5, TOTAL - .5);
-      entries.push({ text: 'tự', color: WHITE, from: +from.toFixed(1), to: +Math.min(from + .5, TOTAL).toFixed(1) });
+      entries.push({ text: 'tự', color: WHITE, size: 1, from: +from.toFixed(1), to: +Math.min(from + .5, TOTAL).toFixed(1) });
       save(); render(); build();
     });
     $('scr4Reset').addEventListener('click', () => { entries = fresh(); save(); render(); build(); });
