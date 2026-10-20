@@ -112,8 +112,6 @@ const QattInk = (() => {
     };
     const fieldOf = p => p.field || (p.field = field(p.points));   // made when first needed
 
-    // exact distances of point clouds (for the refinement of the best candidates)
-    const nearest = (a, b) => { let sum = 0; for (const p of a) { let best = Infinity; for (const q of b) { const d = (q.x - p.x) ** 2 + (q.y - p.y) ** 2; if (d < best) best = d; } sum += Math.sqrt(best); } return sum / a.length; };
     // the drawing moved and scaled onto the template (no rotation): a few rounds of nearest pairs and a least-squares fit, within limits
     const align = (pts, tpl) => {
       let s = 1, tx = 0, ty = 0;
@@ -136,65 +134,138 @@ const QattInk = (() => {
       return p => ({ x: p.x * s + tx, y: p.y * s + ty });
     };
 
+    // the kind of a stroke: its length, its direction (0..180°, from the first to the last point, so the direction of writing does not matter)
+    // and whether it is round (a tone mark: short and bent, the ends near each other; open: how far apart the ends are, a half circle against a whole one)
+    const kind = s => {
+      let len = 0;
+      for (let k = 1; k < s.length; k++) len += Math.hypot(s[k].x - s[k - 1].x, s[k].y - s[k - 1].y);
+      const dx = s[s.length - 1].x - s[0].x, dy = s[s.length - 1].y - s[0].y, chord = Math.hypot(dx, dy);
+      return { len: Math.max(len, 1), ang: (Math.atan2(dy, dx) * 180 / Math.PI + 180) % 180, round: len < 60 && chord < .75 * len, open: chord / Math.max(len, 1) };
+    };
+    [...alone.flat(), ...onset, ...rhyme.flat(), ...tone].forEach(p => { if (p) p.kinds = p.strokes.map(kind); });
+    // how badly two strokes fit as a pair (0 the same kind, 1 nothing alike): round or not, the direction (45° off counts fully), the length (2.5 times counts half)
+    const MISS = 1;   // a stroke without a partner
+    const cost = (d, t) => {
+      if (d.round !== t.round) return MISS;
+      const l = Math.min(1, Math.abs(Math.log(d.len / t.len)) / Math.log(2.5));
+      if (d.round) return Math.min(MISS, 2 * Math.abs(d.open - t.open) + .5 * l);
+      const a = Math.abs(d.ang - t.ang);
+      return Math.min(MISS, Math.min(a, 180 - a) / 45 + .5 * l);
+    };
+    // the best pairing of the drawn strokes with those of the template (each at most once): the sum of the costs, MISS for every stroke left over
+    const pairing = (ds, ts) => {
+      const m = ts.length, size = 1 << m;
+      let dp = new Float32Array(size).fill(Infinity);
+      dp[0] = 0;
+      for (const d of ds) {
+        const next = new Float32Array(size).fill(Infinity);
+        const c = ts.map(t => cost(d, t));
+        for (let mask = 0; mask < size; mask++) {
+          const v = dp[mask];
+          if (v === Infinity) continue;
+          if (v + MISS < next[mask]) next[mask] = v + MISS;
+          for (let j = 0; j < m; j++) if (!(mask & 1 << j) && v + c[j] < next[mask | 1 << j]) next[mask | 1 << j] = v + c[j];
+        }
+        dp = next;
+      }
+      let best = Infinity;
+      for (let mask = 0; mask < size; mask++) {
+        let left = 0;
+        for (let j = 0; j < m; j++) if (!(mask & 1 << j)) left++;
+        best = Math.min(best, dp[mask] + MISS * left);
+      }
+      return best;
+    };
+
+    const sumNearest = (a, b) => { let sum = 0; for (const p of a) { let best = Infinity; for (const q of b) { const d = (q.x - p.x) ** 2 + (q.y - p.y) ** 2; if (d < best) best = d; } sum += Math.sqrt(best); } return sum; };
+    const KIND_WEIGHT = 2;   // the pairing of the strokes against the distances of the points
+
+    // A tone mark is always the last stroke: a candidate with a tone compares the tone mark with the last stroke only, its other parts with the strokes before it.
     const recognize = (drawn, count = 5) => {
       drawn = drawn.filter(s => s.length);
-      const all = resample(drawn).flat();
-      if (!all.length) return [];
-      const penalty = c => 1.5 * Math.abs(c - drawn.length);   // a little for each stroke too many or too few
-      const strokeCount = r => r.parts.reduce((c, p) => c + p.strokes.length, 0);
-      const pointsOf = r => r.parts.flatMap(p => p.points);
+      if (!drawn.length) return [];
+      const strokes = resample(drawn);
+      // the kinds of the drawn strokes from a smoothed copy (a shaky hand makes a stroke longer than it is)
+      const smooth = st => st.map((p, k) => { const w = st.slice(Math.max(0, k - 2), k + 3); return { x: w.reduce((a, q) => a + q.x, 0) / w.length, y: w.reduce((a, q) => a + q.y, 0) / w.length }; });
+      const kinds = strokes.map(st => kind(smooth(st)));
+      const all = strokes.flat();
+      const pointsOf = parts => parts.flatMap(p => p.points);
 
       // 1. the best candidates in the fixed frame, 2. the same with the drawing aligned to the best of them (a drawing off the place or the size),
-      // 3. all of them once more with the drawing aligned to each one
-      const first = shortlist(all, penalty);
-      const moved = all.map(align(all.filter((p, k) => k % 3 === 0), pointsOf(first[0])));
+      // 3. all of them once more with the drawing aligned to each one, now also with the pairing of the kinds of the strokes
+      const first = shortlist(strokes);
+      const move = align(all.filter((p, k) => k % 3 === 0), pointsOf(first[0].parts.concat(first[0].tone || [])));
       const seen = new Set(first.map(r => r.code));
-      const list = first.concat(shortlist(moved, penalty).filter(r => !seen.has(r.code)));
-      const few = all.filter((p, k) => k % 3 === 0);
+      const list = first.concat(shortlist(strokes.map(s => s.map(move))).filter(r => !seen.has(r.code)));
+      const thin = s => s.filter((p, k) => k % 3 === 0 || k === s.length - 1);
+      const few = strokes.map(thin);
       return list.map(r => {
-        const tpl = pointsOf(r).filter((p, k) => k % 2 === 0);
-        const fit = few.map(align(few, tpl));
-        const exact = nearest(fit, tpl) + nearest(tpl, fit) + penalty(strokeCount(r));
-        return { text: r.text, code: r.code, score: exact, strokes: r.parts.flatMap(p => p.strokes) };
+        const body = pointsOf(r.parts).filter((p, k) => k % 2 === 0), tpl = r.tone ? body.concat(r.tone.points) : body;
+        const fit = align(few.flat(), tpl);
+        const moved = few.map(s => s.map(fit));
+        let to, back, kindCost;
+        if (r.tone) {
+          const bodyDrawn = moved.slice(0, -1).flat(), last = moved[moved.length - 1];
+          to = (sumNearest(bodyDrawn, body) + sumNearest(last, r.tone.points)) / (bodyDrawn.length + last.length);
+          back = (sumNearest(body, bodyDrawn) + sumNearest(r.tone.points, last)) / (body.length + r.tone.points.length);
+          kindCost = pairing(kinds.slice(0, -1), r.parts.flatMap(p => p.kinds)) + cost(kinds[kinds.length - 1], r.tone.kinds[0]);
+        } else {
+          const d = moved.flat();
+          to = sumNearest(d, body) / d.length;
+          back = sumNearest(body, d) / body.length;
+          kindCost = pairing(kinds, r.parts.flatMap(p => p.kinds));
+        }
+        return { text: r.text, code: r.code, score: to + back + KIND_WEIGHT * kindCost, kindCost,
+                 strokes: r.parts.concat(r.tone || []).flatMap(p => p.strokes) };
       }).sort((a, b) => a.score - b.score).slice(0, count);
     };
 
-    // the SHORTLIST best cells for the points of a drawing in the fixed frame
+    // the SHORTLIST best cells for the strokes of a drawing in the fixed frame
     const SHORTLIST = 40, PAIRS = 60;
-    const shortlist = (pts, penalty) => {
-      const own = field(pts);
-      const few = pts.filter((p, k) => k % 2 === 0);   // every second point is enough for the distances drawing -> template
-      const n = few.length;
+    const shortlist = strokes => {
+      const total = strokes.length;
+      const penalty = c => 1.5 * Math.abs(c - total);   // a little for each stroke too many or too few
+      const half = pts => pts.filter((p, k) => k % 2 === 0);   // every second point is enough for the distances drawing -> template
+      // the whole drawing; and the drawing without its last stroke (body) and that stroke alone (last), for the candidates with a tone
+      const sets = [strokes.flat(), total > 1 ? strokes.slice(0, -1).flat() : null, total > 1 ? strokes[total - 1] : null]
+        .map(pts => pts && { own: field(pts), few: half(pts) });
+      const [whole, bodySet, lastSet] = sets;
 
-      // per part: for every drawn point its distance to the part (dTo), and the sum of the distances of the part's points to the drawing (back)
-      const measure = p => {
-        if (!p) return null;
-        const f = fieldOf(p), dTo = new Float32Array(n);
-        for (let k = 0; k < n; k++) dTo[k] = lookup(f, few[k]);
+      // per part and set of points: for every drawn point its distance to the part (dTo), and the sum of the distances of the part's points to the drawing (back)
+      const measure = set => p => {
+        if (!p || !set) return null;
+        const f = fieldOf(p), n = set.few.length, dTo = new Float32Array(n);
+        for (let k = 0; k < n; k++) dTo[k] = lookup(f, set.few[k]);
         let back = 0;
-        for (const q of p.points) back += lookup(own, q);
+        for (const q of p.points) back += lookup(set.own, q);
         return { dTo, back, len: p.points.length, count: p.strokes.length };
       };
-      const mAlone = alone.map(ms => ms.map(measure));
-      const mOnset = onset.map(measure);
-      const mRhyme = rhyme.map(ms => ms.map(measure));
-      const mTone = tone.map(measure);
+      const both = p => ({ w: measure(whole)(p), b: measure(bodySet)(p) });
+      const mAlone = alone.map(ms => ms.map(both));
+      const mOnset = onset.map(both);
+      const mRhyme = rhyme.map(ms => ms.map(both));
+      const mTone = tone.map(measure(lastSet));   // a tone mark is only compared with the last stroke
 
-      // the score of a set of parts: mean distance drawn -> template + mean distance template -> drawn, and the penalty of the number of strokes
-      const score = parts => {
+      // the score of a set of parts (and a tone mark): mean distance drawn -> template + mean distance template -> drawn, and the penalty of the number of strokes
+      const score = (parts, tm) => {
+        const ms = parts.map(p => tm ? p.b : p.w);
+        if (ms.some(m => !m)) return Infinity;
+        const n = ms[0].dTo.length;
         let to = 0;
         for (let k = 0; k < n; k++) {
           let best = Infinity;
-          for (const p of parts) if (p.dTo[k] < best) best = p.dTo[k];
+          for (const m of ms) if (m.dTo[k] < best) best = m.dTo[k];
           to += best;
         }
-        let back = 0, len = 0, count = 0;
-        for (const p of parts) { back += p.back; len += p.len; count += p.count; }
-        return to / n + back / len + penalty(count);
+        let back = 0, len = 0, count = 0, points = n;
+        for (const m of ms.concat(tm || [])) { back += m.back; len += m.len; count += m.count; }
+        if (tm) { for (let k = 0; k < tm.dTo.length; k++) to += tm.dTo[k]; points += tm.dTo.length; }
+        return to / points + back / len + penalty(count);
       };
 
       const results = [];
       const keep = r => {
+        if (r.score === Infinity) return;
         if (results.length < SHORTLIST || r.score < results[results.length - 1].score) {
           results.push(r);
           results.sort((a, b) => a.score - b.score);
@@ -205,29 +276,28 @@ const QattInk = (() => {
       const pairs = [];
       for (let t = 0; t <= 8; t++) {
         if (t && !mTone[t]) continue;
-        const tp = t ? [mTone[t]] : [];
-        const toneText = t ? chr(TONES[t]) : "";
+        const tm = t ? mTone[t] : null;
+        const toneText = t ? chr(TONES[t]) : "", toneCode = t ? " " + t : "", tonePart = t ? tone[t] : null;
         SHAPES.forEach((s, i) => {
           // a letter alone (the plain shape, or its marked form: the shape and the marking stroke)
           for (let m = 0; m <= 6; m++) {
-            if (!mAlone[i][0] || (m && !mAlone[i][m])) continue;
-            const parts = m ? [mAlone[i][0], mAlone[i][m], ...tp] : [mAlone[i][0], ...tp];
-            keep({ score: score(parts), text: chr(7 * i + m) + toneText, code: s + (m || "") + (t ? " " + t : ""),
-                   parts: (m ? [alone[i][0], alone[i][m]] : [alone[i][0]]).concat(t ? [tone[t]] : []) });
+            if (!alone[i][0] || (m && !alone[i][m])) continue;
+            keep({ score: score(m ? [mAlone[i][0], mAlone[i][m]] : [mAlone[i][0]], tm), text: chr(7 * i + m) + toneText, code: s + (m || "") + toneCode,
+                   parts: m ? [alone[i][0], alone[i][m]] : [alone[i][0]], tone: tonePart });
           }
         });
         // joined cells: first onset, rhyme and tone without the marking stroke, then the marking strokes for the best of these pairs only
         SHAPES.forEach((s, i) => {
-          if (!mOnset[i]) return;
-          SHAPES.forEach((r, j) => { if (mRhyme[j][0]) pairs.push({ i, j, t, tp, toneText, score: score([mOnset[i], mRhyme[j][0], ...tp]) }); });
+          if (!onset[i]) return;
+          SHAPES.forEach((r, j) => { if (rhyme[j][0]) pairs.push({ i, j, t, tm, toneText, toneCode, tonePart, score: score([mOnset[i], mRhyme[j][0]], tm) }); });
         });
       }
-      pairs.sort((a, b) => a.score - b.score).slice(0, PAIRS).forEach(({ i, j, t, tp, toneText }) => {
+      pairs.sort((a, b) => a.score - b.score).slice(0, PAIRS).forEach(({ i, j, tm, toneText, toneCode, tonePart }) => {
         for (let m = 0; m <= 6; m++) {
-          if (m && !mRhyme[j][m]) continue;
-          keep({ score: score([mOnset[i], mRhyme[j][0], ...(m ? [mRhyme[j][m]] : []), ...tp]),
-                 text: chr(7 * i) + chr(JOINER - BASE) + chr(7 * j + m) + toneText, code: SHAPES[i] + "+" + SHAPES[j] + (m || "") + (t ? " " + t : ""),
-                 parts: [onset[i], rhyme[j][0], ...(m ? [rhyme[j][m]] : []), ...(t ? [tone[t]] : [])] });
+          if (m && !rhyme[j][m]) continue;
+          keep({ score: score([mOnset[i], mRhyme[j][0], ...(m ? [mRhyme[j][m]] : [])], tm),
+                 text: chr(7 * i) + chr(JOINER - BASE) + chr(7 * j + m) + toneText, code: SHAPES[i] + "+" + SHAPES[j] + (m || "") + toneCode,
+                 parts: [onset[i], rhyme[j][0], ...(m ? [rhyme[j][m]] : [])], tone: tonePart });
         }
       });
       return results;
