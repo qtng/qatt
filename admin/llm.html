@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>QATT repository map for language models | Qatt.org</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/site.css">
+<style>
+  .tree { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.5; }
+  .tree ul { list-style: none; padding-left: 1.2rem; margin: 0; border-left: 1px dotted currentColor; }
+  .tree > ul { border-left: 0; padding-left: 0; }
+  .tree li { margin: .1rem 0; }
+  .tree .note { opacity: .7; }
+  .tree details > summary { cursor: pointer; }
+</style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 900px;">
+
+<h1 class="h3">QATT repository map</h1>
+<p class="lead">This page is an entry point for language models. Read it first, then the linked document for details.</p>
+
+<h2 class="h5">What this is</h2>
+<p>QATT (Quốc Âm Tân Tự) is a script for Vietnamese, built in the 1840s and encoded here as Private Use Area code points. The repository <code>qtng/qatt</code> holds the public website at <a href="https://qatt.org/">qatt.org</a>: the explanation of the script, a symbol table, an editor, a game (Spell it!), fonts, a Unicode proposal draft, and admin pages. It is plain HTML and JavaScript with Bootstrap, and has no build step.</p>
+
+<h2 class="h5">Read this first</h2>
+<ul>
+  <li><a href="/qatt.html">qatt.html</a>: the script in detail (shapes, marks, tones, how a syllable is written). <strong>Start here for any question about the system.</strong></li>
+  <li><a href="/js/qatt-text.js">js/qatt-text.js</a>: encoding and decoding of QATT text (syllable, word, convert, decode).</li>
+  <li><a href="/symbols.html">symbols.html</a>: the 22 base shapes and their order.</li>
+</ul>
+
+<h2 class="h5">Repository tree</h2>
+<p class="small text-body-secondary">Generated in your browser from the GitHub repository <code>qtng/qatt</code>, branch <code>main</code>. Images, fonts and other binary files are left out of the tree and counted. Comments are given for the main files only.</p>
+<div id="tree" class="tree" aria-live="polite">Loading the file list…</div>
+
+</main>
+<script src="/admin/llm.js"></script>
+</body>
+</html>
