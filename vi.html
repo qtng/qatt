@@ -60,6 +60,8 @@
     .scr-slide p { position: relative; margin: 0; line-height: 1; white-space: nowrap; font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-family: "QATT Pen Medium", sans-serif; }
     .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
     .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
+    #explore { padding-inline: .75rem; }   /* the hard shadow of a theme must not touch the edge of the screen */
+    .qatt-words { font-family: "QATT Pen Medium", sans-serif; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; }   /* the glyphs of the symbols card */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
@@ -67,6 +69,8 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const strip = document.getElementById('glyph-strip');
+    const eg = document.getElementById('exploreGlyphs'), ep = new VietnameseParser();   // the symbols card: ông ngông hông in QATT
+    if (eg) eg.textContent = eg.textContent.split(' ').map(w => QattText.word(w, ep) || w).join(' ');
     // the 22 base shapes: shape i is U+F0000 + 7 * i (see js/qatt-text.js)
     for (let i = 0; i < 22; i++) { const a = document.createElement('a'), t = document.createElement('tt'); a.href = 'symbols.html'; a.title = 'Symbol table'; a.setAttribute('data-vi-title', 'Bảng chữ'); t.textContent = String.fromCodePoint(0xF0000 + 7 * i); a.append(t); strip.append(a); }
   });
@@ -137,6 +141,32 @@
     <p data-vi="Quốc Âm Tân Tự nghĩa là “chữ mới ghi âm tiếng nước nhà”. Chữ ra đời vào thập niên 1840, dưới triều vua Thiệu Trị. Ngày nay chỉ còn một văn bản, lưu trong hai bản chép tay ở Hà Nội.">Quốc Âm Tân Tự nghĩa là “chữ mới ghi âm tiếng nước nhà”. Chữ ra đời vào thập niên 1840, dưới triều vua Thiệu Trị. Ngày nay chỉ còn một văn bản, lưu trong hai bản chép tay ở Hà Nội.</p>
     <p data-vi="Chữ gồm 22 hình cơ bản, mỗi hình ba nét. Thêm một nét nhỏ ở một trong sáu vị trí thì có thêm sáu dạng. Hai hình đặt cạnh nhau làm thành một âm tiết: bên trái là phần đầu, bên phải là phần vần. Vòng tròn và nửa vòng tròn nhỏ ở các góc ghi tám thanh điệu.">Chữ gồm 22 hình cơ bản, mỗi hình ba nét. Thêm một nét nhỏ ở một trong sáu vị trí thì có thêm sáu dạng. Hai hình đặt cạnh nhau làm thành một âm tiết: bên trái là phần đầu, bên phải là phần vần. Vòng tròn và nửa vòng tròn nhỏ ở các góc ghi tám thanh điệu.</p>
       <p class="mb-0"><a class="btn btn-cinnabar btn-pill" href="qatt.html" data-vi="Đọc thêm">Đọc thêm</a></p>
+  </section>
+
+  <section class="block" id="explore">
+    <div class="rule" aria-hidden="true" data-vi="Khám phá">Khám phá</div>
+    <h2 class="h3 text-center" data-vi="Bảng chữ nhỏ. Khả năng lớn.">Bảng chữ nhỏ. Khả năng lớn.</h2>
+    <p class="text-center mx-auto mb-4" style="max-width:38rem" data-vi="Hai hình ghép lại thành một âm tiết. Những dấu nhỏ ghi thanh điệu. Một hệ thống gọn gàng với nhịp điệu thị giác riêng.">Hai hình ghép lại thành một âm tiết. Những dấu nhỏ ghi thanh điệu. Một hệ thống gọn gàng với nhịp điệu thị giác riêng.</p>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="card h-100"><div class="card-body d-flex flex-column">
+        <div class="han h2 mb-2" aria-hidden="true" data-nosnippet>國音新字</div>
+        <h3 class="h5" data-vi="Tìm hiểu chữ viết">Tìm hiểu chữ viết</h3>
+        <p data-vi="Câu chuyện về Quốc Âm Tân Tự, cấu trúc của chữ và văn bản còn lại đến ngày nay.">Câu chuyện về Quốc Âm Tân Tự, cấu trúc của chữ và văn bản còn lại đến ngày nay.</p>
+        <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="intro.html" data-vi="Đọc phần giới thiệu">Đọc phần giới thiệu</a></p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100"><div class="card-body d-flex flex-column">
+        <div class="h2 mb-2 qatt-words" id="exploreGlyphs" aria-hidden="true" data-nosnippet>ông ngông hông</div>
+        <h3 class="h5" data-vi="Khám phá các ký hiệu">Khám phá các ký hiệu</h3>
+        <p data-vi="Xem các hình, hiểu vai trò của chúng và cách ghép thành âm tiết.">Xem các hình, hiểu vai trò của chúng và cách ghép thành âm tiết.</p>
+        <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Mở bảng chữ">Mở bảng chữ</a></p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100"><div class="card-body d-flex flex-column">
+        <div class="h2 mb-2" aria-hidden="true" data-nosnippet style="font-family: Georgia, 'Times New Roman', serif">Aa → QATT</div>
+        <h3 class="h5" data-vi="Viết bằng QATT">Viết bằng QATT</h3>
+        <p data-vi="Thử công cụ gõ chữ trực tuyến và cảm nhận tiếng Việt trong một lối chữ khác.">Thử công cụ gõ chữ trực tuyến và cảm nhận tiếng Việt trong một lối chữ khác.</p>
+        <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="editor.html" data-vi="Gõ chữ">Gõ chữ</a></p>
+      </div></div></div>
+    </div>
   </section>
 
   <section class="block" id="shapes">
