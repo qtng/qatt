@@ -2,7 +2,7 @@
 // of COLS x ROWS characters drawn from the glyph of the font itself (so every cell and tone that the font has is covered, with no table to keep);
 // Tham Thư cells (with the combiner U+F009B), lone joiners and tone marks, and all other characters stay as they are.
 //
-//   await QattAscii.convert(text, { font: "QATT Pen Medium", cols: 22, rows: 12 })   -> string (lines of text)
+//   await QattAscii.convert(text, { font: "QATT Pen Medium", cols: 22, rows: 12 })   -> string (lines of text); rows default to the height that keeps the cell square
 //
 // Text without a QATT cell comes back as it is. In a line with cells, a run of other characters stands in the middle row of the blocks.
 const QattAscii = (() => {
@@ -38,7 +38,7 @@ const QattAscii = (() => {
     return lines;
   };
 
-  const convert = async (text, { font = 'QATT Pen Medium', cols = 22, rows = 12 } = {}) => {
+  const convert = async (text, { font = 'QATT Pen Medium', cols = 22, rows = Math.round(cols * H / W / 2) } = {}) => {
     const cells = new Set(QattText.cells(text).map(c => c.cell));
     if (!cells.size) return text;
     await document.fonts.load(`100px "${font}"`, '\u{F0000}');
