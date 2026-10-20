@@ -26,9 +26,10 @@ window.Lang = window.Lang || (function() {
     };
     const asked = new URLSearchParams(location.search).get("lang");
     if (valid(asked)) store(asked);
-    // a page can ask for a language when nobody chose one: <html data-page-lang="vi"> (the Vietnamese copy of the homepage, vi.html, for a visitor from a search)
+    // a page can ask for its language: <html data-page-lang="vi"> (the Vietnamese copy of the homepage, vi.html, for a visitor from a search)
     const pageLang = document.documentElement.getAttribute("data-page-lang");
-    let current = valid(stored()) ? stored() : valid(pageLang) ? pageLang : detect();
+    if (valid(pageLang)) store(pageLang);   // visiting vi.html switches the site to Vietnamese (EN there goes to index.html in English)
+    let current = valid(stored()) ? stored() : detect();
 
     const states = new WeakMap();   // per tag: the English text and the text shown last (to tell a change of the page from our own change)
     const waiting = new Set();      // tags the parser may not have finished (no tag after them yet)
@@ -524,6 +525,8 @@ window.Theme = window.Theme || (function() {
             Lang.set(b.dataset.lang);
             // vi.html is the Vietnamese copy of the homepage: EN goes to the English one
             if (b.dataset.lang === 'en' && document.documentElement.getAttribute('data-page-lang') === 'vi') location.href = '/index.html';
+            // and VI on the English homepage goes to vi.html
+            else if (b.dataset.lang === 'vi' && !onChunom && /^\/(index\.html)?$/.test(location.pathname)) location.href = '/vi.html';
         }));
         document.addEventListener('langchange', markLang);
         markLang();
