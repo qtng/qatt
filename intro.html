@@ -74,11 +74,11 @@
   .scr-cfg { max-width: 36rem; margin: .9rem auto 0; text-align: left; font-size: .9rem; }
   .scr-cfg-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
   .scr-cfg-head .spacer { flex: 1; }
-  .scr-ent { display: grid; grid-template-columns: 1fr auto; gap: .2rem .5rem; padding: .45rem 0; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
-  .scr-ent .rngs { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: .2rem .8rem; }
-  .scr-ent .rngs label { display: block; font-size: .8rem; }
-  .scr-ent .bar { grid-column: 1 / -1; position: relative; height: .35rem; border-radius: .2rem; background: color-mix(in srgb, currentColor 12%, transparent); }
-  .scr-ent .bar i { position: absolute; top: 0; bottom: 0; border-radius: .2rem; background: #e0a020; }
+  .scr-ent { display: grid; grid-template-columns: 15% 1fr 2.6rem; align-items: center; gap: .5rem; padding: .45rem 0; border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+  .scr-ent .rngs { display: grid; gap: .1rem; }
+  .scr-ent .rngs label { display: grid; grid-template-columns: 3.6rem 1fr; align-items: center; gap: .4rem; margin: 0; font-size: .8rem; }
+  .scr-ent .rngs output { text-align: right; white-space: nowrap; }
+  .scr-ent .rngs input { margin: 0; }
   .nchar { text-align: center; position: relative; }
   .nchar .n3 { position: absolute; inset: 0; opacity: 0; }
   .nchar .qg { font-size: clamp(3rem, 14vw, 5.4rem); }
@@ -651,14 +651,12 @@
       list.replaceChildren(...entries.map((e, i) => {
         const row = document.createElement('div'); row.className = 'scr-ent';
         row.innerHTML = '<input type="text" class="form-control form-control-sm" aria-label="Text" autocomplete="off" spellcheck="false">' +
-          '<button type="button" class="btn btn-quiet btn-sm btn-pill" aria-label="Remove" data-vi-aria-label="Xoá" title="Remove" data-vi-title="Xoá">×</button>' +
-          '<div class="rngs"><label><span data-vi="Từ">From</span> <output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="From"></label>' +
-          '<label><span data-vi="Đến">To</span> <output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="To"></label></div>' +
-          '<div class="bar"><i></i></div>';
-        const [txt] = row.getElementsByTagName('input'), [rf, rt] = row.querySelectorAll('input[type=range]'), [of, ot] = row.querySelectorAll('output'), bar = row.querySelector('.bar i');
+          '<div class="rngs"><label><output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="From"></label>' +
+          '<label><output></output><input type="range" class="form-range" min="0" max="' + TOTAL + '" step="' + STEP + '" aria-label="To"></label></div>' +
+          '<button type="button" class="btn btn-quiet btn-sm btn-pill" aria-label="Remove" data-vi-aria-label="Xoá" title="Remove" data-vi-title="Xoá">×</button>';
+        const [txt] = row.getElementsByTagName('input'), [rf, rt] = row.querySelectorAll('input[type=range]'), [of, ot] = row.querySelectorAll('output');
         const paint = () => {
-          rf.value = e.from; rt.value = e.to; of.textContent = ' ' + fmt(e.from); ot.textContent = ' ' + fmt(e.to);
-          bar.style.left = e.from / TOTAL * 100 + '%'; bar.style.width = Math.max(e.to - e.from, 0) / TOTAL * 100 + '%';
+          rf.value = e.from; rt.value = e.to; of.textContent = fmt(e.from); ot.textContent = fmt(e.to);
         };
         txt.value = e.text; paint();
         let timer = 0; const changed = () => { save(); clearTimeout(timer); timer = setTimeout(build, 150); };
