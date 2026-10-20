@@ -83,7 +83,14 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 				busy(true);
 				show('');
 				const { error, sent } = await db.signInWithEmail(email.value);
-				if (error) { show(T('Could not send the link: ', 'Không thể gửi liên kết: ') + error.message, true); busy(false); return; }
+				if (error) {
+					// too many mails sent (the mail service of the project has a small limit for everybody together): say what to do instead of "rate limit exceeded"
+					const limited = error.code === 'over_email_send_rate_limit' || error.status === 429 || /rate limit/i.test(error.message || '');
+					show(limited
+						? T('We cannot send sign-in links right now because too many were requested. Please try again in about an hour, or tap "Continue with Google" above.', 'Hiện chưa thể gửi liên kết đăng nhập vì có quá nhiều yêu cầu. Vui lòng thử lại sau khoảng một giờ, hoặc bấm "Tiếp tục với Google" ở trên.')
+						: T('Could not send the link: ', 'Không thể gửi liên kết: ') + error.message, true);
+					busy(false); return;
+				}
 				if (sent) { show(T(`We sent a link to ${email.value.trim()}. Open it on this device to finish.`, `Chúng tôi đã gửi liên kết tới ${email.value.trim()}. Hãy mở nó trên thiết bị này để hoàn tất.`)); send.textContent = T('Link sent', 'Đã gửi liên kết'); }
 			});
 			close.addEventListener('click', () => dialog.close());
