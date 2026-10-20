@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QATT Handwriting</title>
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Write QATT by hand: the cell is recognised while you write (a draft).">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script src="js/qatt.js"></script>
+  <script src="js/qatt-ink.js"></script>
+  <script defer src="js/fonts.js"></script>
+  <style>
+    :root { --qfont: "QATT Pen Medium"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero { background: linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3.2rem); }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .pad-wrap { display: flex; flex-wrap: wrap; gap: 1.2rem; justify-content: center; align-items: flex-start; }
+    .pad { position: relative; width: min(22rem, 92vw); aspect-ratio: 1; touch-action: none; }
+    .pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; border: 1px solid var(--line, #d8ccb2); border-radius: .6rem; background: #fffdf8; cursor: crosshair; }
+    .side { width: min(22rem, 92vw); display: flex; flex-direction: column; gap: .8rem; }
+    .cands { display: flex; flex-wrap: wrap; gap: .4rem; min-height: 4.6rem; }
+    .cand { display: flex; flex-direction: column; align-items: center; min-width: 3.8rem; padding: .2rem .4rem; }
+    .cand .g { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1.1; }
+    .cand .r { font-size: .8rem; }
+    .cand.best { border-color: var(--cinnabar); }
+    .tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+    #out { font-family: var(--qfont), sans-serif; font-size: 2.4rem; min-height: 6rem; line-height: 1.3; }
+    #reading { min-height: 1.5em; color: var(--muted, #6a5a48); }
+    .hint { font-size: .85rem; color: var(--muted, #6a5a48); }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3" data-vi="Viết tay">Handwriting</h1>
+    <p class="mb-0"><span data-vi="Bản nháp">Draft</span></p>
+  </div>
+</header>
+
+<main class="container py-4">
+  <div class="pad-wrap">
+    <div class="pad"><canvas id="pad" aria-label="Writing pad"></canvas></div>
+    <div class="side">
+      <div class="cands" id="cands" aria-live="polite"></div>
+      <div class="tools">
+        <button class="btn btn-quiet btn-pill btn-sm" id="undo"><span data-vi="Hoàn tác nét">Undo stroke</span></button>
+        <button class="btn btn-quiet btn-pill btn-sm" id="clear"><span data-vi="Xoá">Clear</span></button>
+        <button class="btn btn-quiet btn-pill btn-sm" id="space"><span data-vi="Dấu cách">Space</span></button>
+        <button class="btn btn-quiet btn-pill btn-sm" id="back"><span data-vi="Xoá chữ">Delete cell</span></button>
+        <label class="form-check form-switch ms-1 mb-0 align-self-center"><input class="form-check-input" type="checkbox" id="guide" checked> <span data-vi="Hiện mẫu">Show template</span></label>
+      </div>
+      <textarea id="out" class="form-control" rows="2" aria-label="Text"></textarea>
+      <div id="reading"></div>
+      <p class="hint mb-0">Write one cell into the square: a letter alone in the middle, or the onset on the left and the rhyme with its marking stroke on the right; the tone mark goes in its corner. The order of the strokes does not matter. Tap a candidate to take it; the best one is also taken when you start the next cell with “Space”. Tham Thư is not recognised.</p>
+      <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" aria-label="Font"></select>
+    </div>
+  </div>
+</main>
+
+<script>
+  const parser = new VietnameseParser();
+  const ink = QattInk.create();
+  const canvas = document.getElementById('pad'), ctx = canvas.getContext('2d');
+  const $ = id => document.getElementById(id);
+  const F = QattInk.FRAME;
+  let strokes = [], current = null, results = [], scale = 1;
+
+  // canvas pixels <-> the coordinates of a cell of qatt.js
+  const resize = () => {
+    const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    scale = canvas.width / F.size;
+    draw();
+  };
+  const toCell = e => {
+    const r = canvas.getBoundingClientRect();
+    return { x: F.x + (e.clientX - r.left) / r.width * F.size, y: F.y + (e.clientY - r.top) / r.height * F.size };
+  };
+
+  const polyline = (s, color, width) => {
+    ctx.strokeStyle = color; ctx.lineWidth = width * scale; ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.beginPath();
+    s.forEach((p, k) => { const x = (p.x - F.x) * scale, y = (p.y - F.y) * scale; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    if (s.length === 1) ctx.lineTo((s[0].x - F.x) * scale + .1, (s[0].y - F.y) * scale);
+    ctx.stroke();
+  };
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // the guides: the square of the cell and the middle between onset and rhyme
+    ctx.setLineDash([4 * scale / 3, 4 * scale / 3]);
+    polyline([{ x: -9, y: -9 }, { x: 109, y: -9 }, { x: 109, y: 109 }, { x: -9, y: 109 }, { x: -9, y: -9 }], '#e4d9c0', .5);
+    polyline([{ x: 51, y: -9 }, { x: 51, y: 109 }], '#efe6d2', .5);
+    ctx.setLineDash([]);
+    if ($('guide').checked && results[0]) results[0].strokes.forEach(s => polyline(s, 'rgba(168, 54, 42, .18)', 4));
+    strokes.forEach(s => polyline(s, '#2b2118', 2.2));
+    if (current) polyline(current, '#2b2118', 2.2);
+  };
+
+  const reading = text => {
+    const cell = QattText.cells(text)[0];
+    return cell ? QattText.reading(cell.cell, parser) : '';
+  };
+  const recognize = () => {
+    // cells without a reading in this decoding (no syllable) are left out
+    results = strokes.length ? ink.recognize(strokes, 20).filter(r => reading(r.text) !== '?').slice(0, 6) : [];
+    const box = $('cands');
+    box.innerHTML = '';
+    results.forEach((r, k) => {
+      const b = document.createElement('button');
+      b.className = 'btn btn-quiet cand' + (k ? '' : ' best');
+      b.title = r.code;
+      b.innerHTML = '<span class="g"></span><span class="r"></span>';
+      b.querySelector('.g').textContent = r.text;
+      b.querySelector('.r').textContent = reading(r.text);
+      b.addEventListener('click', () => take(r));
+      box.append(b);
+    });
+    draw();
+  };
+  const showReading = () => {
+    $('reading').textContent = QattText.cells($('out').value).map(c => QattText.reading(c.cell, parser)).join(' ');
+  };
+  const take = r => {
+    $('out').value += r.text;
+    strokes = []; results = [];
+    recognize(); showReading();
+  };
+
+  canvas.addEventListener('pointerdown', e => {
+    canvas.setPointerCapture(e.pointerId);
+    current = [toCell(e)];
+    draw();
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!current) return;
+    (e.getCoalescedEvents ? e.getCoalescedEvents() : [e]).forEach(c => current.push(toCell(c)));
+    draw();
+  });
+  const up = () => {
+    if (!current) return;
+    strokes.push(current); current = null;
+    recognize();
+  };
+  canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointercancel', up);
+
+  $('undo').addEventListener('click', () => { strokes.pop(); recognize(); });
+  $('clear').addEventListener('click', () => { strokes = []; recognize(); });
+  $('space').addEventListener('click', () => {
+    if (results[0]) take(results[0]);
+    else { $('out').value += ' '; showReading(); }
+  });
+  $('back').addEventListener('click', () => {
+    const v = $('out').value, cells = QattText.cells(v), last = cells[cells.length - 1];
+    $('out').value = last && last.index + last.cell.length === v.length ? v.slice(0, last.index) : v.slice(0, -1);
+    showReading();
+  });
+  $('out').addEventListener('input', showReading);
+  $('guide').addEventListener('change', draw);
+  window.addEventListener('resize', resize);
+  resize();
+</script>
+</body>
+</html>
