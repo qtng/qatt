@@ -38,12 +38,15 @@
     <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Decoding"><option value="qatt">qatt.org</option><option value="omniglot">omniglot</option></select>
     <button class="btn btn-quiet btn-sm btn-pill" id="clear" type="button">Clear</button>
     <button class="btn btn-quiet btn-sm btn-pill" id="copy" type="button">Copy</button>
+    <button class="btn btn-quiet btn-sm btn-pill" id="ascii" type="button">ASCII art</button>
   </div>
   <textarea id="field" class="form-control" rows="3" autofocus spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Type here"></textarea>
   <div id="live" class="mt-2"></div>
+  <pre id="art" class="mt-3 p-3 border rounded bg-white" hidden style="line-height:1.05; overflow:auto"></pre>
   <div class="kb" id="kb" aria-label="Keys"></div>
   <p class="legend mt-3 mb-0">Clicking a key does the same as pressing it. The map is the constant <code>MAP</code> in <code>direct-input.js</code>; the rows are those of the symbol table (8, 8 and 6 shapes).</p>
 </main>
+<script src="ascii-art.js"></script>
 <script src="direct-input.js"></script>
 </body>
 </html>
