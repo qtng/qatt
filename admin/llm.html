@@ -34,7 +34,7 @@
 </ul>
 
 <h2 class="h5">Repository tree</h2>
-<p class="small text-body-secondary">Generated in your browser from the GitHub repository <a href="https://github.com/qtng/qatt">qtng/qatt</a>, branch <code>main</code>. Each file is at <code>https://github.com/qtng/qatt/blob/main/&lt;path&gt;</code>; the raw text is at <code>https://raw.githubusercontent.com/qtng/qatt/main/&lt;path&gt;</code>. Images, fonts and other binary files are left out of the tree and counted. Comments are given for the main files only.</p>
+<p class="small text-body-secondary">Generated in your browser from the GitHub repository <a href="https://github.com/qtng/qatt">qtng/qatt</a>, branch <code>main</code>. Each file is at <code>https://github.com/qtng/qatt/blob/main/&lt;path&gt;</code>; the raw text is at <code>https://raw.githubusercontent.com/qtng/qatt/main/&lt;path&gt;</code>. Only HTML and JavaScript files are listed; other files are counted. Comments are given for the main files only.</p>
 <div id="tree" class="tree" aria-live="polite">Loading the file list…</div>
 
 </main>
@@ -43,7 +43,7 @@
 (function () {
   const REPO = 'qtng/qatt';
   const BRANCH = 'main';
-  const BINARY = /\.(jpe?g|png|gif|webp|ico|ttf|woff2?|pdf|bin)$/i;
+  const SHOWN = /\.(html|js)$/i; // only HTML and JavaScript files are listed
 
   // Short notes for the main files; other files show their name only.
   const NOTES = {
@@ -63,10 +63,6 @@
     'handwriting.html': 'Draft: recognises a handwritten QATT cell (js/qatt-ink.js).',
     'handwriting-data.html': 'Admin only: collects handwritten cells as training samples.',
     '404.html': 'Forwards old addresses (/qatt/…, /chunom/…) to their new place.',
-    'CLAUDE.md': 'Rules for the coding agent working on this repository.',
-    'robots.txt': 'Crawler rules.',
-    'sitemap.xml': 'Sitemap for search engines.',
-    'css/site.css': 'Colours and layout shared by all pages.',
     'js/navigation.js': 'Menu bar, theme loading and the translation (Lang).',
     'js/qatt.js': 'SVG drawing of QATT glyphs and their stroke templates.',
     'js/qatt-text.js': 'Text encoding and decoding of QATT (syllable, word, convert, decode).',
@@ -77,29 +73,20 @@
     'js/parser.js': 'Parser for QATT input.',
     'js/supabase.js': 'Supabase client loader.',
     'js/login.js': 'Sign-in.',
-    'db/spell.sql': 'Database schema of Spell it! (scores, speed, leaderboard).',
-    'db/ink.sql': 'Database schema of handwriting samples.',
-    'db/visits.sql': 'Visit counter.',
     'admin/index.html': 'Admin area overview.',
     'admin/direct-input/index.html': 'Prototype: direct QATT input and ASCII art.',
     'admin/direct-input/direct-input.js': 'Keyboard mapping of the direct-input prototype.',
     'admin/direct-input/ascii-art.js': 'QATT to ASCII art converter.',
-    'tools/make_vi.py': 'Generates vi.html from index.html. Run after every change to index.html.',
-    'tools/update_unicode_data.py': 'Generates unicode.html from the Unicode draft.',
     'unicode/draft/index.html': 'Unicode proposal draft (the proposal, evidences and UCD drafts).',
-    'vendor/bootstrap/css/bootstrap.min.css': 'Bootstrap 5.3 (third-party).',
-    'vendor/supabase/supabase.min.js': 'Supabase client (third-party).',
-    'favicon.ico': 'Site icon.',
-    'CNAME': 'Custom domain qatt.org.'
   };
 
   const out = document.getElementById('tree');
 
   function build(paths) {
     const root = {};
-    let binaries = 0;
+    let skipped = 0;
     for (const p of paths) {
-      if (BINARY.test(p)) { binaries++; continue; }
+      if (!SHOWN.test(p)) { skipped++; continue; }
       let node = root;
       const parts = p.split('/');
       parts.forEach((part, i) => {
@@ -111,7 +98,7 @@
         }
       });
     }
-    return { root, binaries };
+    return { root, skipped };
   }
 
   function render(node, path) {
@@ -156,12 +143,12 @@
     })
     .then(data => {
       const paths = data.tree.filter(e => e.type === 'blob').map(e => e.path);
-      const { root, binaries } = build(paths);
+      const { root, skipped } = build(paths);
       out.textContent = '';
       out.append(render(root, ''));
       const info = document.createElement('p');
       info.className = 'small text-body-secondary mt-3';
-      info.textContent = binaries + ' binary files (images, fonts, PDFs) not listed.' +
+      info.textContent = skipped + ' files of other types (CSS, SQL, Python, images, fonts, Markdown …) not listed.' +
         (data.truncated ? ' The GitHub listing was truncated.' : '');
       out.append(info);
     })
