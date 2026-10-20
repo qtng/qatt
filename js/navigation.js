@@ -26,7 +26,9 @@ window.Lang = window.Lang || (function() {
     };
     const asked = new URLSearchParams(location.search).get("lang");
     if (valid(asked)) store(asked);
-    let current = valid(stored()) ? stored() : detect();
+    // a page can ask for a language when nobody chose one: <html data-page-lang="vi"> (the Vietnamese copy of the homepage, vi.html, for a visitor from a search)
+    const pageLang = document.documentElement.getAttribute("data-page-lang");
+    let current = valid(stored()) ? stored() : valid(pageLang) ? pageLang : detect();
 
     const states = new WeakMap();   // per tag: the English text and the text shown last (to tell a change of the page from our own change)
     const waiting = new Set();      // tags the parser may not have finished (no tag after them yet)
