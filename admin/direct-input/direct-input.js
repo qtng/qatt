@@ -125,6 +125,11 @@
     parser.setDecoding(e.target.value);
     cell = null; status();
   });
+  $('ascii').addEventListener('click', async () => {
+    const art = $('art');
+    art.textContent = await QattAscii.convert(field.value, { font: document.documentElement.style.getPropertyValue('--qfont').replace(/"/g, '') || 'QATT Pen Medium' });
+    art.hidden = false;
+  });
   $('clear').addEventListener('click', () => { field.value = ''; cell = null; status(); field.focus(); });
   $('copy').addEventListener('click', () => navigator.clipboard && navigator.clipboard.writeText(field.value));
 })();
