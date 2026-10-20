@@ -106,7 +106,8 @@
     b.querySelector('.k').textContent = label(code);
     b.querySelector('.g').textContent = glyphCode;
     b.querySelector('small').textContent = small || '';
-    b.addEventListener('mousedown', e => { e.preventDefault(); field.focus(); press(code); });
+    b.addEventListener('pointerdown', e => e.preventDefault());   // no focus change: the keyboard of a phone neither opens nor jumps
+    b.addEventListener('click', () => press(code));
     row.append(b);
   };
   MAP.shapes.forEach((codes, i) => {
@@ -131,6 +132,6 @@
     art.hidden = false;
   });
   $('asciiSize').addEventListener('change', () => $('ascii').click());
-  $('clear').addEventListener('click', () => { field.value = ''; cell = null; status(); field.focus(); });
+  $('clear').addEventListener('click', () => { field.value = ''; cell = null; status(); });
   $('copy').addEventListener('click', () => navigator.clipboard && navigator.clipboard.writeText(field.value));
 })();
