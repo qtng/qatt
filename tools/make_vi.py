@@ -13,14 +13,18 @@ def tag(m):
 s = re.sub(r'(<([a-z0-9]+)\b[^>]*\bdata-vi="([^"]*)"[^>]*>)([^<]*)(</\2>)',
            lambda m: m.group(1) + html.escape(html.unescape(m.group(3)), quote=False) + m.group(5), s)
 
-head = '''  <title>Quốc Âm Tân Tự (國音新字) – chữ viết tiếng Việt từ thập niên 1840 | Qatt.org</title>
-  <meta name="description" content="Quốc Âm Tân Tự (國音新字, QATT) là lối chữ viết tiếng Việt ra đời thập niên 1840 dưới triều Thiệu Trị, gồm 22 hình cơ bản. Bảng chữ, gõ chữ, phông chữ, Unicode và trò chơi Đánh vần!">
+head = '''  <title>Quốc Âm Tân Tự – chữ viết tiếng Việt từ thập niên 1840 | Qatt.org</title>
+  <meta name="description" content="Quốc Âm Tân Tự (QATT) là lối chữ viết tiếng Việt ra đời thập niên 1840 dưới triều Thiệu Trị, gồm 22 hình cơ bản. Bảng chữ, gõ chữ, phông chữ, Unicode và trò chơi Đánh vần!">
   <link rel="canonical" href="https://qatt.org/vi.html">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="/img/favicon-192.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="alternate" hreflang="en" href="https://qatt.org/">
   <link rel="alternate" hreflang="vi" href="https://qatt.org/vi.html">
   <link rel="alternate" hreflang="x-default" href="https://qatt.org/">
   <meta property="og:locale" content="vi_VN">
-  <meta property="og:title" content="Quốc Âm Tân Tự (國音新字) – chữ viết tiếng Việt từ thập niên 1840">
+  <meta property="og:title" content="Quốc Âm Tân Tự – chữ viết tiếng Việt từ thập niên 1840">
   <meta property="og:description" content="Lối chữ viết tiếng Việt gồm 22 hình cơ bản: bảng chữ, gõ chữ, phông chữ, Unicode.">
   <meta property="og:url" content="https://qatt.org/vi.html">
   <meta property="og:type" content="website">
