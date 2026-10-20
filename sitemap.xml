@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://qatt.org/</loc><priority>1.0</priority></url>
+  <url><loc>https://qatt.org/qatt.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/intro.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/symbols.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/editor.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/spell.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/decodings.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/unicode.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/wiki.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/fonts.html</loc><priority>0.7</priority></url>
+  <url><loc>https://qatt.org/font-license.html</loc><priority>0.7</priority></url>
+</urlset>
