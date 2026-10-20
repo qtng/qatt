@@ -44,6 +44,7 @@
   <div class="head">
     <h1 id="adminTitle" hidden>Admin</h1>
     <p class="note" id="account" hidden></p>
+    <p class="note" id="denied" hidden>This account has no admin rights. Sign out and sign in with an admin account.</p>
   </div>
 
   <div id="area" hidden>
@@ -121,12 +122,13 @@
     await sp.init();
     QattLogin.status(sp, document.getElementById('account'), '[Sign in] with your admin account.', '[Đăng nhập] bằng tài khoản quản trị.');
     const state = await Admin.check(sp);
-    // an admin sees everything, somebody not signed in only the line with the sign-in link, a signed-in non-admin nothing at all
+    // an admin sees everything, somebody not signed in only the line with the sign-in link, a signed-in non-admin the account line (to sign out) and a note
     const admin = state === 'admin';
     if (admin) build(await Admin.owner(sp));
     document.getElementById('area').hidden = !admin;
     document.getElementById('adminTitle').hidden = !admin;
-    document.getElementById('account').hidden = state === 'denied';
+    document.getElementById('account').hidden = false;
+    document.getElementById('denied').hidden = state !== 'denied';
   });
 </script>
 </body>
