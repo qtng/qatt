@@ -60,6 +60,7 @@
     .scr-slide p { position: relative; margin: 0; line-height: 1; white-space: nowrap; font-size: clamp(1.5rem, 6.4vw, 2.5rem); font-family: "QATT Pen Medium", sans-serif; }
     .scr-slide p .px { position: absolute; inset: 0; opacity: 0; pointer-events: none; font-family: sans-serif; }
     .scr-slide p.latin { font-family: Georgia, "QATT Pen Medium", serif; }   /* the scrambled letters in the Latin phase are still QATT syllables */
+    .qatt-words { font-family: "QATT Pen Medium", sans-serif; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; }   /* the glyphs of the symbols card */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
   </style>
 </head>
@@ -67,6 +68,8 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const strip = document.getElementById('glyph-strip');
+    const eg = document.getElementById('exploreGlyphs'), ep = new VietnameseParser();   // the symbols card: ông ngông hông in QATT
+    if (eg) eg.textContent = eg.textContent.split(' ').map(w => QattText.word(w, ep) || w).join(' ');
     // the 22 base shapes: shape i is U+F0000 + 7 * i (see js/qatt-text.js)
     for (let i = 0; i < 22; i++) { const a = document.createElement('a'), t = document.createElement('tt'); a.href = 'symbols.html'; a.title = 'Symbol table'; a.setAttribute('data-vi-title', 'Bảng chữ'); t.textContent = String.fromCodePoint(0xF0000 + 7 * i); a.append(t); strip.append(a); }
   });
@@ -151,13 +154,13 @@
         <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="intro.html" data-vi="Đọc phần giới thiệu">Read the introduction</a></p>
       </div></div></div>
       <div class="col-md-4"><div class="card h-100"><div class="card-body d-flex flex-column">
-        <div class="han h2 mb-2" aria-hidden="true" data-nosnippet>三 ⼏ 丩</div>
+        <div class="h2 mb-2 qatt-words" id="exploreGlyphs" aria-hidden="true" data-nosnippet>ông ngông hông</div>
         <h3 class="h5" data-vi="Khám phá các ký hiệu">Explore the symbols</h3>
         <p data-vi="Xem các hình, hiểu vai trò của chúng và cách ghép thành âm tiết.">Browse the shapes, understand their roles, and see how syllables are assembled.</p>
         <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Mở bảng chữ">Open symbol table</a></p>
       </div></div></div>
       <div class="col-md-4"><div class="card h-100"><div class="card-body d-flex flex-column">
-        <div class="h2 mb-2" aria-hidden="true" data-nosnippet>Aa → QATT</div>
+        <div class="h2 mb-2" aria-hidden="true" data-nosnippet style="font-family: Georgia, 'Times New Roman', serif">Aa → QATT</div>
         <h3 class="h5" data-vi="Viết bằng QATT">Write in QATT</h3>
         <p data-vi="Thử công cụ gõ chữ trực tuyến và cảm nhận tiếng Việt trong một lối chữ khác.">Try the online typing tool and experience Vietnamese in a different script.</p>
         <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="editor.html" data-vi="Gõ chữ">Start typing</a></p>
