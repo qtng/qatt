@@ -13,6 +13,7 @@
   <script src="js/qatt-text.js"></script>
   <script src="js/qatt.js"></script>
   <script src="js/qatt-ink.js"></script>
+  <script src="js/qatt-pad.js"></script>
   <script defer src="js/fonts.js"></script>
   <style>
     :root { --qfont: "QATT Pen Medium"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
@@ -66,41 +67,9 @@
 <script>
   const parser = new VietnameseParser();
   const ink = QattInk.create();
-  const canvas = document.getElementById('pad'), ctx = canvas.getContext('2d');
   const $ = id => document.getElementById(id);
-  const F = QattInk.FRAME;
-  let strokes = [], current = null, results = [], scale = 1;
-
-  // canvas pixels <-> the coordinates of a cell of qatt.js
-  const resize = () => {
-    const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
-    scale = canvas.width / F.size;
-    draw();
-  };
-  const toCell = e => {
-    const r = canvas.getBoundingClientRect();
-    return { x: F.x + (e.clientX - r.left) / r.width * F.size, y: F.y + (e.clientY - r.top) / r.height * F.size };
-  };
-
-  const polyline = (s, color, width) => {
-    ctx.strokeStyle = color; ctx.lineWidth = width * scale; ctx.lineCap = ctx.lineJoin = 'round';
-    ctx.beginPath();
-    s.forEach((p, k) => { const x = (p.x - F.x) * scale, y = (p.y - F.y) * scale; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
-    if (s.length === 1) ctx.lineTo((s[0].x - F.x) * scale + .1, (s[0].y - F.y) * scale);
-    ctx.stroke();
-  };
-  const draw = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // the guides: the square of the cell and the middle between onset and rhyme
-    ctx.setLineDash([4 * scale / 3, 4 * scale / 3]);
-    polyline([{ x: -9, y: -9 }, { x: 109, y: -9 }, { x: 109, y: 109 }, { x: -9, y: 109 }, { x: -9, y: -9 }], '#e4d9c0', .5);
-    polyline([{ x: 51, y: -9 }, { x: 51, y: 109 }], '#efe6d2', .5);
-    ctx.setLineDash([]);
-    if ($('guide').checked && results[0]) results[0].strokes.forEach(s => polyline(s, 'rgba(168, 54, 42, .18)', 4));
-    strokes.forEach(s => polyline(s, '#2b2118', 2.2));
-    if (current) polyline(current, '#2b2118', 2.2);
-  };
+  let results = [];
+  const pad = QattPad.mount($('pad'), { onStroke: () => recognize() });
 
   const reading = text => {
     const cell = QattText.cells(text)[0];
@@ -108,6 +77,7 @@
   };
   const recognize = () => {
     // cells without a reading in this decoding (no syllable) are left out
+    const strokes = pad.strokes();
     results = strokes.length ? ink.recognize(strokes, 20).filter(r => reading(r.text) !== '?').slice(0, 6) : [];
     const box = $('cands');
     box.innerHTML = '';
@@ -121,37 +91,18 @@
       b.addEventListener('click', () => take(r));
       box.append(b);
     });
-    draw();
+    pad.setGuide($('guide').checked && results[0] ? results[0].strokes : null);
   };
   const showReading = () => {
     $('reading').textContent = QattText.cells($('out').value).map(c => QattText.reading(c.cell, parser)).join(' ');
   };
   const take = r => {
     $('out').value += r.text;
-    strokes = []; results = [];
-    recognize(); showReading();
+    pad.clear(); showReading();
   };
 
-  canvas.addEventListener('pointerdown', e => {
-    canvas.setPointerCapture(e.pointerId);
-    current = [toCell(e)];
-    draw();
-  });
-  canvas.addEventListener('pointermove', e => {
-    if (!current) return;
-    (e.getCoalescedEvents ? e.getCoalescedEvents() : [e]).forEach(c => current.push(toCell(c)));
-    draw();
-  });
-  const up = () => {
-    if (!current) return;
-    strokes.push(current); current = null;
-    recognize();
-  };
-  canvas.addEventListener('pointerup', up);
-  canvas.addEventListener('pointercancel', up);
-
-  $('undo').addEventListener('click', () => { strokes.pop(); recognize(); });
-  $('clear').addEventListener('click', () => { strokes = []; recognize(); });
+  $('undo').addEventListener('click', () => pad.undo());
+  $('clear').addEventListener('click', () => pad.clear());
   $('space').addEventListener('click', () => {
     if (results[0]) take(results[0]);
     else { $('out').value += ' '; showReading(); }
@@ -162,9 +113,7 @@
     showReading();
   });
   $('out').addEventListener('input', showReading);
-  $('guide').addEventListener('change', draw);
-  window.addEventListener('resize', resize);
-  resize();
+  $('guide').addEventListener('change', recognize);
 </script>
 </body>
 </html>
