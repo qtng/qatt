@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Direct QATT input (prototype)</title>
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../css/site.css">
+  <link rel="stylesheet" href="../../css/theme-classic.css">
+  <script src="../../js/parser.js"></script>
+  <script src="../../js/qatt-text.js"></script>
+  <script src="../../js/fonts.js"></script>
+  <style>
+    body { background: #fffdf8; color: #2b2118; }
+    .q { font-family: var(--qfont, "QATT Pen Medium"); }
+    #field { font-family: var(--qfont, "QATT Pen Medium"); font-size: 3rem; line-height: 1.3; min-height: 9rem; letter-spacing: .05em; }
+    .kb { display: grid; gap: .35rem; margin-top: 1rem; }
+    .kb .row { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .kb .row.shift1 { margin-left: 1.2rem; } .kb .row.shift2 { margin-left: 2.4rem; }
+    .key { width: 4rem; height: 4.6rem; border: 1px solid #c9bb9d; border-radius: .5rem; background: #fbf5e6; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: .2rem; cursor: pointer; user-select: none; }
+    .key:hover, .key.hit { background: #f1dfb8; }
+    .key .g { font-size: 2.1rem; line-height: 1.1; font-family: var(--qfont, "QATT Pen Medium"); }
+    .key .k { font-size: .7rem; color: #7a6a52; letter-spacing: .05em; }
+    .key.mark .g, .key.tone .g { font-size: 1.7rem; }
+    .key small { font-size: .65rem; color: #7a6a52; }
+    .legend { font-size: .85rem; color: #6b5c47; }
+    #live { font-size: 1.1rem; min-height: 2rem; }
+  </style>
+</head>
+<body>
+<main class="container py-4" style="max-width: 62rem">
+  <h1 class="h3">Direct QATT input <span class="badge text-bg-secondary align-middle fs-6">prototype</span></h1>
+  <p class="text-muted">Type QATT without Quốc Ngữ: a key is a shape (onset first, then rhyme), a digit puts a marking stroke on the last shape, the tone keys set the tone. The keys are the positions on the keyboard (<code>event.code</code>), so the layout of the keyboard does not matter. Space ends a cell, Backspace takes back the last part.</p>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+    <select id="font" data-qatt-fonts class="form-select form-select-sm w-auto" style="min-width:11rem" aria-label="Font"></select>
+    <select id="decoding" class="form-select form-select-sm w-auto" aria-label="Decoding"><option value="qatt">qatt.org</option><option value="omniglot">omniglot</option></select>
+    <button class="btn btn-quiet btn-sm btn-pill" id="clear" type="button">Clear</button>
+    <button class="btn btn-quiet btn-sm btn-pill" id="copy" type="button">Copy</button>
+  </div>
+  <textarea id="field" class="form-control" rows="3" autofocus spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Type here"></textarea>
+  <div id="live" class="mt-2"></div>
+  <div class="kb" id="kb" aria-label="Keys"></div>
+  <p class="legend mt-3 mb-0">Clicking a key does the same as pressing it. The map is the constant <code>MAP</code> in <code>direct-input.js</code>; the rows are those of the symbol table (8, 8 and 6 shapes).</p>
+</main>
+<script src="direct-input.js"></script>
+</body>
+</html>
