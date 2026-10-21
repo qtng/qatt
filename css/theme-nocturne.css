@@ -5,7 +5,7 @@
    Loaded by js/navigation.js (Theme). */
 html[data-theme="nocturne"] { color-scheme: dark;   /* Canvas/CanvasText and the form controls of the browser in dark */
   --ink: #f1ead9; --accent: #e3bd74; --cinnabar: #d9735c; --paper: #0b0e17; --line: rgba(241, 234, 217, .14); --field: rgba(241, 234, 217, .3); --muted: #8c93a6;
-  --nt-text: #f1ead9; --nt-gold: #e3bd74; --nt-coral: #d9735c; --nt-panel: #131a2a; --nt-raise: #1b2338;
+  --nt-text: #f1ead9; --nt-gold: #e3bd74; --nt-coral: #d9735c; --nt-panel: #131a2a; --nt-raise: #1b2338; --nt-primary: #a98440; --nt-primary-hover: #bd9650; --nt-primary-ink: #14100a;
   --nt-serif: "Noto Serif", "Source Serif Pro", Georgia, "Times New Roman", serif;
   --nt-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --nav-bg: #0e1321; --nav-line: rgba(227, 189, 116, .22); }
@@ -25,9 +25,9 @@ html[data-theme="nocturne"] .hero .lead, html[data-theme="nocturne"] .editor-hea
 html[data-theme="nocturne"] .hero a:not(.btn) { color: var(--nt-gold); }
 /* buttons: pills; the quiet ones an outline, the accent one a cream pill (the active choice of the screenshot) */
 html[data-theme="nocturne"] .btn:not(.btn-close):not(.btn-link) { --bs-btn-border-radius: 999px; --bs-btn-border-width: 1px; font-family: var(--nt-sans); font-size: .95rem; letter-spacing: .01em; transition: background-color .2s, color .2s, border-color .2s; }
-html[data-theme="nocturne"] .btn-cinnabar, html[data-theme="nocturne"] .btn-accent { --bs-btn-bg: var(--nt-text); --bs-btn-color: #0b0e17; --bs-btn-border-color: var(--nt-text); --bs-btn-hover-bg: #fff; --bs-btn-hover-color: #0b0e17; --bs-btn-hover-border-color: #fff; --bs-btn-active-bg: #fff; --bs-btn-active-color: #0b0e17; --bs-btn-active-border-color: #fff; }
+html[data-theme="nocturne"] .btn-cinnabar, html[data-theme="nocturne"] .btn-accent { --bs-btn-bg: var(--nt-primary); --bs-btn-color: var(--nt-primary-ink); --bs-btn-border-color: var(--nt-primary); --bs-btn-hover-bg: var(--nt-primary-hover); --bs-btn-hover-color: var(--nt-primary-ink); --bs-btn-hover-border-color: var(--nt-primary-hover); --bs-btn-active-bg: var(--nt-primary-hover); --bs-btn-active-color: var(--nt-primary-ink); --bs-btn-active-border-color: var(--nt-primary-hover); }
 html[data-theme="nocturne"] .btn-quiet, html[data-theme="nocturne"] .btn-ink, html[data-theme="nocturne"] .btn-pill, html[data-theme="nocturne"] .btn[class*="btn-outline-"] { --bs-btn-bg: var(--nt-panel); --bs-btn-color: var(--nt-text); --bs-btn-border-color: rgba(241, 234, 217, .18); --bs-btn-hover-bg: var(--nt-raise); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: rgba(241, 234, 217, .4); --bs-btn-active-bg: var(--nt-raise); --bs-btn-active-color: #fff; --bs-btn-active-border-color: rgba(241, 234, 217, .4); }
-html[data-theme="nocturne"] .btn-cinnabar.btn-pill, html[data-theme="nocturne"] .btn-accent.btn-pill { --bs-btn-bg: var(--nt-text); --bs-btn-color: #0b0e17; --bs-btn-border-color: var(--nt-text); }
+html[data-theme="nocturne"] .btn-cinnabar.btn-pill, html[data-theme="nocturne"] .btn-accent.btn-pill { --bs-btn-bg: var(--nt-primary); --bs-btn-color: var(--nt-primary-ink); --bs-btn-border-color: var(--nt-primary); }
 /* forms */
 html[data-theme="nocturne"] .form-select { --bs-border-radius: 999px; --bs-border-color: var(--field); background-color: var(--nt-panel); color: var(--nt-text); --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e3bd74' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
 html[data-theme="nocturne"] .form-select option, html[data-theme="nocturne"] .form-select optgroup { background: var(--nt-panel); color: var(--nt-text); }
@@ -84,8 +84,8 @@ html[data-theme="nocturne"] .qatt-login .or { color: var(--muted); }
 html[data-theme="nocturne"] .qatt-login .or::before, html[data-theme="nocturne"] .qatt-login .or::after { border-top-color: var(--line); }
 html[data-theme="nocturne"] .qatt-login button.google { background: var(--nt-raise); color: var(--nt-text); border-color: rgba(241, 234, 217, .25); }
 html[data-theme="nocturne"] .qatt-login button.google:hover { background: #232c45; }
-html[data-theme="nocturne"] .qatt-login button.main { background: var(--nt-text); color: #0b0e17; border-color: var(--nt-text); }
-html[data-theme="nocturne"] .qatt-login button.main:hover { background: #fff; }
+html[data-theme="nocturne"] .qatt-login button.main { background: var(--nt-primary); color: var(--nt-primary-ink); border-color: var(--nt-primary); }
+html[data-theme="nocturne"] .qatt-login button.main:hover { background: var(--nt-primary-hover); }
 html[data-theme="nocturne"] .qatt-login input[type=email], html[data-theme="nocturne"] .qatt-login input[type=text] { background: #0f1524; color: var(--nt-text); border-color: var(--field); }
 html[data-theme="nocturne"] .qatt-login input::placeholder { color: rgba(140, 147, 166, .75); }
 html[data-theme="nocturne"] .qatt-login input[type=email]:focus, html[data-theme="nocturne"] .qatt-login input[type=text]:focus { border-color: var(--nt-gold); box-shadow: 0 0 0 .2rem rgba(227, 189, 116, .18); }
