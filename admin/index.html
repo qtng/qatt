@@ -14,10 +14,10 @@
   <script src="../js/login.js"></script>
   <script src="admin.js"></script>
   <style>
-    body { background: #f7efdc; color: #2b2118; }
+    body { background: #f7efdc; color: var(--bs-body-color); }
     h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
-    a { color: #a8362a; }
-    .note { color: #7b6c58; font-size: .9rem; }
+    a { color: var(--accent, #a8362a); }
+    .note { color: var(--bs-secondary-color); font-size: .9rem; }
     .head { display: flex; align-items: baseline; flex-wrap: wrap; gap: .25rem 1rem; margin-bottom: 1.25rem; }
     .head h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.4rem); }
     .head .note { margin: 0; }
@@ -28,12 +28,12 @@
     .sect > .note { margin: 0 0 .6rem 2.5rem; }
     .tile { display: block; text-decoration: none; color: inherit; border: 1px solid var(--bs-border-color); border-radius: .6rem; padding: .5rem .75rem; margin-bottom: .45rem; background: var(--bs-body-bg); }
     .tile:hover, .tile:focus-visible { border-color: #111; background: var(--bs-warning-bg-subtle); }
-    .tile b { color: #2b2118; }
-    .tile small { display: block; color: #7b6c58; line-height: 1.25; }
-    .tile .ext { float: right; color: #a89877; font-size: .8rem; }
+    .tile b { color: var(--bs-body-color); }
+    .tile small { display: block; color: var(--bs-secondary-color); line-height: 1.25; }
+    .tile .ext { float: right; color: var(--bs-tertiary-color); font-size: .8rem; }
     details.files { margin-top: 1.25rem; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .9rem; padding: .75rem 1rem; }
     details.files summary { cursor: pointer; font-family: Georgia, "Times New Roman", serif; font-size: 1.15rem; }
-    details.files h3 { font-size: .8rem; margin: 1rem 0 .35rem; color: #7b6c58; text-transform: uppercase; letter-spacing: .08em; }
+    details.files h3 { font-size: .8rem; margin: 1rem 0 .35rem; color: var(--bs-secondary-color); text-transform: uppercase; letter-spacing: .08em; }
     .chips { display: flex; flex-wrap: wrap; gap: .3rem; }
     .chips a { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; text-decoration: none; border: 1px solid var(--bs-border-color); background: var(--bs-body-bg); border-radius: .4rem; padding: .1rem .45rem; }
     .chips a:hover { border-color: #111; background: var(--bs-warning-bg-subtle); }
