@@ -30,7 +30,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 .qatt-login .note { margin: .8rem 0 0; font-size: .85rem; color: var(--bs-secondary-color, #5b4d3d) }
 .qatt-login .note.error { color: var(--bs-danger-text-emphasis, #a8362a) }
 .qatt-account { font-size: .85rem; color: var(--bs-secondary-color, #7b6c58) }
-.qatt-account a { color: #a8362a; cursor: pointer; text-decoration: none }
+.qatt-account a { color: var(--accent, #a8362a); cursor: pointer; text-decoration: none }
 .qatt-account a:hover { text-decoration: underline }`;
 
 	function addStyle() {
