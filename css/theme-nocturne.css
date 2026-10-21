@@ -60,7 +60,7 @@ html[data-theme="nocturne"] .search-bar .input-group-text, html[data-theme="noct
 html[data-theme="nocturne"] .controls { border: 1px solid var(--line); border-radius: 24px; background: var(--nt-panel); }
 html[data-theme="nocturne"] .controls label { color: var(--nt-text); }
 /* boxes the pages draw light of their own (cells, game buttons, chips, notes) turn dark here, their text light */
-html[data-theme="nocturne"] .cell, html[data-theme="nocturne"] .gbtn, html[data-theme="nocturne"] .game .tool, html[data-theme="nocturne"] .game .tool-btn, html[data-theme="nocturne"] .speak, html[data-theme="nocturne"] .tone-box, html[data-theme="nocturne"] .no-page .suggest, html[data-theme="nocturne"] .no-page .hit, html[data-theme="nocturne"] .chip, html[data-theme="nocturne"] .detail .box, html[data-theme="nocturne"] .bar, html[data-theme="nocturne"] .card.task, html[data-theme="nocturne"] .card.task.solved {
+html[data-theme="nocturne"] .cell, html[data-theme="nocturne"] .gbtn, html[data-theme="nocturne"] .tone-box, html[data-theme="nocturne"] .chip, html[data-theme="nocturne"] .detail .box, html[data-theme="nocturne"] .bar, html[data-theme="nocturne"] .card.task, html[data-theme="nocturne"] .card.task.solved {
   background: var(--nt-raise); background-image: none; color: var(--nt-text); border-color: var(--line); }
 html[data-theme="nocturne"] .gbtn { border-radius: 999px; }
 html[data-theme="nocturne"] .gbtn.ok:disabled { background: rgba(120, 200, 150, .18); color: #a8e6c0; border-color: rgba(120, 200, 150, .5); }
@@ -72,24 +72,8 @@ html[data-theme="nocturne"] .notes h4, html[data-theme="nocturne"] .notes b, htm
 html[data-theme="nocturne"] .form-text { color: var(--muted); }
 /* images of Nôm characters of the Chunom site are dark on white: light on this dark background */
 html[data-theme="nocturne"] :is(img[src*="/chunom-assets/generated/"], img[src*="/chunom-assets/animations/"], img[src*="/chunom-assets/glyph-composer/"]) { filter: invert(1) hue-rotate(180deg); mix-blend-mode: lighten; }
-/* the login dialog (js/login.js draws it light with colours of its own): dark here, so that the light heading and text of this theme are readable */
-html[data-theme="nocturne"] dialog.qatt-login { background: var(--nt-panel); color: var(--nt-text); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55); }
-html[data-theme="nocturne"] dialog.qatt-login::backdrop { background: rgba(5, 7, 12, .65); }
-html[data-theme="nocturne"] .qatt-login h2 { color: var(--nt-text); border-bottom: 0; }
-html[data-theme="nocturne"] .qatt-login p, html[data-theme="nocturne"] .qatt-login .note { color: var(--muted); }
-html[data-theme="nocturne"] .qatt-login .note.error { color: #f2b3a4; }
-html[data-theme="nocturne"] .qatt-login .qatt-login-close { color: var(--muted); }
-html[data-theme="nocturne"] .qatt-login .qatt-login-close:hover { color: var(--nt-text); }
-html[data-theme="nocturne"] .qatt-login .or { color: var(--muted); }
-html[data-theme="nocturne"] .qatt-login .or::before, html[data-theme="nocturne"] .qatt-login .or::after { border-top-color: var(--line); }
-html[data-theme="nocturne"] .qatt-login button.google { background: var(--nt-raise); color: var(--nt-text); border-color: rgba(241, 234, 217, .25); }
-html[data-theme="nocturne"] .qatt-login button.google:hover { background: #232c45; }
+/* the login dialog follows Bootstrap (js/login.js); only its main button takes the primary colours of this theme */
 html[data-theme="nocturne"] .qatt-login button.main { background: var(--nt-primary); color: var(--nt-primary-ink); border-color: var(--nt-primary-line); }
 html[data-theme="nocturne"] .qatt-login button.main:hover { background: var(--nt-primary-hover); }
-html[data-theme="nocturne"] .qatt-login input[type=email], html[data-theme="nocturne"] .qatt-login input[type=text] { background: #0f1524; color: var(--nt-text); border-color: var(--field); }
-html[data-theme="nocturne"] .qatt-login input::placeholder { color: rgba(140, 147, 166, .75); }
-html[data-theme="nocturne"] .qatt-login input[type=email]:focus, html[data-theme="nocturne"] .qatt-login input[type=text]:focus { border-color: var(--nt-gold); box-shadow: 0 0 0 .2rem rgba(227, 189, 116, .18); }
-html[data-theme="nocturne"] .qatt-account { color: var(--muted); }
-html[data-theme="nocturne"] .qatt-account a { color: var(--nt-gold); }
 /* the menu bar and the bottom bar (js/navigation.js): the navy of the background, a fine gold edge */
 html[data-theme="nocturne"] { --nav-bg: #0e1321; --nav-line: rgba(227, 189, 116, .22); }
