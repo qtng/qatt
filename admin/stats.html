@@ -16,16 +16,16 @@
   <style>
     body { background: #f7efdc; color: #2b2118; }
     h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
-    h2 { margin-top: 2rem; font-size: 1.3rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    h2 { margin-top: 2rem; font-size: 1.3rem; border-bottom: 1px solid var(--bs-border-color); padding-bottom: .25rem; }
     .note { color: #7b6c58; font-size: .85rem; }
     .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .8rem; }
-    .tile { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem; }
+    .tile { background: var(--bs-body-bg); border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem; }
     .tile b { display: block; font: 400 2rem/1.1 Georgia, "Times New Roman", serif; }
-    .tile span { font-size: .85rem; color: #5b4d3d; }
-    table { background: #fffdf8; font-size: .9rem; }
-    th { font-weight: 600; color: #5b4d3d; }
+    .tile span { font-size: .85rem; color: var(--bs-secondary-color); }
+    table { background: var(--bs-body-bg); font-size: .9rem; }
+    th { font-weight: 600; color: var(--bs-secondary-color); }
     .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; }
-    .chart { background: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem .4rem; }
+    .chart { background: var(--bs-body-bg); border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); padding: .6rem .8rem .4rem; }
     .chart h3 { font-size: .95rem; font-weight: 600; margin: 0 0 .3rem; }
     .chart div { position: relative; height: 15rem; }
     td, th { text-align: right; } td:first-child, th:first-child { text-align: left; white-space: nowrap; }
