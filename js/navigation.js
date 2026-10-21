@@ -110,7 +110,7 @@ window.Lang = window.Lang || (function() {
 //   Theme.current       the name of the theme
 //   Theme.choosable     whether a theme can be chosen on this page
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
-// Day and night (where a theme can be chosen): by the clock of the visitor it is night from NIGHT_START to DAY_START o'clock and the theme "nocturne" is shown instead of the chosen one.
+// Day and night (where a theme can be chosen): by the clock of the visitor it is night from NIGHT_START to DAY_START o'clock (22:00 to 06:00, in Vietnam 18:00 to 06:00, see NIGHT_RULES) and the theme "nocturne" is shown instead of the chosen one.
 // The icon in the menu bar (sun by day, moon by night) switches by hand; that choice lasts only until the next change between day and night: localStorage.daynight1 =
 // {"mode":"day"|"night","key":"2026-10-21n"} (key: the date the period began and d/n; a night that began yesterday evening is still "yesterday n"), void when the key is no longer the current one.
 //   Theme.dayNight      { available, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
@@ -128,7 +128,13 @@ window.Theme = window.Theme || (function() {
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) chosen = s; } catch (e) {}
     // day and night: night is from NIGHT_START to DAY_START o'clock (the clock of the visitor); then the theme NIGHT_THEME is shown instead of the chosen one
-    const DAY_KEY = "daynight1", DAY_START = 6, NIGHT_START = 18, NIGHT_THEME = "nocturne";
+    // the hours of the night: 22:00 to 06:00 is night everywhere; for the main audience (Vietnam: the sun sets between 17:30 and 18:30 all year) it is more exact: 18:00 to 06:00.
+    // Rules by time zone of the browser (the name as Intl gives it; Asia/Saigon is the older name of Asia/Ho_Chi_Minh); start must be later than end.
+    const DAY_KEY = "daynight1", NIGHT_THEME = "nocturne";
+    const NIGHT_DEFAULT = { start: 22, end: 6 };
+    const NIGHT_RULES = { "Asia/Ho_Chi_Minh": { start: 18, end: 6 }, "Asia/Saigon": { start: 18, end: 6 } };
+    let zone = ""; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+    const NIGHT_START = (NIGHT_RULES[zone] || NIGHT_DEFAULT).start, DAY_START = (NIGHT_RULES[zone] || NIGHT_DEFAULT).end;
     const autoNight = choosable;
     let pinned = false;   // ?theme=<name> in the address: that theme is shown on this page whatever the time
     const pad = n => String(n).padStart(2, "0");
