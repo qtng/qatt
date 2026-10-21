@@ -113,7 +113,8 @@ window.Lang = window.Lang || (function() {
 // Day and night (where a theme can be chosen): by the clock of the visitor it is night from NIGHT_START to DAY_START o'clock (22:00 to 06:00, in Vietnam 18:00 to 06:00, see NIGHT_RULES) and the theme "nocturne" is shown instead of the chosen one.
 // The icon in the menu bar (sun by day, moon by night) switches by hand; that choice lasts only until the next change between day and night: localStorage.daynight1 =
 // {"mode":"day"|"night","key":"2026-10-21n"} (key: the date the period began and d/n; a night that began yesterday evening is still "yesterday n"), void when the key is no longer the current one.
-//   Theme.dayNight      { available, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
+// Only admins can use the icon; for everybody else the clock decides (a stored choice is ignored).
+//   Theme.dayNight      { available, canToggle, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
 window.Theme = window.Theme || (function() {
     const KEY = "theme1";   // the key was "theme" before: a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
@@ -146,7 +147,12 @@ window.Theme = window.Theme || (function() {
         if (h < DAY_START) { const y = new Date(d); y.setDate(y.getDate() - 1); return { night: true, key: ymd(y) + "n" }; }
         return { night: false, key: ymd(d) + "d" };
     };
-    const override = () => { try { const o = JSON.parse(localStorage.getItem(DAY_KEY)); return o && (o.mode === "day" || o.mode === "night") && typeof o.key === "string" ? o : null; } catch (e) { return null; } };
+    // only an admin (app_metadata.is_admin in the session of this browser) can switch day and night by hand; for everybody else the clock decides
+    const isAdmin = () => {
+        try { const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user; return !!(u && u.app_metadata && u.app_metadata.is_admin === true); }
+        catch (e) { return false; }
+    };
+    const override = () => { if (!isAdmin()) return null; try { const o = JSON.parse(localStorage.getItem(DAY_KEY)); return o && (o.mode === "day" || o.mode === "night") && typeof o.key === "string" ? o : null; } catch (e) { return null; } };
     // night now: the manual choice while it is of this period (same key), else the clock
     const isNight = () => { const p = phase(new Date()), o = override(); return o && o.key === p.key ? o.mode === "night" : p.night; };
     const pick = () => autoNight && !pinned && isNight() ? NIGHT_THEME : chosen;
@@ -211,8 +217,9 @@ window.Theme = window.Theme || (function() {
         dayNight: {
             get available() { return autoNight; },
             get night() { return autoNight && !pinned && isNight(); },
+            get canToggle() { return autoNight && isAdmin(); },
             toggle() {
-                if (!autoNight) return;
+                if (!autoNight || !isAdmin()) return;
                 const to = isNight() && !pinned ? "day" : "night";
                 pinned = false;
                 setOverride(to);
@@ -344,8 +351,11 @@ window.Theme = window.Theme || (function() {
             .daynight-switch { background: none; border: 0; padding: .25rem .35rem; margin-right: .3rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
             .daynight-switch:hover { color: #fff; }
             .daynight-switch[hidden] { display: none; }
+            .daynight-switch:disabled { cursor: default; opacity: 1; }   /* not an admin: the icon only shows the time of day */
+            .daynight-switch:disabled:hover { color: rgba(255, 255, 255, .6); }
             .daynight-switch.night { color: #ffe600; }   /* the moon is yellow like the admin icons, the sun is not */
-            .daynight-switch.night:hover { color: #fff59d; }
+            .daynight-switch.night:hover:not(:disabled) { color: #fff59d; }
+            .daynight-switch.night:disabled:hover { color: #ffe600; }
             /* the theme: a palette button next to EN | VI with a small list of the themes */
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
@@ -507,7 +517,7 @@ window.Theme = window.Theme || (function() {
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
                     <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
-                    <button type="button" class="daynight-switch"${Theme.dayNight.available ? '' : ' hidden'}><i class="bi bi-sun-fill"></i></button>
+                    <button type="button" class="daynight-switch"${Theme.dayNight.available ? '' : ' hidden'}${Theme.dayNight.canToggle ? '' : ' disabled'}><i class="bi bi-sun-fill"></i></button>
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
                     </div>
@@ -606,7 +616,8 @@ window.Theme = window.Theme || (function() {
         // day and night: the icon shows the time of day (sun, moon); a click switches by hand (Theme.dayNight.toggle), until the next change between day and night
         const dnBtn = header.querySelector('.daynight-switch');
         const markDayNight = () => {
-            const night = Theme.dayNight.night, label = night ? Lang.t('Switch to day', 'Chuyển sang ban ngày') : Lang.t('Switch to night', 'Chuyển sang ban đêm');
+            const night = Theme.dayNight.night, can = Theme.dayNight.canToggle;
+            const label = can ? (night ? Lang.t('Switch to day', 'Chuyển sang ban ngày') : Lang.t('Switch to night', 'Chuyển sang ban đêm')) : (night ? Lang.t('Night', 'Ban đêm') : Lang.t('Day', 'Ban ngày'));
             dnBtn.querySelector('i').className = 'bi ' + (night ? 'bi-moon-stars-fill' : 'bi-sun-fill');
             dnBtn.classList.toggle('night', night);
             dnBtn.title = label; dnBtn.setAttribute('aria-label', label);
