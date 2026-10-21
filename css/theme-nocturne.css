@@ -72,5 +72,24 @@ html[data-theme="nocturne"] .notes h4, html[data-theme="nocturne"] .notes b, htm
 html[data-theme="nocturne"] .form-text { color: var(--muted); }
 /* images of Nôm characters of the Chunom site are dark on white: light on this dark background */
 html[data-theme="nocturne"] :is(img[src*="/chunom-assets/generated/"], img[src*="/chunom-assets/animations/"], img[src*="/chunom-assets/glyph-composer/"]) { filter: invert(1) hue-rotate(180deg); mix-blend-mode: lighten; }
+/* the login dialog (js/login.js draws it light with colours of its own): dark here, so that the light heading and text of this theme are readable */
+html[data-theme="nocturne"] dialog.qatt-login { background: var(--nt-panel); color: var(--nt-text); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 1rem 3rem rgba(0, 0, 0, .55); }
+html[data-theme="nocturne"] dialog.qatt-login::backdrop { background: rgba(5, 7, 12, .65); }
+html[data-theme="nocturne"] .qatt-login h2 { color: var(--nt-text); border-bottom: 0; }
+html[data-theme="nocturne"] .qatt-login p, html[data-theme="nocturne"] .qatt-login .note { color: var(--muted); }
+html[data-theme="nocturne"] .qatt-login .note.error { color: #f2b3a4; }
+html[data-theme="nocturne"] .qatt-login .qatt-login-close { color: var(--muted); }
+html[data-theme="nocturne"] .qatt-login .qatt-login-close:hover { color: var(--nt-text); }
+html[data-theme="nocturne"] .qatt-login .or { color: var(--muted); }
+html[data-theme="nocturne"] .qatt-login .or::before, html[data-theme="nocturne"] .qatt-login .or::after { border-top-color: var(--line); }
+html[data-theme="nocturne"] .qatt-login button.google { background: var(--nt-raise); color: var(--nt-text); border-color: rgba(241, 234, 217, .25); }
+html[data-theme="nocturne"] .qatt-login button.google:hover { background: #232c45; }
+html[data-theme="nocturne"] .qatt-login button.main { background: var(--nt-text); color: #0b0e17; border-color: var(--nt-text); }
+html[data-theme="nocturne"] .qatt-login button.main:hover { background: #fff; }
+html[data-theme="nocturne"] .qatt-login input[type=email], html[data-theme="nocturne"] .qatt-login input[type=text] { background: #0f1524; color: var(--nt-text); border-color: var(--field); }
+html[data-theme="nocturne"] .qatt-login input::placeholder { color: rgba(140, 147, 166, .75); }
+html[data-theme="nocturne"] .qatt-login input[type=email]:focus, html[data-theme="nocturne"] .qatt-login input[type=text]:focus { border-color: var(--nt-gold); box-shadow: 0 0 0 .2rem rgba(227, 189, 116, .18); }
+html[data-theme="nocturne"] .qatt-account { color: var(--muted); }
+html[data-theme="nocturne"] .qatt-account a { color: var(--nt-gold); }
 /* the menu bar and the bottom bar (js/navigation.js): the navy of the background, a fine gold edge */
 html[data-theme="nocturne"] { --nav-bg: #0e1321; --nav-line: rgba(227, 189, 116, .22); }
