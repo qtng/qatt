@@ -97,7 +97,7 @@ dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 			dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
 			dialog.addEventListener('close', () => { dialog.remove(); resolve(signedIn(db)); });
 			dialog.showModal();
-			email.focus();
+			google.focus();   // not the e-mail field: on a phone it would open the keyboard at once; most people should use the Google button
 		});
 	}
 
