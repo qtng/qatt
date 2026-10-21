@@ -344,6 +344,8 @@ window.Theme = window.Theme || (function() {
             .daynight-switch { background: none; border: 0; padding: .25rem .35rem; margin-right: .3rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
             .daynight-switch:hover { color: #fff; }
             .daynight-switch[hidden] { display: none; }
+            .daynight-switch.night { color: #ffe600; }   /* the moon is yellow like the admin icons, the sun is not */
+            .daynight-switch.night:hover { color: #fff59d; }
             /* the theme: a palette button next to EN | VI with a small list of the themes */
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
@@ -500,15 +502,15 @@ window.Theme = window.Theme || (function() {
                     <div class="desk-menu">${otherLinks}</div>
                 </div>
                 <div class="ms-auto d-flex align-items-center">
-                    <button type="button" class="daynight-switch"${Theme.dayNight.available ? '' : ' hidden'}><i class="bi bi-sun-fill"></i></button>
-                    <div class="lang-switch" role="group" aria-label="Language">
-                        <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
-                    </div>
                     <div class="theme-switch"${Theme.choosable && isAdmin() ? '' : ' hidden'}>
                         <button type="button" aria-haspopup="true" aria-expanded="false" title="Theme" data-vi-title="Giao diện" aria-label="Theme" data-vi-aria-label="Giao diện"><i class="bi bi-palette"></i></button>
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
                     <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
+                    <button type="button" class="daynight-switch"${Theme.dayNight.available ? '' : ' hidden'}><i class="bi bi-sun-fill"></i></button>
+                    <div class="lang-switch" role="group" aria-label="Language">
+                        <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
+                    </div>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -606,6 +608,7 @@ window.Theme = window.Theme || (function() {
         const markDayNight = () => {
             const night = Theme.dayNight.night, label = night ? Lang.t('Switch to day', 'Chuyển sang ban ngày') : Lang.t('Switch to night', 'Chuyển sang ban đêm');
             dnBtn.querySelector('i').className = 'bi ' + (night ? 'bi-moon-stars-fill' : 'bi-sun-fill');
+            dnBtn.classList.toggle('night', night);
             dnBtn.title = label; dnBtn.setAttribute('aria-label', label);
         };
         dnBtn.addEventListener('click', () => Theme.dayNight.toggle());
