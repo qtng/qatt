@@ -120,6 +120,7 @@ window.Theme = window.Theme || (function() {
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
         neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"], nocturne: ["Nocturne", "Đêm khuya"] };
+    const DARK_THEMES = ["future", "nocturne"];   // themes with a dark background: Bootstrap gets data-bs-theme="dark" too
     const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     const CHUNOM_THEMES = true;
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
@@ -169,6 +170,8 @@ window.Theme = window.Theme || (function() {
     const apply = () => {
         if (!themed) return;
         if (current === "classic") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", current);
+        // the dark themes also switch Bootstrap to its dark mode (its own components, such as alerts, badges and list groups, get dark colours)
+        if (DARK_THEMES.includes(current)) document.documentElement.setAttribute("data-bs-theme", "dark"); else document.documentElement.removeAttribute("data-bs-theme");
         const link = document.getElementById("theme-css");
         if (link) link.setAttribute("href", href());
     };
