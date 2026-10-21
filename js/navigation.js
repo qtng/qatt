@@ -110,6 +110,10 @@ window.Lang = window.Lang || (function() {
 //   Theme.current       the name of the theme
 //   Theme.choosable     whether a theme can be chosen on this page
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
+// Day and night (where a theme can be chosen): by the clock of the visitor it is night from NIGHT_START to DAY_START o'clock (22:00 to 06:00, in Vietnam 18:00 to 06:00, see NIGHT_RULES) and the theme "nocturne" is shown instead of the chosen one.
+// The icon in the menu bar (sun by day, moon by night) switches by hand; that choice lasts only until the next change between day and night: localStorage.daynight1 =
+// {"mode":"day"|"night","key":"2026-10-21n"} (key: the date the period began and d/n; a night that began yesterday evening is still "yesterday n"), void when the key is no longer the current one.
+//   Theme.dayNight      { available, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
 window.Theme = window.Theme || (function() {
     const KEY = "theme1";   // the key was "theme" before: a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
@@ -120,14 +124,38 @@ window.Theme = window.Theme || (function() {
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
-    let current = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "popart";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, pop art on qatt.org
+    let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "popart";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, pop art on qatt.org
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
-    if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) current = s; } catch (e) {}
+    if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) chosen = s; } catch (e) {}
+    // day and night: night is from NIGHT_START to DAY_START o'clock (the clock of the visitor); then the theme NIGHT_THEME is shown instead of the chosen one
+    // the hours of the night: 22:00 to 06:00 is night everywhere; for the main audience (Vietnam: the sun sets between 17:30 and 18:30 all year) it is more exact: 18:00 to 06:00.
+    // Rules by time zone of the browser (the name as Intl gives it; Asia/Saigon is the older name of Asia/Ho_Chi_Minh); start must be later than end.
+    const DAY_KEY = "daynight1", NIGHT_THEME = "nocturne";
+    const NIGHT_DEFAULT = { start: 22, end: 6 };
+    const NIGHT_RULES = { "Asia/Ho_Chi_Minh": { start: 18, end: 6 }, "Asia/Saigon": { start: 18, end: 6 } };
+    let zone = ""; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+    const NIGHT_START = (NIGHT_RULES[zone] || NIGHT_DEFAULT).start, DAY_START = (NIGHT_RULES[zone] || NIGHT_DEFAULT).end;
+    const autoNight = choosable;
+    let pinned = false;   // ?theme=<name> in the address: that theme is shown on this page whatever the time
+    const pad = n => String(n).padStart(2, "0");
+    const ymd = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    // the period of a moment: night (and the key of it: the date the period began, n or d)
+    const phase = d => {
+        const h = d.getHours();
+        if (h >= NIGHT_START) return { night: true, key: ymd(d) + "n" };
+        if (h < DAY_START) { const y = new Date(d); y.setDate(y.getDate() - 1); return { night: true, key: ymd(y) + "n" }; }
+        return { night: false, key: ymd(d) + "d" };
+    };
+    const override = () => { try { const o = JSON.parse(localStorage.getItem(DAY_KEY)); return o && (o.mode === "day" || o.mode === "night") && typeof o.key === "string" ? o : null; } catch (e) { return null; } };
+    // night now: the manual choice while it is of this period (same key), else the clock
+    const isNight = () => { const p = phase(new Date()), o = override(); return o && o.key === p.key ? o.mode === "night" : p.night; };
+    const pick = () => autoNight && !pinned && isNight() ? NIGHT_THEME : chosen;
+    let current = pick();
     // ?theme=<name> in the address (license.html sends a visitor back with it): chosen and remembered where themes can be chosen, else only shown on this page
     // (a preview); the parameter is taken out of the address
     const params = new URLSearchParams(location.search), asked = params.get("theme");
     if (asked !== null) {
-        if (themed && valid(asked)) { current = asked; if (choosable) try { localStorage.setItem(KEY, asked); } catch (e) {} }
+        if (themed && valid(asked)) { chosen = current = asked; pinned = true; if (choosable) try { localStorage.setItem(KEY, asked); } catch (e) {} }
         params.delete("theme");
         try { history.replaceState(history.state, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); } catch (e) {}
     }
@@ -143,16 +171,53 @@ window.Theme = window.Theme || (function() {
         else { const l = document.createElement("link"); l.rel = "stylesheet"; l.id = "theme-css"; l.href = href(); document.head.append(l); }
         apply();
     }
+    // show what the clock and the choices say now; the events tell the menu bar
+    const update = () => {
+        current = pick();
+        apply();
+        document.dispatchEvent(new Event("themechange"));
+        document.dispatchEvent(new Event("daynightchange"));
+    };
+    // a manual choice of day or night holds until the next change between them (the key of the period is stored with it)
+    const setOverride = mode => {
+        const p = phase(new Date());
+        try { if (mode === (p.night ? "night" : "day")) localStorage.removeItem(DAY_KEY); else localStorage.setItem(DAY_KEY, JSON.stringify({ mode, key: p.key })); } catch (e) {}
+    };
+    if (autoNight) {
+        // the next change between day and night: switch then (a sleeping tab catches up when it is shown again)
+        const nextChange = () => {
+            const d = new Date(), t = new Date(d); t.setMinutes(0, 0, 0);
+            if (d.getHours() < DAY_START) t.setHours(DAY_START);
+            else if (d.getHours() < NIGHT_START) t.setHours(NIGHT_START);
+            else { t.setDate(t.getDate() + 1); t.setHours(DAY_START); }
+            return t - d;
+        };
+        const arm = () => setTimeout(() => { update(); arm(); }, nextChange() + 500);
+        arm();
+        document.addEventListener("visibilitychange", () => { if (!document.hidden && pick() !== current) update(); });
+        window.addEventListener("storage", e => { if (e.key === DAY_KEY) update(); });
+    }
     return {
         list,
         get current() { return current; },
         get choosable() { return choosable; },
         set(name) {
             if (!choosable || !Object.prototype.hasOwnProperty.call(list, name)) return;
-            current = name;
+            chosen = name; pinned = false;
             try { localStorage.setItem(KEY, name); } catch (e) {}
-            apply();
-            document.dispatchEvent(new Event("themechange"));
+            if (autoNight && name !== NIGHT_THEME && isNight()) setOverride("day");   // a theme chosen at night is shown
+            update();
+        },
+        dayNight: {
+            get available() { return autoNight; },
+            get night() { return autoNight && !pinned && isNight(); },
+            toggle() {
+                if (!autoNight) return;
+                const to = isNight() && !pinned ? "day" : "night";
+                pinned = false;
+                setOverride(to);
+                update();
+            }
         }
     };
 })();
@@ -275,6 +340,10 @@ window.Theme = window.Theme || (function() {
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
             .lang-switch button.active { color: #fff; text-decoration: underline; text-underline-offset: .3em; }
+            /* day and night: a sun or moon left of EN | VI, switches by hand until the next change between day and night */
+            .daynight-switch { background: none; border: 0; padding: .25rem .35rem; margin-right: .3rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
+            .daynight-switch:hover { color: #fff; }
+            .daynight-switch[hidden] { display: none; }
             /* the theme: a palette button next to EN | VI with a small list of the themes */
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
@@ -431,6 +500,7 @@ window.Theme = window.Theme || (function() {
                     <div class="desk-menu">${otherLinks}</div>
                 </div>
                 <div class="ms-auto d-flex align-items-center">
+                    <button type="button" class="daynight-switch"${Theme.dayNight.available ? '' : ' hidden'}><i class="bi bi-sun-fill"></i></button>
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
                     </div>
@@ -530,6 +600,18 @@ window.Theme = window.Theme || (function() {
         }));
         document.addEventListener('langchange', markLang);
         markLang();
+
+        // day and night: the icon shows the time of day (sun, moon); a click switches by hand (Theme.dayNight.toggle), until the next change between day and night
+        const dnBtn = header.querySelector('.daynight-switch');
+        const markDayNight = () => {
+            const night = Theme.dayNight.night, label = night ? Lang.t('Switch to day', 'Chuyển sang ban ngày') : Lang.t('Switch to night', 'Chuyển sang ban đêm');
+            dnBtn.querySelector('i').className = 'bi ' + (night ? 'bi-moon-stars-fill' : 'bi-sun-fill');
+            dnBtn.title = label; dnBtn.setAttribute('aria-label', label);
+        };
+        dnBtn.addEventListener('click', () => Theme.dayNight.toggle());
+        document.addEventListener('daynightchange', markDayNight);
+        document.addEventListener('langchange', markDayNight);
+        markDayNight();
 
         // theme: the palette button opens the list of Theme.list; a choice is remembered (Theme.set), a click outside or Esc closes the list
         const themeBtn = header.querySelector('.theme-switch > button'), themeMenu = header.querySelector('.theme-menu');
