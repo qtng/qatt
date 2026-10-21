@@ -56,7 +56,7 @@
     .grid3 .gbtn { width: calc((100% - 1rem) / 3); height: auto; aspect-ratio: 1; font-size: 2.6rem; }
     .pad { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 46rem; margin-inline: auto; }
     .pad .group { display: flex; gap: .4rem; padding: .3rem; border: 1px dashed #dccfb2; border-radius: .6rem; }
-    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: var(--b, #fffdf8); border: 2px solid var(--bc, #d9ccb0); border-radius: .55rem; box-shadow: 0 2px 0 var(--bc, #d9ccb0); color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s, box-shadow .12s; }
+    .gbtn { font-family: var(--qfont), sans-serif; font-size: 2.2rem; line-height: 1; width: 3.4rem; height: 3.4rem; padding: 0; background: var(--b, var(--bs-body-bg)); border: 2px solid var(--bc, #d9ccb0); border-radius: .55rem; box-shadow: 0 2px 0 var(--bc, #d9ccb0); color: var(--ink); transition: background-color .25s, border-color .25s, color .25s, opacity .25s, transform .12s, box-shadow .12s; }
     /* the kinds of buttons in their own colours: shapes cream, marked forms blue, tones orange */
     #basePad { --b: #fff8e6; --bc: #cdb98a; }
     #variantPad { --b: #e3eef8; --bc: #92b4d3; }
@@ -72,7 +72,7 @@
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
     /* the cards like a retro game: tinted, a thick outline and a hard shadow */
     .game { max-width: 34rem; }
-    .game .tool, .game .tool-btn { font-size: .8rem; color: var(--ink); background-color: #fffdf8; border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); transition: transform .12s, box-shadow .12s; }
+    .game .tool, .game .tool-btn { font-size: .8rem; color: var(--ink); background-color: var(--bs-body-bg); border: 2px solid var(--ink); border-radius: .55rem; box-shadow: 0 2px 0 var(--ink); transition: transform .12s, box-shadow .12s; }
     .game .tool { padding-top: .15rem; padding-bottom: .15rem; }
     .game .tools { flex-wrap: nowrap; } .game .tools .tool { min-width: 0; flex: 0 1 auto; text-overflow: ellipsis; } .game .tool-btn { flex: none; }   /* the buttons keep their size, the selects give way */
     .game .tool-btn { padding: .2rem .7rem; font-weight: 600; }
@@ -90,7 +90,7 @@
     .timer { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); font-size: 1.05rem; }
     .timer .bi { margin-right: .3rem; }
     .late .timer { color: #842029; }
-    .speak { width: 2.4rem; height: 2.4rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; background: #fffdf8; border: 2px solid var(--ink); border-radius: 50%; box-shadow: 0 2px 0 var(--ink); color: var(--ink); transition: transform .12s, box-shadow .12s; }
+    .speak { width: 2.4rem; height: 2.4rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--bs-body-bg); border: 2px solid var(--ink); border-radius: 50%; box-shadow: 0 2px 0 var(--ink); color: var(--ink); transition: transform .12s, box-shadow .12s; }
     .speak:hover { transform: translateY(-1px); }
     .speak:active { transform: translateY(2px); box-shadow: none; }
     .task .cells { border-color: var(--ink); box-shadow: 3px 3px 0 rgba(43, 33, 24, .35); }
@@ -120,7 +120,7 @@
     .cheer { position: absolute; left: 50%; top: 24%; z-index: 3; pointer-events: none; white-space: nowrap; font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-style: italic; font-size: clamp(2.2rem, 10vw, 3.6rem); color: #ffd23f; -webkit-text-stroke: .28em #0f5132; paint-order: stroke fill; text-shadow: 0 .06em .12em rgba(0, 0, 0, .35); opacity: 0; animation: cheer 1.9s ease-out forwards; }   /* letters only: gold with a dark green outline, no box */
     @keyframes cheer { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3) rotate(-8deg); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(3deg); } 30% { transform: translate(-50%, -50%) scale(1) rotate(-2deg); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -64%) scale(1.05) rotate(0); } }
     .spark { position: absolute; left: 50%; top: 42%; z-index: 3; pointer-events: none; font-size: 1.6rem; }
-    .board { max-width: 28rem; margin: 1.4rem auto 0; padding: .8rem 1rem; background: #fffdf8; color: var(--ink); border: 2px solid var(--ink); border-radius: .7rem; box-shadow: 4px 4px 0 var(--ink); font-size: .9rem; }
+    .board { max-width: 28rem; margin: 1.4rem auto 0; padding: .8rem 1rem; background: var(--bs-body-bg); color: var(--ink); border: 2px solid var(--ink); border-radius: .7rem; box-shadow: 4px 4px 0 var(--ink); font-size: .9rem; }
     .board h2 { font: 700 1.05rem Georgia, "Times New Roman", serif; margin: 0 0 .5rem; }
     .board table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
     .board td { padding: .15rem .3rem; }
@@ -129,8 +129,8 @@
     .board tr.guest td { color: color-mix(in srgb, var(--ink) 55%, transparent); font-style: italic; }
     .board .more td { color: color-mix(in srgb, var(--ink) 45%, transparent); text-align: center; line-height: .6; }
     #scoreLock { font-size: .8em; opacity: .55; margin-left: .15rem; }
-    dialog.ask { --ink: #2b2118; --muted: #7b6c58; /* the box is light in every theme (the dark theme makes --ink light) */ max-width: 24rem; width: calc(100vw - 2rem); padding: 1.2rem 1.3rem; background: #fffdf8; color: var(--ink); border: 3px solid var(--ink); border-radius: .8rem; box-shadow: 5px 5px 0 var(--ink); }
-    html[data-theme] dialog.ask :is(h2, p) { color: var(--ink); text-shadow: none; }   /* a theme (the dark one) must not colour the texts of the light box */
+    dialog.ask { max-width: 24rem; width: calc(100vw - 2rem); padding: 1.2rem 1.3rem; background: var(--bs-body-bg); color: var(--bs-body-color); border: 3px solid var(--ink); border-radius: .8rem; box-shadow: 5px 5px 0 var(--ink); }
+    dialog.ask h2 { border-bottom: 0; }   /* the line under h2 of the dark themes */
     dialog.ask::backdrop { background: rgba(43, 33, 24, .45); }
     #introVeil { position: fixed; inset: 0; z-index: 1010; background: rgba(43, 33, 24, .28); }   /* the loaded game shows through; below the menu bars (1030), so they stay usable */
     dialog.ask.intro { position: fixed; inset: 0; margin: auto; height: fit-content; z-index: 1011; max-width: 22rem; padding: 1.8rem 1.5rem 1.8rem; text-align: center; }   /* not modal (no top layer): the menu bars and their popups stay above it */

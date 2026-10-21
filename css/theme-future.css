@@ -53,7 +53,7 @@ html[data-theme="future"] .search-bar .btn { border-radius: 0; clip-path: none; 
 html[data-theme="future"] .controls { border: 1px solid var(--line); border-radius: 0; background: var(--fx-panel); box-shadow: var(--fx-glow); }
 html[data-theme="future"] .controls label { color: var(--fx-text); }
 /* the pages draw some boxes light of their own (cells, game buttons, cards of Sound Check, notes): they turn dark here, their text light */
-html[data-theme="future"] .cell, html[data-theme="future"] .gbtn, html[data-theme="future"] .game .tool, html[data-theme="future"] .game .tool-btn, html[data-theme="future"] .speak, html[data-theme="future"] .tone-box, html[data-theme="future"] .no-page .suggest, html[data-theme="future"] .no-page .hit, html[data-theme="future"] .chip, html[data-theme="future"] .detail .box, html[data-theme="future"] .bar, html[data-theme="future"] .card.task, html[data-theme="future"] .card.task.solved {
+html[data-theme="future"] .cell, html[data-theme="future"] .gbtn, html[data-theme="future"] .tone-box, html[data-theme="future"] .chip, html[data-theme="future"] .detail .box, html[data-theme="future"] .bar, html[data-theme="future"] .card.task, html[data-theme="future"] .card.task.solved {
   background: #0a1530; background-image: none; color: var(--fx-text); border-color: var(--line); }
 html[data-theme="future"] .gbtn { background: color-mix(in srgb, var(--b, #0a1530) 22%, #0a1530); border-color: var(--fx-cyan); box-shadow: var(--fx-glow); }
 html[data-theme="future"] .gbtn.ok:disabled { background: rgba(0, 228, 120, .2); color: #7dffb9; border-color: #00e478; }
