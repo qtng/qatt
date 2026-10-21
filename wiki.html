@@ -26,7 +26,7 @@
         }
         .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
         .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
-        .hero .lead { max-width: 38rem; color: #4a3d30; }
+        .hero .lead { max-width: 38rem; color: var(--bs-secondary-color); }
         @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
 
         /* the search area stays at the top (below the menu bar) */
@@ -228,6 +228,11 @@
             let html = currentWikiHtml.replace(/src="\/\//g, 'src="https://').replace(/srcset="\/\//g, 'srcset="https://');
             html = html.replace(/src="\/([^/])/g, `src="https://${wikiLang}.wikipedia.org/$1`);
             contentArea.innerHTML = html;
+            // Wikipedia boxes carry colours of their own (style="background:#f8f9fa", bgcolor, <font color>): drop them, so that the text and the boxes follow the theme (light or dark)
+            contentArea.querySelectorAll('[style], [bgcolor], [color]').forEach(el => {
+                for (const p of ['background', 'background-color', 'color']) el.style.removeProperty(p);
+                el.removeAttribute('bgcolor'); el.removeAttribute('color');
+            });
 
             if (qattToggle.checked) {
                 applyQatt(contentArea);

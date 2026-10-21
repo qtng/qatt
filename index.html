@@ -38,13 +38,13 @@
     }
     .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
     .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
-    .hero .lead { max-width: 38rem; color: #4a3d30; }
+    .hero .lead { max-width: 38rem; color: var(--bs-secondary-color); }
     .glyph-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .6rem; max-width: 46rem; margin-inline: auto; color: var(--ink); }
     @media (min-width: 768px) { .glyph-strip { display: grid; grid-template-columns: repeat(11, 1fr); max-width: 50rem; text-align: center; } }
     .glyph-strip tt { font-family: "QATT Pen Medium", sans-serif; font-size: 2.4rem; line-height: 1.15; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; transition: opacity .15s, color .15s; }   /* heavier strokes, as strong as the big glyphs of the name below */
     .glyph-strip a { color: inherit !important; text-decoration: none !important; }   /* also against the link colour of a theme, now that the strip is in the main part */
     .glyph-strip tt:hover { opacity: 1; color: var(--cinnabar); }
-    .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: #a8977e; font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
+    .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: var(--bs-tertiary-color); font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
     .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
     section.block { padding-block: 2rem; }
     section.block + section.block { border-top: var(--rule-width, 1px) solid var(--rule, var(--bs-border-color)); }   /* --rule, --rule-width: a theme can give the lines its own colour and weight */
