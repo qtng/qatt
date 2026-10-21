@@ -32,19 +32,19 @@
         /* the search area stays at the top (below the menu bar) */
         .search-bar { position: sticky; top: 60px; z-index: 1020; padding: .6rem 0; background: var(--paper); border-bottom: 1px solid var(--line); }
         .search-bar .input-group { box-shadow: 0 .2rem .6rem rgba(60, 40, 20, .12); }
-        .search-bar .input-group-text, .search-bar .form-control { border-color: var(--field); background: #fffdf8; }
+        .search-bar .input-group-text, .search-bar .form-control { border-color: var(--field); background: var(--bs-body-bg); }
         .search-bar .btn { --bs-btn-bg: var(--accent); --bs-btn-color: #fff; --bs-btn-hover-bg: #8c2c22; --bs-btn-hover-color: #fff; padding: .375rem 1.2rem; }
         .search-bar .form-control:focus { box-shadow: none; border-color: var(--accent); }
         .options { font-size: .85rem; margin-top: .5rem; }
         .options .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
         .options .form-select { font-size: .85rem; padding-top: .1rem; padding-bottom: .1rem; }
 
-        .content-container { background: #fffdf8; border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
+        .content-container { background: var(--bs-body-bg); border: 1px solid var(--line); border-radius: .7rem; box-shadow: 0 .35rem 1rem rgba(60, 40, 20, .14); }
         .wiki-header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
         .external-wiki-link { color: var(--muted); text-decoration: none; line-height: 1; position: relative; top: -0.1em; }
         /* Seite nicht gefunden: Vorschlag und Trefferkarten */
-        .no-page .suggest { background: #fffdf8; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: .5rem; padding: .75rem 1rem; }
-        .no-page .hit { display: block; background: #fffdf8; border: 1px solid var(--line); border-radius: .6rem; padding: .75rem 1rem; margin-bottom: .6rem; text-decoration: none; color: var(--ink); box-shadow: 0 .1rem .3rem rgba(60, 40, 20, .06); transition: transform .12s, border-color .12s; }
+        .no-page .suggest { background: var(--bs-body-bg); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: .5rem; padding: .75rem 1rem; }
+        .no-page .hit { display: block; background: var(--bs-body-bg); border: 1px solid var(--line); border-radius: .6rem; padding: .75rem 1rem; margin-bottom: .6rem; text-decoration: none; color: var(--ink); box-shadow: 0 .1rem .3rem rgba(60, 40, 20, .06); transition: transform .12s, border-color .12s; }
         .no-page .hit:hover, .no-page .hit:focus-visible { transform: translateY(-1px); border-color: var(--accent); }
         .no-page .hit b { color: var(--accent); font-weight: 600; }
         .no-page .hit .snippet { color: var(--muted); font-size: .875rem; margin-top: .15rem; }

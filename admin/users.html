@@ -16,9 +16,9 @@
     body { background: #f7efdc; color: #2b2118; }
     h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
     .note { color: #7b6c58; font-size: .85rem; }
-    .scroll { overflow-x: auto; background: #fffdf8; border: 1px solid #dccfb2; border-radius: .6rem; }
+    .scroll { overflow-x: auto; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .6rem; }
     table { font-size: .85rem; margin: 0; white-space: nowrap; }
-    th { font-weight: 600; color: #5b4d3d; cursor: pointer; user-select: none; position: sticky; top: 0; background: #fffdf8; }
+    th { font-weight: 600; color: var(--bs-secondary-color); cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--bs-body-bg); }
     th.sorted::after { content: " ▾"; } th.sorted.asc::after { content: " ▴"; }
     td.num, th.num { text-align: right; }
     .tag { font-size: .7rem; border: 1px solid #2b2118; border-radius: .3rem; padding: 0 .3rem; margin-left: .3rem; background: #ffe600; color: #111; }

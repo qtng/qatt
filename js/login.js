@@ -10,26 +10,26 @@ await QattLogin.chooseName(db, { required, current })     // the name for the le
 */
 (() => {
 	const STYLE = `
-dialog.qatt-login { border: 1px solid #e4d9c0; border-radius: 1rem; padding: 0; width: min(24rem, calc(100vw - 2rem)); color: #2b2118; background: #fffdf8;
+dialog.qatt-login { border: 1px solid var(--bs-border-color, #e4d9c0); border-radius: 1rem; padding: 0; width: min(24rem, calc(100vw - 2rem)); color: var(--bs-body-color, #2b2118); background: var(--bs-body-bg, #fffdf8);
 	box-shadow: 0 1rem 3rem rgba(60, 40, 20, .3); font-family: system-ui, -apple-system, sans-serif }
 dialog.qatt-login::backdrop { background: rgba(43, 33, 24, .45) }
 .qatt-login form { margin: 0; padding: 1.2rem 1.3rem 1.3rem }
 .qatt-login h2 { font: 400 1.4rem Georgia, "Times New Roman", serif; margin: 0 0 .4rem }
-.qatt-login p { margin: 0 0 1rem; color: #5b4d3d; font-size: .92rem }
-.qatt-login .qatt-login-close { position: absolute; top: .5rem; right: .7rem; border: 0; background: none; font-size: 1.5rem; line-height: 1; color: #7b6c58; cursor: pointer }
+.qatt-login p { margin: 0 0 1rem; color: var(--bs-secondary-color, #5b4d3d); font-size: .92rem }
+.qatt-login .qatt-login-close { position: absolute; top: .5rem; right: .7rem; border: 0; background: none; font-size: 1.5rem; line-height: 1; color: var(--bs-secondary-color, #7b6c58); cursor: pointer }
 .qatt-login button.main, .qatt-login button.google { display: block; width: 100%; border-radius: 2rem; padding: .55rem 1rem; font-size: .95rem; cursor: pointer }
-.qatt-login button.google { border: 1px solid #cdbf9f; background: #fff; color: #2b2118 }
-.qatt-login button.google:hover { background: #f1e8d2 }
+.qatt-login button.google { border: 1px solid var(--bs-border-color, #cdbf9f); background: var(--bs-body-bg, #fff); color: var(--bs-body-color, #2b2118) }
+.qatt-login button.google:hover { background: var(--bs-tertiary-bg, #f1e8d2) }
 .qatt-login button.main { border: 1px solid #a8362a; background: #a8362a; color: #fff }
 .qatt-login button.main:hover { background: #8c2c22 }
 .qatt-login button:disabled { opacity: .6; cursor: default }
-.qatt-login .or { display: flex; align-items: center; gap: .7rem; margin: .9rem 0; color: #a8977e; font-size: .78rem; text-transform: uppercase; letter-spacing: .15em }
-.qatt-login .or::before, .qatt-login .or::after { content: ""; flex: 1; border-top: 1px solid #e4d9c0 }
-.qatt-login input[type=email], .qatt-login input[type=text] { display: block; width: 100%; box-sizing: border-box; border: 1px solid #cdbf9f; border-radius: .7rem; padding: .5rem .8rem; margin-bottom: .6rem; font-size: 1rem; font-family: inherit; background: #fff; color: #2b2118 }
+.qatt-login .or { display: flex; align-items: center; gap: .7rem; margin: .9rem 0; color: var(--bs-secondary-color, #a8977e); font-size: .78rem; text-transform: uppercase; letter-spacing: .15em }
+.qatt-login .or::before, .qatt-login .or::after { content: ""; flex: 1; border-top: 1px solid var(--bs-border-color, #e4d9c0) }
+.qatt-login input[type=email], .qatt-login input[type=text] { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--bs-border-color, #cdbf9f); border-radius: .7rem; padding: .5rem .8rem; margin-bottom: .6rem; font-size: 1rem; font-family: inherit; background: var(--bs-body-bg, #fff); color: var(--bs-body-color, #2b2118) }
 .qatt-login input[type=email]:focus, .qatt-login input[type=text]:focus { outline: 0; border-color: #a8362a; box-shadow: 0 0 0 .2rem rgba(168, 54, 42, .15) }
-.qatt-login .note { margin: .8rem 0 0; font-size: .85rem; color: #5b4d3d }
-.qatt-login .note.error { color: #a8362a }
-.qatt-account { font-size: .85rem; color: #7b6c58 }
+.qatt-login .note { margin: .8rem 0 0; font-size: .85rem; color: var(--bs-secondary-color, #5b4d3d) }
+.qatt-login .note.error { color: var(--bs-danger-text-emphasis, #a8362a) }
+.qatt-account { font-size: .85rem; color: var(--bs-secondary-color, #7b6c58) }
 .qatt-account a { color: #a8362a; cursor: pointer; text-decoration: none }
 .qatt-account a:hover { text-decoration: underline }`;
 
