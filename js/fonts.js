@@ -17,6 +17,7 @@ const QATT_FONTS = [
   { family: "QATT Pen Light",        label: "Qatt.org Pen light",           file: "qatt-pen-light", admin: true },
   { family: "QATT Pen",              label: "Qatt.org Pen",                 file: "qatt-pen", admin: true },
   { family: "QATT Pen Medium",       label: "Qatt.org Pen medium",          file: "qatt-pen-medium", default: true },
+  { family: "QATT Pen Wide",         label: "Qatt.org Pen wide",            file: "qatt-pen-wide", admin: true },
   { family: "QATT Pen Cut ExtraLight", label: "Qatt.org Pen cut extra light", file: "qatt-pencut-extralight", admin: true },
   { family: "QATT Pen Cut Light",    label: "Qatt.org Pen cut light",       file: "qatt-pencut-light", admin: true },
   { family: "QATT Pen Cut",          label: "Qatt.org Pen cut",             file: "qatt-pencut", admin: true },
