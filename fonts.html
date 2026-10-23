@@ -176,7 +176,7 @@
   ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quốc', 'Âm', 'Tân', 'Tự'][i % 4], parser).trim(); });
 
   const render = () => {
-    const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser);   // the sample text until something is typed
+    const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser).replace(/\s+/g, '');   // the sample text until something is typed; no spaces between the QATT cells
     for (const q of samples) q.textContent = qatt;
   };
   $('#text').addEventListener('input', render);
