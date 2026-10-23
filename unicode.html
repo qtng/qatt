@@ -94,7 +94,6 @@
   <div class="alert alert-warning small mb-2" role="note">
       <strong>Draft – not part of the Unicode Standard.</strong>
       The block has no position yet: the code points use the provisional base <span class="cp" id="s-base"></span> (Private Use Area); only the offsets come from the proposal.
-      Glyphs drawn by <code>qatt.js</code>. Data: qtng/qatt-unicode, commit <span class="cp" id="s-commit"></span>.
     </div>
     <p class="text-center mb-0 d-flex justify-content-center gap-2"><a class="btn btn-outline-dark btn-sm" href="/unicode/draft/">View proposal draft</a></p>
 
@@ -371,7 +370,7 @@
   function refresh() { buildChart(); renderDetail(); renderList(); }
 
   // ---------- start ----------
-  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#s-commit').textContent = D.source.commit; $('#l-base').textContent = 'U+' + hex(base, 5);
+  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#l-base').textContent = 'U+' + hex(base, 5);
   buildLegend(); buildOverview(); buildCan(); buildTones(); buildProps(); refresh();
   const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true, false); };
   addEventListener('hashchange', fromHash); fromHash();
