@@ -264,6 +264,7 @@ window.Theme = window.Theme || (function() {
             { name: "Nôm converter", vi: "Bộ chuyển đổi", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
             { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
+            { name: "Bookshelf", vi: "Tủ sách", url: "/chunom/shelf/index.html", icon: "bi-journals" },
         ]
     };
     // what differs between the sites: brand, logo, icons, the colour of the bottom bar; own block first
