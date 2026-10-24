@@ -20,10 +20,9 @@
 @font-face { font-family: "Mansalva"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/reader/mansalva-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "Mansalva"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/reader/mansalva-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     .reader { --read-font: "Lexend", "QATT Pen Medium", sans-serif; --title-font: "Mansalva", "QATT Pen Medium", cursive; font-family: var(--read-font); max-width: 40rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-    .reader h1, .reader a, .reader select, .reader button { font-family: var(--read-font); }
+    .reader a, .reader select, .reader button { font-family: var(--read-font); }
     .reader article h2, .reader .list a .t, .reader label { font-family: var(--title-font); }
-    .reader .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-    .reader .bar h1 { font-size: 1rem; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; margin: 0; color: var(--bs-secondary-color); }
+    .reader .bar { display: flex; align-items: center; justify-content: space-between; min-height: 2.2rem; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
     .reader select { border: 0; border-bottom: 1px solid var(--bs-border-color); background: transparent; color: var(--bs-body-color); font-size: 1.05rem; padding: .2rem 1.6rem .2rem .1rem; border-radius: 0; }
     .reader .list { list-style: none; margin: 0; padding: 0; }
     .reader .list li { border-bottom: 1px solid var(--bs-border-color); }
@@ -32,8 +31,10 @@
     .reader .list .no { flex: 0 0 2rem; text-align: right; font-size: .85rem; color: var(--bs-tertiary-color); font-variant-numeric: tabular-nums; }
     .reader .list .draft { margin-left: auto; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--bs-tertiary-color); }
     .reader .empty { color: var(--bs-secondary-color); padding: 2rem 0; }
-    .reader .back { display: inline-block; color: var(--bs-secondary-color); text-decoration: none; font-size: .95rem; }
+    .reader .back { display: inline-block; color: var(--bs-secondary-color); text-decoration: none; font-size: 1.05rem; }
+    .reader .back[hidden] { display: none; }
     .reader .back:hover { color: var(--accent, var(--bs-link-color)); }
+    main.reader article h2 { border: 0; padding-bottom: 0; }   /* a theme may draw a line under h2 */
     .reader article h2 { font-size: 2.35rem; line-height: 1.25; font-weight: 400; margin: 1.4rem 0 1.6rem; text-align: center; text-shadow: 1px 2px 5px rgb(0 0 0 / 15%); }
     .reader article h2 small { display: block; font-size: .95rem; letter-spacing: .08em; color: var(--bs-secondary-color); }
     .reader .body { font-size: 1.15rem; line-height: 1.75; }
@@ -54,8 +55,10 @@
     .reader .empty-right .layer { left: .2em; }
     [data-bs-theme="dark"] .reader .layer { mix-blend-mode: screen; filter: grayscale(100%) contrast(400%) brightness(1.2) invert(1); }
     /* QATT glyphs by code (tt:…): characters of the QATT font, not drawings */
-    .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 2.6em; line-height: 1.5; min-width: 1.2em; text-align: center; }
-    .reader figure .layers, .reader figure .qatt-glyph { width: 6.5rem; padding: 1em; box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
+    .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 1.35em; line-height: 1.5; min-width: 1.2em; text-align: center; }   /* only a little larger than the Latin text */
+    .reader figure .layers, .reader figure .qatt-glyph { box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
+    .reader figure .layers { width: 6.5rem; padding: 1em; }
+    .reader figure .qatt-glyph { min-width: 2.2em; padding: .2em .8em; }
     .reader .pager { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; }
     .reader .pager a { color: var(--bs-body-color); text-decoration: none; max-width: 40%; }
     .reader .pager a:hover { color: var(--accent, var(--bs-link-color)); }
@@ -67,7 +70,7 @@
 <body>
   <main class="reader">
     <div class="bar">
-      <h1 data-vi="Đọc">Reader</h1>
+      <a class="back" id="back" href="#" hidden>← <span data-vi="Tất cả bài">All texts</span></a>
       <select id="group" aria-label="Collection" data-vi-aria-label="Bộ sưu tập" hidden></select>
     </div>
     <div id="view"><p class="empty" data-vi="Đang tải…">Loading…</p></div>
@@ -80,7 +83,7 @@
   (() => {
     const $ = s => document.querySelector(s);
     const DEFAULT_GROUP = 'thuphap';
-    const view = $('#view'), groupSelect = $('#group');
+    const view = $('#view'), groupSelect = $('#group'), back = $('#back');
     const t = (en, vi) => (window.Lang && Lang.t) ? Lang.t(en, vi) : en;
     const db = new SupabaseService();
     let slides = [], group = '';   // the slides of the chosen group, in order
@@ -180,6 +183,7 @@
 
     function showList() {
       document.title = 'Reader | Qatt.org';
+      back.hidden = true;
       view.replaceChildren();
       if (!slides.length) { view.append(el('p', 'empty', 'Nothing to read here yet.', 'Chưa có gì để đọc ở đây.')); return; }
       const ul = el('ul', 'list');
@@ -209,7 +213,8 @@
         prev ? link('', go(prev.id), '← ', el('span', '', 'Previous', 'Trước')) : el('span', 'gone', '.'),
         el('span', 'count', (i + 1) + ' / ' + slides.length),
         next ? link('', go(next.id), el('span', '', 'Next', 'Sau'), ' →') : el('span', 'gone', '.'));
-      view.append(link('back', go(), '← ', el('span', '', 'All texts', 'Tất cả bài')), art, pager);
+      back.href = go(); back.hidden = false;
+      view.append(art, pager);
       document.title = titleOf(s) + ' | Qatt.org';
       window.scrollTo(0, 0);
     }
