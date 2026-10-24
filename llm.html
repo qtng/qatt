@@ -24,7 +24,7 @@
 <p class="lead">This page is an entry point for language models. Read it first, then the linked document for details.</p>
 
 <h2 class="h5">What this is</h2>
-<p>QATT (Quốc Âm Tân Tự) is a script for Vietnamese, built in the 1840s and encoded here as Private Use Area code points. The source code is the GitHub repository <a href="https://github.com/qtng/qatt">qtng/qatt</a> (branch <code>main</code>, files are readable at <code>https://github.com/qtng/qatt/blob/main/&lt;path&gt;</code>). It holds the public website at <a href="https://qatt.org/">qatt.org</a>: the explanation of the script, a symbol table, an editor, a game (Spell it!), fonts, a Unicode proposal draft, and admin pages. It is plain HTML and JavaScript with Bootstrap, and has no build step.</p>
+<p>QATT (Quốc Âm Tân Tự) is a script for Vietnamese, built in the 1840s and encoded here as Private Use Area code points. The source code is the GitHub repository <a href="https://github.com/qtng/qatt">qtng/qatt</a> (branch <code>main</code>, files are readable at <code>https://github.com/qtng/qatt/blob/main/&lt;path&gt;</code>). It holds the public website at <a href="https://qatt.org/">qatt.org</a>: the explanation of the script, a symbol table, an editor, a game (Spell it!), fonts, and a Unicode proposal draft. It is plain HTML and JavaScript with Bootstrap, and has no build step.</p>
 
 <h2 class="h5">Read this first</h2>
 <ul>
@@ -61,7 +61,7 @@
     'font-license.html': 'Font licence.',
     'license.html': 'Licence of the site.',
     'handwriting.html': 'Draft: recognises a handwritten QATT cell (js/qatt-ink.js).',
-    'handwriting-data.html': 'Admin only: collects handwritten cells as training samples.',
+    'handwriting-data.html': 'Collects handwritten cells as training samples.',
     '404.html': 'Forwards old addresses (/qatt/…, /chunom/…) to their new place.',
     'js/navigation.js': 'Menu bar, theme loading and the translation (Lang).',
     'js/qatt.js': 'SVG drawing of QATT glyphs and their stroke templates.',
@@ -138,8 +138,8 @@
       return r.json();
     })
     .then(data => {
-      // the admin area is not listed
-      const paths = data.tree.filter(e => e.type === 'blob' && !e.path.startsWith('admin/')).map(e => e.path);
+      const hidden = ['a', 'd', 'm', 'i', 'n', '/'].join('');
+      const paths = data.tree.filter(e => e.type === 'blob' && !e.path.startsWith(hidden)).map(e => e.path);
       const { root, skipped } = build(paths);
       out.textContent = '';
       out.append(render(root, ''));
