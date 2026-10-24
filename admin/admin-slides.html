@@ -348,7 +348,8 @@
 
             async deleteSlide(id) {
                 if (!this.db) return;
-                await this.db.deleteSlide(id);
+                const { error } = await this.db.deleteSlide(id);
+                if (error) alert(error.message || String(error));
                 
                 // Prüfen, ob die Gruppe danach leer ist, und ggf. Dropdowns aktualisieren
                 await this.loadGroups();

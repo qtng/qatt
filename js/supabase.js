@@ -735,12 +735,15 @@ class SupabaseService {
     if (!this.user) return { error: "Auth required" };
     if (!id) return { error: "ID is required" };
 
-    const { error } = await this.client
+    // .select(): the rows that were deleted; none means the database refused it (the policy of db/slides.sql) without an error
+    const { data, error } = await this.client
       .from('slides')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select('id');
 
     if (error) console.error("Delete slide error:", error.message);
+    if (!error && !(data || []).length) return { error: { message: "Nothing was deleted (not your slide?)" } };
     return { error };
   }
 
