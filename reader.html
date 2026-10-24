@@ -48,9 +48,6 @@
     /* QATT glyphs by code (tt:…): characters of the QATT font, not drawings */
     .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 2.6em; line-height: 1.5; min-width: 1.2em; text-align: center; }
     .reader figure .layers, .reader figure .qatt-glyph { width: 6.5rem; padding: 1em; box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
-    .reader .english { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; line-height: 1.7; color: var(--bs-secondary-color); font-style: italic; }
-    .reader .toggle { background: none; border: 0; padding: 0; margin-top: 1.5rem; color: var(--bs-secondary-color); font-size: .95rem; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
-    .reader .toggle:hover { color: var(--accent, var(--bs-link-color)); }
     .reader .pager { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; }
     .reader .pager a { color: var(--bs-body-color); text-decoration: none; max-width: 40%; }
     .reader .pager a:hover { color: var(--accent, var(--bs-link-color)); }
@@ -160,8 +157,13 @@
     }
     const render = (text, into) => { const tokens = []; return clean(prepare(text, tokens), tokens, into); };
     const plain = text => { const d = document.createElement('div'); clean(prepare(text, []).replace(/<br\s*\/?>/gi, ' '), [], d); return d.textContent.replace(/\s+/g, ' ').trim(); };
+    // the text of a slide in the language of the menu (Lang): `content` is Vietnamese, `english` English; where the chosen one is missing the other is shown (English first)
+    const textOf = s => {
+      const vi = (s.content || '').trim() ? s.content : '', en = (s.english || '').trim() ? s.english : '';
+      return window.Lang && Lang.current === 'vi' ? (vi || en) : (en || vi);
+    };
     const heading = s => (s.title || '').split('#')[0];   // "Thanh Điệu #1": the part after # is for the order only
-    const titleOf = s => plain(heading(s)) || plain(s.content).slice(0, 60) || '—';
+    const titleOf = s => plain(heading(s)) || plain(textOf(s)).slice(0, 60) || '—';
 
     // --- the two views: the list and one text; the address says which (#group/id) ---
     const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };
@@ -191,14 +193,8 @@
       art.append(h);
       const cls = /^[\w\- ]*$/.test(s.classes || '') ? (s.classes || '') : '';
       const body = el('div', 'body ' + (cls.includes('text-start') ? cls : 'text-center ' + cls));   // centred unless the slide says text-start
-      render(s.content, body);
+      render(textOf(s), body);
       art.append(body);
-      if ((s.english || '').trim()) {
-        const box = el('div', 'english'); box.hidden = true; render(s.english, box);
-        const tg = el('button', 'toggle', 'English', 'Tiếng Anh'); tg.type = 'button';
-        tg.addEventListener('click', () => { box.hidden = !box.hidden; });
-        art.append(tg, box);
-      }
       const prev = slides[i - 1], next = slides[i + 1];
       const pager = el('nav', 'pager');
       pager.append(
@@ -239,6 +235,7 @@
 
     groupSelect.addEventListener('change', async () => { await load(groupSelect.value); location.hash = go(); showList(); });
     window.addEventListener('hashchange', route);
+    document.addEventListener('langchange', route);   // the language of the menu changed: draw the text again in it
     document.addEventListener('keydown', e => {   // arrows turn the page, Escape goes back to the list
       const [, id] = decodeURIComponent(location.hash.slice(1)).split('/');
       if (id == null || e.target.closest('select, input, textarea')) return;
