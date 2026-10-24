@@ -388,13 +388,21 @@ const QattWriter = (() => {
   }
   // QATT in any text field, without the editor around it: Telex is always on, Enter turns the word before the cursor into QATT characters (a space stays a space), the
   // cells stay whole. The field gets a font for the QATT characters. Needs the same scripts as mount() (ime.js of the Chunom site for Telex).
-  //   QattWriter.attach(document.querySelector('textarea'))
+  //   QattWriter.attach(document.querySelector('textarea'))   (also an <input>: there Enter converts the word before the cursor and does not send the form)
   function attach(field, options = {}) {
     if (!field || typeof VietnameseParser === 'undefined' || typeof QattText === 'undefined') return null;
     const parser = new VietnameseParser();
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
     field.style.fontFamily = 'system-ui, "QATT Pen Medium", sans-serif';   // the QATT font after the text font (before a generic family, or it is never used)
-    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: options.convertOn || 'enter' });
+    const core = wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: options.convertOn || 'enter' });
+    // a one-line field has no line break to convert on, and Enter would send the form: Enter converts the word before the cursor, and only without one it goes on as usual
+    if (field.tagName === 'INPUT') field.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' || e.isComposing || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || field.selectionStart !== field.selectionEnd) return;
+      if (!core.convertBefore(field.selectionStart)) return;
+      e.preventDefault();
+      if (ime) ime.hide();
+      core.tidy();
+    });
     return { field };
   }
   return { mount, attach };

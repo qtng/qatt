@@ -364,7 +364,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            ['slide-content', 'slide-english'].forEach(id => QattWriter.attach(document.getElementById(id)));
+            ['slide-title', 'slide-content', 'slide-english'].forEach(id => QattWriter.attach(document.getElementById(id)));
             const app = new SlidesAdminApp();
             setTimeout(() => app.init(), 200);
         });
