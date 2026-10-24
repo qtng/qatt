@@ -467,7 +467,9 @@ window.Theme = window.Theme || (function() {
         if (!/^\/admin\//.test(location.pathname) && !onChunom) {
             const sep = document.createTextNode(' · ');
             const shapes = document.createElement('a');
-            shapes.href = '/qatt.html';
+            const shapesHref = () => { shapes.href = Lang.current === 'vi' ? '/qatt-vi.html' : '/qatt.html'; };   // its Vietnamese copy in vi
+            shapesHref();
+            document.addEventListener('langchange', shapesHref);
             shapes.textContent = 'Quốc Âm Tân Tự';
             footer.append(sep, shapes);
         }
@@ -609,10 +611,11 @@ window.Theme = window.Theme || (function() {
         const markLang = () => langButtons.forEach(b => { const on = b.dataset.lang === Lang.current; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
         langButtons.forEach(b => b.addEventListener('click', () => {
             Lang.set(b.dataset.lang);
-            // vi.html is the Vietnamese copy of the homepage: EN goes to the English one
-            if (b.dataset.lang === 'en' && document.documentElement.getAttribute('data-page-lang') === 'vi') location.href = '/index.html';
-            // and VI on the English homepage goes to vi.html
-            else if (b.dataset.lang === 'vi' && !onChunom && /^\/(index\.html)?$/.test(location.pathname)) location.href = '/vi.html';
+            // a page with a copy in the other language (vi.html of the homepage, qatt-vi.html of qatt.html) names it in
+            // <link rel="alternate" hreflang="…">: EN | VI goes there (same origin, only the path of the link)
+            const twin = !onChunom && document.querySelector(`link[rel="alternate"][hreflang="${b.dataset.lang}"]`);
+            const path = twin && new URL(twin.href).pathname;
+            if (path && path !== location.pathname && !(path === '/' && location.pathname === '/index.html')) location.href = path + location.hash;
         }));
         document.addEventListener('langchange', markLang);
         markLang();
