@@ -10,3 +10,7 @@
 /* a button that only admins see (the buttons of the admin pages): bright yellow in every theme */
 .btn.admin-yellow { background: #ffe600 !important; color: #111 !important; border: 2px solid #111 !important; font-weight: 600; }
 .btn.admin-yellow:hover, .btn.admin-yellow:focus-visible { background: #fff176 !important; }
+
+/* a block in one language only: data-only="en" or "vi" on any tag; Lang (js/navigation.js) keeps <html lang> in step with the language,
+   and a page that is not Vietnamese counts as English (vi.html has lang="vi" in its HTML, so a crawler sees the right block too) */
+html[lang="vi"] [data-only="en"], html:not([lang="vi"]) [data-only="vi"] { display: none !important; }
