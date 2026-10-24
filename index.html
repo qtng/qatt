@@ -109,7 +109,7 @@
     tl.call(() => { bg.lastChild.textContent = TAN; mirror(); }, '<<');
     tl.call(() => p.classList.remove('latin'), '<<');
     tl.call(() => { px.textContent = TAN; bg.lastChild.textContent = ' '; mirror(); }, '+=800');
-    tl.speed = .8;   // 80%, the speed chosen for the scramble card of admin/intro.html
+    tl.speed = .8;   // 80%, the speed chosen for the scramble card of admin/animations.html
     tl.init();
     let on = false;
     new IntersectionObserver(e => { const v = e[0].isIntersecting; if (v && !on) { tl.play(); on = true; } if (!v && on) { tl.pause(); on = false; } }, { threshold: .25 }).observe(root);
