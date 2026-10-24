@@ -29,11 +29,25 @@
     .reader .back:hover { color: var(--accent, var(--bs-link-color)); }
     .reader article h2 { font-size: 2rem; line-height: 1.25; font-weight: 400; margin: 1.4rem 0 1.6rem; text-align: center; }
     .reader article h2 small { display: block; font-size: .95rem; letter-spacing: .08em; color: var(--bs-secondary-color); }
-    .reader .body { font-size: 1.3rem; line-height: 1.85; }
-    .reader .body p { margin: 0 0 1.2em; }
-    .reader .body figure { margin: 1.2em 0; display: flex; flex-wrap: wrap; gap: .6em 1.2em; }
-    .reader .body img { max-width: 100%; height: auto; border-radius: .4rem; }
-    .reader .body.text-center { text-align: center; }
+    .reader .body { font-size: 1.3rem; line-height: 1.8; }
+    .reader .body small, .reader .body .small { font-size: .9em; }
+    .reader .body b { color: var(--bs-emphasis-color); }
+    .reader .body figure { margin: 1.2em 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .6em 1.2em; }
+    .reader .body img:not(.layer) { display: block; max-width: 70%; height: auto; margin: 1em auto; border: 1px solid var(--bs-border-color); border-radius: 1000px; box-shadow: 4px 6px 12px rgb(0 0 0 / 10%); }
+    .reader .body var { display: inline-block; font-style: normal; line-height: 1em; padding: 2px 8px 4px; border: 1px solid var(--bs-border-color); border-radius: 100px; color: var(--bs-secondary-color); background: var(--bs-tertiary-bg); }
+    .reader .body button.reveal { font: inherit; font-size: 1.1rem; padding: .35rem 1.1rem; border: 1px solid var(--bs-border-color); border-radius: 100px; background: transparent; color: var(--bs-secondary-color); cursor: pointer; }
+    .reader .body button.reveal:hover { color: var(--accent, var(--bs-link-color)); border-color: currentColor; }
+    /* a QATT character drawn from picture layers (img/qatt/*.jpg, black on white), with its label below */
+    .reader .glyph { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 .25rem; }
+    .reader .glyph label { font-size: 1.4em; padding: 0 2px; }
+    .reader .layers { position: relative; display: inline-block; width: 3.15rem; aspect-ratio: 1 / 1; margin: .5em 0; text-align: center; }
+    .reader .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; filter: grayscale(100%) contrast(400%) brightness(1.2); }
+    .reader .empty-left .layer { left: -.75em; }
+    .reader .empty-right .layer { left: .2em; }
+    [data-bs-theme="dark"] .reader .layer { mix-blend-mode: screen; filter: grayscale(100%) contrast(400%) brightness(1.2) invert(1); }
+    /* QATT glyphs by code (tt:…): characters of the QATT font, not drawings */
+    .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 2.6em; line-height: 1.5; min-width: 1.2em; text-align: center; }
+    .reader figure .layers, .reader figure .qatt-glyph { width: 6.5rem; padding: 1em; box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
     .reader .english { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; line-height: 1.7; color: var(--bs-secondary-color); font-style: italic; }
     .reader .toggle { background: none; border: 0; padding: 0; margin-top: 1.5rem; color: var(--bs-secondary-color); font-size: .95rem; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
     .reader .toggle:hover { color: var(--accent, var(--bs-link-color)); }
@@ -56,6 +70,7 @@
 
   <script src="vendor/supabase/supabase.min.js"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/qatt-text.js"></script>
   <script>
   (() => {
     const $ = s => document.querySelector(s);
@@ -65,39 +80,70 @@
     const db = new SupabaseService();
     let slides = [], group = '';   // the slides of the chosen group, in order
 
-    // --- the text of a slide: the notation of the slides table, shown as plain reading text ---
-    // allowed in the HTML of a slide: these tags, and a class on them (no attributes, no links, no scripts)
-    const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB']);
-    const MARK = /\u0001(\d+)\u0001/g;
-    const imageUrl = u => /^(https?:\/\/|\/)/.test(u) ? u : 'img/' + u.replace(/^\.?\//, '');
-    const codeLike = w => /^[\w.\/+\-:,]+$/.test(w) && /[-+\/:]|^[a-z]+\d$/.test(w);
-    // [img:file] is a picture; [label code] is a glyph of the old slides, which is not drawn here, so only its label stays; {…} are codes
-    function prepare(text, images) {
+    // --- the text of a slide: the notation of the old slides app, see the table `slides` ---
+    // ←↑↓→ big arrows; blank line = line break; **bold**; ((a box)); [img:url] a picture; [#label: text] a button that reveals text;
+    // [label code] a QATT glyph: a code that starts with tt: (onset,rhyme,coda,tone) is set in the QATT font (QattText.syllable), else layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again) below it
+    // the HTML of a slide may use only these tags, and a class on them (no other attributes, no links, no scripts)
+    const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'BIG', 'VAR', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB', 'DIV']);
+    const IMG = 'img/qatt/';   // the pictures: relative names are in this folder (the old <base>)
+    const imageUrl = u => /^(https?:\/\/|\/)/.test(u) ? u : IMG + u.replace(/^\.?\//, '');
+    function prepare(text, tokens) {
+      const keep = tok => `\u0001${tokens.push(tok) - 1}\u0001`;
       return (text || '').replace(/\r/g, '')
-        .replace(/\[([^\]\n]*)\]/g, (all, inner) => {
-          if (/^img:/.test(inner)) { images.push(inner.slice(4).trim()); return `\u0001${images.length - 1}\u0001`; }
-          const words = inner.trim().split(/\s+/);
-          if (words.length && codeLike(words[words.length - 1])) words.pop();
-          return words.join(' ');
-        })
-        .replace(/\{[^}\n]*\}/g, '')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        .replace(/([←↑↓→])/g, '<big><big><b>&nbsp;$1&nbsp;</b></big></big>')
+        .replace(/\n\n+/g, '<br><br>')
+        .replace(/\*\*([^\n*]+)\*\*/g, '<b>$1</b>')
+        .replace(/\(\(([^\n)]+)\)\)/g, '<var>$1</var>')
+        .replace(/\[(.*?)\]/g, (all, inner) => {
+          const c = inner.trim();
+          if (c.startsWith('img:')) return keep({ t: 'img', url: c.slice(4).trim() });
+          if (c.startsWith('#')) {
+            const i = c.indexOf(':');
+            return keep({ t: 'reveal', label: i < 0 ? 'Hiện' : c.slice(1, i).trim(), text: i < 0 ? c.slice(1).trim() : c.slice(i + 1).trim() });
+          }
+          const sp = c.lastIndexOf(' ');
+          const label = sp < 0 ? '' : c.slice(0, sp).trim().replace(/\{/g, '[').replace(/\}/g, ']');
+          const def = sp < 0 ? c : c.slice(sp + 1).trim();
+          return keep(def.startsWith('tt:') ? { t: 'tt', code: def.slice(3), label } : { t: 'glyph', parts: def.split(/[+:|]/), label });
+        });
     }
-    function blocks(text) {
-      return text.split(/\n{2,}/).map(b => b.trim()).filter(Boolean).map(b => /^<(figure|ul|ol)\b/i.test(b) ? b : '<p>' + b.replace(/\n/g, '<br>') + '</p>').join('');
+    const speak = text => { try { const u = new SpeechSynthesisUtterance(text); u.lang = 'vi-VN'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { /* no speech: fine */ } };
+    function build(tok) {
+      if (tok.t === 'img') {
+        const img = document.createElement('img'); img.src = imageUrl(tok.url); img.alt = ''; img.loading = 'lazy';
+        img.onerror = () => img.remove();
+        return img;
+      }
+      if (tok.t === 'reveal') {
+        const b = el('button', 'reveal', tok.label); b.type = 'button';
+        b.addEventListener('click', () => { b.textContent = tok.text; speak(tok.text); b.blur(); });
+        return b;
+      }
+      let glyph;
+      if (tok.t === 'tt') glyph = el('span', 'qatt-glyph', (typeof QattText !== 'undefined' && QattText.syllable(tok.code)) || tok.code);
+      else {
+        const parts = tok.parts.slice();
+        if (parts.length === 1 && parts[0].endsWith('.jpg')) parts[0] = '../can/' + parts[0].replace('.jpg', '');
+        glyph = el('div', 'layers' + (parts.some(p => p.includes('left')) ? '' : ' empty-left') + (parts.some(p => p.includes('right')) ? '' : ' empty-right'));
+        for (const p of parts) { const img = el('img', 'layer'); img.src = `${IMG}${p}.jpg?6`; img.alt = p; glyph.append(img); }
+      }
+      if (!tok.label) return glyph;
+      const box = el('div', 'glyph'), label = el('label');
+      render(tok.label, label);
+      box.append(glyph, label);
+      return box;
     }
-    function clean(html, images, into) {
+    function clean(html, tokens, into) {
       const doc = new DOMParser().parseFromString('<body>' + html, 'text/html');
       const walk = (from, to) => {
         for (const n of from.childNodes) {
           if (n.nodeType === 3) {
-            let last = 0, m; MARK.lastIndex = 0;
+            let last = 0, m; const MARK = /\u0001(\d+)\u0001/g;   // one for each text node: build() renders labels inside the loop
             const s = n.textContent;
             while ((m = MARK.exec(s))) {
               to.append(s.slice(last, m.index));
-              const img = document.createElement('img'); img.src = imageUrl(images[+m[1]]); img.alt = ''; img.loading = 'lazy';
-              img.onerror = () => img.remove();
-              to.append(img); last = m.index + m[0].length;
+              if (tokens[+m[1]]) to.append(build(tokens[+m[1]]));
+              last = m.index + m[0].length;
             }
             to.append(s.slice(last));
           } else if (n.nodeType === 1) {
@@ -112,9 +158,10 @@
       walk(doc.body, into);
       return into;
     }
-    const render = (text, into) => { const images = []; return clean(blocks(prepare(text, images)), images, into); };
-    const plain = html => { const d = document.createElement('div'); clean(html.replace(/<br\s*\/?>/gi, ' '), [], d); return d.textContent.replace(/\s+/g, ' ').trim(); };
-    const titleOf = s => plain(s.title || '') || plain(prepare(s.content, [])).slice(0, 60) || '—';
+    const render = (text, into) => { const tokens = []; return clean(prepare(text, tokens), tokens, into); };
+    const plain = text => { const d = document.createElement('div'); clean(prepare(text, []).replace(/<br\s*\/?>/gi, ' '), [], d); return d.textContent.replace(/\s+/g, ' ').trim(); };
+    const heading = s => (s.title || '').split('#')[0];   // "Thanh Điệu #1": the part after # is for the order only
+    const titleOf = s => plain(heading(s)) || plain(s.content).slice(0, 60) || '—';
 
     // --- the two views: the list and one text; the address says which (#group/id) ---
     const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };
@@ -139,10 +186,11 @@
       const s = slides[i];
       view.replaceChildren();
       const art = el('article'), h = el('h2');
-      render(s.title || '', h);
+      render(heading(s), h);
       if (!h.textContent.trim()) h.textContent = '';
       art.append(h);
-      const body = el('div', 'body ' + (/^[\w\- ]*$/.test(s.classes || '') ? (s.classes || '') : ''));
+      const cls = /^[\w\- ]*$/.test(s.classes || '') ? (s.classes || '') : '';
+      const body = el('div', 'body ' + (cls.includes('text-start') ? cls : 'text-center ' + cls));   // centred unless the slide says text-start
       render(s.content, body);
       art.append(body);
       if ((s.english || '').trim()) {
