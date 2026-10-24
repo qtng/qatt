@@ -39,7 +39,6 @@
     .line { display: flex; align-items: baseline; gap: .8rem; width: max-content; }
     .line .px { flex: 0 0 2.2rem; font-size: .7rem; text-align: right; font-variant-numeric: tabular-nums; }
     .line .q { white-space: nowrap; line-height: 1.5; }   /* room for the tone marks above and below */
-    .line .q .cjk { font-family: "Noto Sans CJK TC", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK JP", sans-serif; margin-right: .2em; }   /* 國音 before the QATT text: the size of the font against CJK */
     .info { font-size: .82rem; line-height: 1.45; }
     .info p { margin: 0 0 .7rem; }
     .info dl { display: grid; grid-template-columns: auto 1fr; gap: .15rem .8rem; margin: 0 0 1rem; }
@@ -134,7 +133,8 @@
     const left = el('div', 'samples');
     for (const px of SIZES) {
       const line = el('div', 'line'), q = el('div', 'q');
-      q.style.cssText = `font-family: "${f.family}"; font-size: ${px}px`;
+      q.style.cssText = `font-family: "${f.family}", "Noto Sans CJK TC", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; font-size: ${px}px`;   // the CJK characters 國音 (below) come from the fallback, in the same text as the QATT cells
+      q.lang = 'zh-Hant';
       line.append(el('span', 'px muted', px), q);
       left.append(line); samples.push(q);
     }
@@ -179,7 +179,7 @@
 
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser).replace(/\s+/g, '');   // the sample text until something is typed; no spaces between the QATT cells
-    for (const q of samples) { const cjk = el('span', 'cjk', '國音'); cjk.lang = 'zh-Hant'; q.replaceChildren(cjk, qatt); }
+    for (const q of samples) q.textContent = '國音' + qatt;   // 國音 and the QATT cells in one text, to compare size, alignment and spacing
   };
   $('#text').addEventListener('input', render);
   render();
