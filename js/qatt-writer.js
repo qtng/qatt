@@ -9,6 +9,8 @@ The writer: a text field in which Quốc Ngữ becomes Quốc Âm Tân Tự (QAT
           'nom'   the QATT editor: QATT is always on, the switch "Chữ Nôm" turns the candidate list on and off (off at the start)
   storage the prefix of the keys in localStorage (the size and the switch are kept)
 
+  QattWriter.attach(textarea)   QATT in a single text field (admin/admin-slides.html): Telex always on, Enter converts the word before the cursor, no bar, no switches
+
 Needs (loaded before) js/parser.js, js/qatt-text.js, js/fonts.js (the fonts of the list) and, for Telex and the Nôm candidates, ime.js of the Chunom site (VietIme). The page
 may put an element with the class `qatt-only` anywhere: it is shown while QATT is on (the class `qatt-on` on <body>).
 */
@@ -103,6 +105,134 @@ const QattWriter = (() => {
     </div>
     <div id="status" class="status mt-4"></div>`;
 
+  const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
+  const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
+  const WINDOW = 64;
+
+  // The behaviour of QATT in a text field (the editor and every field of `attach`): the word before the cursor becomes QATT characters, the cells stay whole (the cursor does not
+  // go inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
+  //   o.parser     the VietnameseParser (decoding)
+  //   o.on()       whether QATT is on now
+  //   o.refresh()  called after every change
+  //   o.converted() called when a word became QATT (the editor hides its Nôm candidates)
+  //   o.convertOn  'any' (the default): a space, any other character that is no letter, and Enter convert the word before it; 'enter': Enter only
+  function wire(typer, o) {
+    const { parser } = o;
+    // the word that ends right before `end` becomes QATT characters (if there are any)
+    const convertBefore = end => {
+      const m = WORD_END.exec(typer.value.slice(0, end));
+      const text = m && QattText.word(m[0], parser);
+      if (!text) return false;
+      const start = end - m[0].length, caret = typer.selectionStart;
+      typer.setRangeText(text, start, end, 'end');
+      const at = caret + text.length - m[0].length;
+      typer.setSelectionRange(at, at);
+      return true;
+    };
+
+    // ----- keeping the cells whole -----
+    // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
+    const cellAt = (text, pos, which) => {
+      const from = Math.max(0, pos - WINDOW), part = text.slice(from, pos + WINDOW);
+      for (const m of part.matchAll(QattText.CELL_ANY)) {
+        const start = from + m.index, end = start + m[0].length;
+        if (which === 'before' ? (start < pos && pos <= end) : which === 'after' ? (start <= pos && pos < end) : (start < pos && pos < end)) return { start, end };
+      }
+      return null;
+    };
+    // removes the joiners and combiners that join nothing: a joiner needs a letter that is still an onset before it and a letter after it, a combiner a letter on both sides
+    const tidy = () => {
+      const text = typer.value, caret = typer.selectionStart, end = typer.selectionEnd;
+      const cps = Array.from(text, ch => ch.codePointAt(0));
+      let out = '', open = false, prev = 0, i = 0, dropBeforeStart = 0, dropBeforeEnd = 0;
+      cps.forEach((c, k) => {
+        const next = cps[k + 1], len = c > 0xFFFF ? 2 : 1;
+        let keep = true;
+        if (LETTER(c)) open = prev !== JOINER && prev !== COMBINER;
+        else if (c === JOINER) { keep = open && LETTER(next); open = false; }
+        else if (c === COMBINER) { keep = LETTER(prev) && LETTER(next); open = false; }
+        else open = false;
+        if (keep) { out += String.fromCodePoint(c); prev = c; }
+        else { if (i < caret) dropBeforeStart += len; if (i < end) dropBeforeEnd += len; }
+        i += len;
+      });
+      if (out === text) return;
+      typer.value = out;
+      typer.setSelectionRange(caret - dropBeforeStart, end - dropBeforeEnd);
+    };
+
+    // the text as it was before the last edit, to repair a deletion that cut a cell in two (keyboards that bypass the Backspace handler below)
+    let before = '';
+    typer.addEventListener('beforeinput', () => { before = typer.value; });
+    const repairDeletion = () => {
+      const fixed = QattText.repairDeletion(before, typer.value, typer.selectionStart);
+      if (!fixed) return;
+      typer.value = fixed.value;
+      typer.setSelectionRange(fixed.caret, fixed.caret);
+    };
+
+    // Backspace and Delete remove a whole cell
+    typer.addEventListener('beforeinput', e => {
+      if (!o.on() || e.isComposing || (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward')) return;
+      const pos = typer.selectionStart;
+      if (pos !== typer.selectionEnd) return;
+      const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
+      if (!cell || typer.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
+      e.preventDefault();
+      typer.setRangeText('', cell.start, cell.end, 'end');
+      typer.setSelectionRange(cell.start, cell.start);
+      tidy();
+      o.refresh();
+    });
+
+    // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
+    let lastPos = 0;
+    const snap = () => {
+      if (!o.on() || document.activeElement !== typer) return;
+      let a = typer.selectionStart, b = typer.selectionEnd;
+      if (a === b) {
+        const cell = cellAt(typer.value, a);
+        if (cell) a = b = a > lastPos ? cell.end : cell.start;
+      } else {
+        a = cellAt(typer.value, a)?.start ?? a;
+        b = cellAt(typer.value, b)?.end ?? b;
+      }
+      if (a !== typer.selectionStart || b !== typer.selectionEnd) typer.setSelectionRange(a, b, typer.selectionDirection);
+      lastPos = typer.selectionStart;
+    };
+
+    // The character just typed ends the word before it. Space and Enter are swallowed when the word was converted (the cells are squares,
+    // there is no space between them); any other character stays.
+    const flush = (length, swallow) => {
+      const pos = typer.selectionStart;
+      if (pos !== typer.selectionEnd || pos < length) return;
+      if (!NOT_LETTER.test(typer.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
+      o.converted();   // the word is QATT now: no Nôm candidates
+      if (!swallow) return;
+      const at = typer.selectionStart;
+      typer.setRangeText('', at - length, at, 'end');
+    };
+    typer.addEventListener('input', e => {
+      if (!o.on()) return;
+      repairDeletion();
+      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
+      else if (o.convertOn !== 'enter' && !e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
+      if (!e.isComposing) tidy();
+      o.refresh();
+    });
+    // keyboards that compose whole words (Android): the space comes with the end of the composition
+    typer.addEventListener('compositionend', e => setTimeout(() => {
+      if (!o.on()) return;
+      if (o.convertOn !== 'enter' && e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)));
+      tidy();
+      o.refresh();
+    }, 0));
+
+
+    document.addEventListener('selectionchange', snap);
+    return { convertBefore, tidy };
+  }
+
   function mount(root, options = {}) {
     const mode = options.switch === 'nom' ? 'nom' : 'qatt';
     const prefix = options.storage || 'qatt_writer_';
@@ -150,7 +280,6 @@ const QattWriter = (() => {
     heading(decoding, 'Choose QATT decoding', 'Lựa chọn cách giải mã');
     heading(font, 'Choose QATT font', 'Lựa chọn phông chữ');
 
-    const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
 
     // QATT characters are in the private use area: the field needs a QATT font in front of the Nôm fonts, also with QATT off (existing QATT characters keep their look)
     function applyFont() {
@@ -183,118 +312,7 @@ const QattWriter = (() => {
     }
     modeBox.addEventListener('change', () => { store.set('on', modeBox.checked); setState(); });   // kept only when somebody chose it
 
-    // the word that ends right before `end` becomes QATT characters (if there are any)
-    const convertBefore = end => {
-      const m = WORD_END.exec(typer.value.slice(0, end));
-      const text = m && QattText.word(m[0], parser);
-      if (!text) return false;
-      const start = end - m[0].length, caret = typer.selectionStart;
-      typer.setRangeText(text, start, end, 'end');
-      const at = caret + text.length - m[0].length;
-      typer.setSelectionRange(at, at);
-      return true;
-    };
-
-    // ----- keeping the cells whole -----
-    // A cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it.
-    const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;
-    const WINDOW = 64;
-    // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
-    const cellAt = (text, pos, which) => {
-      const from = Math.max(0, pos - WINDOW), part = text.slice(from, pos + WINDOW);
-      for (const m of part.matchAll(QattText.CELL_ANY)) {
-        const start = from + m.index, end = start + m[0].length;
-        if (which === 'before' ? (start < pos && pos <= end) : which === 'after' ? (start <= pos && pos < end) : (start < pos && pos < end)) return { start, end };
-      }
-      return null;
-    };
-    // removes the joiners and combiners that join nothing: a joiner needs a letter that is still an onset before it and a letter after it, a combiner a letter on both sides
-    const tidy = () => {
-      const text = typer.value, caret = typer.selectionStart, end = typer.selectionEnd;
-      const cps = Array.from(text, ch => ch.codePointAt(0));
-      let out = '', open = false, prev = 0, i = 0, dropBeforeStart = 0, dropBeforeEnd = 0;
-      cps.forEach((c, k) => {
-        const next = cps[k + 1], len = c > 0xFFFF ? 2 : 1;
-        let keep = true;
-        if (LETTER(c)) open = prev !== JOINER && prev !== COMBINER;
-        else if (c === JOINER) { keep = open && LETTER(next); open = false; }
-        else if (c === COMBINER) { keep = LETTER(prev) && LETTER(next); open = false; }
-        else open = false;
-        if (keep) { out += String.fromCodePoint(c); prev = c; }
-        else { if (i < caret) dropBeforeStart += len; if (i < end) dropBeforeEnd += len; }
-        i += len;
-      });
-      if (out === text) return;
-      typer.value = out;
-      typer.setSelectionRange(caret - dropBeforeStart, end - dropBeforeEnd);
-    };
-
-    // the text as it was before the last edit, to repair a deletion that cut a cell in two (keyboards that bypass the Backspace handler below)
-    let before = '';
-    typer.addEventListener('beforeinput', () => { before = typer.value; });
-    const repairDeletion = () => {
-      const fixed = QattText.repairDeletion(before, typer.value, typer.selectionStart);
-      if (!fixed) return;
-      typer.value = fixed.value;
-      typer.setSelectionRange(fixed.caret, fixed.caret);
-    };
-
-    // Backspace and Delete remove a whole cell
-    typer.addEventListener('beforeinput', e => {
-      if (!qatt || e.isComposing || (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward')) return;
-      const pos = typer.selectionStart;
-      if (pos !== typer.selectionEnd) return;
-      const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
-      if (!cell || typer.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
-      e.preventDefault();
-      typer.setRangeText('', cell.start, cell.end, 'end');
-      typer.setSelectionRange(cell.start, cell.start);
-      tidy();
-      refresh();
-    });
-
-    // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
-    let lastPos = 0;
-    const snap = () => {
-      if (!qatt || document.activeElement !== typer) return;
-      let a = typer.selectionStart, b = typer.selectionEnd;
-      if (a === b) {
-        const cell = cellAt(typer.value, a);
-        if (cell) a = b = a > lastPos ? cell.end : cell.start;
-      } else {
-        a = cellAt(typer.value, a)?.start ?? a;
-        b = cellAt(typer.value, b)?.end ?? b;
-      }
-      if (a !== typer.selectionStart || b !== typer.selectionEnd) typer.setSelectionRange(a, b, typer.selectionDirection);
-      lastPos = typer.selectionStart;
-    };
-
-    // The character just typed ends the word before it. Space and Enter are swallowed when the word was converted (the cells are squares,
-    // there is no space between them); any other character stays.
-    const flush = (length, swallow) => {
-      const pos = typer.selectionStart;
-      if (pos !== typer.selectionEnd || pos < length) return;
-      if (!NOT_LETTER.test(typer.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
-      if (ime) ime.hide();   // the word is QATT now: no Nôm candidates
-      if (!swallow) return;
-      const at = typer.selectionStart;
-      typer.setRangeText('', at - length, at, 'end');
-    };
-    typer.addEventListener('input', e => {
-      if (!qatt) return;
-      repairDeletion();
-      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
-      else if (!e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
-      if (!e.isComposing) tidy();
-      refresh();
-    });
-    // keyboards that compose whole words (Android): the space comes with the end of the composition
-    typer.addEventListener('compositionend', e => setTimeout(() => {
-      if (!qatt) return;
-      if (e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)));
-      tidy();
-      refresh();
-    }, 0));
+    wire(typer, { parser, on: () => qatt, refresh: () => refresh(), converted: () => ime && ime.hide(), convertOn: 'any' });
 
     // what depends on the text and the cursor: the Tham Thư button
     function refresh() { showTham(); }
@@ -321,7 +339,7 @@ const QattWriter = (() => {
       typer.setSelectionRange(caret + 2, caret + 2);   // behind the same characters
       refresh();
     });
-    document.addEventListener('selectionchange', () => { snap(); if (document.activeElement === typer) refresh(); });
+    document.addEventListener('selectionchange', () => { if (document.activeElement === typer) refresh(); });
 
     // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
     // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
@@ -368,5 +386,24 @@ const QattWriter = (() => {
     setState();
     return { field: typer };
   }
-  return { mount };
+  // QATT in any text field, without the editor around it: Telex is always on, Enter turns the word before the cursor into QATT characters (a space stays a space), the
+  // cells stay whole. The field gets a font for the QATT characters. Needs the same scripts as mount() (ime.js of the Chunom site for Telex).
+  //   QattWriter.attach(document.querySelector('textarea'))   (also an <input>: there Enter converts the word before the cursor and does not send the form)
+  function attach(field, options = {}) {
+    if (!field || typeof VietnameseParser === 'undefined' || typeof QattText === 'undefined') return null;
+    const parser = new VietnameseParser();
+    const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
+    field.style.fontFamily = 'system-ui, "QATT Pen Medium", sans-serif';   // the QATT font after the text font (before a generic family, or it is never used)
+    const core = wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: options.convertOn || 'enter' });
+    // a one-line field has no line break to convert on, and Enter would send the form: Enter converts the word before the cursor, and only without one it goes on as usual
+    if (field.tagName === 'INPUT') field.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' || e.isComposing || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || field.selectionStart !== field.selectionEnd) return;
+      if (!core.convertBefore(field.selectionStart)) return;
+      e.preventDefault();
+      if (ime) ime.hide();
+      core.tidy();
+    });
+    return { field };
+  }
+  return { mount, attach };
 })();
