@@ -6,6 +6,7 @@ import re, html, pathlib
 root = pathlib.Path(__file__).resolve().parent.parent
 s = (root / 'index.html').read_text(encoding='utf-8')
 s = s.replace('<html lang="en">', '<html lang="vi" data-page-lang="vi">', 1)
+s = s.replace('href="qatt.html"', 'href="qatt-vi.html"')   # the Vietnamese copy of the page about the script
 
 # tags with data-vi and no tags inside: the English text becomes the Vietnamese one
 def tag(m):
