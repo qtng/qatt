@@ -113,7 +113,7 @@ window.Lang = window.Lang || (function() {
 // Day and night (where a theme can be chosen): by the clock of the visitor it is night from NIGHT_START to DAY_START o'clock (22:00 to 06:00, in Vietnam 18:00 to 06:00, see NIGHT_RULES) and the theme "nocturne" is shown instead of the chosen one.
 // The icon in the menu bar (sun by day, moon by night) switches by hand; that choice lasts only until the next change between day and night: localStorage.daynight1 =
 // {"mode":"day"|"night","key":"2026-10-21n"} (key: the date the period began and d/n; a night that began yesterday evening is still "yesterday n"), void when the key is no longer the current one.
-// Only admins can use the icon; for everybody else the clock decides (a stored choice is ignored).
+// Everybody can use the icon; without a choice (or after the period it was made for) the clock decides. Only the choice of a theme (the palette button) is for admins.
 //   Theme.dayNight      { available, canToggle, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
 window.Theme = window.Theme || (function() {
     const KEY = "theme1";   // the key was "theme" before: a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
@@ -148,12 +148,8 @@ window.Theme = window.Theme || (function() {
         if (h < DAY_START) { const y = new Date(d); y.setDate(y.getDate() - 1); return { night: true, key: ymd(y) + "n" }; }
         return { night: false, key: ymd(d) + "d" };
     };
-    // only an admin (app_metadata.is_admin in the session of this browser) can switch day and night by hand; for everybody else the clock decides
-    const isAdmin = () => {
-        try { const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user; return !!(u && u.app_metadata && u.app_metadata.is_admin === true); }
-        catch (e) { return false; }
-    };
-    const override = () => { if (!isAdmin()) return null; try { const o = JSON.parse(localStorage.getItem(DAY_KEY)); return o && (o.mode === "day" || o.mode === "night") && typeof o.key === "string" ? o : null; } catch (e) { return null; } };
+    // everybody can switch day and night by hand; the choice holds until the next change between day and night, then the clock decides again
+    const override = () => { try { const o = JSON.parse(localStorage.getItem(DAY_KEY)); return o && (o.mode === "day" || o.mode === "night") && typeof o.key === "string" ? o : null; } catch (e) { return null; } };
     // night now: the manual choice while it is of this period (same key), else the clock
     const isNight = () => { const p = phase(new Date()), o = override(); return o && o.key === p.key ? o.mode === "night" : p.night; };
     const pick = () => autoNight && !pinned && isNight() ? NIGHT_THEME : chosen;
@@ -220,9 +216,9 @@ window.Theme = window.Theme || (function() {
         dayNight: {
             get available() { return autoNight; },
             get night() { return autoNight && !pinned && isNight(); },
-            get canToggle() { return autoNight && isAdmin(); },
+            get canToggle() { return autoNight; },
             toggle() {
-                if (!autoNight || !isAdmin()) return;
+                if (!autoNight) return;
                 const to = isNight() && !pinned ? "day" : "night";
                 pinned = false;
                 setOverride(to);
@@ -355,7 +351,7 @@ window.Theme = window.Theme || (function() {
             .daynight-switch { background: none; border: 0; padding: .25rem .35rem; margin-right: .3rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
             .daynight-switch:hover { color: #fff; }
             .daynight-switch[hidden] { display: none; }
-            .daynight-switch:disabled { cursor: default; opacity: 1; }   /* not an admin: the icon only shows the time of day */
+            .daynight-switch:disabled { cursor: default; opacity: 1; }   /* where the night theme is not used at all (no choice of themes): the icon only shows the time of day */
             .daynight-switch:disabled:hover { color: rgba(255, 255, 255, .6); }
             .daynight-switch.night { color: #ffe600; }   /* the moon is yellow like the admin icons, the sun is not */
             .daynight-switch.night:hover:not(:disabled) { color: #fff59d; }
