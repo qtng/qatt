@@ -58,7 +58,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label small">Content</label>
+                                <label class="form-label small">Content <span class="text-body-secondary">(Telex; <b>Enter</b> turns the word before the cursor into QATT)</span></label>
                                 <textarea id="slide-content" class="form-control" rows="15"></textarea>
                             </div>
 
@@ -112,6 +112,12 @@
     <script src="../vendor/supabase/supabase.min.js"></script>
     <script src="/js/navigation.js"></script>
     <script src="/js/supabase.js"></script>
+    <!-- QATT in the text fields: Telex is on, Enter turns the word before the cursor into QATT characters (js/qatt-writer.js, attach) -->
+    <script src="/js/parser.js"></script>
+    <script src="/js/qatt-text.js"></script>
+    <script src="/js/fonts.js"></script>
+    <script defer src="https://chunom.org/chunom/js/ime.js"></script>
+    <script src="/js/qatt-writer.js?v=4"></script>
 
     <!-- App Logik -->
     <script>
@@ -358,6 +364,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            ['slide-content', 'slide-english'].forEach(id => QattWriter.attach(document.getElementById(id)));
             const app = new SlidesAdminApp();
             setTimeout(() => app.init(), 200);
         });
