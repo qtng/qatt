@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Reader | Qatt.org</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/fonts.js"></script>
+  <style>
+    /* the font of the texts: a book face first, QATT Pen Medium for the QATT characters that it does not have (before the generic family, or it would never be used) */
+    .reader { --read-font: Georgia, "Noto Serif", "Times New Roman", "QATT Pen Medium", serif; font-family: var(--read-font); max-width: 40rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    .reader h1, .reader h2, .reader a, .reader select, .reader button { font-family: var(--read-font); }
+    .reader .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .reader .bar h1 { font-size: 1rem; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; margin: 0; color: var(--bs-secondary-color); }
+    .reader select { border: 0; border-bottom: 1px solid var(--bs-border-color); background: transparent; color: var(--bs-body-color); font-size: 1.05rem; padding: .2rem 1.6rem .2rem .1rem; border-radius: 0; }
+    .reader .list { list-style: none; margin: 0; padding: 0; }
+    .reader .list li { border-bottom: 1px solid var(--bs-border-color); }
+    .reader .list a { display: flex; align-items: baseline; gap: 1rem; padding: .95rem .2rem; text-decoration: none; color: var(--bs-body-color); font-size: 1.3rem; line-height: 1.35; }
+    .reader .list a:hover, .reader .list a:focus-visible { color: var(--accent, var(--bs-link-color)); }
+    .reader .list .no { flex: 0 0 2rem; text-align: right; font-size: .85rem; color: var(--bs-tertiary-color); font-variant-numeric: tabular-nums; }
+    .reader .list .draft { margin-left: auto; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--bs-tertiary-color); }
+    .reader .empty { color: var(--bs-secondary-color); padding: 2rem 0; }
+    .reader .back { display: inline-block; color: var(--bs-secondary-color); text-decoration: none; font-size: .95rem; }
+    .reader .back:hover { color: var(--accent, var(--bs-link-color)); }
+    .reader article h2 { font-size: 2rem; line-height: 1.25; font-weight: 400; margin: 1.4rem 0 1.6rem; text-align: center; }
+    .reader article h2 small { display: block; font-size: .95rem; letter-spacing: .08em; color: var(--bs-secondary-color); }
+    .reader .body { font-size: 1.3rem; line-height: 1.8; }
+    .reader .body small, .reader .body .small { font-size: .9em; }
+    .reader .body b { color: var(--bs-emphasis-color); }
+    .reader .body figure { margin: 1.2em 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .6em 1.2em; }
+    .reader .body img:not(.layer) { display: block; max-width: 70%; height: auto; margin: 1em auto; border: 1px solid var(--bs-border-color); border-radius: 1000px; box-shadow: 4px 6px 12px rgb(0 0 0 / 10%); }
+    .reader .body var { display: inline-block; font-style: normal; line-height: 1em; padding: 2px 8px 4px; border: 1px solid var(--bs-border-color); border-radius: 100px; color: var(--bs-secondary-color); background: var(--bs-tertiary-bg); }
+    .reader .body button.reveal { font: inherit; font-size: 1.1rem; padding: .35rem 1.1rem; border: 1px solid var(--bs-border-color); border-radius: 100px; background: transparent; color: var(--bs-secondary-color); cursor: pointer; }
+    .reader .body button.reveal:hover { color: var(--accent, var(--bs-link-color)); border-color: currentColor; }
+    /* a QATT character drawn from picture layers (img/qatt/*.jpg, black on white), with its label below */
+    .reader .glyph { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 .25rem; }
+    .reader .glyph label { font-size: 1.4em; padding: 0 2px; }
+    .reader .layers { position: relative; display: inline-block; width: 3.15rem; aspect-ratio: 1 / 1; margin: .5em 0; text-align: center; }
+    .reader .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; filter: grayscale(100%) contrast(400%) brightness(1.2); }
+    .reader .empty-left .layer { left: -.75em; }
+    .reader .empty-right .layer { left: .2em; }
+    [data-bs-theme="dark"] .reader .layer { mix-blend-mode: screen; filter: grayscale(100%) contrast(400%) brightness(1.2) invert(1); }
+    /* QATT glyphs by code (tt:…): characters of the QATT font, not drawings */
+    .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 2.6em; line-height: 1.5; min-width: 1.2em; text-align: center; }
+    .reader figure .layers, .reader figure .qatt-glyph { width: 6.5rem; padding: 1em; box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
+    .reader .pager { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; }
+    .reader .pager a { color: var(--bs-body-color); text-decoration: none; max-width: 40%; }
+    .reader .pager a:hover { color: var(--accent, var(--bs-link-color)); }
+    .reader .pager .count { color: var(--bs-tertiary-color); font-size: .85rem; font-variant-numeric: tabular-nums; }
+    .reader .pager .gone { visibility: hidden; }
+    @media (max-width: 575.98px) { .reader .body { font-size: 1.2rem; } .reader article h2 { font-size: 1.7rem; } }
+  </style>
+</head>
+<body>
+  <main class="reader">
+    <div class="bar">
+      <h1 data-vi="Đọc">Reader</h1>
+      <select id="group" aria-label="Collection" data-vi-aria-label="Bộ sưu tập" hidden></select>
+    </div>
+    <div id="view"><p class="empty" data-vi="Đang tải…">Loading…</p></div>
+  </main>
+
+  <script src="vendor/supabase/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/qatt-text.js"></script>
+  <script>
+  (() => {
+    const $ = s => document.querySelector(s);
+    const DEFAULT_GROUP = 'thuphap';
+    const view = $('#view'), groupSelect = $('#group');
+    const t = (en, vi) => (window.Lang && Lang.t) ? Lang.t(en, vi) : en;
+    const db = new SupabaseService();
+    let slides = [], group = '';   // the slides of the chosen group, in order
+
+    // --- the text of a slide: the notation of the old slides app, see the table `slides` ---
+    // ←↑↓→ big arrows; blank line = line break; **bold**; ((a box)); [img:url] a picture; [#label: text] a button that reveals text;
+    // [label code] a QATT glyph: a code that starts with tt: (onset,rhyme,coda,tone) is set in the QATT font (QattText.syllable), else layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again) below it
+    // the HTML of a slide may use only these tags, and a class on them (no other attributes, no links, no scripts)
+    const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'BIG', 'VAR', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB', 'DIV']);
+    const IMG = 'img/qatt/';   // the pictures: relative names are in this folder (the old <base>)
+    const imageUrl = u => /^(https?:\/\/|\/)/.test(u) ? u : IMG + u.replace(/^\.?\//, '');
+    function prepare(text, tokens) {
+      const keep = tok => `\u0001${tokens.push(tok) - 1}\u0001`;
+      return (text || '').replace(/\r/g, '')
+        .replace(/([←↑↓→])/g, '<big><big><b>&nbsp;$1&nbsp;</b></big></big>')
+        .replace(/\n\n+/g, '<br><br>')
+        .replace(/\*\*([^\n*]+)\*\*/g, '<b>$1</b>')
+        .replace(/\(\(([^\n)]+)\)\)/g, '<var>$1</var>')
+        .replace(/\[(.*?)\]/g, (all, inner) => {
+          const c = inner.trim();
+          if (c.startsWith('img:')) return keep({ t: 'img', url: c.slice(4).trim() });
+          if (c.startsWith('#')) {
+            const i = c.indexOf(':');
+            return keep({ t: 'reveal', label: i < 0 ? 'Hiện' : c.slice(1, i).trim(), text: i < 0 ? c.slice(1).trim() : c.slice(i + 1).trim() });
+          }
+          const sp = c.lastIndexOf(' ');
+          const label = sp < 0 ? '' : c.slice(0, sp).trim().replace(/\{/g, '[').replace(/\}/g, ']');
+          const def = sp < 0 ? c : c.slice(sp + 1).trim();
+          return keep(def.startsWith('tt:') ? { t: 'tt', code: def.slice(3), label } : { t: 'glyph', parts: def.split(/[+:|]/), label });
+        });
+    }
+    const speak = text => { try { const u = new SpeechSynthesisUtterance(text); u.lang = 'vi-VN'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { /* no speech: fine */ } };
+    function build(tok) {
+      if (tok.t === 'img') {
+        const img = document.createElement('img'); img.src = imageUrl(tok.url); img.alt = ''; img.loading = 'lazy';
+        img.onerror = () => img.remove();
+        return img;
+      }
+      if (tok.t === 'reveal') {
+        const b = el('button', 'reveal', tok.label); b.type = 'button';
+        b.addEventListener('click', () => { b.textContent = tok.text; speak(tok.text); b.blur(); });
+        return b;
+      }
+      let glyph;
+      if (tok.t === 'tt') glyph = el('span', 'qatt-glyph', (typeof QattText !== 'undefined' && QattText.syllable(tok.code)) || tok.code);
+      else {
+        const parts = tok.parts.slice();
+        if (parts.length === 1 && parts[0].endsWith('.jpg')) parts[0] = '../can/' + parts[0].replace('.jpg', '');
+        glyph = el('div', 'layers' + (parts.some(p => p.includes('left')) ? '' : ' empty-left') + (parts.some(p => p.includes('right')) ? '' : ' empty-right'));
+        for (const p of parts) { const img = el('img', 'layer'); img.src = `${IMG}${p}.jpg?6`; img.alt = p; glyph.append(img); }
+      }
+      if (!tok.label) return glyph;
+      const box = el('div', 'glyph'), label = el('label');
+      render(tok.label, label);
+      box.append(glyph, label);
+      return box;
+    }
+    function clean(html, tokens, into) {
+      const doc = new DOMParser().parseFromString('<body>' + html, 'text/html');
+      const walk = (from, to) => {
+        for (const n of from.childNodes) {
+          if (n.nodeType === 3) {
+            let last = 0, m; const MARK = /\u0001(\d+)\u0001/g;   // one for each text node: build() renders labels inside the loop
+            const s = n.textContent;
+            while ((m = MARK.exec(s))) {
+              to.append(s.slice(last, m.index));
+              if (tokens[+m[1]]) to.append(build(tokens[+m[1]]));
+              last = m.index + m[0].length;
+            }
+            to.append(s.slice(last));
+          } else if (n.nodeType === 1) {
+            if (!TAGS.has(n.tagName)) { walk(n, to); continue; }   // an unknown tag: only its content
+            const e = document.createElement(n.tagName.toLowerCase());
+            const c = n.getAttribute('class');
+            if (c && /^[\w\- ]+$/.test(c)) e.className = c;
+            walk(n, e); to.append(e);
+          }
+        }
+      };
+      walk(doc.body, into);
+      return into;
+    }
+    const render = (text, into) => { const tokens = []; return clean(prepare(text, tokens), tokens, into); };
+    const plain = text => { const d = document.createElement('div'); clean(prepare(text, []).replace(/<br\s*\/?>/gi, ' '), [], d); return d.textContent.replace(/\s+/g, ' ').trim(); };
+    // the text of a slide in the language of the menu (Lang): `content` is Vietnamese, `english` English; where the chosen one is missing the other is shown (English first)
+    const textOf = s => {
+      const vi = (s.content || '').trim() ? s.content : '', en = (s.english || '').trim() ? s.english : '';
+      return window.Lang && Lang.current === 'vi' ? (vi || en) : (en || vi);
+    };
+    const heading = s => (s.title || '').split('#')[0];   // "Thanh Điệu #1": the part after # is for the order only
+    const titleOf = s => plain(heading(s)) || plain(textOf(s)).slice(0, 60) || '—';
+
+    // --- the two views: the list and one text; the address says which (#group/id) ---
+    const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };
+    const link = (cls, href, ...kids) => { const a = el('a', cls); a.href = href; a.append(...kids); return a; };
+    const go = id => '#' + encodeURIComponent(group) + (id == null ? '' : '/' + id);
+
+    function showList() {
+      document.title = 'Reader | Qatt.org';
+      view.replaceChildren();
+      if (!slides.length) { view.append(el('p', 'empty', 'Nothing to read here yet.', 'Chưa có gì để đọc ở đây.')); return; }
+      const ul = el('ul', 'list');
+      slides.forEach((s, i) => {
+        const li = el('li'), a = link('', go(s.id), el('span', 'no', i + 1), el('span', '', titleOf(s)));
+        if (!s.is_public) a.append(el('span', 'draft', 'draft', 'nháp'));
+        li.append(a); ul.append(li);
+      });
+      view.append(ul);
+      window.scrollTo(0, 0);
+    }
+
+    function showSlide(i) {
+      const s = slides[i];
+      view.replaceChildren();
+      const art = el('article'), h = el('h2');
+      render(heading(s), h);
+      if (!h.textContent.trim()) h.textContent = '';
+      art.append(h);
+      const cls = /^[\w\- ]*$/.test(s.classes || '') ? (s.classes || '') : '';
+      const body = el('div', 'body ' + (cls.includes('text-start') ? cls : 'text-center ' + cls));   // centred unless the slide says text-start
+      render(textOf(s), body);
+      art.append(body);
+      const prev = slides[i - 1], next = slides[i + 1];
+      const pager = el('nav', 'pager');
+      pager.append(
+        prev ? link('', go(prev.id), '← ', el('span', '', 'Previous', 'Trước')) : el('span', 'gone', '.'),
+        el('span', 'count', (i + 1) + ' / ' + slides.length),
+        next ? link('', go(next.id), el('span', '', 'Next', 'Sau'), ' →') : el('span', 'gone', '.'));
+      view.append(link('back', go(), '← ', el('span', '', 'All texts', 'Tất cả bài')), art, pager);
+      document.title = titleOf(s) + ' | Qatt.org';
+      window.scrollTo(0, 0);
+    }
+
+    function route() {
+      const [g, id] = decodeURIComponent(location.hash.slice(1)).split('/');
+      if (g && g !== group && [...groupSelect.options].some(o => o.value === g)) { groupSelect.value = g; return load(g).then(route); }
+      const i = id == null ? -1 : slides.findIndex(s => String(s.id) === id);
+      i < 0 ? showList() : showSlide(i);
+    }
+
+    async function load(g) {
+      group = g;
+      slides = (await db.getSlides(g, admin)).slice().sort((a, b) => a.order - b.order);
+    }
+
+    let admin = false;
+    async function start() {
+      admin = typeof isAdmin === 'function' && isAdmin();
+      await db.initQuiet();
+      const all = await db.getSlides('', admin);   // for the groups: the collections that have something to read
+      const groups = [...new Set(all.map(s => s.group))].sort();
+      groupSelect.replaceChildren(...groups.map(g => new Option(g, g)));
+      groupSelect.hidden = groups.length < 2;
+      const wanted = decodeURIComponent(location.hash.slice(1)).split('/')[0];
+      group = groups.includes(wanted) ? wanted : groups.includes(DEFAULT_GROUP) ? DEFAULT_GROUP : groups[0] || '';
+      groupSelect.value = group;
+      slides = all.filter(s => s.group === group).sort((a, b) => a.order - b.order);
+      route();
+    }
+
+    groupSelect.addEventListener('change', async () => { await load(groupSelect.value); location.hash = go(); showList(); });
+    window.addEventListener('hashchange', route);
+    document.addEventListener('langchange', route);   // the language of the menu changed: draw the text again in it
+    document.addEventListener('keydown', e => {   // arrows turn the page, Escape goes back to the list
+      const [, id] = decodeURIComponent(location.hash.slice(1)).split('/');
+      if (id == null || e.target.closest('select, input, textarea')) return;
+      const i = slides.findIndex(s => String(s.id) === id);
+      if (e.key === 'ArrowLeft' && slides[i - 1]) location.hash = go(slides[i - 1].id);
+      else if (e.key === 'ArrowRight' && slides[i + 1]) location.hash = go(slides[i + 1].id);
+      else if (e.key === 'Escape') location.hash = go();
+    });
+    start().catch(e => { console.error(e); view.replaceChildren(el('p', 'empty', 'The texts could not be loaded.', 'Không tải được các bài.')); });
+  })();
+  </script>
+</body>
+</html>
