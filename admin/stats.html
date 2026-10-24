@@ -75,6 +75,16 @@
       </table>
     </div>
 
+    <h2>Pages</h2>
+    <p class="note">Page views of the last 14 days (the first use of a page counts one; bots and admins not), the pages with most views first. Path only, no parameters (db/page_views.sql).</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Site</th><th>Page</th><th>Views</th><th>Vietnamese</th><th>Phone</th><th>Vietnam</th></tr></thead>
+        <tbody id="pages"></tbody>
+      </table>
+    </div>
+    <p class="note mb-0" id="pagesMore"></p>
+
     <h2>History</h2>
     <p class="note">One row per UTC day, written at 23:55 UTC (from 16 Oct 2026). Answers and words learned are the change since the day before.</p>
     <div class="table-responsive">
@@ -209,6 +219,25 @@
         [e.day, e.site, e.anonymous.visitors, e.account.visitors, e.anonymous.visits, e.account.visits].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
         return tr;
       }));
+      const pv = await sp.client.rpc('admin_views', { p_days: 14 });   // page views: needs db/page_views.sql in Supabase
+      if (pv.data) {
+        const pages = new Map(), by = { lang: {}, device: {}, region: {} };
+        let total = 0;
+        for (const r of pv.data) {
+          const key = r.site + ' ' + r.page, e = pages.get(key) || { site: r.site, page: r.page, views: 0, vi: 0, phone: 0, vietnam: 0 };
+          e.views += r.views; if (r.lang === 'vi') e.vi += r.views; if (r.device === 'phone') e.phone += r.views; if (r.region === 'vietnam') e.vietnam += r.views;
+          pages.set(key, e); total += r.views;
+          for (const f of ['lang', 'device', 'region']) by[f][r[f]] = (by[f][r[f]] || 0) + r.views;
+        }
+        const pct = (n, m) => m ? Math.round(100 * n / m) + ' %' : '';
+        $('pages').replaceChildren(...[...pages.values()].sort((a, b) => b.views - a.views).slice(0, 40).map(e => {
+          const tr = document.createElement('tr');
+          [e.site, e.page, e.views, pct(e.vi, e.views), pct(e.phone, e.views), pct(e.vietnam, e.views)].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+          return tr;
+        }));
+        const list = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => k + ' ' + pct(n, total)).join(', ') || 'none';
+        $('pagesMore').textContent = total + ' views. Language: ' + list(by.lang) + '. Device: ' + list(by.device) + '. Region: ' + list(by.region) + '.';
+      } else { $('pagesMore').textContent = 'No page views yet (run db/page_views.sql in Supabase).'; }
       const hist = await sp.client.rpc('admin_history', { p_days: 60 });
       const rows = (hist.data || []);   // newest first; one row more than the 60 shown, for the change of the totals of the oldest
       $('history').replaceChildren(...(rows.length > 60 ? rows.slice(0, 60) : rows).map((r, i) => {
