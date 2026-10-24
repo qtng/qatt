@@ -51,7 +51,6 @@
     'vi.html': 'Homepage in Vietnamese, generated from index.html.',
     'qatt.html': 'The script in detail. Read this for the system.',
     'qatt-vi.html': 'qatt.html in Vietnamese (a copy translated by hand; change it together with qatt.html).',
-    'admin/intro.html': 'Introduction to the script.',
     'symbols.html': 'Symbol table: the 22 base shapes and their order.',
     'editor.html': 'QATT editor (the same editor as writer.html on chunom.org).',
     'spell.html': 'Spell it!, the word game with scoring and speed measurement.',
@@ -74,10 +73,6 @@
     'js/parser.js': 'Parser for QATT input.',
     'js/supabase.js': 'Supabase client loader.',
     'js/login.js': 'Sign-in.',
-    'admin/index.html': 'Admin area overview.',
-    'admin/direct-input/index.html': 'Prototype: direct QATT input and ASCII art.',
-    'admin/direct-input/direct-input.js': 'Keyboard mapping of the direct-input prototype.',
-    'admin/direct-input/ascii-art.js': 'QATT to ASCII art converter.',
     'unicode/draft/index.html': 'Unicode proposal draft (the proposal, evidences and UCD drafts).',
   };
 
@@ -143,7 +138,8 @@
       return r.json();
     })
     .then(data => {
-      const paths = data.tree.filter(e => e.type === 'blob').map(e => e.path);
+      // the admin area is not listed
+      const paths = data.tree.filter(e => e.type === 'blob' && !e.path.startsWith('admin/')).map(e => e.path);
       const { root, skipped } = build(paths);
       out.textContent = '';
       out.append(render(root, ''));
