@@ -695,7 +695,7 @@ window.Theme = window.Theme || (function() {
 // Counts the visits in Supabase (db/visits.sql): only numbers, no cookie, no id, no address of the page. It counts only on qatt.org and chunom.org,
 // only when somebody uses the page (tap, key, mouse wheel or button; so most bots do not count) and not for browsers that name themselves as bots.
 // localStorage "qv" = { d: the UTC day of the last count, t: the time of the last activity }: once per browser and day = a visitor, a pause of more
-// than 30 minutes = a new visit. kind: "account" if the session of the browser is a signed-in user, else "anonymous".
+// than 30 minutes = a new visit. Every page that is used also counts one page view (path, language, device, rough region; db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
 // Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" switches it off in a browser that is not signed in.
 (function() {
     try {
@@ -714,17 +714,28 @@ window.Theme = window.Theme || (function() {
             }
             catch (e) { return "anonymous"; }
         };
+        // what a page view says (db/page_views.sql): the path only (no parameters, no #; the file index.html is its folder), the language of the page,
+        // the kind of device by the width of the window, a rough region by the time zone; nothing that identifies a browser
+        const view = () => {
+            const page = location.pathname.replace(/index\.html$/, "") || "/";
+            const lang = typeof Lang !== "undefined" && (Lang.current === "en" || Lang.current === "vi") ? Lang.current : "other";
+            const w = innerWidth, device = w < 768 ? "phone" : w < 1200 ? "tablet" : "desktop";
+            let zone = ""; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+            const region = /^Asia\/(Ho_Chi_Minh|Saigon)$/.test(zone) ? "vietnam" : /^Asia\//.test(zone) ? "asia" : /^Europe\//.test(zone) ? "europe" : /^America\//.test(zone) ? "americas"
+                : /^Africa\//.test(zone) ? "africa" : /^(Australia|Pacific)\//.test(zone) ? "oceania" : "other";
+            return { p_site: SITE, p_page: page, p_lang: lang, p_device: device, p_region: region };
+        };
         const count = e => {
             if (e && e.isTrusted === false) return;   // events made by a script
             EVENTS.forEach(ev => removeEventListener(ev, count));
             const s = read(), now = Date.now(), today = new Date().toISOString().slice(0, 10);
             const newVisitor = s.d !== today, newVisit = newVisitor || !s.t || now - s.t > PAUSE;
             write({ d: today, t: now });
-            if (!newVisit) return;
             const k = kind();
             if (k === "admin") return;
-            fetch(SUPABASE + "/rest/v1/rpc/count_visit", { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" },
-                body: JSON.stringify({ p_site: SITE, p_kind: k, p_new_visitor: newVisitor }) }).catch(() => {});
+            const call = (fn, body) => fetch(SUPABASE + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => {});
+            call("count_view", view());   // every page that is used counts once (db/page_views.sql)
+            if (newVisit) call("count_visit", { p_site: SITE, p_kind: k, p_new_visitor: newVisitor });
         };
         EVENTS.forEach(e => addEventListener(e, count, { passive: true }));
         // when the page is left the time of the last activity is stored, so a pause is measured from there
