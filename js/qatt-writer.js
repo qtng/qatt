@@ -32,6 +32,8 @@ const QattWriter = (() => {
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
+    .qatt-bar .variants { display: inline-flex; flex: none; gap: .2rem; }
+    .qatt-bar .variants .btn, html .qatt-bar .variants .btn, html[data-theme] .qatt-bar .variants .btn { font-family: var(--qfont), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .45rem; min-width: 2.1rem; letter-spacing: 0; text-transform: none; }   /* the preview of the variant is a QATT character: larger than the text of the bar */
     /* the buttons of the toolbar are the same in every theme: square with a little rounding (some themes give buttons slanted corners or cut edges) */
     html .qatt-bar .btn, html[data-theme] .qatt-bar .btn { border-radius: .35rem !important; clip-path: none !important; }
     /* the size, in the card above the field */
@@ -67,7 +69,7 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
-        <select id="variant-sel" autocomplete="off" disabled class="form-select form-select-sm w-auto" aria-label="Variants" title="Variants of the characters before the cursor" data-vi-aria-label="Biến thể" data-vi-title="Biến thể của các ký tự trước con trỏ"><option value="" data-vi="品 Biến thể">品 Variants</option></select>
+        <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
       </div>
 `;
 
@@ -320,7 +322,7 @@ const QattWriter = (() => {
     //   That form has no reading in any decoding, so Convert leaves it as it is.
     // Neutral tone: the cursor stands right behind a letter, so the cell has no tone mark yet; the mark of ngang U+F009C is put behind it.
     // The cursor stays behind the same characters.
-    const NEUTRAL = 0xF009C, variantSel = $('variant-sel');
+    const NEUTRAL = 0xF009C, variantBtns = Array.from(document.querySelectorAll('#variants .btn'));
     const utf16 = c => c > 0xFFFF ? 2 : 1;
     const variants = () => {
       if (!qatt || typer.selectionStart !== typer.selectionEnd) return [];
@@ -335,30 +337,36 @@ const QattWriter = (() => {
         typer.setSelectionRange(caret, caret);
         refresh();
       };
-      const list = [];
+      const list = [], str = (...cps) => String.fromCodePoint(...cps);   // `view`: the characters as they will stand, shown on the button
       if (j >= 1 && LETTER(before[j]) && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)
-        list.push({ id: 'tham', en: '品 Tham Thư', vi: '品 Tham Thư', run: () => edit(pos(j), 0, String.fromCodePoint(COMBINER), at + 2) });   // before the second letter
+        list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(before[j - 1], COMBINER, before[j]), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
       if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0)
-        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', run: () => edit(pos(j), 2, String.fromCodePoint(before[j] + 1), at) });
+        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
       if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
-        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', run: () => edit(at, 0, String.fromCodePoint(NEUTRAL), at + 2) });
+        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(before[j], NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
       return list;
     };
+    // three small buttons with a place of their own each (marked 1, neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
+    const SLOTS = ['marked1', 'neutral', 'tham'];
     let shownVariants = null;
+    const slotted = () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
     function showVariants() {
-      const list = variants(), key = list.map(v => v.id).join();
-      variantSel.disabled = !list.length;
+      const slots = slotted(), key = slots.map(v => v ? v.id + v.view : '').join();
       if (key === shownVariants) return;
       shownVariants = key;
-      const head = variantSel.firstElementChild;
-      variantSel.replaceChildren(head, ...list.map(v => { const o = document.createElement('option'); o.value = v.id; o.dataset.vi = v.vi; o.textContent = v.en; return o; }));
-      variantSel.value = '';
+      variantBtns.forEach((btn, i) => {
+        const v = slots[i];
+        btn.disabled = !v;
+        btn.textContent = v ? v.view : '·';
+        btn.title = v ? (window.Lang && Lang.t ? Lang.t(v.en, v.vi) : v.en) : '';
+        if (v) btn.setAttribute('aria-label', btn.title); else btn.removeAttribute('aria-label');
+      });
     }
-    variantSel.addEventListener('change', () => {
-      const v = variants().find(x => x.id === variantSel.value);
-      variantSel.value = '';
-      if (v) v.run();
+    variantBtns.forEach((btn, i) => {
+      btn.addEventListener('mousedown', e => e.preventDefault());
+      btn.addEventListener('click', () => { const v = slotted()[i]; if (v) v.run(); });
     });
+    document.addEventListener('langchange', () => { shownVariants = null; showVariants(); });
     document.addEventListener('selectionchange', () => { if (document.activeElement === typer) refresh(); });
 
     // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
