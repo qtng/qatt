@@ -44,26 +44,30 @@ alter table public.spell_daily enable row level security;
 revoke all on public.spell_daily from anon, authenticated;
 
 
--- spell_history: the state of the user at the end of every UTC day on which they played, per decoding: the speed values (v slow, f fast, n times) of the three kinds,
--- the score and the number of words in all. spell_write_speed() overwrites the row of the day with every word, so the last word of the day is what stays: the progress
--- over time (spell-stats.html) is read from it. Counting started when the table was made (the rows of that day come from spell_speed).
+-- spell_history: one row for every milestone reached (a kind of symbol, onset, rhyme or tone, beat one of the times 3, 2, 1.5, 1 and 0.7 s; the page then shows the
+-- message and gives 50 points), per user and decoding: the state at that moment, as the page showed it: the speed values (v slow, f fast, n times) and the
+-- milestones reached (m) of the three kinds, the score and the number of words in all. spell_write_speed() adds it when one of the m grows (and for the speed that
+-- spell_import takes over, as a first row). The progress over time (spell-stats.html) is read from it. Small on purpose: at most 5 milestones of 3 kinds in 2 decodings
+-- per user (and the rows of the import); a pruning is possible later, as there are few users.
 create table if not exists public.spell_history (
-  day date not null,
   user_id uuid not null references auth.users (id) on delete cascade,
   decoding text not null check (decoding in ('qatt', 'omniglot')),
+  at timestamptz not null default now(),
   onset_v real not null default 0 check (onset_v between 0 and 10),
   onset_f real not null default 0 check (onset_f between 0 and 10),
   onset_n integer not null default 0 check (onset_n >= 0),
+  onset_m smallint not null default 0 check (onset_m between 0 and 10),
   rhyme_v real not null default 0 check (rhyme_v between 0 and 10),
   rhyme_f real not null default 0 check (rhyme_f between 0 and 10),
   rhyme_n integer not null default 0 check (rhyme_n >= 0),
+  rhyme_m smallint not null default 0 check (rhyme_m between 0 and 10),
   tone_v real not null default 0 check (tone_v between 0 and 10),
   tone_f real not null default 0 check (tone_f between 0 and 10),
   tone_n integer not null default 0 check (tone_n >= 0),
+  tone_m smallint not null default 0 check (tone_m between 0 and 10),
   score integer not null default 0 check (score >= 0),
   words integer not null default 0 check (words >= 0),
-  updated_at timestamptz not null default now(),
-  primary key (user_id, day, decoding)
+  primary key (user_id, decoding, at)
 );
 alter table public.spell_history enable row level security;
 revoke all on public.spell_history from anon, authenticated;
@@ -109,7 +113,7 @@ security definer
 set search_path = public
 as $$
 declare
-  o record; r record; t record;
+  o record; r record; t record; old record; had boolean;
 begin
   if p_decoding not in ('qatt', 'omniglot') or p_speed is null or jsonb_typeof(p_speed) <> 'object' then
     return;
@@ -117,6 +121,8 @@ begin
   select * into o from public.spell_kind(p_speed, 'onset');
   select * into r from public.spell_kind(p_speed, 'rhyme');
   select * into t from public.spell_kind(p_speed, 'tone');
+  select onset_m, rhyme_m, tone_m into old from public.spell_speed where user_id = p_uid and decoding = p_decoding;
+  had := found;
   insert into public.spell_speed (user_id, decoding, onset_v, onset_f, onset_n, onset_m, rhyme_v, rhyme_f, rhyme_n, rhyme_m,
                                   tone_v, tone_f, tone_n, tone_m, device, updated_at)
   values (p_uid, p_decoding, o.v, o.f, o.n, o.m, r.v, r.f, r.n, r.m, t.v, t.f, t.n, t.m,
@@ -126,15 +132,12 @@ begin
     rhyme_v = excluded.rhyme_v, rhyme_f = excluded.rhyme_f, rhyme_n = excluded.rhyme_n, rhyme_m = excluded.rhyme_m,
     tone_v = excluded.tone_v, tone_f = excluded.tone_f, tone_n = excluded.tone_n, tone_m = excluded.tone_m,
     device = excluded.device, updated_at = now();
-  -- the state at the end of the day (the row of the day is overwritten by every word)
-  insert into public.spell_history as h (day, user_id, decoding, onset_v, onset_f, onset_n, rhyme_v, rhyme_f, rhyme_n, tone_v, tone_f, tone_n, score, words, updated_at)
-  select (now() at time zone 'utc')::date, p_uid, p_decoding, o.v, o.f, o.n, r.v, r.f, r.n, t.v, t.f, t.n, coalesce(sc.score, 0), coalesce(sc.words, 0), now()
-    from (select 1) x left join public.spell_scores sc on sc.user_id = p_uid
-  on conflict (user_id, day, decoding) do update set
-    onset_v = excluded.onset_v, onset_f = excluded.onset_f, onset_n = excluded.onset_n,
-    rhyme_v = excluded.rhyme_v, rhyme_f = excluded.rhyme_f, rhyme_n = excluded.rhyme_n,
-    tone_v = excluded.tone_v, tone_f = excluded.tone_f, tone_n = excluded.tone_n,
-    score = excluded.score, words = excluded.words, updated_at = now();
+  -- a milestone was reached (one of the m grew; a first row with milestones counts too): the state is kept in spell_history
+  if (not had and o.m + r.m + t.m > 0) or (had and (o.m > old.onset_m or r.m > old.rhyme_m or t.m > old.tone_m)) then
+    insert into public.spell_history (user_id, decoding, onset_v, onset_f, onset_n, onset_m, rhyme_v, rhyme_f, rhyme_n, rhyme_m, tone_v, tone_f, tone_n, tone_m, score, words)
+    select p_uid, p_decoding, o.v, o.f, o.n, o.m, r.v, r.f, r.n, r.m, t.v, t.f, t.n, t.m, coalesce(sc.score, 0), coalesce(sc.words, 0)
+      from (select 1) x left join public.spell_scores sc on sc.user_id = p_uid;
+  end if;
 end;
 $$;
 
