@@ -30,12 +30,12 @@ const QATT_FONTS = [
 ];
 const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], [51, "150%"], [68, "200%"], [102, "300%"], [136, "400%"]];
 
-// an admin: the session of this browser has app_metadata.is_admin (as the palette button of navigation.js), or localStorage.qv_off is set (the admin area sets it,
-// js/navigation.js leaves such a browser out of the visit counter). Only what is offered: the font files are public.
+// an admin: the session of this browser has app_metadata.is_admin (as the palette button of navigation.js); nothing else counts (localStorage.qv_off only keeps a browser out of the
+// visit counter). Only what is offered: the font files are public, so this is no protection of them.
 const isAdmin = () => {
   try {
     const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user;
-    return !!localStorage.getItem("qv_off") || !!(u && u.app_metadata && u.app_metadata.is_admin === true);
+    return !!(u && u.app_metadata && u.app_metadata.is_admin === true);
   } catch (e) { return false; }
 };
 
