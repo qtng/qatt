@@ -23,7 +23,7 @@
     @font-face { font-family: "QATT Cells"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); unicode-range: U+F0000-F00A3; }
     .reader { --read-font: "QATT Cells", "Lexend", "QATT Pen Medium", sans-serif; --title-font: "QATT Cells", "Mansalva", "QATT Pen Medium", cursive; font-family: var(--read-font); max-width: 40rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
     .reader a, .reader select, .reader button { font-family: var(--read-font); }
-    .reader article h2, .reader .list a .t, .reader label { font-family: var(--title-font); }
+    .reader article h2 { font-family: var(--title-font); }   /* the font of the titles only: the labels and the list are in the body font */
     .reader .bar { display: flex; align-items: center; justify-content: space-between; min-height: 2.2rem; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
     .reader select { border: 0; border-bottom: 1px solid var(--bs-border-color); background: transparent; color: var(--bs-body-color); font-size: 1.05rem; padding: .2rem 1.6rem .2rem .1rem; border-radius: 0; }
     .reader .list { list-style: none; margin: 0; padding: 0; }
@@ -59,7 +59,7 @@
     /* QATT characters of the QATT font ([stack:a,b]), not drawings */
     .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 1.35em; line-height: 1.5; min-width: 1.2em; text-align: center; }   /* only a little larger than the Latin text */
     .reader figure .layers, .reader figure .qatt-glyph { box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
-    .reader .stack .qatt-glyph { font-size: 2.6em; line-height: 1.2; }
+    .reader .stack .qatt-glyph { font-size: 2.1em; line-height: 1.2; }
     .reader .stack label { font-size: 1.1em; }
     .reader figure .layers { width: 6.5rem; padding: 1em; }
     .reader figure .qatt-glyph { min-width: 2.2em; padding: .2em .8em; }
