@@ -107,8 +107,9 @@
     // --- the text of a slide: the notation of the old slides app, see the table `slides` ---
     // ←↑↓→ big arrows; blank line = line break; **bold**; ((a box)); [img:url] a picture; [#label: text] a button that reveals text;
     // [anim-merge:word1,word2,word3] the animation of two characters that fly in, turn and merge into the third (a play button; a click starts it, every click again starts it anew)
+    // a format has a prefix and a colon (img:, stack:, anim-merge:, #label:); only Label has a space (or a colon); without a colon [x] is [stack:x]
     // [stack:x] x (text with QATT characters) above, below it its reading in Quốc Ngữ (the QATT cells converted), smaller
-    // [label code] a QATT glyph from layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again, with {} for []) below it
+    // [label code] or [label:code] a QATT glyph from layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again, with {} for []) below it
     // the HTML of a slide may use only these tags, and a class on them (no other attributes, no links, no scripts)
     const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'BIG', 'VAR', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB', 'DIV']);
     const IMG = 'img/qatt/';   // the pictures: relative names are in this folder (the old <base>)
@@ -129,9 +130,11 @@
             const i = c.indexOf(':');
             return keep({ t: 'reveal', label: i < 0 ? 'Hiện' : c.slice(1, i).trim(), text: i < 0 ? c.slice(1).trim() : c.slice(i + 1).trim() });
           }
-          const sp = c.lastIndexOf(' ');
-          const label = sp < 0 ? '' : c.slice(0, sp).trim().replace(/\{/g, '[').replace(/\}/g, ']');
-          const def = sp < 0 ? c : c.slice(sp + 1).trim();
+          // Label: `[label code]` or `[label:code]` (the code is ASCII: layers a+b+c); no colon (and no label) = stack, `[x]` is `[stack:x]`; text with QATT cells is always a stack
+          const cut = c.lastIndexOf(' ') >= 0 ? c.lastIndexOf(' ') : c.indexOf(':');
+          const def = cut < 0 ? '' : c.slice(cut + 1).trim();
+          if (cut < 0 || QattText.cells(c).length || !/^[\w+|:.\-]+$/.test(def)) return keep({ t: 'stack', text: c });
+          const label = c.slice(0, cut).trim().replace(/\{/g, '[').replace(/\}/g, ']');
           return keep({ t: 'glyph', parts: def.split(/[+:|]/), label });
         });
     }
