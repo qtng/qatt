@@ -9,14 +9,14 @@ await s.getLeaderboard(topLimit = 20, neighborBuffer = 5);
 await s.getDisplayName();         // the name in the leaderboard (null if there is none yet)
 await s.setDisplayName(name);     // { name } or { error } (error.code 'name_taken', 'name_invalid'); names are unique, ignoring case
 await s.getProfile();            // { name, score } of the user (name null if there is none yet)
-await s.getProgress();            // { rows: [{ key, correct, wrong }] } of the practice, kept on the server (db/practice_progress.sql)
+await s.getProgress();            // { rows: [{ key, correct, wrong }] } of the practice, kept on the server (tools/db/practice_progress.sql)
 await s.recordAnswer(key, true);  // counts an answer on the server, gives { data: { correct, wrong, score } }
 await s.importProgress(stats);    // once: takes over the progress of the browser
 s.suggestedName();                // a first suggestion from the account (first name or the part of the email before the @)
 await s.signInWithGoogle();
 await s.signInWithEmail(email);   // sends a link
 await s.signOut();
-await s.inkSubmit(target, strokes, device);  // admins: one handwritten cell of handwriting-data.html (db/ink.sql); gives the id, { error } otherwise
+await s.inkSubmit(target, strokes, device);  // admins: one handwritten cell of handwriting-data.html (tools/db/ink.sql); gives the id, { error } otherwise
 await s.inkUndo();                // takes back the own last sample (at most 10 minutes old); gives the id or null
 await s.inkCounts();              // admins: { total, mine, targets: { target: count } }
 await s.initQuiet();               // the user if signed in for real, else null; no anonymous account is made (Spell it!: spellLoad, spellSubmit, spellLeaderboard)
@@ -170,7 +170,7 @@ class SupabaseService {
     return profile ? profile.name : null;
   }
 
-  // --- Spell it! (spell.html): score and speed of the signed-in user, see db/spell.sql ---
+  // --- Spell it! (spell.html): score and speed of the signed-in user, see tools/db/spell.sql ---
 
   // like init() (which does not sign in anonymously any more either), but ignores an old anonymous session: gives the user if somebody is signed in for real (not an anonymous one), else null
   async initQuiet() {
@@ -230,7 +230,7 @@ class SupabaseService {
     return error ? [] : data || [];
   }
 
-  // --- practice: progress and score are kept on the server, see db/practice_progress.sql ---
+  // --- practice: progress and score are kept on the server, see tools/db/practice_progress.sql ---
 
   // all words of the user with their counts: { rows: [{ key, correct, wrong }] } or { error }
   async getProgress() {
@@ -735,7 +735,7 @@ class SupabaseService {
     if (!this.user) return { error: "Auth required" };
     if (!id) return { error: "ID is required" };
 
-    // .select(): the rows that were deleted; none means the database refused it (the policy of db/slides.sql) without an error
+    // .select(): the rows that were deleted; none means the database refused it (the policy of tools/db/slides.sql) without an error
     const { data, error } = await this.client
       .from('slides')
       .delete()

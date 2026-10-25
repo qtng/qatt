@@ -692,10 +692,10 @@ window.Theme = window.Theme || (function() {
 })();
 
 // ---------- Visit counter ----------
-// Counts the visits in Supabase (db/visits.sql): only numbers, no cookie, no id, no address of the page. It counts only on qatt.org and chunom.org,
+// Counts the visits in Supabase (tools/db/visits.sql): only numbers, no cookie, no id, no address of the page. It counts only on qatt.org and chunom.org,
 // only when somebody uses the page (tap, key, mouse wheel or button; so most bots do not count) and not for browsers that name themselves as bots.
 // localStorage "qv" = { d: the UTC day of the last count, t: the time of the last activity }: once per browser and day = a visitor, a pause of more
-// than 30 minutes = a new visit. Every page that is used also counts one page view (path, language, device, rough region; db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
+// than 30 minutes = a new visit. Every page that is used also counts one page view (path, language, device, rough region; tools/db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
 // Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" switches it off in a browser that is not signed in.
 (function() {
     try {
@@ -714,7 +714,7 @@ window.Theme = window.Theme || (function() {
             }
             catch (e) { return "anonymous"; }
         };
-        // what a page view says (db/page_views.sql): the path only (no parameters, no #; the file index.html is its folder), the language of the page,
+        // what a page view says (tools/db/page_views.sql): the path only (no parameters, no #; the file index.html is its folder), the language of the page,
         // the kind of device by the width of the window, a rough region by the time zone; nothing that identifies a browser
         const view = () => {
             const page = location.pathname.replace(/index\.html$/, "") || "/";
@@ -734,7 +734,7 @@ window.Theme = window.Theme || (function() {
             const k = kind();
             if (k === "admin") return;
             const call = (fn, body) => fetch(SUPABASE + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => {});
-            call("count_view", view());   // every page that is used counts once (db/page_views.sql)
+            call("count_view", view());   // every page that is used counts once (tools/db/page_views.sql)
             if (newVisit) call("count_visit", { p_site: SITE, p_kind: k, p_new_visitor: newVisitor });
         };
         EVENTS.forEach(e => addEventListener(e, count, { passive: true }));
