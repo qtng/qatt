@@ -182,15 +182,15 @@ class SupabaseService {
     return this.user;
   }
 
-  // the record of the user: { score, speed: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } } or null (no row yet, or an error)
+  // the record of the user: { score, badge, speed: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } } or null (no row yet, or an error)
   async spellLoad() {
     if (!this.client || !this.user) return null;
     const [score, speed] = await Promise.all([
-      this.client.from('spell_scores').select('score').eq('user_id', this.user.id).maybeSingle(),
+      this.client.from('spell_scores').select('score, badge').eq('user_id', this.user.id).maybeSingle(),
       this.client.from('spell_speed').select('*').eq('user_id', this.user.id),
     ]);
     if (score.error || speed.error) return null;
-    const out = { score: (score.data && score.data.score) || 0, speed: {} };
+    const out = { score: (score.data && score.data.score) || 0, badge: (score.data && score.data.badge) || 0, speed: {} };
     for (const r of speed.data || []) {
       out.speed[r.decoding] = {};
       for (const k of ['onset', 'rhyme', 'tone']) out.speed[r.decoding][k] = { v: r[k + '_v'], f: r[k + '_f'], n: r[k + '_n'], m: r[k + '_m'] };

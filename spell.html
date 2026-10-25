@@ -112,8 +112,12 @@
     .gbtn.hint { animation: wiggle .5s ease-in-out 2; }   /* a wiggle, the button grows only a little */
     @keyframes wiggle { 0%, 100% { transform: rotate(0) scale(1); } 20% { transform: rotate(-9deg) scale(1.04); } 40% { transform: rotate(8deg) scale(1.04); } 60% { transform: rotate(-5deg) scale(1.03); } 80% { transform: rotate(3deg) scale(1.01); } }
     /* score: the points in the foot of the card, the points of a step rise from it, a word without hesitation gets a cheer */
+    .scorebox { justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; }
+    .gbadge { display: flex; flex-direction: column; align-items: center; gap: .05rem; align-self: flex-end; }
+    .gbadge .stars { display: flex; gap: .08rem; } .gbadge .stars svg { width: .55rem; height: .55rem; }
+    .gbadge .medal { width: 1.5rem; height: 1.7rem; }
+    .gbadge .name { font: 600 .6rem/1 Georgia, "Times New Roman", serif; }
     .score { justify-self: end; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--ink); font-size: 1.4rem; line-height: 1.1; }
-    .score .bi { color: #e0a800; }
     .score.bump { animation: bump .4s ease-out; }
     @keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.35); } 100% { transform: scale(1); } }
     .pts { position: absolute; right: 1.2rem; top: 3.4rem; z-index: 2; pointer-events: none; font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; opacity: 0; animation: pts 1.1s ease-out forwards; }
@@ -196,7 +200,7 @@
       <div class="head">
         <div class="word" id="word" lang="vi">?</div>
         <div class="mood" id="mood" aria-live="polite">🙂</div>
-        <div class="score" id="score" title="Score"><i class="bi bi-star-fill"></i> <span id="scoreVal">0</span><i class="bi bi-lock-fill" id="scoreLock" hidden></i></div>
+        <div class="scorebox"><div class="gbadge" id="gbadge"></div><div class="score" id="score" title="Score"><span id="scoreVal">0</span><i class="bi bi-lock-fill" id="scoreLock" hidden></i></div></div>
       </div>
       <div class="cells" id="cells" aria-label="The symbols of the word"></div>
       <div class="solution" id="solution" hidden><div class="full" id="full"></div></div>
@@ -430,7 +434,7 @@
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null, relearn1: true, snapshot: false };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null, relearn1: true, snapshot: false, badge: 0 };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
@@ -447,6 +451,7 @@
         else if (saved.stats) me.stats = saved.stats;
         me.relearn1 = !!saved.relearn1;
         me.snapshot = saved.snapshot === true;
+        if (typeof saved.badge === 'number') me.badge = saved.badge;
       }
     } catch (e) {}
     const dec = () => $('decoding').value || 'qatt';
@@ -466,11 +471,27 @@
     const drawWatch = () => { if (!watch.word || !adminSeen()) return; $('log').textContent = [watchLine()].concat(logLines).join('\n'); $('log').hidden = false; };
     setInterval(() => { if (watch.on) drawWatch(); }, 100);
     const newLap = () => { lap = { t0: performance.now(), wrong: false, wrongs: 0, hinted: false }; hiddenDuring = false; };
+    // the skill badge (as on spell-stats.html; kept in spell_scores.badge and only ever raised): how many of the three kinds have a usual time under 1.75 s as shown
+    const BADGE_LIMIT = 1.75, LEVELS = [{ en: 'Newbie', color: '#9aa0a6' }, { en: 'Beginner', color: '#e6a700' }, { en: 'Intermediate', color: '#198754' }, { en: 'Advanced', color: '#0d6efd' }];
+    const STAR_PATH = 'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z';
+    function showBadge() {
+      let n = me.badge || 0;
+      for (const set of Object.values(me.stats)) if (set) n = Math.max(n, KINDS.filter(k => set[k] && set[k].n >= MIN_SAMPLES && shown(k, set[k].v) < BADGE_LIMIT).length);
+      n = Math.min(3, n); me.badge = n;
+      const L = LEVELS[n], box = $('gbadge');
+      if (box.dataset.n === String(n)) return;
+      box.dataset.n = n; box.title = L.en;
+      const star = i => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR_PATH}" fill="${i < n ? '#f2b600' : '#c9ccd0'}"/></svg>`;
+      box.innerHTML = `<div class="stars">${[0, 1, 2].map(star).join('')}</div>`
+        + `<svg class="medal" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 59 13v22c0 17-12 29-27 34C17 64 5 52 5 35V13z" fill="${L.color}"/><path d="M32 10 52 18v17c0 12-8 21-20 26C20 56 12 47 12 35V18z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/><path d="${STAR_PATH}" transform="translate(16 22) scale(1.35)" fill="#fff" fill-opacity="${n ? 1 : .6}"/></svg>`
+        + `<span class="name" style="color:${L.color}">${L.en}</span>`;
+    }
     const showScore = bump => {
       $('scoreVal').textContent = me.score;
       if (bump) { const el = $('score'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
     };
     const showStats = () => {
+      showBadge();
       const names = { onset: Lang.t('Onsets', 'Âm đầu'), rhyme: Lang.t('Rhymes', 'Vần'), tone: Lang.t('Tones', 'Thanh') };
       const set = mine(), have = KINDS.filter(k => set[k].n);
       $('stats').hidden = !have.length;
@@ -755,7 +776,7 @@
         me.shadow = 0;   // what a visitor would have had does not come along: the points count from now on
         const rec = await db.spellLoad().catch(() => null);
         if (rec) {   // the server has the truth: the score and the speed of the decodings it knows
-          me.score = rec.score + me.pending;
+          me.score = rec.score + me.pending; me.badge = rec.badge || 0;   // the server has the badge
           for (const d of Object.keys(rec.speed)) me.stats[d] = rec.speed[d];
         } else if (rec === null) me.score = me.score;   // an error: the browser keeps what it has
         else me.score = me.pending;
