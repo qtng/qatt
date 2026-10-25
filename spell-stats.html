@@ -77,22 +77,16 @@
     const fmt = x => x.toFixed(1) + ' s';
     const el = (tag, text, cls) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; };
     const tile = (value, label) => { const t = el('div', undefined, 'tile'); t.append(el('b', value), el('span', label)); $('tiles').append(t); };
-    // badge: how many of the three kinds (onset, rhyme, tone) are under BADGE_LIMIT seconds (the usual time as the game shows it, counted from MIN_SAMPLES times; of the better of the decodings)
-    const BADGE_LIMIT = 1.75;
+    // badge: kept in spell_scores.badge (tools/db/spell.sql: how many of the three kinds are under 1.75 s as the game shows it, only ever raised; the database allows 0 to 5, the page shows 0 to 3 for now)
     const LEVELS = [
       { en: 'Newbie', color: '#9aa0a6' }, { en: 'Beginner', color: '#e6a700' },
       { en: 'Intermediate', color: '#198754' }, { en: 'Advanced', color: '#0d6efd' }];
     const STAR = 'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z', STAR_OFF = '#c9ccd0', STAR_ON = '#f2b600';
     const SVG = 'http://www.w3.org/2000/svg';
     const svg = (cls, view, inner) => { const e = document.createElementNS(SVG, 'svg'); e.setAttribute('viewBox', view); e.setAttribute('class', cls); e.setAttribute('aria-hidden', 'true'); e.innerHTML = inner; return e; };
-    function level(rows) {
-      let best = 0;
-      for (const row of rows) best = Math.max(best, KINDS.filter(k => row[k + '_n'] >= MIN_SAMPLES && shown(k, row[k + '_v']) < BADGE_LIMIT).length);
-      return best;
-    }
-    function badge(rows) {
-      const n = level(rows), L = LEVELS[n], t = el('div', undefined, 'tile badge');
-      t.title = T('Times under ' + BADGE_LIMIT + ' s: ', 'Thời gian dưới ' + BADGE_LIMIT + ' giây: ') + n + ' / 3';
+    function badge(stored) {
+      const n = Math.max(0, Math.min(3, stored || 0)), L = LEVELS[n], t = el('div', undefined, 'tile badge');
+      t.title = T('Times under 1.75 s: ', 'Thời gian dưới 1,75 giây: ') + n + ' / 3';
       const stars = el('div', undefined, 'stars');
       for (let i = 0; i < 3; i++) stars.append(svg('', '0 0 24 24', `<path d="${STAR}" fill="${n ? (i < n ? STAR_ON : STAR_OFF) : STAR_OFF}"/>`));
       const medal = svg('medal', '0 0 64 72', `<path d="M32 3 59 13v22c0 17-12 29-27 34C17 64 5 52 5 35V13z" fill="${L.color}"/><path d="M32 10 52 18v17c0 12-8 21-20 26C20 56 12 47 12 35V18z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/><path d="${STAR}" transform="translate(16 22) scale(1.35)" fill="#fff" fill-opacity="${n ? 1 : .6}"/>`);
@@ -116,7 +110,7 @@
       return;
     }
     const [score, speed, history] = await Promise.all([
-      db.client.from('spell_scores').select('score, words').eq('user_id', user.id).maybeSingle(),
+      db.client.from('spell_scores').select('score, words, badge').eq('user_id', user.id).maybeSingle(),
       db.client.from('spell_speed').select('*').eq('user_id', user.id),
       db.client.from('spell_history').select('*').eq('user_id', user.id).order('at', { ascending: true }),
     ]);
@@ -124,9 +118,9 @@
       $('status').hidden = false; $('status').textContent = T('The statistics could not be loaded.', 'Không tải được thống kê.'); return;
     }
     $('content').hidden = false;
-    const sc = score.data || { score: 0, words: 0 };
+    const sc = score.data || { score: 0, words: 0, badge: 0 };
     tile(sc.score, T('Points', 'Điểm'));
-    badge(speed.data || []);
+    badge(sc.badge);
     tile(sc.words, T('Words', 'Từ'));
     if (!(speed.data || []).length) {
       $('decodings').append(el('p', T('Play a few words to see your speed here.', 'Hãy chơi vài từ để xem tốc độ của bạn ở đây.'), 'note mt-4'));
