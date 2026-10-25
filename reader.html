@@ -159,7 +159,8 @@
         else tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
           .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
           .add(els, { rotateY: [0, 360], duration: D, ease: 'outQuad' }, W);
-        tl.add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: M, ease: 'outQuad' }, W)
+        tl.call(() => speak(words[2]), W)   // the third word is read when the turn starts (after the fly-in and the wait)
+          .add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: M, ease: 'outQuad' }, W)
           .call(() => {   // the first fades into the third character, the second fades out
             const ov = els[0].querySelector('.n3'), q = els[0].children, o = { duration: FADE, ease: 'inOutSine' };
             animate([q[0], q[1], els[1]], { opacity: 0, ...o }); animate(ov, { opacity: 1, ...o });
