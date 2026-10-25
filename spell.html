@@ -945,7 +945,10 @@
     $('lateNext').addEventListener('click', another);   // after the minute: the word is left without a take-back (the points of its clicks stay), no Skip rule
     $('reload').addEventListener('click', skipWord);
     showSkip();
-    $('decoding').addEventListener('change', e => { parser.setDecoding(e.target.value); showStats(); if (started) start(answer, nomOf); });   // the same word after the other decoding
+    $('decoding').addEventListener('change', e => {
+      parser.setDecoding(e.target.value); showStats(); if (started) start(answer, nomOf);
+      try { const u = new URL(location.href); u.searchParams.set('decoding', e.target.value); history.replaceState(history.state, '', u); } catch (err) {}   // the address follows the choice: a link or a reload keeps it
+    });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
     // the game starts with a click on Start (the word, its speech and the clocks wait for it)
