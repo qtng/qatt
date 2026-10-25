@@ -23,7 +23,7 @@
     @font-face { font-family: "QATT Cells"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); unicode-range: U+F0000-F00A3; }
     .reader { --read-font: "QATT Cells", "Lexend", "QATT Pen Medium", sans-serif; --title-font: "QATT Cells", "Mansalva", "QATT Pen Medium", cursive; font-family: var(--read-font); max-width: 40rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
     .reader a, .reader select, .reader button { font-family: var(--read-font); }
-    .reader article h2, .reader .list a .t, .reader label { font-family: var(--title-font); }
+    .reader article h2 { font-family: var(--title-font); }   /* the font of the titles only: the labels and the list are in the body font */
     .reader .bar { display: flex; align-items: center; justify-content: space-between; min-height: 2.2rem; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
     .reader select { border: 0; border-bottom: 1px solid var(--bs-border-color); background: transparent; color: var(--bs-body-color); font-size: 1.05rem; padding: .2rem 1.6rem .2rem .1rem; border-radius: 0; }
     .reader .list { list-style: none; margin: 0; padding: 0; }
@@ -59,7 +59,7 @@
     /* QATT characters of the QATT font ([stack:a,b]), not drawings */
     .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 1.35em; line-height: 1.5; min-width: 1.2em; text-align: center; }   /* only a little larger than the Latin text */
     .reader figure .layers, .reader figure .qatt-glyph { box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
-    .reader .stack .qatt-glyph { font-size: 2.6em; line-height: 1.2; }
+    .reader .stack .qatt-glyph { font-size: 2.1em; line-height: 1.2; }
     .reader .stack label { font-size: 1.1em; }
     .reader figure .layers { width: 6.5rem; padding: 1em; }
     .reader figure .qatt-glyph { min-width: 2.2em; padding: .2em .8em; }
@@ -107,7 +107,7 @@
     // --- the text of a slide: the notation of the old slides app, see the table `slides` ---
     // ←↑↓→ big arrows; blank line = line break; **bold**; ((a box)); [img:url] a picture; [#label: text] a button that reveals text;
     // [anim-merge:word1,word2,word3] the animation of two characters that fly in, turn and merge into the third (a play button; a click starts it, every click again starts it anew)
-    // [stack:a,b] a (a Quốc Ngữ word as QATT characters, else the text) above, b centred below it, a larger
+    // [stack:x] x (text with QATT characters) above, below it its reading in Quốc Ngữ (the QATT cells converted), smaller
     // [label code] a QATT glyph from layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again, with {} for []) below it
     // the HTML of a slide may use only these tags, and a class on them (no other attributes, no links, no scripts)
     const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'BIG', 'VAR', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB', 'DIV']);
@@ -123,7 +123,7 @@
         .replace(/\[(.*?)\]/g, (all, inner) => {
           const c = inner.trim();
           if (c.startsWith('img:')) return keep({ t: 'img', url: c.slice(4).trim() });
-          if (c.startsWith('stack:')) { const i = c.indexOf(','); return keep({ t: 'stack', a: (i < 0 ? c.slice(6) : c.slice(6, i)).trim(), b: i < 0 ? '' : c.slice(i + 1).trim().replace(/\{/g, '[').replace(/\}/g, ']') }); }
+          if (c.startsWith('stack:')) return keep({ t: 'stack', text: c.slice(6).trim() });
           if (c.startsWith('anim-merge:')) return keep({ t: 'merge', words: c.slice(11).split(',').map(w => w.trim()) });
           if (c.startsWith('#')) {
             const i = c.indexOf(':');
@@ -189,10 +189,10 @@
         b.addEventListener('click', () => { b.textContent = tok.text; speak(tok.text); b.blur(); });
         return b;
       }
-      if (tok.t === 'stack') {   // a (the QATT characters of a Quốc Ngữ word, else the text itself) above, b centred below it, a larger
-        const box = el('div', 'glyph stack'), top = el('span', 'qatt-glyph', (typeof QattText !== 'undefined' && typeof VietnameseParser !== 'undefined' && QattText.word(tok.a, new VietnameseParser())) || tok.a), low = el('label');
-        render(tok.b, low);
-        box.append(top, low);
+      if (tok.t === 'stack') {   // the QATT text above, its reading in Quốc Ngữ (every cell by the default decoding) below, smaller
+        const box = el('div', 'glyph stack'), parser = new VietnameseParser();
+        const read = tok.text.replace(QattText.CELL, c => ' ' + QattText.reading(c, parser) + ' ').replace(/\s+/g, ' ').trim();
+        box.append(el('span', 'qatt-glyph', tok.text), el('label', '', read));
         return box;
       }
       const parts = tok.parts.slice();
