@@ -435,8 +435,18 @@
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
     let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null, relearn1: true, snapshot: false, badge: 0 };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    // a checksum over the record of the browser: a record that was edited by hand (or has none) is dropped, so changing it needs a look at this code (a speed bump, no protection against a program)
+    const sumOf = o => {
+      const text = JSON.stringify(o) + String.fromCharCode(...[83, 112, 51, 108, 108, 33, 48, 120].map((c, i) => c ^ (i * 3 + 1)));
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < text.length; i++) { const c = text.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+    };
     try {
-      const saved = JSON.parse(localStorage.getItem('qattSpell'));
+      let saved = JSON.parse(localStorage.getItem('qattSpell'));
+      if (saved) { const { sum, ...rest } = saved; if (sum !== sumOf(rest)) saved = null; }
       if (saved && typeof saved.score === 'number') {
         me.score = saved.score;
         for (const k of ['shadow', 'pending', 'asked', 'words']) if (typeof saved[k] === 'number') me[k] = saved[k];
@@ -460,7 +470,7 @@
       if (want && [...$('decoding').options].some(o => o.value === want)) { $('decoding').value = want; parser.setDecoding(want); }
     }
     const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
-    const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
+    const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify({ ...me, sum: sumOf(JSON.parse(JSON.stringify(me))) })); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, points: 0 }, hiddenDuring = false;
     document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuring = true; });
     // the stopwatch and the log at the bottom of the page: the first line is the word in play with the time of every click (right, or wrong ✗) and the running one, to check
