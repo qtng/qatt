@@ -201,8 +201,18 @@ class SupabaseService {
   // the points of a word (delta) and the speed of the decoding in use ({ onset, rhyme, tone: { v, f, n, m } }): { score, words } or { error }
   async spellSubmit(delta, decoding, speed, device) {
     if (!this.client || !this.user) return { error: new Error('not signed in') };
-    const { data, error } = await this.client.rpc('spell_submit', { p_delta: delta, p_decoding: decoding, p_speed: speed, p_device: device || null });
-    return error ? { error } : data;
+    try {
+      const payload = JSON.stringify({ d: delta, dec: decoding, speed, dev: device || null });
+      const { data, error } = await this.client.rpc('spell_submit', { p_payload: payload, p_sum: await SupabaseService.sign(payload) });
+      return error ? { error } : data;
+    } catch (error) { return { error }; }
+  }
+
+  // the checksum of a request of Spell it! (tools/db/spell.sql, spell_submit(payload, sum), checks it with the same salt): SHA-256 of the text and the salt, as hex
+  static async sign(text) {
+    const salt = String.fromCharCode(...[114, 105, 121, 102, 57, 111, 113, 99, 103, 124, 58, 115, 116, 54, 91, 55, 62, 117].map((c, i) => c ^ ((i * 5 + 3) & 31)));
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text + salt));
+    return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   async inkSubmit(target, strokes, device) {
