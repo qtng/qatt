@@ -50,7 +50,7 @@
     .cells.two .g { transform: scale(.75, 1); }
     #variants, #bases, #tones { margin-top: .8rem; }
     .tones { display: flex; justify-content: center; gap: 1.6rem; }
-    .tones .block { display: grid; grid-template-columns: repeat(2, 1fr); gap: .3rem; }
+    .tones .block { display: grid; grid-template-columns: repeat(var(--cols, 2), 1fr); gap: .3rem; }
     .tones .gbtn { width: 4.2rem; height: 4.2rem; }
     .pad.grid3 { gap: .5rem; max-width: 15rem; }   /* 6 shapes in two rows of 3 */
     .grid3 .gbtn { width: calc((100% - 1rem) / 3); height: auto; aspect-ratio: 1; font-size: 2.6rem; }
@@ -258,8 +258,8 @@
     // the tone marks in code point order 1..8 (U+F009C..U+F00A3): ngang, huyền, hỏi, ngã, sắc, nặng, sắc nhập, nặng nhập; the tone code of the syllable for each
     const toneGlyph = n => String.fromCodePoint(0xF0000 + 155 + n);
     const TONE_CODE = { 1: 0, 2: 2, 3: 3, 4: 4, 5: 1, 6: 5, 7: 6, 8: 7 };
-    // two blocks of four:  3 5 | 4 6  /  1 7 | 2 8
-    const TONE_BLOCKS = [[3, 5, 1, 7], [4, 6, 2, 8]];
+    // three blocks with a gap between them, two rows: 4 | 3 5 | 6  /  2 | 1 7 | 8 (the block of the two middle columns has two columns, the others one)
+    const TONE_BLOCKS = [[4, 2], [3, 5, 1, 7], [6, 8]];
     const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
 
     // fade and fold an element in or out instead of switching it at once; resolves when done
@@ -874,6 +874,7 @@
       $('tonePad').replaceChildren(...TONE_BLOCKS.map(block => {
         const d = document.createElement('div');
         d.className = 'block';
+        d.style.setProperty('--cols', block.length / 2);
         d.append(...block.map((n, i) => { const b = withData(button(toneGlyph(n), 'gbtn tone', b => pickTone(n, b)), { tone: n }); b.style.setProperty('--i', i); return b; }));
         return d;
       }));
