@@ -356,12 +356,15 @@ const QattWriter = (() => {
         refresh();
       };
       const list = [], str = (...cps) => String.fromCodePoint(...cps);   // `view`: the characters as they will stand, shown on the button
+      // the cell that ends at index k: a letter, or a pair (letter + joiner + letter) with the letter before the joiner
+      const cellEnding = k => before.slice(before[k - 1] === JOINER && k >= 2 && LETTER(before[k - 2]) ? k - 2 : k, k + 1);
+      const tones = before.slice(j + 1);   // the tone marks between the letter and the cursor stand in the preview too
       if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
-        list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(before[j - 1], COMBINER, before[j]), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
+        list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(...cellEnding(j - 1), COMBINER, before[j], ...tones), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
       if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // it stands alone: not the second part of a pair or of a stack
-        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
+        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1, ...tones), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
       if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
-        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(before[j], NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
+        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(...cellEnding(j), NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
       return list;
     };
     // three small buttons with a place of their own each (marked 1, neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
