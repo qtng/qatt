@@ -107,6 +107,24 @@ const QattWriter = (() => {
   const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
   const WINDOW = 64;
 
+  // The form with marking stroke 1 (code point + 1 of an unmarked letter) has no reading of its own; it is written as the reading of the unmarked form, in capitals, and read back the same way:
+  // a word of two letters or more in capitals whose lowercase is one unmarked letter (a syllable that ends in ông, with or without a tone) becomes that letter + 1.
+  const UNMARKED_CELL = /^([\u{F0000}-\u{F0099}])([\u{F009C}-\u{F00A3}]*)$/u;
+  const wordToQatt = (w, parser) => {
+    if (w.length > 1 && w === w.toUpperCase() && w !== w.toLowerCase()) {
+      const m = UNMARKED_CELL.exec(QattText.word(w.toLowerCase(), parser) || '');
+      if (m && (m[1].codePointAt(0) - 0xF0000) % 7 === 0) return String.fromCodePoint(m[1].codePointAt(0) + 1) + m[2];
+    }
+    return QattText.word(w, parser);
+  };
+  // the reading of a cell, "?" if there is none; the form with marking stroke 1 alone (+ tone marks) reads as its unmarked form in capitals
+  const cellReading = (cell, parser) => {
+    const r = QattText.reading(cell, parser), m = r === '?' && UNMARKED_CELL.exec(cell);
+    if (!m || (m[1].codePointAt(0) - 0xF0000) % 7 !== 1) return r;
+    const plain = QattText.reading(String.fromCodePoint(m[1].codePointAt(0) - 1) + m[2], parser);
+    return plain === '?' ? plain : plain.toUpperCase();
+  };
+
   // The behaviour of QATT in a text field (the editor and every field of `attach`): the word before the cursor becomes QATT characters, the cells stay whole (the cursor does not
   // go inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
   //   o.parser     the VietnameseParser (decoding)
@@ -119,7 +137,7 @@ const QattWriter = (() => {
     // the word that ends right before `end` becomes QATT characters (if there are any)
     const convertBefore = end => {
       const m = WORD_END.exec(typer.value.slice(0, end));
-      const text = m && QattText.word(m[0], parser);
+      const text = m && wordToQatt(m[0], parser);
       if (!text) return false;
       const start = end - m[0].length, caret = typer.selectionStart;
       typer.setRangeText(text, start, end, 'end');
@@ -340,7 +358,7 @@ const QattWriter = (() => {
       const list = [], str = (...cps) => String.fromCodePoint(...cps);   // `view`: the characters as they will stand, shown on the button
       if (j >= 1 && LETTER(before[j]) && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)
         list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(before[j - 1], COMBINER, before[j]), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
-      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0)
+      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0 && before[j - 1] !== JOINER)   // it stands alone, never in a pair (in a stack it can)
         list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
       if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
         list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(before[j], NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
@@ -376,7 +394,7 @@ const QattWriter = (() => {
     const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
       let out = '', afterCell = false;
       for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
-        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? QattText.reading(part, parser) : '?';
+        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? cellReading(part, parser) : '?';
         const isCell = read !== '?';   // a cell without a reading (the form with marking stroke 1) stays as it is, like any other character
         if (isCell) out += (afterCell ? ' ' : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
         else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
@@ -385,11 +403,11 @@ const QattWriter = (() => {
       return out;
     }).join(IDS_STACK);
     // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
-    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => QattText.word(w, parser) ?? w)
+    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => wordToQatt(w, parser) ?? w)
       .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
     // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
     // (the parts of a stack are cells of their own; a cell without a reading, such as the form with marking stroke 1, does not count: it stays as it is, and the field can still be converted back)
-    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => QattText.reading(c.cell, parser) !== '?'));
+    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => cellReading(c.cell, parser) !== '?'));
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
       typer.value = readable(typer.value) ? readAsQuocNgu(typer.value) : toQatt(typer.value);
       refresh();
