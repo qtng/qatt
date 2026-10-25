@@ -43,6 +43,35 @@ create table if not exists public.spell_daily (
 alter table public.spell_daily enable row level security;
 revoke all on public.spell_daily from anon, authenticated;
 
+
+-- spell_history: the state of the user at the end of every UTC day on which they played, per decoding: the speed values (v slow, f fast, n times) of the three kinds,
+-- the score and the number of words in all. spell_write_speed() overwrites the row of the day with every word, so the last word of the day is what stays: the progress
+-- over time (spell-stats.html) is read from it. Counting started when the table was made (the rows of that day come from spell_speed).
+create table if not exists public.spell_history (
+  day date not null,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  decoding text not null check (decoding in ('qatt', 'omniglot')),
+  onset_v real not null default 0 check (onset_v between 0 and 10),
+  onset_f real not null default 0 check (onset_f between 0 and 10),
+  onset_n integer not null default 0 check (onset_n >= 0),
+  rhyme_v real not null default 0 check (rhyme_v between 0 and 10),
+  rhyme_f real not null default 0 check (rhyme_f between 0 and 10),
+  rhyme_n integer not null default 0 check (rhyme_n >= 0),
+  tone_v real not null default 0 check (tone_v between 0 and 10),
+  tone_f real not null default 0 check (tone_f between 0 and 10),
+  tone_n integer not null default 0 check (tone_n >= 0),
+  score integer not null default 0 check (score >= 0),
+  words integer not null default 0 check (words >= 0),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, day, decoding)
+);
+alter table public.spell_history enable row level security;
+revoke all on public.spell_history from anon, authenticated;
+grant select on public.spell_history to authenticated;
+drop policy if exists "Spell history read own" on public.spell_history;
+create policy "Spell history read own" on public.spell_history for select to authenticated
+  using ((select auth.uid()) = user_id);
+
 alter table public.spell_scores enable row level security;
 alter table public.spell_speed enable row level security;
 
@@ -97,6 +126,15 @@ begin
     rhyme_v = excluded.rhyme_v, rhyme_f = excluded.rhyme_f, rhyme_n = excluded.rhyme_n, rhyme_m = excluded.rhyme_m,
     tone_v = excluded.tone_v, tone_f = excluded.tone_f, tone_n = excluded.tone_n, tone_m = excluded.tone_m,
     device = excluded.device, updated_at = now();
+  -- the state at the end of the day (the row of the day is overwritten by every word)
+  insert into public.spell_history as h (day, user_id, decoding, onset_v, onset_f, onset_n, rhyme_v, rhyme_f, rhyme_n, tone_v, tone_f, tone_n, score, words, updated_at)
+  select (now() at time zone 'utc')::date, p_uid, p_decoding, o.v, o.f, o.n, r.v, r.f, r.n, t.v, t.f, t.n, coalesce(sc.score, 0), coalesce(sc.words, 0), now()
+    from (select 1) x left join public.spell_scores sc on sc.user_id = p_uid
+  on conflict (user_id, day, decoding) do update set
+    onset_v = excluded.onset_v, onset_f = excluded.onset_f, onset_n = excluded.onset_n,
+    rhyme_v = excluded.rhyme_v, rhyme_f = excluded.rhyme_f, rhyme_n = excluded.rhyme_n,
+    tone_v = excluded.tone_v, tone_f = excluded.tone_f, tone_n = excluded.tone_n,
+    score = excluded.score, words = excluded.words, updated_at = now();
 end;
 $$;
 
