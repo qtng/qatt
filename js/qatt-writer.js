@@ -356,7 +356,7 @@ const QattWriter = (() => {
         refresh();
       };
       const list = [], str = (...cps) => String.fromCodePoint(...cps);   // `view`: the characters as they will stand, shown on the button
-      if (j >= 1 && LETTER(before[j]) && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)
+      if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
         list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(before[j - 1], COMBINER, before[j]), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
       if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // it stands alone: not the second part of a pair or of a stack
         list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
