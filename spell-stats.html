@@ -126,7 +126,12 @@
               return [{ ...line, label: T(...NAMES[k].slice(0, 2)) + ' · ' + T('lately', 'gần đây'), data: pick('f'), pointRadius: 3 },
                       { ...line, label: T(...NAMES[k].slice(0, 2)) + ' · ' + T('usual', 'thường'), data: pick('v'), borderDash: [6, 5], borderWidth: 2, pointRadius: 0, pointHoverRadius: 3 }];
             }) },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 28 } } }, scales: { y: { beginAtZero: true, title: { display: true, text: T('seconds', 'giây') } } } },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {
+              // one entry per kind: its two lines (lately, usual) are shown and hidden together
+              labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 28, generateLabels: chart => KINDS.map((k, i) => ({
+                text: T(...NAMES[k].slice(0, 2)), strokeStyle: COLORS[k], fillStyle: COLORS[k], fontColor: Chart.defaults.color, lineWidth: 2.5, pointStyle: 'line', hidden: !chart.isDatasetVisible(2 * i), datasetIndex: 2 * i, kind: i })) },
+              onClick: (e, item, legend) => { const c = legend.chart, show = !c.isDatasetVisible(2 * item.kind); c.setDatasetVisibility(2 * item.kind, show); c.setDatasetVisibility(2 * item.kind + 1, show); c.update(); },
+            } }, scales: { y: { beginAtZero: true, title: { display: true, text: T('seconds', 'giây') } } } },
           });
         }
         // the milestones as a list: what grew since the row before
@@ -140,8 +145,8 @@
       $('decodings').append(box);
     }
     $('notes').textContent = T(
-      'Times are as in the game: the time to find the button (and, for the onset, to read the word) is taken off. "Usual" moves slowly, "Lately" follows the last words. A kind counts from 5 times. The history keeps one row for every milestone reached.',
-      'Thời gian tính như trong trò chơi: đã trừ thời gian tìm nút (và đọc từ với âm đầu). "Thường" đổi chậm, "Gần đây" theo những từ vừa chơi. Mỗi loại tính từ 5 lần. Lịch sử lưu một dòng cho mỗi cột mốc đạt được.');
+      'Solid line: lately, dashed line: usual (click a kind in the legend to hide or show both). Times are as in the game: the time to find the button (and, for the onset, to read the word) is taken off. "Usual" moves slowly, "Lately" follows the last words. A kind counts from 5 times. The history keeps one row for every milestone reached.',
+      'Nét liền: gần đây, nét đứt: thường (bấm vào một loại ở chú giải để ẩn hoặc hiện cả hai). Thời gian tính như trong trò chơi: đã trừ thời gian tìm nút (và đọc từ với âm đầu). "Thường" đổi chậm, "Gần đây" theo những từ vừa chơi. Mỗi loại tính từ 5 lần. Lịch sử lưu một dòng cho mỗi cột mốc đạt được.');
   });
 </script>
 </body>
