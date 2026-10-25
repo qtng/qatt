@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>My statistics</title>
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/navigation.js"></script>
+  <script src="vendor/supabase/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/login.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .8rem; }
+    .tile { padding: .6rem .8rem; border: 1px solid var(--bs-border-color); border-radius: .6rem; background: var(--bs-body-bg); }
+    .tile b { display: block; font: 400 2rem/1.1 Georgia, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+    .tile span { font-size: .85rem; color: var(--bs-secondary-color); }
+    h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.4rem; margin: 2rem 0 .6rem; padding-bottom: .25rem; border-bottom: 1px solid var(--bs-border-color); }
+    table { font-variant-numeric: tabular-nums; font-size: .92rem; }
+    th { font-weight: 600; color: var(--bs-secondary-color); }
+    td, th { text-align: right; } td:first-child, th:first-child { text-align: left; }
+    .note { color: var(--bs-secondary-color); font-size: .85rem; }
+    .chart { position: relative; height: 16rem; }
+    .log td:first-child { white-space: nowrap; }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <h1 class="mb-3" data-vi="Thống kê của tôi">My statistics</h1>
+    <p class="lead mx-auto mb-0" data-vi="Điểm số và tốc độ của bạn trong Đánh vần!">Your score and speed in Spell it!</p>
+  </div>
+</header>
+
+<main class="container py-3" style="max-width: 48rem">
+  <p id="status" class="note text-center" aria-live="polite" data-vi="Đang tải…">Loading…</p>
+  <div id="signin" class="text-center my-4" hidden>
+    <p data-vi="Hãy đăng nhập để xem thống kê của bạn.">Sign in to see your statistics.</p>
+    <button type="button" class="btn btn-cinnabar btn-pill" id="signinBtn" data-vi="Đăng nhập">Sign in</button>
+  </div>
+  <div id="content" hidden>
+    <div class="tiles" id="tiles"></div>
+    <div id="decodings"></div>
+    <p class="note mt-4" id="notes"></p>
+  </div>
+  <p class="text-center mt-5 mb-4"><a href="spell.html"><i class="bi bi-arrow-left" aria-hidden="true"></i> <span data-vi="Quay lại trò chơi">Back to the game</span></a></p>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const $ = id => document.getElementById(id);
+    const T = (en, vi) => window.Lang && Lang.t ? Lang.t(en, vi) : en;
+    const KINDS = ['onset', 'rhyme', 'tone'];
+    const NAMES = { onset: ['Onsets', 'Âm đầu'], rhyme: ['Rhymes', 'Vần'], tone: ['Tones', 'Thanh'] };
+    const COLORS = { onset: '#a8362a', rhyme: '#146c43', tone: '#0d6efd' };
+    const DECODINGS = { qatt: 'qatt.org', omniglot: 'omniglot.com' };
+    // what the game shows is not the measured time: the time to find and press a button and, for the onset, to read the word are taken off (as in spell.html)
+    const READ_TIME = 1.25, CLICK_TIME = { onset: 0.5, rhyme: 0.5, tone: 1 }, MIN_SHOWN = 0.1, MIN_SAMPLES = 5;
+    const MILESTONES = [3, 2, 1.5, 1, 0.7];
+    const shown = (kind, x) => Math.max(MIN_SHOWN, x - CLICK_TIME[kind] - (kind === 'onset' ? READ_TIME : 0));
+    const fmt = x => x.toFixed(1) + ' s';
+    const el = (tag, text, cls) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; };
+    const tile = (value, label) => { const t = el('div', undefined, 'tile'); t.append(el('b', value), el('span', label)); $('tiles').append(t); };
+    const table = (head, rows, cls) => {
+      const t = el('table', undefined, 'table table-sm' + (cls ? ' ' + cls : ''));
+      const tr = el('tr'), thead = el('thead'); head.forEach(h => tr.append(el('th', h))); thead.append(tr); t.append(thead);
+      const body = el('tbody'); rows.forEach(r => { const row = el('tr'); r.forEach(v => row.append(el('td', v))); body.append(row); }); t.append(body);
+      const wrap = el('div', undefined, 'table-responsive'); wrap.append(t); return wrap;
+    };
+
+    const db = window.QATT_SPELL_DB || new SupabaseService();
+    let user = null;
+    try { user = await db.initQuiet(); } catch (e) {}
+    $('status').hidden = true;
+    if (!user) {
+      $('signin').hidden = false;
+      $('signinBtn').addEventListener('click', () => QattLogin.open(db, T('Sign in to see your statistics.', 'Hãy đăng nhập để xem thống kê của bạn.')));
+      return;
+    }
+    const [score, speed, history] = await Promise.all([
+      db.client.from('spell_scores').select('score, words').eq('user_id', user.id).maybeSingle(),
+      db.client.from('spell_speed').select('*').eq('user_id', user.id),
+      db.client.from('spell_history').select('*').eq('user_id', user.id).order('at', { ascending: true }),
+    ]);
+    if (score.error || speed.error || history.error) {
+      $('status').hidden = false; $('status').textContent = T('The statistics could not be loaded.', 'Không tải được thống kê.'); return;
+    }
+    $('content').hidden = false;
+    const sc = score.data || { score: 0, words: 0 };
+    tile(sc.score, T('Points', 'Điểm')); tile(sc.words, T('Words', 'Từ'));
+    if (!(speed.data || []).length) {
+      $('decodings').append(el('p', T('Play a few words to see your speed here.', 'Hãy chơi vài từ để xem tốc độ của bạn ở đây.'), 'note mt-4'));
+    }
+
+    for (const row of speed.data || []) {
+      const d = row.decoding, box = el('section');
+      box.append(el('h2', T('Speed', 'Tốc độ') + ' · ' + (DECODINGS[d] || d)));
+      const rows = KINDS.map(k => {
+        const n = row[k + '_n'], m = row[k + '_m'], counted = n >= MIN_SAMPLES;
+        const f = shown(k, row[k + '_f']), v = shown(k, row[k + '_v']);
+        const next = MILESTONES[m];
+        return [T(...NAMES[k].slice(0, 2)), counted ? fmt(v) : '–', counted ? fmt(f) : '–', n, m + ' / ' + MILESTONES.length,
+                !counted ? T(`${MIN_SAMPLES - n} more`, `còn ${MIN_SAMPLES - n}`) : next ? '< ' + next + ' s' : '✓'];
+      });
+      box.append(table([T('Kind', 'Loại'), T('Usual', 'Thường'), T('Lately', 'Gần đây'), T('Times', 'Lần'), T('Milestones', 'Cột mốc'), T('Next goal', 'Mục tiêu')], rows));
+      const mine = (history.data || []).filter(h => h.decoding === d);
+      if (mine.length) {
+        const wrap = el('div', undefined, 'chart'), canvas = el('canvas'); wrap.append(canvas); box.append(wrap);
+        if (window.Chart) {
+          new Chart(canvas, {
+            type: 'line',
+            data: { labels: mine.map(h => new Date(h.at).toLocaleDateString()), datasets: KINDS.map(k => ({
+              label: T(...NAMES[k].slice(0, 2)), borderColor: COLORS[k], backgroundColor: COLORS[k], tension: .2, pointRadius: 3,
+              data: mine.map(h => h[k + '_n'] >= MIN_SAMPLES ? shown(k, h[k + '_f']) : null), spanGaps: true })) },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: T('seconds (lately)', 'giây (gần đây)') } } } },
+          });
+        }
+        // the milestones as a list: what grew since the row before
+        const log = mine.map((h, i) => {
+          const p = mine[i - 1], got = KINDS.filter(k => h[k + '_m'] > (p ? p[k + '_m'] : 0))
+            .map(k => T(...NAMES[k].slice(0, 2)) + ' < ' + MILESTONES[h[k + '_m'] - 1] + ' s');
+          return [new Date(h.at).toLocaleString(), (p ? '' : T('Start: ', 'Bắt đầu: ')) + got.join(', '), h.score];
+        }).reverse();
+        box.append(table([T('When', 'Khi nào'), T('Milestone', 'Cột mốc'), T('Points', 'Điểm')], log, 'log'));
+      }
+      $('decodings').append(box);
+    }
+    $('notes').textContent = T(
+      'Times are as in the game: the time to find the button (and, for the onset, to read the word) is taken off. "Usual" moves slowly, "Lately" follows the last words. A kind counts from 5 times. The history keeps one row for every milestone reached.',
+      'Thời gian tính như trong trò chơi: đã trừ thời gian tìm nút (và đọc từ với âm đầu). "Thường" đổi chậm, "Gần đây" theo những từ vừa chơi. Mỗi loại tính từ 5 lần. Lịch sử lưu một dòng cho mỗi cột mốc đạt được.');
+  });
+</script>
+</body>
+</html>
