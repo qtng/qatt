@@ -1,50 +1,27 @@
-<!DOCTYPE html>
-<html lang="en" translate="no">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google" content="notranslate">
-  <title>QATT Unicode Proposal – Draft, Alpha 1 | Qatt.org</title>
-  <meta name="description" content="Draft Unicode encoding proposal for Quốc Âm Tân Tự (QATT).">
-  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/site.css">
-  <script src="/js/navigation.js"></script>
-  <style>
-    body { background: #fffdf8; color: #2b2118; }
-    main { max-width: 54rem; }
-    h1, h2, h3, h4 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
-    h2 { margin-top: 2.2rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
-    a { color: #a8362a; }
-    table { border-collapse: collapse; margin: 1rem 0; font-size: .9rem; }
-    th, td { border: 1px solid #dccfb2; padding: .25rem .5rem; vertical-align: top; }
-    th { background: #f7efdc; }
-    .table-wrap { overflow-x: auto; }
-    details.sec { margin-bottom: .6rem; }
-    details.sec > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .6rem; padding: .15rem .9rem; border-radius: .4rem; }
-    details.sec > summary::-webkit-details-marker { display: none; }
-    details.sec > summary::before { content: "\25B8"; transition: transform .15s; }
-    details.sec[open] > summary::before { transform: rotate(90deg); }
-    details.sec > summary h2 { border-bottom: 0; margin: .5rem 0; flex: 1; color: inherit; font-size: 1.35rem; }
-    details.sec > summary .anchor { color: inherit; }
-    details.sec > :not(summary) { padding: .25rem .25rem 0; }
-    main img { max-width: 100%; height: auto; border: 1px solid #dccfb2; }
-    code, pre { font-size: .85rem; }
-    pre { background: #f7efdc; padding: .75rem 1rem; overflow-x: auto; }
-    .anchor { margin-left: .4rem; opacity: 0; color: #a8362a; text-decoration: none; vertical-align: -.1em; }
-    .anchor svg { width: .75em; height: .75em; fill: currentColor; }
-    h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; }
-    @media (hover: none) { .anchor { opacity: .45; } }
-    h1, h2, h3, h4 { scroll-margin-top: 4.5rem; }
-  </style>
-</head>
-<body>
-  <main class="container py-4">
-<h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1<a class="anchor" href="#qatt-unicode-proposal-draft-alpha-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h1>
+<!DOCTYPE html><html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>QATT Unicode proposal, Alpha 1</title><style>
+@font-face { font-family: "QATT Chart"; src: url(../../fonts/qatt-gothic.woff2) format("woff2"), url(../../fonts/qatt-gothic.ttf) format("truetype"); }
+body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; font: 17px/1.55 Georgia, "Times New Roman", serif; color: #111; background: #fff; }
+h1 { font-size: 1.9rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #999; } h3 { margin-top: 1.6rem; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem; display: block; overflow-x: auto; }
+th, td { border: 1px solid #aaa; padding: .25rem .5rem; vertical-align: top; } th { background: #eee; }
+code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88rem; } pre { background: #f4f4f4; padding: .5rem .7rem; overflow-x: auto; }
+a { color: #8a2a1f; }
+.figs { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end; }
+figure { margin: 0; max-width: 11rem; } figure.wide { max-width: 22rem; }
+figure img { max-width: 100%; display: block; border: 1px solid #bbb; } figcaption { font-size: .85rem; margin-top: .2rem; }
+.chart td, .chart th { text-align: center; padding: .2rem .4rem; font-size: .8rem; }
+.chart .g { font-family: "QATT Chart"; font-size: 2.2rem; line-height: 1.1; } .chart .cp { font-size: .7rem; color: #666; }
+.chart td.name { text-align: left; white-space: nowrap; }
+.ids { display: inline-block; width: .72em; height: .72em; border: 1px solid #333; position: relative; vertical-align: -.04em; margin: 0 .06em; }
+.ids::after { content: ""; position: absolute; border: 0 solid #333; }
+.ids-lr::after { left: 50%; top: 0; bottom: 0; border-left-width: 1px; }
+.ids-ud::after { top: 50%; left: 0; right: 0; border-top-width: 1px; }
+.ids-in::after { inset: 24%; border-width: 1px; }
+</style></head><body><h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1</h1>
 <p>Oct 25, 2026 · Nguyễn Quốc Trung</p>
-<details class="sec" open><summary class="bg-secondary text-white"><h2 id="1-summary">1. Summary<a class="anchor" href="#1-summary" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+<h2 id="1-summary">1. Summary</h2>
 <p>This proposal encodes Quốc Âm Tân Tự (QATT), a Vietnamese script used inside Hán Nôm texts, as 164 characters in the Supplementary Multilingual Plane.</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>Item</th>
@@ -89,22 +66,20 @@
 <td>Two manuscripts of one text, Institute of Hán Nôm Studies, Hanoi, AB.630; reign of Thiệu Trị (1841–1847)</td>
 </tr>
 </tbody>
-</table></div>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="2-introduction">2. Introduction<a class="anchor" href="#2-introduction" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+</table>
+<h2 id="2-introduction">2. Introduction</h2>
 <p>Quốc Âm Tân Tự (國音新字, &quot;new script for the sounds of the national language&quot;) is a Vietnamese script built from 22 bases, each drawn with three strokes. A base exists in seven forms: one without a marking stroke and six with a short marking stroke at one of the six stroke ends. Every form can stand alone; all but one per base combine in groups of two or three, and any character may carry a tone mark in one of its corners.</p>
-<h3 id="sec-2-1">2.1 Background<a class="anchor" href="#sec-2-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>The script is known from one text, preserved in two manuscripts at the Institute of Hán Nôm Studies in Hanoi (3.1). The text names the script in the heading of its preface, 國音新字序, &quot;preface to the new script for the sounds of the national language&quot; (p. <a href="pages/S1-p1.jpg" target="_blank">1</a>). The text is undated. It can be dated to the reign of Emperor Thiệu Trị (1841–1847), because the character 華 lacks its final stroke, a naming taboo for the emperor's mother, Hồ Thị Hoa (p. <a href="pages/S1-p1.jpg" target="_blank">1</a>). The author signs as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành, at the end of the preface (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>).</p>
+<h3 id="sec-2-1">2.1 Background</h3>
+<p>The script is known from one text, preserved in two manuscripts at the Institute of Hán Nôm Studies in Hanoi (3.1). The text names the script in the heading of its preface, 國音新字序, &quot;preface to the new script for the sounds of the national language&quot; (p. 1). The text is undated. It can be dated to the reign of Emperor Thiệu Trị (1841–1847), because the character 華 lacks its final stroke, a naming taboo for the emperor's mother, Hồ Thị Hoa (p. 1). The author signs as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành, at the end of the preface (p. 2).</p>
 <p>In the source the script appears within Hán Nôm text and is treated exactly like Hán Nôm characters. The source contains no running text written in the script: it gives single characters as examples and spelling formulas in the phản thiết manner (4.1). Three-component characters (Tham Thư) are attested in two examples; their pronunciation is not described (4.3). Eight tones are marked with circles and semicircles in the corners, following the Chinese yin-yang method. [TBD: scholarly literature]</p>
-<h3 id="sec-2-2">2.2 Reasons for encoding<a class="anchor" href="#sec-2-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-2-2">2.2 Reasons for encoding</h3>
 <p>The script is attested in one text, in two manuscripts (3.1). Digital text in the script cannot be exchanged today: no character of the script exists in Unicode, so it can be written only with characters of another script or as images. The proposer has built a font for the script, an editor and a conversion between the script and Quốc Ngữ; these use code points of the Supplementary Private Use Area-A (U+F0000..U+F00AF), laid out as proposed here. Text written with them is readable only with this font and these tools. Private-use code points have no assigned properties, so search, sorting, line breaking and segmentation of such text depend on each application, and text in different private-use assignments cannot be combined.</p>
 <p>Encoding the script lets the text of the source be transcribed, quoted and searched in a standard form, and lets the script be used next to Hán Nôm and Quốc Ngữ in one document, as it appears in the source (2.1). The model of the proposal (5) is built so that every character of the source can be written, including the Tham Thư attested in the source (4.3).</p>
 <p>The script is in use on the web today (3.3). [TBD: scholarship]</p>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="3-sources-and-evidence">3. Sources and Evidence<a class="anchor" href="#3-sources-and-evidence" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
-<p>Two sources attest the script. Both are manuscripts of the same vertical Hán Nôm text, which describes the methods of combination. Each has four double pages, numbered as eight pages, with the same content and the same page numbering. Both are bound in one volume with continuous folio numbers, Source 1 on folios 3–10 and Source 2 on folios 11–18; page references in this proposal give the page within each manuscript, 1 to 8. Whether Source 2 was copied from Source 1 or both from an earlier original cannot be determined. The two sources are one text in two witnesses. Page references in this proposal, such as (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>), refer to Source 1; since both witnesses share the page numbering and the layout of the columns, they apply to Source 2 as well. Source 2 is named only where it differs or where its reading matters.</p>
-<h3 id="sec-3-1">3.1 Attested sources<a class="anchor" href="#sec-3-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<div class="table-wrap"><table>
+<h2 id="3-sources-and-evidence">3. Sources and Evidence</h2>
+<p>Two sources attest the script. Both are manuscripts of the same vertical Hán Nôm text, which describes the methods of combination. Each has four double pages, numbered as eight pages, with the same content and the same page numbering. Both are bound in one volume with continuous folio numbers, Source 1 on folios 3–10 and Source 2 on folios 11–18; page references in this proposal give the page within each manuscript, 1 to 8. Whether Source 2 was copied from Source 1 or both from an earlier original cannot be determined. The two sources are one text in two witnesses. Page references in this proposal, such as (p. 2), refer to Source 1; since both witnesses share the page numbering and the layout of the columns, they apply to Source 2 as well. Source 2 is named only where it differs or where its reading matters.</p>
+<h3 id="sec-3-1">3.1 Attested sources</h3>
+<table>
 <thead>
 <tr>
 <th>Source</th>
@@ -130,11 +105,11 @@
 <td>Vertical</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <p>Both manuscripts share the shelfmark AB.630. The date is that of the text, from the naming taboo (2.1); the dates of the two copies are not known.</p>
-<h3 id="sec-3-2">3.2 Evidence by feature<a class="anchor" href="#sec-3-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-3-2">3.2 Evidence by feature</h3>
 <p>Appendix B lists the passages by page.</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>Feature</th>
@@ -144,53 +119,52 @@
 <tbody>
 <tr>
 <td>Marked Cán</td>
-<td>The 22 marked Cán are listed with the names of their sounds in the section 幹音二十二字 (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>)</td>
+<td>The 22 marked Cán are listed with the names of their sounds in the section 幹音二十二字 (p. 2)</td>
 </tr>
 <tr>
 <td>Unmarked Cán</td>
-<td>Not listed; shown in the combined characters of the examples and standing alone, for example with the eight tones (pp. <a href="pages/S1-p5.jpg" target="_blank">5</a>–<a href="pages/S1-p7.jpg" target="_blank">7</a>)</td>
+<td>Not listed; shown in the combined characters of the examples and standing alone, for example with the eight tones (pp. 5–7)</td>
 </tr>
 <tr>
 <td>Chi</td>
-<td>Tabulated in the section 枝字一百一十字 in blocks of five per Cán: 109 forms shown against 110 named (pp. <a href="pages/S1-p3.jpg" target="_blank">3</a>–<a href="pages/S1-p4.jpg" target="_blank">4</a>)</td>
+<td>Tabulated in the section 枝字一百一十字 in blocks of five per Cán: 109 forms shown against 110 named (pp. 3–4)</td>
 </tr>
 <tr>
 <td>Phản thiết pairs</td>
-<td>Described in the section Phản Thiết Hài Âm Pháp (反切諧音法, from p. <a href="pages/S1-p5.jpg" target="_blank">5</a>); components of different bases, unmarked Cán first; the unmarked Cán gives the initial, the Chi the rhyme; pairs in running text (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>)</td>
+<td>Described in the section Phản Thiết Hài Âm Pháp (反切諧音法, from p. 5); components of different bases, unmarked Cán first; the unmarked Cán gives the initial, the Chi the rhyme; pairs in running text (p. 6)</td>
 </tr>
 <tr>
 <td>Hợp Thư</td>
-<td>Described in the text; every example is a same-base pair with the Chi first; the Chi gives the initial, the unmarked Cán the rhyme; the count of 880 (110 × 8 tones) covers only same-base pairs (p. <a href="pages/S1-p8.jpg" target="_blank">8</a>)</td>
+<td>Described in the text; every example is a same-base pair with the Chi first; the Chi gives the initial, the unmarked Cán the rhyme; the count of 880 (110 × 8 tones) covers only same-base pairs (p. 8)</td>
 </tr>
 <tr>
 <td>Tham Thư</td>
-<td>Rule described in the text, with a Hợp Thư as the base; two examples attested, both on a Hợp Thư; the formula of a Tham Thư names the lower component first (p. <a href="pages/S1-p7.jpg" target="_blank">7</a>, <a href="evidences/E40.html">E40</a>); the pronunciation is not described</td>
+<td>Rule described in the text, with a Hợp Thư as the base; two examples attested, both on a Hợp Thư; the formula of a Tham Thư names the lower component first (p. 7); the pronunciation is not described</td>
 </tr>
 <tr>
 <td>Standalone and adjacent components</td>
-<td>When the text explains how components combine, it writes components on their own and side by side without combining them: a standalone unmarked Cán before a Chi, and two standalone unmarked Cán before a phản thiết pair (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>)</td>
+<td>When the text explains how components combine, it writes components on their own and side by side without combining them: a standalone unmarked Cán before a Chi, and two standalone unmarked Cán before a phản thiết pair (p. 6)</td>
 </tr>
 <tr>
 <td>Tone marks</td>
-<td>Eight tones in four corners, explained with the corner of each tone class and illustrated on one character (pp. <a href="pages/S1-p4.jpg" target="_blank">4</a>–<a href="pages/S1-p5.jpg" target="_blank">5</a>); the neutral tone marked with a semicircle lower left; marked and unmarked characters in one passage; round and angular forms of the same mark (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>)</td>
+<td>Eight tones in four corners, explained with the corner of each tone class and illustrated on one character (pp. 4–5); the neutral tone marked with a semicircle lower left; marked and unmarked characters in one passage; round and angular forms of the same mark (p. 6)</td>
 </tr>
 <tr>
 <td>Writing direction</td>
 <td>The text is silent; both witnesses are vertical Hán Nôm</td>
 </tr>
 </tbody>
-</table></div>
-<h3 id="sec-3-3">3.3 Modern use<a class="anchor" href="#sec-3-3" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>The script is in use on the web today: a website of the proposer (qatt.org), a page on Omniglot, and a group on social media whose members write tutorials and develop fonts (<a href="evidences/E22.html">E22</a>).</p>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="4-structure-of-the-script">4. Structure of the Script<a class="anchor" href="#4-structure-of-the-script" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+</table>
+<h3 id="sec-3-3">3.3 Modern use</h3>
+<p>The script is in use on the web today: a website of the proposer (qatt.org), a page on Omniglot, and a group on social media whose members write tutorials and develop fonts.</p>
+<h2 id="4-structure-of-the-script">4. Structure of the Script</h2>
 <p>Quốc Âm Tân Tự is built from 22 bases, each in seven forms. Every form can stand alone; all but one per base combine in groups of two or three, and any character may carry one tone mark in one of its four corners.</p>
-<h3 id="sec-4-1">4.1 Components<a class="anchor" href="#sec-4-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>The script has 22 bases (<em>Cán</em>, 幹; the source writes it with 音 in the heading 幹音二十二字 of the listing, p. <a href="pages/S1-p2.jpg" target="_blank">2</a>, and with 字 in 二十二幹字為標, p. <a href="pages/S1-p7.jpg" target="_blank">7</a>), each drawn with three strokes. The source lists the 22 base sounds (幹音二十二字, p. <a href="pages/S1-p2.jpg" target="_blank">2</a>); each is shown with a QATT character, which carries one short marking stroke at the start position, upper left or upper middle depending on the base, and with a Nôm annotation that gives its sound. This form is the <em>marked Cán</em>. The marking stroke always sits at the end of a stroke, so the three strokes offer six positions for it, counted counter-clockwise from the start position as 1 to 6. The marked Cán has it at position 1; the five forms with the marking stroke at positions 2 to 6 are the <em>Chi</em>, in order. A seventh form has no marking stroke. The source calls it Cán, like the marked Cán; this proposal calls it the <em>unmarked Cán</em> to tell it from the marked Cán, whose forms are listed under 幹音 and have no special name either. The unmarked form is shown for ONG (<a href="evidences/E07.html">E07</a>, <a href="evidences/E39.html">E39</a>) and đông (<a href="evidences/E15.html">E15</a>); that all 22 Cán occur as unmarked Cán in combinations follows from the counts in the section 音数 (p. <a href="pages/S1-p8.jpg" target="_blank">8</a>, <a href="evidences/E36.html">E36</a>), not from a listing (<a href="evidences/E34.html">E34</a>). In the count section the source calls both the Cán standing alone (單幹書) and the component of a combination, which is always the unmarked form, 幹 (幹体, p. <a href="pages/S1-p8.jpg" target="_blank">8</a>). Because the marking stroke of every Chi lies at another position than that of the marked Cán, no Chi coincides with the marked Cán: each base has six distinct marked forms and one unmarked form.</p>
-<p>The Chi are tabulated in the section 枝字一百一十字, &quot;the 110 Chi characters&quot;, in blocks of five per base (pp. <a href="pages/S1-p3.jpg" target="_blank">3</a>–<a href="pages/S1-p4.jpg" target="_blank">4</a>); the table shows 109, one having been left out by oversight (KHONG MARKED-4). The source gives the readings of the Chi only through Nôm annotations next to each form; these are ambiguous or not attested in dictionaries, so the readings are not established. The encoding does not depend on them, because the forms differ by the position of the marking stroke. The annotations are not transcribed here.</p>
-<p>The three classes have distinct functions. An unmarked Cán gives the initial consonant of its base, and a Chi gives a rhyme; together the 110 Chi form the rhyme table of the script. A marked Cán stands for the whole syllable of its initial with the rhyme ông and names its base; it serves to pronounce the unmarked Cán in the phản thiết method. The unmarked Cán and the Chi also serve as the components of a Tham Thư (4.3). The worked examples of the source show these functions. Each explains a combined character with a formula in the fanqie form, the character, 乃, two spelling characters and 反, in which the first spelling character gives the initial and the second the rhyme: for a phản thiết pair on p. <a href="pages/S1-p7.jpg" target="_blank">7</a> (<a href="evidences/E39.html">E39</a>), for a Hợp Thư on p. <a href="pages/S1-p6.jpg" target="_blank">6</a> (<a href="evidences/E07.html">E07</a>).</p>
-<p>Whether a component may stand alone in running text cannot be decided from the source, which contains no running text in the script (2.1). In these examples the marked Cán, the unmarked Cán and the Chi all appear standalone, also with tone marks. A standalone unmarked Cán has the same reading as the marked Cán of its base: the source illustrates the eight tones on the standalone unmarked Cán of đông (p. <a href="pages/S1-p5.jpg" target="_blank">5</a>). Only the unmarked Cán and the Chi combine; the marked Cán never does. Outside the listing of the 22 Cán (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>) the marked Cán occurs only twice, both times as a separate character with a reading, in formulas that explain a combined character (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>, p. <a href="pages/S1-p7.jpg" target="_blank">7</a>); the second carries a tone mark.</p>
-<div class="table-wrap"><table>
+<h3 id="sec-4-1">4.1 Components</h3>
+<p>The script has 22 bases (<em>Cán</em>, 幹; the source writes it with 音 in the heading 幹音二十二字 of the listing, p. 2, and with 字 in 二十二幹字為標, p. 7), each drawn with three strokes. The source lists the 22 base sounds (幹音二十二字, p. 2); each is shown with a QATT character, which carries one short marking stroke at the start position, upper left or upper middle depending on the base, and with a Nôm annotation that gives its sound. This form is the <em>marked Cán</em>. The marking stroke always sits at the end of a stroke, so the three strokes offer six positions for it, counted counter-clockwise from the start position as 1 to 6. The marked Cán has it at position 1; the five forms with the marking stroke at positions 2 to 6 are the <em>Chi</em>, in order. A seventh form has no marking stroke. The source calls it Cán, like the marked Cán; this proposal calls it the <em>unmarked Cán</em> to tell it from the marked Cán, whose forms are listed under 幹音 and have no special name either. The unmarked form is shown for ONG  and đông; that all 22 Cán occur as unmarked Cán in combinations follows from the counts in the section 音数 (p. 8), not from a listing. In the count section the source calls both the Cán standing alone (單幹書) and the component of a combination, which is always the unmarked form, 幹 (幹体, p. 8). Because the marking stroke of every Chi lies at another position than that of the marked Cán, no Chi coincides with the marked Cán: each base has six distinct marked forms and one unmarked form.</p>
+<p>The Chi are tabulated in the section 枝字一百一十字, &quot;the 110 Chi characters&quot;, in blocks of five per base (pp. 3–4); the table shows 109, one having been left out by oversight (KHONG MARKED-4). The source gives the readings of the Chi only through Nôm annotations next to each form; these are ambiguous or not attested in dictionaries, so the readings are not established. The encoding does not depend on them, because the forms differ by the position of the marking stroke. The annotations are not transcribed here.</p>
+<p>The three classes have distinct functions. An unmarked Cán gives the initial consonant of its base, and a Chi gives a rhyme; together the 110 Chi form the rhyme table of the script. A marked Cán stands for the whole syllable of its initial with the rhyme ông and names its base; it serves to pronounce the unmarked Cán in the phản thiết method. The unmarked Cán and the Chi also serve as the components of a Tham Thư (4.3). The worked examples of the source show these functions. Each explains a combined character with a formula in the fanqie form, the character, 乃, two spelling characters and 反, in which the first spelling character gives the initial and the second the rhyme: for a phản thiết pair on p. 7, for a Hợp Thư on p. 6.</p>
+<p>Whether a component may stand alone in running text cannot be decided from the source, which contains no running text in the script (2.1). In these examples the marked Cán, the unmarked Cán and the Chi all appear standalone, also with tone marks. A standalone unmarked Cán has the same reading as the marked Cán of its base: the source illustrates the eight tones on the standalone unmarked Cán of đông (p. 5). Only the unmarked Cán and the Chi combine; the marked Cán never does. Outside the listing of the 22 Cán (p. 2) the marked Cán occurs only twice, both times as a separate character with a reading, in formulas that explain a combined character (p. 6, p. 7); the second carries a tone mark.</p>
+<table>
 <thead>
 <tr>
 <th>Component</th>
@@ -223,20 +197,20 @@
 <td>with a Chi</td>
 </tr>
 </tbody>
-</table></div>
-<h3 id="sec-4-2">4.2 Two-component characters: phản thiết and Hợp Thư<a class="anchor" href="#sec-4-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+</table>
+<h3 id="sec-4-2">4.2 Two-component characters: phản thiết and Hợp Thư</h3>
 <p>An unmarked Cán and a Chi combine into one character. The source describes two methods.</p>
 <ul>
 <li><strong>Phản thiết.</strong> The unmarked Cán and the Chi belong to different Cán, and the unmarked Cán comes first. The unmarked Cán gives the initial and the Chi the rhyme, as in the Chinese fanqie (反切) method of spelling a syllable by the initial of one character and the rhyme of another. The section Phản Thiết Hài Âm Pháp (反切諧音法) describes these pairs; the source gives them no name of its own, and this proposal calls them phản thiết pairs. A phản thiết pair of the same base would add nothing to the Chi, so the encoding does not form such pairs (5.3); the Chi is written alone.</li>
-<li><strong>Hợp Thư.</strong> The Chi and the unmarked Cán belong to the same Cán, and the Chi comes first. The source describes this arrangement as an exchange of positions. It is not only visual: compared with a phản thiết pair, the components also exchange their functions, so that the Chi gives the initial consonant and the unmarked Cán the rhyme (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>, <a href="evidences/E07.html">E07</a>). There are 110 Hợp Thư, one for each Chi.</li>
+<li><strong>Hợp Thư.</strong> The Chi and the unmarked Cán belong to the same Cán, and the Chi comes first. The source describes this arrangement as an exchange of positions. It is not only visual: compared with a phản thiết pair, the components also exchange their functions, so that the Chi gives the initial consonant and the unmarked Cán the rhyme (p. 6). There are 110 Hợp Thư, one for each Chi.</li>
 </ul>
 <p>When the source explains these methods, it also writes components on their own and side by side without combining them (3.2). In both methods the written order of the components is also their reading order: initial, then rhyme.</p>
-<h3 id="sec-4-3">4.3 Tham Thư (three components)<a class="anchor" href="#sec-4-3" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-4-3">4.3 Tham Thư (three components)</h3>
 <p>A Hợp Thư may carry a third component, a single Chi, above it. The base is always a Hợp Thư; a phản thiết pair or a single Chi is not a base. The third component is otherwise unrestricted. This allows 110 bases and 110 × 110 = 12,100 Tham Thư. The two attested Tham Thư both have a Hợp Thư as the base, as the rule requires.</p>
-<p>The order of the components is given by the source: the formula that explains a Tham Thư character names the lower component first and the upper one after it (p. <a href="pages/S1-p7.jpg" target="_blank">7</a>, <a href="evidences/E40.html">E40</a>). The formula explains the character <code>[ONG-MARKED-4 J ONG-UNMARKED C KHONG-MARKED-5]</code> (notation in 5.3): a Hợp Thư of ONG with the Chi MARKED-5 of KHONG above it. It is written 音乃嗡圈反合 followed by the Chữ Nôm character ⿰舌⿴⿰片爿一 (淵 with the radical 舌), whose reading is unknown. The second example is explained by a formula of the same form (p. <a href="pages/S1-p7.jpg" target="_blank">7</a>, <a href="evidences/E41.html">E41</a>): <code>[BONG-MARKED-4 J BONG-UNMARKED C HONG-MARKED-2]</code>, written 音乃⿰口⿱艹風花反法合吧字也. Tham Thư is nevertheless the least certain part of the script. The source describes its structure but not its pronunciation, and with only two examples the function of the three components within a Tham Thư cannot be established. This proposal therefore treats Tham Thư as a structural formation only and makes no claim about its pronunciation. The encoding follows the reading order: the Hợp Thư comes first as a complete unit, and the combiner adds the third component to it (5.3).</p>
-<h3 id="sec-4-4">4.4 Tone marks<a class="anchor" href="#sec-4-4" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>A tone mark is a circle or a semicircle placed in one of the four corners of the character, giving the eight tones of the Chinese yin-yang system. The source explains the system after the Chi table: &quot;yang uses a full circle, yin a half circle&quot; (陽用全圈，陰用半圈, p. <a href="pages/S1-p4.jpg" target="_blank">4</a>), and names the corner for each tone class: the left foot (左足) for bình, the left shoulder (左肩) for thượng, the right shoulder (右肩) for khứ and the right foot (右足) for nhập (p. <a href="pages/S1-p5.jpg" target="_blank">5</a>). It illustrates the eight marks on one character, the unmarked Cán of đông, annotated 東 董 凍 篤 for âm and 同 洞 動 獨 for dương (p. <a href="pages/S1-p5.jpg" target="_blank">5</a>). The source gives 同 洞 動 獨 explicitly as the level, rising, departing and entering tones (平上去入, p. <a href="pages/S1-p4.jpg" target="_blank">4</a>), whereas the rime tradition assigns 動 to the rising and 洞 to the departing tone. 洞 has the readings đỗng and động (Tự điển chữ Nôm trích dẫn, p. 403); by placing 洞 in the rising tone, the source reads it đỗng, so that 同 洞 動 獨 (đồng, đỗng, động, độc) follow the Vietnamese tones huyền, ngã, nặng and the entering nặng. The corner gives the tone class and the shape gives the register: a semicircle marks âm (陰), a circle dương (陽).</p>
-<div class="table-wrap"><table>
+<p>The order of the components is given by the source: the formula that explains a Tham Thư character names the lower component first and the upper one after it (p. 7). The formula explains the character <code>[ONG-MARKED-4 J ONG-UNMARKED C KHONG-MARKED-5]</code> (notation in 5.3): a Hợp Thư of ONG with the Chi MARKED-5 of KHONG above it. It is written 音乃嗡圈反合 followed by the Chữ Nôm character <span class="ids ids-lr"></span>舌<span class="ids ids-in"></span><span class="ids ids-lr"></span>片爿一 (淵 with the radical 舌), whose reading is unknown. The second example is explained by a formula of the same form (p. 7): <code>[BONG-MARKED-4 J BONG-UNMARKED C HONG-MARKED-2]</code>, written 音乃<span class="ids ids-lr"></span>口<span class="ids ids-ud"></span>艹風花反法合吧字也. Tham Thư is nevertheless the least certain part of the script. The source describes its structure but not its pronunciation, and with only two examples the function of the three components within a Tham Thư cannot be established. This proposal therefore treats Tham Thư as a structural formation only and makes no claim about its pronunciation. The encoding follows the reading order: the Hợp Thư comes first as a complete unit, and the combiner adds the third component to it (5.3).</p>
+<h3 id="sec-4-4">4.4 Tone marks</h3>
+<p>A tone mark is a circle or a semicircle placed in one of the four corners of the character, giving the eight tones of the Chinese yin-yang system. The source explains the system after the Chi table: &quot;yang uses a full circle, yin a half circle&quot; (陽用全圈，陰用半圈, p. 4), and names the corner for each tone class: the left foot (左足) for bình, the left shoulder (左肩) for thượng, the right shoulder (右肩) for khứ and the right foot (右足) for nhập (p. 5). It illustrates the eight marks on one character, the unmarked Cán of đông, annotated 東 董 凍 篤 for âm and 同 洞 動 獨 for dương (p. 5). The source gives 同 洞 動 獨 explicitly as the level, rising, departing and entering tones (平上去入, p. 4), whereas the rime tradition assigns 動 to the rising and 洞 to the departing tone. 洞 has the readings đỗng and động (Tự điển chữ Nôm trích dẫn, p. 403); by placing 洞 in the rising tone, the source reads it đỗng, so that 同 洞 動 獨 (đồng, đỗng, động, độc) follow the Vietnamese tones huyền, ngã, nặng and the entering nặng. The corner gives the tone class and the shape gives the register: a semicircle marks âm (陰), a circle dương (陽).</p>
+<table>
 <thead>
 <tr>
 <th>Corner</th>
@@ -271,22 +245,21 @@
 <td>dương nhập (nặng in syllables ending in -p, -t, -c)</td>
 </tr>
 </tbody>
-</table></div>
-<p>The neutral tone ngang has its own mark, a semicircle in the lower left corner (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>). A character carries at most one tone mark, and many carry none; on p. <a href="pages/S1-p6.jpg" target="_blank">6</a> a passage marks every Quốc Âm Tân Tự character with the neutral tone except the last two, which carry no mark. An unmarked character therefore leaves the tone unspecified. Standalone components carry tone marks as well (p. <a href="pages/S1-p6.jpg" target="_blank">6</a>).</p>
-<p>The source does not specify the orientation of the semicircle; every example shows its open side facing the centre of the character (p. <a href="pages/S1-p5.jpg" target="_blank">5</a>, <a href="evidences/E16.html">E16</a>). Round and angular forms of the semicircle are handwriting variation, not different marks: Source 1 writes the same mark now round, now close to a hook, while Source 2 writes every tone mark of the passage on p. <a href="pages/S1-p6.jpg" target="_blank">6</a> angular.</p>
-<h3 id="sec-4-5">4.5 Layout<a class="anchor" href="#sec-4-5" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+</table>
+<p>The neutral tone ngang has its own mark, a semicircle in the lower left corner (p. 6). A character carries at most one tone mark, and many carry none; on p. 6 a passage marks every Quốc Âm Tân Tự character with the neutral tone except the last two, which carry no mark. An unmarked character therefore leaves the tone unspecified. Standalone components carry tone marks as well (p. 6).</p>
+<p>The source does not specify the orientation of the semicircle; every example shows its open side facing the centre of the character (p. 5). Round and angular forms of the semicircle are handwriting variation, not different marks: Source 1 writes the same mark now round, now close to a hook, while Source 2 writes every tone mark of the passage on p. 6 angular.</p>
+<h3 id="sec-4-5">4.5 Layout</h3>
 <p>The source writes the components of a character in a fixed arrangement. In the notation of the Ideographic Description Characters:</p>
 <ul>
-<li><strong>Phản thiết:</strong> ⿰, the unmarked Cán on the left and the Chi on the right (<a href="evidences/E39.html">E39</a>).</li>
-<li><strong>Hợp Thư:</strong> ⿰, the Chi on the left and the unmarked Cán on the right (<a href="evidences/E07.html">E07</a>).</li>
-<li><strong>Tham Thư:</strong> ⿱, the Hợp Thư below and the Chi above it (<a href="evidences/E40.html">E40</a>, <a href="evidences/E41.html">E41</a>). The Hợp Thư keeps its own arrangement ⿰ within the lower half.</li>
+<li><strong>Phản thiết:</strong> <span class="ids ids-lr"></span>, the unmarked Cán on the left and the Chi on the right.</li>
+<li><strong>Hợp Thư:</strong> <span class="ids ids-lr"></span>, the Chi on the left and the unmarked Cán on the right.</li>
+<li><strong>Tham Thư:</strong> <span class="ids ids-ud"></span>, the Hợp Thư below and the Chi above it. The Hợp Thư keeps its own arrangement <span class="ids ids-lr"></span> within the lower half.</li>
 </ul>
-<p>The components of a character share the cell in equal parts: each half of a two-component character, and each half of a Tham Thư, is drawn compressed to its part of the cell. In every case the arrangement follows the stored order: in ⿰ the first component is on the left, and in the Tham Thư the Hợp Thư is stored first and drawn below.</p>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="5-encoding-model">5. Encoding Model<a class="anchor" href="#5-encoding-model" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+<p>The components of a character share the cell in equal parts: each half of a two-component character, and each half of a Tham Thư, is drawn compressed to its part of the cell. In every case the arrangement follows the stored order: in <span class="ids ids-lr"></span> the first component is on the left, and in the Tham Thư the Hợp Thư is stored first and drawn below.</p>
+<h2 id="5-encoding-model">5. Encoding Model</h2>
 <p>The script is encoded as 164 atomic characters: 154 components, two joiners and eight tone marks. Components are stored in reading order and drawn in that order; no component is reordered. Every combination is written with an explicit joiner, and components without a joiner are separate characters. Two- and three-component characters are sequences, so every character stays editable and its boundaries are determined locally.</p>
-<h3 id="sec-5-1">5.1 Repertoire<a class="anchor" href="#sec-5-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<div class="table-wrap"><table>
+<h3 id="sec-5-1">5.1 Repertoire</h3>
+<table>
 <thead>
 <tr>
 <th>Group</th>
@@ -323,10 +296,10 @@
 <td><strong>164</strong></td>
 </tr>
 </tbody>
-</table></div>
-<h3 id="sec-5-2">5.2 Why not precomposed<a class="anchor" href="#sec-5-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>An unmarked Cán and a Chi allow 2,420 two-component characters (22 unmarked Cán × 110 Chi): 2,310 phản thiết pairs and 110 Hợp Thư. The source gives the same counts multiplied by the eight tones: 880 with the Chi left and 18,480 with the Cán left, besides 176 single Cán and 880 single characters (p. <a href="pages/S1-p8.jpg" target="_blank">8</a>). Tham Thư allows 110 × 110 = 12,100. Precomposing would need 14,520 code points, most of them for combinations of which only a few are attested. Precomposing is neither feasible nor justified.</p>
-<h3 id="sec-5-3">5.3 Sequence grammar<a class="anchor" href="#sec-5-3" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+</table>
+<h3 id="sec-5-2">5.2 Why not precomposed</h3>
+<p>An unmarked Cán and a Chi allow 2,420 two-component characters (22 unmarked Cán × 110 Chi): 2,310 phản thiết pairs and 110 Hợp Thư. The source gives the same counts multiplied by the eight tones: 880 with the Chi left and 18,480 with the Cán left, besides 176 single Cán and 880 single characters (p. 8). Tham Thư allows 110 × 110 = 12,100. Precomposing would need 14,520 code points, most of them for combinations of which only a few are attested. Precomposing is neither feasible nor justified.</p>
+<h3 id="sec-5-3">5.3 Sequence grammar</h3>
 <pre><code>Character := Cluster [ToneMark]
 Cluster   := MarkedCan | Chi | UnmarkedCan | PhanThiet | HopThu | ThamThu
 PhanThiet := UnmarkedCan(X) Joiner Chi(Y)  X ≠ Y; unmarked Cán first
@@ -335,7 +308,7 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 </code></pre>
 <p>In running text and in the tables, a sequence is written in square brackets: each component is given as the name of its base and its form (ONG-UNMARKED, ONG-MARKED-4), <code>J</code> stands for the component joiner and <code>C</code> for the Tham Thư combiner. For example, <code>[ONG-MARKED-4 J ONG-UNMARKED C KHONG-MARKED-5]</code> is the Hợp Thư of ONG with the Chi MARKED-5 of KHONG above it.</p>
 <p>The component joiner joins two components into one character, and their order gives the arrangement. Components without a joiner are separate characters; a standalone unmarked Cán has the reading of the marked Cán of its base (4.1). The same-base conditions do not affect segmentation; they are checked by validation (5.5).</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>Intended character</th>
@@ -376,18 +349,18 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 <td>sequence + TONE</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <p>Sequences outside these patterns are not prohibited. They are not attested, and this proposal does not specify their rendering.</p>
-<h3 id="sec-5-4">5.4 Reading order and the component joiner<a class="anchor" href="#sec-5-4" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-5-4">5.4 Reading order and the component joiner</h3>
 <p>In a Hợp Thư the Chi gives the initial and the unmarked Cán the rhyme (4.2). Storing the Chi first follows the reading order, which is also the written order, so rendering needs no reordering.</p>
 <p>The joiner carries information that the components alone do not. The source writes components side by side without combining them (3.2), so <code>CU CH</code> may be two separate components or a phản thiết pair, and <code>CH CU</code> may be a Chi followed by a separate unmarked Cán or a Hợp Thư. The joiner decides. Every attested two-component character therefore contains it.</p>
-<h3 id="sec-5-5">5.5 Edit stability<a class="anchor" href="#sec-5-5" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-5-5">5.5 Edit stability</h3>
 <p>Deleting or inserting one character alters at most the cluster at the edit point and its immediate neighbours. An edit can split a cluster, merge two neighbours (for example when the top component of a Tham Thư is deleted and the next Chi takes its place) or attach a tone mark to the preceding cluster. Nothing beyond the neighbours changes.</p>
 <p>The guarantee also holds for ill-formed text, because segmentation uses pairwise rules only (6.2): whether a boundary lies between two characters depends on those two characters alone, and there is never a break before or after a joiner. An ill-formed chain such as <code>CH COMB CH COMB CH</code> therefore forms one cluster, which a validator reports as ill-formed. Segmentation never pairs up the parts of such a chain, so an edit inside it cannot regroup the text beyond it.</p>
 <p><strong>Why the joiner is needed.</strong> Without the joiner, a Hợp Thư would be the bare sequence Chi, unmarked Cán. With B a Chi and A an unmarked Cán of the same base, the sequence <code>BAB</code> would then read as <code>[BA][B]</code> or as <code>[B][AB]</code>, and both are valid text. A left-to-right parser takes the first reading, so deleting the first A in <code>ABABAB</code> would regroup all following characters from <code>[AB][AB][AB]</code> into <code>[BA][BA][B]</code>. With the joiner, <code>B JOIN A B</code> is <code>[BA][B]</code>, <code>B A JOIN B</code> is <code>[B][AB]</code> and <code>B A B</code> is three separate components: each reading has one spelling, and edits stay local.</p>
-<h3 id="sec-5-6">5.6 Tone marks<a class="anchor" href="#sec-5-6" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-5-6">5.6 Tone marks</h3>
 <p>The eight tone marks are combining characters that follow the complete cluster. Each corner and each mark type is contrastive, so a tone is a character and not a glyph variant. An unmarked cluster leaves the tone unspecified; it does not denote the neutral tone, which has its own mark (4.4). All eight marks are therefore needed. The orientation of the semicircle follows from its corner and is a glyph property. A cluster takes at most one tone mark.</p>
-<h3 id="sec-5-7">5.7 Alternatives considered<a class="anchor" href="#sec-5-7" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-5-7">5.7 Alternatives considered</h3>
 <ul>
 <li>Automatic exchange: a Hợp Thư stored as unmarked Cán, Chi, with the font exchanging the components when both share a Cán. Not adopted, because it stores the rhyme before the initial, against the reading order, and relies on a rendering rule that compares bases. It would also fix <code>CU(X) CH(X)</code> to the Hợp Thư for good.</li>
 <li>Implicit phản thiết, in which an unmarked Cán binds to the following character without a joiner and only a Hợp Thư uses the joiner: not adopted, because the source also writes an unmarked Cán standalone and components side by side (3.2). A forward-binding unmarked Cán would join them wrongly, for example with a following Han character.</li>
@@ -395,18 +368,17 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 <li>Joiner as a suffix (<code>CH(X) CU(X) JOIN</code>): not adopted, because it groups preceding characters retroactively, which needs right context in segmentation. Joiners such as U+200D ZERO WIDTH JOINER stand between the parts they join, and so does the Tham Thư combiner.</li>
 <li>One joiner for both two- and three-component characters (163 characters): not adopted, because the structure would follow from position instead of from the joiner, and the Tham Thư combiner could no longer be weighed on its own.</li>
 <li>Variation selector: rejected, because the two orders differ in reading, and a variation selector may only select a glyph variant of the same character.</li>
-<li>Unification of the marked Cán with the unmarked Cán: not adopted. The marked Cán never combines, and outside the listing of the 22 Cán (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>) it occurs only twice, as a separate character (4.1); the unmarked Cán of the same base has the same reading when it stands alone (p. <a href="pages/S1-p5.jpg" target="_blank">5</a>). The two forms are nevertheless distinct, differing by the marking stroke, and both are attested, so each has its own code point.</li>
+<li>Unification of the marked Cán with the unmarked Cán: not adopted. The marked Cán never combines, and outside the listing of the 22 Cán (p. 2) it occurs only twice, as a separate character (4.1); the unmarked Cán of the same base has the same reading when it stands alone (p. 5). The two forms are nevertheless distinct, differing by the marking stroke, and both are attested, so each has its own code point.</li>
 <li>Separate code points for the unmarked Cán of a Hợp Thư: rejected, 22 code points instead of one joiner.</li>
-<li>Broad reading of Hợp Thư, in which the term covers every unmarked Cán + Chi pair and a Tham Thư base may be any pair or a single Chi (278,300 Tham Thư): not adopted, because it needs an unattested base and does not match the division of the source into Hợp Thư and Phản Thiết Hài Âm Pháp. The count section confirms the narrow reading: the source counts 880 characters with the Chi on the left and the Cán on the right, eight tones on each of the 110 same-base pairs, and no others in this arrangement (p. <a href="pages/S1-p8.jpg" target="_blank">8</a>).</li>
+<li>Broad reading of Hợp Thư, in which the term covers every unmarked Cán + Chi pair and a Tham Thư base may be any pair or a single Chi (278,300 Tham Thư): not adopted, because it needs an unattested base and does not match the division of the source into Hợp Thư and Phản Thiết Hài Âm Pháp. The count section confirms the narrow reading: the source counts 880 characters with the Chi on the left and the Cán on the right, eight tones on each of the 110 same-base pairs, and no others in this arrangement (p. 8).</li>
 <li>Reuse of U+A700..U+A707 MODIFIER LETTER CHINESE TONE YIN PING to YANG RU: not adopted. These eight characters cover the same eight tones in the same order, but they are spacing modifier letters (General_Category Sk) written beside a syllable, not combining marks placed in a corner of a character. As separate grapheme clusters they would break the cluster structure, and a font could not place them within the cell. Their forms also differ: they distinguish yin and yang by an underline, Quốc Âm Tân Tự by semicircle and circle.</li>
 <li>Reuse of U+302A..U+302D IDEOGRAPHIC LEVEL, RISING, DEPARTING and ENTERING TONE MARK: not adopted. These combining marks use the same corners for the same four tone classes, but they do not distinguish âm and dương. Using them for one register and new characters for the other would split one set of eight contrastive marks across two blocks, and the existing marks would carry a register they do not denote.</li>
 <li>Two tone marks plus a position selector: rejected, because the corner is contrastive.</li>
 <li>Precomposed Hợp Thư and Tham Thư: rejected for size (5.2).</li>
 </ul>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="6-character-properties">6. Character Properties<a class="anchor" href="#6-character-properties" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+<h2 id="6-character-properties">6. Character Properties</h2>
 <p>The proposed properties follow from the encoding model: components are letters, the two joiners are format characters, and tone marks are nonspacing marks. The values for the two joiners are proposals; the Unicode text-segmentation experts are asked to review them (6.2).</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>Characters</th>
@@ -443,20 +415,19 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 <td>NSM</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <p>The draft data files list every value, including Indic_Conjunct_Break, East_Asian_Width and Vertical_Orientation; the questions for review are collected with them.</p>
-<h3 id="sec-6-1">6.1 Combining class of the tone marks<a class="anchor" href="#sec-6-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-6-1">6.1 Combining class of the tone marks</h3>
 <p>The corner is part of each tone mark's identity, so no positional combining classes are needed. A cluster takes at most one tone mark, so canonical reordering between marks never occurs. All eight marks therefore take class 0. The ideographic tone marks U+302A..U+302D, which mark the same corners on Han characters, have positional classes instead (218 lower left, 228 upper left, 232 upper right, 222 lower right); the same classes would also work here, since a cluster never takes two tone marks. [TBD: confirm with current Unicode conventions which classes to use]</p>
-<h3 id="sec-6-2">6.2 Grapheme clusters<a class="anchor" href="#sec-6-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-6-2">6.2 Grapheme clusters</h3>
 <p>Segmentation uses pairwise rules only: there is no break directly before or after either joiner and no break before a tone mark; every other boundary is a break. Tone marks match Extend. Components that are not joined, including a standalone unmarked Cán, form clusters of their own, so all components behave alike. Whether a cluster is well-formed is left to validation (5.5). One way to express this with existing properties is Grapheme_Cluster_Break=Extend for both joiners, which prevents a break before them, together with the Indic_Conjunct_Break mechanism of rule GB9c for the break after them: components as Consonant, joiners as Linker, tone marks as Extend. [TBD: whether Indic_Conjunct_Break may be used for a non-Indic script, or a new value or rule is preferred; compare with the Egyptian hieroglyph format controls]</p>
-<h3 id="sec-6-3">6.3 Line breaking and direction<a class="anchor" href="#sec-6-3" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-6-3">6.3 Line breaking and direction</h3>
 <p>The source does not state a writing direction. Both witnesses contain vertical Hán Nôm text, and in every case the script is treated exactly like Hán Nôm and flows with it: vertical lines, columns running right to left, no spaces between words. No horizontal use is attested. The proposal therefore assumes the writing habits of Hán Nôm. The characters behave like ideographs, each occupying one square cell. Proposed for the components: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Tone marks and the joiners never start a line, because they belong to the preceding cluster.</p>
-<h3 id="sec-6-4">6.4 Code point order<a class="anchor" href="#sec-6-4" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>The source lists the 22 Cán in the section 幹音二十二字, &quot;trunk sounds, twenty-two characters&quot;, each annotated with its name in Chữ Nôm (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>). The order groups the initials roughly by place of articulation. It has no encoding significance, so code points follow the order of that listing and no collation claim is made. Within each Cán, the five Chi follow the order of the marking-stroke position, counter-clockwise from the position of the marked Cán (4.1). The seven forms of a base follow one another: the unmarked form first, then the six marked forms. The code points are therefore grouped by base. Because a phản thiết pair begins with the unmarked Cán of its first base and a Hợp Thư begins with a Chi of its base, a binary comparison of code point sequences, without any collation, places both constructions of a base in the one range of that base.</p>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="7-character-table-and-code-chart">7. Character Table and Code Chart<a class="anchor" href="#7-character-table-and-code-chart" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+<h3 id="sec-6-4">6.4 Code point order</h3>
+<p>The source lists the 22 Cán in the section 幹音二十二字, &quot;trunk sounds, twenty-two characters&quot;, each annotated with its name in Chữ Nôm (p. 2). The order groups the initials roughly by place of articulation. It has no encoding significance, so code points follow the order of that listing and no collation claim is made. Within each Cán, the five Chi follow the order of the marking-stroke position, counter-clockwise from the position of the marked Cán (4.1). The seven forms of a base follow one another: the unmarked form first, then the six marked forms. The code points are therefore grouped by base. Because a phản thiết pair begins with the unmarked Cán of its first base and a Hợp Thư begins with a Chi of its base, a binary comparison of code point sequences, without any collation, places both constructions of a base in the one range of that base.</p>
+<h2 id="7-character-table-and-code-chart">7. Character Table and Code Chart</h2>
 <p>The 164 characters fit in a block of 176 code points (11 columns of 16), proposed for the Supplementary Multilingual Plane; the block position is assigned by the UTC. Code points follow the source order of the 22 Cán, and the seven forms of each base are consecutive: the unmarked form, the marked Cán and the five Chi. The 22 unmarked forms are therefore not one run; they are the forms at every seventh position (+00, +07, … +93).</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>Group</th>
@@ -491,9 +462,9 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 <td>12</td>
 </tr>
 </tbody>
-</table></div>
-<p>The tone marks follow the traditional order of the eight tones, the numbering 1 to 8 used in Chinese dialectology: âm bình, dương bình, âm thượng, dương thượng, âm khứ, dương khứ, âm nhập, dương nhập, that is by tone class and within each class âm before dương. The first six correspond to the Vietnamese tone order ngang, huyền, hỏi, ngã, sắc, nặng used in dictionaries and in Vietnamese collation. The source lists the marks in a different order, first the four semicircles and then the four circles, each starting lower left and running clockwise (p. <a href="pages/S1-p5.jpg" target="_blank">5</a>); that order presents the marks by shape and is not adopted for the code points.</p>
-<div class="table-wrap"><table>
+</table>
+<p>The tone marks follow the traditional order of the eight tones, the numbering 1 to 8 used in Chinese dialectology: âm bình, dương bình, âm thượng, dương thượng, âm khứ, dương khứ, âm nhập, dương nhập, that is by tone class and within each class âm before dương. The first six correspond to the Vietnamese tone order ngang, huyền, hỏi, ngã, sắc, nặng used in dictionaries and in Vietnamese collation. The source lists the marks in a different order, first the four semicircles and then the four circles, each starting lower left and running clockwise (p. 5); that order presents the marks by shape and is not adopted for the code points.</p>
+<table>
 <thead>
 <tr>
 <th>Offset</th>
@@ -543,8 +514,8 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 <td>dương nhập</td>
 </tr>
 </tbody>
-</table></div>
-<h3 id="sec-7-1">7.1 Character names<a class="anchor" href="#sec-7-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+</table>
+<h3 id="sec-7-1">7.1 Character names</h3>
 <p>Names use ASCII capitals without diacritics, as Unicode requires. Patterns:</p>
 <pre><code>QUOC AM TAN TU &lt;NAME&gt; UNMARKED
 QUOC AM TAN TU &lt;NAME&gt; MARKED-&lt;N&gt;
@@ -556,7 +527,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <p>The tone marks use the corners UPPER LEFT, UPPER RIGHT, LOWER LEFT and LOWER RIGHT, each for circle and semicircle. The names describe the mark; the tone it denotes is given as an annotation, for example QUOC AM TAN TU TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). The names list cross-references the related existing characters: each tone mark refers to the spacing modifier letter for the same tone (U+A700..U+A707) and to the ideographic tone mark for the same corner (U+302A..U+302D).</p>
 <p>The names describe the form only and say nothing about its function. A form without marking stroke is UNMARKED. A form with the marking stroke is MARKED-1 to MARKED-6, the number being the position of the marking stroke among the six stroke ends, counted counter-clockwise from the start position of the marked Cán (4.1); MARKED-1 is the marked Cán, MARKED-2 to MARKED-6 are the five Chi, for example QUOC AM TAN TU ONG MARKED-1 to QUOC AM TAN TU ONG MARKED-6. The positions are relative to the marked Cán and lie in different places for different bases, so the names number them instead of describing them geometrically. The names list gives the class as an annotation.</p>
 <p>The names of the 22 Cán are the names of their sounds in the source listing (6.4), where each Cán is annotated with a Chữ Nôm character; annotations without an encoded character are given as Ideographic Description Sequences. Each name is the syllable of the initial with the rhyme ông. Every form of a base takes the name of its Cán. Diacritics are dropped. To keep đông and dông apart, đ is written DD and d is written DZ, following an established convention for Vietnamese: đông → DDONG, dông → DZONG.</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>No.</th>
@@ -580,7 +551,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>2</td>
-<td>⿰木禺</td>
+<td><span class="ids ids-lr"></span>木禺</td>
 <td>ngông</td>
 <td>Ng</td>
 <td>NGONG</td>
@@ -598,7 +569,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>4</td>
-<td>⿰木功</td>
+<td><span class="ids ids-lr"></span>木功</td>
 <td>gông</td>
 <td>G</td>
 <td>GONG</td>
@@ -616,7 +587,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>6</td>
-<td>⿰竜羽</td>
+<td><span class="ids ids-lr"></span>竜羽</td>
 <td>lông</td>
 <td>L</td>
 <td>LONG</td>
@@ -625,7 +596,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>7</td>
-<td>⿰竜里</td>
+<td><span class="ids ids-lr"></span>竜里</td>
 <td>trông</td>
 <td>Tr</td>
 <td>TRONG</td>
@@ -670,7 +641,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>12</td>
-<td>⿰亻戍</td>
+<td><span class="ids ids-lr"></span>亻戍</td>
 <td>nhông</td>
 <td>Nh</td>
 <td>NHONG</td>
@@ -688,7 +659,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>14</td>
-<td>⿰月容</td>
+<td><span class="ids ids-lr"></span>月容</td>
 <td>dông</td>
 <td>D</td>
 <td>DZONG</td>
@@ -724,7 +695,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>18</td>
-<td>⿱山庸</td>
+<td><span class="ids ids-ud"></span>山庸</td>
 <td>rông</td>
 <td>R</td>
 <td>RONG</td>
@@ -751,7 +722,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>21</td>
-<td>⿰木芃</td>
+<td><span class="ids ids-lr"></span>木芃</td>
 <td>vông</td>
 <td>V</td>
 <td>VONG</td>
@@ -760,7 +731,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>22</td>
-<td>⿰口風</td>
+<td><span class="ids ids-lr"></span>口風</td>
 <td>phông</td>
 <td>Ph</td>
 <td>PHONG</td>
@@ -768,11 +739,10 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <td>+99</td>
 </tr>
 </tbody>
-</table></div>
-<h3 id="sec-7-2">7.2 Code chart<a class="anchor" href="#sec-7-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<p>The code chart of the draft is <a href="chart.html">chart.html</a>. It sets the 22 bases in rows with the seven forms of each base in columns (UNMARKED, MARKED-1 to MARKED-6), followed by the two joiners and the eight tone marks, each shown on a dotted circle in its corner. The glyphs are those of the reference font (8). The code points are the provisional ones of the draft; only the offsets belong to the proposal.</p>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="8-font-design-notes">8. Font Design Notes<a class="anchor" href="#8-font-design-notes" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
+</table>
+<h3 id="sec-7-2">7.2 Code chart</h3>
+<p>The code chart of the draft is Appendix E. It sets the 22 bases in rows with the seven forms of each base in columns (UNMARKED, MARKED-1 to MARKED-6), followed by the two joiners and the eight tone marks, each shown on a dotted circle in its corner. The glyphs are those of the reference font (8). The code points are the provisional ones of the draft; only the offsets belong to the proposal.</p>
+<h2 id="8-font-design-notes">8. Font Design Notes</h2>
 <p>A conforming font draws every cluster in one square cell and composes it with substitution and positioning rules, not with precomposed glyphs.</p>
 <ul>
 <li><strong>Cell:</strong> Each cluster fills one square cell with the metrics of Hán Nôm ideographs, so it sits in vertical or horizontal lines without adjustment.</li>
@@ -782,10 +752,9 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <li><strong>Tone marks:</strong> Eight combining glyphs sit in the four corners of the whole cluster cell. The open side of the semicircle faces the centre. Round or angular outlines are a design choice, since the source treats the difference as handwriting variation.</li>
 <li><strong>Reference font:</strong> A reference font exists, designed by the proposer. It implements the rules above, including the Tham Thư composition. It is released under the SIL Open Font License 1.1.</li>
 </ul>
-</details><details class="sec"><summary class="bg-secondary text-white"><h2 id="9-appendices">9. Appendices<a class="anchor" href="#9-appendices" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
-
-<h3 id="sec-A">A. Glossary<a class="anchor" href="#sec-A" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
-<div class="table-wrap"><table>
+<h2 id="9-appendices">9. Appendices</h2>
+<h3 id="sec-A">A. Glossary</h3>
+<table>
 <thead>
 <tr>
 <th>Term</th>
@@ -795,7 +764,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <tbody>
 <tr>
 <td>Cán</td>
-<td>One of the 22 bases, each of three strokes, listed in the section 幹音二十二字 (p. <a href="pages/S1-p2.jpg" target="_blank">2</a>); each exists as a marked Cán and as an unmarked Cán</td>
+<td>One of the 22 bases, each of three strokes, listed in the section 幹音二十二字 (p. 2); each exists as a marked Cán and as an unmarked Cán</td>
 </tr>
 <tr>
 <td>Marked Cán</td>
@@ -830,11 +799,11 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <td>Format character that places the following Chi above a Hợp Thư</td>
 </tr>
 </tbody>
-</table></div>
-<h3 id="sec-B">B. Attested passages<a class="anchor" href="#sec-B" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+</table>
+<h3 id="sec-B">B. Attested passages</h3>
 <!-- appendix-b:start -->
 <p>Passages located in the source, by page of Source 1 (section 3). A QATT character is written {x}, x being the Nôm annotation beside it in the source; a sequence of components in square brackets is written in the notation of 5.3.</p>
-<div class="table-wrap"><table>
+<table>
 <thead>
 <tr>
 <th>Page</th>
@@ -844,119 +813,137 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </thead>
 <tbody>
 <tr>
-<td><a href="pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>1</td>
 <td>我國附於中華日前只</td>
 <td>Dating: the character 華 lacks its final stroke, a naming taboo for Hồ Thị Hoa, mother of Emperor Thiệu Trị (1841–1847)</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>1</td>
 <td>國音新字序</td>
 <td>Name of the script: 國音新字 (Quốc Âm Tân Tự), in the heading of the preface 國音新字序</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>2</td>
 <td>幹音二十二字</td>
 <td>The listing under the heading 幹音二十二字 shows 22 forms, the marked Cán, each of three strokes and one short marking stroke; The term Cán (幹): the listing of the 22 Cán is headed 幹音二十二字, 'trunk sounds, twenty-two characters'</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p2.jpg" target="_blank">2</a></td>
-<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · ⿰木禺 ngông · 胸 hông · ⿰木功 gông · 工 công · ⿰竜羽 lông · ⿰竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · ⿰亻戍 nhông · 柊 chông · ⿰月容 dông · 衝 xông · 空 không · 滝 sông · ⿱山庸 rông · 蒙 mông · 芃 bông · ⿰木芃 vông · ⿰口風 phông</td>
+<td>2</td>
+<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · <span class="ids ids-lr"></span>竜羽 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 芃 bông · <span class="ids ids-lr"></span>木芃 vông · <span class="ids ids-lr"></span>口風 phông</td>
 <td>Listing of the 22 base sounds (幹音二十二字) in source order, each shown with its QATT character and annotated with the name of its sound in Chữ Nôm</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>2</td>
 <td>五星聚斗南城居士阮子書</td>
 <td>Author's signature: Nam Thành cư sĩ Nguyễn Tử (南城居士阮子)</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p3.jpg" target="_blank">3</a></td>
+<td>3</td>
 <td>枝字一百一十字</td>
 <td>Five Chi per Cán: the marking stroke sits only at stroke ends (six positions); the marked Cán has it at the start position (upper left or upper middle), and moving it counter-clockwise gives the Chi in order</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p3.jpg" target="_blank">3</a></td>
+<td>3</td>
 <td>枝字一百一十字 · 109 Chi, each annotated with a Nôm character</td>
 <td>Table of the Chi under the heading 枝字一百一十字, 'the 110 Chi characters'; the table shows 109, one left out by oversight</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p4.jpg" target="_blank">4</a></td>
+<td>4</td>
 <td>本字八音識別法。於本字上依陰陽四象識別，每一字各成八字。如同東合一字，惟同音其聲在上為陽，東音其聲在下為陰。以陰陽分配，則東董凍篤四音是陰之平上去入，同洞動獨四音是陽之平上去入。以四象識別，則陽用全圈，陰用半圈。  其同字全識於其字之左足，洞字全識於其字之左肩，動字全識於其字之右肩，獨字全識於其字之右足；東字半識於其字之左足，董字半識於其字之左肩，凍字半識於其字之右肩，篤字半識於其字之右足。如下。他倣此。  {東}{董}{凍}{篤}{同}{洞}{動}{獨}</td>
 <td>Tone marks: circle and semicircle in four corners, eight tones; Eight tones follow the Chinese yin-yang method</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>反切諧音法</td>
 <td>Phản thiết method described in the section Phản Thiết Hài Âm Pháp (反切諧音法); components of different bases, unmarked Cán first</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>{東}{董}{凍}{篤}{同}{洞}{動}{獨}</td>
 <td>Tone marks in all four corners, both shapes: the unmarked Cán of đông written with all eight tone marks, annotated 東 董 凍 篤 同 洞 動 獨; Semicircle orientation: open side facing the centre in every example; Marked Cán and unmarked Cán both appear standalone, with the same reading, also with tone marks; only the unmarked Cán combines, never the marked Cán</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>5</td>
 <td>其同字全識於其字之左足，洞字全識於其字之左肩，動字全識於其字之右肩，獨字全識於其字之右足；東字半識於其字之左足，董字半識於其字之左肩，凍字半識於其字之右肩，篤字半識於其字之右足。如下。他倣此。</td>
 <td>The source lists the tones first with the four half circles, then the four full circles, each starting lower left and running clockwise</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>6</td>
 <td>如{翁}{宜}{反}反云{翁}{翁}{鳥}{衣}是合取{衣}{字}也</td>
 <td>Components written standalone and side by side when the text explains combination, including a standalone unmarked Cán and two adjacent unmarked Cán; Tone marks are optional: marked and unmarked characters in the same passage; The neutral tone (ngang, âm bình) has its own mark, a semicircle in the lower left corner; an unmarked character does not mean the neutral tone; Tone marks on standalone components (unmarked Cán and Chi); Round and angular forms of the same tone mark are handwriting variation: Source 1 writes the mark now round, now close to a hook; Source 2 writes all tone marks of the passage angular</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p6.jpg" target="_blank">6</a></td>
-<td>合書左從枝体右從幹体畧法  {螉}乃{喊}{翁}{反}法合螉字也他倣此切法亦如之  {癰} {螉} {嗡} {⿰口癰}</td>
+<td>6</td>
+<td>合書左從枝体右從幹体畧法  {螉}乃{喊}{翁}{反}法合螉字也他倣此切法亦如之  {癰} {螉} {嗡} {<span class="ids ids-lr"></span>口癰}</td>
 <td>Hợp Thư: same-base pairs only, Chi first; Function in a Hợp Thư: Chi gives the initial, unmarked Cán the rhyme</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>7</td>
 <td>參書下從合体上從枝体畧</td>
 <td>Tham Thư rule: the base is a Hợp Thư</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>7</td>
 <td>故二十二幹字為標足以</td>
 <td>The term Cán (幹) also occurs with 字 in 二十二幹字為標, 'the 22 Cán characters as the mark'; with 幹音二十二字 the source uses 幹 with 音 and with 字</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p7.jpg" target="_blank">7</a></td>
-<td>{嚥}乃{翁}{⿰口昭}{反}法合嚥字也他倣此切法亦然  {⿰口淵} {馬} {淵} {卬} {喧}</td>
+<td>7</td>
+<td>{嚥}乃{翁}{<span class="ids ids-lr"></span>口昭}{反}法合嚥字也他倣此切法亦然  {<span class="ids ids-lr"></span>口淵} {馬} {淵} {卬} {喧}</td>
 <td>Worked example of a phản thiết pair, the unmarked Cán of ONG and the Chi MARKED-5 of CHONG, read yên, and a list of five characters</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p7.jpg" target="_blank">7</a></td>
-<td>[ONG-MARKED-4 J ONG-UNMARKED C KHONG-MARKED-5] 音乃嗡圈反合⿰舌⿴⿰片爿一</td>
+<td>7</td>
+<td>[ONG-MARKED-4 J ONG-UNMARKED C KHONG-MARKED-5] 音乃嗡圈反合<span class="ids ids-lr"></span>舌<span class="ids ids-in"></span><span class="ids ids-lr"></span>片爿一</td>
 <td>Reading order of the Tham Thư: the formula that explains a Tham Thư character names the lower component first</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p7.jpg" target="_blank">7</a></td>
-<td>[BONG-MARKED-4 J BONG-UNMARKED C HONG-MARKED-2] 音乃⿰口⿱艹風花反法合吧字也</td>
+<td>7</td>
+<td>[BONG-MARKED-4 J BONG-UNMARKED C HONG-MARKED-2] 音乃<span class="ids ids-lr"></span>口<span class="ids ids-ud"></span>艹風花反法合吧字也</td>
 <td>Second attested Tham Thư: a Hợp Thư of BONG with the Chi MARKED-2 of HONG above it, explained by a formula</td>
 </tr>
 <tr>
-<td><a href="pages/S1-p8.jpg" target="_blank">8</a></td>
+<td>8</td>
 <td>音数  單幹書協契象（即識別也）成一百七十六字。單書協契象成八百八十字（內有喊字等四十六字其八聲稀微置語）。合書左從枝体右從幹体協契象成八百八十字。合書左從幹体右從枝体協契象成一萬八千四百八十字（內有一千九百三十二字其八声稀微置語）。參書倣此。</td>
 <td>Counts of the characters in the section 音数: 176 single Cán, 880 single characters, 880 合書 with Chi left and Cán right, 18,480 合書 with Cán left and Chi right, each including the tone marks; eight times 22, 110, 110 and 2,310</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <!-- appendix-b:end -->
-<h3 id="sec-C">C. References<a class="anchor" href="#sec-C" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
+<h3 id="sec-C">C. References</h3>
 <ul>
 <li>Nguyễn Hữu Vinh, Đặng Thế Kiệt, Nguyễn Doãn Vượng, Lê Văn Đặng, Nguyễn Văn Sâm, Nguyễn Ngọc Bích, Trần Uyên Thi. <em>Tự điển chữ Nôm trích dẫn</em> (字典𡨸喃摘引) / <em>Dictionary of Nôm Characters with Excerpts</em>. USA: Viện Việt-Học (Institute of Vietnamese Studies), 2009. P. 403, entry 洞 đỗng (động, đùng), U+6D1E, with a cross-reference to 洞 động.</li>
 </ul>
 <p>[TBD: scholarly literature and prior work on the script]</p>
-</details>
-  </main>
-  <script>
-    // a link to an anchor inside a closed section opens the section
-    function openTarget() {
-      const t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-      for (let d = t && t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
-      if (t) t.scrollIntoView();
-    }
-    addEventListener('hashchange', openTarget);
-    openTarget();
-  </script>
-</body>
-</html>
+<h3 id="app-d">D. Figures</h3><p>Cut-outs of Source 1, Institute of Hán Nôm Studies, Hanoi, AB.630. The page of the Chi table is shown whole.</p>
+<div class="figs"><figure><img src="images/E33-1.png" alt="Figure 1" loading="lazy"><figcaption>Figure 1. Title of the preface, 國音新字序, with the name of the script (p. 1).</figcaption></figure><figure><img src="images/E18-1.png" alt="Figure 2" loading="lazy"><figcaption>Figure 2. The listing of the 22 Cán under the heading 幹音二十二字, each with its Nôm annotation (p. 2).</figcaption></figure><figure class="wide"><img src="images/S1-p3.jpg" alt="Figure 3" loading="lazy"><figcaption>Figure 3. The Chi table, five forms per Cán (p. 3).</figcaption></figure><figure><img src="images/E16-1.png" alt="Figure 4" loading="lazy"><figcaption>Figure 4. The unmarked Cán of đông with the eight tone marks, annotated 東 董 凍 篤 同 洞 動 獨 (p. 5).</figcaption></figure><figure><img src="images/E04-1.png" alt="Figure 5" loading="lazy"><figcaption>Figure 5. Components written on their own and side by side, with tone marks (p. 6).</figcaption></figure><figure><img src="images/E07-1.png" alt="Figure 6" loading="lazy"><figcaption>Figure 6. The section on the Hợp Thư: heading, worked example and list of four characters (p. 6).</figcaption></figure><figure><img src="images/E39-1.png" alt="Figure 7" loading="lazy"><figcaption>Figure 7. Worked example of a phản thiết pair, with a list of five characters (p. 7).</figcaption></figure><figure><img src="images/E40-1.png" alt="Figure 8" loading="lazy"><figcaption>Figure 8. First Tham Thư: the formula 音乃嗡圈反合 and the character it explains (p. 7).</figcaption></figure><figure><img src="images/E41-1.png" alt="Figure 9" loading="lazy"><figcaption>Figure 9. Second Tham Thư, end of the second column, and its formula (p. 7).</figcaption></figure><figure><img src="images/E41-2.png" alt="Figure 10" loading="lazy"><figcaption>Figure 10. Second Tham Thư, continuation in the first column (p. 7).</figcaption></figure></div>
+<h3 id="app-e">E. Code chart</h3>
+
+
+<p>Provisional code points U+F0000..U+F00AF; the offsets are those of the proposal. Set in QATT Gothic, a placeholder until the reference font exists.</p>
+<table class="chart"><tr><th>Base</th><th>UNMARKED</th><th>MARKED-1</th><th>MARKED-2</th><th>MARKED-3</th><th>MARKED-4</th><th>MARKED-5</th><th>MARKED-6</th></tr>
+<tr><td class="name">01 ONG</td><td><div class="g">&#xF0000;</div><div class="cp">+00</div></td><td><div class="g">&#xF0001;</div><div class="cp">+01</div></td><td><div class="g">&#xF0002;</div><div class="cp">+02</div></td><td><div class="g">&#xF0003;</div><div class="cp">+03</div></td><td><div class="g">&#xF0004;</div><div class="cp">+04</div></td><td><div class="g">&#xF0005;</div><div class="cp">+05</div></td><td><div class="g">&#xF0006;</div><div class="cp">+06</div></td></tr>
+<tr><td class="name">02 NGONG</td><td><div class="g">&#xF0007;</div><div class="cp">+07</div></td><td><div class="g">&#xF0008;</div><div class="cp">+08</div></td><td><div class="g">&#xF0009;</div><div class="cp">+09</div></td><td><div class="g">&#xF000A;</div><div class="cp">+0A</div></td><td><div class="g">&#xF000B;</div><div class="cp">+0B</div></td><td><div class="g">&#xF000C;</div><div class="cp">+0C</div></td><td><div class="g">&#xF000D;</div><div class="cp">+0D</div></td></tr>
+<tr><td class="name">03 HONG</td><td><div class="g">&#xF000E;</div><div class="cp">+0E</div></td><td><div class="g">&#xF000F;</div><div class="cp">+0F</div></td><td><div class="g">&#xF0010;</div><div class="cp">+10</div></td><td><div class="g">&#xF0011;</div><div class="cp">+11</div></td><td><div class="g">&#xF0012;</div><div class="cp">+12</div></td><td><div class="g">&#xF0013;</div><div class="cp">+13</div></td><td><div class="g">&#xF0014;</div><div class="cp">+14</div></td></tr>
+<tr><td class="name">04 GONG</td><td><div class="g">&#xF0015;</div><div class="cp">+15</div></td><td><div class="g">&#xF0016;</div><div class="cp">+16</div></td><td><div class="g">&#xF0017;</div><div class="cp">+17</div></td><td><div class="g">&#xF0018;</div><div class="cp">+18</div></td><td><div class="g">&#xF0019;</div><div class="cp">+19</div></td><td><div class="g">&#xF001A;</div><div class="cp">+1A</div></td><td><div class="g">&#xF001B;</div><div class="cp">+1B</div></td></tr>
+<tr><td class="name">05 CONG</td><td><div class="g">&#xF001C;</div><div class="cp">+1C</div></td><td><div class="g">&#xF001D;</div><div class="cp">+1D</div></td><td><div class="g">&#xF001E;</div><div class="cp">+1E</div></td><td><div class="g">&#xF001F;</div><div class="cp">+1F</div></td><td><div class="g">&#xF0020;</div><div class="cp">+20</div></td><td><div class="g">&#xF0021;</div><div class="cp">+21</div></td><td><div class="g">&#xF0022;</div><div class="cp">+22</div></td></tr>
+<tr><td class="name">06 LONG</td><td><div class="g">&#xF0023;</div><div class="cp">+23</div></td><td><div class="g">&#xF0024;</div><div class="cp">+24</div></td><td><div class="g">&#xF0025;</div><div class="cp">+25</div></td><td><div class="g">&#xF0026;</div><div class="cp">+26</div></td><td><div class="g">&#xF0027;</div><div class="cp">+27</div></td><td><div class="g">&#xF0028;</div><div class="cp">+28</div></td><td><div class="g">&#xF0029;</div><div class="cp">+29</div></td></tr>
+<tr><td class="name">07 TRONG</td><td><div class="g">&#xF002A;</div><div class="cp">+2A</div></td><td><div class="g">&#xF002B;</div><div class="cp">+2B</div></td><td><div class="g">&#xF002C;</div><div class="cp">+2C</div></td><td><div class="g">&#xF002D;</div><div class="cp">+2D</div></td><td><div class="g">&#xF002E;</div><div class="cp">+2E</div></td><td><div class="g">&#xF002F;</div><div class="cp">+2F</div></td><td><div class="g">&#xF0030;</div><div class="cp">+30</div></td></tr>
+<tr><td class="name">08 DDONG</td><td><div class="g">&#xF0031;</div><div class="cp">+31</div></td><td><div class="g">&#xF0032;</div><div class="cp">+32</div></td><td><div class="g">&#xF0033;</div><div class="cp">+33</div></td><td><div class="g">&#xF0034;</div><div class="cp">+34</div></td><td><div class="g">&#xF0035;</div><div class="cp">+35</div></td><td><div class="g">&#xF0036;</div><div class="cp">+36</div></td><td><div class="g">&#xF0037;</div><div class="cp">+37</div></td></tr>
+<tr><td class="name">09 NONG</td><td><div class="g">&#xF0038;</div><div class="cp">+38</div></td><td><div class="g">&#xF0039;</div><div class="cp">+39</div></td><td><div class="g">&#xF003A;</div><div class="cp">+3A</div></td><td><div class="g">&#xF003B;</div><div class="cp">+3B</div></td><td><div class="g">&#xF003C;</div><div class="cp">+3C</div></td><td><div class="g">&#xF003D;</div><div class="cp">+3D</div></td><td><div class="g">&#xF003E;</div><div class="cp">+3E</div></td></tr>
+<tr><td class="name">10 TONG</td><td><div class="g">&#xF003F;</div><div class="cp">+3F</div></td><td><div class="g">&#xF0040;</div><div class="cp">+40</div></td><td><div class="g">&#xF0041;</div><div class="cp">+41</div></td><td><div class="g">&#xF0042;</div><div class="cp">+42</div></td><td><div class="g">&#xF0043;</div><div class="cp">+43</div></td><td><div class="g">&#xF0044;</div><div class="cp">+44</div></td><td><div class="g">&#xF0045;</div><div class="cp">+45</div></td></tr>
+<tr><td class="name">11 THONG</td><td><div class="g">&#xF0046;</div><div class="cp">+46</div></td><td><div class="g">&#xF0047;</div><div class="cp">+47</div></td><td><div class="g">&#xF0048;</div><div class="cp">+48</div></td><td><div class="g">&#xF0049;</div><div class="cp">+49</div></td><td><div class="g">&#xF004A;</div><div class="cp">+4A</div></td><td><div class="g">&#xF004B;</div><div class="cp">+4B</div></td><td><div class="g">&#xF004C;</div><div class="cp">+4C</div></td></tr>
+<tr><td class="name">12 NHONG</td><td><div class="g">&#xF004D;</div><div class="cp">+4D</div></td><td><div class="g">&#xF004E;</div><div class="cp">+4E</div></td><td><div class="g">&#xF004F;</div><div class="cp">+4F</div></td><td><div class="g">&#xF0050;</div><div class="cp">+50</div></td><td><div class="g">&#xF0051;</div><div class="cp">+51</div></td><td><div class="g">&#xF0052;</div><div class="cp">+52</div></td><td><div class="g">&#xF0053;</div><div class="cp">+53</div></td></tr>
+<tr><td class="name">13 CHONG</td><td><div class="g">&#xF0054;</div><div class="cp">+54</div></td><td><div class="g">&#xF0055;</div><div class="cp">+55</div></td><td><div class="g">&#xF0056;</div><div class="cp">+56</div></td><td><div class="g">&#xF0057;</div><div class="cp">+57</div></td><td><div class="g">&#xF0058;</div><div class="cp">+58</div></td><td><div class="g">&#xF0059;</div><div class="cp">+59</div></td><td><div class="g">&#xF005A;</div><div class="cp">+5A</div></td></tr>
+<tr><td class="name">14 DZONG</td><td><div class="g">&#xF005B;</div><div class="cp">+5B</div></td><td><div class="g">&#xF005C;</div><div class="cp">+5C</div></td><td><div class="g">&#xF005D;</div><div class="cp">+5D</div></td><td><div class="g">&#xF005E;</div><div class="cp">+5E</div></td><td><div class="g">&#xF005F;</div><div class="cp">+5F</div></td><td><div class="g">&#xF0060;</div><div class="cp">+60</div></td><td><div class="g">&#xF0061;</div><div class="cp">+61</div></td></tr>
+<tr><td class="name">15 XONG</td><td><div class="g">&#xF0062;</div><div class="cp">+62</div></td><td><div class="g">&#xF0063;</div><div class="cp">+63</div></td><td><div class="g">&#xF0064;</div><div class="cp">+64</div></td><td><div class="g">&#xF0065;</div><div class="cp">+65</div></td><td><div class="g">&#xF0066;</div><div class="cp">+66</div></td><td><div class="g">&#xF0067;</div><div class="cp">+67</div></td><td><div class="g">&#xF0068;</div><div class="cp">+68</div></td></tr>
+<tr><td class="name">16 KHONG</td><td><div class="g">&#xF0069;</div><div class="cp">+69</div></td><td><div class="g">&#xF006A;</div><div class="cp">+6A</div></td><td><div class="g">&#xF006B;</div><div class="cp">+6B</div></td><td><div class="g">&#xF006C;</div><div class="cp">+6C</div></td><td><div class="g">&#xF006D;</div><div class="cp">+6D</div></td><td><div class="g">&#xF006E;</div><div class="cp">+6E</div></td><td><div class="g">&#xF006F;</div><div class="cp">+6F</div></td></tr>
+<tr><td class="name">17 SONG</td><td><div class="g">&#xF0070;</div><div class="cp">+70</div></td><td><div class="g">&#xF0071;</div><div class="cp">+71</div></td><td><div class="g">&#xF0072;</div><div class="cp">+72</div></td><td><div class="g">&#xF0073;</div><div class="cp">+73</div></td><td><div class="g">&#xF0074;</div><div class="cp">+74</div></td><td><div class="g">&#xF0075;</div><div class="cp">+75</div></td><td><div class="g">&#xF0076;</div><div class="cp">+76</div></td></tr>
+<tr><td class="name">18 RONG</td><td><div class="g">&#xF0077;</div><div class="cp">+77</div></td><td><div class="g">&#xF0078;</div><div class="cp">+78</div></td><td><div class="g">&#xF0079;</div><div class="cp">+79</div></td><td><div class="g">&#xF007A;</div><div class="cp">+7A</div></td><td><div class="g">&#xF007B;</div><div class="cp">+7B</div></td><td><div class="g">&#xF007C;</div><div class="cp">+7C</div></td><td><div class="g">&#xF007D;</div><div class="cp">+7D</div></td></tr>
+<tr><td class="name">19 MONG</td><td><div class="g">&#xF007E;</div><div class="cp">+7E</div></td><td><div class="g">&#xF007F;</div><div class="cp">+7F</div></td><td><div class="g">&#xF0080;</div><div class="cp">+80</div></td><td><div class="g">&#xF0081;</div><div class="cp">+81</div></td><td><div class="g">&#xF0082;</div><div class="cp">+82</div></td><td><div class="g">&#xF0083;</div><div class="cp">+83</div></td><td><div class="g">&#xF0084;</div><div class="cp">+84</div></td></tr>
+<tr><td class="name">20 BONG</td><td><div class="g">&#xF0085;</div><div class="cp">+85</div></td><td><div class="g">&#xF0086;</div><div class="cp">+86</div></td><td><div class="g">&#xF0087;</div><div class="cp">+87</div></td><td><div class="g">&#xF0088;</div><div class="cp">+88</div></td><td><div class="g">&#xF0089;</div><div class="cp">+89</div></td><td><div class="g">&#xF008A;</div><div class="cp">+8A</div></td><td><div class="g">&#xF008B;</div><div class="cp">+8B</div></td></tr>
+<tr><td class="name">21 VONG</td><td><div class="g">&#xF008C;</div><div class="cp">+8C</div></td><td><div class="g">&#xF008D;</div><div class="cp">+8D</div></td><td><div class="g">&#xF008E;</div><div class="cp">+8E</div></td><td><div class="g">&#xF008F;</div><div class="cp">+8F</div></td><td><div class="g">&#xF0090;</div><div class="cp">+90</div></td><td><div class="g">&#xF0091;</div><div class="cp">+91</div></td><td><div class="g">&#xF0092;</div><div class="cp">+92</div></td></tr>
+<tr><td class="name">22 PHONG</td><td><div class="g">&#xF0093;</div><div class="cp">+93</div></td><td><div class="g">&#xF0094;</div><div class="cp">+94</div></td><td><div class="g">&#xF0095;</div><div class="cp">+95</div></td><td><div class="g">&#xF0096;</div><div class="cp">+96</div></td><td><div class="g">&#xF0097;</div><div class="cp">+97</div></td><td><div class="g">&#xF0098;</div><div class="cp">+98</div></td><td><div class="g">&#xF0099;</div><div class="cp">+99</div></td></tr></table>
+<div style="break-inside: avoid"><h3>Joiners and tone marks</h3>
+<table class="chart"><tr><th>COMPONENT JOINER</th><th>THAM THU COMBINER</th><th colspan=8>Tone marks, shown on a dotted circle</th></tr><tr><td><div class="g">&#x25CC;&#xF009A;</div><div class="cp">+9A</div></td><td><div class="g">&#x25CC;&#xF009B;</div><div class="cp">+9B</div></td><td><div class="g">&#x25CC;&#xF009C;</div><div class="cp">+9C</div></td><td><div class="g">&#x25CC;&#xF009D;</div><div class="cp">+9D</div></td><td><div class="g">&#x25CC;&#xF009E;</div><div class="cp">+9E</div></td><td><div class="g">&#x25CC;&#xF009F;</div><div class="cp">+9F</div></td><td><div class="g">&#x25CC;&#xF00A0;</div><div class="cp">+A0</div></td><td><div class="g">&#x25CC;&#xF00A1;</div><div class="cp">+A1</div></td><td><div class="g">&#x25CC;&#xF00A2;</div><div class="cp">+A2</div></td><td><div class="g">&#x25CC;&#xF00A3;</div><div class="cp">+A3</div></td></tr></table>
+</div></body></html>
