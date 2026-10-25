@@ -443,6 +443,10 @@
       }
     } catch (e) {}
     const dec = () => $('decoding').value || 'qatt';
+    {   // ?decoding=qatt|omniglot preselects that reading of the rhyme table (an unknown name is ignored)
+      const want = new URLSearchParams(location.search).get('decoding');
+      if (want && [...$('decoding').options].some(o => o.value === want)) { $('decoding').value = want; parser.setDecoding(want); }
+    }
     const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify(me)); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, points: 0 }, hiddenDuring = false;
