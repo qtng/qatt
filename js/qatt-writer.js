@@ -346,15 +346,16 @@ const QattWriter = (() => {
         list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(before[j], NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
       return list;
     };
-    // three small buttons: a middot and off, or the first variants in this order as a preview of the result (a click does it; the mouse does not take the focus from the field)
-    let shownVariants = null, current = [];
+    // three small buttons with a place of their own each (marked 1, neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
+    const SLOTS = ['marked1', 'neutral', 'tham'];
+    let shownVariants = null;
+    const slotted = () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
     function showVariants() {
-      current = variants();
-      const key = current.map(v => v.id + v.view).join();
+      const slots = slotted(), key = slots.map(v => v ? v.id + v.view : '').join();
       if (key === shownVariants) return;
       shownVariants = key;
       variantBtns.forEach((btn, i) => {
-        const v = current[i];
+        const v = slots[i];
         btn.disabled = !v;
         btn.textContent = v ? v.view : '·';
         btn.title = v ? (window.Lang && Lang.t ? Lang.t(v.en, v.vi) : v.en) : '';
@@ -363,7 +364,7 @@ const QattWriter = (() => {
     }
     variantBtns.forEach((btn, i) => {
       btn.addEventListener('mousedown', e => e.preventDefault());
-      btn.addEventListener('click', () => { const v = variants()[i]; if (v) v.run(); });
+      btn.addEventListener('click', () => { const v = slotted()[i]; if (v) v.run(); });
     });
     document.addEventListener('langchange', () => { shownVariants = null; showVariants(); });
     document.addEventListener('selectionchange', () => { if (document.activeElement === typer) refresh(); });
