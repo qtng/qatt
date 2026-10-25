@@ -22,10 +22,15 @@
       color: var(--ink);
     }
     .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
-    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .8rem; }
-    .tile { padding: .6rem .8rem; border: 1px solid var(--bs-border-color); border-radius: .6rem; background: var(--bs-body-bg); }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
+    .tile { text-align: center; display: flex; flex-direction: column; justify-content: center; padding: .6rem .8rem; border: 1px solid var(--bs-border-color); border-radius: .6rem; background: var(--bs-body-bg); }
     .tile b { display: block; font: 400 2rem/1.1 Georgia, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
     .tile span { font-size: .85rem; color: var(--bs-secondary-color); }
+    .tile.badge { display: flex; flex-direction: column; align-items: center; gap: .15rem; }
+    .tile.badge .stars { display: flex; gap: .15rem; }
+    .tile.badge .stars svg { width: .9rem; height: .9rem; }
+    .tile.badge .medal { width: 3.2rem; height: 3.6rem; }
+    .tile.badge .name { font: 600 1rem/1.1 Georgia, "Times New Roman", serif; }
     h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.4rem; margin: 2rem 0 .6rem; padding-bottom: .25rem; border-bottom: 1px solid var(--bs-border-color); }
     table { font-variant-numeric: tabular-nums; font-size: .92rem; }
     th { font-weight: 600; color: var(--bs-secondary-color); }
@@ -72,6 +77,28 @@
     const fmt = x => x.toFixed(1) + ' s';
     const el = (tag, text, cls) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; };
     const tile = (value, label) => { const t = el('div', undefined, 'tile'); t.append(el('b', value), el('span', label)); $('tiles').append(t); };
+    // badge: how many of the three kinds (onset, rhyme, tone) are under BADGE_LIMIT seconds (the usual time as the game shows it, counted from MIN_SAMPLES times; of the better of the decodings)
+    const BADGE_LIMIT = 1.75;
+    const LEVELS = [
+      { en: 'Newbie', vi: 'Người mới', color: '#9aa0a6' }, { en: 'Beginner', vi: 'Sơ cấp', color: '#e6a700' },
+      { en: 'Intermediate', vi: 'Trung cấp', color: '#198754' }, { en: 'Advanced', vi: 'Cao cấp', color: '#0d6efd' }];
+    const STAR = 'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z', STAR_OFF = '#c9ccd0', STAR_ON = '#f2b600';
+    const SVG = 'http://www.w3.org/2000/svg';
+    const svg = (cls, view, inner) => { const e = document.createElementNS(SVG, 'svg'); e.setAttribute('viewBox', view); e.setAttribute('class', cls); e.setAttribute('aria-hidden', 'true'); e.innerHTML = inner; return e; };
+    function level(rows) {
+      let best = 0;
+      for (const row of rows) best = Math.max(best, KINDS.filter(k => row[k + '_n'] >= MIN_SAMPLES && shown(k, row[k + '_v']) < BADGE_LIMIT).length);
+      return best;
+    }
+    function badge(rows) {
+      const n = level(rows), L = LEVELS[n], t = el('div', undefined, 'tile badge');
+      t.title = T('Times under ' + BADGE_LIMIT + ' s: ', 'Thời gian dưới ' + BADGE_LIMIT + ' giây: ') + n + ' / 3';
+      const stars = el('div', undefined, 'stars');
+      for (let i = 0; i < 3; i++) stars.append(svg('', '0 0 24 24', `<path d="${STAR}" fill="${n ? (i < n ? STAR_ON : STAR_OFF) : STAR_OFF}"/>`));
+      const medal = svg('medal', '0 0 64 72', `<path d="M32 3 59 13v22c0 17-12 29-27 34C17 64 5 52 5 35V13z" fill="${L.color}"/><path d="M32 10 52 18v17c0 12-8 21-20 26C20 56 12 47 12 35V18z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/><path d="${STAR}" transform="translate(16 22) scale(1.35)" fill="#fff" fill-opacity="${n ? 1 : .6}"/>`);
+      const name = el('span', T(L.en, L.vi), 'name'); name.style.color = L.color;
+      t.append(stars, medal, name); $('tiles').append(t);
+    }
     const table = (head, rows, cls) => {
       const t = el('table', undefined, 'table table-sm' + (cls ? ' ' + cls : ''));
       const tr = el('tr'), thead = el('thead'); head.forEach(h => tr.append(el('th', h))); thead.append(tr); t.append(thead);
@@ -98,7 +125,9 @@
     }
     $('content').hidden = false;
     const sc = score.data || { score: 0, words: 0 };
-    tile(sc.score, T('Points', 'Điểm')); tile(sc.words, T('Words', 'Từ'));
+    tile(sc.score, T('Points', 'Điểm'));
+    badge(speed.data || []);
+    tile(sc.words, T('Words', 'Từ'));
     if (!(speed.data || []).length) {
       $('decodings').append(el('p', T('Play a few words to see your speed here.', 'Hãy chơi vài từ để xem tốc độ của bạn ở đây.'), 'note mt-4'));
     }
