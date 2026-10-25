@@ -425,7 +425,7 @@
     // the record: { score, decoding (the one in use), stats: { <decoding>: { onset, rhyme, tone: { v, f, n, m } } } }: the times belong to a decoding, the reading of the rhyme table decides which symbols a word has
     const blank = () => ({ onset: { v: 0, f: 0, n: 0, m: 0 }, rhyme: { v: 0, f: 0, n: 0, m: 0 }, tone: { v: 0, f: 0, n: 0, m: 0 } });
     const freshRound = () => ({ onset: [], rhyme: [], tone: [], wrong: { onset: 0, rhyme: 0, tone: 0 } });   // the times (measured) of the last words since the last card, and the wrong choices
-    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null, relearn1: true };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
+    let me = { score: 0, shadow: 0, pending: 0, asked: 0, words: 0, decoding: 'qatt', stats: {}, avg: { v: 0, n: 0 }, skipOk: true, round: freshRound(), prev: null, best: 0, lastValue: null, base: null, relearn1: true, snapshot: false };   // score: what counts (signed in); shadow: the points a visitor would have; pending: points not sent yet; asked: how often the visitor was asked to sign in   // avg: the smoothed points of a solved word; skipOk: Skip may be used (see skipWord)
     try {
       const saved = JSON.parse(localStorage.getItem('qattSpell'));
       if (saved && typeof saved.score === 'number') {
@@ -441,6 +441,7 @@
         if (saved.stats && saved.stats.onset) me.stats.qatt = saved.stats;   // the first form of the record, without the decoding: it was the one of qatt.org
         else if (saved.stats) me.stats = saved.stats;
         me.relearn1 = !!saved.relearn1;
+        me.snapshot = saved.snapshot === true;
       }
     } catch (e) {}
     const dec = () => $('decoding').value || 'qatt';
@@ -564,6 +565,7 @@
       if (!signed && typeof loadBoard === 'function') loadBoard();   // the grey line of a visitor with the points he would have
       me.words++; saveMe();
       const due = me.words % STATS_EVERY === 0;
+      if (due && signed) { me.snapshot = true; saveMe(); }   // the card of this word: the next submit also asks the server to keep the state in spell_history
       setTimeout(() => { if (typeof maybeAsk === 'function' && !maybeAsk() && due) showProgress(); }, 2400);   // a visitor is asked to sign in after a good word; every few words the card of progress
     }
     // Skip: the word does not count at all (the state before the word comes back: score and times); then Skip is locked until a word is solved that beats the own average
@@ -594,9 +596,11 @@
       if (!signed || !db || syncing || !me.pending) return;
       const d = Math.max(-200, Math.min(400, me.pending));   // what the server takes at most at once
       syncing = true;
-      const res = await db.spellSubmit(d, dec(), mine(), device()).catch(error => ({ error }));
+      const snap = me.snapshot;   // the card of progress was due: the server keeps the state of this moment (spell_history)
+      const res = await db.spellSubmit(d, dec(), snap ? { ...mine(), snapshot: true } : mine(), device()).catch(error => ({ error }));
       syncing = false;
       if (!res || res.error) { syncTimer = setTimeout(sync, 8000); return; }
+      if (snap) me.snapshot = false;
       me.pending -= d; me.score = res.score + me.pending;   // the server has the score, what is not sent yet comes on top
       saveMe(); showScore();
       if (me.pending) schedSync();
