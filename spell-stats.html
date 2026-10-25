@@ -58,6 +58,7 @@
     <div class="tiles" id="tiles"></div>
     <div id="decodings"></div>
     <p class="note mt-4" id="notes"></p>
+    <p class="text-center mt-4"><button type="button" class="btn btn-quiet btn-sm" id="resetBtn" data-vi="Bắt đầu lại từ đầu">Start over</button></p>
   </div>
   <p class="text-center mt-5 mb-4"><a href="spell.html"><i class="bi bi-arrow-left" aria-hidden="true"></i> <span data-vi="Quay lại trò chơi">Back to the game</span></a></p>
 </main>
@@ -164,6 +165,15 @@
       }
       $('decodings').append(box);
     }
+    // start over: the own rows of the four tables go (spell_reset() in tools/db/spell.sql, the badge with them) and so does the record of this browser
+    $('resetBtn').addEventListener('click', async () => {
+      if (!confirm(T('Delete all your points, times, badge and history and start over? This cannot be undone.', 'Xóa toàn bộ điểm, thời gian, huy hiệu và lịch sử của bạn và bắt đầu lại? Không thể hoàn tác.'))) return;
+      $('resetBtn').disabled = true;
+      const { error } = await db.client.rpc('spell_reset');
+      if (error) { $('resetBtn').disabled = false; alert(T('Could not start over.', 'Không thể bắt đầu lại.')); return; }
+      try { localStorage.removeItem('qattSpell'); } catch (e) {}
+      location.reload();
+    });
     $('notes').textContent = T(
       'Solid line: lately, dashed line: usual (click a kind in the legend to hide or show both). Times are as in the game: the time to find the button (and, for the onset, to read the word) is taken off. "Usual" moves slowly, "Lately" follows the last words. A kind counts from 5 times. The history keeps one row for every card of progress (every 4 words): the usual and the latest time of every kind, ★ = milestones reached.',
       'Nét liền: gần đây, nét đứt: thường (bấm vào một loại ở chú giải để ẩn hoặc hiện cả hai). Thời gian tính như trong trò chơi: đã trừ thời gian tìm nút (và đọc từ với âm đầu). "Thường" đổi chậm, "Gần đây" theo những từ vừa chơi. Mỗi loại tính từ 5 lần. Lịch sử lưu một dòng cho mỗi thẻ tiến bộ (cứ 4 từ): thời gian thường và gần đây của mỗi loại, ★ = số cột mốc đạt được.');
