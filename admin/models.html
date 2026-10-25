@@ -72,7 +72,7 @@
     </div>
 
     <hr class="mt-4">
-    <p class="note mb-1"><b>Definitions</b> (db/translate_log.sql)</p>
+    <p class="note mb-1"><b>Definitions</b> (tools/db/translate_log.sql)</p>
     <p class="note mb-1"><b>Try:</b> one request of the function to one model of Gemini. <b>Worked</b> = status 200. <b>Over quota</b> = 429, the key has no more requests for that model at the moment (the model is skipped for a minute afterwards). <b>Overloaded</b> = 503, the model has too much demand. <b>Other</b> = every other status and tries without an answer. The times are those of working tries.</p>
     <p class="note mb-1"><b>Translation:</b> one call of the translator page. <b>Whole call</b> = from the request to the answer, including tries that failed before. <b>Own characters</b> = share of the words for which the model gave a character that is not in the list of the page. <b>Fallback</b> = the model's answer was unusable twice and the page got the first option of every syllable.</p>
     <p class="note mb-1">Tries are recorded since the function version of 16 Oct 2026, translations a few hours earlier. No text of a sentence and no user is stored.</p>

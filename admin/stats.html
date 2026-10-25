@@ -76,7 +76,7 @@
     </div>
 
     <h2>Pages</h2>
-    <p class="note">Page views of the last 14 days (the first use of a page counts one; bots and admins not), the pages with most views first. Path only, no parameters (db/page_views.sql).</p>
+    <p class="note">Page views of the last 14 days (the first use of a page counts one; bots and admins not), the pages with most views first. Path only, no parameters (tools/db/page_views.sql).</p>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
         <thead><tr><th>Site</th><th>Page</th><th>Views</th><th>Vietnamese</th><th>Phone</th><th>Vietnam</th></tr></thead>
@@ -124,7 +124,7 @@
     </div>
 
     <hr class="mt-4">
-    <p class="note mb-1"><b>Definitions</b> (the sessions and visitors come from the counter in js/navigation.js, db/visits.sql)</p>
+    <p class="note mb-1"><b>Definitions</b> (the sessions and visitors come from the counter in js/navigation.js, tools/db/visits.sql)</p>
     <p class="note mb-1"><b>Session</b> (= "visits" in the database and in the code)<b>:</b> a period of use of one browser on one site that ends after more than 30 minutes without activity, like a session in Google Analytics. It is counted on the first tap, key or mouse wheel, so it is closer to an "engaged session" there; bots that name themselves, admins and browsers with <code>qv_off</code> are left out, at most 200 counts per minute are accepted.</p>
     <p class="note mb-1"><b>Visitor:</b> a browser that used a site on that UTC day, counted once per day. The same person on three days is three visitors, so do not add the days; the same person on two devices is two visitors.</p>
     <p class="note mb-1"><b>Kind:</b> "account" = the browser is signed in with Google or e-mail, "anonymous" = everybody else, also the first session before the visitor has one (shown as "not signed in"). The other numbers (accounts, practice, translator) count people with an account of the database and come from the daily rows.</p>
@@ -219,7 +219,7 @@
         [e.day, e.site, e.anonymous.visitors, e.account.visitors, e.anonymous.visits, e.account.visits].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
         return tr;
       }));
-      const pv = await sp.client.rpc('admin_views', { p_days: 14 });   // page views: needs db/page_views.sql in Supabase
+      const pv = await sp.client.rpc('admin_views', { p_days: 14 });   // page views: needs tools/db/page_views.sql in Supabase
       if (pv.data) {
         const pages = new Map(), by = { lang: {}, device: {}, region: {} };
         let total = 0;
@@ -237,7 +237,7 @@
         }));
         const list = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => k + ' ' + pct(n, total)).join(', ') || 'none';
         $('pagesMore').textContent = total + ' views. Language: ' + list(by.lang) + '. Device: ' + list(by.device) + '. Region: ' + list(by.region) + '.';
-      } else { $('pagesMore').textContent = 'No page views yet (run db/page_views.sql in Supabase).'; }
+      } else { $('pagesMore').textContent = 'No page views yet (run tools/db/page_views.sql in Supabase).'; }
       const hist = await sp.client.rpc('admin_history', { p_days: 60 });
       const rows = (hist.data || []);   // newest first; one row more than the 60 shown, for the change of the totals of the oldest
       $('history').replaceChildren(...(rows.length > 60 ? rows.slice(0, 60) : rows).map((r, i) => {
