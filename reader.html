@@ -62,14 +62,14 @@
     .reader figure .layers { width: 6.5rem; padding: 1em; }
     .reader figure .qatt-glyph { min-width: 2.2em; padding: .2em .8em; }
     /* the merge animation: [anim-merge:a,b,c] */
-    .reader .merge { position: relative; margin: 1.5rem 0; }
-    .reader .merge-host { display: flex; justify-content: center; perspective: 700px; min-height: 10rem; cursor: pointer; }
-    .reader .merge-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4rem; height: 4rem; padding: 0 0 0 .2rem; border-radius: 50%; border: 1px solid var(--bs-border-color); background: var(--bs-body-bg); color: var(--bs-body-color); display: flex; align-items: center; justify-content: center; box-shadow: 2px 3px 8px rgb(0 0 0 / 15%); cursor: pointer; }
+    .reader .merge { position: relative; margin: 1.5rem auto; aspect-ratio: 16 / 9; overflow: hidden; border-radius: .75rem; background: radial-gradient(ellipse at center, #2b2b30, #0d0d10); color: #fff; box-shadow: 0 4px 16px rgb(0 0 0 / 30%); }   /* like an embedded video */
+    .reader .merge-host { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; perspective: 700px; cursor: pointer; }
+    .reader .merge-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4.25rem; height: 3rem; padding: 0; border: 0; border-radius: .9rem; background: #f00; color: #fff; display: flex; align-items: center; justify-content: center; opacity: .92; cursor: pointer; }
+    .reader .merge-play:hover { opacity: 1; }
     .reader .merge-play[hidden] { display: none; }
-    .reader .merge-play:hover { color: var(--accent, var(--bs-link-color)); }
     .reader .nchar { text-align: center; position: relative; }
     .reader .nchar.n3 { position: absolute; inset: 0; opacity: 0; }
-    .reader .nchar .qg { font-family: "QATT Cells", "QATT Pen Medium", sans-serif; font-size: clamp(3rem, 14vw, 5.4rem); line-height: 1; }
+    .reader .nchar .qg { font-family: "QATT Cells", "QATT Pen Medium", sans-serif; font-size: clamp(2.6rem, 12vw, 4.6rem); line-height: 1; }
     .reader .nchar small { display: block; font-family: Georgia, serif; opacity: .6; font-size: 1rem; }
     .reader .pager { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; }
     .reader .pager a { color: var(--bs-body-color); text-decoration: none; max-width: 40%; }
