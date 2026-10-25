@@ -120,10 +120,13 @@
         if (window.Chart) {
           new Chart(canvas, {
             type: 'line',
-            data: { labels: mine.map(h => new Date(h.at).toLocaleDateString()), datasets: KINDS.map(k => ({
-              label: T(...NAMES[k].slice(0, 2)), borderColor: COLORS[k], backgroundColor: COLORS[k], tension: .2, pointRadius: 3,
-              data: mine.map(h => h[k + '_n'] >= MIN_SAMPLES ? shown(k, h[k + '_f']) : null), spanGaps: true })) },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: T('seconds (lately)', 'giây (gần đây)') } } } },
+            data: { labels: mine.map(h => new Date(h.at).toLocaleDateString()), datasets: KINDS.flatMap(k => {
+              const line = { borderColor: COLORS[k], backgroundColor: COLORS[k], cubicInterpolationMode: 'monotone', borderCapStyle: 'round', borderJoinStyle: 'round', borderWidth: 2.5, spanGaps: true };
+              const pick = f => mine.map(h => h[k + '_n'] >= MIN_SAMPLES ? shown(k, h[k + '_' + f]) : null);
+              return [{ ...line, label: T(...NAMES[k].slice(0, 2)) + ' · ' + T('lately', 'gần đây'), data: pick('f'), pointRadius: 3 },
+                      { ...line, label: T(...NAMES[k].slice(0, 2)) + ' · ' + T('usual', 'thường'), data: pick('v'), borderDash: [6, 5], borderWidth: 2, pointRadius: 0, pointHoverRadius: 3 }];
+            }) },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 28 } } }, scales: { y: { beginAtZero: true, title: { display: true, text: T('seconds', 'giây') } } } },
           });
         }
         // the milestones as a list: what grew since the row before
