@@ -976,15 +976,16 @@
       if (paused) {   // after a pause always a new word (no looking at the old one); a word still in play is dropped like a skipped one (score and times as before it)
         paused = false;
         if ($('nextRow').hidden && word_.snap) { const snap = JSON.parse(word_.snap); me.score = snap.score; me.shadow = snap.shadow; me.pending = snap.pending; me.stats = snap.stats; me.round = snap.round || freshRound(); saveMe(); showScore(); showStats(); }
+        clearTimeout(syncTimer); me.score = Math.max(0, me.score - me.pending); me.pending = 0; saveMe(); showScore();   // the pause ends the session: points not sent yet expire
         another();
       }
       else if (wanted) start(wanted, (DICT.find(e => e.w === wanted.trim().toLowerCase()) || {}).nom);
       else another();
     });
-    // Pause: the clocks stop, the game is covered by the start popup; Start gives a new word
+    // Pause: ends the session: the clocks stop, the game is covered by the start popup; Start begins anew with a new word (the points not sent yet are dropped)
     $('pause').addEventListener('click', () => {
       if (!started || paused) return;
-      paused = true; stopTimer(); clearTimeout(hintTimer); watch.on = false; sync();
+      paused = true; stopTimer(); clearTimeout(hintTimer); watch.on = false; clearTimeout(syncTimer);
       document.querySelector('.game').inert = true; $('introVeil').hidden = false; $('intro').show(); $('startGame').focus();
     });
   });
