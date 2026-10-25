@@ -80,8 +80,8 @@
     // badge: how many of the three kinds (onset, rhyme, tone) are under BADGE_LIMIT seconds (the usual time as the game shows it, counted from MIN_SAMPLES times; of the better of the decodings)
     const BADGE_LIMIT = 1.75;
     const LEVELS = [
-      { en: 'Newbie', vi: 'Người mới', color: '#9aa0a6' }, { en: 'Beginner', vi: 'Sơ cấp', color: '#e6a700' },
-      { en: 'Intermediate', vi: 'Trung cấp', color: '#198754' }, { en: 'Advanced', vi: 'Cao cấp', color: '#0d6efd' }];
+      { en: 'Newbie', color: '#9aa0a6' }, { en: 'Beginner', color: '#e6a700' },
+      { en: 'Intermediate', color: '#198754' }, { en: 'Advanced', color: '#0d6efd' }];
     const STAR = 'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z', STAR_OFF = '#c9ccd0', STAR_ON = '#f2b600';
     const SVG = 'http://www.w3.org/2000/svg';
     const svg = (cls, view, inner) => { const e = document.createElementNS(SVG, 'svg'); e.setAttribute('viewBox', view); e.setAttribute('class', cls); e.setAttribute('aria-hidden', 'true'); e.innerHTML = inner; return e; };
@@ -96,7 +96,7 @@
       const stars = el('div', undefined, 'stars');
       for (let i = 0; i < 3; i++) stars.append(svg('', '0 0 24 24', `<path d="${STAR}" fill="${n ? (i < n ? STAR_ON : STAR_OFF) : STAR_OFF}"/>`));
       const medal = svg('medal', '0 0 64 72', `<path d="M32 3 59 13v22c0 17-12 29-27 34C17 64 5 52 5 35V13z" fill="${L.color}"/><path d="M32 10 52 18v17c0 12-8 21-20 26C20 56 12 47 12 35V18z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/><path d="${STAR}" transform="translate(16 22) scale(1.35)" fill="#fff" fill-opacity="${n ? 1 : .6}"/>`);
-      const name = el('span', T(L.en, L.vi), 'name'); name.style.color = L.color;
+      const name = el('span', L.en, 'name'); name.style.color = L.color;
       t.append(stars, medal, name); $('tiles').append(t);
     }
     const table = (head, rows, cls) => {
