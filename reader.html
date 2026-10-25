@@ -56,9 +56,11 @@
     .reader .empty-left .layer { left: -.75em; }
     .reader .empty-right .layer { left: .2em; }
     [data-bs-theme="dark"] .reader .layer { mix-blend-mode: screen; filter: grayscale(100%) contrast(400%) brightness(1.2) invert(1); }
-    /* QATT glyphs by code (tt:…): characters of the QATT font, not drawings */
+    /* QATT characters of the QATT font ([stack:a,b]), not drawings */
     .reader .qatt-glyph { display: inline-block; vertical-align: middle; font-family: "QATT Pen Medium"; font-size: 1.35em; line-height: 1.5; min-width: 1.2em; text-align: center; }   /* only a little larger than the Latin text */
     .reader figure .layers, .reader figure .qatt-glyph { box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
+    .reader .stack .qatt-glyph { font-size: 2.6em; line-height: 1.2; }
+    .reader .stack label { font-size: 1.1em; }
     .reader figure .layers { width: 6.5rem; padding: 1em; }
     .reader figure .qatt-glyph { min-width: 2.2em; padding: .2em .8em; }
     /* the merge animation: [anim-merge:a,b,c] */
@@ -105,7 +107,8 @@
     // --- the text of a slide: the notation of the old slides app, see the table `slides` ---
     // ←↑↓→ big arrows; blank line = line break; **bold**; ((a box)); [img:url] a picture; [#label: text] a button that reveals text;
     // [anim-merge:word1,word2,word3] the animation of two characters that fly in, turn and merge into the third (a play button; a click starts it, every click again starts it anew)
-    // [label code] a QATT glyph: a code that starts with tt: (onset,rhyme,coda,tone) is set in the QATT font (QattText.syllable), else layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again) below it
+    // [stack:a,b] a (a Quốc Ngữ word as QATT characters, else the text) above, b centred below it, a larger
+    // [label code] a QATT glyph from layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again, with {} for []) below it
     // the HTML of a slide may use only these tags, and a class on them (no other attributes, no links, no scripts)
     const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'BIG', 'VAR', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB', 'DIV']);
     const IMG = 'img/qatt/';   // the pictures: relative names are in this folder (the old <base>)
@@ -120,6 +123,7 @@
         .replace(/\[(.*?)\]/g, (all, inner) => {
           const c = inner.trim();
           if (c.startsWith('img:')) return keep({ t: 'img', url: c.slice(4).trim() });
+          if (c.startsWith('stack:')) { const i = c.indexOf(','); return keep({ t: 'stack', a: (i < 0 ? c.slice(6) : c.slice(6, i)).trim(), b: i < 0 ? '' : c.slice(i + 1).trim().replace(/\{/g, '[').replace(/\}/g, ']') }); }
           if (c.startsWith('anim-merge:')) return keep({ t: 'merge', words: c.slice(11).split(',').map(w => w.trim()) });
           if (c.startsWith('#')) {
             const i = c.indexOf(':');
@@ -128,7 +132,7 @@
           const sp = c.lastIndexOf(' ');
           const label = sp < 0 ? '' : c.slice(0, sp).trim().replace(/\{/g, '[').replace(/\}/g, ']');
           const def = sp < 0 ? c : c.slice(sp + 1).trim();
-          return keep(def.startsWith('tt:') ? { t: 'tt', code: def.slice(3), label } : { t: 'glyph', parts: def.split(/[+:|]/), label });
+          return keep({ t: 'glyph', parts: def.split(/[+:|]/), label });
         });
     }
     const speak = text => { try { const u = new SpeechSynthesisUtterance(text); u.lang = 'vi-VN'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { /* no speech: fine */ } };
@@ -185,14 +189,16 @@
         b.addEventListener('click', () => { b.textContent = tok.text; speak(tok.text); b.blur(); });
         return b;
       }
-      let glyph;
-      if (tok.t === 'tt') glyph = el('span', 'qatt-glyph', (typeof QattText !== 'undefined' && QattText.syllable(tok.code)) || tok.code);
-      else {
-        const parts = tok.parts.slice();
-        if (parts.length === 1 && parts[0].endsWith('.jpg')) parts[0] = '../can/' + parts[0].replace('.jpg', '');
-        glyph = el('div', 'layers' + (parts.some(p => p.includes('left')) ? '' : ' empty-left') + (parts.some(p => p.includes('right')) ? '' : ' empty-right'));
-        for (const p of parts) { const img = el('img', 'layer'); img.src = `${IMG}${p}.jpg?6`; img.alt = p; glyph.append(img); }
+      if (tok.t === 'stack') {   // a (the QATT characters of a Quốc Ngữ word, else the text itself) above, b centred below it, a larger
+        const box = el('div', 'glyph stack'), top = el('span', 'qatt-glyph', (typeof QattText !== 'undefined' && typeof VietnameseParser !== 'undefined' && QattText.word(tok.a, new VietnameseParser())) || tok.a), low = el('label');
+        render(tok.b, low);
+        box.append(top, low);
+        return box;
       }
+      const parts = tok.parts.slice();
+      if (parts.length === 1 && parts[0].endsWith('.jpg')) parts[0] = '../can/' + parts[0].replace('.jpg', '');
+      const glyph = el('div', 'layers' + (parts.some(p => p.includes('left')) ? '' : ' empty-left') + (parts.some(p => p.includes('right')) ? '' : ' empty-right'));
+      for (const p of parts) { const img = el('img', 'layer'); img.src = `${IMG}${p}.jpg?6`; img.alt = p; glyph.append(img); }
       if (!tok.label) return glyph;
       const box = el('div', 'glyph'), label = el('label');
       render(tok.label, label);
