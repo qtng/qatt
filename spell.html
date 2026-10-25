@@ -765,8 +765,9 @@
     }
     initAccount();
 
-    let nomOf = '';
+    let nomOf = '', winTimer = null;
     function start(word, nom) {
+      clearTimeout(winTimer);
       let a = analyse(word);
       if (!a) { ({ w: word, nom } = draw()); a = analyse(word); }
       answer = word; nomOf = nom || '';
@@ -904,7 +905,8 @@
       if ($('tones')._anim) $('tones')._anim.cancel();
       $('tones').hidden = true; $('nextRow').hidden = false;   // the next button at once, in the place of the tones
       $('task').classList.add('solved');
-      setTimeout(() => {   // after a moment to see the last cell, no folding: the card keeps its size
+      clearTimeout(winTimer);
+      winTimer = setTimeout(() => {   // after a moment to see the last cell, no folding: the card keeps its size (start() cancels it: a quick click on Next must not bring the solution of the old word over the new one)
         $('cells').hidden = true; $('solution').hidden = false;
         $('task').classList.add('win');
       }, 1000);
