@@ -167,8 +167,9 @@
           }, W + M - FADE / 2);
       }
       build();
-      go.addEventListener('click', e => { e.stopPropagation(); go.hidden = true; play(); });
-      host.addEventListener('click', play);
+      const start = () => { go.hidden = true; play(); };
+      go.addEventListener('click', start);
+      host.addEventListener('click', start);
       box.append(host, go);
       return box;
     }
