@@ -32,10 +32,6 @@ const QattWriter = (() => {
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
-    #tham-btn { line-height: 1.3; }
-    #tham-btn .icon { font-style: normal; font-size: .95rem; }   /* the character is only an icon: not slanted like the text of a button in some themes */
-    #tham-btn .wide { display: none; font-size: .78rem; }   /* the name too, on a big screen */
-    @media (min-width: 768px) { #tham-btn .wide { display: inline; } }
     /* the buttons of the toolbar are the same in every theme: square with a little rounding (some themes give buttons slanted corners or cut edges) */
     html .qatt-bar .btn, html[data-theme] .qatt-bar .btn { border-radius: .35rem !important; clip-path: none !important; }
     /* the size, in the card above the field */
@@ -71,7 +67,7 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
-        <button type="button" class="btn btn-quiet" id="tham-btn" disabled title="Tham Thư: stack the two characters before the cursor (puts the combiner between them)" data-vi-title="Tham Thư: xếp chồng hai ký tự trước con trỏ (chèn dấu ghép vào giữa)"><span class="icon">品</span><span class="wide"> Tham Thư</span></button>
+        <select id="variant-sel" autocomplete="off" disabled class="form-select form-select-sm w-auto" aria-label="Variants" title="Variants of the characters before the cursor" data-vi-aria-label="Biến thể" data-vi-title="Biến thể của các ký tự trước con trỏ"><option value="" data-vi="品 Biến thể">品 Variants</option></select>
       </div>
 `;
 
@@ -314,42 +310,67 @@ const QattWriter = (() => {
 
     wire(typer, { parser, on: () => qatt, refresh: () => refresh(), converted: () => ime && ime.hide(), convertOn: 'any' });
 
-    // what depends on the text and the cursor: the Tham Thư button
-    function refresh() { showTham(); }
-    // Tham Thư (stack): the button is on when the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the
-    // rhyme of a pair, so it does not count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair,
-    // but not the upper part of a stack. A click puts the combiner U+F009B between the two letters, the cursor stays behind the same characters.
-    const tham = $('tham-btn');
-    const thamAt = () => {
-      if (!qatt || typer.selectionStart !== typer.selectionEnd) return null;
-      const before = Array.from(typer.value.slice(0, typer.selectionStart), ch => ch.codePointAt(0)), after = typer.value.codePointAt(typer.selectionStart);
-      if (after === JOINER || after === COMBINER) return null;   // the cursor is inside a cell
+    // what depends on the text and the cursor: the dropdown of the variants
+    function refresh() { showVariants(); }
+    // Variants (the dropdown next to Convert): what can be done to the characters before the cursor, offered in this order (the dropdown is on when there is something, else off):
+    // Tham Thư (stack): the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the rhyme of a pair, so it does not
+    //   count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair, but not the upper part of a stack.
+    //   It puts the combiner U+F009B between the two letters.
+    // Marked 1: the letter before the cursor (behind its tone marks) is an unmarked form (offset 0 of its seven); it becomes the form with marking stroke 1 (code point + 1).
+    //   That form has no reading in any decoding, so Convert leaves it as it is.
+    // Neutral tone: the cursor stands right behind a letter, so the cell has no tone mark yet; the mark of ngang U+F009C is put behind it.
+    // The cursor stays behind the same characters.
+    const NEUTRAL = 0xF009C, variantSel = $('variant-sel');
+    const utf16 = c => c > 0xFFFF ? 2 : 1;
+    const variants = () => {
+      if (!qatt || typer.selectionStart !== typer.selectionEnd) return [];
+      const at = typer.selectionStart, before = Array.from(typer.value.slice(0, at), ch => ch.codePointAt(0)), after = typer.value.codePointAt(at);
+      if (after === JOINER || after === COMBINER) return [];   // the cursor is inside a cell
       let j = before.length - 1;
       while (j >= 0 && before[j] >= 0xF009C && before[j] <= 0xF00A3) j--;
-      if (j < 1 || !LETTER(before[j]) || !LETTER(before[j - 1]) || before[j - 2] === COMBINER) return null;
-      return before.slice(0, j).reduce((n, c) => n + (c > 0xFFFF ? 2 : 1), 0);   // where the combiner goes: before the second letter
+      const pos = i => before.slice(0, i).reduce((n, c) => n + utf16(c), 0);   // the position of before[i] in the text
+      const edit = (from, length, text, caret) => {
+        typer.setRangeText(text, from, from + length, 'preserve');
+        typer.focus({ preventScroll: true });   // the cursor stays in the field (the dropdown does not keep the focus)
+        typer.setSelectionRange(caret, caret);
+        refresh();
+      };
+      const list = [];
+      if (j >= 1 && LETTER(before[j]) && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)
+        list.push({ id: 'tham', en: '品 Tham Thư', vi: '品 Tham Thư', run: () => edit(pos(j), 0, String.fromCodePoint(COMBINER), at + 2) });   // before the second letter
+      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0)
+        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', run: () => edit(pos(j), 2, String.fromCodePoint(before[j] + 1), at) });
+      if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
+        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', run: () => edit(at, 0, String.fromCodePoint(NEUTRAL), at + 2) });
+      return list;
     };
-    const showTham = () => { tham.disabled = thamAt() === null; };
-    tham.addEventListener('click', () => {
-      const at = thamAt();
-      if (at === null) return;
-      const caret = typer.selectionStart;
-      typer.setRangeText(String.fromCodePoint(COMBINER), at, at, 'preserve');
-      typer.focus({ preventScroll: true });   // the cursor stays in the field (the button does not keep the focus)
-      typer.setSelectionRange(caret + 2, caret + 2);   // behind the same characters
-      refresh();
+    let shownVariants = null;
+    function showVariants() {
+      const list = variants(), key = list.map(v => v.id).join();
+      variantSel.disabled = !list.length;
+      if (key === shownVariants) return;
+      shownVariants = key;
+      const head = variantSel.firstElementChild;
+      variantSel.replaceChildren(head, ...list.map(v => { const o = document.createElement('option'); o.value = v.id; o.dataset.vi = v.vi; o.textContent = v.en; return o; }));
+      variantSel.value = '';
+    }
+    variantSel.addEventListener('change', () => {
+      const v = variants().find(x => x.id === variantSel.value);
+      variantSel.value = '';
+      if (v) v.run();
     });
     document.addEventListener('selectionchange', () => { if (document.activeElement === typer) refresh(); });
 
     // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
     // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
-    const IDS_STACK = '\u2FF1', COMBINER_CHAR = String.fromCodePoint(COMBINER);
+    const IDS_STACK = '\u2FF1', COMBINER_CHAR = String.fromCodePoint(COMBINER), NEUTRAL_CHAR = String.fromCodePoint(NEUTRAL);
     // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
     const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
       let out = '', afterCell = false;
       for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
-        const isCell = /^[\u{F0000}-\u{F0099}]/u.test(part);
-        if (isCell) out += (afterCell ? ' ' : '') + QattText.reading(part, parser);
+        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? QattText.reading(part, parser) : '?';
+        const isCell = read !== '?';   // a cell without a reading (the form with marking stroke 1) stays as it is, like any other character
+        if (isCell) out += (afterCell ? ' ' : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
         else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
         afterCell = isCell;
       }
@@ -358,9 +379,11 @@ const QattWriter = (() => {
     // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
     const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => QattText.word(w, parser) ?? w)
       .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
-    // Convert: with QATT characters in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
+    // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
+    // (the parts of a stack are cells of their own; a cell without a reading, such as the form with marking stroke 1, does not count: it stays as it is, and the field can still be converted back)
+    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => QattText.reading(c.cell, parser) !== '?'));
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
-      typer.value = QattText.cells(typer.value).length ? readAsQuocNgu(typer.value) : toQatt(typer.value);
+      typer.value = readable(typer.value) ? readAsQuocNgu(typer.value) : toQatt(typer.value);
       refresh();
     });
     $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); refresh(); });   // without the spaces
