@@ -580,7 +580,7 @@
     }
     newLap(); showScore(); showStats();
 
-    // ---- the account: score and speed of a signed-in player go to the server (db/spell.sql, js/supabase.js), a visitor only plays --------------------------------------
+    // ---- the account: score and speed of a signed-in player go to the server (tools/db/spell.sql, js/supabase.js), a visitor only plays --------------------------------------
     const device = () => matchMedia('(max-width: 767.98px)').matches ? 'phone' : 'desktop';
     const showLock = () => {
       $('scoreLock').hidden = signed;
