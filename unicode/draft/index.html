@@ -401,7 +401,7 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 </ul>
 </details><details class="sec"><summary class="bg-secondary text-white"><h2 id="6-character-properties">6. Character Properties<a class="anchor" href="#6-character-properties" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2></summary>
 
-<p>The proposed properties follow from the encoding model: components are letters, the two joiners are format characters, and tone marks are nonspacing marks. Cells marked [TBD] depend on evidence from the source or on review by the Unicode text-segmentation experts.</p>
+<p>The proposed properties follow from the encoding model: components are letters, the two joiners are format characters, and tone marks are nonspacing marks. The values for the two joiners are proposals; the Unicode text-segmentation experts are asked to review them (6.2).</p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
@@ -426,9 +426,9 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 <td>Component joiner, Tham Thư combiner</td>
 <td>Cf</td>
 <td>0</td>
-<td>Extend [TBD]</td>
-<td>GL [TBD]</td>
-<td>BN [TBD]</td>
+<td>Extend</td>
+<td>GL</td>
+<td>BN</td>
 </tr>
 <tr>
 <td>Tone marks (8)</td>
@@ -440,7 +440,7 @@ ThamThu   := HopThu Combiner Chi            third component added to a complete 
 </tr>
 </tbody>
 </table></div>
-<p>The draft data files list every value, including Indic_Conjunct_Break, East_Asian_Width and Vertical_Orientation; the questions on the values marked [TBD] are collected for review.</p>
+<p>The draft data files list every value, including Indic_Conjunct_Break, East_Asian_Width and Vertical_Orientation; the questions for review are collected with them.</p>
 <h3 id="sec-6-1">6.1 Combining class of the tone marks<a class="anchor" href="#sec-6-1" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
 <p>The corner is part of each tone mark's identity, so no positional combining classes are needed. A cluster takes at most one tone mark, so canonical reordering between marks never occurs. All eight marks therefore take class 0. The ideographic tone marks U+302A..U+302D, which mark the same corners on Han characters, have positional classes instead (218 lower left, 228 upper left, 232 upper right, 222 lower right); the same classes would also work here, since a cluster never takes two tone marks. [TBD: confirm with current Unicode conventions which classes to use]</p>
 <h3 id="sec-6-2">6.2 Grapheme clusters<a class="anchor" href="#sec-6-2" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h3>
