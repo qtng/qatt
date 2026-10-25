@@ -12,18 +12,10 @@
   <script src="js/navigation.js"></script>
   <script src="js/fonts.js"></script>
   <style>
-    /* the fonts of the old slides app, from fonts/reader/ (Lexend for the text, Mansalva for titles; both SIL Open Font License): QATT Pen Medium comes before the generic family, or it would never be used for the QATT characters */
-@font-face { font-family: "Lexend"; font-style: normal; font-weight: 100 900; font-display: swap; src: url(fonts/reader/lexend-vietnamese.woff2) format("woff2"); unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
-@font-face { font-family: "Lexend"; font-style: normal; font-weight: 100 900; font-display: swap; src: url(fonts/reader/lexend-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-@font-face { font-family: "Lexend"; font-style: normal; font-weight: 100 900; font-display: swap; src: url(fonts/reader/lexend-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Mansalva"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/reader/mansalva-vietnamese.woff2) format("woff2"); unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
-@font-face { font-family: "Mansalva"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/reader/mansalva-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-@font-face { font-family: "Mansalva"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/reader/mansalva-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
     /* the QATT characters (U+F0000 to U+F00A3) always from QATT Pen Medium, in front of every other font (the same files as js/fonts.js, so they are loaded once) */
     @font-face { font-family: "QATT Cells"; src: url(fonts/qatt-pen-medium.woff2?v=6) format("woff2"), url(fonts/qatt-pen-medium.ttf?v=6) format("truetype"); unicode-range: U+F0000-F00A3; }
-    .reader { --read-font: "QATT Cells", "Lexend", "QATT Pen Medium", sans-serif; --title-font: "QATT Cells", "Mansalva", "QATT Pen Medium", cursive; font-family: var(--read-font); max-width: 40rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-    .reader a, .reader select, .reader button { font-family: var(--read-font); }
-    .reader article h2 { font-family: var(--title-font); }   /* the font of the titles only: the labels and the list are in the body font */
+    .reader { font-family: "QATT Cells", var(--bs-body-font-family); max-width: 40rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    .reader a, .reader select, .reader button { font-family: inherit; }
     .reader .bar { display: flex; align-items: center; justify-content: space-between; min-height: 2.2rem; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
     .reader select { border: 0; border-bottom: 1px solid var(--bs-border-color); background: transparent; color: var(--bs-body-color); font-size: 1.05rem; padding: .2rem 1.6rem .2rem .1rem; border-radius: 0; }
     .reader .list { list-style: none; margin: 0; padding: 0; }
@@ -36,9 +28,9 @@
     .reader .back { display: inline-block; color: var(--bs-secondary-color); text-decoration: none; font-size: 1.05rem; }
     .reader .back[hidden] { display: none; }
     .reader .back:hover { color: var(--accent, var(--bs-link-color)); }
-    main.reader article h2 { border: 0; padding-bottom: 0; }   /* a theme may draw a line under h2 */
-    .reader article h2 { font-size: 2.35rem; line-height: 1.25; font-weight: 400; margin: 1.4rem 0 1.6rem; text-align: center; text-shadow: 1px 2px 5px rgb(0 0 0 / 15%); }
-    .reader article h2 small { display: block; font-size: .95rem; letter-spacing: .08em; color: var(--bs-secondary-color); }
+    main.reader article h3 { border: 0; padding-bottom: 0; }   /* a theme may draw a line under h3 */
+    .reader article h3 { text-align: center; margin: 1.4rem 0 1.6rem; }
+    .reader article h3 small { display: block; font-size: .95rem; letter-spacing: .08em; color: var(--bs-secondary-color); }
     .reader .body { font-size: 1.05rem; line-height: 1.75; }
     .reader .body small, .reader .body .small { font-size: .9em; }
     .reader .body b { color: var(--bs-emphasis-color); }
@@ -78,7 +70,7 @@
     .reader .pager a:hover { color: var(--accent, var(--bs-link-color)); }
     .reader .pager .count { color: var(--bs-tertiary-color); font-size: .85rem; font-variant-numeric: tabular-nums; }
     .reader .pager .gone { visibility: hidden; }
-    @media (max-width: 575.98px) { .reader { padding-left: .8rem; padding-right: .8rem; } .reader .body { font-size: .95rem; } .reader article h2 { font-size: 1.9rem; } }
+    @media (max-width: 575.98px) { .reader { padding-left: .8rem; padding-right: .8rem; } .reader .body { font-size: .95rem; } }
   </style>
 </head>
 <body>
@@ -266,7 +258,7 @@
     function showSlide(i) {
       const s = slides[i];
       view.replaceChildren();
-      const art = el('article'), h = el('h2');
+      const art = el('article'), h = el('h3');
       render(heading(s), h);
       if (!h.textContent.trim()) h.textContent = '';
       art.append(h);
