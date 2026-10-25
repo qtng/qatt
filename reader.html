@@ -61,6 +61,16 @@
     .reader figure .layers, .reader figure .qatt-glyph { box-sizing: content-box; border-radius: 2.5rem; background: light-dark(white, transparent); box-shadow: 2px 3px 8px rgb(0 0 0 / 10%); }
     .reader figure .layers { width: 6.5rem; padding: 1em; }
     .reader figure .qatt-glyph { min-width: 2.2em; padding: .2em .8em; }
+    /* the merge animation: [anim-merge:a,b,c] */
+    .reader .merge { position: relative; margin: 1.5rem 0; }
+    .reader .merge-host { display: flex; justify-content: center; perspective: 700px; min-height: 10rem; cursor: pointer; }
+    .reader .merge-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4rem; height: 4rem; padding: 0 0 0 .2rem; border-radius: 50%; border: 1px solid var(--bs-border-color); background: var(--bs-body-bg); color: var(--bs-body-color); display: flex; align-items: center; justify-content: center; box-shadow: 2px 3px 8px rgb(0 0 0 / 15%); cursor: pointer; }
+    .reader .merge-play[hidden] { display: none; }
+    .reader .merge-play:hover { color: var(--accent, var(--bs-link-color)); }
+    .reader .nchar { text-align: center; position: relative; }
+    .reader .nchar.n3 { position: absolute; inset: 0; opacity: 0; }
+    .reader .nchar .qg { font-family: "QATT Cells", "QATT Pen Medium", sans-serif; font-size: clamp(3rem, 14vw, 5.4rem); line-height: 1; }
+    .reader .nchar small { display: block; font-family: Georgia, serif; opacity: .6; font-size: 1rem; }
     .reader .pager { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--bs-border-color); font-size: 1.05rem; }
     .reader .pager a { color: var(--bs-body-color); text-decoration: none; max-width: 40%; }
     .reader .pager a:hover { color: var(--accent, var(--bs-link-color)); }
@@ -80,7 +90,9 @@
 
   <script src="vendor/supabase/supabase.min.js"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/parser.js"></script>
   <script src="js/qatt-text.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
   <script>
   (() => {
     const $ = s => document.querySelector(s);
@@ -92,6 +104,7 @@
 
     // --- the text of a slide: the notation of the old slides app, see the table `slides` ---
     // ←↑↓→ big arrows; blank line = line break; **bold**; ((a box)); [img:url] a picture; [#label: text] a button that reveals text;
+    // [anim-merge:word1,word2,word3] the animation of two characters that fly in, turn and merge into the third (a play button; a click starts it, every click again starts it anew)
     // [label code] a QATT glyph: a code that starts with tt: (onset,rhyme,coda,tone) is set in the QATT font (QattText.syllable), else layers of pictures a+b+c (img/qatt/a.jpg …); the label (any of this again) below it
     // the HTML of a slide may use only these tags, and a class on them (no other attributes, no links, no scripts)
     const TAGS = new Set(['BR', 'SMALL', 'SPAN', 'EM', 'I', 'STRONG', 'B', 'BIG', 'VAR', 'FIGURE', 'UL', 'OL', 'LI', 'P', 'SUP', 'SUB', 'DIV']);
@@ -107,6 +120,7 @@
         .replace(/\[(.*?)\]/g, (all, inner) => {
           const c = inner.trim();
           if (c.startsWith('img:')) return keep({ t: 'img', url: c.slice(4).trim() });
+          if (c.startsWith('anim-merge:')) return keep({ t: 'merge', words: c.slice(11).split(',').map(w => w.trim()) });
           if (c.startsWith('#')) {
             const i = c.indexOf(':');
             return keep({ t: 'reveal', label: i < 0 ? 'Hiện' : c.slice(1, i).trim(), text: i < 0 ? c.slice(1).trim() : c.slice(i + 1).trim() });
@@ -118,12 +132,52 @@
         });
     }
     const speak = text => { try { const u = new SpeechSynthesisUtterance(text); u.lang = 'vi-VN'; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { /* no speech: fine */ } };
+    // the animation of admin/animations.html ("Name, two characters"), set to: turn 25%, speed 800%, wait 1.5 s, cross-fade 0.2 s, distance 20 px
+    const MERGE = { turn: .25, speed: 8, wait: 1500, fade: 200, dist: 20 };
+    function merge(words) {
+      const box = el('div', 'merge'), host = el('div', 'merge-host'), go = el('button', 'merge-play'); go.type = 'button'; go.setAttribute('aria-label', 'Play');
+      go.innerHTML = '<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
+      let els = [], tl = null, gap = 0;
+      const glyph = w => (w && typeof QattText !== 'undefined' && typeof VietnameseParser !== 'undefined' && QattText.word(w, new VietnameseParser())) || '';
+      const mk = w => { const d = el('div', 'nchar'); d.append(el('div', 'qg', glyph(w)), el('small', '', w)); return d; };
+      function build() {
+        host.textContent = ''; host.style.gap = MERGE.dist + 'px';
+        els = words.slice(0, 2).map(mk); host.append(...els);
+        els[0].append(Object.assign(mk(words[2]), { className: 'nchar n3' }));   // the third character, laid over the first
+        if (els[1]) { const r = els.map(e => e.getBoundingClientRect()); gap = r[1].left + r[1].width / 2 - (r[0].left + r[0].width / 2); }
+      }
+      function play() {
+        const A = window.anime;
+        if (!A || words.length < 3 || !els[1]) return;
+        tl && tl.pause();
+        build();
+        const { animate, stagger, createTimeline } = A;
+        const D = 1400 / MERGE.speed, W = 1300 + MERGE.wait, M = Math.max(D * MERGE.turn, 30), FADE = MERGE.fade * D / 1400;
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        tl = createTimeline({ defaults: { ease: 'outBack(2.2)' } });
+        if (reduce) { tl.add(els, { opacity: [0, 1], duration: 300 }); }
+        else tl.add(els, { translateY: [-220, 0], rotateX: [100, 0], rotateZ: [() => A.utils.random(-60, 60), 0], scale: [.2, 1], opacity: [0, 1], duration: 1100 }, stagger(160))
+          .add(els, { translateY: [0, -18, 0], duration: 900, ease: 'inOutSine' }, stagger(110, { start: 400 }))
+          .add(els, { rotateY: [0, 360], duration: D, ease: 'outQuad' }, W);
+        tl.add(els, { translateX: (e, i) => [0, i ? -gap / 2 : gap / 2], duration: M, ease: 'outQuad' }, W)
+          .call(() => {   // the first fades into the third character, the second fades out
+            const ov = els[0].querySelector('.n3'), q = els[0].children, o = { duration: FADE, ease: 'inOutSine' };
+            animate([q[0], q[1], els[1]], { opacity: 0, ...o }); animate(ov, { opacity: 1, ...o });
+          }, W + M - FADE / 2);
+      }
+      build();
+      go.addEventListener('click', e => { e.stopPropagation(); go.hidden = true; play(); });
+      host.addEventListener('click', play);
+      box.append(host, go);
+      return box;
+    }
     function build(tok) {
       if (tok.t === 'img') {
         const img = document.createElement('img'); img.src = imageUrl(tok.url); img.alt = ''; img.loading = 'lazy';
         img.onerror = () => img.remove();
         return img;
       }
+      if (tok.t === 'merge') return merge(tok.words);
       if (tok.t === 'reveal') {
         const b = el('button', 'reveal', tok.label); b.type = 'button';
         b.addEventListener('click', () => { b.textContent = tok.text; speak(tok.text); b.blur(); });
