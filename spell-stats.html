@@ -120,33 +120,30 @@
         if (window.Chart) {
           new Chart(canvas, {
             type: 'line',
-            data: { labels: mine.map(h => new Date(h.at).toLocaleDateString()), datasets: KINDS.flatMap(k => {
+            data: { labels: mine.map(h => h.words), datasets: KINDS.flatMap(k => {
               const line = { borderColor: COLORS[k], backgroundColor: COLORS[k], cubicInterpolationMode: 'monotone', borderCapStyle: 'round', borderJoinStyle: 'round', borderWidth: 2.5, spanGaps: true };
               const pick = f => mine.map(h => h[k + '_n'] >= MIN_SAMPLES ? shown(k, h[k + '_' + f]) : null);
               return [{ ...line, label: T(...NAMES[k].slice(0, 2)) + ' · ' + T('lately', 'gần đây'), data: pick('f'), pointRadius: 3 },
                       { ...line, label: T(...NAMES[k].slice(0, 2)) + ' · ' + T('usual', 'thường'), data: pick('v'), borderDash: [6, 5], borderWidth: 2, pointRadius: 0, pointHoverRadius: 3 }];
             }) },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {
+            options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { title: items => T('Word ', 'Từ ') + items[0].label + ' · ' + new Date(mine[items[0].dataIndex].at).toLocaleString() } }, legend: {
               // one entry per kind: its two lines (lately, usual) are shown and hidden together
               labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 28, generateLabels: chart => KINDS.map((k, i) => ({
                 text: T(...NAMES[k].slice(0, 2)), strokeStyle: COLORS[k], fillStyle: COLORS[k], fontColor: Chart.defaults.color, lineWidth: 2.5, pointStyle: 'line', hidden: !chart.isDatasetVisible(2 * i), datasetIndex: 2 * i, kind: i })) },
               onClick: (e, item, legend) => { const c = legend.chart, show = !c.isDatasetVisible(2 * item.kind); c.setDatasetVisibility(2 * item.kind, show); c.setDatasetVisibility(2 * item.kind + 1, show); c.update(); },
-            } }, scales: { y: { beginAtZero: true, title: { display: true, text: T('seconds', 'giây') } } } },
+            } }, scales: { x: { title: { display: true, text: T('words played', 'số từ đã chơi') } }, y: { beginAtZero: true, title: { display: true, text: T('seconds', 'giây') } } } },
           });
         }
-        // the milestones as a list: what grew since the row before
-        const log = mine.map((h, i) => {
-          const p = mine[i - 1], got = KINDS.filter(k => h[k + '_m'] > (p ? p[k + '_m'] : 0))
-            .map(k => T(...NAMES[k].slice(0, 2)) + ' < ' + MILESTONES[h[k + '_m'] - 1] + ' s');
-          return [new Date(h.at).toLocaleString(), (p ? '' : T('Start: ', 'Bắt đầu: ')) + got.join(', '), h.score];
-        }).reverse();
-        box.append(table([T('When', 'Khi nào'), T('Milestone', 'Cột mốc'), T('Points', 'Điểm')], log, 'log'));
+        // one row for every card of progress (every 4 words): what the card showed, newest first: usual / lately of every kind
+        const pair = (h, k) => h[k + '_n'] >= MIN_SAMPLES ? shown(k, h[k + '_v']).toFixed(1) + ' / ' + shown(k, h[k + '_f']).toFixed(1) : '–';
+        const log = mine.map(h => [new Date(h.at).toLocaleString(), h.words, h.score, ...KINDS.map(k => pair(h, k) + (h[k + '_m'] ? ' ★' + h[k + '_m'] : ''))]).reverse();
+        box.append(table([T('When', 'Khi nào'), T('Words', 'Từ'), T('Points', 'Điểm'), ...KINDS.map(k => T(...NAMES[k].slice(0, 2)) + ' (' + T('usual / lately', 'thường / gần đây') + ')')], log, 'log'));
       }
       $('decodings').append(box);
     }
     $('notes').textContent = T(
-      'Solid line: lately, dashed line: usual (click a kind in the legend to hide or show both). Times are as in the game: the time to find the button (and, for the onset, to read the word) is taken off. "Usual" moves slowly, "Lately" follows the last words. A kind counts from 5 times. The history keeps one row for every milestone reached.',
-      'Nét liền: gần đây, nét đứt: thường (bấm vào một loại ở chú giải để ẩn hoặc hiện cả hai). Thời gian tính như trong trò chơi: đã trừ thời gian tìm nút (và đọc từ với âm đầu). "Thường" đổi chậm, "Gần đây" theo những từ vừa chơi. Mỗi loại tính từ 5 lần. Lịch sử lưu một dòng cho mỗi cột mốc đạt được.');
+      'Solid line: lately, dashed line: usual (click a kind in the legend to hide or show both). Times are as in the game: the time to find the button (and, for the onset, to read the word) is taken off. "Usual" moves slowly, "Lately" follows the last words. A kind counts from 5 times. The history keeps one row for every card of progress (every 4 words): the usual and the latest time of every kind, ★ = milestones reached.',
+      'Nét liền: gần đây, nét đứt: thường (bấm vào một loại ở chú giải để ẩn hoặc hiện cả hai). Thời gian tính như trong trò chơi: đã trừ thời gian tìm nút (và đọc từ với âm đầu). "Thường" đổi chậm, "Gần đây" theo những từ vừa chơi. Mỗi loại tính từ 5 lần. Lịch sử lưu một dòng cho mỗi thẻ tiến bộ (cứ 4 từ): thời gian thường và gần đây của mỗi loại, ★ = số cột mốc đạt được.');
   });
 </script>
 </body>
