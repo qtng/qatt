@@ -41,7 +41,7 @@
   <main class="container py-4">
 <p><a href="../index.html">Proposal</a> · <a href="index.html">Draft character data</a> · <a href="questions.html">Questions</a></p>
 <h1 id="questions-for-the-unicode-experts">Questions for the Unicode experts<a class="anchor" href="#questions-for-the-unicode-experts" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h1>
-<p>Each question concerns a value marked [TBD] in section 6 of the proposal. The draft files contain the value given here as &quot;Draft&quot;.</p>
+<p>Each question concerns a value in section 6 of the proposal that is submitted for review. The draft files contain the value given here as &quot;Draft&quot;.</p>
 <h2 id="segmentation">Segmentation<a class="anchor" href="#segmentation" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
 <ol>
 <li><strong>Grapheme clusters for the two joiners.</strong> Required behaviour: no break directly before or after the component joiner or the Tham Thư combiner; every other boundary between components is a break (proposal 5.5, 6.2).
@@ -54,7 +54,7 @@ Draft: not set. Question: should the joiners be Default_Ignorable_Code_Point?</l
 </ol>
 <h2 id="other-properties">Other properties<a class="anchor" href="#other-properties" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
 <ol start="4">
-<li><strong>Bidi_Class of the joiners.</strong> Draft: BN, as for most format characters. The earlier draft of the proposal had L.</li>
+<li><strong>Bidi_Class of the joiners.</strong> Draft: BN, as for most format characters.</li>
 <li><strong>Canonical_Combining_Class of the tone marks.</strong> Draft: 0. A cluster takes at most one tone mark, so no canonical reordering occurs (proposal 6.1). Please confirm.</li>
 <li><strong>Vertical_Orientation and East_Asian_Width of the tone marks and joiners.</strong> Draft: Vertical_Orientation=U, East_Asian_Width=N. The components are W and U like Han ideographs.</li>
 <li><strong>Script code.</strong> No ISO 15924 code is known to exist for Quốc Âm Tân Tự. Draft script name: Quoc_Am_Tan_Tu. A code would have to be requested from the ISO 15924 Registration Authority.</li>
