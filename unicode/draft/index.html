@@ -21,6 +21,11 @@ figure.fig .parts { display: flex; gap: 8px; align-items: flex-start; }
 figure.fig img { display: block; min-width: 0; max-width: 100%; height: auto; border: 1px solid #bbb; }
 figure.fig figcaption { font-size: .85em; line-height: 1.35; margin-top: .25rem; }
 h2 { clear: both; }
+blockquote.epigraph { margin: 1.2rem auto 1.6rem; max-width: 30em; text-align: center; font-style: italic; color: #555; }
+blockquote.epigraph p { margin: .2rem 0; }
+blockquote.epigraph .zh { font-style: normal; font-size: 1.25em; letter-spacing: .15em; color: #333; }
+blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4rem; }
+blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; padding: .15em 0; font-family: "QATT Chart"; font-size: 1.7em; line-height: 1.1; vertical-align: -.4em; white-space: nowrap; }
 </style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1</h1>
 <p>Oct 26, 2026 · Nguyễn Quốc Trung</p>
@@ -75,7 +80,12 @@ h2 { clear: both; }
 <h2 id="2-introduction">2. Introduction</h2>
 <p>Quốc Âm Tân Tự (國音新字, &quot;new script for the sounds of the national language&quot;) is a Vietnamese script built from 22 bases, each drawn with three strokes. A base exists in seven forms: one without a marking stroke and six with a short marking stroke at one of the six stroke ends. Every form can stand alone. All but one per base combine in groups of two or three, and any character may carry a tone mark in one of its corners.</p>
 <h3 id="sec-2-1">2.1 Background</h3>
-<p>The script is known from one text, preserved in two manuscripts at the Institute of Hán Nôm Studies in Hanoi (3.1). The text names the script in the heading of its preface, 國音新字序, &quot;preface to the new script for the sounds of the national language&quot; (p. 1). The text is undated. It is not older than the reign of Emperor Thiệu Trị (1841–1847), because the character 華 lacks its final stroke, a naming taboo for the emperor's mother, Hồ Thị Hoa (p. 1). The taboo gives the earliest date only. The author signs as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành, at the end of the preface (p. 2). Just before it he describes the purpose of the script: 茲模索音畫創爲一樣書，以便私記已也，豈敢云通倮蠱之聲音乎哉, &quot;so, groping for sound strokes, I created a kind of writing, only to make my private notes easier. How would I dare to say that it conveys the sounds of …?&quot; (p. 2,; draft translation). The last word, 倮蠱, is unclear; it may stand for 倮蟲, 'the naked creatures', a classical term for human beings.</p>
+<p>The script is known from one text, preserved in two manuscripts at the Institute of Hán Nôm Studies in Hanoi (3.1). The text names the script in the heading of its preface, 國音新字序, &quot;preface to the new script for the sounds of the national language&quot; (p. 1). The text is undated. It is not older than the reign of Emperor Thiệu Trị (1841–1847), because the character 華 lacks its final stroke, a naming taboo for the emperor's mother, Hồ Thị Hoa (p. 1). The taboo gives the earliest date only. The author signs as Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), a lay scholar (cư sĩ) surnamed Nguyễn from Nam Thành, at the end of the preface (p. 2). The preface ends with the purpose of the script:</p>
+<blockquote class="epigraph">
+<p class="zh" lang="zh">茲模索音畫創爲一樣書，以便私記已也。</p>
+<p>So, groping for sound strokes, I created a kind of writing, only to make my private notes easier.</p>
+<footer>Nam Thành cư sĩ Nguyễn Tử, end of the preface, page 2 (draft translation)</footer>
+</blockquote>
 <p>In the source the script appears within Hán Nôm text and is treated exactly like Hán Nôm characters. The source contains no running text written in the script: it gives single characters as examples and spelling formulas in the phản thiết manner (4.1). Three-component characters (Tham Thư) are attested in two examples. The source describes how their sounds are articulated but gives them no reading (4.3). Eight tones are marked with circles and semicircles in the corners, following the Chinese yin-yang method.</p>
 <p>A description of the script was published by Nguyễn Quang Hồng in 1986 (Appendix C). This proposal is based on the source itself.</p>
 <h3 id="sec-2-2">2.2 Reasons for encoding</h3>
