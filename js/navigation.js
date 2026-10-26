@@ -342,6 +342,7 @@ window.Theme = window.Theme || (function() {
             .desk-other.open .desk-menu { display: block; }
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+            @media (min-width: 1200px) { .desk-links i { display: none; } }
             @media (max-width: 1199.98px) { .desk-links .dl-text { display: none; } .desk-links a { padding: 0 .75rem; } .desk-links i { font-size: 1.15rem; } }
             .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
