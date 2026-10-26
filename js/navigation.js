@@ -11,7 +11,7 @@
 //   Lang.current        "en" or "vi"
 //   Lang.set("vi")      choose and remember a language, the page changes at once; the event "langchange" is sent to the document
 //   Lang.t("Next", "Tiếp")   the text for the language, for texts that are not in a tag of their own
-// Attributes: data-vi-label, data-vi-title, data-vi-placeholder, data-vi-aria-label give the attribute without data-vi- (e.g. the label of an <optgroup>) its text in vi.
+// Attributes: data-vi-label, data-vi-title, data-vi-placeholder, data-vi-aria-label, data-vi-href give the attribute without data-vi- (e.g. the label of an <optgroup>) its text in vi.
 window.Lang = window.Lang || (function() {
     const KEY = "lang";
     const valid = l => l === "en" || l === "vi";
@@ -47,7 +47,7 @@ window.Lang = window.Lang || (function() {
         if (text !== want) el.textContent = want;
         st.shown = want;
     };
-    const ATTRS = ["label", "title", "placeholder", "aria-label"];
+    const ATTRS = ["label", "title", "placeholder", "aria-label", "href"];
     const attrStates = new WeakMap();   // per tag and attribute: the English value and the value shown last
     const applyAttr = (el, name) => {
         const vi = el.getAttribute("data-vi-" + name), cur = el.getAttribute(name);
