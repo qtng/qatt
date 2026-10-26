@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Quốc Âm Tân Tự – Unicode-Block (Entwurf, deutsche Lesefassung)</title>
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Deutsche Lesefassung der Unicode-Seite zu Quốc Âm Tân Tự (nur zum Lesen).">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/navigation.js"></script>
+  <script src="js/qatt.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --bs-link-color: #a8362a; --bs-link-hover-color: #8c2c22; --bs-link-color-rgb: 168, 54, 42; --bs-link-hover-color-rgb: 140, 44, 34; }
+    body { color: var(--ink); }
+    .hero { background: radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%), linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: var(--bs-secondary-color); }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
+    :root {
+      --g-unmarked: #d9e8ff; --g-marked: #d7f0d6; --g-chi: #fff1bf; --g-combiner: #ffdcc0; --g-joiner: #ffdcc0; --g-tone: #e9d9ff;
+      --g-reserved: #eceff1; --g-border: #b8c1c9;
+    }
+    h2 { margin-top: 2.2rem; font-size: 1.45rem; font-family: Georgia, "Times New Roman", serif; font-weight: 400; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    h3 { font-size: 1.1rem; }
+    .tt { font-variant-numeric: tabular-nums; }
+    .cp { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    /* code chart */
+    .chart { border-collapse: separate; border-spacing: 0; font-size: .75rem; width: 100%; min-width: 46rem; table-layout: fixed; }   /* the 16 columns share the width, below 46rem the chart scrolls */
+    .chart th { font-weight: 600; text-align: center; padding: .15rem .25rem; color: var(--bs-secondary-color); white-space: nowrap; }
+    .chart th.rowhead { width: 4.6rem; text-align: right; padding-right: .5rem; position: sticky; left: 0; background: var(--bs-body-bg); z-index: 1; }
+    .chart td { padding: 0; border: 1px solid var(--g-border); border-width: 0 1px 1px 0; }
+    .chart tr:first-child td { border-top-width: 1px; }
+    .chart td:nth-child(2) { border-left-width: 1px; }
+    .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 3.5rem;
+            padding: .1rem; border: 0; background: var(--g-bg, transparent); color: inherit; line-height: 1.1; cursor: pointer; position: relative; }
+    .cell:hover { filter: brightness(.94); }
+    .cell:focus-visible { outline: 3px solid var(--bs-primary); outline-offset: -3px; z-index: 2; }
+    .cell.selected { outline: 3px solid var(--bs-primary); outline-offset: -3px; z-index: 2; }
+    .cell .glyph { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+    .cell .cpno { font-size: .58rem; color: var(--bs-secondary-color); font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .tok { font-size: .66rem; font-weight: 700; letter-spacing: -.02em; }
+    .sub { font-size: .6rem; opacity: .8; }
+    .fmt { border: 1.5px dashed currentColor; border-radius: .25rem; padding: 0 .25rem; font-size: .68rem; font-weight: 700; opacity: .85; }
+    .reserved { background: repeating-linear-gradient(135deg, transparent 0 5px, var(--g-border) 5px 6px), var(--g-reserved); cursor: default; }
+    .g-unmarked { --g-bg: var(--g-unmarked); } .g-marked { --g-bg: var(--g-marked); } .g-chi { --g-bg: var(--g-chi); }
+    .g-combiner { --g-bg: var(--g-combiner); } .g-joiner { --g-bg: var(--g-joiner); } .g-tone { --g-bg: var(--g-tone); }
+    .dim { opacity: .22; }
+    .chip { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--g-border); border-radius: 2rem; padding: .15rem .65rem .15rem .4rem;
+            background: transparent; color: var(--bs-body-color); font-size: .85rem; cursor: pointer; }
+    .chip .sw { width: 1rem; height: 1rem; border-radius: .25rem; background: var(--g-bg); border: 1px solid var(--g-border); }
+    .chip[aria-pressed=true] { background: var(--bs-secondary-bg); border-color: var(--bs-primary); }
+    /* below the xl breakpoint the detail card is a popup that opens when a character is chosen */
+    #detail-backdrop { display: none; }
+    @media (max-width: 1199.98px) {
+      #detail { display: none; }
+      #detail.open { display: block; position: fixed; z-index: 1056; left: 50%; top: 50%; transform: translate(-50%, -50%); width: calc(100% - 1.5rem); max-width: 26rem; max-height: calc(100vh - 1.5rem); max-height: calc(100dvh - 1.5rem); overflow: auto; box-shadow: 0 .5rem 2rem rgba(0,0,0,.4); }
+      #detail-backdrop.open { display: block; position: fixed; inset: 0; z-index: 1055; background: rgba(0,0,0,.5); }
+    }
+    .detail-glyph { flex: none; width: 6.2rem; height: 6.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--g-border);
+                    border-radius: .5rem; background: var(--g-bg, var(--bs-tertiary-bg)); }
+    .detail-glyph .tok { font-size: 1.2rem; } .detail-glyph .sub { font-size: .95rem; } .detail-glyph .fmt { font-size: 1.1rem; padding: .1rem .5rem; }
+    .names td, .names th { vertical-align: top; }
+    .names .mini { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: .3rem; background: var(--g-bg); border: 1px solid var(--g-border); flex-direction: column; line-height: 1.05; }
+    .qglyph { font-size: 2rem; line-height: 1; color: inherit; }
+    .cell.g-tone .qglyph { font-size: 1.45rem; margin-bottom: .55rem; } /* a tone mark sits in a corner of the glyph box: keep it clear of the code number */
+    .names .qglyph { font-size: 1.7rem; }
+    .detail-glyph .qglyph { font-size: 3.8rem; }
+    /* a tone mark sits in a corner of its glyph box: drawn smaller so that the mark stays inside the swatch */
+    .names .mini.g-tone .qglyph { font-size: 1.35rem; }
+    .sw-tone { display: flex; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; background: var(--g-bg); border: 1px solid var(--g-border); border-radius: .3rem; }
+    .sw-tone .qglyph { font-size: 1.45rem; }
+    .names tr.hit { background: var(--bs-warning-bg-subtle); }
+    .names thead th { background: var(--bs-secondary-bg); white-space: nowrap; }
+    .names tr.sect th { background: var(--bs-tertiary-bg); font-weight: 600; font-size: .95rem; }
+    .note-x { color: var(--bs-secondary-color); }
+    code.name { white-space: normal; word-break: break-word; }
+    @media (max-width: 575.98px) { h2 { font-size: 1.25rem; } }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3">QATT Unicode</h1>
+    <p class="lead mx-auto mb-0">Der vorgeschlagene Block für Quốc Âm Tân Tự (QATT), eine Schrift aus Hán-Nôm-Texten: <span id="s-total"></span> Zeichen in einem Block von <span id="s-size"></span> Codepunkten.</p>
+  </div>
+</header>
+
+<main class="container-xl py-4" id="top">
+
+  <div class="alert alert-warning small mb-2" role="note">
+      <strong>Entwurf – nicht Teil des Unicode-Standards.</strong>
+      Der Block hat noch keine Position: Die Codepunkte verwenden die vorläufige Basis <span class="cp" id="s-base"></span> (Private Use Area); nur die Offsets stammen aus dem Vorschlag.
+    </div>
+    <p class="text-center mb-0 d-flex justify-content-center gap-2"><a class="btn btn-outline-dark btn-sm" href="/unicode/draft/">Vorschlagsentwurf ansehen</a></p>
+
+
+  <h2 id="chart-title">Codetabelle</h2>
+  <div class="d-flex flex-wrap gap-2 mb-3" id="legend" role="group" aria-label="Nach Gruppe filtern"></div>
+  <div class="row g-4">
+    <div class="col-12 col-xl-9">
+      <div class="table-responsive pb-1"><table class="chart" id="chart" aria-labelledby="chart-title"></table></div>
+      <p class="small text-secondary mt-2 mb-0">Sechzehn Codepunkte pro Zeile. Eine Zelle wählen für die Einzelheiten. Gestrichelt: Formatzeichen; Kreise: Tonzeichen.</p>
+    </div>
+    <div class="col-12 col-xl-3">
+      <div class="card" id="detail" aria-live="polite"></div>
+      <div id="detail-backdrop"></div>
+    </div>
+  </div>
+
+  <h2 id="list-title">Liste der Codepunkte</h2>
+  <p>Eine Zeile pro Codepunkt mit dem vollständigen Namen aus der Entwurfs-Namensliste: <code>QUOC AM TAN TU &lt;NAME&gt;</code> ohne Markierungsstrich oder <code>QUOC AM TAN TU &lt;NAME&gt; WITH MARK-1</code> bis <code>WITH MARK-6</code> (die Position des Markierungsstrichs). In den Namen wird đ als <b>D</b> geschrieben (DONG), und der eine Cán für d und gi heißt <b>GIONG</b>. Die Codepunkte sind vorläufig (Basis <span class="cp" id="l-base"></span>).</p>
+  <div class="row g-2 mb-2">
+    <div class="col-12 col-md-6"><input class="form-control" type="search" id="q" placeholder="Namen, Lesungen, Codepunkte suchen…" aria-label="Liste der Codepunkte durchsuchen" autocomplete="off"></div>
+    <div class="col-12 col-md-6 small text-secondary d-flex align-items-center" id="count"></div>
+  </div>
+  <div class="table-responsive"><table class="table table-sm table-hover names align-middle" id="names"></table></div>
+
+  <h2>Überblick</h2>
+  <div class="table-responsive"><table class="table table-sm align-middle" id="overview"></table></div>
+
+  <h2>Die 22 Cán</h2>
+  <p>Jeder Cán hat sieben Formen: eine ohne Markierungsstrich und sechs mit dem Markierungsstrich an einer der sechs Positionen. Die sieben Formen einer Basis sind aufeinanderfolgende Codepunkte (zuerst die unmarkierte). Der Markierungsstrich an Position 1 ergibt den markierten Cán der Quellenliste, die Positionen 2 bis 6 sind die fünf Chi. Die Namen sind die Lautnamen der Quellenliste (Anlaut + <i>ông</i>). đ wird als <b>D</b> geschrieben (DONG), und der eine Cán für d und gi heißt <b>GIONG</b>.</p>
+  <div class="table-responsive"><table class="table table-sm table-hover align-middle tt" id="can-table"></table></div>
+
+  <h2>Tonzeichen</h2>
+  <p>Acht kombinierende Zeichen, eines pro Ton, in den vier Ecken des Clusters angeordnet, in der traditionellen Reihenfolge der acht Töne (âm vor dương). Die Zeichnungen sind schematisch und folgen der Beschreibung im Vorschlag (die offene Seite des Halbkreises zeigt zur Mitte); es sind keine Referenzglyphen.</p>
+  <div class="table-responsive"><table class="table table-sm align-middle" id="tone-table"></table></div>
+
+  <h2>Zeicheneigenschaften</h2>
+  <p>Entwurfswerte nach Zeichenklasse.</p>
+  <div class="table-responsive"><table class="table table-sm align-middle tt" id="props"></table></div>
+
+  <hr class="mt-4">
+  <p class="small text-secondary">Quelle: der Vorschlagsentwurf (Abschnitte 5 bis 7) und seine Entwurfs-Zeichendaten. Diese Seite zeigt eine Momentaufnahme dieser Daten. Deutsche Lesefassung nur zum Lesen, nicht verlinkt und nicht indexiert; die Unicode-Namen und Eigenschaftswerte bleiben englisch.</p>
+</main>
+
+<script type="application/json" id="qatt-data">{"source":{"repo":"qtng/qatt-unicode","commit":"eac6390","base":983040,"size":176,"block":"Quoc Am Tan Tu","script":"Quoc_Am_Tan_Tu"},"can":[{"no":1,"nom":"翁","reading":"ông","name":"ONG"},{"no":2,"nom":"⿰木禺","reading":"ngông","name":"NGONG"},{"no":3,"nom":"胸","reading":"hông","name":"HONG"},{"no":4,"nom":"⿰木功","reading":"gông","name":"GONG"},{"no":5,"nom":"工","reading":"công","name":"CONG"},{"no":6,"nom":"⿰竜羽","reading":"lông","name":"LONG"},{"no":7,"nom":"⿰竜里","reading":"trông","name":"TRONG"},{"no":8,"nom":"東","reading":"đông","name":"DONG"},{"no":9,"nom":"農","reading":"nông","name":"NONG"},{"no":10,"nom":"宗","reading":"tông","name":"TONG"},{"no":11,"nom":"通","reading":"thông","name":"THONG"},{"no":12,"nom":"⿰亻戍","reading":"nhông","name":"NHONG"},{"no":13,"nom":"柊","reading":"chông","name":"CHONG"},{"no":14,"nom":"⿰月容","reading":"dông","name":"GIONG"},{"no":15,"nom":"衝","reading":"xông","name":"XONG"},{"no":16,"nom":"空","reading":"không","name":"KHONG"},{"no":17,"nom":"滝","reading":"sông","name":"SONG"},{"no":18,"nom":"⿱山庸","reading":"rông","name":"RONG"},{"no":19,"nom":"蒙","reading":"mông","name":"MONG"},{"no":20,"nom":"芃","reading":"bông","name":"BONG"},{"no":21,"nom":"⿰木芃","reading":"vông","name":"VONG"},{"no":22,"nom":"⿰口風","reading":"phông","name":"PHONG"}],"chars":[{"o":0,"n":"QUOC AM TAN TU ONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: ông 翁"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"t":"unmarked"},{"o":1,"n":"QUOC AM TAN TU ONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: ông 翁"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":1,"t":"marked"},{"o":2,"n":"QUOC AM TAN TU ONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":2,"t":"chi"},{"o":3,"n":"QUOC AM TAN TU ONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":3,"t":"chi"},{"o":4,"n":"QUOC AM TAN TU ONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":4,"t":"chi"},{"o":5,"n":"QUOC AM TAN TU ONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":5,"t":"chi"},{"o":6,"n":"QUOC AM TAN TU ONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":0,"m":6,"t":"chi"},{"o":7,"n":"QUOC AM TAN TU NGONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: ngông ⿰木禺"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"t":"unmarked"},{"o":8,"n":"QUOC AM TAN TU NGONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: ngông ⿰木禺"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":1,"t":"marked"},{"o":9,"n":"QUOC AM TAN TU NGONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":2,"t":"chi"},{"o":10,"n":"QUOC AM TAN TU NGONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":3,"t":"chi"},{"o":11,"n":"QUOC AM TAN TU NGONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":4,"t":"chi"},{"o":12,"n":"QUOC AM TAN TU NGONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":5,"t":"chi"},{"o":13,"n":"QUOC AM TAN TU NGONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis ngông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":1,"m":6,"t":"chi"},{"o":14,"n":"QUOC AM TAN TU HONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: hông 胸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"t":"unmarked"},{"o":15,"n":"QUOC AM TAN TU HONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: hông 胸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":1,"t":"marked"},{"o":16,"n":"QUOC AM TAN TU HONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":2,"t":"chi"},{"o":17,"n":"QUOC AM TAN TU HONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":3,"t":"chi"},{"o":18,"n":"QUOC AM TAN TU HONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":4,"t":"chi"},{"o":19,"n":"QUOC AM TAN TU HONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":5,"t":"chi"},{"o":20,"n":"QUOC AM TAN TU HONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis hông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":2,"m":6,"t":"chi"},{"o":21,"n":"QUOC AM TAN TU GONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: gông ⿰木功"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"t":"unmarked"},{"o":22,"n":"QUOC AM TAN TU GONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: gông ⿰木功"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":1,"t":"marked"},{"o":23,"n":"QUOC AM TAN TU GONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":2,"t":"chi"},{"o":24,"n":"QUOC AM TAN TU GONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":3,"t":"chi"},{"o":25,"n":"QUOC AM TAN TU GONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":4,"t":"chi"},{"o":26,"n":"QUOC AM TAN TU GONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":5,"t":"chi"},{"o":27,"n":"QUOC AM TAN TU GONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis gông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":3,"m":6,"t":"chi"},{"o":28,"n":"QUOC AM TAN TU CONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: công 工"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"t":"unmarked"},{"o":29,"n":"QUOC AM TAN TU CONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: công 工"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":1,"t":"marked"},{"o":30,"n":"QUOC AM TAN TU CONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":2,"t":"chi"},{"o":31,"n":"QUOC AM TAN TU CONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":3,"t":"chi"},{"o":32,"n":"QUOC AM TAN TU CONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":4,"t":"chi"},{"o":33,"n":"QUOC AM TAN TU CONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":5,"t":"chi"},{"o":34,"n":"QUOC AM TAN TU CONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis công"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":4,"m":6,"t":"chi"},{"o":35,"n":"QUOC AM TAN TU LONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: lông ⿰竜羽"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"t":"unmarked"},{"o":36,"n":"QUOC AM TAN TU LONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: lông ⿰竜羽"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":1,"t":"marked"},{"o":37,"n":"QUOC AM TAN TU LONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":2,"t":"chi"},{"o":38,"n":"QUOC AM TAN TU LONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":3,"t":"chi"},{"o":39,"n":"QUOC AM TAN TU LONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":4,"t":"chi"},{"o":40,"n":"QUOC AM TAN TU LONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":5,"t":"chi"},{"o":41,"n":"QUOC AM TAN TU LONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis lông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":5,"m":6,"t":"chi"},{"o":42,"n":"QUOC AM TAN TU TRONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: trông ⿰竜里"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"t":"unmarked"},{"o":43,"n":"QUOC AM TAN TU TRONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: trông ⿰竜里"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":1,"t":"marked"},{"o":44,"n":"QUOC AM TAN TU TRONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":2,"t":"chi"},{"o":45,"n":"QUOC AM TAN TU TRONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":3,"t":"chi"},{"o":46,"n":"QUOC AM TAN TU TRONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":4,"t":"chi"},{"o":47,"n":"QUOC AM TAN TU TRONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":5,"t":"chi"},{"o":48,"n":"QUOC AM TAN TU TRONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis trông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":6,"m":6,"t":"chi"},{"o":49,"n":"QUOC AM TAN TU DONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: đông 東"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"t":"unmarked"},{"o":50,"n":"QUOC AM TAN TU DONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: đông 東"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":1,"t":"marked"},{"o":51,"n":"QUOC AM TAN TU DONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":2,"t":"chi"},{"o":52,"n":"QUOC AM TAN TU DONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":3,"t":"chi"},{"o":53,"n":"QUOC AM TAN TU DONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":4,"t":"chi"},{"o":54,"n":"QUOC AM TAN TU DONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":5,"t":"chi"},{"o":55,"n":"QUOC AM TAN TU DONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis đông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":7,"m":6,"t":"chi"},{"o":56,"n":"QUOC AM TAN TU NONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: nông 農"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"t":"unmarked"},{"o":57,"n":"QUOC AM TAN TU NONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: nông 農"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":1,"t":"marked"},{"o":58,"n":"QUOC AM TAN TU NONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":2,"t":"chi"},{"o":59,"n":"QUOC AM TAN TU NONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":3,"t":"chi"},{"o":60,"n":"QUOC AM TAN TU NONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":4,"t":"chi"},{"o":61,"n":"QUOC AM TAN TU NONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":5,"t":"chi"},{"o":62,"n":"QUOC AM TAN TU NONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":8,"m":6,"t":"chi"},{"o":63,"n":"QUOC AM TAN TU TONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: tông 宗"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"t":"unmarked"},{"o":64,"n":"QUOC AM TAN TU TONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: tông 宗"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":1,"t":"marked"},{"o":65,"n":"QUOC AM TAN TU TONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":2,"t":"chi"},{"o":66,"n":"QUOC AM TAN TU TONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":3,"t":"chi"},{"o":67,"n":"QUOC AM TAN TU TONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":4,"t":"chi"},{"o":68,"n":"QUOC AM TAN TU TONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":5,"t":"chi"},{"o":69,"n":"QUOC AM TAN TU TONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis tông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":9,"m":6,"t":"chi"},{"o":70,"n":"QUOC AM TAN TU THONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: thông 通"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"t":"unmarked"},{"o":71,"n":"QUOC AM TAN TU THONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: thông 通"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":1,"t":"marked"},{"o":72,"n":"QUOC AM TAN TU THONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":2,"t":"chi"},{"o":73,"n":"QUOC AM TAN TU THONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":3,"t":"chi"},{"o":74,"n":"QUOC AM TAN TU THONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":4,"t":"chi"},{"o":75,"n":"QUOC AM TAN TU THONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":5,"t":"chi"},{"o":76,"n":"QUOC AM TAN TU THONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis thông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":10,"m":6,"t":"chi"},{"o":77,"n":"QUOC AM TAN TU NHONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: nhông ⿰亻戍"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"t":"unmarked"},{"o":78,"n":"QUOC AM TAN TU NHONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: nhông ⿰亻戍"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":1,"t":"marked"},{"o":79,"n":"QUOC AM TAN TU NHONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":2,"t":"chi"},{"o":80,"n":"QUOC AM TAN TU NHONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":3,"t":"chi"},{"o":81,"n":"QUOC AM TAN TU NHONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":4,"t":"chi"},{"o":82,"n":"QUOC AM TAN TU NHONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":5,"t":"chi"},{"o":83,"n":"QUOC AM TAN TU NHONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis nhông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":11,"m":6,"t":"chi"},{"o":84,"n":"QUOC AM TAN TU CHONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: chông 柊"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"t":"unmarked"},{"o":85,"n":"QUOC AM TAN TU CHONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: chông 柊"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":1,"t":"marked"},{"o":86,"n":"QUOC AM TAN TU CHONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":2,"t":"chi"},{"o":87,"n":"QUOC AM TAN TU CHONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":3,"t":"chi"},{"o":88,"n":"QUOC AM TAN TU CHONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":4,"t":"chi"},{"o":89,"n":"QUOC AM TAN TU CHONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":5,"t":"chi"},{"o":90,"n":"QUOC AM TAN TU CHONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis chông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":12,"m":6,"t":"chi"},{"o":91,"n":"QUOC AM TAN TU GIONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: dông ⿰月容"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"t":"unmarked"},{"o":92,"n":"QUOC AM TAN TU GIONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: dông ⿰月容"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":1,"t":"marked"},{"o":93,"n":"QUOC AM TAN TU GIONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":2,"t":"chi"},{"o":94,"n":"QUOC AM TAN TU GIONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":3,"t":"chi"},{"o":95,"n":"QUOC AM TAN TU GIONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":4,"t":"chi"},{"o":96,"n":"QUOC AM TAN TU GIONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":5,"t":"chi"},{"o":97,"n":"QUOC AM TAN TU GIONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis dông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":13,"m":6,"t":"chi"},{"o":98,"n":"QUOC AM TAN TU XONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: xông 衝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"t":"unmarked"},{"o":99,"n":"QUOC AM TAN TU XONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: xông 衝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":1,"t":"marked"},{"o":100,"n":"QUOC AM TAN TU XONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":2,"t":"chi"},{"o":101,"n":"QUOC AM TAN TU XONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":3,"t":"chi"},{"o":102,"n":"QUOC AM TAN TU XONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":4,"t":"chi"},{"o":103,"n":"QUOC AM TAN TU XONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":5,"t":"chi"},{"o":104,"n":"QUOC AM TAN TU XONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis xông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":14,"m":6,"t":"chi"},{"o":105,"n":"QUOC AM TAN TU KHONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: không 空"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"t":"unmarked"},{"o":106,"n":"QUOC AM TAN TU KHONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: không 空"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":1,"t":"marked"},{"o":107,"n":"QUOC AM TAN TU KHONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":2,"t":"chi"},{"o":108,"n":"QUOC AM TAN TU KHONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":3,"t":"chi"},{"o":109,"n":"QUOC AM TAN TU KHONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":4,"t":"chi"},{"o":110,"n":"QUOC AM TAN TU KHONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":5,"t":"chi"},{"o":111,"n":"QUOC AM TAN TU KHONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis không"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":15,"m":6,"t":"chi"},{"o":112,"n":"QUOC AM TAN TU SONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: sông 滝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"t":"unmarked"},{"o":113,"n":"QUOC AM TAN TU SONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: sông 滝"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":1,"t":"marked"},{"o":114,"n":"QUOC AM TAN TU SONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":2,"t":"chi"},{"o":115,"n":"QUOC AM TAN TU SONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":3,"t":"chi"},{"o":116,"n":"QUOC AM TAN TU SONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":4,"t":"chi"},{"o":117,"n":"QUOC AM TAN TU SONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":5,"t":"chi"},{"o":118,"n":"QUOC AM TAN TU SONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis sông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":16,"m":6,"t":"chi"},{"o":119,"n":"QUOC AM TAN TU RONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: rông ⿱山庸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"t":"unmarked"},{"o":120,"n":"QUOC AM TAN TU RONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: rông ⿱山庸"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":1,"t":"marked"},{"o":121,"n":"QUOC AM TAN TU RONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":2,"t":"chi"},{"o":122,"n":"QUOC AM TAN TU RONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":3,"t":"chi"},{"o":123,"n":"QUOC AM TAN TU RONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":4,"t":"chi"},{"o":124,"n":"QUOC AM TAN TU RONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":5,"t":"chi"},{"o":125,"n":"QUOC AM TAN TU RONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis rông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":17,"m":6,"t":"chi"},{"o":126,"n":"QUOC AM TAN TU MONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: mông 蒙"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"t":"unmarked"},{"o":127,"n":"QUOC AM TAN TU MONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: mông 蒙"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":1,"t":"marked"},{"o":128,"n":"QUOC AM TAN TU MONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":2,"t":"chi"},{"o":129,"n":"QUOC AM TAN TU MONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":3,"t":"chi"},{"o":130,"n":"QUOC AM TAN TU MONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":4,"t":"chi"},{"o":131,"n":"QUOC AM TAN TU MONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":5,"t":"chi"},{"o":132,"n":"QUOC AM TAN TU MONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis mông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":18,"m":6,"t":"chi"},{"o":133,"n":"QUOC AM TAN TU BONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: bông 芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"t":"unmarked"},{"o":134,"n":"QUOC AM TAN TU BONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: bông 芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":1,"t":"marked"},{"o":135,"n":"QUOC AM TAN TU BONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":2,"t":"chi"},{"o":136,"n":"QUOC AM TAN TU BONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":3,"t":"chi"},{"o":137,"n":"QUOC AM TAN TU BONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":4,"t":"chi"},{"o":138,"n":"QUOC AM TAN TU BONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":5,"t":"chi"},{"o":139,"n":"QUOC AM TAN TU BONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis bông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":19,"m":6,"t":"chi"},{"o":140,"n":"QUOC AM TAN TU VONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: vông ⿰木芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"t":"unmarked"},{"o":141,"n":"QUOC AM TAN TU VONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: vông ⿰木芃"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":1,"t":"marked"},{"o":142,"n":"QUOC AM TAN TU VONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":2,"t":"chi"},{"o":143,"n":"QUOC AM TAN TU VONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":3,"t":"chi"},{"o":144,"n":"QUOC AM TAN TU VONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":4,"t":"chi"},{"o":145,"n":"QUOC AM TAN TU VONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":5,"t":"chi"},{"o":146,"n":"QUOC AM TAN TU VONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis vông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":20,"m":6,"t":"chi"},{"o":147,"n":"QUOC AM TAN TU PHONG","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","ohne Markierungsstrich; allein steht er mit der Lesung des markierten Cán seiner Basis: phông ⿰口風"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"t":"unmarked"},{"o":148,"n":"QUOC AM TAN TU PHONG WITH MARK-1","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","markierter Cán, der Cán der Quellenliste: phông ⿰口風"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":1,"t":"marked"},{"o":149,"n":"QUOC AM TAN TU PHONG WITH MARK-2","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":2,"t":"chi"},{"o":150,"n":"QUOC AM TAN TU PHONG WITH MARK-3","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":3,"t":"chi"},{"o":151,"n":"QUOC AM TAN TU PHONG WITH MARK-4","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":4,"t":"chi"},{"o":152,"n":"QUOC AM TAN TU PHONG WITH MARK-5","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":5,"t":"chi"},{"o":153,"n":"QUOC AM TAN TU PHONG WITH MARK-6","gc":"Lo","ccc":0,"bidi":"L","notes":[["*","Chi der Basis phông"]],"gcb":"Other","incb":"Consonant","lb":"ID","eaw":"W","vo":"U","b":21,"m":6,"t":"chi"},{"o":154,"n":"QUOC AM TAN TU COMPONENT JOINER","gc":"Cf","ccc":0,"bidi":"BN","notes":[["*","verbindet zwei Komponenten zu einem Zeichen; ihre Reihenfolge ergibt die Anordnung"]],"gcb":"Extend","incb":"Linker","lb":"GL","eaw":"N","vo":"U","t":"joiner"},{"o":155,"n":"QUOC AM TAN TU THAM THU COMBINER","gc":"Cf","ccc":0,"bidi":"BN","notes":[["*","setzt das folgende Chi über ein Hợp Thư"]],"gcb":"Extend","incb":"Linker","lb":"GL","eaw":"N","vo":"U","t":"combiner"},{"o":156,"n":"QUOC AM TAN TU TONE SEMICIRCLE LOWER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm bình (ngang)"],["x","(modifier letter chinese tone yin ping - A700)"],["x","(ideographic level tone mark - 302A)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":157,"n":"QUOC AM TAN TU TONE CIRCLE LOWER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương bình (huyền)"],["x","(modifier letter chinese tone yang ping - A701)"],["x","(ideographic level tone mark - 302A)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":158,"n":"QUOC AM TAN TU TONE SEMICIRCLE UPPER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm thượng (hỏi)"],["x","(modifier letter chinese tone yin shang - A702)"],["x","(ideographic rising tone mark - 302B)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":159,"n":"QUOC AM TAN TU TONE CIRCLE UPPER LEFT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương thượng (ngã)"],["x","(modifier letter chinese tone yang shang - A703)"],["x","(ideographic rising tone mark - 302B)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":160,"n":"QUOC AM TAN TU TONE SEMICIRCLE UPPER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm khứ (sắc)"],["x","(modifier letter chinese tone yin qu - A704)"],["x","(ideographic departing tone mark - 302C)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":161,"n":"QUOC AM TAN TU TONE CIRCLE UPPER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương khứ (nặng)"],["x","(modifier letter chinese tone yang qu - A705)"],["x","(ideographic departing tone mark - 302C)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":162,"n":"QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","âm nhập"],["x","(modifier letter chinese tone yin ru - A706)"],["x","(ideographic entering tone mark - 302D)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"},{"o":163,"n":"QUOC AM TAN TU TONE CIRCLE LOWER RIGHT","gc":"Mn","ccc":0,"bidi":"NSM","notes":[["=","dương nhập"],["x","(modifier letter chinese tone yang ru - A707)"],["x","(ideographic entering tone mark - 302D)"]],"gcb":"Extend","incb":"Extend","lb":"CM","eaw":"N","vo":"U","t":"tone"}]}</script>
+<script>
+(() => {
+  'use strict';
+  const D = JSON.parse(document.getElementById('qatt-data').textContent);
+  const chars = D.chars, SIZE = D.source.size, COLS = 16;
+  let base = D.source.base;                       // code point of offset 0 (provisional)
+  let selected = null, activeGroup = null;
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
+  const hex = (n, w = 4) => n.toString(16).toUpperCase().padStart(w, '0');
+  const cpOf = o => base + o;
+  const U = o => 'U+' + hex(cpOf(o), 5);
+  const off = o => '+' + hex(o, 2);
+
+  const GROUPS = {
+    unmarked: { label: 'Unmarkierter Cán', note: 'Formen ohne Markierungsstrich' },
+    marked:   { label: 'Markierter Cán', note: 'Markierungsstrich an Position 1: der Cán der Quellenliste' },
+    chi:      { label: 'Chi', note: 'Markierungsstrich an den Positionen 2 bis 6' },
+    combiner: { label: 'Tham-Thư-Combiner', note: 'Formatzeichen' },
+    joiner:   { label: 'Komponenten-Joiner', note: 'Formatzeichen' },
+    tone:     { label: 'Tonzeichen', note: 'Kombinierende Zeichen, eines pro Ton' },
+    reserved: { label: 'Reserviert', note: 'Nicht zugewiesen' },
+  };
+  const typeOf = o => o < chars.length ? chars[o].t : 'reserved';
+
+  // ---------- glyph / placeholder ----------
+  const tokOf = c => c.n.replace(/^QUOC AM TAN TU /, '').split(' ')[0];
+  // tone marks as qatt.js draws them on their own: ",,,<n>" (1 semicircle upper right, 2 circle lower left, 3 semicircle upper left, 4 circle upper left,
+  // 5 circle upper right, 6 semicircle lower right, 7 circle lower right, 8 semicircle lower left)
+  const TONE_DIGIT = { 'SEMICIRCLE UPPER RIGHT': 1, 'CIRCLE LOWER LEFT': 2, 'SEMICIRCLE UPPER LEFT': 3, 'CIRCLE UPPER LEFT': 4, 'CIRCLE UPPER RIGHT': 5, 'SEMICIRCLE LOWER RIGHT': 6, 'CIRCLE LOWER RIGHT': 7, 'SEMICIRCLE LOWER LEFT': 8 };
+  const toneCode = name => ',,,' + TONE_DIGIT[name.replace(/^QUOC AM TAN TU TONE /, '')];
+
+  // QATT glyphs are drawn by qatt.js from a <tt> element: ",<onset>" is the unmarked Cán, ",<onset><n>" the one with marking stroke n
+  const qatt = new Qatt(); qatt.observe('TT');
+  const onsetOf = n => n === 'ONG' ? '_' : n === 'GIONG' ? 'dz' : n.slice(0, -3).toLowerCase();
+  const qattCode = c => ',' + onsetOf(D.can[c.b].name) + (c.m || '');
+
+  /** Content of a glyph box: the real glyph if a font is loaded, else a label describing the character. */
+  function glyphContent(o) {
+    const t = typeOf(o); if (t === 'reserved') return [];
+    const c = chars[o];
+    const nodes = [];
+    if (t === 'tone') nodes.push(el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
+    else if (t === 'combiner') nodes.push(el('span', { className: 'fmt', textContent: 'TT' }));
+    else if (t === 'joiner') nodes.push(el('span', { className: 'fmt', textContent: 'J' }));
+    else nodes.push(el('tt', { className: 'qglyph', textContent: qattCode(c) }));
+    return nodes;
+  }
+
+  // ---------- chart ----------
+  function buildChart() {
+    const t = $('#chart'); t.replaceChildren();
+    const head = el('tr', {}, el('th')); for (let c = 0; c < COLS; c++) head.append(el('th', { scope: 'col', textContent: c.toString(16).toUpperCase() }));
+    t.append(el('thead', {}, head));
+    const body = el('tbody');
+    for (let r = 0; r < SIZE / COLS; r++) {
+      const tr = el('tr', {}, el('th', { scope: 'row', className: 'rowhead cp', textContent: 'U+' + hex(cpOf(r * COLS), 5).slice(0, 4) + '_' }));
+      for (let c = 0; c < COLS; c++) {
+        const o = r * COLS + c, type = typeOf(o), td = el('td');
+        const b = el('button', { type: 'button', className: `cell g-${type}${type === 'reserved' ? ' reserved' : ''}` });
+        b.dataset.o = o; b.dataset.group = type;
+        if (type === 'reserved') { b.disabled = true; b.setAttribute('aria-label', `${U(o)} reserviert`); b.append(el('span', { className: 'cpno', textContent: hex(cpOf(o), 5) })); }
+        else {
+          b.title = `${U(o)} ${chars[o].n}`; b.setAttribute('aria-label', `${U(o)} ${chars[o].n}`);
+          b.append(el('span', { className: 'glyph' }, ...glyphContent(o)), el('span', { className: 'cpno', textContent: hex(cpOf(o), 5) }));
+        }
+        td.append(b); tr.append(td);
+      }
+      body.append(tr);
+    }
+    t.append(body);
+    markSelection(); applyGroup();
+  }
+  $('#chart').addEventListener('click', e => { const b = e.target.closest('.cell'); if (b && !b.disabled) select(+b.dataset.o, true); });
+  $('#chart').addEventListener('keydown', e => {            // arrow keys move between the cells
+    const b = e.target.closest('.cell'); if (!b) return;
+    const d = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -COLS, ArrowDown: COLS }[e.key]; if (!d) return;
+    let o = +b.dataset.o + d; while (o >= 0 && o < SIZE && typeOf(o) === 'reserved') o += d;
+    const n = $(`.cell[data-o="${o}"]`); if (n && !n.disabled) { e.preventDefault(); n.focus(); }
+  });
+
+  // ---------- detail ----------
+  function noteNode(n) {
+    const [kind, text] = n;
+    if (kind === 'x') return el('div', { className: 'note-x', textContent: 'Siehe auch ' + text.replace(/^\(/, '').replace(/\)$/, '').replace(/ - ([0-9A-F]{4})$/, ' – U+$1') });
+    if (kind === '=') return el('div', {}, el('span', { className: 'text-secondary', textContent: 'Ton: ' }), text);
+    return el('div', { textContent: text });
+  }
+  function renderDetail() {
+    const box = $('#detail'); box.replaceChildren();
+    if (selected == null) { box.append(el('div', { className: 'card-body text-secondary', textContent: 'Ein Zeichen in der Tabelle oder der Liste wählen.' })); return; }
+    const c = chars[selected], t = c.t;
+    const g = el('div', { className: `detail-glyph g-${t}` }, ...glyphContent(selected));
+    const rows = [['General_Category', c.gc], ['Canonical_Combining_Class', String(c.ccc)], ['Bidi_Class', c.bidi], ['Grapheme_Cluster_Break', c.gcb],
+      ['Indic_Conjunct_Break', c.incb], ['Line_Break', c.lb], ['East_Asian_Width', c.eaw], ['Vertical_Orientation', c.vo]];
+    const dl = el('dl', { className: 'row small mb-0 gx-2' }); rows.forEach(([k, v]) => dl.append(el('dt', { className: 'col-9 fw-normal text-secondary text-break', textContent: k }), el('dd', { className: 'col-3 cp mb-1', textContent: v })));
+    const nav = el('div', { className: 'd-flex justify-content-between mt-3' },
+      el('button', { type: 'button', className: 'btn btn-sm btn-outline-secondary', textContent: '‹ Zurück', disabled: selected === 0, onclick: () => select(selected - 1, true) }),
+      el('button', { type: 'button', className: 'btn btn-sm btn-outline-secondary', textContent: 'Weiter ›', disabled: selected >= chars.length - 1, onclick: () => select(selected + 1, true) }));
+    box.append(el('div', { className: 'card-body position-relative' },
+      el('button', { type: 'button', className: 'btn-close position-absolute top-0 end-0 m-2 d-xl-none', title: 'Schließen', ariaLabel: 'Schließen', onclick: closeDetail }),
+      el('div', { className: 'd-flex gap-3 align-items-start mb-3' }, g, el('div', {}, el('code', { className: 'name fs-6', textContent: c.n }),
+        el('div', { className: 'cp mt-2' }, el('b', { textContent: U(selected) }), el('div', { className: 'small text-secondary', textContent: `Offset ${off(selected)} · ${GROUPS[t].label}` })))),
+      el('div', { className: 'small mb-3' }, ...c.notes.map(noteNode)), dl, nav));
+  }
+
+  const detailPopup = () => matchMedia('(max-width: 1199.98px)').matches;
+  function closeDetail() { $('#detail').classList.remove('open'); $('#detail-backdrop').classList.remove('open'); }
+  $('#detail-backdrop').addEventListener('click', closeDetail);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+  function select(o, scroll, open = true) {
+    selected = o; markSelection(); renderDetail();
+    if (open && detailPopup()) { $('#detail').classList.add('open'); $('#detail-backdrop').classList.add('open'); }
+    history.replaceState(null, '', '#' + hex(cpOf(o), 5));
+    $$('#names tr').forEach(tr => tr.classList.toggle('hit', +tr.dataset.o === o));
+    if (scroll) { const b = $(`.cell[data-o="${o}"]`); b && b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  }
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  function markSelection() { $$('.cell').forEach(b => b.classList.toggle('selected', selected != null && +b.dataset.o === selected)); }
+
+  // ---------- legend / group filter ----------
+  function buildLegend() {
+    const L = $('#legend');
+    Object.entries(GROUPS).filter(([k]) => k !== 'reserved').forEach(([k, g]) => {
+      const n = chars.filter(c => c.t === k).length;
+      const b = el('button', { type: 'button', className: 'chip', title: g.note }, el('span', { className: `sw g-${k}` }), `${g.label} `, el('span', { className: 'text-secondary', textContent: n }));
+      b.setAttribute('aria-pressed', 'false'); b.dataset.group = k;
+      b.onclick = () => { activeGroup = activeGroup === k ? null : k; applyGroup(); renderList(); };
+      L.append(b);
+    });
+  }
+  function applyGroup() {
+    $$('#legend .chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.group === activeGroup)));
+    $$('.cell').forEach(b => b.classList.toggle('dim', !!activeGroup && b.dataset.group !== activeGroup));
+  }
+
+  // ---------- overview / Cán / tone tables ----------
+  const range = (a, b) => a === b ? `${U(a)}` : `${U(a)}–${hex(cpOf(b), 5)}`;
+  function buildOverview() {
+    const t = $('#overview'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['Gruppe', 'Offset', 'Codepunkte (vorläufig)', 'Anzahl', 'Beschreibung'].map(h => el('th', { textContent: h })))));
+    const runs = []; // consecutive offsets of the same group
+    for (let o = 0; o < SIZE; o++) { const g = typeOf(o); const r = runs[runs.length - 1]; if (r && r.g === g && !(g === 'combiner' || g === 'joiner')) r.b = o; else runs.push({ g, a: o, b: o }); }
+    // merge unmarked/marked/chi visually into the one range of the letters: 22 bases x 7 forms, +00..+99
+    const merged = []; runs.forEach(r => { const last = merged[merged.length - 1]; if (last && ['unmarked', 'marked', 'chi'].includes(r.g) && ['unmarked', 'marked', 'chi'].includes(last.g)) { last.b = r.b; last.g = 'unmarked'; last.both = true; } else merged.push({ ...r }); });
+    const body = el('tbody');
+    merged.forEach(r => {
+      const n = r.b - r.a + 1, g = GROUPS[r.g];
+      body.append(el('tr', {}, el('td', {}, el('span', { className: `chip sw g-${r.g}`, style: 'width:1rem;height:1rem;padding:0;margin-right:.4rem' }), r.both ? 'Buchstaben (unmarkierter Cán, markierter Cán, Chi)' : g.label),
+        el('td', { className: 'cp', textContent: r.a === r.b ? off(r.a) : `${off(r.a)}–${hex(r.b, 2)}` }), el('td', { className: 'cp', textContent: range(r.a, r.b) }), el('td', { textContent: n }),
+        el('td', { className: 'small', textContent: r.both ? '22 Basen × 7 Formen, sieben aufeinanderfolgende Codepunkte pro Basis: ohne Markierungsstrich, WITH MARK-1 (der markierte Cán), WITH MARK-2 bis WITH MARK-6 (die fünf Chi); Offset = Basis × 7 + Form (22 × 7 = 154)' : g.note })));
+    });
+    t.append(body);
+  }
+  function buildCan() {
+    const t = $('#can-table'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['Nr.', 'Nôm-Annotation', 'Lesung', 'Name', 'Unmarkiert', 'Markierter Cán (WITH MARK-1)', 'Chi (WITH MARK-2 bis -6)'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody');
+    D.can.forEach((c, i) => {
+      const u0 = 7 * i, m1 = u0 + 1, link = (o, txt) => { const a = el('a', { href: '#' + hex(cpOf(o), 5), className: 'cp', textContent: txt }); a.onclick = e => { e.preventDefault(); select(o, true); $('#chart').scrollIntoView({ block: 'center' }); }; return a; };
+      body.append(el('tr', {}, el('td', { textContent: c.no }), el('td', { textContent: c.nom, lang: 'zh-Hant' }), el('td', { textContent: c.reading, lang: 'vi' }), el('td', {}, el('code', { textContent: c.name })),
+        el('td', {}, link(u0, U(u0))), el('td', {}, link(m1, U(m1))), el('td', {}, link(m1 + 1, `${U(m1 + 1)}–${hex(cpOf(m1 + 5), 5)}`))));
+    });
+    t.append(body);
+  }
+  function buildTones() {
+    const t = $('#tone-table'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['', 'Codepunkt', 'Name', 'Ton', 'Verwandte vorhandene Zeichen'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody');
+    chars.filter(c => c.t === 'tone').forEach(c => {
+      const tone = c.notes.find(n => n[0] === '=')[1], rel = c.notes.filter(n => n[0] === 'x').map(n => n[1].replace(/^\(/, '').replace(/\)$/, '').replace(/ - ([0-9A-F]{4})$/, ' – U+$1'));
+      const sw = el('div', { className: 'g-tone sw-tone' }, el('tt', { className: 'qglyph', textContent: toneCode(c.n) }));
+      const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, true); $('#chart').scrollIntoView({ block: 'center' }); };
+      body.append(el('tr', {}, el('td', {}, sw), el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })), el('td', {}, el('code', { className: 'name', textContent: c.n })), el('td', { textContent: tone }),
+        el('td', { className: 'small' }, ...rel.map(r => el('div', { textContent: r })))));
+    });
+    t.append(body);
+  }
+
+  // ---------- character list ----------
+  const SECTIONS = { u: 'Buchstaben: sieben Formen pro Basis (unmarkiert, Markierungsstrich 1 bis 6)', f: 'Formatzeichen', t: 'Tonzeichen' };
+  const sectionOf = t => ({ unmarked: 'u', marked: 'u', chi: 'u', combiner: 'f', joiner: 'f', tone: 't' })[t];
+  function renderList() {
+    const q = $('#q').value.trim().toLowerCase(), t = $('#names'); t.replaceChildren();
+    t.append(el('thead', {}, el('tr', {}, ...['Codepunkt', 'Glyphe', 'Unicode-Name', 'Anmerkungen'].map(h => el('th', { textContent: h })))));
+    const body = el('tbody'); let n = 0, section = null;
+    const ranges = {}; chars.forEach(c => { const k = sectionOf(c.t); (ranges[k] ??= [c.o, c.o])[1] = c.o; });
+    chars.forEach(c => {
+      const text = `${U(c.o)} ${hex(cpOf(c.o), 5)} ${cpOf(c.o)} ${off(c.o)} ${c.n} ${c.notes.map(x => x[1]).join(' ')}`.toLowerCase();
+      if ((q && !text.includes(q)) || (activeGroup && c.t !== activeGroup)) return;
+      n++;
+      const k = sectionOf(c.t);
+      if (k !== section) { // a heading row whenever the section changes, like the sub-headings of the Wikipedia block lists
+        section = k; const [a, b] = ranges[k];
+        body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 4, scope: 'colgroup' }, SECTIONS[k], el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(a)}${a === b ? '' : '–' + hex(cpOf(b), 5)}` }))));
+      }
+      const a = el('a', { href: '#' + hex(cpOf(c.o), 5), className: 'cp text-nowrap', textContent: U(c.o) }); a.onclick = e => { e.preventDefault(); select(c.o, false); window.scrollTo({ top: $('#chart-title').offsetTop - 70, behavior: 'smooth' }); };
+      const tr = el('tr', { className: c.o === selected ? 'hit' : '' }, el('td', {}, a, el('div', { className: 'small text-secondary cp', textContent: off(c.o) })),
+        el('td', {}, el('span', { className: `mini g-${c.t}` }, ...glyphContent(c.o))), el('td', {}, el('code', { className: 'name', textContent: c.n })),
+        el('td', { className: 'small' }, ...c.notes.map(noteNode)));
+      tr.dataset.o = c.o; body.append(tr);
+    });
+    if (!q && !activeGroup) {   // the unassigned rest of the block
+      const first = chars.length, last = SIZE - 1;
+      body.append(el('tr', { className: 'sect' }, el('th', { colSpan: 4, scope: 'colgroup' }, 'Reserviert', el('span', { className: 'fw-normal text-secondary cp ms-2', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }))),
+        el('tr', { className: 'text-secondary' }, el('td', { className: 'cp', textContent: `${U(first)}–${hex(cpOf(last), 5)}` }), el('td'), el('td', { textContent: `${last - first + 1} Codepunkte, nicht zugewiesen` }), el('td', { className: 'small', textContent: 'Für spätere Erweiterungen reserviert (Vorschlag, Abschnitt 7)' })));
+    }
+    t.append(body);
+    $('#count').textContent = `${n} von ${chars.length} Zeichen` + (activeGroup ? ` – Gruppe: ${GROUPS[activeGroup].label}` : '');
+  }
+  $('#q').addEventListener('input', renderList);
+
+  // ---------- properties by class ----------
+  function buildProps() {
+    const t = $('#props'); t.replaceChildren();
+    const cols = [['gc', 'General_Category'], ['ccc', 'Combining class'], ['bidi', 'Bidi_Class'], ['gcb', 'Grapheme_Cluster_Break'], ['incb', 'Indic_Conjunct_Break'], ['lb', 'Line_Break'], ['eaw', 'East_Asian_Width'], ['vo', 'Vertical_Orientation']];
+    t.append(el('thead', {}, el('tr', {}, el('th', { textContent: 'Zeichen' }), ...cols.map(c => el('th', { textContent: c[1] })))));
+    const body = el('tbody');
+    ['unmarked', 'marked', 'chi', 'combiner', 'joiner', 'tone'].forEach(k => {
+      const c = chars.find(x => x.t === k);
+      body.append(el('tr', {}, el('td', {}, el('span', { className: `chip sw g-${k}`, style: 'width:1rem;height:1rem;padding:0;margin-right:.4rem' }), GROUPS[k].label), ...cols.map(([key]) => el('td', { className: 'cp', textContent: String(c[key]) }))));
+    });
+    t.append(body);
+  }
+
+  function refresh() { buildChart(); renderDetail(); renderList(); }
+
+  // ---------- start ----------
+  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#l-base').textContent = 'U+' + hex(base, 5);
+  buildLegend(); buildOverview(); buildCan(); buildTones(); buildProps(); refresh();
+  const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true, false); };
+  addEventListener('hashchange', fromHash); fromHash();
+})();
+</script>
+</body>
+</html>
