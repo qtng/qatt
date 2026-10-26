@@ -240,11 +240,11 @@ window.Theme = window.Theme || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Qatt.org home", vi: "Trang chủ Qatt.org", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
+            { name: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Spell it!", vi: "Đánh vần!", bar: "Spell it!", barOrder: 4, barVi: "Đánh vần!", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barOrder: 2, barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
-            { name: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
     };
@@ -342,8 +342,8 @@ window.Theme = window.Theme || (function() {
             .desk-other.open .desk-menu { display: block; }
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
-            @media (min-width: 1200px) { .desk-links i { display: none; } }
-            @media (max-width: 1199.98px) { .desk-links .dl-text { display: none; } .desk-links a { padding: 0 .75rem; } .desk-links i { font-size: 1.15rem; } }
+            .desk-links i { display: none; }
+            @media (max-width: 1199.98px) { .desk-links a { padding: 0 .4rem; font-size: .9rem; } }
             .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
