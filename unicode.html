@@ -85,15 +85,20 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3">QATT Unicode</h1>
-    <p class="lead mx-auto mb-0">The proposed block for Quốc Âm Tân Tự (QATT), a script found in Hán Nôm texts: <span id="s-total"></span> characters in a block of <span id="s-size"></span> code points.</p>
+    <p class="lead mx-auto mb-0" data-only="en">The proposed block for Quốc Âm Tân Tự (QATT), a script found in Hán Nôm texts: <span id="s-total"></span> characters in a block of <span id="s-size"></span> code points.</p>
+    <p class="lead mx-auto mb-0" data-only="vi">Khối mã đề xuất cho Quốc Âm Tân Tự (QATT), một loại chữ viết có trong các văn bản Hán Nôm: <span id="s-total-vi"></span> ký tự trong một khối gồm <span id="s-size-vi"></span> điểm mã.</p>
   </div>
 </header>
 
 <main class="container-xl py-4" id="top">
 
-  <div class="alert alert-warning small mb-2" role="note">
+  <div class="alert alert-warning small mb-2" role="note" data-only="en">
       <strong>Draft – not part of the Unicode Standard.</strong>
       The block has no position yet: the code points use the provisional base <span class="cp" id="s-base"></span> (Private Use Area); only the offsets come from the proposal.
+    </div>
+    <div class="alert alert-warning small mb-2" role="note" data-only="vi">
+      <strong>Bản thảo – không thuộc Chuẩn Unicode.</strong>
+      Khối mã chưa có vị trí: các điểm mã dùng cơ sở tạm thời <span class="cp" id="s-base-vi"></span> (Vùng Dùng riêng); chỉ các độ lệch lấy từ đề xuất.
     </div>
     <p class="text-center mb-0 d-flex justify-content-center gap-2"><a class="btn btn-outline-dark btn-sm" data-only="en" href="/unicode/draft/">View proposal draft</a><a class="btn btn-outline-dark btn-sm" data-only="vi" href="/unicode/draft/vi">Xem bản thảo đề xuất</a></p>
 
@@ -368,7 +373,7 @@
   function refresh() { buildChart(); renderDetail(); renderList(); }
 
   // ---------- start ----------
-  $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#l-base').textContent = 'U+' + hex(base, 5);
+  $('#s-total-vi').textContent = chars.length; $('#s-size-vi').textContent = SIZE; $('#s-base-vi').textContent = 'U+' + hex(base, 5); $('#s-total').textContent = chars.length; $('#s-size').textContent = SIZE; $('#s-base').textContent = 'U+' + hex(base, 5); $('#l-base').textContent = 'U+' + hex(base, 5);
   buildLegend(); buildOverview(); buildCan(); buildTones(); buildProps(); refresh();
   const fromHash = () => { const m = location.hash.match(/^#(?:U\+)?([0-9A-Fa-f]{4,6})$/); if (!m) return; const o = parseInt(m[1], 16) - base; if (o >= 0 && o < chars.length) select(o, true, false); };
   addEventListener('hashchange', fromHash); fromHash();
