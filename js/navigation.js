@@ -126,7 +126,7 @@ window.Theme = window.Theme || (function() {
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
-    let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "popart";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, pop art on qatt.org
+    let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "retro";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, retro on qatt.org
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) chosen = s; } catch (e) {}
     // day and night: night is from NIGHT_START to DAY_START o'clock (the clock of the visitor); then the theme NIGHT_THEME is shown instead of the chosen one
