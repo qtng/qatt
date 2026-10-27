@@ -269,7 +269,7 @@
     const toneGlyph = n => String.fromCodePoint(0xF0000 + 155 + n);
     const TONE_CODE = { 1: 0, 2: 2, 3: 3, 4: 4, 5: 1, 6: 5, 7: 6, 8: 7 };
     // three blocks with a gap between them, two rows: 3 | 4 6 | 5  /  1 | 2 8 | 7 (the block of the two middle columns has two columns, the others one)
-    const TONE_BLOCKS = [[3, 1], [4, 6, 2, 8], [5, 7]];
+    const TONE_BLOCKS = [[4, 2], [3, 5, 1, 7], [6, 8]];
     const piece = p => { const m = /^(_|[a-z]+?)([1-6]?)$/.exec(p); return { shape: m[1], mark: +m[2] || 0 }; };
 
     // fade and fold an element in or out instead of switching it at once; resolves when done
