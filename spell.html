@@ -334,13 +334,14 @@
     const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
     // word levels: some rhymes are harder and are asked only from a level on. The level is the skill badge (0 newbie, 1 beginner, 2 intermediate, 3 advanced), with
     // 2.5 (upper intermediate) between: intermediate and the usual rhyme time under the limit of the badge (the rhymes are the hardest of the three kinds, about 110).
-    // ông, ong, ung, uông: all decodings, from intermediate (2); ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu: only the decoding qatt.org, from upper
-    // intermediate (2.5). At the level where a group is unlocked its rhymes are asked more often: FOCUS_SHARE (a fifth) of the words are drawn from them. The rhyme
+    // ông, ong, ung, uông: all decodings, from intermediate (2); ôm, om, um, uôm: only the decoding qatt.org, from intermediate too; ao, oao, eo, oeo, yu, uyu,
+    // êu, iêu: only the decoding qatt.org, from upper intermediate (2.5). At the level where a group is unlocked its rhymes are asked more often: FOCUS_SHARE (a fifth) of the words are drawn from them. The rhyme
     // is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông), the tone marks do not count
     const FOCUS_SHARE = 0.2;
     const HARD_RHYMES = [
       { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
-      { level: 2.5, all: false, rhymes: ['ôm', 'om', 'um', 'uôm', 'ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
+      { level: 2, all: false, rhymes: ['ôm', 'om', 'um', 'uôm'] },
+      { level: 2.5, all: false, rhymes: ['ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
     const shuffled = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);   // the order of the buttons only, the choice stays
     const wordLevel = () => {
       const n = badgeLevel(), r = mine().rhyme;
@@ -361,8 +362,8 @@
     // a random entry that the parser can spell and the level allows, not the one just shown
     const draw = () => {
       const list = pool(), level = wordLevel();
-      const group = HARD_RHYMES.find(h => h.level === level && (h.all || dec() === 'qatt'));   // the group unlocked at this level is asked more often
-      const focus = group && Math.random() < FOCUS_SHARE ? group.rhymes : [];
+      const fresh = HARD_RHYMES.filter(h => h.level === level && (h.all || dec() === 'qatt')).flatMap(h => h.rhymes);   // the rhymes unlocked at this level are asked more often
+      const focus = Math.random() < FOCUS_SHARE ? fresh : [];
       const ok = e => e.w !== answer && analyse(e.w) && allowed(e.w);
       if (focus.length) for (let i = 0; i < 600; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e) && focus.includes(rhymeOf(e.w))) return e; }
       for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e)) return e; }
@@ -535,8 +536,9 @@
     const FEATURES = [
       { level: 2, text: ['Stop finals p, c, t, ch', 'Âm cuối tắc p, c, t, ch'] },
       { level: 2, text: ['Rhymes ông, ong, ung, uông', 'Vần ông, ong, ung, uông'] },
+      { level: 2, qatt: true, text: ['Rhymes ôm, om, um, uôm', 'Vần ôm, om, um, uôm'] },
       { level: 2, text: ['Randomized onset buttons', 'Các nút phụ âm đầu xếp ngẫu nhiên'] },
-      { level: 2.5, qatt: true, text: ['Rhymes ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu', 'Vần ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu'] },
+      { level: 2.5, qatt: true, text: ['Rhymes ao, oao, eo, oeo, yu, uyu, êu, iêu', 'Vần ao, oao, eo, oeo, yu, uyu, êu, iêu'] },
       { level: 2.5, text: ['Randomized rhyme buttons', 'Các nút vần xếp ngẫu nhiên'] }];
     let levelsKey = '';
     function showLevels() {
