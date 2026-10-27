@@ -331,11 +331,38 @@
       }
     });
     const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
-    // a random entry that the parser can spell, not the one just shown
+    // word levels: some rhymes are harder and are asked only from a level on. The level is the skill badge (0 newbie, 1 beginner, 2 intermediate, 3 advanced), with
+    // 2.5 (upper intermediate) between: intermediate and the usual rhyme time under the limit of the badge (the rhymes are the hardest of the three kinds, about 110).
+    // ông, ong, ung, uông: all decodings, from intermediate (2); ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu: only the decoding qatt.org, from upper
+    // intermediate (2.5). At the level where a group is unlocked its rhymes are asked more often: FOCUS_SHARE (a fifth) of the words are drawn from them. The rhyme
+    // is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông), the tone marks do not count
+    const FOCUS_SHARE = 0.2;
+    const HARD_RHYMES = [
+      { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
+      { level: 2.5, all: false, rhymes: ['ôm', 'om', 'um', 'uôm', 'ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
+    const wordLevel = () => {
+      const n = badgeLevel(), r = mine().rhyme;
+      return n === 2 && r.n >= MIN_SAMPLES && shown('rhyme', r.v) < BADGE_LIMIT ? 2.5 : n;
+    };
+    const rhymeOf = word => {
+      const r = parser.parse(word);
+      if (!r) return '';
+      const twin = parser.constructor.STOP_TWIN[r.coda] || r.coda;
+      return (r.glide + r.vowel + twin).normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
+    };
+    const allowed = word => {
+      const rh = rhymeOf(word), level = wordLevel();
+      return !HARD_RHYMES.some(h => level < h.level && (h.all || dec() === 'qatt') && h.rhymes.includes(rh));
+    };
+    // a random entry that the parser can spell and the level allows, not the one just shown
     const draw = () => {
-      const list = pool();
-      for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (e.w !== answer && analyse(e.w)) return e; }
-      return { w: FALLBACK.find(w => analyse(w)) };
+      const list = pool(), level = wordLevel();
+      const group = HARD_RHYMES.find(h => h.level === level && (h.all || dec() === 'qatt'));   // the group unlocked at this level is asked more often
+      const focus = group && Math.random() < FOCUS_SHARE ? group.rhymes : [];
+      const ok = e => e.w !== answer && analyse(e.w) && allowed(e.w);
+      if (focus.length) for (let i = 0; i < 600; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e) && focus.includes(rhymeOf(e.w))) return e; }
+      for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e)) return e; }
+      return { w: FALLBACK.find(w => analyse(w) && allowed(w)) };
     };
 
     // the countdown of one minute per word; at 0 the card turns reddish, the game goes on
@@ -484,10 +511,13 @@
     // the skill badge (as on spell-stats.html; kept in spell_scores.badge and only ever raised): how many of the three kinds have a usual time under 1.75 s as shown
     const BADGE_LIMIT = 1.75, LEVELS = [{ en: 'Newbie', color: '#9aa0a6' }, { en: 'Beginner', color: '#e6a700' }, { en: 'Intermediate', color: '#198754' }, { en: 'Advanced', color: '#0d6efd' }];
     const STAR_PATH = 'M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z';
-    function showBadge() {
+    function badgeLevel() {
       let n = me.badge || 0;
       for (const set of Object.values(me.stats)) if (set) n = Math.max(n, KINDS.filter(k => set[k] && set[k].n >= MIN_SAMPLES && shown(k, set[k].v) < BADGE_LIMIT).length);
-      n = Math.min(3, n); me.badge = n;
+      return Math.min(3, n);
+    }
+    function showBadge() {
+      const n = me.badge = badgeLevel();
       const L = LEVELS[n], box = $('gbadge');
       if (box.dataset.n === String(n)) return;
       box.dataset.n = n; box.title = L.en;
