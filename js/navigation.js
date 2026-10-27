@@ -126,7 +126,7 @@ window.Theme = window.Theme || (function() {
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
-    let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "retro";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, retro on qatt.org
+    let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "nocturne";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, nocturne on qatt.org
     const DEFAULT_THEME = chosen;
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) chosen = s; } catch (e) {}
@@ -138,7 +138,7 @@ window.Theme = window.Theme || (function() {
     const NIGHT_RULES = { "Asia/Ho_Chi_Minh": { start: 18, end: 6 }, "Asia/Saigon": { start: 18, end: 6 } };
     let zone = ""; try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
     const NIGHT_START = (NIGHT_RULES[zone] || NIGHT_DEFAULT).start, DAY_START = (NIGHT_RULES[zone] || NIGHT_DEFAULT).end;
-    const autoNight = choosable;
+    const autoNight = choosable && onChunom;   // day and night only on the Chunom site; qatt.org is always nocturne (unless a theme was chosen), no switch
     let pinned = false;   // ?theme=<name> in the address: that theme is shown on this page whatever the time
     const pad = n => String(n).padStart(2, "0");
     const ymd = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
