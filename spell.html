@@ -334,9 +334,9 @@
     // word levels: some rhymes are harder and are asked only from a level on. The level is the skill badge (0 newbie, 1 beginner, 2 intermediate, 3 advanced), with
     // 2.5 (upper intermediate) between: intermediate and the usual rhyme time under the limit of the badge (the rhymes are the hardest of the three kinds, about 110).
     // ông, ong, ung, uông: all decodings, from intermediate (2); ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu: only the decoding qatt.org, from upper
-    // intermediate (2.5). At the level where a group is unlocked its rhymes are asked more often: FOCUS_SHARE (a quarter) of the words are drawn from them. The rhyme
+    // intermediate (2.5). At the level where a group is unlocked its rhymes are asked more often: FOCUS_SHARE (a fifth) of the words are drawn from them. The rhyme
     // is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông), the tone marks do not count
-    const FOCUS_SHARE = 0.25;
+    const FOCUS_SHARE = 0.2;
     const HARD_RHYMES = [
       { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
       { level: 2.5, all: false, rhymes: ['ôm', 'om', 'um', 'uôm', 'ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
