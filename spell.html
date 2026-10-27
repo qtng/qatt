@@ -352,8 +352,10 @@
       const twin = parser.constructor.STOP_TWIN[r.coda] || r.coda;
       return (r.glide + r.vowel + twin).normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
     };
+    const STOP_FINALS = ['p', 'c', 't', 'ch'];   // words with such a final (an entering tone) are asked from lower intermediate on
     const allowed = word => {
       const rh = rhymeOf(word), level = wordLevel();
+      if (level < 2 && STOP_FINALS.includes(parser.parse(word).coda)) return false;
       return !HARD_RHYMES.some(h => level < h.level && (h.all || dec() === 'qatt') && h.rhymes.includes(rh));
     };
     // a random entry that the parser can spell and the level allows, not the one just shown
@@ -529,10 +531,13 @@
         + `<svg class="medal" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 59 13v22c0 17-12 29-27 34C17 64 5 52 5 35V13z" fill="${L.color}"/><path d="M32 10 52 18v17c0 12-8 21-20 26C20 56 12 47 12 35V18z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/><path d="${STAR_PATH}" transform="translate(16 22) scale(1.35)" fill="#fff" fill-opacity="${n ? 1 : .6}"/></svg>`
         + `<span class="name" style="color:${L.color}">${L.en}</span>`;
     }
-    // the levels of difficulty at the end of the page and whether they are active (the level is wordLevel(): the badge with upper intermediate)
-    const STAGES = [
-      { level: 2, name: ['Lower intermediate', 'Trung cấp thấp'], what: ['Rhymes ông, ong, ung, uông; the onset buttons in random order', 'Vần ông, ong, ung, uông; các nút phụ âm đầu xếp ngẫu nhiên'] },
-      { level: 2.5, name: ['Upper intermediate', 'Trung cấp cao'], what: ['Rhymes ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu (only qatt.org); the rhyme buttons in random order', 'Vần ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu (chỉ qatt.org); các nút vần xếp ngẫu nhiên'] }];
+    // the added difficulties at the end of the page, from the easiest, and whether each is active (the level is wordLevel(): the badge with upper intermediate)
+    const FEATURES = [
+      { level: 2, text: ['Stop finals p, c, t, ch', 'Âm cuối tắc p, c, t, ch'] },
+      { level: 2, text: ['Rhymes ông, ong, ung, uông', 'Vần ông, ong, ung, uông'] },
+      { level: 2, text: ['Randomized onset buttons', 'Các nút phụ âm đầu xếp ngẫu nhiên'] },
+      { level: 2.5, qatt: true, text: ['Rhymes ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu (qatt.org only)', 'Vần ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu (chỉ qatt.org)'] },
+      { level: 2.5, text: ['Randomized rhyme buttons', 'Các nút vần xếp ngẫu nhiên'] }];
     let levelsKey = '';
     function showLevels() {
       const lv = wordLevel(), key = lv + dec();
@@ -541,12 +546,13 @@
       const el = (tag, en, vi, cls) => { const e = document.createElement(tag); e.textContent = en; if (vi) e.dataset.vi = vi; if (cls) e.className = cls; return e; };
       const list = document.createElement('ul');
       list.className = 'list-unstyled mb-0';
-      for (const st of STAGES) {
-        const on = lv >= st.level, li = document.createElement('li');
-        li.append(el('b', st.name[0], st.name[1]), ' ', el('span', on ? 'active' : 'not active', on ? 'đang bật' : 'chưa bật', on ? 'text-success' : ''), ': ', el('span', st.what[0], st.what[1]));
+      for (const f of FEATURES) {
+        const on = lv >= f.level && (!f.qatt || dec() === 'qatt'), li = document.createElement('li');
+        if (!on) li.className = 'opacity-50';
+        li.append(on ? '✓ ' : '○ ', el('span', f.text[0], f.text[1]));
         list.append(li);
       }
-      $('levels').replaceChildren(el('h2', 'Levels of difficulty', 'Các mức độ khó', 'h6'), list);
+      $('levels').replaceChildren(el('h2', 'Added difficulties', 'Độ khó thêm', 'h6'), list);
     }
     const showScore = bump => {
       $('scoreVal').textContent = me.score;
