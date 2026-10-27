@@ -331,10 +331,18 @@
       }
     });
     const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
-    // word levels: some rhymes are harder and are asked only from a level of the skill badge on (0 newbie, 1 beginner, 2 intermediate, 3 advanced): the rhymes
-    // ông, ong, ung, uông from intermediate; with the decoding qatt.org also ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu from advanced. The rhyme is the one
-    // of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông, op = om), the tone marks do not count
-    const HARD_RHYMES = [{ level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] }, { level: 3, all: false, rhymes: ['ôm', 'om', 'um', 'uôm', 'ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
+    // word levels: some rhymes are harder and are asked only from a level on. The level is the skill badge (0 newbie, 1 beginner, 2 intermediate, 3 advanced), with
+    // 2.5 (upper intermediate) between: intermediate and the usual rhyme time under the limit of the badge (the rhymes are the hardest of the three kinds, about 110).
+    // From intermediate (2): ông, ong, ung, uông; with the decoding qatt.org from upper intermediate (2.5) also ôm, om, um, uôm, and from advanced (3) ao, oao, eo,
+    // oeo, yu, uyu, êu, iêu. The rhyme is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông), the tone marks do not count
+    const HARD_RHYMES = [
+      { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
+      { level: 2.5, all: false, rhymes: ['ôm', 'om', 'um', 'uôm'] },
+      { level: 3, all: false, rhymes: ['ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
+    const wordLevel = () => {
+      const n = badgeLevel(), r = mine().rhyme;
+      return n === 2 && r.n >= MIN_SAMPLES && shown('rhyme', r.v) < BADGE_LIMIT ? 2.5 : n;
+    };
     const rhymeOf = word => {
       const r = parser.parse(word);
       if (!r) return '';
@@ -342,7 +350,7 @@
       return (r.glide + r.vowel + twin).normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
     };
     const allowed = word => {
-      const rh = rhymeOf(word), level = badgeLevel();
+      const rh = rhymeOf(word), level = wordLevel();
       return !HARD_RHYMES.some(h => level < h.level && (h.all || dec() === 'qatt') && h.rhymes.includes(rh));
     };
     // a random entry that the parser can spell and the level allows, not the one just shown
