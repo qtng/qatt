@@ -225,6 +225,7 @@
     <table id="boardTable"></table>
   </div>
   <pre class="stats mt-4 mb-5" id="log" hidden></pre>
+  <div class="levels small text-muted mt-4 mb-5" id="levels"></div>
   <dialog class="ask" id="askLogin">
     <h2 data-vi="Điểm của bạn" id="askTitle">Your points</h2>
     <p id="askText"></p>
@@ -340,6 +341,7 @@
     const HARD_RHYMES = [
       { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
       { level: 2.5, all: false, rhymes: ['ôm', 'om', 'um', 'uôm', 'ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
+    const shuffled = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);   // the order of the buttons only, the choice stays
     const wordLevel = () => {
       const n = badgeLevel(), r = mine().rhyme;
       return n === 2 && r.n >= MIN_SAMPLES && shown('rhyme', r.v) < BADGE_LIMIT ? 2.5 : n;
@@ -350,8 +352,10 @@
       const twin = parser.constructor.STOP_TWIN[r.coda] || r.coda;
       return (r.glide + r.vowel + twin).normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC');
     };
+    const STOP_FINALS = ['p', 'c', 't', 'ch'];   // words with such a final (an entering tone) are asked from lower intermediate on
     const allowed = word => {
       const rh = rhymeOf(word), level = wordLevel();
+      if (level < 2 && STOP_FINALS.includes(parser.parse(word).coda)) return false;
       return !HARD_RHYMES.some(h => level < h.level && (h.all || dec() === 'qatt') && h.rhymes.includes(rh));
     };
     // a random entry that the parser can spell and the level allows, not the one just shown
@@ -518,6 +522,7 @@
     }
     function showBadge() {
       const n = me.badge = badgeLevel();
+      showLevels();
       const L = LEVELS[n], box = $('gbadge');
       if (box.dataset.n === String(n)) return;
       box.dataset.n = n; box.title = L.en;
@@ -525,6 +530,30 @@
       box.innerHTML = `<div class="stars">${[0, 1, 2].map(star).join('')}</div>`
         + `<svg class="medal" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 59 13v22c0 17-12 29-27 34C17 64 5 52 5 35V13z" fill="${L.color}"/><path d="M32 10 52 18v17c0 12-8 21-20 26C20 56 12 47 12 35V18z" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="2.5"/><path d="${STAR_PATH}" transform="translate(16 22) scale(1.35)" fill="#fff" fill-opacity="${n ? 1 : .6}"/></svg>`
         + `<span class="name" style="color:${L.color}">${L.en}</span>`;
+    }
+    // the added difficulties at the end of the page, from the easiest, and whether each is active (the level is wordLevel(): the badge with upper intermediate)
+    const FEATURES = [
+      { level: 2, text: ['Stop finals p, c, t, ch', 'Âm cuối tắc p, c, t, ch'] },
+      { level: 2, text: ['Rhymes ông, ong, ung, uông', 'Vần ông, ong, ung, uông'] },
+      { level: 2, text: ['Randomized onset buttons', 'Các nút phụ âm đầu xếp ngẫu nhiên'] },
+      { level: 2.5, qatt: true, text: ['Rhymes ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu', 'Vần ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu'] },
+      { level: 2.5, text: ['Randomized rhyme buttons', 'Các nút vần xếp ngẫu nhiên'] }];
+    let levelsKey = '';
+    function showLevels() {
+      const lv = wordLevel(), key = lv + dec();
+      if (key === levelsKey) return;
+      levelsKey = key;
+      const el = (tag, en, vi, cls) => { const e = document.createElement(tag); e.textContent = en; if (vi) e.dataset.vi = vi; if (cls) e.className = cls; return e; };
+      const list = document.createElement('ul');
+      list.className = 'list-unstyled mb-0';
+      for (const f of FEATURES) {   // a difficulty of qatt.org is left out for another decoding
+        if (f.qatt && dec() !== 'qatt') continue;
+        const on = lv >= f.level, li = document.createElement('li');
+        if (!on) li.className = 'opacity-50';
+        li.append(on ? '✓ ' : '○ ', el('span', f.text[0], f.text[1]));
+        list.append(li);
+      }
+      $('levels').replaceChildren(el('h2', 'Added difficulties', 'Độ khó thêm', 'h6'), list);
     }
     const showScore = bump => {
       $('scoreVal').textContent = me.score;
@@ -898,7 +927,7 @@
         const more = ROWS[ri].filter(x => !need.includes(x)).sort(() => Math.random() - .5).slice(0, Math.max(0, SHAPES_PER_ROW - have.length));
         return ROWS[ri].filter(x => have.includes(x) || more.includes(x));
       });
-      $('basePad').replaceChildren(...shapes.map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
+      $('basePad').replaceChildren(...(wordLevel() >= 2 ? shuffled(shapes) : shapes).map(s => withData(button(glyph(s), 'gbtn', b => pickShape(s, b)), { shape: s })));
     }
 
     function pickShape(shape, b) {
@@ -912,7 +941,7 @@
       if (found.some(s => s.mark)) {   // a marked form was hit: offer the marked forms of this shape
         const group = document.createElement('div');
         group.className = 'group';
-        group.append(...MARKS.map(m => withData(button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb)), { shape, mark: m })));
+        group.append(...(wordLevel() >= 2.5 ? shuffled(MARKS) : MARKS).map(m => withData(button(glyph(shape, m), 'gbtn', vb => pickMark(shape, m, vb)), { shape, mark: m })));
         group.querySelectorAll('button').forEach((x, i) => x.style.setProperty('--i', i));
         $('variantPad').append(group);   // shown by update() once the consonant buttons are gone
       }
@@ -1022,7 +1051,7 @@
     $('reload').addEventListener('click', skipWord);
     showSkip();
     $('decoding').addEventListener('change', e => {
-      parser.setDecoding(e.target.value); showStats(); if (started) start(answer, nomOf);
+      parser.setDecoding(e.target.value); showLevels(); showStats(); if (started) start(answer, nomOf);
       try { const u = new URL(location.href); u.searchParams.set('decoding', e.target.value); history.replaceState(history.state, '', u); } catch (err) {}   // the address follows the choice: a link or a reload keeps it
     });   // the same word after the other decoding
 
