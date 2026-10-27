@@ -333,13 +333,12 @@
     const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
     // word levels: some rhymes are harder and are asked only from a level on. The level is the skill badge (0 newbie, 1 beginner, 2 intermediate, 3 advanced), with
     // 2.5 (upper intermediate) between: intermediate and the usual rhyme time under the limit of the badge (the rhymes are the hardest of the three kinds, about 110).
-    // From intermediate (2): ông, ong, ung, uông, ôm, om, um, uôm (all decodings); with qatt.org only, from upper intermediate (2.5) ao, oao, eo, oeo,
-    // yu, uyu, êu, iêu, which are then asked more often (focus). The rhyme is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin
-    // (ốc = ông), the tone marks do not count
+    // ông, ong, ung, uông: all decodings, from intermediate (2); ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu: only the decoding qatt.org, from upper
+    // intermediate (2.5). At the level where a group is unlocked its rhymes are asked more often (share: the part of the words that are drawn from them). The rhyme
+    // is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông), the tone marks do not count
     const HARD_RHYMES = [
-      { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
-      { level: 2, all: true, rhymes: ['ôm', 'om', 'um', 'uôm'] },
-      { level: 2.5, all: false, focus: true, rhymes: ['ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
+      { level: 2, all: true, share: 0.2, rhymes: ['ông', 'ong', 'ung', 'uông'] },
+      { level: 2.5, all: false, share: 0.3, rhymes: ['ôm', 'om', 'um', 'uôm', 'ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
     const wordLevel = () => {
       const n = badgeLevel(), r = mine().rhyme;
       return n === 2 && r.n >= MIN_SAMPLES && shown('rhyme', r.v) < BADGE_LIMIT ? 2.5 : n;
@@ -354,12 +353,10 @@
       const rh = rhymeOf(word), level = wordLevel();
       return !HARD_RHYMES.some(h => level < h.level && (h.all || dec() === 'qatt') && h.rhymes.includes(rh));
     };
-    // at upper intermediate the rhymes that have just been unlocked (focus) are asked more often: FOCUS_SHARE of the words
-    const FOCUS_SHARE = 0.5;
-    const focusRhymes = () => HARD_RHYMES.filter(h => h.focus && h.level === wordLevel() && (h.all || dec() === 'qatt')).flatMap(h => h.rhymes);
     // a random entry that the parser can spell and the level allows, not the one just shown
     const draw = () => {
-      const list = pool(), focus = Math.random() < FOCUS_SHARE ? focusRhymes() : [];
+      const list = pool(), group = HARD_RHYMES.find(h => h.level === wordLevel() && (h.all || dec() === 'qatt'));   // the group unlocked at this level
+      const focus = group && Math.random() < group.share ? group.rhymes : [];
       const ok = e => e.w !== answer && analyse(e.w) && allowed(e.w);
       if (focus.length) for (let i = 0; i < 600; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e) && focus.includes(rhymeOf(e.w))) return e; }
       for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e)) return e; }
