@@ -109,6 +109,7 @@ window.Lang = window.Lang || (function() {
 //   Theme.list          {name: [English, Tiếng Việt]}
 //   Theme.current       the name of the theme
 //   Theme.choosable     whether a theme can be chosen on this page
+//   Theme.reset()       forget the stored choice (the "Default" entry of the menu)
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
 // Day and night (where a theme can be chosen): by the clock of the visitor it is night from NIGHT_START to DAY_START o'clock (22:00 to 06:00, in Vietnam 18:00 to 06:00, see NIGHT_RULES) and the theme "nocturne" is shown instead of the chosen one.
 // The icon in the menu bar (sun by day, moon by night) switches by hand; that choice lasts only until the next change between day and night: localStorage.daynight1 =
@@ -214,6 +215,12 @@ window.Theme = window.Theme || (function() {
             try { localStorage.setItem(KEY, name); } catch (e) {}
             if (autoNight && name !== NIGHT_THEME && isNight()) setOverride("day");   // a theme chosen at night is shown
             if (autoNight && name === NIGHT_THEME && !isNight()) setOverride("night");   // the night theme chosen by day is shown until the next change
+            update();
+        },
+        reset() {   // "Default": forget the stored choice (and the manual day/night switch), the default theme and the clock decide again
+            if (!choosable) return;
+            chosen = DEFAULT_THEME; pinned = false;
+            try { localStorage.removeItem(KEY); localStorage.removeItem(DAY_KEY); } catch (e) {}
             update();
         },
         dayNight: {
@@ -654,7 +661,7 @@ window.Theme = window.Theme || (function() {
 
         // theme: the palette button opens the list of Theme.list; a choice is remembered (Theme.set), a click outside or Esc closes the list
         const themeBtn = header.querySelector('.theme-switch > button'), themeMenu = header.querySelector('.theme-menu');
-        for (const [name, [en, vi]] of Object.entries(Theme.list)) {
+        for (const [name, [en, vi]] of [["", ["Default", "Mặc định"]], ...Object.entries(Theme.list)]) {
             const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'menuitem'); b.dataset.theme = name;
             const s = document.createElement('span'); s.textContent = en; if (vi !== en) s.setAttribute('data-vi', vi);
             b.append(s); themeMenu.append(b);
@@ -662,7 +669,7 @@ window.Theme = window.Theme || (function() {
         const markTheme = () => themeMenu.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.theme === Theme.current));
         const closeTheme = () => { themeMenu.hidden = true; themeBtn.setAttribute('aria-expanded', 'false'); };
         themeBtn.addEventListener('click', e => { e.stopPropagation(); const open = themeMenu.hidden; themeMenu.hidden = !open; themeBtn.setAttribute('aria-expanded', String(open)); });
-        themeMenu.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { Theme.set(b.dataset.theme); closeTheme(); } });
+        themeMenu.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { if (b.dataset.theme) Theme.set(b.dataset.theme); else Theme.reset(); closeTheme(); } });
         document.addEventListener('click', e => { if (!themeMenu.hidden && !e.target.closest('.theme-switch')) closeTheme(); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTheme(); });
         document.addEventListener('themechange', markTheme);
