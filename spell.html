@@ -337,7 +337,7 @@
     // oeo, yu, uyu, êu, iêu. The rhyme is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin (ốc = ông), the tone marks do not count
     const HARD_RHYMES = [
       { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
-      { level: 2.5, all: false, rhymes: ['ôm', 'om', 'um', 'uôm'] },
+      { level: 2.5, all: false, focus: true, rhymes: ['ôm', 'om', 'um', 'uôm'] },
       { level: 3, all: false, rhymes: ['ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
     const wordLevel = () => {
       const n = badgeLevel(), r = mine().rhyme;
@@ -353,10 +353,15 @@
       const rh = rhymeOf(word), level = wordLevel();
       return !HARD_RHYMES.some(h => level < h.level && (h.all || dec() === 'qatt') && h.rhymes.includes(rh));
     };
+    // at upper intermediate the rhymes that have just been unlocked (focus) are asked more often: FOCUS_SHARE of the words
+    const FOCUS_SHARE = 0.5;
+    const focusRhymes = () => HARD_RHYMES.filter(h => h.focus && h.level === wordLevel() && (h.all || dec() === 'qatt')).flatMap(h => h.rhymes);
     // a random entry that the parser can spell and the level allows, not the one just shown
     const draw = () => {
-      const list = pool();
-      for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (e.w !== answer && analyse(e.w) && allowed(e.w)) return e; }
+      const list = pool(), focus = Math.random() < FOCUS_SHARE ? focusRhymes() : [];
+      const ok = e => e.w !== answer && analyse(e.w) && allowed(e.w);
+      if (focus.length) for (let i = 0; i < 600; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e) && focus.includes(rhymeOf(e.w))) return e; }
+      for (let i = 0; i < 200; i++) { const e = list[Math.floor(Math.random() * list.length)]; if (ok(e)) return e; }
       return { w: FALLBACK.find(w => analyse(w) && allowed(w)) };
     };
 
