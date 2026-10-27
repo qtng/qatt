@@ -168,7 +168,7 @@ window.Theme = window.Theme || (function() {
     const href = () => base + "/css/theme-" + current + ".css";
     const apply = () => {
         if (!themed) return;
-        if (current === "classic") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", current);
+        document.documentElement.setAttribute("data-theme", current);
         // the dark themes also switch Bootstrap to its dark mode (its own components, such as alerts, badges and list groups, get dark colours)
         if (DARK_THEMES.includes(current)) document.documentElement.setAttribute("data-bs-theme", "dark"); else document.documentElement.removeAttribute("data-bs-theme");
         const link = document.getElementById("theme-css");
