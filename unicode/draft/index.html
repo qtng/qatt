@@ -28,7 +28,7 @@ blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4
 blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; padding: .15em 0; font-family: "QATT Chart"; font-size: 1.7em; line-height: 1.1; vertical-align: -.4em; white-space: nowrap; }
 </style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1</h1>
-<p>Oct 26, 2026 · Nguyễn Quốc Trung</p>
+<p>Oct 27, 2026 · Nguyễn Quốc Trung</p>
 <h2 id="1-summary">1. Summary</h2>
 <p>This proposal encodes Quốc Âm Tân Tự (QATT), a Vietnamese script used inside Hán Nôm texts, as 164 characters in the Supplementary Multilingual Plane.</p>
 <table>
@@ -53,7 +53,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Draft date</td>
-<td>2026-10-26</td>
+<td>2026-10-27</td>
 </tr>
 <tr>
 <td>Characters</td>
@@ -184,7 +184,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </blockquote>
 <h3 id="sec-4-1">4.1 Components</h3>
 <figure class="fig" id="fig-listing" style="width: 160px"><div class="parts"><img src="images/E18-1.png" alt="Figure 2" loading="lazy" style="flex: 0 1 120px"></div><figcaption>Figure 2. The listing of the 22 Cán under the heading 幹音二十二字, each with its Nôm annotation (p. 2).</figcaption></figure>
-<p>The script has 22 bases (<em>Cán</em>, 幹, which the source writes with 音 in the heading 幹音二十二字 of the listing, p. 2, and with 字 in 二十二幹字為標, p. 7), each drawn with three strokes. The source lists the 22 base sounds (幹音二十二字, p. 2). Each is shown with a QATT character, which carries one short marking stroke at the start position, upper left or upper middle depending on the base, and with a Nôm annotation that gives its sound. This form is the <em>marked Cán</em>. The marking stroke always sits at the end of a stroke, so the three strokes offer six positions for it, counted counter-clockwise from the start position as 1 to 6. The marked Cán has it at position 1, and the five forms with the marking stroke at positions 2 to 6 are the <em>Chi</em>, in order. A seventh form has no marking stroke. The source calls both the marked and the unmarked form Cán: in the count section 幹 names the Cán standing alone (單幹書) as well as the component of a combination, which is always the unmarked form (幹体, p. 8). This proposal calls the form without marking stroke the <em>unmarked Cán</em> to tell the two apart, and uses <em>base</em> for the unit of seven forms. The unmarked form is shown for ONG  and đông. That all 22 bases occur as unmarked Cán in combinations follows from the counts of the source (4.2), not from a listing. Because the marking stroke of every Chi lies at another position than that of the marked Cán, no Chi coincides with the marked Cán: each base has six distinct marked forms and one unmarked form.</p>
+<p>The script has 22 bases (<em>Cán</em>, 幹, which the source writes with 音 in the heading 幹音二十二字 of the listing, p. 2, and with 字 in 二十二幹字為標, p. 7), each drawn with three strokes. The source lists the 22 base sounds (幹音二十二字, p. 2). Each is shown with a QATT character, which carries one short marking stroke at the start position, upper left or upper middle depending on the base, and with a Nôm annotation that gives its sound. This form is the <em>marked Cán</em>. The marking stroke always sits at the end of a stroke, so the three strokes offer six positions for it, counted counter-clockwise from the start position as 1 to 6. The marked Cán has it at position 1, and the five forms with the marking stroke at positions 2 to 6 are the <em>Chi</em>, in order. A seventh form has no marking stroke. The source calls both the marked and the unmarked form Cán: in the count section 幹 names the Cán standing alone (單幹書) as well as the component of a combination, which is always the unmarked form (幹体, p. 8). This proposal calls the form without marking stroke the <em>unmarked Cán</em> to tell the two apart, and uses <em>base</em> for the unit of seven forms. The unmarked form is attested for ONG, DONG, NGONG, TONG and PHONG (pp. 5–7). That all 22 bases have it follows from the counts of the source (4.2), not from a listing. Because the marking stroke of every Chi lies at another position than that of the marked Cán, no Chi coincides with the marked Cán: each base has six distinct marked forms and one unmarked form.</p>
 <p>The Chi are tabulated in the section 枝字一百一十字, &quot;the 110 Chi characters&quot;, in blocks of five per base (pp. 3–4). The table shows 109, one having been left out by oversight (KHONG WITH MARK-4). The source gives the readings of the Chi only through Nôm annotations next to each form. These are ambiguous or not attested in dictionaries, so the readings are not established. The encoding does not depend on them, because the forms differ by the position of the marking stroke. The annotations are not transcribed here.</p>
 <figure class="fig wide" id="fig-chi-table" style="width: 428px"><div class="parts"><img src="images/S1-p3.jpg" alt="Figure 3, part 1" loading="lazy" style="flex: 0 1 294px"><img src="images/S1-p4.jpg" alt="Figure 3, part 2" loading="lazy" style="flex: 0 1 126px"></div><figcaption>Figure 3. The Chi table, five forms per Cán (pp. 3 and 4: the table continues at the top right of p. 4).</figcaption></figure>
 <p>The three classes have distinct functions. In a phản thiết pair an unmarked Cán gives the initial consonant of its base and a Chi gives a rhyme. Together the 110 Chi form the rhyme table of the script. In a Hợp Thư the formula of the source points to the reverse (4.2). A marked Cán stands for the whole syllable of its initial with the rhyme ông and names its base. It serves to pronounce the unmarked Cán in the phản thiết method. The unmarked Cán and the Chi also serve as the components of a Tham Thư (4.3). The worked examples of the source show these functions. Each explains a combined character with a formula in the fanqie form, the character, 乃, two spelling characters and 反, in which the first spelling character gives the initial and the second the rhyme: for a phản thiết pair on p. 7, for a Hợp Thư on p. 6.</p>
@@ -244,7 +244,7 @@ blockquote.epigraph footer::before { content: "— "; }
 <p>A broad reading of Hợp Thư, in which the term covers every unmarked Cán + Chi pair and a Tham Thư base may be any pair or a single Chi (2,530 bases × 110 Chi = 278,300 Tham Thư), is not adopted, but the source does not exclude it. In the count section the source uses 合書 for both arrangements (4.2), so 合体 in the rule could mean any pair. The narrow reading rests on three points: both attested Tham Thư stand on a Chi-first pair of one base, the section on p. 6 uses 合書 in its heading for the Chi-first arrangement only, and the phản thiết pairs are described in a section of their own (反切諧音法). The count section gives no number for the Tham Thư (參書倣此, 'the Tham Thư likewise'). The choice does not affect the repertoire: the broad reading would admit more bases before the combiner, with the same characters and the same segmentation, and change only what a validator accepts (5.3).</p>
 <figure class="fig" id="fig-tham-thu-1" style="width: 160px"><div class="parts"><img src="images/E40-1.png" alt="Figure 7" loading="lazy" style="flex: 0 1 50px"></div><figcaption>Figure 7. First Tham Thư: the formula 音乃嗡圈反合 and the character it explains (p. 7).</figcaption></figure>
 <figure class="fig" id="fig-tham-thu-2" style="width: 160px"><div class="parts"><img src="images/E41-1.png" alt="Figure 8, part 1" loading="lazy" style="flex: 0 1 44px"><img src="images/E41-2.png" alt="Figure 8, part 2" loading="lazy" style="flex: 0 1 34px"></div><figcaption>Figure 8. Second Tham Thư: the end of the second column and its continuation in the first column, with its formula (p. 7).</figcaption></figure>
-<p>The order of the components is given by the source: the formula that explains a Tham Thư character names the lower component first and the upper one after it (p. 7). The formula explains the character <code>[ONG-MARK-4 J ONG C KHONG-MARK-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-MARK-4 J ONG C KHONG-MARK-5">󰀄󰂚󰀀󰂛󰁮</span> (notation in 5.3, Figure 7): a Hợp Thư of ONG with the Chi KHONG-MARK-5 above it. It is written 音乃嗡圈反合 followed by the Chữ Nôm character <span class="ids ids-lr"></span>舌<span class="ids ids-in"></span><span class="ids ids-lr"></span>片爿一 (淵 with the radical 舌), whose reading is unknown. The second example is explained by a formula of the same form (p. 7, Figure 8): <code>[BONG-MARK-4 J BONG C HONG-MARK-2]</code>&nbsp;<span class="qg" role="img" aria-label="BONG-MARK-4 J BONG C HONG-MARK-2">󰂉󰂚󰂅󰂛󰀐</span>, written 音乃<span class="ids ids-lr"></span>口<span class="ids ids-ud"></span>艹風花反法合吧字也. Tham Thư is nevertheless the least certain part of the script. The source describes its structure and, for each example, how the sound is articulated, but gives no reading: the first is 'spoken quickly, the tongue curled under the jaw, the teeth wide apart, the lips drawn in on all sides' (其音疾語…舌卷在頷下兩牙…闊開上下唇縮八方成音也), the second is spoken quickly with the lips pressed together (p. 7). With only two examples the function of the three components within a Tham Thư cannot be established. This proposal therefore treats Tham Thư as a structural formation only and makes no claim about its pronunciation. The encoding follows the order of the formula: the Hợp Thư comes first as a complete unit, and the combiner adds the third component to it (5.3).</p>
+<p>The order of the components is given by the source: the formula that explains a Tham Thư character names the lower component first and the upper one after it (p. 7). The formula explains the character <code>[ONG-MARK-4 J ONG C KHONG-MARK-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-MARK-4 J ONG C KHONG-MARK-5">󰀄󰂚󰀀󰂛󰁮</span> (notation in 5.3, Figure 7): a Hợp Thư of ONG with the Chi KHONG-MARK-5 above it. It is written 音乃嗡圈反合 followed by the Chữ Nôm character <span class="ids ids-lr"></span>舌<span class="ids ids-in"></span><span class="ids ids-lr"></span>片爿一 (淵 with the radical 舌), whose reading is unknown. The second example is explained by a formula of the same form (p. 7, Figure 8): <code>[BONG-MARK-4 J BONG C HONG-MARK-2]</code>&nbsp;<span class="qg" role="img" aria-label="BONG-MARK-4 J BONG C HONG-MARK-2">󰂉󰂚󰂅󰂛󰀐</span>, written 音乃𱓄花反法合吧字也. Tham Thư is nevertheless the least certain part of the script. The source describes its structure and, for each example, how the sound is articulated, but gives no reading: the first is 'spoken quickly, the tongue curled under the jaw, the teeth wide apart, the lips drawn in on all sides' (其音疾語…舌卷在頷下兩牙…闊開上下唇縮八方成音也), the second is spoken quickly with the lips pressed together (p. 7). With only two examples the function of the three components within a Tham Thư cannot be established. This proposal therefore treats Tham Thư as a structural formation only and makes no claim about its pronunciation. The encoding follows the order of the formula: the Hợp Thư comes first as a complete unit, and the combiner adds the third component to it (5.3).</p>
 <h3 id="sec-4-4">4.4 Tone marks</h3>
 <figure class="fig" id="fig-tones" style="width: 160px"><div class="parts"><img src="images/E16-1.png" alt="Figure 9" loading="lazy" style="flex: 0 1 44px"></div><figcaption>Figure 9. The unmarked Cán of đông with the eight tone marks, annotated 東 董 凍 篤 同 洞 動 獨 (p. 5).</figcaption></figure>
 <p>A tone mark is a circle or a semicircle placed in one of the four corners of the character, giving the eight tones of the Chinese yin-yang system. The source explains the system after the Chi table: &quot;yang uses a full circle, yin a half circle&quot; (陽用全圈，陰用半圈, p. 4), and names the corner for each tone class: the left foot (左足) for bình, the left shoulder (左肩) for thượng, the right shoulder (右肩) for khứ and the right foot (右足) for nhập (p. 5). It illustrates the eight marks on one character, the unmarked Cán of đông, annotated 東 董 凍 篤 for âm and 同 洞 動 獨 for dương (p. 5). The source gives 同 洞 動 獨 explicitly as the level, rising, departing and entering tones (平上去入, p. 4), whereas the rime tradition assigns 動 to the rising and 洞 to the departing tone. 洞 has the readings đỗng and động (Tự điển chữ Nôm trích dẫn, p. 403). By placing 洞 in the rising tone, the source reads it đỗng, so that 同 洞 動 獨 (đồng, đỗng, động, độc) follow the Vietnamese tones huyền, ngã, nặng and the entering nặng. The corner gives the tone class and the shape gives the register: a semicircle marks âm (陰), a circle dương (陽).</p>
@@ -471,6 +471,75 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <p>The source does not state a writing direction. Both witnesses contain vertical Hán Nôm text, and in every case the script is treated exactly like Hán Nôm and flows with it: vertical lines, columns running right to left, no spaces between words. No horizontal use is attested. The proposal therefore assumes the writing habits of Hán Nôm. The characters behave like ideographs, each occupying one square cell. Proposed for the components: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Tone marks and the joiners never start a line, because they belong to the preceding cluster.</p>
 <h3 id="sec-6-4">6.4 Code point order</h3>
 <p>The source lists the 22 Cán in the section 幹音二十二字, &quot;trunk sounds, twenty-two characters&quot;, each annotated with its name in Chữ Nôm (p. 2). The order groups the initials roughly by place of articulation. It has no encoding significance, so code points follow the order of that listing and no collation claim is made. Within each base, the five Chi follow the order of the marking-stroke position, counter-clockwise from the position of the marked Cán (4.1). The seven forms of a base follow one another: the unmarked form first, then the six marked forms. The code points are therefore grouped by base. Because a phản thiết pair begins with an unmarked Cán and a Hợp Thư with a Chi, a binary comparison of code point sequences, without any collation, sorts every combination into the range of the base of its first component.</p>
+<h3 id="sec-6-5">6.5 Visually similar characters</h3>
+<p>Several unmarked forms look like existing characters, mostly CJK ideographs built from the same straight strokes. The comparison below was made by eye on the code chart (7.2) and covers the unmarked forms. The marked forms add one marking stroke and lie close to the same characters. The list is preliminary <code>[TBD: confirm with the UTR #36 confusables data]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Similar existing characters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ONG (+00)</td>
+<td>U+4E09 三</td>
+</tr>
+<tr>
+<td>NGONG (+07)</td>
+<td>U+4E0C 丌, U+5140 兀</td>
+</tr>
+<tr>
+<td>GONG (+15)</td>
+<td>U+0045 E, U+314C ㅌ HANGUL LETTER THIEUTH</td>
+</tr>
+<tr>
+<td>CONG (+1C)</td>
+<td>U+3155 ㅕ HANGUL LETTER YEO</td>
+</tr>
+<tr>
+<td>LONG (+23)</td>
+<td>U+5DDD 川</td>
+</tr>
+<tr>
+<td>TRONG (+2A)</td>
+<td>U+5E72 干, U+4E8E 于</td>
+</tr>
+<tr>
+<td>DONG (+31)</td>
+<td>U+571F 土, U+58EB 士</td>
+</tr>
+<tr>
+<td>THONG (+46)</td>
+<td>U+5344 卄, U+5EFE 廾</td>
+</tr>
+<tr>
+<td>CHONG (+54)</td>
+<td>U+4E30 丰, U+30AD キ KATAKANA LETTER KI</td>
+</tr>
+<tr>
+<td>XONG (+62)</td>
+<td>U+5DE5 工</td>
+</tr>
+<tr>
+<td>MONG (+7E)</td>
+<td>U+53C9 叉</td>
+</tr>
+<tr>
+<td>VONG (+8C), PHONG (+93)</td>
+<td>U+4EE5 以</td>
+</tr>
+<tr>
+<td>Tone mark circle upper right (+A1)</td>
+<td>U+309A COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK</td>
+</tr>
+<tr>
+<td>Tone marks (+9C..+A3)</td>
+<td>U+302A..U+302D ideographic tone marks (same corners, different shapes, 5.7)</td>
+</tr>
+</tbody>
+</table>
+<p>All proposed characters have their own Script value, so mixed-script detection separates them from these characters. The forms are distinguished by the number and position of their strokes, and within a cell the context of the script makes a confusion unlikely in running text.</p>
 <h2 id="7-character-table-and-code-chart">7. Character Table and Code Chart</h2>
 <p>The 164 characters fit in a block of 176 code points (11 columns of 16), proposed for the Supplementary Multilingual Plane. The block position is assigned by the UTC. Code points follow the source order of the 22 Cán, and the seven forms of each base are consecutive: the unmarked form, the marked Cán and the five Chi. The 22 unmarked forms are therefore not one run. They are the forms at every seventh position (+00, +07, … +93).</p>
 <table>
@@ -633,7 +702,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>6</td>
-<td><span class="ids ids-lr"></span>竜羽</td>
+<td>𱻢</td>
 <td>lông</td>
 <td>L</td>
 <td>LONG</td>
@@ -759,7 +828,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>20</td>
-<td>芃</td>
+<td>𱽐</td>
 <td>bông</td>
 <td>B</td>
 <td>BONG</td>
@@ -768,7 +837,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>21</td>
-<td><span class="ids ids-lr"></span>木芃</td>
+<td>𱣩</td>
 <td>vông</td>
 <td>V</td>
 <td>VONG</td>
@@ -787,7 +856,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tbody>
 </table>
 <h3 id="sec-7-2">7.2 Code chart</h3>
-<p>The code chart of the draft is Appendix D. It sets the 22 bases in rows with the seven forms of each base in columns (no marking stroke, MARK-1 to MARK-6), followed by the two joiners and the eight tone marks, each shown on a dotted circle in its corner. The glyphs are those of the reference font (8). The code points are the provisional ones of the draft. Only the offsets belong to the proposal.</p>
+<p>The code chart of the draft is Appendix E. It sets the 22 bases in rows with the seven forms of each base in columns (no marking stroke, MARK-1 to MARK-6), followed by the two joiners and the eight tone marks, each shown on a dotted circle in its corner. The glyphs are those of the reference font (8). The code points are the provisional ones of the draft. Only the offsets belong to the proposal.</p>
 <h2 id="8-font-design-notes">8. Font Design Notes</h2>
 <p>A conforming font draws every cluster in one square cell and composes it with substitution and positioning rules, not with precomposed glyphs.</p>
 <ul>
@@ -880,7 +949,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>2</td>
-<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · <span class="ids ids-lr"></span>竜羽 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 芃 bông · <span class="ids ids-lr"></span>木芃 vông · <span class="ids ids-lr"></span>口風 phông</td>
+<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
 <td>Listing of the 22 base sounds (幹音二十二字) in source order, each shown with its QATT character and annotated with the name of its sound in Chữ Nôm</td>
 </tr>
 <tr>
@@ -950,7 +1019,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>7</td>
-<td>{嚥}乃{翁}{<span class="ids ids-lr"></span>口昭}{反}法合嚥字也他倣此切法亦然  {<span class="ids ids-lr"></span>口淵} {馬} {淵} {卬} {喧}</td>
+<td>{嚥}乃{翁}{𲕠}{反}法合嚥字也他倣此切法亦然  {<span class="ids ids-lr"></span>口淵} {馬} {淵} {卬} {喧}</td>
 <td>Worked example of a phản thiết pair, the unmarked Cán of ONG and the Chi CHONG-MARK-5, read yên, and a list of five characters</td>
 </tr>
 <tr>
@@ -960,7 +1029,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>7</td>
-<td>[BONG-MARK-4 J BONG C HONG-MARK-2] 音乃<span class="ids ids-lr"></span>口<span class="ids ids-ud"></span>艹風花反法合吧字也</td>
+<td>[BONG-MARK-4 J BONG C HONG-MARK-2] 音乃𱓄花反法合吧字也</td>
 <td>Second attested Tham Thư: a Hợp Thư of BONG with the Chi HONG-MARK-2 above it, explained by a formula</td>
 </tr>
 <tr>
@@ -991,7 +1060,150 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <li><em>Are there any records left of the Quốc Âm Tân Tự writing system, which was said to be constructed by the third emperor of the Nguyen dynasty?</em> Quora discussion, 2018. <a href="https://www.quora.com/Are-there-any-records-left-of-the-Qu%E1%BB%91c-%C3%82m-T%C3%A2n-T%E1%BB%B1-writing-system-which-was-said-to-be-constructed-by-the-third-emperor-of-the-Nguyen-dynasty">https://www.quora.com/Are-there-any-records-left-of-the-Quốc-Âm-Tân-Tự-writing-system-which-was-said-to-be-constructed-by-the-third-emperor-of-the-Nguyen-dynasty</a></li>
 <li>ASEAN urbanist. Post on Quốc Âm Tân Tự. Facebook. <a href="https://www.facebook.com/urbanistasean/posts/-qu%E1%BB%91c-%C3%A2m-t%C3%A2n-t%E1%BB%B1-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/">https://www.facebook.com/urbanistasean/posts/-quốc-âm-tân-tự-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/</a></li>
 </ul>
-<h3 id="app-d">D. Code chart</h3>
+<h3 id="sec-D">D. Proposal Summary Form</h3>
+<p>Answers to the questions of the ISO/IEC JTC 1/SC 2/WG 2 Proposal Summary Form, version L2/14-232 (N4502), which the Unicode page of the form (<a href="https://www.unicode.org/L2/summary.html">https://www.unicode.org/L2/summary.html</a>) gives as current in October 2026. Entries marked <code>[TBD]</code> are open.</p>
+<p><strong>A. Administrative</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title</td>
+<td>Preliminary proposal to encode Quốc Âm Tân Tự (QATT) in the SMP of the UCS</td>
+</tr>
+<tr>
+<td>Requester</td>
+<td>Nguyễn Quốc Trung</td>
+</tr>
+<tr>
+<td>Requester type</td>
+<td>Individual contribution</td>
+</tr>
+<tr>
+<td>Submission date</td>
+<td><code>[TBD]</code></td>
+</tr>
+<tr>
+<td>Complete proposal</td>
+<td>No. Preliminary proposal; see Section 5.1 (Tham Thư combiner) and the <code>[TBD]</code> points</td>
+</tr>
+</tbody>
+</table>
+<p><strong>B. Technical – General</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New script or addition to an existing block</td>
+<td>New script: Quốc Âm Tân Tự</td>
+</tr>
+<tr>
+<td>Number of characters</td>
+<td>164 (Section 5.1)</td>
+</tr>
+<tr>
+<td>Proposed category</td>
+<td>E – Minor extinct: a historic script, attested in two manuscripts of one text of the 1840s (Section 3.1), with a small modern community of users (Section 3.3) <code>[TBD: check against section 2.2 of the WG2 Principles and Procedures]</code></td>
+</tr>
+<tr>
+<td>Repertoire with names and shapes</td>
+<td>Yes: names in Section 7.1, code chart in Section 7.2 and in the reference font. The names use only A–Z, digits, space and hyphen, no word starts with a digit (MARK-1 as in U+1069 MYANMAR SIGN WESTERN PWO KAREN TONE-1), and none clashes with an existing name or another proposed name under the loose matching of UAX #44 (checked against Unicode 15.1)</td>
+</tr>
+<tr>
+<td>Font provider</td>
+<td>The proposer (Nguyễn Quốc Trung)</td>
+</tr>
+<tr>
+<td>Font license</td>
+<td>SIL Open Font License 1.1 (Section 8) <code>[TBD: confirm the grant for the editors' use]</code></td>
+</tr>
+<tr>
+<td>References and published examples</td>
+<td>Yes: Appendix C; the source pages are in <code>evidence/</code> and in Appendix B</td>
+</tr>
+<tr>
+<td>Special encoding issues</td>
+<td>Input of sequences with joiners; vertical and horizontal layout (4.5, 5.3, 5.4)</td>
+</tr>
+<tr>
+<td>Script properties</td>
+<td>Combining class of the tone marks (6.1), grapheme clusters (6.2), line breaking and direction (6.3). No case, no numeric or currency values</td>
+</tr>
+</tbody>
+</table>
+<p><strong>C. Technical – Justification</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Entry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Submitted before</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Contact with the user community</td>
+<td><code>[TBD]</code>. Active web communities exist (Section 3.3); which of them have been consulted is to be stated</td>
+</tr>
+<tr>
+<td>Information on the user community</td>
+<td>Section 3.3</td>
+</tr>
+<tr>
+<td>Context of use</td>
+<td>Historical manuscript (Section 3.1) and a small current community writing and sharing texts online (Section 3.3). Rare</td>
+</tr>
+<tr>
+<td>Characters in use</td>
+<td>Yes: in the manuscript and on the web (Sections 3.1, 3.3, Appendix C)</td>
+</tr>
+<tr>
+<td>Must be in the BMP</td>
+<td>No. The proposal is for the SMP</td>
+</tr>
+<tr>
+<td>Contiguous range</td>
+<td>Yes: 176 code points in 11 columns of 16 (Section 7)</td>
+</tr>
+<tr>
+<td>Presentation form of an existing character</td>
+<td>No. The tone marks are not the modifier letters U+A700..U+A707 (5.7)</td>
+</tr>
+<tr>
+<td>Encodable as a sequence of existing characters</td>
+<td>No. The components are new characters; two- and three-component characters are sequences of new characters (5.2)</td>
+</tr>
+<tr>
+<td>Confusable with an existing character</td>
+<td>Yes, some forms resemble CJK ideographs and Hangul letters; list in Section 6.5</td>
+</tr>
+<tr>
+<td>Combining characters or composite sequences</td>
+<td>Yes: eight combining tone marks, the component joiner and the Tham Thư combiner (4.2, 4.3, 5.3). The patterns of the composite sequences, each with a glyph image, are listed in Section 5.3; the counts of possible sequences are in Section 5.2</td>
+</tr>
+<tr>
+<td>Special properties</td>
+<td>The two joiners and the eight tone marks (Section 6); no control function</td>
+</tr>
+<tr>
+<td>Ideographic compatibility characters</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="app-e">E. Code chart</h3>
 
 
 <p>Provisional code points U+F0000..U+F00AF; the offsets are those of the proposal. Set in QATT Gothic, a placeholder until the reference font exists.</p>
