@@ -333,12 +333,12 @@
     const pool = () => DICT.length ? DICT : FALLBACK.map(w => ({ w }));
     // word levels: some rhymes are harder and are asked only from a level on. The level is the skill badge (0 newbie, 1 beginner, 2 intermediate, 3 advanced), with
     // 2.5 (upper intermediate) between: intermediate and the usual rhyme time under the limit of the badge (the rhymes are the hardest of the three kinds, about 110).
-    // From intermediate (2): ông, ong, ung, uông, and with the decoding qatt.org also ôm, om, um, uôm; with qatt.org from upper intermediate (2.5) ao, oao, eo, oeo,
+    // From intermediate (2): ông, ong, ung, uông, ôm, om, um, uôm (all decodings); with qatt.org only, from upper intermediate (2.5) ao, oao, eo, oeo,
     // yu, uyu, êu, iêu, which are then asked more often (focus). The rhyme is the one of the spelling (glide, vowel, coda), the stops count as their nasal twin
     // (ốc = ông), the tone marks do not count
     const HARD_RHYMES = [
       { level: 2, all: true, rhymes: ['ông', 'ong', 'ung', 'uông'] },
-      { level: 2, all: false, rhymes: ['ôm', 'om', 'um', 'uôm'] },
+      { level: 2, all: true, rhymes: ['ôm', 'om', 'um', 'uôm'] },
       { level: 2.5, all: false, focus: true, rhymes: ['ao', 'oao', 'eo', 'oeo', 'yu', 'uyu', 'êu', 'iêu'] }];
     const wordLevel = () => {
       const n = badgeLevel(), r = mine().rhyme;
