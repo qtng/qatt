@@ -127,6 +127,7 @@ window.Theme = window.Theme || (function() {
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
     let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "retro";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, retro on qatt.org
+    const DEFAULT_THEME = chosen;
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) chosen = s; } catch (e) {}
     // day and night: night is from NIGHT_START to DAY_START o'clock (the clock of the visitor); then the theme NIGHT_THEME is shown instead of the chosen one
@@ -152,7 +153,8 @@ window.Theme = window.Theme || (function() {
     const override = () => { try { const o = JSON.parse(localStorage.getItem(DAY_KEY)); return o && (o.mode === "day" || o.mode === "night") && typeof o.key === "string" ? o : null; } catch (e) { return null; } };
     // night now: the manual choice while it is of this period (same key), else the clock
     const isNight = () => { const p = phase(new Date()), o = override(); return o && o.key === p.key ? o.mode === "night" : p.night; };
-    const pick = () => autoNight && !pinned && isNight() ? NIGHT_THEME : chosen;
+    // by day the night theme is never shown for a stored choice of it (the switch would change nothing): the default theme instead
+    const pick = () => autoNight && !pinned && isNight() ? NIGHT_THEME : (autoNight && !pinned && chosen === NIGHT_THEME ? DEFAULT_THEME : chosen);
     let current = pick();
     // ?theme=<name> in the address (license.html sends a visitor back with it): chosen and remembered where themes can be chosen, else only shown on this page
     // (a preview); the parameter is taken out of the address
@@ -211,6 +213,7 @@ window.Theme = window.Theme || (function() {
             chosen = name; pinned = false;
             try { localStorage.setItem(KEY, name); } catch (e) {}
             if (autoNight && name !== NIGHT_THEME && isNight()) setOverride("day");   // a theme chosen at night is shown
+            if (autoNight && name === NIGHT_THEME && !isNight()) setOverride("night");   // the night theme chosen by day is shown until the next change
             update();
         },
         dayNight: {
