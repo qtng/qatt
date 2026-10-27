@@ -245,7 +245,7 @@ window.Theme = window.Theme || (function() {
             { name: "Qatt.org home", vi: "Trang chủ Qatt.org", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
             { name: "Unicode", bar: "Unicode", barOrder: 2, barVi: "Unicode", barUrl: "/unicode/draft/", barUrlVi: "/unicode/draft/vi", url: "/unicode.html", icon: "bi-fonts" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
-            { name: "Spell it!", vi: "Đánh vần!", bar: "Spell it!", barOrder: 4, barVi: "Đánh vần!", url: "/spell.html", icon: "bi-mortarboard" },
+            { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "Symbols", vi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
