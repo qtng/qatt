@@ -536,7 +536,7 @@
       { level: 2, text: ['Stop finals p, c, t, ch', 'Âm cuối tắc p, c, t, ch'] },
       { level: 2, text: ['Rhymes ông, ong, ung, uông', 'Vần ông, ong, ung, uông'] },
       { level: 2, text: ['Randomized onset buttons', 'Các nút phụ âm đầu xếp ngẫu nhiên'] },
-      { level: 2.5, qatt: true, text: ['Rhymes ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu (qatt.org only)', 'Vần ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu (chỉ qatt.org)'] },
+      { level: 2.5, qatt: true, text: ['Rhymes ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu', 'Vần ôm, om, um, uôm, ao, oao, eo, oeo, yu, uyu, êu, iêu'] },
       { level: 2.5, text: ['Randomized rhyme buttons', 'Các nút vần xếp ngẫu nhiên'] }];
     let levelsKey = '';
     function showLevels() {
@@ -546,8 +546,9 @@
       const el = (tag, en, vi, cls) => { const e = document.createElement(tag); e.textContent = en; if (vi) e.dataset.vi = vi; if (cls) e.className = cls; return e; };
       const list = document.createElement('ul');
       list.className = 'list-unstyled mb-0';
-      for (const f of FEATURES) {
-        const on = lv >= f.level && (!f.qatt || dec() === 'qatt'), li = document.createElement('li');
+      for (const f of FEATURES) {   // a difficulty of qatt.org is left out for another decoding
+        if (f.qatt && dec() !== 'qatt') continue;
+        const on = lv >= f.level, li = document.createElement('li');
         if (!on) li.className = 'opacity-50';
         li.append(on ? '✓ ' : '○ ', el('span', f.text[0], f.text[1]));
         list.append(li);
