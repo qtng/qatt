@@ -387,6 +387,9 @@ window.Theme = window.Theme || (function() {
                 letter-spacing: 0.08rem;
                 padding: 1.5rem 1.25rem 0.5rem;
             }
+            .nav-section-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: 0; text-align: left; cursor: pointer; }
+            .nav-section-toggle i { font-size: .8rem; transition: transform .2s ease; }
+            .nav-section-toggle[aria-expanded="true"] i { transform: rotate(180deg); }
             .offcanvas-nav-link {
                 color: #adb5bd;
                 padding: 0.7rem 1.25rem;
@@ -548,6 +551,9 @@ window.Theme = window.Theme || (function() {
                             <i class="bi ${link.icon}"></i> <span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span>
                         </a>`;
             }).join('');
+            // the block of the other site is folded in the sidebar (a click on its header opens it)
+            if (section !== ownSection) return `<button type="button" class="nav-section-header nav-section-toggle ${section.themeClass}" aria-expanded="false">${section.header}<i class="bi bi-chevron-down"></i></button>
+                    <div class="nav flex-column" hidden>${linksHtml}</div>`;
             return `<div class="nav-section-header ${section.themeClass}">${section.header}</div>
                     <div class="nav flex-column">${linksHtml}</div>`;
         }).join('');
@@ -559,6 +565,12 @@ window.Theme = window.Theme || (function() {
             </div>
             <div class="offcanvas-body p-0">${sectionsHtml}</div>
         `;
+
+        offcanvas.querySelectorAll('.nav-section-toggle').forEach(btn => btn.addEventListener('click', () => {
+            const open = btn.getAttribute('aria-expanded') !== 'true';
+            btn.setAttribute('aria-expanded', open);
+            btn.nextElementSibling.hidden = !open;
+        }));
 
         // bottom bar for phones: only the links of the block of this page; not on the immersive page
         const ownBottomBar = /\/immersive\.html$/.test(currentPath);
