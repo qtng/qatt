@@ -240,10 +240,10 @@ window.Theme = window.Theme || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Qatt.org home", vi: "Trang chủ Qatt.org", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
+            { name: "Unicode", bar: "Unicode", barOrder: 2, barVi: "Unicode", barUrl: "/unicode/draft/", barUrlVi: "/unicode/draft/vi", url: "/unicode.html", icon: "bi-fonts" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Spell it!", vi: "Đánh vần!", bar: "Spell it!", barOrder: 4, barVi: "Đánh vần!", url: "/spell.html", icon: "bi-mortarboard" },
-            { name: "Symbols", vi: "Bảng chữ", bar: "Symbols", barOrder: 2, barVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
+            { name: "Symbols", vi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
@@ -343,7 +343,9 @@ window.Theme = window.Theme || (function() {
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
             .desk-links i { display: none; }
-            @media (max-width: 1199.98px) { .desk-links a { padding: 0 .4rem; font-size: .9rem; } }
+            .desk-links.icons-only i { display: inline; font-size: 1.15rem; }
+            .desk-links.icons-only .dl-text { display: none; }
+            .desk-links.icons-only a { padding: 0 .75rem; }
             .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
@@ -562,7 +564,7 @@ window.Theme = window.Theme || (function() {
             const own = sections.find(sec => sec.linkClass === navConfig.own) || block;
             const barLinks = own.links.filter(l => l.bar).sort((a, b) => (a.barOrder ?? 0) - (b.barOrder ?? 0)).map(link => {
                 const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
-                return `<a href="${link.url}" class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></a>`;
+                return `<a href="${link.barUrl || link.url}"${link.barUrl ? ` data-href-en="${link.barUrl}" data-href-vi="${link.barUrlVi || link.barUrl}"` : ''} class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></a>`;
             }).join('');
             const bar = document.createElement('nav');
             bar.className = 'bottom-bar';
@@ -571,6 +573,10 @@ window.Theme = window.Theme || (function() {
             bar.innerHTML = `${barLinks}<button type="button" id="barMenu"><i class="bi bi-list"></i>Menu</button>`;
             document.body.appendChild(bar);
             document.body.classList.add('has-bottom-bar');
+            // a bar entry can lead to another address in Vietnamese (the Unicode draft)
+            const barHrefs = () => bar.querySelectorAll('[data-href-vi]').forEach(a => { a.href = Lang.current === 'vi' ? a.dataset.hrefVi : a.dataset.hrefEn; });
+            barHrefs();
+            document.addEventListener('langchange', barHrefs);
             bar.querySelector('#barMenu').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
             // hide it while the on-screen keyboard is open (the visual viewport is much shorter than the window)
             // or while the user has put the cursor in a text field and the window is lower than wide (a field focused by the page itself does not count)
@@ -649,6 +655,19 @@ window.Theme = window.Theme || (function() {
 
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
+        // the horizontal menu shows text only; when it no longer fits (the controls on the right wrap to a second row) it shows icons only
+        const deskUl = header.querySelector('.desk-links'), deskBrand = header.querySelector('.navbar-brand');
+        const fitDesk = () => {
+            deskUl.classList.remove('icons-only');
+            if (!deskUl.offsetParent) return;
+            const wrapped = () => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || deskUl.scrollWidth > deskUl.clientWidth;
+            if (wrapped()) deskUl.classList.add('icons-only');
+        };
+        fitDesk();
+        window.addEventListener('resize', fitDesk);
+        document.addEventListener('langchange', fitDesk);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDesk);
+        window.addEventListener('load', fitDesk);
         document.body.appendChild(offcanvas);
         if (!ownBottomBar) injectFooter(navConfig.license);
 
