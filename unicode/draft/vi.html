@@ -28,7 +28,7 @@ blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4
 blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; padding: .15em 0; font-family: "QATT Chart"; font-size: 1.7em; line-height: 1.1; vertical-align: -.4em; white-space: nowrap; }
 </style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="xu-t-unicode-cho-qatt-b-n-th-o-alpha-1">Đề xuất Unicode cho QATT – Bản thảo, Alpha 1</h1>
-<p>Oct 26, 2026 · Nguyễn Quốc Trung</p>
+<p>Oct 27, 2026 · Nguyễn Quốc Trung</p>
 <p><em>Bản dịch tiếng Việt (bản nháp). Bản tiếng Anh là bản gốc của đề xuất.</em></p>
 <h2 id="1-t-m-t-t">1. Tóm tắt</h2>
 <p>Đề xuất này mã hoá Quốc Âm Tân Tự (QATT), một loại chữ viết cho tiếng Việt dùng trong các văn bản Hán Nôm, thành 164 ký tự trong Mặt phẳng Đa ngữ Bổ sung (SMP).</p>
@@ -54,7 +54,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Ngày của bản thảo</td>
-<td>2026-10-26</td>
+<td>2026-10-27</td>
 </tr>
 <tr>
 <td>Ký tự</td>
@@ -472,6 +472,75 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <p>Nguồn không nêu hướng viết. Cả hai bản chép đều chứa văn bản Hán Nôm viết dọc, và trong mọi trường hợp chữ này được đối xử hệt như Hán Nôm và chạy theo nó: dòng dọc, cột chạy từ phải sang trái, không có khoảng trắng giữa các từ. Không có cách dùng ngang nào được chứng thực. Vì vậy đề xuất giả định thói quen viết của Hán Nôm. Các ký tự ứng xử như chữ biểu ý, mỗi chữ chiếm một ô vuông. Đề xuất cho các thành phần: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Dấu thanh và các ký tự nối không bao giờ mở đầu một dòng, vì chúng thuộc về cụm đứng trước.</p>
 <h3 id="sec-6-4">6.4 Thứ tự điểm mã</h3>
 <p>Nguồn liệt kê 22 Cán trong mục 幹音二十二字, &quot;âm Cán, hai mươi hai chữ&quot;, mỗi Cán chú tên bằng chữ Nôm (tr. 2). Thứ tự này nhóm các phụ âm đầu theo vị trí cấu âm một cách đại khái. Nó không có ý nghĩa mã hoá, nên các điểm mã theo thứ tự của bảng liệt kê đó và không đưa ra khẳng định nào về đối chiếu. Trong mỗi cơ sở, năm Chi theo thứ tự vị trí nét đánh dấu, ngược chiều kim đồng hồ từ vị trí của Cán đánh dấu (4.1). Bảy dạng của một cơ sở nối tiếp nhau: dạng trơn trước, rồi sáu dạng đánh dấu. Vì vậy các điểm mã được nhóm theo cơ sở. Do một cặp phản thiết bắt đầu bằng Cán trơn và một Hợp Thư bằng Chi, so sánh nhị phân các chuỗi điểm mã, không cần đối chiếu nào, xếp mọi tổ hợp vào dải của cơ sở của thành phần đầu tiên của nó.</p>
+<h3 id="sec-6-5">6.5 Các ký tự giống về hình thức</h3>
+<p>Một số dạng trơn trông giống các ký tự đã có, phần lớn là chữ Hán (CJK) được tạo từ cùng những nét thẳng. Việc so sánh dưới đây được làm bằng mắt trên bảng mã (7.2) và gồm các dạng trơn. Các dạng có dấu thêm một nét đánh dấu và gần với cùng những ký tự đó. Danh sách này là tạm thời <code>[TBD: xác nhận bằng dữ liệu ký tự dễ nhầm của UTR #36]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Dạng</th>
+<th>Ký tự đã có tương tự</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ONG (+00)</td>
+<td>U+4E09 三</td>
+</tr>
+<tr>
+<td>NGONG (+07)</td>
+<td>U+4E0C 丌, U+5140 兀</td>
+</tr>
+<tr>
+<td>GONG (+15)</td>
+<td>U+0045 E, U+314C ㅌ HANGUL LETTER THIEUTH</td>
+</tr>
+<tr>
+<td>CONG (+1C)</td>
+<td>U+3155 ㅕ HANGUL LETTER YEO</td>
+</tr>
+<tr>
+<td>LONG (+23)</td>
+<td>U+5DDD 川</td>
+</tr>
+<tr>
+<td>TRONG (+2A)</td>
+<td>U+5E72 干, U+4E8E 于</td>
+</tr>
+<tr>
+<td>DONG (+31)</td>
+<td>U+571F 土, U+58EB 士</td>
+</tr>
+<tr>
+<td>THONG (+46)</td>
+<td>U+5344 卄, U+5EFE 廾</td>
+</tr>
+<tr>
+<td>CHONG (+54)</td>
+<td>U+4E30 丰, U+30AD キ KATAKANA LETTER KI</td>
+</tr>
+<tr>
+<td>XONG (+62)</td>
+<td>U+5DE5 工</td>
+</tr>
+<tr>
+<td>MONG (+7E)</td>
+<td>U+53C9 叉</td>
+</tr>
+<tr>
+<td>VONG (+8C), PHONG (+93)</td>
+<td>U+4EE5 以</td>
+</tr>
+<tr>
+<td>Dấu thanh vòng tròn trên phải (+A1)</td>
+<td>U+309A COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK</td>
+</tr>
+<tr>
+<td>Các dấu thanh (+9C..+A3)</td>
+<td>U+302A..U+302D dấu thanh của chữ Hán (cùng góc, khác hình, 5.7)</td>
+</tr>
+</tbody>
+</table>
+<p>Mọi ký tự được đề xuất có giá trị Script riêng, nên việc phát hiện văn bản trộn chữ phân biệt chúng với các ký tự này. Các dạng khác nhau ở số và vị trí của các nét, và trong một ô, ngữ cảnh của chữ khiến sự nhầm lẫn trong văn bản liền mạch khó xảy ra.</p>
 <h2 id="7-b-ng-k-t-v-b-ng-m">7. Bảng ký tự và bảng mã</h2>
 <p>164 ký tự nằm vừa trong một khối 176 điểm mã (11 cột × 16), đề xuất đặt trong Mặt phẳng Đa ngữ Bổ sung. Vị trí khối do UTC ấn định. Các điểm mã theo thứ tự nguồn của 22 Cán, và bảy dạng của mỗi cơ sở liên tiếp nhau: dạng trơn, Cán đánh dấu và năm Chi. Vì vậy 22 dạng trơn không nằm trong một dải liền. Chúng là các dạng ở mỗi vị trí thứ bảy (+00, +07, … +93).</p>
 <table>
@@ -760,7 +829,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>20</td>
-<td>芃</td>
+<td>𱽐</td>
 <td>bông</td>
 <td>B</td>
 <td>BONG</td>
@@ -769,7 +838,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>21</td>
-<td><span class="ids ids-lr"></span>木芃</td>
+<td><span class="ids ids-lr"></span>木𱽐</td>
 <td>vông</td>
 <td>V</td>
 <td>VONG</td>
@@ -788,7 +857,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tbody>
 </table>
 <h3 id="sec-7-2">7.2 Bảng mã</h3>
-<p>Bảng mã của bản thảo là Appendix D. Nó xếp 22 cơ sở thành các hàng với bảy dạng của mỗi cơ sở thành các cột (không nét đánh dấu, MARK-1 đến MARK-6), tiếp theo là hai ký tự nối và tám dấu thanh, mỗi dấu được hiển thị trên một vòng tròn chấm ở góc của nó. Các mặt chữ là của phông chữ tham chiếu (8). Các điểm mã là điểm mã tạm thời của bản thảo. Chỉ các độ lệch thuộc về đề xuất.</p>
+<p>Bảng mã của bản thảo là phụ lục E. Nó xếp 22 cơ sở thành các hàng với bảy dạng của mỗi cơ sở thành các cột (không nét đánh dấu, MARK-1 đến MARK-6), tiếp theo là hai ký tự nối và tám dấu thanh, mỗi dấu được hiển thị trên một vòng tròn chấm ở góc của nó. Các mặt chữ là của phông chữ tham chiếu (8). Các điểm mã là điểm mã tạm thời của bản thảo. Chỉ các độ lệch thuộc về đề xuất.</p>
 <h2 id="8-ghi-ch-thi-t-k-ph-ng-ch">8. Ghi chú thiết kế phông chữ</h2>
 <p>Một phông chữ tuân thủ vẽ mỗi cụm trong một ô vuông và tạo nó bằng các quy tắc thay thế và định vị, không dùng các mặt chữ tổ hợp sẵn.</p>
 <ul>
@@ -881,7 +950,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>2</td>
-<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · <span class="ids ids-lr"></span>竜羽 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 芃 bông · <span class="ids ids-lr"></span>木芃 vông · <span class="ids ids-lr"></span>口風 phông</td>
+<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · <span class="ids ids-lr"></span>竜羽 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · <span class="ids ids-lr"></span>木𱽐 vông · <span class="ids ids-lr"></span>口風 phông</td>
 <td>Bảng liệt kê 22 âm cơ sở (幹音二十二字) theo thứ tự của nguồn, mỗi âm có ký tự QATT và chú tên âm bằng chữ Nôm</td>
 </tr>
 <tr>
@@ -992,7 +1061,150 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <li><em>Are there any records left of the Quốc Âm Tân Tự writing system, which was said to be constructed by the third emperor of the Nguyen dynasty?</em> Thảo luận trên Quora, 2018. <a href="https://www.quora.com/Are-there-any-records-left-of-the-Qu%E1%BB%91c-%C3%82m-T%C3%A2n-T%E1%BB%B1-writing-system-which-was-said-to-be-constructed-by-the-third-emperor-of-the-Nguyen-dynasty">https://www.quora.com/Are-there-any-records-left-of-the-Quốc-Âm-Tân-Tự-writing-system-which-was-said-to-be-constructed-by-the-third-emperor-of-the-Nguyen-dynasty</a></li>
 <li>ASEAN urbanist. Bài đăng về Quốc Âm Tân Tự. Facebook. <a href="https://www.facebook.com/urbanistasean/posts/-qu%E1%BB%91c-%C3%A2m-t%C3%A2n-t%E1%BB%B1-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/">https://www.facebook.com/urbanistasean/posts/-quốc-âm-tân-tự-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/</a></li>
 </ul>
-<h3 id="app-d">D. Code chart</h3>
+<h3 id="sec-D">D. Proposal Summary Form</h3>
+<p>Trả lời các câu hỏi của Proposal Summary Form của ISO/IEC JTC 1/SC 2/WG 2, phiên bản L2/14-232 (N4502), mà trang Unicode của mẫu đơn (<a href="https://www.unicode.org/L2/summary.html">https://www.unicode.org/L2/summary.html</a>) ghi là hiện hành vào tháng 10 năm 2026. Các mục đánh dấu <code>[TBD]</code> còn để ngỏ.</p>
+<p><strong>A. Hành chính</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mục</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tiêu đề</td>
+<td>Preliminary proposal to encode Quốc Âm Tân Tự (QATT) in the SMP of the UCS</td>
+</tr>
+<tr>
+<td>Người đề xuất</td>
+<td>Nguyễn Quốc Trung</td>
+</tr>
+<tr>
+<td>Loại người đề xuất</td>
+<td>Đóng góp cá nhân</td>
+</tr>
+<tr>
+<td>Ngày nộp</td>
+<td><code>[TBD]</code></td>
+</tr>
+<tr>
+<td>Đề xuất hoàn chỉnh</td>
+<td>Không. Đề xuất sơ bộ; xem mục 5.1 (ký tự nối Tham Thư) và các điểm <code>[TBD]</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>B. Kỹ thuật – Chung</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mục</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chữ mới hay bổ sung vào khối đã có</td>
+<td>Chữ mới: Quốc Âm Tân Tự</td>
+</tr>
+<tr>
+<td>Số ký tự</td>
+<td>164 (mục 5.1)</td>
+</tr>
+<tr>
+<td>Loại được đề xuất</td>
+<td>E – Minor extinct: một chữ lịch sử, được chứng thực trong hai bản chép tay của một văn bản thập niên 1840 (mục 3.1), với một cộng đồng người dùng nhỏ ngày nay (mục 3.3) <code>[TBD: đối chiếu với mục 2.2 của WG2 Principles and Procedures]</code></td>
+</tr>
+<tr>
+<td>Bộ ký tự với tên và hình dạng</td>
+<td>Có: tên ở mục 7.1, bảng mã ở mục 7.2 và trong phông tham chiếu. Tên chỉ dùng A–Z, chữ số, dấu cách và gạch nối, không từ nào bắt đầu bằng chữ số (MARK-1 như trong U+1069 MYANMAR SIGN WESTERN PWO KAREN TONE-1), và không tên nào trùng với tên đã có hay tên đề xuất khác theo cách so khớp lỏng của UAX #44 (kiểm tra với Unicode 15.1)</td>
+</tr>
+<tr>
+<td>Người cung cấp phông</td>
+<td>Người đề xuất (Nguyễn Quốc Trung)</td>
+</tr>
+<tr>
+<td>Giấy phép phông</td>
+<td>SIL Open Font License 1.1 (mục 8) <code>[TBD: xác nhận cho phép biên tập viên sử dụng]</code></td>
+</tr>
+<tr>
+<td>Tài liệu tham khảo và ví dụ đã công bố</td>
+<td>Có: phụ lục C; các trang của nguồn nằm trong <code>evidence/</code> và trong phụ lục B</td>
+</tr>
+<tr>
+<td>Vấn đề mã hóa đặc biệt</td>
+<td>Nhập các chuỗi có ký tự nối; trình bày dọc và ngang (4.5, 5.3, 5.4)</td>
+</tr>
+<tr>
+<td>Thuộc tính của chữ</td>
+<td>Lớp kết hợp của dấu thanh (6.1), cụm grapheme (6.2), ngắt dòng và hướng viết (6.3). Không có chữ hoa/thường, không có giá trị số hay tiền tệ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>C. Kỹ thuật – Lý do</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mục</th>
+<th>Nội dung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Đã nộp trước đây</td>
+<td>Không</td>
+</tr>
+<tr>
+<td>Liên hệ với cộng đồng người dùng</td>
+<td><code>[TBD]</code>. Có các cộng đồng hoạt động trên web (mục 3.3); cần nêu đã tham khảo những cộng đồng nào</td>
+</tr>
+<tr>
+<td>Thông tin về cộng đồng người dùng</td>
+<td>Mục 3.3</td>
+</tr>
+<tr>
+<td>Bối cảnh sử dụng</td>
+<td>Bản chép tay lịch sử (mục 3.1) và một cộng đồng nhỏ ngày nay viết và chia sẻ văn bản trên mạng (mục 3.3). Hiếm</td>
+</tr>
+<tr>
+<td>Ký tự đang được dùng</td>
+<td>Có: trong bản chép tay và trên web (mục 3.1, 3.3, phụ lục C)</td>
+</tr>
+<tr>
+<td>Phải nằm trong BMP</td>
+<td>Không. Đề xuất dành cho SMP</td>
+</tr>
+<tr>
+<td>Dải liên tục</td>
+<td>Có: 176 điểm mã trong 11 cột 16 ô (mục 7)</td>
+</tr>
+<tr>
+<td>Dạng trình bày của một ký tự đã có</td>
+<td>Không. Các dấu thanh không phải là chữ bổ trợ U+A700..U+A707 (5.7)</td>
+</tr>
+<tr>
+<td>Có thể mã hóa bằng chuỗi ký tự đã có</td>
+<td>Không. Các thành phần là ký tự mới; chữ hai và ba thành phần là chuỗi các ký tự mới (5.2)</td>
+</tr>
+<tr>
+<td>Dễ nhầm với một ký tự đã có</td>
+<td>Có, một số dạng giống chữ Hán và chữ Hangul; danh sách ở mục 6.5</td>
+</tr>
+<tr>
+<td>Ký tự kết hợp hoặc chuỗi tổ hợp</td>
+<td>Có: tám dấu thanh kết hợp, ký tự nối thành phần và ký tự nối Tham Thư (4.2, 4.3, 5.3). Các mẫu chuỗi tổ hợp, mỗi mẫu kèm hình glyph, được liệt kê ở mục 5.3; số chuỗi có thể có ở mục 5.2</td>
+</tr>
+<tr>
+<td>Thuộc tính đặc biệt</td>
+<td>Hai ký tự nối và tám dấu thanh (mục 6); không có chức năng điều khiển</td>
+</tr>
+<tr>
+<td>Ký tự tương thích chữ Hán</td>
+<td>Không</td>
+</tr>
+</tbody>
+</table>
+<h3 id="app-e">E. Code chart</h3>
 
 
 <p>Provisional code points U+F0000..U+F00AF; the offsets are those of the proposal. Set in QATT Gothic, a placeholder until the reference font exists.</p>
