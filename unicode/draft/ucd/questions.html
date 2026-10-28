@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Draft character data | Qatt.org</title>
+  <meta name="description" content="Draft Unicode encoding proposal for Quốc Âm Tân Tự (QATT).">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/navigation.js"></script>
+  <style>
+    body { background: #fffdf8; color: #2b2118; }
+    main { max-width: 54rem; }
+    h1, h2, h3, h4 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h2 { margin-top: 2.2rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    a { color: #a8362a; }
+    table { border-collapse: collapse; margin: 1rem 0; font-size: .9rem; }
+    th, td { border: 1px solid #dccfb2; padding: .25rem .5rem; vertical-align: top; }
+    th { background: #f7efdc; }
+    .table-wrap { overflow-x: auto; }
+    details.sec { margin-bottom: .6rem; }
+    details.sec > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .6rem; padding: .15rem .9rem; border-radius: .4rem; }
+    details.sec > summary::-webkit-details-marker { display: none; }
+    details.sec > summary::before { content: "\25B8"; transition: transform .15s; }
+    details.sec[open] > summary::before { transform: rotate(90deg); }
+    details.sec > summary h2 { border-bottom: 0; margin: .5rem 0; flex: 1; color: inherit; font-size: 1.35rem; }
+    details.sec > summary .anchor { color: inherit; }
+    details.sec > :not(summary) { padding: .25rem .25rem 0; }
+    main img { max-width: 100%; height: auto; border: 1px solid #dccfb2; }
+    code, pre { font-size: .85rem; }
+    pre { background: #f7efdc; padding: .75rem 1rem; overflow-x: auto; }
+    .anchor { margin-left: .4rem; opacity: 0; color: #a8362a; text-decoration: none; vertical-align: -.1em; }
+    .anchor svg { width: .75em; height: .75em; fill: currentColor; }
+    h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; }
+    @media (hover: none) { .anchor { opacity: .45; } }
+    h1, h2, h3, h4 { scroll-margin-top: 4.5rem; }
+  </style>
+</head>
+<body>
+  <main class="container py-4">
+<p><a href="../index.html">Proposal</a> · <a href="index.html">Draft character data</a> · <a href="questions.html">Questions</a></p>
+<h1 id="questions-for-the-unicode-experts">Questions for the Unicode experts<a class="anchor" href="#questions-for-the-unicode-experts" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h1>
+<p>Each question concerns a value in section 6 of the proposal that is submitted for review. The draft files contain the value given here as &quot;Draft&quot;.</p>
+<h2 id="segmentation">Segmentation<a class="anchor" href="#segmentation" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<ol>
+<li><strong>Grapheme clusters for the two joiners.</strong> Required behaviour: no break directly before or after the component joiner or the Tham Thư combiner; every other boundary between components is a break (proposal 5.5, 6.2).
+Draft: Grapheme_Cluster_Break=Extend for both joiners (no break before them, GB9), and the Indic_Conjunct_Break mechanism of rule GB9c for the break after them: components InCB=Consonant, joiners InCB=Linker, tone marks InCB=Extend.
+Question: may Indic_Conjunct_Break be used for a non-Indic script, or is a new property value or rule preferred? With GB9c a joiner that follows no component (ill-formed text) does not join the next character; the reference implementation joins it. Is that difference acceptable?</li>
+<li><strong>Line breaking around the joiners.</strong> Required: no line break before or after a joiner. Line_Break=CM keeps a joiner with the preceding character but allows a break after it.
+Draft: Line_Break=GL. Question: GL, a ZWJ-like class, or a new class?</li>
+<li><strong>Default_Ignorable_Code_Point.</strong> If the joiners are default ignorable, software without support shows the components side by side in reading order, which keeps the text readable.
+Draft: not set. Question: should the joiners be Default_Ignorable_Code_Point?</li>
+</ol>
+<h2 id="other-properties">Other properties<a class="anchor" href="#other-properties" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<ol start="4">
+<li><strong>Bidi_Class of the joiners.</strong> Draft: BN, as for most format characters.</li>
+<li><strong>Canonical_Combining_Class of the tone marks.</strong> Draft: 0. A cluster takes at most one tone mark, so no canonical reordering occurs (proposal 6.1). Please confirm.</li>
+<li><strong>Vertical_Orientation and East_Asian_Width of the tone marks and joiners.</strong> Draft: Vertical_Orientation=U, East_Asian_Width=N. The components are W and U like Han ideographs.</li>
+<li><strong>Script code.</strong> No ISO 15924 code is known to exist for Quốc Âm Tân Tự. Draft script name: Quoc_Am_Tan_Tu. A code would have to be requested from the ISO 15924 Registration Authority.</li>
+</ol>
+<h2 id="relation-to-existing-characters">Relation to existing characters<a class="anchor" href="#relation-to-existing-characters" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<ol start="8">
+<li><strong>Tone marks and existing characters.</strong> U+A700..U+A707 MODIFIER LETTER CHINESE TONE YIN PING to YANG RU cover the same eight tones but are spacing modifier letters (Sk); U+302A..U+302D IDEOGRAPHIC LEVEL to ENTERING TONE MARK are combining marks for the same corners but without the âm/dương distinction. The draft encodes eight new combining marks and cross-references both sets in the names list (proposal 5.6).
+Question: does the UTC accept eight new marks, or would it prefer unification with U+302A..U+302D for one register? If new marks are accepted, should they take the positional combining classes of U+302A..U+302D (218, 228, 232, 222) instead of 0?</li>
+</ol>
+<h2 id="names">Names<a class="anchor" href="#names" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<ol start="9">
+<li><strong>Name conventions.</strong> đ is written D (DONG), and the one Cán for d and gi is GIONG, after the reading giông; the forms are named by the position of the marking stroke, with digits after a hyphen (ONG WITH MARK-1 to ONG WITH MARK-6, and ONG); the names describe the form only. The tone marks have descriptive names with the tone as annotation. Are these acceptable?</li>
+<li><strong>Block name and position.</strong> Draft block name: Quoc Am Tan Tu, 176 code points in the Supplementary Multilingual Plane.</li>
+</ol>
+<h2 id="repertoire">Repertoire<a class="anchor" href="#repertoire" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<ol start="11">
+<li><strong>Tham Thư combiner.</strong> The combiner serves only the Tham Thư, attested in two examples without a stated pronunciation (proposal 4.3, 5.1). The other 163 characters do not depend on it. Should it be encoded now, or deferred with its position (+9B) reserved?</li>
+<li><strong>Marked and unmarked Cán.</strong> The draft encodes them separately: the unmarked form combines and the marked form never does, the marked form is position 1 of the six marking-stroke positions, and the source writes both standalone in spelling formulas (proposal 5.1). A standalone unmarked Cán has the reading of the marked Cán. Is the separate encoding acceptable?</li>
+<li><strong>The first Hợp Thư of p. 6.</strong> Both sources write the character explained by the formula 螉乃喊翁反 as ONG J ONG, two unmarked Cán of one base, while the formula spells it with the Chi ONG-MARK-2 and the four Hợp Thư that follow carry the marking stroke at positions 3 to 6 (proposal 4.2). The draft treats it as a slip of the common original (ONG-MARK-2 J ONG). If it is taken as written, ONG J ONG must be valid and the grammar of 5.3 gains a pattern; the repertoire and the segmentation stay the same. Which reading does the UTC prefer?</li>
+</ol>
+
+  </main>
+  <script>
+    // a link to an anchor inside a closed section opens the section
+    function openTarget() {
+      const t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      for (let d = t && t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+      if (t) t.scrollIntoView();
+    }
+    addEventListener('hashchange', openTarget);
+    openTarget();
+  </script>
+</body>
+</html>
