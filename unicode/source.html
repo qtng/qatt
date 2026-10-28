@@ -37,8 +37,17 @@
     .vi { opacity: .9;  font-family: var(--bs-font-sans-serif), var(--nom-font); font-style: italic; margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid color-mix(in srgb, #c9a227 55%, transparent); }
     .vi + .en { margin-top: .3rem; }
     .tr-h { font-style: italic; }
-    .ids svg { vertical-align: -.2em; }
+    .ids { display: inline-block; width: 1em; height: 1em; overflow: hidden; vertical-align: -.2em; line-height: 1; white-space: nowrap; }   /* the space of the drawing is kept while it loads, so the lines do not jump */
+    .ids:not(.drawn) { color: transparent; }
+    .ids svg { display: block; }
     .toc a { margin: 0 .3rem; }
+    @media (max-width: 575.98px) {   /* phone: the Chi table has 11 characters per line */
+      main.container-xl { padding-left: .5rem; padding-right: .5rem; }
+      .page-card { padding: .9rem .6rem; }
+      .orig { font-size: 1.15rem; }
+      h3.orig { font-size: 1.6rem; }
+      .orig ruby { margin: 0 .02em; }
+    }
   </style>
 </head>
 <body>
@@ -133,7 +142,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('span.ids[data-ids], span.ids[data-char]'), function (sp, n) {
       var ch = sp.getAttribute('data-char'), ids = ch || sp.getAttribute('data-ids'), tree = ch ? { ch: ch } : parseIds(ids);
       if (!tree) return;
-      drawIds(tree, 'k' + n).then(function (svg) { sp.innerHTML = svg; sp.setAttribute('role', 'img'); sp.setAttribute('aria-label', ids); sp.title = ids; }).catch(function () { /* stays text */ });
+      drawIds(tree, 'k' + n).then(function (svg) { sp.innerHTML = svg; sp.classList.add('drawn'); sp.setAttribute('role', 'img'); sp.setAttribute('aria-label', ids); sp.title = ids; }).catch(function () { /* stays text */ });
     });
   };
   document.head.appendChild(s);
