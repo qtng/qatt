@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Evidence | Qatt.org</title>
+  <meta name="description" content="Draft Unicode encoding proposal for Quốc Âm Tân Tự (QATT).">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/navigation.js"></script>
+  <style>
+    body { background: #fffdf8; color: #2b2118; }
+    main { max-width: 54rem; }
+    h1, h2, h3, h4 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+    h2 { margin-top: 2.2rem; border-bottom: 1px solid #dccfb2; padding-bottom: .25rem; }
+    a { color: #a8362a; }
+    table { border-collapse: collapse; margin: 1rem 0; font-size: .9rem; }
+    th, td { border: 1px solid #dccfb2; padding: .25rem .5rem; vertical-align: top; }
+    th { background: #f7efdc; }
+    .table-wrap { overflow-x: auto; }
+    details.sec { margin-bottom: .6rem; }
+    details.sec > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .6rem; padding: .15rem .9rem; border-radius: .4rem; }
+    details.sec > summary::-webkit-details-marker { display: none; }
+    details.sec > summary::before { content: "\25B8"; transition: transform .15s; }
+    details.sec[open] > summary::before { transform: rotate(90deg); }
+    details.sec > summary h2 { border-bottom: 0; margin: .5rem 0; flex: 1; color: inherit; font-size: 1.35rem; }
+    details.sec > summary .anchor { color: inherit; }
+    details.sec > :not(summary) { padding: .25rem .25rem 0; }
+    main img { max-width: 100%; height: auto; border: 1px solid #dccfb2; }
+    code, pre { font-size: .85rem; }
+    pre { background: #f7efdc; padding: .75rem 1rem; overflow-x: auto; }
+    .anchor { margin-left: .4rem; opacity: 0; color: #a8362a; text-decoration: none; vertical-align: -.1em; }
+    .anchor svg { width: .75em; height: .75em; fill: currentColor; }
+    h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, .anchor:focus { opacity: 1; }
+    @media (hover: none) { .anchor { opacity: .45; } }
+    h1, h2, h3, h4 { scroll-margin-top: 4.5rem; }
+  </style>
+</head>
+<body>
+  <main class="container py-4">
+<p><a href="../index.html">Proposal</a></p>
+<h1 id="evidence">Evidence<a class="anchor" href="#evidence" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h1>
+<p>One Markdown file per claim in the proposal that needs a source citation: <code>E01.md</code>, <code>E02.md</code>, … Each file shows the images of the passage, followed by the transcription, the translation and notes. Appendix B of the proposal and the overview below are generated from these files with <code>python tools/make_appendix.py</code>.</p>
+<h2 id="format">Format<a class="anchor" href="#format" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<pre><code class="language-markdown">---
+id: E04
+claim: &quot;The statement in the proposal that the passage supports&quot;
+sections: [3.2, 4.1]
+source: [Source 1]
+page: 6
+location: &quot;Column and line on the page&quot;
+image: [E04-1.png]
+status: located
+---
+
+![Source 1](images/E04-1.png)
+
+## Transcription
+…
+## Translation
+…
+## Notes
+…
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>Stable identifier, also the file name; add <code>E12a</code> etc. for further passages</td>
+</tr>
+<tr>
+<td>claim</td>
+<td>The statement in the proposal that the passage supports, in double quotes</td>
+</tr>
+<tr>
+<td>sections</td>
+<td>Sections of <code>proposal.md</code> that rely on the claim</td>
+</tr>
+<tr>
+<td>source</td>
+<td>Sources shown, the cited source first</td>
+</tr>
+<tr>
+<td>page</td>
+<td>Page within the manuscript, 1 to 8, shared by both sources (not the folio number of the volume: Source 1 is on folios 3–10, Source 2 on folios 11–18)</td>
+</tr>
+<tr>
+<td>location</td>
+<td>Column and line on the page, in double quotes</td>
+</tr>
+<tr>
+<td>image</td>
+<td>Image files in <code>images/</code>, in the order of <code>source</code></td>
+</tr>
+<tr>
+<td>status</td>
+<td><code>missing</code>, <code>located</code> (passage known, citation incomplete) or <code>cited</code> (all fields filled)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Transcriptions write QATT characters as placeholders until a font exists: <code>{CU 翁}</code> is a standalone unmarked Cán annotated 翁, <code>{CM 翁}</code> a standalone marked Cán, <code>{CH …}</code> a standalone Chi, <code>{PT …}</code> a phản thiết pair, <code>{QT …}</code> a QATT character whose class has not been determined.</p>
+<p>Cite Source 1, and add Source 2 only where it differs or where its reading matters. Both witnesses share the page numbering and the layout of the columns. The proposal cites by page only, for example (p. <a href="../pages/S1-p2.jpg" target="_blank">2</a>), and names a source only where it matters.</p>
+<p>Full pages are in <code>pages/</code>: <code>S1-p1.jpg</code> … <code>S1-p8.jpg</code> for Source 1 and <code>S2-p1.jpg</code> … <code>S2-p8.jpg</code> for Source 2, extracted unchanged from the scan of the volume (folios 3–18, 785 × 1525 pixels each). An entry can show a full page by giving its path, for example <code>image: [pages/S1-p4.jpg]</code>.</p>
+<p>Cut-outs go in <code>images/</code>. They are cut from the full pages by <code>python tools/make_crops.py</code>, using the page and the pixel box (left, top, right, bottom) listed for each image in <code>crops.csv</code>; to change a cut-out, edit its box and run the script again. The optional column <code>strike</code> lists boxes (left top right bottom, separated by semicolons) that are not relevant to the evidence; they are framed with a red rectangle and crossed out, so that a full page can be shown with the relevant columns only. Cut-outs are named after the entry id, for example <code>E08-1.png</code> (Source 1) and <code>E08-2.png</code> (Source 2). Publish scans only where the holding institution permits it.</p>
+<h2 id="overview">Overview<a class="anchor" href="#overview" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<!-- overview:start -->
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Entry</th>
+<th>Claim</th>
+<th>Sections</th>
+<th>Page</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="E01.html">E01</a></td>
+<td>The listing under the heading 幹音二十二字 shows 22 forms, the marked Cán, each of three strokes and one short marking stroke</td>
+<td>4.1, 6.4</td>
+<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E02.html">E02</a></td>
+<td>Five Chi per Cán: the marking stroke sits only at stroke ends (six positions); the marked Cán has it at the start position (upper left or upper middle), and moving it counter-clockwise gives the Chi in order</td>
+<td>4.1</td>
+<td><a href="../pages/S1-p3.jpg" target="_blank">3</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E04.html">E04</a></td>
+<td>Components written standalone and side by side when the text explains combination, including a standalone unmarked Cán and two adjacent unmarked Cán</td>
+<td>3.2, 4.1, 5.4</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E05.html">E05</a></td>
+<td>Phản thiết method described in the section Phản Thiết Hài Âm Pháp (反切諧音法); components of different bases, unmarked Cán first</td>
+<td>3.2, 4.2</td>
+<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E06.html">E06</a></td>
+<td>Function in a phản thiết pair: the unmarked Cán gives the initial, the Chi the rhyme</td>
+<td>4.2</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E07.html">E07</a></td>
+<td>Hợp Thư: same-base pairs only, Chi first</td>
+<td>3.2, 4.2, 5.7</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E08.html">E08</a></td>
+<td>Function in a Hợp Thư: the formula names the Chi first and gives the rhyme with the Cán; the part of the Chi is not established</td>
+<td>4.2, 5.4</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E10.html">E10</a></td>
+<td>Tham Thư rule: the lower part follows the 合 body, read as a Hợp Thư</td>
+<td>4.3</td>
+<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E11.html">E11</a></td>
+<td>Reading of a Tham Thư and function of its components</td>
+<td>4.3</td>
+<td>–</td>
+<td>missing</td>
+</tr>
+<tr>
+<td><a href="E12.html">E12</a></td>
+<td>Attested Tham Thư, first example</td>
+<td>4.3, B</td>
+<td>–</td>
+<td>missing</td>
+</tr>
+<tr>
+<td><a href="E13.html">E13</a></td>
+<td>Attested Tham Thư, second example</td>
+<td>4.3, B</td>
+<td>–</td>
+<td>missing</td>
+</tr>
+<tr>
+<td><a href="E14.html">E14</a></td>
+<td>Tone marks: circle and semicircle in four corners, eight tones</td>
+<td>4.4</td>
+<td><a href="../pages/S1-p4.jpg" target="_blank">4</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E15.html">E15</a></td>
+<td>Tone marks in all four corners, both shapes: the unmarked Cán of đông written with all eight tone marks, annotated 東 董 凍 篤 同 洞 動 獨</td>
+<td>4.4, B</td>
+<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E16.html">E16</a></td>
+<td>Semicircle orientation: open side facing the centre in every example</td>
+<td>4.4</td>
+<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E17.html">E17</a></td>
+<td>Eight tones follow the Chinese yin-yang method</td>
+<td>2.1</td>
+<td><a href="../pages/S1-p4.jpg" target="_blank">4</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E18.html">E18</a></td>
+<td>Listing of the 22 base sounds (幹音二十二字) in source order, each shown with its QATT character and annotated with the name of its sound in Chữ Nôm</td>
+<td>6.4, 7.1</td>
+<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E19.html">E19</a></td>
+<td>Script runs with vertical Hán Nôm text, treated like Hán Nôm characters</td>
+<td>3.1, 6.3</td>
+<td>–</td>
+<td>missing</td>
+</tr>
+<tr>
+<td><a href="E20.html">E20</a></td>
+<td>Date and provenance of source 1</td>
+<td>2.1, 3.1</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E21.html">E21</a></td>
+<td>Date and provenance of source 2</td>
+<td>2.1, 3.1</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E22.html">E22</a></td>
+<td>Modern use of the script, including written forms in online discussion</td>
+<td>3.3</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E23.html">E23</a></td>
+<td>Source 2 has the same content and page numbering as Source 1; whether it was copied from Source 1 or from an earlier original cannot be determined</td>
+<td>1, 3</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E24.html">E24</a></td>
+<td>Tone marks are optional: characters with and without a tone mark in the same passage</td>
+<td>4.4, 5.6</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E25.html">E25</a></td>
+<td>The neutral tone (ngang, âm bình) has its own mark, a semicircle in the lower left corner; a character without a tone mark does not mean the neutral tone</td>
+<td>4.4, 5.6</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E26.html">E26</a></td>
+<td>Tone marks on standalone components (unmarked Cán and Chi)</td>
+<td>4.4, 5.3</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E27.html">E27</a></td>
+<td>Round and angular forms of the same tone mark are handwriting variation: Source 1 writes the mark now round, now close to a hook; Source 2 writes all tone marks of the passage angular</td>
+<td>4.4, 8</td>
+<td><a href="../pages/S1-p6.jpg" target="_blank">6</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E28.html">E28</a></td>
+<td>The source lists the tones first with the four half circles, then the four full circles, each starting lower left and running clockwise</td>
+<td>7</td>
+<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E29.html">E29</a></td>
+<td>Table of the Chi under the heading 枝字一百一十字, 'the 110 Chi characters'; the table shows 109, one left out by oversight</td>
+<td>4.1, 6.4, 7.1</td>
+<td><a href="../pages/S1-p3.jpg" target="_blank">3</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E30.html">E30</a></td>
+<td>Dating: the character 華 lacks its final stroke, a naming taboo for Hồ Thị Hoa, mother of Emperor Thiệu Trị (1841–1847), so the text is not older than his reign</td>
+<td>1, 2.1, 3.1</td>
+<td><a href="../pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E31.html">E31</a></td>
+<td>Author's signature: Nam Thành cư sĩ Nguyễn Tử (南城居士阮子)</td>
+<td>2.1</td>
+<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E33.html">E33</a></td>
+<td>Name of the script: 國音新字 (Quốc Âm Tân Tự), in the heading of the preface 國音新字序</td>
+<td>1, 2, 2.1</td>
+<td><a href="../pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E34.html">E34</a></td>
+<td>Marked Cán and unmarked Cán both appear standalone, with the same reading, also with tone marks; only the unmarked Cán combines, never the marked Cán</td>
+<td>4.1, 5.3</td>
+<td><a href="../pages/S1-p5.jpg" target="_blank">5</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E35.html">E35</a></td>
+<td>The source contains no running text in the script: only single characters given as examples and spelling formulas in the phản thiết manner, within Hán Nôm text</td>
+<td>2.1, 4.1</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E36.html">E36</a></td>
+<td>Counts of the characters in the section 音数: 176 single Cán, 880 single characters, 880 合書 with Chi left and Cán right, 18,480 合書 with Cán left and Chi right, each including the tone marks; eight times 22, 110, 110 and 2,310</td>
+<td>4.1, 4.2, 4.5</td>
+<td><a href="../pages/S1-p8.jpg" target="_blank">8</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E37.html">E37</a></td>
+<td>The term Cán (幹): the listing of the 22 Cán is headed 幹音二十二字, 'trunk sounds, twenty-two characters'</td>
+<td>4.1, 6.4</td>
+<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E38.html">E38</a></td>
+<td>The term Cán (幹) also occurs with 字 in 二十二幹字為標, 'the 22 Cán characters as the mark'; with 幹音二十二字 (<a href="E37.html">E37</a>) the source uses 幹 with 音 and with 字</td>
+<td>4.1</td>
+<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>cited</td>
+</tr>
+<tr>
+<td><a href="E39.html">E39</a></td>
+<td>Worked example of a phản thiết pair, the unmarked Cán of ONG and the Chi CHONG-MARK-5, read yên, and a list of five characters</td>
+<td>4.2</td>
+<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E40.html">E40</a></td>
+<td>Reading order of the Tham Thư: the formula that explains a Tham Thư character names the lower component first</td>
+<td>3.2, 4.3</td>
+<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E41.html">E41</a></td>
+<td>Second attested Tham Thư: a Hợp Thư of BONG with the Chi HONG-MARK-2 above it, explained by a formula</td>
+<td>4.3</td>
+<td><a href="../pages/S1-p7.jpg" target="_blank">7</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E42.html">E42</a></td>
+<td>Nguyễn Quang Hồng (1986), an earlier description of the script (hint only, not cited)</td>
+<td>2.1</td>
+<td>–</td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E43.html">E43</a></td>
+<td>Purpose of the script: the author made it for his own private notes (以便私記)</td>
+<td>2.1</td>
+<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E44.html">E44</a></td>
+<td>The idea of the script: writing was first made with one simple rule that left no sound out</td>
+<td>2.1</td>
+<td><a href="../pages/S1-p2.jpg" target="_blank">2</a></td>
+<td>located</td>
+</tr>
+<tr>
+<td><a href="E45.html">E45</a></td>
+<td>Combination from few signs: the preface takes the growth of the trigrams of the Book of Changes as its model</td>
+<td>4</td>
+<td><a href="../pages/S1-p1.jpg" target="_blank">1</a></td>
+<td>located</td>
+</tr>
+</tbody>
+</table></div>
+<!-- overview:end -->
+<h2 id="corrections">Corrections<a class="anchor" href="#corrections" aria-label="Link to this section" title="Link to this section"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"/></svg></a></h2>
+<p><code>corrections.csv</code> lists the places where Source 2 differs from Source 1: corrections of characters that are unclear or wrong in Source 1, and local rewrites where the scribe of Source 2 struck out and rewrote his own unclear character.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>Stable identifier (C01, C02, …)</td>
+</tr>
+<tr>
+<td>page</td>
+<td>Page within the manuscript, 1 to 8, shared by both sources</td>
+</tr>
+<tr>
+<td>location</td>
+<td>Column and position on the page</td>
+</tr>
+<tr>
+<td>source_1</td>
+<td>Reading in Source 1</td>
+</tr>
+<tr>
+<td>source_2</td>
+<td>Reading in Source 2</td>
+</tr>
+<tr>
+<td>type</td>
+<td><code>correction of Source 1</code> (character unclear or wrong in Source 1) or <code>local rewrite in Source 2</code> (the scribe of Source 2 rewrote his own unclear character; no difference in reading)</td>
+</tr>
+<tr>
+<td>image</td>
+<td>Image file in <code>images/</code></td>
+</tr>
+<tr>
+<td>notes</td>
+<td>Anything else</td>
+</tr>
+</tbody>
+</table></div>
+<p>A character struck out with three dots is deleted and does not count.</p>
+
+  </main>
+  <script>
+    // a link to an anchor inside a closed section opens the section
+    function openTarget() {
+      const t = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      for (let d = t && t.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) d.open = true;
+      if (t) t.scrollIntoView();
+    }
+    addEventListener('hashchange', openTarget);
+    openTarget();
+  </script>
+</body>
+</html>
