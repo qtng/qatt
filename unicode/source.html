@@ -109,7 +109,7 @@
       Object.keys(buhin).forEach(function (n) { k.kBuhin.push(n, buhin[n]); });
       var p = new Kage.Polygons();
       k.makeGlyph(p, top);
-      var svg = p.generateSVG().replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+      var svg = p.generateSVG().replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').replace(/fill="black"/g, 'fill="currentColor"');
       return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="1em" height="1em" fill="currentColor">' + svg + '</svg>';
     });
   }
