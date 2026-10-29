@@ -19,9 +19,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .note-row { display: block; width: 100%; min-height: 64px; padding: .7rem 1rem; text-align: left; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
 .note-row:active { background: rgba(255, 255, 255, .06); }
 .note-title { display: block; font-size: 1.5rem; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.note-title[data-vi] { font-family: system-ui, sans-serif; font-size: 1.1rem; color: var(--muted); }
-.note-preview { display: block; color: var(--muted); font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.note-date { display: block; color: var(--muted); font-size: .8rem; margin-top: .1rem; }
+.note-title[data-vi] { font-family: system-ui, sans-serif; font-size: 1.1rem; opacity: .7; }
+.note-preview { display: block; opacity: .8; font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-date { display: block; opacity: .7; font-size: .8rem; margin-top: .1rem; }
 .empty { margin: 3rem 1rem; text-align: center; color: var(--muted); }
 .fab { position: fixed; right: calc(1rem + env(safe-area-inset-right)); bottom: calc(1rem + env(safe-area-inset-bottom)); width: 56px; height: 56px; border: 0; border-radius: 16px; background: var(--accent); color: #fff; font-size: 1.6rem; box-shadow: 0 4px 14px rgba(0, 0, 0, .55); }
 
