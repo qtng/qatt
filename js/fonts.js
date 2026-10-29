@@ -44,8 +44,7 @@ const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.cur
 (() => {
   const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());
   const style = document.createElement("style");
-  const FONT_VERSION = 6;   // raise it when the fonts are built again (they are cached for 4 hours): v2 = joiner U+F009A, combiner U+F009B; v3 = brush tones of Khai and Pen Cut; v4 = also Pen; v5 = the lowered marks of tr, x, kh, m in Prototype and Brush; v6 = built from fonts/paths.json
-  style.textContent = FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(${QATT_FONT_DIR}${f.file}.woff2?v=${FONT_VERSION}) format("woff2"), url(${QATT_FONT_DIR}${f.file}.ttf?v=${FONT_VERSION}) format("truetype"); }`).join("\n");
+  style.textContent = FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(${QATT_FONT_DIR}${f.file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${f.file}.ttf) format("truetype"); }`).join("\n");
   document.head.append(style);
 
   const fill = (select, items) => {
