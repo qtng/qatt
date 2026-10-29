@@ -49,6 +49,8 @@ window.notesApp = { store, ready, flush() } is for the tests.
     for (const note of shown) {
       const li = document.createElement('li'), row = document.createElement('button');
       row.type = 'button'; row.className = 'note-row'; row.dataset.id = note.id;
+      const look = styleOf(note);   // each note is drawn in its own style
+      row.style.background = look.bg; row.style.color = look.ink; row.style.textShadow = look.shadow;
       const title = document.createElement('span'), title_ = NotesCore.title(note.text);
       title.className = 'note-title';
       if (title_) title.textContent = title_;
@@ -133,6 +135,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('view-list').hidden = true;
     $('view-editor').hidden = false;
     field.scrollTop = 0;
+    applyStyle(note);
     setEditing(fresh);
     if (fresh) field.focus();
   }
@@ -158,7 +161,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
   $('new-note').addEventListener('click', () => {
-    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now };
+    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(styleById(settings.get('style', NotesStyles.defaultId)))) };
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
@@ -275,12 +278,25 @@ window.notesApp = { store, ready, flush() } is for the tests.
     b.addEventListener('click', () => setFont(f.family));
     $('set-font').append(b);
   }
-  setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.list[0].family);
+  setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.defaultFamily);
 
+  // the style of a note is stored in the note as css (base64), not as a name; a note without a (valid) style has the default one
+  const styleById = id => NotesStyles.list.find(s => s.id === id) || NotesStyles.list.find(s => s.id === NotesStyles.defaultId);
+  function styleOf(note) {
+    return NotesStyles.parse(NotesStyles.decode(note.style || '')) || NotesStyles.parse(NotesStyles.css(styleById(NotesStyles.defaultId)));
+  }
+  function applyStyle(note) {
+    NotesStyles.apply(styleOf(note));
+    const current = NotesStyles.decode(note.style || '') || NotesStyles.css(styleById(NotesStyles.defaultId));
+    document.querySelectorAll('#set-style button').forEach(b => b.setAttribute('aria-checked', String(NotesStyles.css(styleById(b.dataset.style)) === current)));
+  }
   const setStyle = id => {
-    const s = NotesStyles.apply(id);
-    settings.set('style', s.id);
-    document.querySelectorAll('#set-style button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.style === s.id)));
+    const note = state.current;
+    if (!note) return;
+    note.style = NotesStyles.encode(NotesStyles.css(styleById(id)));
+    settings.set('style', id);   // the next new note starts with it
+    applyStyle(note);
+    schedule();
   };
   for (const s of NotesStyles.list) {
     const b = document.createElement('button'), box = document.createElement('span'), label = document.createElement('span');
@@ -292,7 +308,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
     b.addEventListener('click', () => setStyle(s.id));
     $('set-style').append(b);
   }
-  setStyle(settings.get('style', NotesStyles.list[0].id));
 
   const setSize = value => {
     value = Math.min(400, Math.max(50, Number(value) || 100));

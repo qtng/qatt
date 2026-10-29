@@ -2,8 +2,12 @@
 The styles of the text field of QATT notes (apps/notes/): background (colour, gradients, textures), ink and the effect of the writing (shadow, glow, embossing, 3D by stacked shadows).
 Only the text field and the reading view have a style; the bars and the list keep the look of the app. Textures are small SVG noise patterns drawn by the browser (no image files).
 
-  NotesStyles.list         [{ id, en, vi, bg, ink, shadow }] (bg is a value of the CSS property background); the first is the default
-  NotesStyles.apply(id)    sets --field-bg, --field-ink and --field-shadow on <html>
+  NotesStyles.list         [{ id, en, vi, bg, ink, shadow }] (bg is a value of the CSS property background)
+  NotesStyles.defaultId    the style of a new installation (Cherry blossom dusk)
+  NotesStyles.css(style)   the css text of a style: "background: …;\ncolor: …;\ntext-shadow: …;" (what a note stores, not the name of the style)
+  NotesStyles.encode(css)  / decode(base64): the css text as base64 (UTF-8) and back (null if it is no base64)
+  NotesStyles.parse(css)   { bg, ink, shadow } of css text, or null if it is not plain css of this kind (no address in it: only the built-in data: textures)
+  NotesStyles.apply(parsed) sets --field-bg, --field-ink and --field-shadow on <html>
 */
 const NotesStyles = (() => {
   // fibres of paper: noise in the colour r g b (0 to 1) with the opacity a
@@ -39,12 +43,25 @@ const NotesStyles = (() => {
       bg: `${noise(.5, .35, .3, .22)}, linear-gradient(#f4ead7, #eadcc0)`,
       ink: '#b3261e', shadow: '1px 1px 0 rgba(255,255,255,.75), -1px -1px 0 rgba(90,10,10,.25)' },
   ];
-  const apply = id => {
-    const s = list.find(x => x.id === id) || list[0], root = document.documentElement.style;
-    root.setProperty('--field-bg', s.bg);
-    root.setProperty('--field-ink', s.ink);
-    root.setProperty('--field-shadow', s.shadow);
-    return s;
+  const defaultId = 'sakura-dusk';
+  const css = s => `background: ${s.bg};\ncolor: ${s.ink};\ntext-shadow: ${s.shadow};`;
+  const encode = text => btoa(unescape(encodeURIComponent(text)));
+  const decode = b64 => { try { return decodeURIComponent(escape(atob(b64))); } catch (e) { return null; } };
+  const parse = text => {
+    if (typeof text !== 'string' || text.length > 50000) return null;
+    // no address to load: a file of somebody else must not make the app fetch anything. Allowed are only the quoted data: images (the textures); the rest may not load images at all.
+    const rest = text.replace(/url\(\s*"data:image\/[^"]*"\s*\)/gi, '');
+    if (/url\(|image-set\(|image\(|src\(|paint\(|element\(|cross-fade\(|@import/i.test(rest)) return null;
+    const probe = document.createElement('div').style;
+    probe.cssText = text;   // the browser reads it as css: anything it does not understand is dropped
+    const bg = probe.getPropertyValue('background'), ink = probe.getPropertyValue('color');
+    return bg && ink ? { bg, ink, shadow: probe.getPropertyValue('text-shadow') || 'none' } : null;
   };
-  return { list, apply };
+  const apply = parsed => {
+    const root = document.documentElement.style;
+    root.setProperty('--field-bg', parsed.bg);
+    root.setProperty('--field-ink', parsed.ink);
+    root.setProperty('--field-shadow', parsed.shadow);
+  };
+  return { list, defaultId, css, encode, decode, parse, apply };
 })();
