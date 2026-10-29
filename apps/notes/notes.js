@@ -310,6 +310,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
     renderList();
   });
 
+  // ----- offline: the service worker (sw.js) -----
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {}));
+
   // ----- start -----
   (async () => {
     await loadDecodings();
