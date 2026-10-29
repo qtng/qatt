@@ -252,7 +252,7 @@ const QattWriter = (() => {
   // The variants of the characters before the cursor (see the long comment in mount): returns a function that gives the three slots in the order marked1, neutral, tham
   // (undefined = not possible now).  o.on() whether QATT is on, o.refresh() called after a variant was applied.
   function makeVariants(typer, o) {
-        const utf16 = c => c > 0xFFFF ? 2 : 1;
+    const utf16 = c => c > 0xFFFF ? 2 : 1;
     const variants = () => {
       if (!o.on() || typer.selectionStart !== typer.selectionEnd) return [];
       const at = typer.selectionStart, before = Array.from(typer.value.slice(0, at), ch => ch.codePointAt(0)), after = typer.value.codePointAt(at);
