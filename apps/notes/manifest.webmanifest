@@ -1,7 +1,7 @@
 {
   "id": "/apps/notes/",
-  "name": "QATT notes",
-  "short_name": "QATT notes",
+  "name": "Qatt.org Notes",
+  "short_name": "Qatt.org Notes",
   "description": "Notes in Quốc Âm Tân Tự",
   "lang": "en",
   "start_url": "./",

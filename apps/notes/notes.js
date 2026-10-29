@@ -1,6 +1,6 @@
 /*
-QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, ime.js, notes-editor.js, notes-core.js, notes-db.js, notes-fonts.js.
-Routes (undoLog, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
+QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, fonts.js, ime.js, notes-editor.js, notes-core.js, notes-db.js.
+Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
 window.notesApp = { store, ready, flush() } is for the tests.
 */
 (() => {
@@ -12,7 +12,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const app = window.notesApp = { store: null, ready: false, parser, flush: () => save() };
   let saveTimer = null, snackTimer = null, deleted = null, persistAsked = false;
 
-  NotesFonts.install('/');
 
   const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
@@ -183,7 +182,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
   $('new-note').addEventListener('click', () => {
-    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };   // the first note is Neon night, later ones get a random style
+    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, format: { size: 150 }, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };   // the first note is Neon night, later ones get a random style
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
@@ -282,19 +281,20 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // ----- font, style, size, alignment, decoding -----
   // the format (font, size, alignment, decoding, bold, italic) belongs to the note: note.format holds what differs from the defaults; user = chosen in the menu (stored in the note), else only shown
-  const FORMAT_DEFAULTS = { font: NotesFonts.defaultFamily, size: 100, align: 'left', decoding: 'qatt', bold: false, italic: false };
+  const FONTS = qattFontsShown();   // js/fonts.js decides which fonts this visitor has, and its default is the default here
+  const FORMAT_DEFAULTS = { font: (FONTS.find(f => f.default) || FONTS[0]).family, size: 100, align: 'left', decoding: 'qatt', bold: false, italic: false };
   const formatOf = note => ({ ...FORMAT_DEFAULTS, ...(note && note.format && typeof note.format === 'object' ? note.format : {}) });
   const keepFormat = (key, value) => { const note = state.current; if (!note) return; note.format = { ...(note.format || {}), [key]: value }; schedule(); };
   const setFont = (family, user) => {
-    if (!NotesFonts.list.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
-    NotesFonts.apply(family);
+    if (!FONTS.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
+    document.documentElement.style.setProperty('--qfont', `"${family}"`);
     if (user) keepFormat('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
   const pickFont = family => { setFont(family, true); closeMenu(); };
   const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles, written with the decoding chosen
   const refreshSamples = () => { const text = sampleText(); document.querySelectorAll('.qsample, .style-sample').forEach(e => { e.textContent = text; }); };
-  for (const f of NotesFonts.list) {
+  for (const f of FONTS) {
     const b = document.createElement('button');
     b.type = 'button'; b.dataset.font = f.family; b.setAttribute('role', 'radio');
     const q = document.createElement('span'), label = document.createElement('span');
@@ -438,7 +438,8 @@ window.notesApp = { store, ready, flush() } is for the tests.
     try { state.store = await NotesDB.open(); state.notes = await state.store.all(); }
     catch (e) { state.store = NotesDB.memory(); warnUnsaved(); }
     app.store = state.store;
+    await route();
+    if (state.notes.length === 0 && !state.current) $('new-note').click();   // nothing written yet: straight to the editor
     app.ready = true;
-    route();
   })();
 })();
