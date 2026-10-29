@@ -113,7 +113,7 @@ const NotesEditor = (() => {
     // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
     let lastPos = 0;
     const snap = () => {
-      if (!o.on() || document.activeElement !== typer) return;
+      if (!o.on() || document.activeElement !== (typer.element || typer)) return;
       let a = typer.selectionStart, b = typer.selectionEnd;
       if (a === b) {
         const cell = cellAt(typer.value, a);
