@@ -34,10 +34,19 @@
       <div id="editor-title" class="title qfont"></div>
       <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
       <div id="menu" class="menu" hidden>
+        <button id="convert" type="button"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển QATT">Convert QATT</span></button>
+        <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
+        <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
+        <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
+        <button id="set-vertical" type="button" role="switch" aria-checked="false"><i class="bi bi-text-paragraph"></i> <span data-vi="Dọc">Vertical</span></button>
         <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
       </div>
     </header>
     <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
+    <div id="keybar" class="keybar" hidden>
+      <span class="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button></span>
+      <button id="convert-key" type="button" class="key"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển QATT">Convert QATT</span></button>
+    </div>
   </section>
   <div id="snackbar" class="snackbar" role="status" hidden><span id="snackbar-text"></span> <button id="undo" type="button" hidden data-vi="Hoàn tác">Undo</button></div>
 </body>

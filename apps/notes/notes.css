@@ -33,3 +33,22 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .snackbar { position: fixed; z-index: 20; left: 50%; bottom: calc(5.5rem + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; max-width: calc(100% - 2rem); padding: .6rem 1rem; border-radius: 10px; background: #3a342a; color: var(--ink); box-shadow: 0 4px 14px rgba(0, 0, 0, .6); }
 .snackbar button { min-height: 40px; padding: 0 .5rem; border: 0; background: transparent; color: var(--accent); font-weight: 600; text-transform: uppercase; }
+
+#note-field.vertical { writing-mode: vertical-rl; overflow-x: auto; overflow-y: hidden; }
+.menu { max-height: calc(100vh - 72px - env(safe-area-inset-top)); overflow-y: auto; }
+.menu-group { padding: .25rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.menu-label { display: block; padding: .25rem 1rem; color: var(--muted); font-size: .8rem; }
+#set-font button { padding-left: 1.25rem; }
+#set-font button[aria-checked="true"] { color: var(--accent); }
+#set-font .qsample { font-size: 1.6rem; min-width: 1.6em; }
+.menu-row { display: flex; align-items: center; gap: .75rem; min-height: 48px; padding: 0 1rem; }
+.menu-row select { margin-left: auto; max-width: 11rem; padding: .35rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.menu-row input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+#set-vertical[aria-checked="true"] { color: var(--accent); }
+
+.keybar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
+.variants { display: inline-flex; gap: .4rem; }
+.variant, .key { min-width: 48px; min-height: 48px; padding: 0 .75rem; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.variant { font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.6rem; line-height: 1; }
+.variant:disabled { opacity: .35; }
+.variant:not(:disabled):active, .key:active { background: rgba(255, 255, 255, .12); }

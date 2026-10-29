@@ -12,7 +12,13 @@ window.notesApp = { store, ready, flush() } is for the tests.
   let saveTimer = null, snackTimer = null, deleted = null, persistAsked = false;
 
   NotesFonts.install('/');
-  NotesFonts.apply(NotesFonts.list[0].family);
+
+  // ----- settings (this device only; the app works without them) -----
+  const settings = (() => {
+    let s = {};
+    try { s = JSON.parse(localStorage.getItem('qattNotes')) || {}; } catch (e) { s = {}; }
+    return { get: (key, fallback) => (s[key] === undefined ? fallback : s[key]), set(key, value) { s[key] = value; try { localStorage.setItem('qattNotes', JSON.stringify(s)); } catch (e) { /* storage may be blocked */ } } };
+  })();
 
   const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
@@ -90,9 +96,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
   window.addEventListener('pagehide', () => { save(); });
 
   // ----- editor -----
-  const editor = QattWriter.editor(field, { parser, onChange: () => { schedule(); showTitle(); } });
+  const editor = QattWriter.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); } });
   const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value); };
-  field.addEventListener('input', () => { schedule(); showTitle(); });
+  field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); });
 
   function showEditor(note, fresh) {
     state.current = note; state.inStore = !fresh; state.dirty = false;
@@ -140,6 +146,35 @@ window.notesApp = { store, ready, flush() } is for the tests.
     else { history.replaceState(null, '', '#/'); route(); }
   });
 
+  // ----- key bar: the variants of the characters before the cursor and Convert; it sits above the keyboard (the editor view is cut at the top of the keyboard) -----
+  const keybar = $('keybar'), variantBtns = Array.from(document.querySelectorAll('#keybar .variant'));
+  let shownKeys = null;
+  function renderKeys() {
+    const slots = editor.variants(), key = slots.map(v => (v ? v.id + v.view : '')).join();
+    if (key === shownKeys) return;
+    shownKeys = key;
+    variantBtns.forEach((btn, i) => {
+      const v = slots[i];
+      btn.disabled = !v;
+      btn.textContent = v ? v.view : '·';
+      btn.title = v ? Lang.t(v.en, v.vi) : '';
+    });
+  }
+  const keepFocus = e => e.preventDefault();   // a click on the bar does not take the focus (and the keyboard) from the field
+  variantBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = editor.variants()[i]; if (v) v.run(); }); });
+  $('convert-key').addEventListener('pointerdown', keepFocus);
+  $('convert-key').addEventListener('click', () => editor.convert());
+  field.addEventListener('focus', () => { keybar.hidden = false; renderKeys(); });
+  field.addEventListener('blur', () => { keybar.hidden = true; });
+  document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
+  document.addEventListener('langchange', () => { shownKeys = null; renderKeys(); });
+  const vv = window.visualViewport;
+  function fitKeyboard() {   // the keyboard covers the lower part of the screen: the editor view ends above it
+    const inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    $('view-editor').style.bottom = inset + 'px';
+  }
+  if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
+
   // ----- menu -----
   function closeMenu() { $('menu').hidden = true; $('menu-btn').setAttribute('aria-expanded', 'false'); }
   $('menu-btn').addEventListener('click', e => {
@@ -149,7 +184,65 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('menu-btn').setAttribute('aria-expanded', String(open));
   });
   document.addEventListener('click', e => { if (!e.target.closest('#menu')) closeMenu(); });
+  $('convert').addEventListener('click', () => { editor.convert(); closeMenu(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+  // ----- font, size, vertical, decoding -----
+  const setFont = family => {
+    NotesFonts.apply(family);
+    settings.set('font', family);
+    document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
+  };
+  const sample = QattText.word('ghi', parser) || '';
+  for (const f of NotesFonts.list) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.font = f.family; b.setAttribute('role', 'radio');
+    const q = document.createElement('span'), label = document.createElement('span');
+    q.className = 'qsample'; q.style.fontFamily = `"${f.family}", system-ui, sans-serif`; q.textContent = sample;
+    label.textContent = f.label;
+    b.append(q, label);
+    b.addEventListener('click', () => setFont(f.family));
+    $('set-font').append(b);
+  }
+  setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.list[0].family);
+
+  const setSize = value => {
+    value = Math.min(400, Math.max(50, Number(value) || 100));
+    $('set-size').value = value; $('size-label').textContent = value + '%';
+    field.style.fontSize = Math.round(value * 0.363) + 'px';   // 100% is 36 pixels as in the editor of qatt.org
+    settings.set('size', value);
+  };
+  $('set-size').addEventListener('input', () => setSize($('set-size').value));
+  setSize(settings.get('size', 100));
+
+  const setVertical = on => {
+    field.classList.toggle('vertical', on);
+    $('set-vertical').setAttribute('aria-checked', String(on));
+    settings.set('vertical', on);
+  };
+  $('set-vertical').addEventListener('click', () => setVertical(!field.classList.contains('vertical')));
+  setVertical(settings.get('vertical', false) === true);
+
+  // the decodings are loaded at every start (decodings.json); without the file the built-in tables of parser.js are used
+  async function loadDecodings() {
+    let list = [{ name: 'qatt', label: 'qatt.org' }, { name: 'omniglot', label: 'omniglot' }];
+    try {
+      const r = await fetch('/decodings.json', { cache: 'no-store' });
+      const loaded = r.ok ? VietnameseParser.loadDecodings(await r.json()) : [];
+      if (loaded.length) list = loaded;
+    } catch (e) { /* offline without a stored copy: the built-in tables */ }
+    const select = $('set-decoding');
+    select.textContent = '';
+    for (const d of list) select.append(new Option(d.label, d.name));
+    const chosen = list.some(d => d.name === settings.get('decoding')) ? settings.get('decoding') : list[0].name;
+    select.value = chosen;
+    parser.setDecoding(chosen);
+  }
+  $('set-decoding').addEventListener('change', () => {
+    const name = $('set-decoding').value;
+    settings.set('decoding', name);
+    editor.setDecoding(name);
+  });
 
   // ----- delete and undo -----
   $('menu-delete').addEventListener('click', async () => {
@@ -178,6 +271,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // ----- start -----
   (async () => {
+    await loadDecodings();
     try { state.store = await NotesDB.open(); state.notes = await state.store.all(); }
     catch (e) { state.store = NotesDB.memory(); warnUnsaved(); }
     app.store = state.store;
