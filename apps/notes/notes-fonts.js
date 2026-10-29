@@ -10,9 +10,9 @@ const NotesFonts = (() => {
   const VERSION = 6;
   const list = [
     { family: "QATT Pen Medium", label: "Pen medium", file: "qatt-pen-medium" },
+    { family: "QATT Serif", label: "Serif", file: "qatt-serif" },
     { family: "QATT Gothic", label: "Gothic", file: "qatt-gothic" },
     { family: "QATT Gothic Wide", label: "Gothic wide", file: "qatt-gothic-wide" },
-    { family: "QATT Serif", label: "Serif", file: "qatt-serif" },
   ];
   const install = base => {
     const style = document.createElement("style");
