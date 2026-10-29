@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>QATT notes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#16130f">
+  <meta name="theme-color" content="#2d2720">
   <meta name="description" content="Notes in Quốc Âm Tân Tự.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -18,6 +18,7 @@
   <script src="notes-core.js"></script>
   <script src="notes-db.js"></script>
   <script src="notes-fonts.js"></script>
+  <script src="notes-styles.js"></script>
   <script src="notes.js" defer></script>
 </head>
 <body>
@@ -43,13 +44,23 @@
     <header class="appbar">
       <button id="back" class="icon-btn" type="button" aria-label="Back" data-vi-aria-label="Quay lại"><i class="bi bi-arrow-left"></i></button>
       <div id="editor-title" class="title qfont"></div>
+      <button id="edit-btn" class="icon-btn" type="button" aria-label="Edit" data-vi-aria-label="Chỉnh sửa"><i class="bi bi-pencil"></i></button>
+      <button id="style-btn" class="style-btn" type="button" aria-label="Style" data-vi-aria-label="Kiểu chữ" aria-haspopup="true" aria-expanded="false"></button>
+      <div id="style-menu" class="menu" hidden><div id="set-style" role="radiogroup"></div></div>
       <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
       <div id="menu" class="menu" hidden>
         <button id="convert" type="button"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển QATT">Convert QATT</span></button>
         <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
         <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
         <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
-        <button id="set-vertical" type="button" role="switch" aria-checked="false"><i class="bi bi-text-paragraph"></i> <span data-vi="Dọc">Vertical</span></button>
+        <div class="menu-row"><span data-vi="Căn lề">Alignment</span>
+          <span id="set-align" class="aligns" role="radiogroup">
+            <button type="button" role="radio" data-align="left" aria-label="Left" data-vi-aria-label="Căn trái" title="Left" data-vi-title="Căn trái"><i class="bi bi-text-left"></i></button>
+            <button type="button" role="radio" data-align="center" aria-label="Centred" data-vi-aria-label="Căn giữa" title="Centred" data-vi-title="Căn giữa"><i class="bi bi-text-center"></i></button>
+            <button type="button" role="radio" data-align="vertical-center" aria-label="Vertical, centred" data-vi-aria-label="Chữ dọc, căn giữa" title="Vertical, centred" data-vi-title="Chữ dọc, căn giữa"><i class="bi bi-text-center turned"></i></button>
+            <button type="button" role="radio" data-align="vertical" aria-label="Vertical" data-vi-aria-label="Chữ dọc" title="Vertical" data-vi-title="Chữ dọc"><i class="bi bi-text-left turned"></i></button>
+          </span></div>
+        <div class="menu-sep" role="separator"></div>
         <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
       </div>
     </header>
