@@ -49,8 +49,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .menu .aligns button { width: 44px; min-height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line); border-radius: 10px; font-size: 1.25rem; }
 .aligns button[aria-checked="true"] { color: var(--accent); border-color: var(--accent); }
 .aligns .turned { display: inline-block; transform: rotate(90deg); }
-#note-field.align-center { text-align: center; }
-#note-field.align-right { text-align: right; }
+#note-field.align-center { text-align: center; }   /* with the vertical lines the centre is the middle of the line from top to bottom */
+.menu-sep { height: 1px; margin: .25rem 0; background: var(--line); }
 
 .keybar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
 .variants { display: inline-flex; gap: .4rem; }

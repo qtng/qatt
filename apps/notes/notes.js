@@ -303,12 +303,11 @@ window.notesApp = { store, ready, flush() } is for the tests.
   $('set-size').addEventListener('input', () => setSize($('set-size').value));
   setSize(settings.get('size', 100));
 
-  // left, centred, right or vertical (vertical lines from right to left): one choice of four
+  // left, centred, vertical centred or vertical (vertical lines from right to left): one choice of four
   const setAlign = value => {
-    if (!['left', 'center', 'right', 'vertical'].includes(value)) value = 'left';
-    field.classList.toggle('vertical', value === 'vertical');
-    field.classList.toggle('align-center', value === 'center');
-    field.classList.toggle('align-right', value === 'right');
+    if (!['left', 'center', 'vertical-center', 'vertical'].includes(value)) value = 'left';
+    field.classList.toggle('vertical', value.startsWith('vertical'));
+    field.classList.toggle('align-center', value === 'center' || value === 'vertical-center');
     document.querySelectorAll('#set-align button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.align === value)));
     settings.set('align', value);
   };
