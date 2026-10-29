@@ -73,3 +73,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 #note-field.bold { font-weight: bold; }
 #note-field.italic { font-style: italic; }
+.hist { width: 40px; }
+.hist:disabled { opacity: .3; }
