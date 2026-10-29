@@ -73,8 +73,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 #note-field.bold { font-weight: bold; }
 #note-field.italic { font-style: italic; }
-.hist { width: 40px; }
-.hist:disabled { opacity: .3; }
+.history { display: inline-flex; gap: .4rem; }
+.key:disabled { opacity: .35; }
 .py-1 { padding-top: .25rem; padding-bottom: .25rem; }
 .lang-switch { flex: none; display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .lang-switch button { min-width: 2.2rem; padding-left: .5rem; padding-right: .5rem; border: 0; background: transparent; font-size: .8rem; font-weight: 600; color: var(--muted); }
