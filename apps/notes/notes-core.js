@@ -1,6 +1,6 @@
 /*
 The logic of the notes app (apps/notes/) that needs no browser: titles, search text, export and import. Needs the global QattText (js/qatt-text.js) for the cells of QATT text.
-A note is { id, text, created, updated } (milliseconds).
+A note is { id, text, created, updated } (milliseconds) and may have style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
 
   NotesCore.title(text)                       first line with a character that is no space, trimmed, at most 80 code points ("" if none)
   NotesCore.preview(text)                     the text after the title line on one line, at most 120 code points
@@ -45,7 +45,7 @@ const NotesCore = (() => {
     try { data = JSON.parse(json); } catch (e) { return { ok: false, error: "Not a notes file" }; }
     if (!data || data.version !== 1 || !Array.isArray(data.notes)) return { ok: false, error: "Not a notes file" };
     if (!data.notes.every(validNote)) return { ok: false, error: "The file has an invalid note" };
-    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated })) };
+    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}) })) };
   };
 
   const merge = (existing, incoming) => {
