@@ -1,6 +1,6 @@
 /*
 QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, ime.js, notes-editor.js, notes-core.js, notes-db.js, notes-fonts.js.
-Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
+Routes (undoLog, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
 window.notesApp = { store, ready, flush() } is for the tests.
 */
 (() => {
@@ -102,9 +102,36 @@ window.notesApp = { store, ready, flush() } is for the tests.
   window.addEventListener('pagehide', () => { save(); });
 
   // ----- editor -----
-  const editor = NotesEditor.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); } });
+  const editor = NotesEditor.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); remember(false); } });
   const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value); };
-  field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); });
+  field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); remember(true); });
+
+  // undo and redo: the field changes by script (Telex, variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
+  const undoLog = { steps: [], at: 0, time: 0 };
+  const cursor = () => ({ text: field.value, start: field.selectionStart, end: field.selectionEnd });
+  function buttons() { $('undo-btn').disabled = undoLog.at <= 0; $('redo-btn').disabled = undoLog.at >= undoLog.steps.length - 1; }
+  function resetHistory() { undoLog.steps = [cursor()]; undoLog.at = 0; undoLog.time = 0; buttons(); }
+  function remember(typing) {
+    const last = undoLog.steps[undoLog.at];
+    if (last && last.text === field.value) { if (typing) last.start = field.selectionStart, last.end = field.selectionEnd; return; }
+    const now = Date.now();
+    undoLog.steps.length = undoLog.at + 1;
+    if (typing && undoLog.time && now - undoLog.time < 500 && undoLog.at > 0) undoLog.steps[undoLog.at] = cursor();
+    else { undoLog.steps.push(cursor()); undoLog.at = undoLog.steps.length - 1; if (undoLog.steps.length > 300) { undoLog.steps.shift(); undoLog.at--; } }
+    undoLog.time = typing ? now : 0;
+    buttons();
+  }
+  function goto(i) {
+    if (i < 0 || i >= undoLog.steps.length) return;
+    undoLog.at = i; undoLog.time = 0;
+    const s = undoLog.steps[i];
+    field.value = s.text; field.setSelectionRange(s.start, s.end);
+    schedule(); showTitle(); renderKeys(); buttons();
+  }
+  for (const [id, step] of [['undo-btn', -1], ['redo-btn', 1]]) {
+    $(id).addEventListener('pointerdown', e => e.preventDefault());   // the keyboard stays
+    $(id).addEventListener('click', () => goto(undoLog.at + step));
+  }
 
   // reading mode (an existing note opens read-only, no keyboard) and editing mode (a new note, the pencil of the bar, a double tap in the text); the check mark leads back to reading
   function setEditing(on) {
@@ -115,6 +142,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
     $('convert').hidden = !on;
+    $('undo-btn').hidden = $('redo-btn').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
@@ -130,6 +158,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   function showEditor(note, fresh) {
     state.current = note; state.inStore = !fresh; state.dirty = false;
     field.value = note.text;
+    resetHistory();
     showTitle();
     closeMenu();
     $('view-list').hidden = true;
@@ -266,6 +295,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     settings.set('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
+  const pickFont = family => { setFont(family); closeMenu(); };
   const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles, written with the decoding chosen
   const refreshSamples = () => { const text = sampleText(); document.querySelectorAll('.qsample, .style-sample').forEach(e => { e.textContent = text; }); };
   for (const f of NotesFonts.list) {
@@ -275,7 +305,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     q.className = 'qsample'; q.style.fontFamily = `"${f.family}", system-ui, sans-serif`;
     label.textContent = f.label;
     b.append(q, label);
-    b.addEventListener('click', () => setFont(f.family));
+    b.addEventListener('click', () => pickFont(f.family));
     $('set-font').append(b);
   }
   setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.defaultFamily);
@@ -296,6 +326,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     note.style = NotesStyles.encode(NotesStyles.css(styleById(id)));
     applyStyle(note);
     schedule();
+    closeMenu();
   };
   for (const s of NotesStyles.list) {
     const b = document.createElement('button'), box = document.createElement('span'), label = document.createElement('span');
@@ -325,8 +356,15 @@ window.notesApp = { store, ready, flush() } is for the tests.
     document.querySelectorAll('#set-align button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.align === value)));
     settings.set('align', value);
   };
-  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => setAlign(b.dataset.align)));
+  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => { setAlign(b.dataset.align); closeMenu(); }));
   setAlign(settings.get('align', settings.get('vertical', false) === true ? 'vertical' : 'left'));   // the former switch "Vertical" is kept
+
+  // bold and italic (the browser slants and thickens the strokes of the font; kept on this device like the font)
+  for (const [key, id] of [['bold', 'set-bold'], ['italic', 'set-italic']]) {
+    const set = on => { field.classList.toggle(key, on); $(id).setAttribute('aria-pressed', String(on)); settings.set(key, on); };
+    $(id).addEventListener('click', () => { set(!field.classList.contains(key)); closeMenu(); });
+    set(settings.get(key, false) === true);
+  }
 
   // qatt and omniglot are in parser.js; decodings.json holds additional ones (an entry with the name of a built-in one replaces it in the app) and is loaded at every start
   const validDecoding = d => d && typeof d.name === 'string' && /^[a-z][a-z0-9_-]*$/.test(d.name) && Array.isArray(d.table)
@@ -355,6 +393,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     settings.set('decoding', name);
     editor.setDecoding(name);
     refreshSamples();
+    closeMenu();
   });
 
   // ----- delete and undo -----
