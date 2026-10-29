@@ -2,11 +2,11 @@
 Service worker of QATT notes (apps/notes/): the app works offline.
 Raise CACHE when a file of PRECACHE changes (a new name = a new cache; the old ones are deleted when the new worker takes over, the open page keeps what it has and the next start uses the new files).
 Keep PRECACHE equal to what index.html loads (a test compares them).
-  - the files of PRECACHE: from the cache only, all of one version (they are renewed together by a new worker when CACHE changes; renewing single files in the background mixed an old page with new scripts)
+  - the files of PRECACHE: from the cache, renewed in the background
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex) is cached the first time it loads, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v2';
+const CACHE = 'qatt-notes-v1';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const PAGE = '/apps/notes/';
 const PRECACHE = [
@@ -67,10 +67,9 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
     event.respondWith((async () => {
       const cache = await caches.open(CACHE), key = keyOf(req);
       const hit = await cache.match(key, { ignoreSearch: true });
-      if (hit) return hit;
-      const res = await fetch(req);   // a file that is not in the cache yet (a font of an admin, ime.js)
-      if (res.ok) cache.put(key, res.clone());
-      return res;
+      const refresh = fetch(req).then(res => { if (res.ok) cache.put(key, res.clone()); return res; });
+      if (hit) { event.waitUntil(refresh.catch(() => {})); return hit; }
+      return refresh;
     })());
   });
 }
