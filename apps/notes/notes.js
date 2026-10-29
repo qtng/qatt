@@ -283,9 +283,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
     snack(`Imported ${merged.added}, updated ${merged.updated}`, `Đã nhập ${merged.added}, cập nhật ${merged.updated}`);
   });
 
-  // the language (the site menu bar is not in the app): the button names the language it switches to, in that language
-  const langLabel = () => { $('lang-label').textContent = Lang.current === 'vi' ? 'English' : 'Tiếng Việt'; };
-  $('lang-toggle').addEventListener('click', () => { closeMenu(); Lang.set(Lang.current === 'vi' ? 'en' : 'vi'); });
+  // the language (the site menu bar is not in the app): EN | VI in the bar of the list, the current one is lit
+  const langLabel = () => document.querySelectorAll('#lang-switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === Lang.current)));
+  document.querySelectorAll('#lang-switch button').forEach(b => b.addEventListener('click', () => Lang.set(b.dataset.lang)));
   document.addEventListener('langchange', () => { langLabel(); renderList(); });
   langLabel();
 
