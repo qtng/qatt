@@ -104,7 +104,7 @@ const QattWriter = (() => {
     <div id="status" class="status mt-4"></div>`;
 
   const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
-  const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B, NEUTRAL = 0xF009C;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
+  const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
   const WINDOW = 64;
 
   // The form with marking stroke 1 (code point + 1 of an unmarked letter) has no reading of its own; it is written as the reading of the unmarked form, in capitals, and read back the same way:
@@ -249,66 +249,6 @@ const QattWriter = (() => {
     return { convertBefore, tidy };
   }
 
-  // The variants of the characters before the cursor (see the long comment in mount): returns a function that gives the three slots in the order marked1, neutral, tham
-  // (undefined = not possible now).  o.on() whether QATT is on, o.refresh() called after a variant was applied.
-  function makeVariants(typer, o) {
-    const utf16 = c => c > 0xFFFF ? 2 : 1;
-    const variants = () => {
-      if (!o.on() || typer.selectionStart !== typer.selectionEnd) return [];
-      const at = typer.selectionStart, before = Array.from(typer.value.slice(0, at), ch => ch.codePointAt(0)), after = typer.value.codePointAt(at);
-      if (after === JOINER || after === COMBINER) return [];   // the cursor is inside a cell
-      let j = before.length - 1;
-      while (j >= 0 && before[j] >= 0xF009C && before[j] <= 0xF00A3) j--;
-      const pos = i => before.slice(0, i).reduce((n, c) => n + utf16(c), 0);   // the position of before[i] in the text
-      const edit = (from, length, text, caret) => {
-        typer.setRangeText(text, from, from + length, 'preserve');
-        typer.focus({ preventScroll: true });   // the cursor stays in the field (the dropdown does not keep the focus)
-        typer.setSelectionRange(caret, caret);
-        o.refresh();
-      };
-      const list = [], str = (...cps) => String.fromCodePoint(...cps);   // `view`: the characters as they will stand, shown on the button
-      // the cell that ends at index k: a letter, or a pair (letter + joiner + letter) with the letter before the joiner
-      const cellEnding = k => before.slice(before[k - 1] === JOINER && k >= 2 && LETTER(before[k - 2]) ? k - 2 : k, k + 1);
-      const tones = before.slice(j + 1);   // the tone marks between the letter and the cursor stand in the preview too
-      if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
-        list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(...cellEnding(j - 1), COMBINER, before[j], ...tones), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
-      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // it stands alone: not the second part of a pair or of a stack
-        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1, ...tones), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
-      if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
-        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(...cellEnding(j), NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
-      return list;
-    };
-    // three small buttons with a place of their own each (marked 1, neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
-    const SLOTS = ['marked1', 'neutral', 'tham'];
-    return () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
-  }
-
-  // Convert: with QATT characters that have a reading in the text they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding of the parser
-  // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
-  // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
-  function convertText(text, parser) {
-    const IDS_STACK = '\u2FF1', COMBINER_CHAR = String.fromCodePoint(COMBINER), NEUTRAL_CHAR = String.fromCodePoint(NEUTRAL);
-    // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
-    const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
-      let out = '', afterCell = false;
-      for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
-        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? cellReading(part, parser) : '?';
-        const isCell = read !== '?';   // a cell without a reading (the form with marking stroke 1) stays as it is, like any other character
-        if (isCell) out += (afterCell ? ' ' : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
-        else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
-        afterCell = isCell;
-      }
-      return out;
-    }).join(IDS_STACK);
-    // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
-    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => wordToQatt(w, parser) ?? w)
-      .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
-    // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
-    // (the parts of a stack are cells of their own; a cell without a reading, such as the form with marking stroke 1, does not count: it stays as it is, and the field can still be converted back)
-    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => cellReading(c.cell, parser) !== '?'));
-    return readable(text) ? readAsQuocNgu(text) : toQatt(text);
-  }
-
   function mount(root, options = {}) {
     const mode = options.switch === 'nom' ? 'nom' : 'qatt';
     const prefix = options.storage || 'qatt_writer_';
@@ -400,9 +340,37 @@ const QattWriter = (() => {
     //   That form has no reading in any decoding, so Convert leaves it as it is.
     // Neutral tone: the cursor stands right behind a letter, so the cell has no tone mark yet; the mark of ngang U+F009C is put behind it.
     // The cursor stays behind the same characters.
-    const variantBtns = Array.from(document.querySelectorAll('#variants .btn'));
-    const slotted = makeVariants(typer, { on: () => qatt, refresh: () => refresh() });
+    const NEUTRAL = 0xF009C, variantBtns = Array.from(document.querySelectorAll('#variants .btn'));
+    const utf16 = c => c > 0xFFFF ? 2 : 1;
+    const variants = () => {
+      if (!qatt || typer.selectionStart !== typer.selectionEnd) return [];
+      const at = typer.selectionStart, before = Array.from(typer.value.slice(0, at), ch => ch.codePointAt(0)), after = typer.value.codePointAt(at);
+      if (after === JOINER || after === COMBINER) return [];   // the cursor is inside a cell
+      let j = before.length - 1;
+      while (j >= 0 && before[j] >= 0xF009C && before[j] <= 0xF00A3) j--;
+      const pos = i => before.slice(0, i).reduce((n, c) => n + utf16(c), 0);   // the position of before[i] in the text
+      const edit = (from, length, text, caret) => {
+        typer.setRangeText(text, from, from + length, 'preserve');
+        typer.focus({ preventScroll: true });   // the cursor stays in the field (the dropdown does not keep the focus)
+        typer.setSelectionRange(caret, caret);
+        refresh();
+      };
+      const list = [], str = (...cps) => String.fromCodePoint(...cps);   // `view`: the characters as they will stand, shown on the button
+      // the cell that ends at index k: a letter, or a pair (letter + joiner + letter) with the letter before the joiner
+      const cellEnding = k => before.slice(before[k - 1] === JOINER && k >= 2 && LETTER(before[k - 2]) ? k - 2 : k, k + 1);
+      const tones = before.slice(j + 1);   // the tone marks between the letter and the cursor stand in the preview too
+      if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
+        list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(...cellEnding(j - 1), COMBINER, before[j], ...tones), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
+      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // it stands alone: not the second part of a pair or of a stack
+        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1, ...tones), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
+      if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
+        list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(...cellEnding(j), NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
+      return list;
+    };
+    // three small buttons with a place of their own each (marked 1, neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
+    const SLOTS = ['marked1', 'neutral', 'tham'];
     let shownVariants = null;
+    const slotted = () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
     function showVariants() {
       const slots = slotted(), key = slots.map(v => v ? v.id + v.view : '').join();
       if (key === shownVariants) return;
@@ -422,8 +390,29 @@ const QattWriter = (() => {
     document.addEventListener('langchange', () => { shownVariants = null; showVariants(); });
     document.addEventListener('selectionchange', () => { if (document.activeElement === typer) refresh(); });
 
+    // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
+    // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
+    const IDS_STACK = '\u2FF1', COMBINER_CHAR = String.fromCodePoint(COMBINER), NEUTRAL_CHAR = String.fromCodePoint(NEUTRAL);
+    // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
+    const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
+      let out = '', afterCell = false;
+      for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
+        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? cellReading(part, parser) : '?';
+        const isCell = read !== '?';   // a cell without a reading (the form with marking stroke 1) stays as it is, like any other character
+        if (isCell) out += (afterCell ? ' ' : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
+        else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
+        afterCell = isCell;
+      }
+      return out;
+    }).join(IDS_STACK);
+    // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
+    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => wordToQatt(w, parser) ?? w)
+      .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
+    // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
+    // (the parts of a stack are cells of their own; a cell without a reading, such as the form with marking stroke 1, does not count: it stays as it is, and the field can still be converted back)
+    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => cellReading(c.cell, parser) !== '?'));
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
-      typer.value = convertText(typer.value, parser);
+      typer.value = readable(typer.value) ? readAsQuocNgu(typer.value) : toQatt(typer.value);
       refresh();
     });
     $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); refresh(); });   // without the spaces
@@ -468,28 +457,5 @@ const QattWriter = (() => {
     });
     return { field };
   }
-  // The editor of an app (apps/notes/): QATT in a text area without any editor around it. Telex always on (ime.js), a word becomes QATT at a space or other character that is no letter,
-  // the cells stay whole. The app draws its own buttons.
-  //   opts.parser    the VietnameseParser (decoding)
-  //   opts.onChange  called after a change the field did not report itself (a variant, Convert, a new decoding)
-  //   variants()     the three slots [marked1, neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
-  //   convert()      Convert as the button of the editor; setDecoding(name) writes every cell again after the decoding `name`
-  function editor(field, opts) {
-    const { parser } = opts, changed = () => opts.onChange && opts.onChange();
-    const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
-    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: 'any' });
-    const slots = makeVariants(field, { on: () => true, refresh: changed });
-    return {
-      field,
-      variants: slots,
-      convert() { field.value = convertText(field.value, parser); changed(); },
-      setDecoding(name) {
-        field.value = QattText.recode(field.value, parser, new VietnameseParser(name));
-        parser.setDecoding(name);
-        if (ime) ime.hide();
-        changed();
-      },
-    };
-  }
-  return { mount, attach, editor, convertText };
+  return { mount, attach };
 })();
