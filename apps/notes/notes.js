@@ -270,18 +270,17 @@ window.notesApp = { store, ready, flush() } is for the tests.
   $('set-vertical').addEventListener('click', () => setVertical(!field.classList.contains('vertical')));
   setVertical(settings.get('vertical', false) === true);
 
-  // the decodings are loaded at every start (decodings.json); without the file the built-in tables of parser.js are used
+  // qatt and omniglot are in parser.js; decodings.json holds only additional ones (an entry with the name of a built-in one replaces it) and is loaded at every start
   async function loadDecodings() {
-    let list = [{ name: 'qatt', label: 'qatt.org' }, { name: 'omniglot', label: 'omniglot' }];
+    const list = new Map([['qatt', 'qatt.org'], ['omniglot', 'omniglot']]);
     try {
       const r = await fetch('/decodings.json', { cache: 'no-store' });
-      const loaded = r.ok ? VietnameseParser.loadDecodings(await r.json()) : [];
-      if (loaded.length) list = loaded;
-    } catch (e) { /* offline without a stored copy: the built-in tables */ }
+      if (r.ok) for (const d of VietnameseParser.loadDecodings(await r.json())) list.set(d.name, d.label);
+    } catch (e) { /* offline without a stored copy: the built-in tables only */ }
     const select = $('set-decoding');
     select.textContent = '';
-    for (const d of list) select.append(new Option(d.label, d.name));
-    const chosen = list.some(d => d.name === settings.get('decoding')) ? settings.get('decoding') : list[0].name;
+    for (const [name, label] of list) select.append(new Option(label, name));
+    const chosen = list.has(settings.get('decoding')) ? settings.get('decoding') : 'qatt';
     select.value = chosen;
     parser.setDecoding(chosen);
   }
