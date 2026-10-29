@@ -738,12 +738,12 @@ window.Theme = window.Theme || (function() {
 // only when somebody uses the page (tap, key, mouse wheel or button; so most bots do not count) and not for browsers that name themselves as bots.
 // localStorage "qv" = { d: the UTC day of the last count, t: the time of the last activity }: once per browser and day = a visitor, a pause of more
 // than 30 minutes = a new visit. Every page that is used also counts one page view (path, language, device, rough region; tools/db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
-// Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" switches it off in a browser that is not signed in.
+// Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" (set by an admin session on every page of a site, and by admin/admin.js) switches it off in a browser that is not signed in.
 (function() {
     try {
         const SITE = location.hostname === "qatt.org" ? "qatt.org" : location.hostname === "chunom.org" ? "chunom.org" : null;
         const BOT = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|python|curl|wget|httpclient|java\//i;
-        if (!SITE || navigator.webdriver || BOT.test(navigator.userAgent) || localStorage.getItem("qv_off")) return;
+        if (!SITE || navigator.webdriver || BOT.test(navigator.userAgent)) return;
         const SUPABASE = "https://kfgqhhmdzboszpwsqkxt.supabase.co", KEY = "sb_publishable_99iUsu3_BQ6mp1TbZUEWlw_iVhDJhPi";
         const PAUSE = 30 * 60 * 1000, EVENTS = ["pointerdown", "keydown", "touchstart", "wheel"];   // no "scroll": a page that restores or sets its position fires it without anybody
         const read = () => { try { return JSON.parse(localStorage.getItem("qv")) || {}; } catch (e) { return {}; } };
@@ -751,7 +751,7 @@ window.Theme = window.Theme || (function() {
         const kind = () => {
             try {
                 const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user;
-                if (u && u.app_metadata && u.app_metadata.is_admin === true) return "admin";   // admins are not counted
+                if (u && u.app_metadata && u.app_metadata.is_admin === true) { try { localStorage.setItem("qv_off", "1"); } catch (e) {} return "admin"; }   // admins are not counted, and this browser stays out after signing out (as admin/admin.js does)
                 return u && u.is_anonymous === false ? "account" : "anonymous";
             }
             catch (e) { return "anonymous"; }
@@ -779,6 +779,7 @@ window.Theme = window.Theme || (function() {
             call("count_view", view());   // every page that is used counts once (tools/db/page_views.sql)
             if (newVisit) call("count_visit", { p_site: SITE, p_kind: k, p_new_visitor: newVisitor });
         };
+        if (kind() === "admin" || localStorage.getItem("qv_off")) return;   // an admin session sets qv_off at once, on this site too (the flag is per origin)
         EVENTS.forEach(e => addEventListener(e, count, { passive: true }));
         // when the page is left the time of the last activity is stored, so a pause is measured from there
         document.addEventListener("visibilitychange", () => {
