@@ -161,6 +161,20 @@ class VietnameseParser {
             static TONE_INT_MAP = {"ngang": 0, "sac": 1, "huyen": 2, "hoi": 3, "nga": 4, "nang": 5};
             static DIACRITIC_MAP = { '\u0300': 'huyen', '\u0301': 'sac', '\u0309': 'hoi', '\u0303': 'nga', '\u0323': 'nang' };
 
+            // Adds decodings loaded at run time (decodings.json): [{ name, label?, table }] with a table of one row of rhymes per shape (SHAPES.length rows). A name that exists is replaced,
+            // an invalid entry is skipped (the built-in tables stay as they are). Returns the accepted ones as [{ name, label }].
+            static loadDecodings(list) {
+                if (!Array.isArray(list)) return [];
+                const valid = t => Array.isArray(t) && t.length === VietnameseParser.SHAPES.length && t.every(row => Array.isArray(row) && row.every(r => typeof r === "string"));
+                const accepted = [];
+                for (const d of list) {
+                    if (!d || typeof d.name !== "string" || !/^[a-z][a-z0-9_-]*$/.test(d.name) || !valid(d.table)) continue;
+                    VietnameseParser.DECODINGS[d.name] = d.table;
+                    accepted.push({ name: d.name, label: typeof d.label === "string" && d.label ? d.label : d.name });
+                }
+                return accepted;
+            }
+
             // decoding: name of a table in VietnameseParser.DECODINGS, or a table itself (rows of rhymes, see DECODINGS)
             constructor(decoding = "qatt") {
                 this.setDecoding(decoding);
