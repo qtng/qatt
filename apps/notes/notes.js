@@ -1,6 +1,6 @@
 /*
 QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, ime.js, notes-editor.js, notes-core.js, notes-db.js, notes-fonts.js.
-Routes (undoLog, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
+Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
 window.notesApp = { store, ready, flush() } is for the tests.
 */
 (() => {
@@ -12,7 +12,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const app = window.notesApp = { store: null, ready: false, parser, flush: () => save() };
   let saveTimer = null, snackTimer = null, deleted = null, persistAsked = false;
 
-  NotesFonts.install('/');
 
   const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
@@ -183,7 +182,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
   $('new-note').addEventListener('click', () => {
-    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };   // the first note is Neon night, later ones get a random style
+    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, format: { size: 150 }, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };   // the first note is Neon night, later ones get a random style
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
@@ -438,7 +437,8 @@ window.notesApp = { store, ready, flush() } is for the tests.
     try { state.store = await NotesDB.open(); state.notes = await state.store.all(); }
     catch (e) { state.store = NotesDB.memory(); warnUnsaved(); }
     app.store = state.store;
+    await route();
+    if (state.notes.length === 0 && !state.current) $('new-note').click();   // nothing written yet: straight to the editor
     app.ready = true;
-    route();
   })();
 })();
