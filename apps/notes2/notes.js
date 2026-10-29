@@ -1,15 +1,15 @@
 /*
 QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, fonts.js, ime.js, notes-editor.js, notes-core.js, notes-db.js.
 Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
-window.notesApp = { store, ready, flush() } is for the tests.
+window.notesApp = { store, ready, flush(), ed } is for the tests.
 */
 (() => {
   const $ = id => document.getElementById(id);
   const extraDecodings = {};   // the tables of decodings.json by name, filled at the start (loadDecodings)
   const parser = new VietnameseParser('qatt', extraDecodings);
-  const field = $('note-field');
+  const field = $('note-field'), ed = CeAdapter.wrap(field);   // field: the element, ed: the same as a text field with formats
   const state = { store: null, notes: [], current: null, inStore: false, dirty: false };
-  const app = window.notesApp = { store: null, ready: false, parser, flush: () => save() };
+  const app = window.notesApp = { store: null, ready: false, parser, flush: () => save(), get ed() { return ed; } };
   let saveTimer = null, snackTimer = null, deleted = null, persistAsked = false;
 
 
@@ -75,8 +75,10 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const note = state.current;
     if (!note || !state.dirty) return saving;
     state.dirty = false;
-    if (field.value === '' && !state.inStore) return saving;   // a new note that stays empty
-    note.text = field.value;
+    if (ed.value === '' && !state.inStore) return saving;   // a new note that stays empty
+    note.text = ed.value;
+    const runs = ed.runs;
+    if (runs.length) note.runs = runs; else delete note.runs;
     note.updated = Date.now();
     const copy = { ...note };
     saving = saving.then(async () => {
@@ -94,18 +96,18 @@ window.notesApp = { store, ready, flush() } is for the tests.
   window.addEventListener('pagehide', () => { save(); });
 
   // ----- editor -----
-  const editor = NotesEditor.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); remember(false); } });
-  const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value); };
+  const editor = NotesEditor.editor(ed, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); remember(false); } });
+  const showTitle = () => { $('editor-title').textContent = NotesCore.title(ed.value); };
   field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); remember(true); });
 
   // undo and redo: the field changes by script (Telex, variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
   const undoLog = { steps: [], at: 0, time: 0 };
-  const cursor = () => ({ text: field.value, start: field.selectionStart, end: field.selectionEnd });
+  const cursor = () => ({ text: ed.value, runs: ed.runs, start: ed.selectionStart, end: ed.selectionEnd });
   function buttons() { $('undo-btn').disabled = undoLog.at <= 0; $('redo-btn').disabled = undoLog.at >= undoLog.steps.length - 1; }
   function resetHistory() { undoLog.steps = [cursor()]; undoLog.at = 0; undoLog.time = 0; buttons(); }
   function remember(typing) {
     const last = undoLog.steps[undoLog.at];
-    if (last && last.text === field.value) { if (typing) last.start = field.selectionStart, last.end = field.selectionEnd; return; }
+    if (last && last.text === ed.value && JSON.stringify(last.runs) === JSON.stringify(ed.runs)) { if (typing) last.start = ed.selectionStart, last.end = ed.selectionEnd; return; }
     const now = Date.now();
     undoLog.steps.length = undoLog.at + 1;
     if (typing && undoLog.time && now - undoLog.time < 500 && undoLog.at > 0) undoLog.steps[undoLog.at] = cursor();
@@ -117,7 +119,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (i < 0 || i >= undoLog.steps.length) return;
     undoLog.at = i; undoLog.time = 0;
     const s = undoLog.steps[i];
-    field.value = s.text; field.setSelectionRange(s.start, s.end);
+    ed.setModel(s.text, s.runs); ed.setSelectionRange(s.start, s.end);
     schedule(); showTitle(); renderKeys(); buttons();
   }
   for (const [id, step] of [['undo-btn', -1], ['redo-btn', 1]]) {
@@ -127,7 +129,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // reading mode (an existing note opens read-only, no keyboard) and editing mode (a new note, the pencil of the bar, a double tap in the text); the check mark leads back to reading
   function setEditing(on) {
-    field.readOnly = !on;
+    ed.readOnly = !on;
     if (on) field.removeAttribute('inputmode'); else field.setAttribute('inputmode', 'none');
     const icon = $('edit-btn').querySelector('i');
     icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
@@ -137,18 +139,18 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
-  $('edit-btn').addEventListener('click', () => { const on = field.readOnly; setEditing(on); if (on) field.focus(); else save(); });
+  $('edit-btn').addEventListener('click', () => { const on = ed.readOnly; setEditing(on); if (on) field.focus(); else save(); });
   let lastTap = { t: 0, x: 0, y: 0 };
   field.addEventListener('pointerup', e => {   // a double tap in the reading view starts editing (the event dblclick is not sent on every phone)
-    if (!field.readOnly) return;
-    if (e.timeStamp - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap.t = 0; const at = field.selectionStart; setEditing(true); field.focus(); field.setSelectionRange(at, at); }   // the double tap selected a word: the cursor goes to its start, nothing is replaced by the next key
+    if (!ed.readOnly) return;
+    if (e.timeStamp - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap.t = 0; const at = ed.selectionStart; setEditing(true); field.focus(); ed.setSelectionRange(at, at); }   // the double tap selected a word: the cursor goes to its start, nothing is replaced by the next key
     else lastTap = { t: e.timeStamp, x: e.clientX, y: e.clientY };
   });
-  document.addEventListener('langchange', () => setEditing(!field.readOnly));
+  document.addEventListener('langchange', () => setEditing(!ed.readOnly));
 
   function showEditor(note, fresh) {
     state.current = note; state.inStore = !fresh; state.dirty = false;
-    field.value = note.text;
+    ed.setModel(note.text, note.runs);
     resetHistory();
     showTitle();
     closeMenu();
@@ -200,6 +202,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const keybar = $('keybar'), variantBtns = Array.from(document.querySelectorAll('#keybar .variant'));
   let shownKeys = null;
   function renderKeys() {
+    showFormat();
     const slots = editor.variants(), key = slots.map(v => (v ? v.id + v.view : '')).join();
     if (key === shownKeys) return;
     shownKeys = key;
@@ -210,9 +213,26 @@ window.notesApp = { store, ready, flush() } is for the tests.
       btn.title = v ? Lang.t(v.en, v.vi) : '';
     });
   }
+  // bold, italic and size of the selected text (or of the text typed next); the changes are steps of the undo list too
+  const showFormat = () => {
+    const f = ed.formatState();
+    $('sel-bold').setAttribute('aria-pressed', String(f.b === 1));
+    $('sel-italic').setAttribute('aria-pressed', String(f.i === 1));
+  };
+  const stepSize = dir => {
+    const now = ed.formatState().z || 100, sizes = CeAdapter.SIZES;
+    const next = dir > 0 ? sizes.find(z => z > now) : [...sizes].reverse().find(z => z < now);
+    if (next) changeFormat('z', next === 100 ? 0 : next);
+  };
+  const changeFormat = (kind, value) => { ed.format(kind, value); schedule(); remember(false); showFormat(); };
+  $('sel-bold').addEventListener('click', () => changeFormat('b', ed.formatState().b === 1 ? 0 : 1));
+  $('sel-italic').addEventListener('click', () => changeFormat('i', ed.formatState().i === 1 ? 0 : 1));
+  $('sel-smaller').addEventListener('click', () => stepSize(-1));
+  $('sel-larger').addEventListener('click', () => stepSize(1));
   const keepFocus = e => e.preventDefault();   // a click on the bar does not take the focus (and the keyboard) from the field
+  ['sel-bold', 'sel-italic', 'sel-smaller', 'sel-larger'].forEach(id => $(id).addEventListener('pointerdown', keepFocus));
   variantBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = editor.variants()[i]; if (v) v.run(); }); });
-  field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
+  field.addEventListener('focus', () => { if (ed.readOnly) return; keybar.hidden = false; renderKeys(); });
   field.addEventListener('blur', () => { keybar.hidden = true; });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
   document.addEventListener('langchange', () => { shownKeys = null; renderKeys(); });
@@ -407,7 +427,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const note = state.current;
     if (!note) return;
     clearTimeout(saveTimer); saveTimer = null; state.dirty = false;
-    const wasStored = state.inStore, snapshot = { ...note, text: field.value };
+    const wasStored = state.inStore, snapshot = { ...note, text: ed.value };
     state.current = null;
     closeMenu();
     await saving;   // a save that is already running ends before the note is removed

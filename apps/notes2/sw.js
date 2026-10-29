@@ -12,7 +12,7 @@ const PAGE = '/apps/notes2/';
 const PRECACHE = [
   PAGE, '/apps/notes2/notes.css', '/apps/notes2/notes.js', '/apps/notes2/notes-core.js', '/apps/notes2/notes-db.js', '/apps/notes2/notes-styles.js', '/apps/notes2/lang.js',
   '/apps/notes2/manifest.webmanifest', '/apps/notes2/icons/icon-192.png', '/apps/notes2/icons/icon-512.png', '/apps/notes2/icons/maskable-512.png',
-  '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes2/notes-editor.js',
+  '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes2/notes-editor.js', '/apps/notes2/ce-adapter.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
   '/fonts/qatt-pen-medium.woff2?v=6', '/fonts/qatt-serif.woff2?v=6', '/fonts/qatt-gothic.woff2?v=6', '/fonts/qatt-gothic-wide.woff2?v=6',
   '/decodings.json',
