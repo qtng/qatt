@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex) is cached the first time it loads, and at install if the network allows
 */
-const CACHE = 'qatt-notes2-v1';
+const CACHE = 'qatt-notes2-v2';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const PAGE = '/apps/notes2/';
 const PRECACHE = [
