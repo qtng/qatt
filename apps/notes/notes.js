@@ -1,5 +1,5 @@
 /*
-QATT notes: the list, the editor, the saving. Needs js/navigation.js (Lang only, window.QATT_APP), parser.js, qatt-text.js, ime.js, qatt-writer.js, notes-core.js, notes-db.js, notes-fonts.js.
+QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, ime.js, qatt-writer.js, notes-core.js, notes-db.js, notes-fonts.js.
 Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
 window.notesApp = { store, ready, flush() } is for the tests.
 */

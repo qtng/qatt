@@ -2,7 +2,6 @@
 // and the pages of the Chunom site load it from there (https://qatt.org/js/navigation.js).
 // The two sites are separate: the links to the other site are absolute, the links of the site of the page start at the root.
 // Load it early in <head> as a normal (not defer) script, so that Lang translates the page while it is parsed.
-// An app that brings its own look (apps/notes/) sets window.QATT_APP = true before loading it: then only Lang is active (no theme, no bars, no visit counter).
 
 // ---------- Lang: the translation of a page ----------
 // The language is localStorage.lang ("en" or "vi") if it was chosen (the switch in the menu bar, license.html, or ?lang=vi in the address), else the first of English and
@@ -118,7 +117,6 @@ window.Lang = window.Lang || (function() {
 // Everybody can use the icon; without a choice (or after the period it was made for) the clock decides. Only the choice of a theme (the palette button) is for admins.
 //   Theme.dayNight      { available, canToggle, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
 window.Theme = window.Theme || (function() {
-    if (window.QATT_APP) return null;   // the app (apps/notes/): one fixed look, no themes
     const KEY = "theme1";   // the key was "theme" before: a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
@@ -241,7 +239,6 @@ window.Theme = window.Theme || (function() {
 })();
 
 (function() {
-    if (window.QATT_APP) return;   // the app (apps/notes/) has its own bars: only Lang is used
     const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
     // the site of this page: the Chunom site (chunom.org, the folders /chunom/, /pages/, /chunom-assets/) or qatt.org
@@ -743,7 +740,6 @@ window.Theme = window.Theme || (function() {
 // than 30 minutes = a new visit. Every page that is used also counts one page view (path, language, device, rough region; tools/db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
 // Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" switches it off in a browser that is not signed in.
 (function() {
-    if (window.QATT_APP) return;   // the app is not counted
     try {
         const SITE = location.hostname === "qatt.org" ? "qatt.org" : location.hostname === "chunom.org" ? "chunom.org" : null;
         const BOT = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|python|curl|wget|httpclient|java\//i;
