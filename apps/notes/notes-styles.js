@@ -3,7 +3,8 @@ The styles of the text field of QATT notes (apps/notes/): background (colour, gr
 Only the text field and the reading view have a style; the bars and the list keep the look of the app. Textures are small SVG noise patterns drawn by the browser (no image files).
 
   NotesStyles.list         [{ id, en, vi, bg, ink, shadow }] (bg is a value of the CSS property background)
-  NotesStyles.defaultId    the style of a new installation (Cherry blossom dusk)
+  NotesStyles.defaultId    the style of a note that has none (Cherry blossom dusk)
+  NotesStyles.random()     the style of a new note: any style except the plain ones (white on black, black on white; `plain: true`)
   NotesStyles.css(style)   the css text of a style: "background: …;\ncolor: …;\ntext-shadow: …;" (what a note stores, not the name of the style)
   NotesStyles.encode(css)  / decode(base64): the css text as base64 (UTF-8) and back (null if it is no base64)
   NotesStyles.parse(css)   { bg, ink, shadow } of css text, or null if it is not plain css of this kind (no address in it: only the built-in data: textures)
@@ -13,14 +14,14 @@ const NotesStyles = (() => {
   // fibres of paper: noise in the colour r g b (0 to 1) with the opacity a
   const noise = (r, g, b, a) => `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${b} 0 0 0 ${a} 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>")`;
   const list = [
-    { id: 'white-on-black', en: 'White on black', vi: 'Chữ trắng nền đen', bg: '#000', ink: '#fff', shadow: 'none' },
-    { id: 'black-on-white', en: 'Black on white', vi: 'Chữ đen nền trắng', bg: '#fff', ink: '#111', shadow: 'none' },
+    { id: 'white-on-black', en: 'White on black', vi: 'Chữ trắng nền đen', bg: '#000', ink: '#fff', shadow: 'none', plain: true },
+    { id: 'black-on-white', en: 'Black on white', vi: 'Chữ đen nền trắng', bg: '#fff', ink: '#111', shadow: 'none', plain: true },
     { id: 'rice-paper', en: 'Calligraphy on rice paper', vi: 'Thư pháp trên giấy dó',
       bg: `radial-gradient(ellipse at 50% 30%, rgba(255,250,235,0) 40%, rgba(160,130,80,.24) 100%), ${noise(.45, .36, .22, .3)}, #efe6cf`,
       ink: '#1b1814', shadow: '0 0 1px rgba(20,16,10,.7), 1px 2px 6px rgba(20,16,10,.25)' },
-    { id: 'washi-indigo', en: 'Washi and indigo', vi: 'Giấy washi và chàm',
-      bg: `repeating-linear-gradient(90deg, rgba(60,50,30,.04) 0 1px, transparent 1px 4px), ${noise(.4, .4, .35, .16)}, linear-gradient(#f6f1e6, #ebe3d2)`,
-      ink: '#1f3a68', shadow: '0 1px 0 rgba(255,255,255,.7)' },
+    { id: 'neon-glitch', en: 'Neon glitch', vi: 'Neon nhiễu',
+      bg: 'radial-gradient(circle at 12% 18%, rgba(37,244,238,.28), transparent 42%), radial-gradient(circle at 88% 82%, rgba(254,44,85,.32), transparent 44%), linear-gradient(160deg, #11111a, #05050a)',
+      ink: '#ffffff', shadow: '2px 0 0 #fe2c55, -2px 0 0 #25f4ee, 0 0 10px rgba(255,255,255,.25)' },
     { id: 'red-lacquer', en: 'Red lacquer and gold', vi: 'Sơn mài đỏ và vàng',
       bg: 'radial-gradient(ellipse at 30% 0%, rgba(255,120,90,.38), transparent 55%), linear-gradient(160deg, #8e1b17, #5c0f0d 70%, #3c0a09)',
       ink: '#f3d27a', shadow: '0 1px 0 #c99a2e, 0 2px 0 #a97a1d, 0 3px 0 #7d5412, 0 4px 6px rgba(0,0,0,.55)' },
@@ -57,11 +58,12 @@ const NotesStyles = (() => {
     const bg = probe.getPropertyValue('background'), ink = probe.getPropertyValue('color');
     return bg && ink ? { bg, ink, shadow: probe.getPropertyValue('text-shadow') || 'none' } : null;
   };
+  const random = () => { const pool = list.filter(s => !s.plain); return pool[Math.floor(Math.random() * pool.length)]; };
   const apply = parsed => {
     const root = document.documentElement.style;
     root.setProperty('--field-bg', parsed.bg);
     root.setProperty('--field-ink', parsed.ink);
     root.setProperty('--field-shadow', parsed.shadow);
   };
-  return { list, defaultId, css, encode, decode, parse, apply };
+  return { list, defaultId, random, css, encode, decode, parse, apply };
 })();
