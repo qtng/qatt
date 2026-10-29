@@ -53,7 +53,13 @@
         <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
         <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
         <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
-        <button id="set-vertical" type="button" role="switch" aria-checked="false"><i class="bi bi-text-paragraph"></i> <span data-vi="Dọc">Vertical</span></button>
+        <div class="menu-row"><span data-vi="Căn lề">Alignment</span>
+          <span id="set-align" class="aligns" role="radiogroup">
+            <button type="button" role="radio" data-align="left" aria-label="Left" data-vi-aria-label="Căn trái" title="Left" data-vi-title="Căn trái"><i class="bi bi-text-left"></i></button>
+            <button type="button" role="radio" data-align="center" aria-label="Centred" data-vi-aria-label="Căn giữa" title="Centred" data-vi-title="Căn giữa"><i class="bi bi-text-center"></i></button>
+            <button type="button" role="radio" data-align="right" aria-label="Right" data-vi-aria-label="Căn phải" title="Right" data-vi-title="Căn phải"><i class="bi bi-text-right"></i></button>
+            <button type="button" role="radio" data-align="vertical" aria-label="Vertical" data-vi-aria-label="Chữ dọc" title="Vertical" data-vi-title="Chữ dọc"><i class="bi bi-justify-left turned"></i></button>
+          </span></div>
         <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
       </div>
     </header>

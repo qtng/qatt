@@ -257,18 +257,19 @@ window.notesApp = { store, ready, flush() } is for the tests.
   document.addEventListener('langchange', () => { langLabel(); renderList(); });
   langLabel();
 
-  // ----- font, size, vertical, decoding -----
+  // ----- font, style, size, alignment, decoding -----
   const setFont = family => {
     NotesFonts.apply(family);
     settings.set('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
-  const sample = ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles
+  const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles, written with the decoding chosen
+  const refreshSamples = () => { const text = sampleText(); document.querySelectorAll('.qsample, .style-sample').forEach(e => { e.textContent = text; }); };
   for (const f of NotesFonts.list) {
     const b = document.createElement('button');
     b.type = 'button'; b.dataset.font = f.family; b.setAttribute('role', 'radio');
     const q = document.createElement('span'), label = document.createElement('span');
-    q.className = 'qsample'; q.style.fontFamily = `"${f.family}", system-ui, sans-serif`; q.textContent = sample;
+    q.className = 'qsample'; q.style.fontFamily = `"${f.family}", system-ui, sans-serif`;
     label.textContent = f.label;
     b.append(q, label);
     b.addEventListener('click', () => setFont(f.family));
@@ -284,7 +285,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   for (const s of NotesStyles.list) {
     const b = document.createElement('button'), box = document.createElement('span'), label = document.createElement('span');
     b.type = 'button'; b.dataset.style = s.id; b.setAttribute('role', 'radio');
-    box.className = 'style-sample'; box.textContent = sample;
+    box.className = 'style-sample';
     box.style.background = s.bg; box.style.color = s.ink; box.style.textShadow = s.shadow;
     label.textContent = s.en; label.setAttribute('data-vi', s.vi);
     b.append(box, label);
@@ -302,13 +303,17 @@ window.notesApp = { store, ready, flush() } is for the tests.
   $('set-size').addEventListener('input', () => setSize($('set-size').value));
   setSize(settings.get('size', 100));
 
-  const setVertical = on => {
-    field.classList.toggle('vertical', on);
-    $('set-vertical').setAttribute('aria-checked', String(on));
-    settings.set('vertical', on);
+  // left, centred, right or vertical (vertical lines from right to left): one choice of four
+  const setAlign = value => {
+    if (!['left', 'center', 'right', 'vertical'].includes(value)) value = 'left';
+    field.classList.toggle('vertical', value === 'vertical');
+    field.classList.toggle('align-center', value === 'center');
+    field.classList.toggle('align-right', value === 'right');
+    document.querySelectorAll('#set-align button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.align === value)));
+    settings.set('align', value);
   };
-  $('set-vertical').addEventListener('click', () => setVertical(!field.classList.contains('vertical')));
-  setVertical(settings.get('vertical', false) === true);
+  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => setAlign(b.dataset.align)));
+  setAlign(settings.get('align', settings.get('vertical', false) === true ? 'vertical' : 'left'));   // the former switch "Vertical" is kept
 
   // qatt and omniglot are in parser.js; decodings.json holds additional ones (an entry with the name of a built-in one replaces it in the app) and is loaded at every start
   const validDecoding = d => d && typeof d.name === 'string' && /^[a-z][a-z0-9_-]*$/.test(d.name) && Array.isArray(d.table)
@@ -330,11 +335,13 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const chosen = list.has(settings.get('decoding')) ? settings.get('decoding') : 'qatt';
     select.value = chosen;
     parser.setDecoding(chosen);
+    refreshSamples();
   }
   $('set-decoding').addEventListener('change', () => {
     const name = $('set-decoding').value;
     settings.set('decoding', name);
     editor.setDecoding(name);
+    refreshSamples();
   });
 
   // ----- delete and undo -----

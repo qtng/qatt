@@ -45,7 +45,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .menu-row { display: flex; align-items: center; gap: .75rem; min-height: 48px; padding: 0 1rem; }
 .menu-row select { margin-left: auto; max-width: 11rem; padding: .35rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
 .menu-row input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
-#set-vertical[aria-checked="true"] { color: var(--accent); }
+.aligns { display: inline-flex; gap: .25rem; margin-left: auto; }
+.menu .aligns button { width: 44px; min-height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line); border-radius: 10px; font-size: 1.25rem; }
+.aligns button[aria-checked="true"] { color: var(--accent); border-color: var(--accent); }
+.aligns .turned { display: inline-block; transform: rotate(90deg); }
+#note-field.align-center { text-align: center; }
+#note-field.align-right { text-align: right; }
 
 .keybar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
 .variants { display: inline-flex; gap: .4rem; }
