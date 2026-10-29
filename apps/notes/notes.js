@@ -104,6 +104,27 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value); };
   field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); });
 
+  // reading mode (an existing note opens read-only, no keyboard) and editing mode (a new note, the pencil of the bar, a double tap in the text); the check mark leads back to reading
+  function setEditing(on) {
+    field.readOnly = !on;
+    if (on) field.removeAttribute('inputmode'); else field.setAttribute('inputmode', 'none');
+    const icon = $('edit-btn').querySelector('i');
+    icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
+    $('edit-btn').setAttribute('aria-pressed', String(on));
+    $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
+    $('convert').hidden = !on;
+    if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
+    else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
+  }
+  $('edit-btn').addEventListener('click', () => { const on = field.readOnly; setEditing(on); if (on) field.focus(); else save(); });
+  let lastTap = { t: 0, x: 0, y: 0 };
+  field.addEventListener('pointerup', e => {   // a double tap in the reading view starts editing (the event dblclick is not sent on every phone)
+    if (!field.readOnly) return;
+    if (e.timeStamp - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap.t = 0; const at = field.selectionStart; setEditing(true); field.focus(); field.setSelectionRange(at, at); }   // the double tap selected a word: the cursor goes to its start, nothing is replaced by the next key
+    else lastTap = { t: e.timeStamp, x: e.clientX, y: e.clientY };
+  });
+  document.addEventListener('langchange', () => setEditing(!field.readOnly));
+
   function showEditor(note, fresh) {
     state.current = note; state.inStore = !fresh; state.dirty = false;
     field.value = note.text;
@@ -112,6 +133,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('view-list').hidden = true;
     $('view-editor').hidden = false;
     field.scrollTop = 0;
+    setEditing(fresh);
     if (fresh) field.focus();
   }
   async function showList() {
@@ -168,7 +190,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   variantBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = editor.variants()[i]; if (v) v.run(); }); });
   $('convert-key').addEventListener('pointerdown', keepFocus);
   $('convert-key').addEventListener('click', () => editor.convert());
-  field.addEventListener('focus', () => { keybar.hidden = false; renderKeys(); });
+  field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
   field.addEventListener('blur', () => { keybar.hidden = true; });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
   document.addEventListener('langchange', () => { shownKeys = null; renderKeys(); });
@@ -180,7 +202,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
 
   // ----- menu -----
-  const MENUS = [['menu-btn', 'menu'], ['list-menu-btn', 'list-menu']];
+  const MENUS = [['menu-btn', 'menu'], ['list-menu-btn', 'list-menu'], ['style-btn', 'style-menu']];
   function closeMenu() { for (const [button, menu] of MENUS) { $(menu).hidden = true; $(button).setAttribute('aria-expanded', 'false'); } }
   for (const [button, menu] of MENUS) $(button).addEventListener('click', e => {
     e.stopPropagation();
@@ -241,7 +263,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     settings.set('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
-  const sample = QattText.word('ghi', parser) || '';
+  const sample = ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles
   for (const f of NotesFonts.list) {
     const b = document.createElement('button');
     b.type = 'button'; b.dataset.font = f.family; b.setAttribute('role', 'radio');
@@ -253,6 +275,23 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('set-font').append(b);
   }
   setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.list[0].family);
+
+  const setStyle = id => {
+    const s = NotesStyles.apply(id);
+    settings.set('style', s.id);
+    document.querySelectorAll('#set-style button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.style === s.id)));
+  };
+  for (const s of NotesStyles.list) {
+    const b = document.createElement('button'), box = document.createElement('span'), label = document.createElement('span');
+    b.type = 'button'; b.dataset.style = s.id; b.setAttribute('role', 'radio');
+    box.className = 'style-sample'; box.textContent = sample;
+    box.style.background = s.bg; box.style.color = s.ink; box.style.textShadow = s.shadow;
+    label.textContent = s.en; label.setAttribute('data-vi', s.vi);
+    b.append(box, label);
+    b.addEventListener('click', () => setStyle(s.id));
+    $('set-style').append(b);
+  }
+  setStyle(settings.get('style', NotesStyles.list[0].id));
 
   const setSize = value => {
     value = Math.min(400, Math.max(50, Number(value) || 100));

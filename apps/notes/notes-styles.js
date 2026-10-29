@@ -1,0 +1,50 @@
+/*
+The styles of the text field of QATT notes (apps/notes/): background (colour, gradients, textures), ink and the effect of the writing (shadow, glow, embossing, 3D by stacked shadows).
+Only the text field and the reading view have a style; the bars and the list keep the look of the app. Textures are small SVG noise patterns drawn by the browser (no image files).
+
+  NotesStyles.list         [{ id, en, vi, bg, ink, shadow }] (bg is a value of the CSS property background); the first is the default
+  NotesStyles.apply(id)    sets --field-bg, --field-ink and --field-shadow on <html>
+*/
+const NotesStyles = (() => {
+  // fibres of paper: noise in the colour r g b (0 to 1) with the opacity a
+  const noise = (r, g, b, a) => `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${b} 0 0 0 ${a} 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>")`;
+  const list = [
+    { id: 'white-on-black', en: 'White on black', vi: 'Chữ trắng nền đen', bg: '#000', ink: '#fff', shadow: 'none' },
+    { id: 'black-on-white', en: 'Black on white', vi: 'Chữ đen nền trắng', bg: '#fff', ink: '#111', shadow: 'none' },
+    { id: 'rice-paper', en: 'Calligraphy on rice paper', vi: 'Thư pháp trên giấy dó',
+      bg: `radial-gradient(ellipse at 50% 30%, rgba(255,250,235,0) 40%, rgba(160,130,80,.24) 100%), ${noise(.45, .36, .22, .3)}, #efe6cf`,
+      ink: '#1b1814', shadow: '0 0 1px rgba(20,16,10,.7), 1px 2px 6px rgba(20,16,10,.25)' },
+    { id: 'washi-indigo', en: 'Washi and indigo', vi: 'Giấy washi và chàm',
+      bg: `repeating-linear-gradient(90deg, rgba(60,50,30,.04) 0 1px, transparent 1px 4px), ${noise(.4, .4, .35, .16)}, linear-gradient(#f6f1e6, #ebe3d2)`,
+      ink: '#1f3a68', shadow: '0 1px 0 rgba(255,255,255,.7)' },
+    { id: 'red-lacquer', en: 'Red lacquer and gold', vi: 'Sơn mài đỏ và vàng',
+      bg: 'radial-gradient(ellipse at 30% 0%, rgba(255,120,90,.38), transparent 55%), linear-gradient(160deg, #8e1b17, #5c0f0d 70%, #3c0a09)',
+      ink: '#f3d27a', shadow: '0 1px 0 #c99a2e, 0 2px 0 #a97a1d, 0 3px 0 #7d5412, 0 4px 6px rgba(0,0,0,.55)' },
+    { id: 'jade', en: 'Jade', vi: 'Ngọc bích',
+      bg: `radial-gradient(circle at 20% 15%, rgba(190,255,220,.24), transparent 40%), radial-gradient(circle at 80% 85%, rgba(0,60,40,.5), transparent 50%), ${noise(.7, 1, .85, .14)}, linear-gradient(145deg, #2f6f5a, #173f33)`,
+      ink: '#eaf7ee', shadow: '0 0 6px rgba(190,255,225,.55), 0 0 16px rgba(120,230,190,.3)' },
+    { id: 'gold-on-ink', en: 'Gold on ink black', vi: 'Vàng trên mực tàu',
+      bg: `radial-gradient(circle at 50% 120%, rgba(212,175,55,.2), transparent 60%), ${noise(1, .85, .4, .12)}, linear-gradient(#17140f, #050504)`,
+      ink: '#e6c15a', shadow: '0 1px 0 #7a5a12, 0 2px 3px rgba(0,0,0,.8)' },
+    { id: 'ink-wash', en: 'Ink wash mountains', vi: 'Tranh thủy mặc',
+      bg: 'radial-gradient(ellipse 120% 40% at 20% 100%, rgba(40,55,70,.7), transparent 70%), radial-gradient(ellipse 100% 35% at 85% 100%, rgba(60,75,90,.6), transparent 70%), linear-gradient(180deg, #dfe6e8 0%, #b9c6cb 55%, #8fa1a9 100%)',
+      ink: '#10181d', shadow: '0 0 2px rgba(255,255,255,.65)' },
+    { id: 'sakura-dusk', en: 'Cherry blossom dusk', vi: 'Hoa anh đào lúc hoàng hôn',
+      bg: 'radial-gradient(circle at 80% 10%, rgba(255,214,225,.38), transparent 45%), linear-gradient(170deg, #5a2a52, #2b1537 75%)',
+      ink: '#ffe9f0', shadow: '0 0 8px rgba(255,170,200,.6)' },
+    { id: 'bamboo-slip', en: 'Bamboo slip', vi: 'Thẻ tre',
+      bg: 'repeating-linear-gradient(0deg, transparent 0 118px, rgba(90,60,20,.4) 118px 120px), repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 3px, transparent 3px 40px), linear-gradient(90deg, #cdb676, #dcc98c 50%, #c4aa68)',
+      ink: '#3a2610', shadow: '0 1px 0 rgba(255,245,200,.55)' },
+    { id: 'cinnabar-seal', en: 'Cinnabar on paper', vi: 'Chu sa trên giấy',
+      bg: `${noise(.5, .35, .3, .22)}, linear-gradient(#f4ead7, #eadcc0)`,
+      ink: '#b3261e', shadow: '1px 1px 0 rgba(255,255,255,.75), -1px -1px 0 rgba(90,10,10,.25)' },
+  ];
+  const apply = id => {
+    const s = list.find(x => x.id === id) || list[0], root = document.documentElement.style;
+    root.setProperty('--field-bg', s.bg);
+    root.setProperty('--field-ink', s.ink);
+    root.setProperty('--field-shadow', s.shadow);
+    return s;
+  };
+  return { list, apply };
+})();
