@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>QATT notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16130f">
+  <meta name="description" content="Notes in Quốc Âm Tân Tự.">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="notes.css">
+  <script>window.QATT_APP = true</script>
+  <script src="/js/navigation.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <script src="https://chunom.org/chunom/js/ime.js" crossorigin="anonymous"></script>
+  <script src="/js/qatt-writer.js"></script>
+  <script src="notes-core.js"></script>
+  <script src="notes-db.js"></script>
+  <script src="notes-fonts.js"></script>
+  <script src="notes.js" defer></script>
+</head>
+<body>
+  <main id="view-list" class="view">
+    <header class="appbar">
+      <h1 class="title"><span data-vi="Ghi chú QATT">QATT notes</span></h1>
+    </header>
+    <ul id="notes" class="notes"></ul>
+    <p id="empty" class="empty" hidden data-vi="Chưa có ghi chú">No notes yet</p>
+    <button id="new-note" class="fab" type="button" aria-label="New note" data-vi-aria-label="Ghi chú mới"><i class="bi bi-plus-lg"></i></button>
+  </main>
+  <section id="view-editor" class="view" hidden>
+    <header class="appbar">
+      <button id="back" class="icon-btn" type="button" aria-label="Back" data-vi-aria-label="Quay lại"><i class="bi bi-arrow-left"></i></button>
+      <div id="editor-title" class="title qfont"></div>
+      <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+      <div id="menu" class="menu" hidden>
+        <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
+      </div>
+    </header>
+    <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
+  </section>
+  <div id="snackbar" class="snackbar" role="status" hidden><span id="snackbar-text"></span> <button id="undo" type="button" hidden data-vi="Hoàn tác">Undo</button></div>
+</body>
+</html>
