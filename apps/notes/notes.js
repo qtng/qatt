@@ -266,6 +266,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     settings.set('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
+  const pickFont = family => { setFont(family); closeMenu(); };
   const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles, written with the decoding chosen
   const refreshSamples = () => { const text = sampleText(); document.querySelectorAll('.qsample, .style-sample').forEach(e => { e.textContent = text; }); };
   for (const f of NotesFonts.list) {
@@ -275,7 +276,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     q.className = 'qsample'; q.style.fontFamily = `"${f.family}", system-ui, sans-serif`;
     label.textContent = f.label;
     b.append(q, label);
-    b.addEventListener('click', () => setFont(f.family));
+    b.addEventListener('click', () => pickFont(f.family));
     $('set-font').append(b);
   }
   setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.defaultFamily);
@@ -296,6 +297,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     note.style = NotesStyles.encode(NotesStyles.css(styleById(id)));
     applyStyle(note);
     schedule();
+    closeMenu();
   };
   for (const s of NotesStyles.list) {
     const b = document.createElement('button'), box = document.createElement('span'), label = document.createElement('span');
@@ -325,8 +327,15 @@ window.notesApp = { store, ready, flush() } is for the tests.
     document.querySelectorAll('#set-align button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.align === value)));
     settings.set('align', value);
   };
-  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => setAlign(b.dataset.align)));
+  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => { setAlign(b.dataset.align); closeMenu(); }));
   setAlign(settings.get('align', settings.get('vertical', false) === true ? 'vertical' : 'left'));   // the former switch "Vertical" is kept
+
+  // bold and italic (the browser slants and thickens the strokes of the font; kept on this device like the font)
+  for (const [key, id] of [['bold', 'set-bold'], ['italic', 'set-italic']]) {
+    const set = on => { field.classList.toggle(key, on); $(id).setAttribute('aria-pressed', String(on)); settings.set(key, on); };
+    $(id).addEventListener('click', () => { set(!field.classList.contains(key)); closeMenu(); });
+    set(settings.get(key, false) === true);
+  }
 
   // qatt and omniglot are in parser.js; decodings.json holds additional ones (an entry with the name of a built-in one replaces it in the app) and is loaded at every start
   const validDecoding = d => d && typeof d.name === 'string' && /^[a-z][a-z0-9_-]*$/.test(d.name) && Array.isArray(d.table)
@@ -355,6 +364,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     settings.set('decoding', name);
     editor.setDecoding(name);
     refreshSamples();
+    closeMenu();
   });
 
   // ----- delete and undo -----

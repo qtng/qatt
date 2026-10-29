@@ -51,6 +51,11 @@
       <div id="menu" class="menu" hidden>
         <button id="convert" type="button"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển QATT">Convert QATT</span></button>
         <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
+        <div class="menu-row"><span data-vi="Kiểu">Emphasis</span>
+          <span id="set-emphasis" class="aligns">
+            <button type="button" id="set-bold" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button>
+            <button type="button" id="set-italic" aria-pressed="false" aria-label="Italic" data-vi-aria-label="In nghiêng" title="Italic" data-vi-title="In nghiêng"><i class="bi bi-type-italic"></i></button>
+          </span></div>
         <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
         <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
         <div class="menu-row"><span data-vi="Căn lề">Alignment</span>

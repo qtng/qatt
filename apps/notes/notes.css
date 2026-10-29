@@ -28,7 +28,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #note-field { flex: 1; width: 100%; min-height: 0; padding: 1rem; border: 0; outline: 0; resize: none; background: var(--field-bg, #000); color: var(--field-ink, #fff); text-shadow: var(--field-shadow, none); caret-color: var(--field-ink, #fff);
   font-size: 36px; line-height: 1.5; font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; }
 
-.menu { position: absolute; z-index: 10; top: calc(52px + env(safe-area-inset-top)); right: .5rem; min-width: 220px; padding: .25rem 0; background: var(--menu); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); }
+.menu { position: absolute; z-index: 10; top: calc(52px + env(safe-area-inset-top)); right: .5rem; min-width: 220px; padding: .25rem 0; background: rgba(58, 51, 42, .8); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); }
 .menu button { display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 48px; padding: 0 1rem; border: 0; background: transparent; text-align: left; }
 .menu button:active { background: rgba(255, 255, 255, .08); }
 
@@ -70,3 +70,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #set-style .style-sample { flex: none; min-width: 7.2rem; padding: .25rem .5rem; border-radius: 8px; border: 1px solid var(--line); font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.15rem; line-height: 1.3; }
 #set-style button[aria-checked="true"] { color: var(--accent); }
 #edit-btn[aria-pressed="true"] { color: var(--accent); }
+.aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+#note-field.bold { font-weight: bold; }
+#note-field.italic { font-style: italic; }
