@@ -161,7 +161,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
   $('new-note').addEventListener('click', () => {
-    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(styleById(settings.get('style', NotesStyles.defaultId)))) };
+    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(NotesStyles.random())) };   // a new note gets a random style
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
@@ -294,7 +294,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const note = state.current;
     if (!note) return;
     note.style = NotesStyles.encode(NotesStyles.css(styleById(id)));
-    settings.set('style', id);   // the next new note starts with it
     applyStyle(note);
     schedule();
   };
@@ -382,6 +381,8 @@ window.notesApp = { store, ready, flush() } is for the tests.
     state.notes.push(note);
     renderList();
   });
+
+  document.addEventListener('gesturestart', e => e.preventDefault());   // Safari ignores user-scalable=no
 
   // ----- offline: the service worker (sw.js) -----
   if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {}));

@@ -119,8 +119,7 @@ const NotesEditor = (() => {
         const cell = cellAt(typer.value, a);
         if (cell) a = b = a > lastPos ? cell.end : cell.start;
       } else {
-        a = cellAt(typer.value, a)?.start ?? a;
-        b = cellAt(typer.value, b)?.end ?? b;
+        return;   // a range is not changed: setting it again would close the copy/cut toolbar of the phone while the handles are dragged (copy and cut give whole cells, see below)
       }
       if (a !== typer.selectionStart || b !== typer.selectionEnd) typer.setSelectionRange(a, b, typer.selectionDirection);
       lastPos = typer.selectionStart;
@@ -153,6 +152,26 @@ const NotesEditor = (() => {
       o.refresh();
     }, 0));
 
+
+    // copy and cut give whole cells (the selection may end inside one)
+    const wholeCells = () => {
+      const a = typer.selectionStart, b = typer.selectionEnd;
+      return a === b ? null : { start: cellAt(typer.value, a)?.start ?? a, end: cellAt(typer.value, b)?.end ?? b };
+    };
+    typer.addEventListener('copy', e => {
+      const r = wholeCells();
+      if (!r || !e.clipboardData) return;
+      e.clipboardData.setData('text/plain', typer.value.slice(r.start, r.end));
+      e.preventDefault();
+    });
+    typer.addEventListener('cut', e => {
+      const r = !typer.readOnly && wholeCells();
+      if (!r || !e.clipboardData) return;
+      e.clipboardData.setData('text/plain', typer.value.slice(r.start, r.end));
+      e.preventDefault();
+      typer.setSelectionRange(r.start, r.end);
+      document.execCommand('delete');   // as a deletion by the user: events, undo
+    });
 
     document.addEventListener('selectionchange', snap);
     return { convertBefore, tidy };

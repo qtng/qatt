@@ -1,6 +1,6 @@
 /* QATT notes: one fixed dark look, full screen like a native app (no themes, no site bars) */
 :root { --bg: #1e1a15; --bar: #2d2720; --card: #2a251f; --ink: #f4eee2; --muted: #cfc5b3; --line: #4a4136; --accent: #e8694f; --menu: #3a332a; color-scheme: dark; }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: pan-x pan-y; }   /* scrolling yes, pinch zoom and double-tap zoom no */
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overscroll-behavior: none; }
 [hidden] { display: none !important; }
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -63,7 +63,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .search-bar input { width: 100%; min-height: 44px; padding: 0 1rem; border: 1px solid var(--line); border-radius: 22px; background: var(--bg); color: var(--ink); font-size: 1rem; outline: 0; }
 .search-bar input:focus { border-color: var(--accent); }
 
-#note-field::selection { background: color-mix(in srgb, var(--field-ink, #fff) 30%, transparent); }
 #note-field[readonly] { cursor: default; }
 .style-btn { flex: none; width: 34px; height: 34px; margin: 0 .5rem; padding: 0; border: 2px solid var(--ink); border-radius: 8px; background: var(--field-bg, #000); }
 .style-btn:active { opacity: .8; }
