@@ -139,11 +139,20 @@ window.notesApp = { store, ready, flush(), ed } is for the tests.
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
-  $('edit-btn').addEventListener('click', () => { const on = ed.readOnly; setEditing(on); if (on) field.focus(); else save(); });
+  // the field was not editable and had inputmode none when the tap began: focus it again after the change so the phone shows the cursor and the keyboard, and put the cursor back after the double tap has selected its word
+  function focusEditing(at) {
+    field.focus();
+    for (const wait of [0, 60, 200]) setTimeout(() => {
+      if (ed.readOnly) return;
+      if (document.activeElement !== field) field.focus();
+      if (at != null) ed.setSelectionRange(at, at);
+    }, wait);
+  }
+  $('edit-btn').addEventListener('click', () => { const on = ed.readOnly; setEditing(on); if (on) focusEditing(); else save(); });
   let lastTap = { t: 0, x: 0, y: 0 };
   field.addEventListener('pointerup', e => {   // a double tap in the reading view starts editing (the event dblclick is not sent on every phone)
     if (!ed.readOnly) return;
-    if (e.timeStamp - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap.t = 0; const at = ed.selectionStart; setEditing(true); field.focus(); ed.setSelectionRange(at, at); }   // the double tap selected a word: the cursor goes to its start, nothing is replaced by the next key
+    if (e.timeStamp - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap.t = 0; const at = ed.selectionStart; setEditing(true); focusEditing(at); }   // the double tap selected a word: the cursor goes to its start, nothing is replaced by the next key
     else lastTap = { t: e.timeStamp, x: e.clientX, y: e.clientY };
   });
   document.addEventListener('langchange', () => setEditing(!ed.readOnly));
