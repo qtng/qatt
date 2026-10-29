@@ -14,13 +14,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   NotesFonts.install('/');
 
-  // ----- settings (this device only; the app works without them) -----
-  const settings = (() => {
-    let s = {};
-    try { s = JSON.parse(localStorage.getItem('qattNotes')) || {}; } catch (e) { s = {}; }
-    return { get: (key, fallback) => (s[key] === undefined ? fallback : s[key]), set(key, value) { s[key] = value; try { localStorage.setItem('qattNotes', JSON.stringify(s)); } catch (e) { /* storage may be blocked */ } } };
-  })();
-
   const newId = () => (crypto.randomUUID ? crypto.randomUUID() : 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
   // ----- snackbar -----
@@ -142,7 +135,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
     $('convert').hidden = !on;
-    $('undo-btn').hidden = $('redo-btn').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
@@ -165,6 +157,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('view-editor').hidden = false;
     field.scrollTop = 0;
     applyStyle(note);
+    applyFormat(note);
     setEditing(fresh);
     if (fresh) field.focus();
   }
@@ -190,7 +183,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
   $('new-note').addEventListener('click', () => {
-    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(NotesStyles.random())) };   // a new note gets a random style
+    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };   // the first note is Neon night, later ones get a random style
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
@@ -220,8 +213,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
   }
   const keepFocus = e => e.preventDefault();   // a click on the bar does not take the focus (and the keyboard) from the field
   variantBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = editor.variants()[i]; if (v) v.run(); }); });
-  $('convert-key').addEventListener('pointerdown', keepFocus);
-  $('convert-key').addEventListener('click', () => editor.convert());
   field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
   field.addEventListener('blur', () => { keybar.hidden = true; });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
@@ -283,19 +274,24 @@ window.notesApp = { store, ready, flush() } is for the tests.
     snack(`Imported ${merged.added}, updated ${merged.updated}`, `Đã nhập ${merged.added}, cập nhật ${merged.updated}`);
   });
 
-  // the language (the site menu bar is not in the app): the button names the language it switches to, in that language
-  const langLabel = () => { $('lang-label').textContent = Lang.current === 'vi' ? 'English' : 'Tiếng Việt'; };
-  $('lang-toggle').addEventListener('click', () => { closeMenu(); Lang.set(Lang.current === 'vi' ? 'en' : 'vi'); });
+  // the language (the site menu bar is not in the app): EN | VI in the bar of the list, the current one is lit
+  const langLabel = () => document.querySelectorAll('#lang-switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === Lang.current)));
+  document.querySelectorAll('#lang-switch button').forEach(b => b.addEventListener('click', () => Lang.set(b.dataset.lang)));
   document.addEventListener('langchange', () => { langLabel(); renderList(); });
   langLabel();
 
   // ----- font, style, size, alignment, decoding -----
-  const setFont = family => {
+  // the format (font, size, alignment, decoding, bold, italic) belongs to the note: note.format holds what differs from the defaults; user = chosen in the menu (stored in the note), else only shown
+  const FORMAT_DEFAULTS = { font: NotesFonts.defaultFamily, size: 100, align: 'left', decoding: 'qatt', bold: false, italic: false };
+  const formatOf = note => ({ ...FORMAT_DEFAULTS, ...(note && note.format && typeof note.format === 'object' ? note.format : {}) });
+  const keepFormat = (key, value) => { const note = state.current; if (!note) return; note.format = { ...(note.format || {}), [key]: value }; schedule(); };
+  const setFont = (family, user) => {
+    if (!NotesFonts.list.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
     NotesFonts.apply(family);
-    settings.set('font', family);
+    if (user) keepFormat('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
-  const pickFont = family => { setFont(family); closeMenu(); };
+  const pickFont = family => { setFont(family, true); closeMenu(); };
   const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles, written with the decoding chosen
   const refreshSamples = () => { const text = sampleText(); document.querySelectorAll('.qsample, .style-sample').forEach(e => { e.textContent = text; }); };
   for (const f of NotesFonts.list) {
@@ -308,7 +304,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     b.addEventListener('click', () => pickFont(f.family));
     $('set-font').append(b);
   }
-  setFont(NotesFonts.list.some(f => f.family === settings.get('font')) ? settings.get('font') : NotesFonts.defaultFamily);
+  setFont(FORMAT_DEFAULTS.font);
 
   // the style of a note is stored in the note as css (base64), not as a name; a note without a (valid) style has the default one
   const styleById = id => NotesStyles.list.find(s => s.id === id) || NotesStyles.list.find(s => s.id === NotesStyles.defaultId);
@@ -339,31 +335,37 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('set-style').append(b);
   }
 
-  const setSize = value => {
+  const setSize = (value, user) => {
     value = Math.min(400, Math.max(50, Number(value) || 100));
     $('set-size').value = value; $('size-label').textContent = value + '%';
     field.style.fontSize = Math.round(value * 0.363) + 'px';   // 100% is 36 pixels as in the editor of qatt.org
-    settings.set('size', value);
+    if (user) keepFormat('size', value);
   };
-  $('set-size').addEventListener('input', () => setSize($('set-size').value));
-  setSize(settings.get('size', 100));
+  $('set-size').addEventListener('input', () => setSize($('set-size').value, true));
 
   // left, centred, vertical centred or vertical (vertical lines from right to left): one choice of four
-  const setAlign = value => {
+  const setAlign = (value, user) => {
     if (!['left', 'center', 'vertical-center', 'vertical'].includes(value)) value = 'left';
     field.classList.toggle('vertical', value.startsWith('vertical'));
     field.classList.toggle('align-center', value === 'center' || value === 'vertical-center');
     document.querySelectorAll('#set-align button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.align === value)));
-    settings.set('align', value);
+    if (user) keepFormat('align', value);
   };
-  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => { setAlign(b.dataset.align); closeMenu(); }));
-  setAlign(settings.get('align', settings.get('vertical', false) === true ? 'vertical' : 'left'));   // the former switch "Vertical" is kept
+  document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => { setAlign(b.dataset.align, true); closeMenu(); }));
 
+  const emphasis = {};
   // bold and italic (the browser slants and thickens the strokes of the font; kept on this device like the font)
   for (const [key, id] of [['bold', 'set-bold'], ['italic', 'set-italic']]) {
-    const set = on => { field.classList.toggle(key, on); $(id).setAttribute('aria-pressed', String(on)); settings.set(key, on); };
-    $(id).addEventListener('click', () => { set(!field.classList.contains(key)); closeMenu(); });
-    set(settings.get(key, false) === true);
+    const set = (on, user) => { field.classList.toggle(key, on); $(id).setAttribute('aria-pressed', String(on)); if (user) keepFormat(key, on); };
+    $(id).addEventListener('click', () => { set(!field.classList.contains(key), true); closeMenu(); });
+    emphasis[key] = set;
+  }
+
+  function applyFormat(note) {
+    const f = formatOf(note);
+    setFont(f.font); setSize(f.size); setAlign(f.align);
+    emphasis.bold(f.bold === true); emphasis.italic(f.italic === true);
+    useDecoding(f.decoding);
   }
 
   // qatt and omniglot are in parser.js; decodings.json holds additional ones (an entry with the name of a built-in one replaces it in the app) and is loaded at every start
@@ -383,14 +385,18 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const select = $('set-decoding');
     select.textContent = '';
     for (const [name, label] of list) select.append(new Option(label, name));
-    const chosen = list.has(settings.get('decoding')) ? settings.get('decoding') : 'qatt';
-    select.value = chosen;
-    parser.setDecoding(chosen);
+    useDecoding(formatOf(state.current).decoding);
+  }
+  function useDecoding(name) {   // the reading of the note: only the tables change, the text stays as it is
+    const select = $('set-decoding');
+    if (!Array.from(select.options).some(o => o.value === name)) name = 'qatt';
+    select.value = name;
+    parser.setDecoding(name);
     refreshSamples();
   }
   $('set-decoding').addEventListener('change', () => {
     const name = $('set-decoding').value;
-    settings.set('decoding', name);
+    keepFormat('decoding', name);
     editor.setDecoding(name);
     refreshSamples();
     closeMenu();

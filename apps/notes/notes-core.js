@@ -1,6 +1,6 @@
 /*
 The logic of the notes app (apps/notes/) that needs no browser: titles, search text, export and import. Needs the global QattText (js/qatt-text.js) for the cells of QATT text.
-A note is { id, text, created, updated } (milliseconds) and may have style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
+A note is { id, text, created, updated } (milliseconds) and may have format: { font, size, align, decoding, bold, italic } (only what differs from the defaults) and style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
 
   NotesCore.title(text)                       first line with a character that is no space, trimmed, at most 80 code points ("" if none)
   NotesCore.preview(text)                     the text after the title line on one line, at most 120 code points
@@ -12,6 +12,18 @@ A note is { id, text, created, updated } (milliseconds) and may have style: the 
   NotesCore.merge(existing, incoming)         by id, the larger `updated` wins (equal: the existing one stays), sorted by `updated` descending: { notes, added, updated }
 */
 const NotesCore = (() => {
+  // the format of a note ({ font, size, align, decoding, bold, italic }): only valid values are kept
+  const cleanFormat = f => {
+    if (!f || typeof f !== "object") return null;
+    const out = {};
+    if (typeof f.font === "string" && f.font.length <= 60) out.font = f.font;
+    if (Number.isFinite(f.size)) out.size = Math.min(400, Math.max(50, f.size));
+    if (["left", "center", "vertical-center", "vertical"].includes(f.align)) out.align = f.align;
+    if (typeof f.decoding === "string" && /^[a-z][a-z0-9_-]*$/.test(f.decoding) && f.decoding.length <= 40) out.decoding = f.decoding;
+    if (typeof f.bold === "boolean") out.bold = f.bold;
+    if (typeof f.italic === "boolean") out.italic = f.italic;
+    return Object.keys(out).length ? out : null;
+  };
   const cut = (s, n) => Array.from(s).slice(0, n).join("");
   const lines = text => text.split(/\r?\n/);
   const titleIndex = text => lines(text).findIndex(l => /\S/.test(l));
@@ -45,7 +57,7 @@ const NotesCore = (() => {
     try { data = JSON.parse(json); } catch (e) { return { ok: false, error: "Not a notes file" }; }
     if (!data || data.version !== 1 || !Array.isArray(data.notes)) return { ok: false, error: "Not a notes file" };
     if (!data.notes.every(validNote)) return { ok: false, error: "The file has an invalid note" };
-    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}) })) };
+    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}) })) };
   };
 
   const merge = (existing, incoming) => {
