@@ -244,6 +244,8 @@ const NotesEditor = (() => {
   //   opts.onChange  called after a change the field did not report itself (a variant, Convert, a new decoding)
   //   variants()     the three slots [marked1, neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
   //   convert()      Convert as the button of the editor; setDecoding(name) writes every cell again after the decoding `name`
+  // the text becomes fn(text); a field that keeps formats (apps/notes2/ce-adapter.js) moves them along
+  const setText = (f, fn) => { if (f.mapText) f.mapText(fn); else f.value = fn(f.value); };
   function editor(field, opts) {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
@@ -252,9 +254,10 @@ const NotesEditor = (() => {
     return {
       field,
       variants: slots,
-      convert() { field.value = convertText(field.value, parser); changed(); },
+      convert() { setText(field, t => convertText(t, parser)); changed(); },
       setDecoding(name) {
-        field.value = QattText.recode(field.value, parser, new VietnameseParser(name, parser.extra));
+        const to = new VietnameseParser(name, parser.extra);
+        setText(field, t => QattText.recode(t, parser, to));
         parser.setDecoding(name);
         if (ime) ime.hide();
         changed();

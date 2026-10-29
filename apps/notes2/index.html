@@ -14,6 +14,7 @@
   <script src="/js/parser.js"></script>
   <script src="/js/qatt-text.js"></script>
   <script src="https://chunom.org/chunom/js/ime.js" crossorigin="anonymous"></script>
+  <script src="ce-adapter.js"></script>
   <script src="notes-editor.js"></script>
   <script src="notes-core.js"></script>
   <script src="notes-db.js"></script>
@@ -69,9 +70,10 @@
         <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
       </div>
     </header>
-    <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
+    <div id="note-field" lang="vi" spellcheck="false" autocapitalize="off" role="textbox" aria-multiline="true" aria-label="Note" data-vi-aria-label="Ghi chú"></div>
     <div id="keybar" class="keybar" hidden>
       <span class="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button></span>
+      <span class="formats" role="group" aria-label="Format of the selected text" data-vi-aria-label="Định dạng chữ đã chọn"><button id="sel-bold" type="button" class="key" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button><button id="sel-italic" type="button" class="key" aria-pressed="false" aria-label="Italic" data-vi-aria-label="In nghiêng" title="Italic" data-vi-title="In nghiêng"><i class="bi bi-type-italic"></i></button><button id="sel-smaller" type="button" class="key" aria-label="Smaller" data-vi-aria-label="Nhỏ hơn" title="Smaller" data-vi-title="Nhỏ hơn">A−</button><button id="sel-larger" type="button" class="key" aria-label="Larger" data-vi-aria-label="Lớn hơn" title="Larger" data-vi-title="Lớn hơn">A+</button></span>
       <span class="history"><button id="undo-btn" type="button" class="key" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" type="button" class="key" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i></button></span>
     </div>
   </section>

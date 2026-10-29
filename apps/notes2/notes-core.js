@@ -1,6 +1,6 @@
 /*
 The logic of the notes app (apps/notes2/) that needs no browser: titles, search text, export and import. Needs the global QattText (js/qatt-text.js) for the cells of QATT text.
-A note is { id, text, created, updated } (milliseconds) and may have format: { font, size, align, decoding, bold, italic } (only what differs from the defaults) and style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
+A note is { id, text, created, updated } (milliseconds) and may have runs (formats of pieces of the text: bold, italic, size) and format: { font, size, align, decoding, bold, italic } (only what differs from the defaults) and style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
 
   NotesCore.title(text)                       first line with a character that is no space, trimmed, at most 80 code points ("" if none)
   NotesCore.preview(text)                     the text after the title line on one line, at most 120 code points
@@ -12,6 +12,17 @@ A note is { id, text, created, updated } (milliseconds) and may have format: { f
   NotesCore.merge(existing, incoming)         by id, the larger `updated` wins (equal: the existing one stays), sorted by `updated` descending: { notes, added, updated }
 */
 const NotesCore = (() => {
+  // the formats of the text of a note: runs [{ n, b?, i?, z? }] that add up to the length of the text (else they are dropped)
+  const cleanRuns = (runs, length) => {
+    if (!Array.isArray(runs) || runs.length > 5000) return null;
+    let sum = 0; const out = [];
+    for (const r of runs) {
+      if (!r || !Number.isInteger(r.n) || r.n < 1) return null;
+      if ((r.z !== undefined && !(Number.isFinite(r.z) && r.z >= 20 && r.z <= 500)) || (r.b !== undefined && typeof r.b !== "boolean") || (r.i !== undefined && typeof r.i !== "boolean")) return null;
+      sum += r.n; out.push({ n: r.n, ...(r.b ? { b: true } : {}), ...(r.i ? { i: true } : {}), ...(r.z ? { z: Math.round(r.z) } : {}) });
+    }
+    return sum === length && out.some(r => r.b || r.i || r.z) ? out : null;
+  };
   // the format of a note ({ font, size, align, decoding, bold, italic }): only valid values are kept
   const cleanFormat = f => {
     if (!f || typeof f !== "object") return null;
@@ -57,7 +68,7 @@ const NotesCore = (() => {
     try { data = JSON.parse(json); } catch (e) { return { ok: false, error: "Not a notes file" }; }
     if (!data || data.version !== 1 || !Array.isArray(data.notes)) return { ok: false, error: "Not a notes file" };
     if (!data.notes.every(validNote)) return { ok: false, error: "The file has an invalid note" };
-    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}) })) };
+    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}), ...(cleanRuns(n.runs, n.text.length) ? { runs: cleanRuns(n.runs, n.text.length) } : {}) })) };
   };
 
   const merge = (existing, incoming) => {
