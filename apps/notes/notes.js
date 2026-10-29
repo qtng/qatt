@@ -228,6 +228,12 @@ window.notesApp = { store, ready, flush() } is for the tests.
     snack(`Imported ${merged.added}, updated ${merged.updated}`, `Đã nhập ${merged.added}, cập nhật ${merged.updated}`);
   });
 
+  // the language (the site menu bar is not in the app): the button names the language it switches to, in that language
+  const langLabel = () => { $('lang-label').textContent = Lang.current === 'vi' ? 'English' : 'Tiếng Việt'; };
+  $('lang-toggle').addEventListener('click', () => { closeMenu(); Lang.set(Lang.current === 'vi' ? 'en' : 'vi'); });
+  document.addEventListener('langchange', () => { langLabel(); renderList(); });
+  langLabel();
+
   // ----- font, size, vertical, decoding -----
   const setFont = family => {
     NotesFonts.apply(family);
