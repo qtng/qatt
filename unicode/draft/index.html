@@ -28,7 +28,7 @@ blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4
 blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; font-family: "QATT Chart"; font-size: 1.3em; white-space: nowrap; }
 </style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1</h1>
-<p>Oct 28, 2026 · Nguyễn Quốc Trung</p>
+<p>Oct 29, 2026 · Nguyễn Quốc Trung</p>
 <h2 id="1-summary">1. Summary</h2>
 <p>This proposal encodes Quốc Âm Tân Tự (QATT), a Vietnamese script used inside Hán Nôm texts, as 164 characters in the Supplementary Multilingual Plane.</p>
 <table>
@@ -53,7 +53,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Draft date</td>
-<td>2026-10-28</td>
+<td>2026-10-29</td>
 </tr>
 <tr>
 <td>Characters</td>
@@ -637,15 +637,15 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 </table>
 <h3 id="sec-7-1">7.1 Character names</h3>
 <p>Names use ASCII capitals without diacritics, as Unicode requires. Patterns:</p>
-<pre><code>QUOC AM TAN TU &lt;NAME&gt;
-QUOC AM TAN TU &lt;NAME&gt; WITH MARK-&lt;N&gt;
+<pre><code>QUOC AM TAN TU LETTER &lt;NAME&gt;
+QUOC AM TAN TU LETTER &lt;NAME&gt; WITH MARK-&lt;N&gt;
 QUOC AM TAN TU THAM THU COMBINER
 QUOC AM TAN TU COMPONENT JOINER
-QUOC AM TAN TU TONE CIRCLE UPPER LEFT
-QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
+QUOC AM TAN TU COMBINING TONE CIRCLE UPPER LEFT
+QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </code></pre>
-<p>The tone marks use the corners UPPER LEFT, UPPER RIGHT, LOWER LEFT and LOWER RIGHT, each for circle and semicircle. The names describe the mark. The tone it denotes is given as an annotation, for example QUOC AM TAN TU TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). The names list cross-references the related existing characters: each tone mark refers to the spacing modifier letter for the same tone (U+A700..U+A707) and to the ideographic tone mark for the same corner (U+302A..U+302D).</p>
-<p>The names describe the form only and say nothing about its function. A form without marking stroke takes the plain name of its base. A form with the marking stroke is the base WITH MARK-1 to WITH MARK-6, the number being the position of the marking stroke among the six stroke ends, counted counter-clockwise from the start position of the marked Cán (4.1). MARK-1 is the marked Cán, MARK-2 to MARK-6 are the five Chi, for example QUOC AM TAN TU ONG WITH MARK-1 to QUOC AM TAN TU ONG WITH MARK-6. The positions are relative to the marked Cán and lie in different places for different bases, so the names number them instead of describing them geometrically. The names list gives the class as an annotation.</p>
+<p>The tone marks use the corners UPPER LEFT, UPPER RIGHT, LOWER LEFT and LOWER RIGHT, each for circle and semicircle. The names describe the mark. The tone it denotes is given as an annotation, for example QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). The names list cross-references the related existing characters: each tone mark refers to the spacing modifier letter for the same tone (U+A700..U+A707) and to the ideographic tone mark for the same corner (U+302A..U+302D).</p>
+<p>The 154 components are letters, so their names contain LETTER, and the tone marks are combining characters, so theirs contain COMBINING. The names describe the form only and say nothing about its function. A form without marking stroke takes the plain name of its base. A form with the marking stroke is the base WITH MARK-1 to WITH MARK-6, the number being the position of the marking stroke among the six stroke ends, counted counter-clockwise from the start position of the marked Cán (4.1). MARK-1 is the marked Cán, MARK-2 to MARK-6 are the five Chi, for example QUOC AM TAN TU LETTER ONG WITH MARK-1 to QUOC AM TAN TU LETTER ONG WITH MARK-6. The positions are relative to the marked Cán and lie in different places for different bases, so the names number them instead of describing them geometrically. The names list gives the class as an annotation.</p>
 <p>The names of the 22 Cán are the names of their sounds in the source listing (6.4), where each Cán is annotated with a Chữ Nôm character. Annotations without an encoded character are given as Ideographic Description Sequences. Each name is the syllable of the initial with the rhyme ông. Every form of a base takes the name of its Cán. Diacritics are dropped. The source has one Cán for the initials d and gi, as none of the 22 is the Cán of gi, and none for đ apart from đông, so the stroke of đ can be dropped without a clash: đông → DONG, and the Cán of d and gi is GIONG.</p>
 <table>
 <thead>
