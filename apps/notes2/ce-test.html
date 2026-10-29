@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>contenteditable test</title>
+<meta name="robots" content="noindex">
+<style>textarea, #ce { display: block; width: 90%; height: 6rem; margin: 1rem; font: 36px/1.5 "QATT Pen Medium", system-ui; white-space: pre-wrap; border: 1px solid #888; }</style>
+<script src="/js/parser.js"></script><script src="/js/qatt-text.js"></script>
+<script src="https://chunom.org/chunom/js/ime.js" crossorigin="anonymous"></script>
+<script src="notes-editor.js"></script><script src="ce-adapter.js"></script>
+</head><body>
+<textarea id="ta" spellcheck="false"></textarea>
+<div id="ce" spellcheck="false"></div>
+<script>
+  const parser = new VietnameseParser('qatt');
+  window.editors = { ta: NotesEditor.editor(document.getElementById('ta'), { parser }), ce: NotesEditor.editor(CeAdapter.wrap(document.getElementById('ce')), { parser }) };
+</script>
+</body></html>
