@@ -235,7 +235,7 @@ const NotesEditor = (() => {
       variants: slots,
       convert() { field.value = convertText(field.value, parser); changed(); },
       setDecoding(name) {
-        field.value = QattText.recode(field.value, parser, new VietnameseParser(name));
+        field.value = QattText.recode(field.value, parser, new VietnameseParser(name, parser.extra));
         parser.setDecoding(name);
         if (ime) ime.hide();
         changed();

@@ -5,10 +5,11 @@ window.notesApp = { store, ready, flush() } is for the tests.
 */
 (() => {
   const $ = id => document.getElementById(id);
-  const parser = new VietnameseParser();
+  const extraDecodings = {};   // the tables of decodings.json by name, filled at the start (loadDecodings)
+  const parser = new VietnameseParser('qatt', extraDecodings);
   const field = $('note-field');
   const state = { store: null, notes: [], current: null, inStore: false, dirty: false };
-  const app = window.notesApp = { store: null, ready: false, flush: () => save() };
+  const app = window.notesApp = { store: null, ready: false, parser, flush: () => save() };
   let saveTimer = null, snackTimer = null, deleted = null, persistAsked = false;
 
   NotesFonts.install('/');
@@ -270,12 +271,19 @@ window.notesApp = { store, ready, flush() } is for the tests.
   $('set-vertical').addEventListener('click', () => setVertical(!field.classList.contains('vertical')));
   setVertical(settings.get('vertical', false) === true);
 
-  // qatt and omniglot are in parser.js; decodings.json holds only additional ones (an entry with the name of a built-in one replaces it) and is loaded at every start
+  // qatt and omniglot are in parser.js; decodings.json holds additional ones (an entry with the name of a built-in one replaces it in the app) and is loaded at every start
+  const validDecoding = d => d && typeof d.name === 'string' && /^[a-z][a-z0-9_-]*$/.test(d.name) && Array.isArray(d.table)
+    && d.table.length === VietnameseParser.SHAPES.length && d.table.every(row => Array.isArray(row) && row.every(r => typeof r === 'string'));
   async function loadDecodings() {
     const list = new Map([['qatt', 'qatt.org'], ['omniglot', 'omniglot']]);
     try {
       const r = await fetch('/decodings.json', { cache: 'no-store' });
-      if (r.ok) for (const d of VietnameseParser.loadDecodings(await r.json())) list.set(d.name, d.label);
+      const data = r.ok ? await r.json() : [];
+      for (const d of Array.isArray(data) ? data : []) {
+        if (!validDecoding(d)) continue;   // an invalid entry is skipped, the others stay
+        extraDecodings[d.name] = d.table;
+        list.set(d.name, typeof d.label === 'string' && d.label ? d.label : d.name);
+      }
     } catch (e) { /* offline without a stored copy: the built-in tables only */ }
     const select = $('set-decoding');
     select.textContent = '';
