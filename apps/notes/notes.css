@@ -52,3 +52,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .variant { font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.6rem; line-height: 1; }
 .variant:disabled { opacity: .35; }
 .variant:not(:disabled):active, .key:active { background: rgba(255, 255, 255, .12); }
+
+.search-bar { flex: none; padding: .5rem 1rem; background: var(--bar); border-bottom: 1px solid var(--line); }
+.search-bar input { width: 100%; min-height: 44px; padding: 0 1rem; border: 1px solid var(--line); border-radius: 22px; background: var(--bg); color: var(--ink); font-size: 1rem; outline: 0; }
+.search-bar input:focus { border-color: var(--accent); }

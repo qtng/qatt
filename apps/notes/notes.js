@@ -43,7 +43,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const list = $('notes');
     list.textContent = '';
     state.notes.sort((a, b) => b.updated - a.updated);
-    for (const note of state.notes) {
+    const query = $('search').value, cellReading = cell => QattText.reading(cell, parser);
+    const shown = state.notes.filter(n => NotesCore.matches(n.text, query, cellReading));
+    for (const note of shown) {
       const li = document.createElement('li'), row = document.createElement('button');
       row.type = 'button'; row.className = 'note-row'; row.dataset.id = note.id;
       const title = document.createElement('span'), title_ = NotesCore.title(note.text);
@@ -58,6 +60,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
       list.append(li);
     }
     $('empty').hidden = state.notes.length > 0;
+    $('no-results').hidden = state.notes.length === 0 || shown.length > 0;
   }
 
   // ----- saving -----
@@ -176,16 +179,54 @@ window.notesApp = { store, ready, flush() } is for the tests.
   if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
 
   // ----- menu -----
-  function closeMenu() { $('menu').hidden = true; $('menu-btn').setAttribute('aria-expanded', 'false'); }
-  $('menu-btn').addEventListener('click', e => {
+  const MENUS = [['menu-btn', 'menu'], ['list-menu-btn', 'list-menu']];
+  function closeMenu() { for (const [button, menu] of MENUS) { $(menu).hidden = true; $(button).setAttribute('aria-expanded', 'false'); } }
+  for (const [button, menu] of MENUS) $(button).addEventListener('click', e => {
     e.stopPropagation();
-    const open = $('menu').hidden;
-    $('menu').hidden = !open;
-    $('menu-btn').setAttribute('aria-expanded', String(open));
+    const open = $(menu).hidden;
+    closeMenu();
+    $(menu).hidden = !open;
+    $(button).setAttribute('aria-expanded', String(open));
   });
-  document.addEventListener('click', e => { if (!e.target.closest('#menu')) closeMenu(); });
+  document.addEventListener('click', e => { if (!e.target.closest('.menu')) closeMenu(); });
   $('convert').addEventListener('click', () => { editor.convert(); closeMenu(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+  // ----- search, export, import -----
+  let searchTimer = null;
+  $('search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderList, 150); });
+  $('search-toggle').addEventListener('click', () => {
+    const open = $('search-bar').hidden;
+    $('search-bar').hidden = !open;
+    if (open) $('search').focus(); else { $('search').value = ''; renderList(); }
+  });
+  const ERRORS_VI = { 'Not a notes file': 'Không phải tệp ghi chú', 'The file has an invalid note': 'Tệp có ghi chú không hợp lệ' };
+  $('export').addEventListener('click', async () => {
+    closeMenu();
+    await save();
+    const d = new Date(), pad = n => String(n).padStart(2, '0');
+    const name = `qatt-notes-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+    const file = new File([NotesCore.exportJSON(state.notes)], name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file] }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file); a.download = name;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  });
+  $('import').addEventListener('click', () => { closeMenu(); $('import-file').value = ''; $('import-file').click(); });
+  $('import-file').addEventListener('change', async () => {
+    const file = $('import-file').files[0];
+    if (!file) return;
+    const parsed = NotesCore.parseImport(await file.text());
+    if (!parsed.ok) { snack(parsed.error, ERRORS_VI[parsed.error] || parsed.error); return; }
+    const merged = NotesCore.merge(state.notes, parsed.notes);
+    try { await state.store.putMany(merged.notes); } catch (e) { warnUnsaved(); return; }
+    state.notes = merged.notes;
+    renderList();
+    snack(`Imported ${merged.added}, updated ${merged.updated}`, `Đã nhập ${merged.added}, cập nhật ${merged.updated}`);
+  });
 
   // ----- font, size, vertical, decoding -----
   const setFont = family => {
