@@ -1,5 +1,5 @@
 /*
-QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, fonts.js, notes-editor.js, notes-core.js, notes-db.js.
+QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, fonts.js, ime.js, notes-editor.js, notes-core.js, notes-db.js.
 Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
 window.notesApp = { store, ready, flush() } is for the tests.
 */
@@ -97,19 +97,27 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const editor = NotesEditor.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); remember(false); } });
   const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value, state.current && state.current.title); };
 
-  // a tap on the title in the bar sets the title by hand (empty: back to the first line of the text)
+  // a tap on the title in the bar sets the title by hand: the title of the moment is there, selected, to be overwritten or changed a little (the first line of the text brings its QATT characters;
+  // QATT is typed here as in the text); a title like the first line, or an empty one, is no title of its own
   const titleInput = $('title-input');
+  NotesEditor.editor(titleInput, { parser, onChange: () => {} });
   function editTitle(on, commit) {
     if (on) {
       if (!state.current) return;
-      titleInput.value = state.current.title || ''; titleInput.placeholder = NotesCore.title(field.value);
+      titleInput.value = NotesCore.title(field.value, state.current.title);
       $('editor-title').hidden = true; titleInput.hidden = false; titleInput.focus(); titleInput.select();
       return;
     }
     if (titleInput.hidden) return;
+    if (commit) {   // the word typed last has no space behind it yet: end it so it becomes QATT too
+      const end = titleInput.value.length;
+      titleInput.setRangeText(' ', end, end, 'end');
+      titleInput.dispatchEvent(new InputEvent('input', { inputType: 'insertText', data: ' ' }));
+    }
     titleInput.hidden = true; $('editor-title').hidden = false;
-    const note = state.current, value = titleInput.value.trim();
-    if (commit && note && value !== (note.title || '')) { if (value) note.title = value; else delete note.title; schedule(); }
+    const note = state.current, value = titleInput.value.trim(), auto = NotesCore.title(field.value);
+    const next = value === '' || value === auto ? '' : value;
+    if (commit && note && next !== (note.title || '')) { if (next) note.title = next; else delete note.title; schedule(); }
     showTitle();
   }
   $('editor-title').addEventListener('click', () => editTitle(true));
@@ -120,7 +128,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   });
   field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); remember(true); });
 
-  // undo and redo: the field changes by script (variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
+  // undo and redo: the field changes by script (Telex, variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
   const undoLog = { steps: [], at: 0, time: 0 };
   const cursor = () => ({ text: field.value, start: field.selectionStart, end: field.selectionEnd });
   function buttons() { $('undo-btn').disabled = undoLog.at <= 0; $('redo-btn').disabled = undoLog.at >= undoLog.steps.length - 1; }
