@@ -1,0 +1,86 @@
+/* QATT notes: one fixed dark look, full screen like a native app (no themes, no site bars) */
+:root { --bg: #1e1a15; --bar: #2d2720; --card: #2a251f; --ink: #f4eee2; --muted: #cfc5b3; --line: #4a4136; --accent: #e8694f; --menu: #3a332a; color-scheme: dark; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: pan-x pan-y; }   /* scrolling yes, pinch zoom and double-tap zoom no */
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overscroll-behavior: none; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.qfont, .note-title, .note-preview { font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; }
+
+.view { position: fixed; inset: 0; display: flex; flex-direction: column; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+.appbar { position: relative; display: flex; align-items: center; gap: .25rem; min-height: calc(56px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) .5rem 0 1rem; background: var(--bar); border-bottom: 1px solid var(--line); }
+#view-editor .appbar { padding-left: .25rem; }
+.appbar .title { flex: 1; min-width: 0; margin: 0; font-size: 1.25rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#editor-title { font-size: 1.6rem; line-height: 1.2; }
+.icon-btn { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; font-size: 1.4rem; }
+.icon-btn:active { background: rgba(255, 255, 255, .1); }
+
+.notes { flex: 1; margin: 0; padding: .6rem .75rem calc(96px + env(safe-area-inset-bottom)); list-style: none; overflow-y: auto; }
+.notes li + li { margin-top: .55rem; }
+.note-row { display: block; width: 100%; min-height: 64px; padding: .7rem 1rem; text-align: left; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.note-row:active { background: rgba(255, 255, 255, .06); }
+.note-title { display: block; font-size: 1.5rem; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-title[data-vi] { font-family: system-ui, sans-serif; font-size: 1.1rem; opacity: .7; }
+.note-preview { display: block; opacity: .8; font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-date { display: block; opacity: .7; font-size: .8rem; margin-top: .1rem; }
+.empty { margin: 3rem 1rem; text-align: center; color: var(--muted); }
+.fab { position: fixed; right: calc(1rem + env(safe-area-inset-right)); bottom: calc(1rem + env(safe-area-inset-bottom)); width: 56px; height: 56px; border: 0; border-radius: 16px; background: var(--accent); color: #fff; font-size: 1.6rem; box-shadow: 0 4px 14px rgba(0, 0, 0, .55); }
+
+#note-field { flex: 1; width: 100%; min-height: 0; padding: 1rem; border: 0; outline: 0; resize: none; background: var(--field-bg, #000); color: var(--field-ink, #fff); text-shadow: var(--field-shadow, none); caret-color: var(--field-ink, #fff);
+  font-size: 36px; line-height: 1.5; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; }
+
+.menu { position: absolute; z-index: 10; top: calc(52px + env(safe-area-inset-top)); right: .5rem; min-width: 220px; padding: .25rem 0; background: rgba(58, 51, 42, .8); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .6); }
+.menu button { display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 48px; padding: 0 1rem; border: 0; background: transparent; text-align: left; }
+.menu button:active { background: rgba(255, 255, 255, .08); }
+
+.snackbar { position: fixed; z-index: 20; left: 50%; bottom: calc(5.5rem + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; max-width: calc(100% - 2rem); padding: .6rem 1rem; border-radius: 10px; background: #51473a; color: var(--ink); box-shadow: 0 4px 14px rgba(0, 0, 0, .6); }
+.snackbar button { min-height: 40px; padding: 0 .5rem; border: 0; background: transparent; color: var(--accent); font-weight: 600; text-transform: uppercase; }
+
+#note-field.vertical { writing-mode: vertical-rl; overflow-x: auto; overflow-y: hidden; }
+.menu { max-height: calc(100vh - 72px - env(safe-area-inset-top)); overflow-y: auto; }
+.menu-group { padding: .25rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.menu-label { display: block; padding: .25rem 1rem; color: var(--muted); font-size: .8rem; }
+#set-font button { padding-left: 1.25rem; }
+#set-font button[aria-checked="true"] { color: var(--accent); }
+#set-font .qsample { font-size: 1.6rem; min-width: 1.6em; }
+.menu-row { display: flex; align-items: center; gap: .75rem; min-height: 48px; padding: 0 1rem; }
+.menu-row select { margin-left: auto; max-width: 11rem; padding: .35rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.menu-row input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+.aligns { display: inline-flex; gap: .25rem; margin-left: auto; }
+.menu .aligns button { width: 44px; min-height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line); border-radius: 10px; font-size: 1.25rem; }
+.aligns button[aria-checked="true"] { color: var(--accent); border-color: var(--accent); }
+.aligns .turned { display: inline-block; transform: rotate(90deg); }
+#note-field.align-center { text-align: center; }   /* with the vertical lines the centre is the middle of the line from top to bottom */
+.menu-sep { height: 1px; margin: .25rem 0; background: var(--line); }
+
+.keybar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
+.variants { display: inline-flex; gap: .4rem; }
+.variant, .key { min-width: 48px; min-height: 48px; padding: 0 .75rem; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.variant { font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.6rem; line-height: 1; }
+.variant:disabled { opacity: .35; }
+.variant:not(:disabled):active, .key:active { background: rgba(255, 255, 255, .12); }
+
+.search-bar { flex: none; padding: .5rem 1rem; background: var(--bar); border-bottom: 1px solid var(--line); }
+.search-bar input { width: 100%; min-height: 44px; padding: 0 1rem; border: 1px solid var(--line); border-radius: 22px; background: var(--bg); color: var(--ink); font-size: 1rem; outline: 0; }
+.search-bar input:focus { border-color: var(--accent); }
+
+#note-field[contenteditable="false"] { cursor: default; }
+.style-btn { flex: none; width: 34px; height: 34px; margin: 0 .5rem; padding: 0; border: 2px solid var(--ink); border-radius: 8px; background: var(--field-bg, #000); }
+.style-btn:active { opacity: .8; }
+#set-style button { gap: .75rem; }
+#set-style .style-sample { flex: none; min-width: 7.2rem; padding: .25rem .5rem; border-radius: 8px; border: 1px solid var(--line); font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.15rem; line-height: 1.3; }
+#set-style button[aria-checked="true"] { color: var(--accent); }
+#edit-btn[aria-pressed="true"] { color: var(--accent); }
+.aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+#note-field.bold { font-weight: bold; }
+#note-field.italic { font-style: italic; }
+.history { display: inline-flex; gap: .4rem; }
+.key:disabled { opacity: .35; }
+.py-1 { padding-top: .25rem; padding-bottom: .25rem; }
+.lang-switch { flex: none; display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.lang-switch button { min-width: 2.2rem; padding-left: .5rem; padding-right: .5rem; border: 0; background: transparent; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.lang-switch button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+#note-field [data-b] { font-weight: bold; }
+#note-field [data-i] { font-style: italic; }
+.keybar { flex-wrap: wrap; }
+.formats { display: inline-flex; gap: .4rem; }
+.key[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }

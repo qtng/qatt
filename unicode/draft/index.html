@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>QATT Unicode proposal, Alpha 1</title><link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css"><link rel="stylesheet" href="/css/site.css"><script src="/js/navigation.js"></script><style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, code, figcaption) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) :is(code, pre) { font-family: ui-monospace, Menlo, Consolas, monospace; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body table { display: block; max-width: 100%; overflow-x: auto; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style><style>
+<!DOCTYPE html><html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>QATT Unicode proposal, Alpha 1</title><link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css"><link rel="stylesheet" href="/css/site.css"><script src="/js/navigation.js"></script><script>document.addEventListener("langchange", e => { const vi = /\/vi(\.html)?$/.test(location.pathname); if ((e.detail === "vi") !== vi) location.href = (e.detail === "vi" ? "vi.html" : "./") + location.hash; });</script><style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, code, figcaption) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) :is(code, pre) { font-family: ui-monospace, Menlo, Consolas, monospace; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body table { display: block; max-width: 100%; overflow-x: auto; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style><style>
 @font-face { font-family: "QATT Chart"; src: url(../../fonts/qatt-serif.woff2) format("woff2"), url(../../fonts/qatt-serif.ttf) format("truetype"); }
 body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; font: 17px/1.55 Georgia, "Times New Roman", serif; color: #111; background: #fff; }
 h1 { font-size: 1.9rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #999; } h3 { margin-top: 1.6rem; }
@@ -28,7 +28,7 @@ blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4
 blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; font-family: "QATT Chart"; font-size: 1.3em; white-space: nowrap; }
 </style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1</h1>
-<p>Oct 28, 2026 · Nguyễn Quốc Trung</p>
+<p>Oct 29, 2026 · Nguyễn Quốc Trung</p>
 <h2 id="1-summary">1. Summary</h2>
 <p>This proposal encodes Quốc Âm Tân Tự (QATT), a Vietnamese script used inside Hán Nôm texts, as 164 characters in the Supplementary Multilingual Plane.</p>
 <table>
@@ -53,7 +53,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Draft date</td>
-<td>2026-10-28</td>
+<td>2026-10-29</td>
 </tr>
 <tr>
 <td>Characters</td>
@@ -471,6 +471,7 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <p>The source does not state a writing direction. Both witnesses contain vertical Hán Nôm text, and in every case the script is treated exactly like Hán Nôm and flows with it: vertical lines, columns running right to left, no spaces between words. No horizontal use is attested. The proposal therefore assumes the writing habits of Hán Nôm. The characters behave like ideographs, each occupying one square cell. Proposed for the components: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Tone marks and the joiners never start a line, because they belong to the preceding cluster.</p>
 <h3 id="sec-6-4">6.4 Code point order</h3>
 <p>The source lists the 22 Cán in the section 幹音二十二字, &quot;trunk sounds, twenty-two characters&quot;, each annotated with its name in Chữ Nôm (p. 2). The order groups the initials roughly by place of articulation. It has no encoding significance, so code points follow the order of that listing and no collation claim is made. Within each base, the five Chi follow the order of the marking-stroke position, counter-clockwise from the position of the marked Cán (4.1). The seven forms of a base follow one another: the unmarked form first, then the six marked forms. The code points are therefore grouped by base. Because a phản thiết pair begins with an unmarked Cán and a Hợp Thư with a Chi, a binary comparison of code point sequences, without any collation, sorts every combination into the range of the base of its first component.</p>
+<p><strong>Alternative order.</strong> A member of the user community suggested ordering the code points by form instead of by base: first the 22 unmarked Cán, then the 22 marked Cán, then the 110 Chi. Each class would then be one contiguous range, so a validator could check the patterns of 5.3 by ranges instead of by the offset modulo 7, and if the UTC unified the marked and unmarked Cán, one range would become free instead of 22 single positions. The draft keeps the order by base, because the source lists the Cán and tabulates the Chi in blocks of five per base, because a binary comparison then sorts every combination by the base of its first component, and because base and form follow from the offset by division by 7. All components have the same properties in either order (6.2), so the choice does not affect segmentation, line breaking or fonts. The offsets in 7.1 follow the order by base.</p>
 <h3 id="sec-6-5">6.5 Visually similar characters</h3>
 <p>Several unmarked forms look like existing characters, mostly CJK ideographs built from the same straight strokes. The comparison below was made by eye on the code chart (7.2) and covers the unmarked forms. The marked forms add one marking stroke and lie close to the same characters. The list is preliminary <code>[TBD: confirm with the UTR #36 confusables data]</code>.</p>
 <table>
@@ -637,15 +638,15 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 </table>
 <h3 id="sec-7-1">7.1 Character names</h3>
 <p>Names use ASCII capitals without diacritics, as Unicode requires. Patterns:</p>
-<pre><code>QUOC AM TAN TU &lt;NAME&gt;
-QUOC AM TAN TU &lt;NAME&gt; WITH MARK-&lt;N&gt;
+<pre><code>QUOC AM TAN TU LETTER &lt;NAME&gt;
+QUOC AM TAN TU LETTER &lt;NAME&gt; WITH MARK-&lt;N&gt;
 QUOC AM TAN TU THAM THU COMBINER
 QUOC AM TAN TU COMPONENT JOINER
-QUOC AM TAN TU TONE CIRCLE UPPER LEFT
-QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
+QUOC AM TAN TU COMBINING TONE CIRCLE UPPER LEFT
+QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </code></pre>
-<p>The tone marks use the corners UPPER LEFT, UPPER RIGHT, LOWER LEFT and LOWER RIGHT, each for circle and semicircle. The names describe the mark. The tone it denotes is given as an annotation, for example QUOC AM TAN TU TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). The names list cross-references the related existing characters: each tone mark refers to the spacing modifier letter for the same tone (U+A700..U+A707) and to the ideographic tone mark for the same corner (U+302A..U+302D).</p>
-<p>The names describe the form only and say nothing about its function. A form without marking stroke takes the plain name of its base. A form with the marking stroke is the base WITH MARK-1 to WITH MARK-6, the number being the position of the marking stroke among the six stroke ends, counted counter-clockwise from the start position of the marked Cán (4.1). MARK-1 is the marked Cán, MARK-2 to MARK-6 are the five Chi, for example QUOC AM TAN TU ONG WITH MARK-1 to QUOC AM TAN TU ONG WITH MARK-6. The positions are relative to the marked Cán and lie in different places for different bases, so the names number them instead of describing them geometrically. The names list gives the class as an annotation.</p>
+<p>The tone marks use the corners UPPER LEFT, UPPER RIGHT, LOWER LEFT and LOWER RIGHT, each for circle and semicircle. The names describe the mark. The tone it denotes is given as an annotation, for example QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). The names list cross-references the related existing characters: each tone mark refers to the spacing modifier letter for the same tone (U+A700..U+A707) and to the ideographic tone mark for the same corner (U+302A..U+302D).</p>
+<p>The 154 components are letters, so their names contain LETTER, and the tone marks are combining characters, so theirs contain COMBINING. The names describe the form only and say nothing about its function. A form without marking stroke takes the plain name of its base. A form with the marking stroke is the base WITH MARK-1 to WITH MARK-6, the number being the position of the marking stroke among the six stroke ends, counted counter-clockwise from the start position of the marked Cán (4.1). MARK-1 is the marked Cán, MARK-2 to MARK-6 are the five Chi, for example QUOC AM TAN TU LETTER ONG WITH MARK-1 to QUOC AM TAN TU LETTER ONG WITH MARK-6. The positions are relative to the marked Cán and lie in different places for different bases, so the names number them instead of describing them geometrically. The names list gives the class as an annotation.</p>
 <p>The names of the 22 Cán are the names of their sounds in the source listing (6.4), where each Cán is annotated with a Chữ Nôm character. Annotations without an encoded character are given as Ideographic Description Sequences. Each name is the syllable of the initial with the rhyme ông. Every form of a base takes the name of its Cán. Diacritics are dropped. The source has one Cán for the initials d and gi, as none of the 22 is the Cán of gi, and none for đ apart from đông, so the stroke of đ can be dropped without a clash: đông → DONG, and the Cán of d and gi is GIONG.</p>
 <table>
 <thead>
@@ -780,7 +781,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>14</td>
 <td><span class="ids ids-lr"></span>月容</td>
-<td>dông (also gi)</td>
+<td>giông (also dông)</td>
 <td>D, Gi</td>
 <td>GIONG</td>
 <td>+5B</td>
@@ -954,7 +955,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>2</td>
-<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
+<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 giông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
 <td>Listing of the 22 base sounds (幹音二十二字) in source order, each shown with its QATT character and annotated with the name of its sound in Chữ Nôm</td>
 </tr>
 <tr>
@@ -1159,7 +1160,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>Contact with the user community</td>
-<td><code>[TBD]</code>. Active web communities exist (Section 3.3); which of them have been consulted is to be stated</td>
+<td>Yes: the forum r/Qatt (through its Discord server) and the QATT Facebook group (a post in the group) were asked for feedback on 29 October 2026 (Section 3.3). A suggestion on the order of the code points is discussed in Section 6.4</td>
 </tr>
 <tr>
 <td>Information on the user community</td>

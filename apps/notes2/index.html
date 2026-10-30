@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Qatt.org Notes 2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2d2720">
+  <meta name="description" content="Notes in Quốc Âm Tân Tự.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="notes.css">
+  <script src="lang.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <script src="https://chunom.org/chunom/js/ime.js" crossorigin="anonymous"></script>
+  <script src="ce-adapter.js"></script>
+  <script src="notes-editor.js"></script>
+  <script src="notes-core.js"></script>
+  <script src="notes-db.js"></script>
+  <script src="/js/fonts.js"></script>
+  <script src="notes-styles.js"></script>
+  <script src="notes.js" defer></script>
+</head>
+<body>
+  <main id="view-list" class="view">
+    <header class="appbar">
+      <h1 class="title">Qatt.org Notes 2</h1>
+      <span id="lang-switch" class="lang-switch" role="group" aria-label="Language" data-vi-aria-label="Ngôn ngữ"><button type="button" class="py-1" data-lang="en" lang="en">EN</button><button type="button" class="py-1" data-lang="vi" lang="vi">VI</button></span>
+      <button id="search-toggle" class="icon-btn" type="button" aria-label="Search" data-vi-aria-label="Tìm kiếm"><i class="bi bi-search"></i></button>
+      <button id="list-menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+      <div id="list-menu" class="menu" hidden>
+        <button id="export" type="button"><i class="bi bi-box-arrow-up"></i> <span data-vi="Xuất ghi chú">Export notes</span></button>
+        <button id="import" type="button"><i class="bi bi-box-arrow-in-down"></i> <span data-vi="Nhập ghi chú">Import notes</span></button>
+      </div>
+    </header>
+    <div id="search-bar" class="search-bar" hidden><input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search" data-vi-aria-label="Tìm kiếm" placeholder="Search" data-vi-placeholder="Tìm kiếm"></div>
+    <input id="import-file" type="file" accept=".json,application/json" hidden>
+    <ul id="notes" class="notes"></ul>
+    <p id="empty" class="empty" hidden data-vi="Chưa có ghi chú">No notes yet</p>
+    <p id="no-results" class="empty" hidden data-vi="Không có ghi chú phù hợp">No matching notes</p>
+    <button id="new-note" class="fab" type="button" aria-label="New note" data-vi-aria-label="Ghi chú mới"><i class="bi bi-plus-lg"></i></button>
+  </main>
+  <section id="view-editor" class="view" hidden>
+    <header class="appbar">
+      <button id="back" class="icon-btn" type="button" aria-label="Back" data-vi-aria-label="Quay lại"><i class="bi bi-arrow-left"></i></button>
+      <div id="editor-title" class="title qfont"></div>
+      <button id="edit-btn" class="icon-btn" type="button" aria-label="Edit" data-vi-aria-label="Chỉnh sửa"><i class="bi bi-pencil"></i></button>
+      <button id="style-btn" class="style-btn" type="button" aria-label="Style" data-vi-aria-label="Kiểu chữ" aria-haspopup="true" aria-expanded="false"></button>
+      <div id="style-menu" class="menu" hidden><div id="set-style" role="radiogroup"></div></div>
+      <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+      <div id="menu" class="menu" hidden>
+        <button id="convert" type="button"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển QATT">Convert QATT</span></button>
+        <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
+        <div class="menu-row"><span data-vi="Kiểu">Emphasis</span>
+          <span id="set-emphasis" class="aligns">
+            <button type="button" id="set-bold" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button>
+            <button type="button" id="set-italic" aria-pressed="false" aria-label="Italic" data-vi-aria-label="In nghiêng" title="Italic" data-vi-title="In nghiêng"><i class="bi bi-type-italic"></i></button>
+          </span></div>
+        <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
+        <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
+        <div class="menu-row"><span data-vi="Căn lề">Alignment</span>
+          <span id="set-align" class="aligns" role="radiogroup">
+            <button type="button" role="radio" data-align="left" aria-label="Left" data-vi-aria-label="Căn trái" title="Left" data-vi-title="Căn trái"><i class="bi bi-text-left"></i></button>
+            <button type="button" role="radio" data-align="center" aria-label="Centred" data-vi-aria-label="Căn giữa" title="Centred" data-vi-title="Căn giữa"><i class="bi bi-text-center"></i></button>
+            <button type="button" role="radio" data-align="vertical-center" aria-label="Vertical, centred" data-vi-aria-label="Chữ dọc, căn giữa" title="Vertical, centred" data-vi-title="Chữ dọc, căn giữa"><i class="bi bi-text-center turned"></i></button>
+            <button type="button" role="radio" data-align="vertical" aria-label="Vertical" data-vi-aria-label="Chữ dọc" title="Vertical" data-vi-title="Chữ dọc"><i class="bi bi-text-left turned"></i></button>
+          </span></div>
+        <div class="menu-sep" role="separator"></div>
+        <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
+      </div>
+    </header>
+    <div id="note-field" lang="vi" spellcheck="false" autocapitalize="off" role="textbox" aria-multiline="true" aria-label="Note" data-vi-aria-label="Ghi chú"></div>
+    <div id="keybar" class="keybar" hidden>
+      <span class="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button></span>
+      <span class="formats" role="group" aria-label="Format of the selected text" data-vi-aria-label="Định dạng chữ đã chọn"><button id="sel-bold" type="button" class="key" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button><button id="sel-italic" type="button" class="key" aria-pressed="false" aria-label="Italic" data-vi-aria-label="In nghiêng" title="Italic" data-vi-title="In nghiêng"><i class="bi bi-type-italic"></i></button><button id="sel-smaller" type="button" class="key" aria-label="Smaller" data-vi-aria-label="Nhỏ hơn" title="Smaller" data-vi-title="Nhỏ hơn">A−</button><button id="sel-larger" type="button" class="key" aria-label="Larger" data-vi-aria-label="Lớn hơn" title="Larger" data-vi-title="Lớn hơn">A+</button></span>
+      <span class="history"><button id="undo-btn" type="button" class="key" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" type="button" class="key" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i></button></span>
+    </div>
+  </section>
+  <div id="snackbar" class="snackbar" role="status" hidden><span id="snackbar-text"></span> <button id="undo" type="button" hidden data-vi="Hoàn tác">Undo</button></div>
+</body>
+</html>

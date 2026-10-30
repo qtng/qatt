@@ -11,8 +11,8 @@ The font files are found next to the script (../fonts/), so other sites can load
 */
 const QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
-  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic", admin: true },
-  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", admin: true },
+  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic" },
+  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
   { family: "QATT Pen ExtraLight",   label: "Qatt.org Pen extra light",     file: "qatt-pen-extralight", admin: true },
   { family: "QATT Pen Light",        label: "Qatt.org Pen light",           file: "qatt-pen-light", admin: true },
   { family: "QATT Pen",              label: "Qatt.org Pen",                 file: "qatt-pen", admin: true },
@@ -39,10 +39,13 @@ const isAdmin = () => {
   } catch (e) { return false; }
 };
 
+// the fonts this visitor may use (all for an admin, else those not marked admin: true); other scripts (apps/notes/) use this list instead of their own
+const qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
+
 const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.currentScript.src : location.href).href;   // the folder fonts/ of qatt.org
 
 (() => {
-  const FONTS = QATT_FONTS.filter(f => !f.admin || isAdmin());
+  const FONTS = qattFontsShown();
   const style = document.createElement("style");
   style.textContent = FONTS.map(f => `@font-face { font-family: "${f.family}"; src: url(${QATT_FONT_DIR}${f.file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${f.file}.ttf) format("truetype"); }`).join("\n");
   document.head.append(style);

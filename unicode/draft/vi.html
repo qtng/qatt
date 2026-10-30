@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="vi" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Đề xuất Unicode cho QATT, Alpha 1</title><link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css"><link rel="stylesheet" href="/css/site.css"><script src="/js/navigation.js"></script><style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, code, figcaption) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) :is(code, pre) { font-family: ui-monospace, Menlo, Consolas, monospace; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body table { display: block; max-width: 100%; overflow-x: auto; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style><style>
+<!DOCTYPE html><html lang="vi" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Đề xuất Unicode cho QATT, Alpha 1</title><link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css"><link rel="stylesheet" href="/css/site.css"><script src="/js/navigation.js"></script><script>document.addEventListener("langchange", e => { const vi = /\/vi(\.html)?$/.test(location.pathname); if ((e.detail === "vi") !== vi) location.href = (e.detail === "vi" ? "vi.html" : "./") + location.hash; });</script><style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, code, figcaption) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) :is(code, pre) { font-family: ui-monospace, Menlo, Consolas, monospace; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body table { display: block; max-width: 100%; overflow-x: auto; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style><style>
 @font-face { font-family: "QATT Chart"; src: url(../../fonts/qatt-serif.woff2) format("woff2"), url(../../fonts/qatt-serif.ttf) format("truetype"); }
 body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; font: 17px/1.55 Georgia, "Times New Roman", serif; color: #111; background: #fff; }
 h1 { font-size: 1.9rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #999; } h3 { margin-top: 1.6rem; }
@@ -81,7 +81,7 @@ blockquote.epigraph footer::before { content: "— "; }
 <h2 id="2-gi-i-thi-u">2. Giới thiệu</h2>
 <p>Quốc Âm Tân Tự (國音新字, &quot;chữ mới ghi âm của tiếng nước nhà&quot;) là một loại chữ viết cho tiếng Việt, xây từ 22 cơ sở, mỗi cơ sở vẽ bằng ba nét. Một cơ sở có bảy dạng: một dạng không có nét đánh dấu và sáu dạng có một nét đánh dấu ngắn ở một trong sáu đầu nét. Mỗi dạng đều đứng riêng được. Mỗi cơ sở có sáu dạng kết hợp được với nhau theo nhóm hai hoặc ba, và mọi ký tự đều có thể mang một dấu thanh ở một trong các góc.</p>
 <h3 id="sec-2-1">2.1 Bối cảnh</h3>
-<p>Chữ này được biết đến qua một văn bản duy nhất, lưu giữ trong hai bản chép tay tại Viện Nghiên cứu Hán Nôm ở Hà Nội (3.1). Văn bản gọi tên chữ ở đầu bài tựa, 國音新字序, &quot;tựa chữ mới ghi âm của tiếng nước nhà&quot; (tr. 1). Văn bản không ghi niên đại. Nó không cổ hơn đời vua Thiệu Trị (1841–1847), vì chữ 華 bị bớt nét cuối, một chữ kiêng huý của mẹ nhà vua, bà Hồ Thị Hoa (tr. 1). Chữ kiêng huý chỉ cho biết mốc sớm nhất. Tác giả ký tên ở cuối bài tựa là Nam Thành cư sĩ Nguyễn Tử (南城居士阮子), một nho sĩ tại gia (cư sĩ) họ Nguyễn ở Nam Thành (tr. 2). Ông nói rằng mình đặt ra chữ này để ghi chép riêng cho bản thân. Bài tựa giải thích ý tưởng đằng sau chữ:</p>
+<p>Chữ này được biết đến qua một văn bản duy nhất, lưu giữ trong hai bản chép tay tại Viện Nghiên cứu Hán Nôm ở Hà Nội (3.1). Văn bản gọi tên chữ ở đầu bài tựa, 國音新字序, &quot;tựa chữ mới ghi âm của tiếng nước nhà&quot; (tr. 1). Văn bản không ghi niên đại. Nó không cổ hơn đời vua Thiệu Trị (1841–1847), vì chữ 華 bị bớt nét cuối, một chữ kiêng huý của mẹ nhà vua, bà Hồ Thị Hoa (tr. 1). Chữ kiêng huý chỉ cho biết mốc sớm nhất. Tác giả ký tên ở cuối bài tựa là 南城居士阮子 (Nam Thành cư sĩ Nguyễn Tử), một nho sĩ tại gia (cư sĩ) họ Nguyễn ở Nam Thành (tr. 2). Ông nói rằng mình đặt ra chữ này để ghi chép riêng cho bản thân. Bài tựa giải thích ý tưởng đằng sau chữ:</p>
 <blockquote class="epigraph">
 <p class="zh" lang="zh">窃想書契之造，必有一箇簡易之格，而人物聲音靡有遺者。</p>
 <p>Tôi trộm nghĩ rằng khi chữ viết mới được tạo ra, ắt phải có một phép đơn giản, dễ dùng, nhờ đó không sót âm thanh nào của người và vật.</p>
@@ -124,7 +124,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 </tbody>
 </table>
-<p>Cả hai bản chép cùng ký hiệu AB.630. Niên đại là của văn bản, suy ra từ chữ kiêng huý (2.1). Niên đại của hai bản chép chưa rõ.</p>
+<p>Cả hai bản chép cùng ký hiệu AB.630 (hoặc AB.636 [TBD]). Niên đại là của văn bản, suy ra từ chữ kiêng huý (2.1). Niên đại của hai bản chép chưa rõ.</p>
 <h3 id="sec-3-2">3.2 Chứng cứ theo đặc điểm</h3>
 <p>Phụ lục B liệt kê các đoạn theo trang.</p>
 <table>
@@ -149,7 +149,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Cặp phản thiết</td>
-<td>Mô tả trong mục Phản Thiết Hài Âm Pháp (反切諧音法, từ tr. 5). Thành phần thuộc các cơ sở khác nhau, Cán trơn đứng trước. Cán trơn cho phụ âm đầu, Chi cho vần. Các cặp trong phần lời giải thích (tr. 6)</td>
+<td>Mô tả trong mục 反切諧音法, từ tr. 5. Thành phần thuộc các cơ sở khác nhau, Cán trơn đứng trước. Cán trơn cho phụ âm đầu, Chi cho vần. Các cặp trong phần lời giải thích (tr. 6)</td>
 </tr>
 <tr>
 <td>Hợp Thư</td>
@@ -233,7 +233,7 @@ blockquote.epigraph footer::before { content: "— "; }
 <p>Một Cán trơn và một Chi kết hợp thành một chữ. Nguồn mô tả hai phương pháp.</p>
 <figure class="fig" id="fig-phan-thiet" style="width: 160px"><div class="parts"><img src="images/E39-1.png" alt="Hình 5" loading="lazy" style="flex: 0 1 106px"></div><figcaption>Hình 5. Ví dụ minh hoạ về một cặp phản thiết, kèm danh sách năm chữ (tr. 7).</figcaption></figure>
 <ul>
-<li><strong>Phản thiết.</strong> Cán trơn và Chi thuộc các cơ sở khác nhau, và Cán trơn đứng trước. Cán trơn cho phụ âm đầu và Chi cho vần, như trong phép phản thiết (反切) của Trung Hoa, ghi một âm tiết bằng phụ âm đầu của một chữ và vần của một chữ khác. Mục Phản Thiết Hài Âm Pháp (反切諧音法) mô tả các cặp này. Mục đếm tính chúng là 合書 với Cán ở bên trái (xem dưới). Ngoài ra nguồn không đặt tên riêng cho chúng, và đề xuất này gọi chúng là cặp phản thiết. Nguồn không đếm cặp phản thiết nào cùng cơ sở (xem dưới), và ngữ pháp không tạo ra các cặp như vậy (5.3). Ví dụ minh hoạ ở tr. 7 giải thích cặp <code>[ONG J CHONG-MARK-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-MARK-5">󰀀󰂚󰁙</span>, đọc là yên (Hình 5).</li>
+<li><strong>Phản thiết.</strong> Cán trơn và Chi thuộc các cơ sở khác nhau, và Cán trơn đứng trước. Cán trơn cho phụ âm đầu và Chi cho vần, như trong phép phản thiết (反切), ghi một âm tiết bằng phụ âm đầu của một chữ và vần của một chữ khác. Mục Phản Thiết Hài Âm Pháp (反切諧音法) mô tả các cặp này. Mục đếm tính chúng là 合書 với Cán ở bên trái (xem dưới). Ngoài ra nguồn không đặt tên riêng cho chúng, và đề xuất này gọi chúng là cặp phản thiết. Nguồn không đếm cặp phản thiết nào cùng cơ sở (xem dưới), và ngữ pháp không tạo ra các cặp như vậy (5.3). Ví dụ minh hoạ ở tr. 7 giải thích cặp <code>[ONG J CHONG-MARK-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-MARK-5">󰀀󰂚󰁙</span>, đọc là yên (Hình 5).</li>
 <li><strong>Hợp Thư.</strong> Chi và Cán trơn thuộc cùng một cơ sở, và Chi đứng trước. Đầu đề của mục nêu cách sắp xếp: 合書左從枝体右從幹体, thể Chi ở bên trái, thể Cán ở bên phải (tr. 6). Ví dụ minh hoạ giải thích một Hợp Thư của ONG bằng công thức dạng phản thiết, 螉乃喊翁反, nêu Chi (喊, ONG-MARK-2) trước và Cán đánh dấu của ONG (翁) sau. Trong dạng phản thiết, chữ đánh vần thứ hai cho vần, và 螉 có vần của 翁. Do đó công thức phù hợp với cách đọc trong đó Cán trơn cho vần và Chi cho phụ âm đầu, ngược với cặp phản thiết. Nó không chứng minh cách đọc đó: cách đọc của các Chi chưa được xác lập (4.1), nên phần của Chi không kiểm chứng được. Việc mã hoá không phụ thuộc vào điều này. Có 110 Hợp Thư, mỗi Chi một chữ, chẳng hạn <code>[ONG-MARK-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-MARK-2 J ONG">󰀂󰂚󰀀</span>.</li>
 </ul>
 <figure class="fig" id="fig-hop-thu" style="width: 160px"><div class="parts"><img src="images/E07-1.png" alt="Hình 6" loading="lazy" style="flex: 0 1 132px"></div><figcaption>Hình 6. Mục về Hợp Thư: đầu đề, ví dụ minh hoạ và danh sách bốn chữ (tr. 6).</figcaption></figure>
@@ -472,6 +472,7 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <p>Nguồn không nêu hướng viết. Cả hai bản chép đều chứa văn bản Hán Nôm viết dọc, và trong mọi trường hợp chữ này được đối xử hệt như Hán Nôm và chạy theo nó: dòng dọc, cột chạy từ phải sang trái, không có khoảng trắng giữa các từ. Không có cách dùng ngang nào được chứng thực. Vì vậy đề xuất giả định thói quen viết của Hán Nôm. Các ký tự ứng xử như chữ biểu ý, mỗi chữ chiếm một ô vuông. Đề xuất cho các thành phần: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Dấu thanh và các ký tự nối không bao giờ mở đầu một dòng, vì chúng thuộc về cụm đứng trước.</p>
 <h3 id="sec-6-4">6.4 Thứ tự điểm mã</h3>
 <p>Nguồn liệt kê 22 Cán trong mục 幹音二十二字, &quot;âm Cán, hai mươi hai chữ&quot;, mỗi Cán chú tên bằng chữ Nôm (tr. 2). Thứ tự này nhóm các phụ âm đầu theo vị trí cấu âm một cách đại khái. Nó không có ý nghĩa mã hoá, nên các điểm mã theo thứ tự của bảng liệt kê đó và không đưa ra khẳng định nào về đối chiếu. Trong mỗi cơ sở, năm Chi theo thứ tự vị trí nét đánh dấu, ngược chiều kim đồng hồ từ vị trí của Cán đánh dấu (4.1). Bảy dạng của một cơ sở nối tiếp nhau: dạng trơn trước, rồi sáu dạng đánh dấu. Vì vậy các điểm mã được nhóm theo cơ sở. Do một cặp phản thiết bắt đầu bằng Cán trơn và một Hợp Thư bằng Chi, so sánh nhị phân các chuỗi điểm mã, không cần đối chiếu nào, xếp mọi tổ hợp vào dải của cơ sở của thành phần đầu tiên của nó.</p>
+<p><strong>Thứ tự thay thế.</strong> Một thành viên của cộng đồng người dùng đề nghị sắp xếp các điểm mã theo dạng thay vì theo cơ sở: trước hết 22 Cán trơn, rồi 22 Cán đánh dấu, rồi 110 Chi. Khi đó mỗi lớp là một dải liên tục, nên một bộ kiểm tra có thể kiểm các mẫu của 5.3 bằng dải thay vì bằng phần dư của độ lệch khi chia cho 7, và nếu UTC hợp nhất Cán đánh dấu với Cán trơn thì một dải được giải phóng thay vì 22 vị trí rời rạc. Bản thảo giữ thứ tự theo cơ sở, vì nguồn liệt kê các Cán và lập bảng các Chi theo từng khối năm chữ cho mỗi cơ sở, vì khi đó so sánh nhị phân xếp mọi tổ hợp theo cơ sở của thành phần đầu tiên, và vì cơ sở và dạng suy ra được từ độ lệch bằng phép chia cho 7. Mọi thành phần có cùng thuộc tính trong cả hai thứ tự (6.2), nên lựa chọn này không ảnh hưởng đến phân đoạn, ngắt dòng hay phông chữ. Các độ lệch ở 7.1 theo thứ tự theo cơ sở.</p>
 <h3 id="sec-6-5">6.5 Các ký tự giống về hình thức</h3>
 <p>Một số dạng trơn trông giống các ký tự đã có, phần lớn là chữ Hán (CJK) được tạo từ cùng những nét thẳng. Việc so sánh dưới đây được làm bằng mắt trên bảng mã (7.2) và gồm các dạng trơn. Các dạng có dấu thêm một nét đánh dấu và gần với cùng những ký tự đó. Danh sách này là tạm thời <code>[TBD: xác nhận bằng dữ liệu ký tự dễ nhầm của UTR #36]</code>.</p>
 <table>
@@ -638,15 +639,15 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 </table>
 <h3 id="sec-7-1">7.1 Tên ký tự</h3>
 <p>Tên dùng chữ hoa ASCII không dấu, như Unicode yêu cầu. Các mẫu:</p>
-<pre><code>QUOC AM TAN TU &lt;NAME&gt;
-QUOC AM TAN TU &lt;NAME&gt; WITH MARK-&lt;N&gt;
+<pre><code>QUOC AM TAN TU LETTER &lt;NAME&gt;
+QUOC AM TAN TU LETTER &lt;NAME&gt; WITH MARK-&lt;N&gt;
 QUOC AM TAN TU THAM THU COMBINER
 QUOC AM TAN TU COMPONENT JOINER
-QUOC AM TAN TU TONE CIRCLE UPPER LEFT
-QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
+QUOC AM TAN TU COMBINING TONE CIRCLE UPPER LEFT
+QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </code></pre>
-<p>Các dấu thanh dùng các góc UPPER LEFT, UPPER RIGHT, LOWER LEFT và LOWER RIGHT, mỗi góc cho vòng tròn và nửa vòng tròn. Tên mô tả dấu. Thanh mà nó biểu thị được cho dưới dạng chú thích, chẳng hạn QUOC AM TAN TU TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). Danh sách tên có tham chiếu chéo đến các ký tự hiện có liên quan: mỗi dấu thanh dẫn đến chữ cái biến âm có độ rộng cho cùng thanh (U+A700..U+A707) và đến dấu thanh biểu ý cho cùng góc (U+302A..U+302D).</p>
-<p>Tên chỉ mô tả dạng và không nói gì về chức năng. Một dạng không có nét đánh dấu lấy tên trơn của cơ sở. Một dạng có nét đánh dấu là cơ sở WITH MARK-1 đến WITH MARK-6, số là vị trí của nét đánh dấu trong sáu đầu nét, đếm ngược chiều kim đồng hồ từ vị trí xuất phát của Cán đánh dấu (4.1). MARK-1 là Cán đánh dấu, MARK-2 đến MARK-6 là năm Chi, chẳng hạn QUOC AM TAN TU ONG WITH MARK-1 đến QUOC AM TAN TU ONG WITH MARK-6. Các vị trí là tương đối so với Cán đánh dấu và nằm ở những chỗ khác nhau với các cơ sở khác nhau, nên tên đánh số chúng thay vì mô tả chúng về hình học. Danh sách tên ghi lớp dưới dạng chú thích.</p>
+<p>Các dấu thanh dùng các góc UPPER LEFT, UPPER RIGHT, LOWER LEFT và LOWER RIGHT, mỗi góc cho vòng tròn và nửa vòng tròn. Tên mô tả dấu. Thanh mà nó biểu thị được cho dưới dạng chú thích, chẳng hạn QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). Danh sách tên có tham chiếu chéo đến các ký tự hiện có liên quan: mỗi dấu thanh dẫn đến chữ cái biến âm có độ rộng cho cùng thanh (U+A700..U+A707) và đến dấu thanh biểu ý cho cùng góc (U+302A..U+302D).</p>
+<p>154 thành phần là chữ cái nên tên của chúng có LETTER, còn các dấu thanh là ký tự kết hợp nên tên của chúng có COMBINING. Tên chỉ mô tả dạng và không nói gì về chức năng. Một dạng không có nét đánh dấu lấy tên trơn của cơ sở. Một dạng có nét đánh dấu là cơ sở WITH MARK-1 đến WITH MARK-6, số là vị trí của nét đánh dấu trong sáu đầu nét, đếm ngược chiều kim đồng hồ từ vị trí xuất phát của Cán đánh dấu (4.1). MARK-1 là Cán đánh dấu, MARK-2 đến MARK-6 là năm Chi, chẳng hạn QUOC AM TAN TU LETTER ONG WITH MARK-1 đến QUOC AM TAN TU LETTER ONG WITH MARK-6. Các vị trí là tương đối so với Cán đánh dấu và nằm ở những chỗ khác nhau với các cơ sở khác nhau, nên tên đánh số chúng thay vì mô tả chúng về hình học. Danh sách tên ghi lớp dưới dạng chú thích.</p>
 <p>Tên của 22 Cán là tên âm của chúng trong bảng liệt kê của nguồn (6.4), nơi mỗi Cán được chú bằng một chữ Nôm. Các chú âm không có ký tự được mã hoá thì được cho dưới dạng Chuỗi Mô tả Chữ Biểu ý. Mỗi tên là âm tiết của phụ âm đầu với vần ông. Mọi dạng của một cơ sở lấy tên Cán của nó. Dấu phụ được bỏ. Nguồn có một Cán cho các phụ âm d và gi, vì không Cán nào trong 22 là Cán của gi, và không có Cán nào cho đ ngoài đông, nên nét của đ có thể bỏ mà không xung đột: đông → DONG, và Cán của d và gi là GIONG.</p>
 <table>
 <thead>
@@ -781,7 +782,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>14</td>
 <td><span class="ids ids-lr"></span>月容</td>
-<td>dông (cũng gi)</td>
+<td>giông (cũng dông)</td>
 <td>D, Gi</td>
 <td>GIONG</td>
 <td>+5B</td>
@@ -955,7 +956,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>2</td>
-<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 dông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
+<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 giông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
 <td>Bảng liệt kê 22 âm cơ sở (幹音二十二字) theo thứ tự của nguồn, mỗi âm có ký tự QATT và chú tên âm bằng chữ Nôm</td>
 </tr>
 <tr>
@@ -986,7 +987,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>4</td>
 <td>本字八音識別法。於本字上依陰陽四象識別，每一字各成八字。如同東合一字，惟同音其聲在上為陽，東音其聲在下為陰。以陰陽分配，則東董凍篤四音是陰之平上去入，同洞動獨四音是陽之平上去入。以四象識別，則陽用全圈，陰用半圈。  其同字全識於其字之左足，洞字全識於其字之左肩，動字全識於其字之右肩，獨字全識於其字之右足；東字半識於其字之左足，董字半識於其字之左肩，凍字半識於其字之右肩，篤字半識於其字之右足。如下。他倣此。  {東}{董}{凍}{篤}{同}{洞}{動}{獨}</td>
-<td>Dấu thanh: vòng tròn và nửa vòng tròn ở bốn góc, tám thanh; Tám thanh theo phép âm dương Trung Hoa</td>
+<td>Dấu thanh: vòng tròn và nửa vòng tròn ở bốn góc, tám thanh; Tám thanh theo phép dương âm</td>
 </tr>
 <tr>
 <td>5</td>
@@ -1063,7 +1064,6 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 <li><em>QATT Facebook Group</em>. <a href="https://www.facebook.com/groups/1842030006367450/">https://www.facebook.com/groups/1842030006367450/</a></li>
 <li><em>Quốc Âm Tân Tự Converter (QATT)</em>. Bộ chuyển đổi trên web từ Quốc ngữ, không rõ tác giả. <a href="https://quocamtantu.vercel.app/">https://quocamtantu.vercel.app/</a></li>
 <li><em>Qatt.org – Quốc Âm Tân Tự</em>. Trang web của người đề xuất, có tài liệu học và công cụ viết. <a href="https://qatt.org">https://qatt.org</a></li>
-<li><em>Are there any records left of the Quốc Âm Tân Tự writing system, which was said to be constructed by the third emperor of the Nguyen dynasty?</em> Thảo luận trên Quora, 2018. <a href="https://www.quora.com/Are-there-any-records-left-of-the-Qu%E1%BB%91c-%C3%82m-T%C3%A2n-T%E1%BB%B1-writing-system-which-was-said-to-be-constructed-by-the-third-emperor-of-the-Nguyen-dynasty">https://www.quora.com/Are-there-any-records-left-of-the-Quốc-Âm-Tân-Tự-writing-system-which-was-said-to-be-constructed-by-the-third-emperor-of-the-Nguyen-dynasty</a></li>
 <li>ASEAN urbanist. Bài đăng về Quốc Âm Tân Tự. Facebook. <a href="https://www.facebook.com/urbanistasean/posts/-qu%E1%BB%91c-%C3%A2m-t%C3%A2n-t%E1%BB%B1-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/">https://www.facebook.com/urbanistasean/posts/-quốc-âm-tân-tự-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/</a></li>
 </ul>
 <h3 id="sec-D">D. Proposal Summary Form</h3>
@@ -1161,7 +1161,7 @@ QUOC AM TAN TU TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>Liên hệ với cộng đồng người dùng</td>
-<td><code>[TBD]</code>. Có các cộng đồng hoạt động trên web (mục 3.3); cần nêu đã tham khảo những cộng đồng nào</td>
+<td>Có: diễn đàn r/Qatt (qua máy chủ Discord của diễn đàn) và nhóm Facebook QATT (bằng một bài đăng trong nhóm) đã được hỏi ý kiến ngày 29 tháng 10 năm 2026 (mục 3.3). Một đề nghị về thứ tự các điểm mã được bàn ở mục 6.4</td>
 </tr>
 <tr>
 <td>Thông tin về cộng đồng người dùng</td>
