@@ -10,7 +10,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .appbar { position: relative; display: flex; align-items: center; gap: .25rem; min-height: calc(56px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) .5rem 0 1rem; background: var(--bar); border-bottom: 1px solid var(--line); }
 #view-editor .appbar { padding-left: .25rem; }
 .appbar .title { flex: 1; min-width: 0; margin: 0; font-size: 1.25rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#editor-title { font-size: 1.6rem; line-height: 1.2; }
+#editor-title, #title-input { font-size: 1.6rem; line-height: 1.2; }
+#editor-title { cursor: text; }
+#title-input { height: 44px; padding: 0 .5rem; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .08); color: inherit; outline: 0; }
 .icon-btn { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; font-size: 1.4rem; }
 .icon-btn:active { background: rgba(255, 255, 255, .1); }
 

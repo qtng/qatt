@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex) is cached the first time it loads, and at install if the network allows
 */
-const CACHE = 'qatt-notes2-v2';
+const CACHE = 'qatt-notes2-v3';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const PAGE = '/apps/notes2/';
 const PRECACHE = [
@@ -14,7 +14,7 @@ const PRECACHE = [
   '/apps/notes2/manifest.webmanifest', '/apps/notes2/icons/icon-192.png', '/apps/notes2/icons/icon-512.png', '/apps/notes2/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes2/notes-editor.js', '/apps/notes2/ce-adapter.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  '/fonts/qatt-pen-medium.woff2?v=6', '/fonts/qatt-serif.woff2?v=6', '/fonts/qatt-gothic.woff2?v=6', '/fonts/qatt-gothic-wide.woff2?v=6',
+  '/fonts/qatt-pen-medium.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2',
   '/decodings.json',
 ];
 
