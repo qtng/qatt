@@ -12,7 +12,7 @@ const PRECACHE = [
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  '/fonts/qatt-pen-medium.woff2?v=6', '/fonts/qatt-serif.woff2?v=6', '/fonts/qatt-gothic.woff2?v=6', '/fonts/qatt-gothic-wide.woff2?v=6',
+  '/fonts/qatt-pen-medium.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2',
   '/decodings.json',
 ];
 
