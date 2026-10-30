@@ -2,8 +2,8 @@
 The logic of the notes app (apps/notes/) that needs no browser: titles, search text, export and import. Needs the global QattText (js/qatt-text.js) for the cells of QATT text.
 A note is { id, text, created, updated } (milliseconds) and may have format: { font, size, align, decoding, bold, italic } (only what differs from the defaults) and style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
 
-  NotesCore.title(text)                       first line with a character that is no space, trimmed, at most 80 code points ("" if none)
-  NotesCore.preview(text)                     the text after the title line on one line, at most 120 code points
+  NotesCore.title(text, custom)               the title set by hand (note.title) if it has a character that is no space, else the first line with a character that is no space, trimmed, at most 80 code points ("" if none)
+  NotesCore.preview(text, custom)             the text after the title line (all of it when a title was set by hand) on one line, at most 120 code points
   NotesCore.fold(s)                           lowercase without accents, đ as d: what the search compares
   NotesCore.readingText(text, cellReading)    the text with every QATT cell written as its reading (cellReading(cell) -> string, "?" if none)
   NotesCore.matches(text, query, cellReading) whether the folded query is in the text or in its readings (an empty query matches)
@@ -28,13 +28,14 @@ const NotesCore = (() => {
   const lines = text => text.split(/\r?\n/);
   const titleIndex = text => lines(text).findIndex(l => /\S/.test(l));
 
-  const title = text => {
+  const title = (text, custom) => {
+    if (typeof custom === "string" && /\S/.test(custom)) return cut(custom.trim(), 80);
     const i = titleIndex(text);
     return i < 0 ? "" : cut(lines(text)[i].trim(), 80);
   };
-  const preview = text => {
-    const i = titleIndex(text);
-    return i < 0 ? "" : cut(lines(text).slice(i + 1).map(l => l.trim()).filter(Boolean).join(" "), 120);
+  const preview = (text, custom) => {
+    const i = typeof custom === "string" && /\S/.test(custom) ? -1 : titleIndex(text);   // a title set by hand leaves the whole text to the preview
+    return i < 0 && !/\S/.test(text) ? "" : cut(lines(text).slice(i + 1).map(l => l.trim()).filter(Boolean).join(" "), 120);
   };
 
   const fold = s => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/g, "d");
@@ -57,7 +58,7 @@ const NotesCore = (() => {
     try { data = JSON.parse(json); } catch (e) { return { ok: false, error: "Not a notes file" }; }
     if (!data || data.version !== 1 || !Array.isArray(data.notes)) return { ok: false, error: "Not a notes file" };
     if (!data.notes.every(validNote)) return { ok: false, error: "The file has an invalid note" };
-    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}) })) };
+    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(typeof n.title === "string" && /\S/.test(n.title) ? { title: cut(n.title.trim(), 80) } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}) })) };
   };
 
   const merge = (existing, incoming) => {

@@ -1,9 +1,9 @@
 /*
 The editing logic of QATT notes (apps/notes/): QATT in a text area, independent of the editor of the website (js/qatt-writer.js), so the app can grow on its own.
-Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and, for Telex, VietIme (ime.js).
+Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js).
 
   const ed = NotesEditor.editor(textarea, { parser, onChange })
-    Telex is always on; a word becomes QATT characters at a space or any other character that is no letter (and at Enter); the cells stay whole (the cursor never sits
+    No Telex of its own (the phone keyboard has it); a word becomes QATT characters at a space or any other character that is no letter (and at Enter); the cells stay whole (the cursor never sits
     inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
     onChange        called after a change the field did not report itself (a variant, Convert, a new decoding)
     ed.variants()   the three slots [marked1, neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
@@ -238,7 +238,7 @@ const NotesEditor = (() => {
   }
 
 
-  // The editor of an app (apps/notes/): QATT in a text area without any editor around it. Telex always on (ime.js), a word becomes QATT at a space or other character that is no letter,
+  // The editor of an app (apps/notes/): QATT in a text area without any editor around it. no Telex of its own (the phone keyboard has it), a word becomes QATT at a space or other character that is no letter,
   // the cells stay whole. The app draws its own buttons.
   //   opts.parser    the VietnameseParser (decoding)
   //   opts.onChange  called after a change the field did not report itself (a variant, Convert, a new decoding)
@@ -246,8 +246,7 @@ const NotesEditor = (() => {
   //   convert()      Convert as the button of the editor; setDecoding(name) writes every cell again after the decoding `name`
   function editor(field, opts) {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
-    const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
-    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: 'any' });
+    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => {}, convertOn: 'any' });
     const slots = makeVariants(field, { on: () => true, refresh: changed });
     return {
       field,
@@ -256,7 +255,6 @@ const NotesEditor = (() => {
       setDecoding(name) {
         field.value = QattText.recode(field.value, parser, new VietnameseParser(name, parser.extra));
         parser.setDecoding(name);
-        if (ime) ime.hide();
         changed();
       },
     };
