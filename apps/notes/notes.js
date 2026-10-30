@@ -37,18 +37,18 @@ window.notesApp = { store, ready, flush() } is for the tests.
     list.textContent = '';
     state.notes.sort((a, b) => b.updated - a.updated);
     const query = $('search').value, cellReading = cell => QattText.reading(cell, parser);
-    const shown = state.notes.filter(n => NotesCore.matches(n.text, query, cellReading));
+    const shown = state.notes.filter(n => NotesCore.matches((n.title ? n.title + '\n' : '') + n.text, query, cellReading));
     for (const note of shown) {
       const li = document.createElement('li'), row = document.createElement('button');
       row.type = 'button'; row.className = 'note-row'; row.dataset.id = note.id;
       const look = styleOf(note);   // each note is drawn in its own style
       row.style.background = look.bg; row.style.color = look.ink; row.style.textShadow = look.shadow;
-      const title = document.createElement('span'), title_ = NotesCore.title(note.text);
+      const title = document.createElement('span'), title_ = NotesCore.title(note.text, note.title);
       title.className = 'note-title';
       if (title_) title.textContent = title_;
       else { title.setAttribute('data-vi', 'Không có tiêu đề'); title.textContent = 'Untitled'; }
       const preview = document.createElement('span'), date = document.createElement('span');
-      preview.className = 'note-preview'; preview.textContent = NotesCore.preview(note.text);
+      preview.className = 'note-preview'; preview.textContent = NotesCore.preview(note.text, note.title);
       date.className = 'note-date'; date.textContent = when(note.updated);
       row.append(title, preview, date);
       li.append(row);
@@ -75,7 +75,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const note = state.current;
     if (!note || !state.dirty) return saving;
     state.dirty = false;
-    if (field.value === '' && !state.inStore) return saving;   // a new note that stays empty
+    if (field.value === '' && !note.title && !state.inStore) return saving;   // a new note that stays empty
     note.text = field.value;
     note.updated = Date.now();
     const copy = { ...note };
@@ -95,7 +95,29 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // ----- editor -----
   const editor = NotesEditor.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); remember(false); } });
-  const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value); };
+  const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value, state.current && state.current.title); };
+
+  // a tap on the title in the bar sets the title by hand (empty: back to the first line of the text)
+  const titleInput = $('title-input');
+  function editTitle(on, commit) {
+    if (on) {
+      if (!state.current) return;
+      titleInput.value = state.current.title || ''; titleInput.placeholder = NotesCore.title(field.value);
+      $('editor-title').hidden = true; titleInput.hidden = false; titleInput.focus(); titleInput.select();
+      return;
+    }
+    if (titleInput.hidden) return;
+    titleInput.hidden = true; $('editor-title').hidden = false;
+    const note = state.current, value = titleInput.value.trim();
+    if (commit && note && value !== (note.title || '')) { if (value) note.title = value; else delete note.title; schedule(); }
+    showTitle();
+  }
+  $('editor-title').addEventListener('click', () => editTitle(true));
+  titleInput.addEventListener('blur', () => editTitle(false, true));
+  titleInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); editTitle(false, true); }
+    else if (e.key === 'Escape') { e.preventDefault(); editTitle(false, false); }
+  });
   field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); remember(true); });
 
   // undo and redo: the field changes by script (Telex, variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
