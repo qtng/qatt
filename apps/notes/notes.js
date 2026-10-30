@@ -1,5 +1,5 @@
 /*
-QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, fonts.js, notes-editor.js, notes-core.js, notes-db.js.
+QATT notes: the list, the editor, the saving. Needs lang.js, parser.js, qatt-text.js, fonts.js, ime.js, notes-editor.js, notes-core.js, notes-db.js.
 Routes (history, so the back button of Android works): "#/" the list, "#/n/<id>" a note. A new note is written to the store at its first autosave that is not empty.
 window.notesApp = { store, ready, flush() } is for the tests.
 */
@@ -128,7 +128,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   });
   field.addEventListener('input', () => { schedule(); showTitle(); renderKeys(); remember(true); });
 
-  // undo and redo: the field changes by script (variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
+  // undo and redo: the field changes by script (Telex, variants, Convert), which the browser does not undo, so the app keeps its own steps (the text and the cursor); typing within half a second is one step
   const undoLog = { steps: [], at: 0, time: 0 };
   const cursor = () => ({ text: field.value, start: field.selectionStart, end: field.selectionEnd });
   function buttons() { $('undo-btn').disabled = undoLog.at <= 0; $('redo-btn').disabled = undoLog.at >= undoLog.steps.length - 1; }
