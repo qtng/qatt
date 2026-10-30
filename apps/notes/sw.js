@@ -4,10 +4,8 @@ Raise CACHE when a file of PRECACHE changes (a new name = a new cache; the old o
 Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
-  - ime.js of chunom.org (Telex) is cached the first time it loads, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v2';
-const IME = 'https://chunom.org/chunom/js/ime.js';
+const CACHE = 'qatt-notes-v3';
 const PAGE = '/apps/notes/';
 const PRECACHE = [
   PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js',
@@ -20,7 +18,7 @@ const PRECACHE = [
 
 // the caches of earlier versions of this app
 const staleCaches = (keys, current) => keys.filter(k => k.startsWith('qatt-notes-') && k !== current);
-if (typeof module !== 'undefined') module.exports = { CACHE, PRECACHE, IME, staleCaches };
+if (typeof module !== 'undefined') module.exports = { CACHE, PRECACHE, staleCaches };
 
 if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWorkerGlobalScope) {
   const keyOf = req => {
@@ -29,7 +27,6 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
   };
   const known = req => {
     const url = new URL(req.url);
-    if (req.url === IME) return true;
     if (url.origin !== location.origin) return false;
     if (req.mode === 'navigate') return url.pathname === PAGE || url.pathname === '/apps/notes/index.html';
     return /^\/fonts\/[\w.-]+\.(woff2|ttf)$/.test(url.pathname) || PRECACHE.some(p => p.split('?')[0] === url.pathname);   // the other fonts (admins) are cached when they load
@@ -42,7 +39,6 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
       if (!res.ok) throw new Error(url + ' ' + res.status);
       await cache.put(url, res);
     }));
-    try { const res = await fetch(new Request(IME, { cache: 'reload', mode: 'cors' })); if (res.ok) await cache.put(IME, res); } catch (e) { /* cached when the page loads it */ }
     await self.skipWaiting();
   })()));
 
