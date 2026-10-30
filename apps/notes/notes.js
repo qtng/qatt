@@ -97,19 +97,27 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const editor = NotesEditor.editor(field, { parser, onChange: () => { schedule(); showTitle(); renderKeys(); remember(false); } });
   const showTitle = () => { $('editor-title').textContent = NotesCore.title(field.value, state.current && state.current.title); };
 
-  // a tap on the title in the bar sets the title by hand (empty: back to the first line of the text)
+  // a tap on the title in the bar sets the title by hand: the title of the moment is there, selected, to be overwritten or changed a little (the first line of the text brings its QATT characters;
+  // QATT is typed here as in the text); a title like the first line, or an empty one, is no title of its own
   const titleInput = $('title-input');
+  NotesEditor.editor(titleInput, { parser, onChange: () => {} });
   function editTitle(on, commit) {
     if (on) {
       if (!state.current) return;
-      titleInput.value = state.current.title || ''; titleInput.placeholder = NotesCore.title(field.value);
+      titleInput.value = NotesCore.title(field.value, state.current.title);
       $('editor-title').hidden = true; titleInput.hidden = false; titleInput.focus(); titleInput.select();
       return;
     }
     if (titleInput.hidden) return;
+    if (commit) {   // the word typed last has no space behind it yet: end it so it becomes QATT too
+      const end = titleInput.value.length;
+      titleInput.setRangeText(' ', end, end, 'end');
+      titleInput.dispatchEvent(new InputEvent('input', { inputType: 'insertText', data: ' ' }));
+    }
     titleInput.hidden = true; $('editor-title').hidden = false;
-    const note = state.current, value = titleInput.value.trim();
-    if (commit && note && value !== (note.title || '')) { if (value) note.title = value; else delete note.title; schedule(); }
+    const note = state.current, value = titleInput.value.trim(), auto = NotesCore.title(field.value);
+    const next = value === '' || value === auto ? '' : value;
+    if (commit && note && next !== (note.title || '')) { if (next) note.title = next; else delete note.title; schedule(); }
     showTitle();
   }
   $('editor-title').addEventListener('click', () => editTitle(true));

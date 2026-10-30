@@ -5,7 +5,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
 */
-const CACHE = 'qatt-notes-v4';
+const CACHE = 'qatt-notes-v5';
 const PAGE = '/apps/notes/';
 const PRECACHE = [
   PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js',
