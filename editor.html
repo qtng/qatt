@@ -22,6 +22,11 @@
     .hero .han { color: var(--accent); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
     .hero .lead { max-width: 38rem; color: var(--bs-secondary-color); }
     @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } }
+    /* advert for the Notes app: small, square-ish, loud; fixed colours so it stands out in every theme (also the dark one); stays on the phone (it is no .btn) */
+    .app-promo { display: inline-flex; align-items: center; margin-left: 1.25rem; padding: 0 .35rem; background: #ffc83d; color: #2b2118; border: 1px solid rgba(43, 33, 24, .35); border-radius: .2rem; box-shadow: 1px 1px 0 rgba(43, 33, 24, .25); font-size: .65rem; font-weight: 500; text-decoration: none; white-space: nowrap; transform: rotate(4deg); transition: transform .12s, box-shadow .12s; }
+    .app-promo:hover, .app-promo:focus-visible { color: #2b2118; transform: rotate(4deg) translate(-1px, -1px); box-shadow: 2px 2px 0 rgba(43, 33, 24, .25); }
+    .app-promo:active { transform: rotate(4deg) translate(1px, 1px); box-shadow: 0 0 0 rgba(43, 33, 24, .25); }
+    @media (max-width: 575.98px) { .app-promo { margin-left: 0; margin-bottom: .6rem; } }
     main { max-width: 62rem; margin: 0 auto; padding: 0 1rem 3rem; }
     a { color: var(--accent); }
     /* the writing card (.card-box: the panel of the theme); the parts inside are in js/qatt-writer.js */
@@ -36,7 +41,7 @@
   <script src="js/qatt-text.js"></script>
   <script src="js/fonts.js"></script>   <!-- the QATT fonts (QATT_FONTS) and their @font-face rules -->
   <script defer src="https://chunom.org/chunom/js/ime.js"></script>
-  <script src="js/qatt-writer.js?v=10"></script>
+  <script src="js/qatt-writer.js"></script>
 </head>
 <body>
 <header class="hero pt-5 pb-4 mb-4">
@@ -46,6 +51,7 @@
     <p class="lead mx-auto mb-4" data-vi="Gõ tiếng Việt (Quốc Ngữ). Mỗi từ gõ xong sẽ thành chữ QATT.">Type Vietnamese (Quốc Ngữ). Every finished word becomes QATT text.</p>
     <a class="btn btn-cinnabar btn-pill" href="symbols.html" data-vi="Bảng chữ">Symbol table</a>
     <a class="btn btn-cinnabar btn-pill" href="decodings.html" data-vi="Giải mã">Decodings</a>
+    <a class="app-promo" href="/apps/notes"><span data-vi="Cài đặt ứng dụng">Install app</span></a>
   </div>
 </header>
 <main>
