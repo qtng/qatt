@@ -212,7 +212,7 @@
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser).replace(/\s+/g, '');   // the sample text until something is typed; no spaces between the QATT cells
     for (const q of samples) q.textContent = '國音' + qatt;
-    const short = QattText.convert($('#text').value.trim() || 'Quốc Âm Tân Tự', parser).replace(/\s+/g, '');
+    const short = QattText.convert($('#text').value.trim() || 'Quốc Âm Tân Tự Việt Nam', parser).replace(/\s+/g, '');
     for (const q of specs) q.textContent = '國音' + short;   // 國音 and the QATT cells in one text, to compare size, alignment and spacing
   };
   $('#text').addEventListener('input', render);
