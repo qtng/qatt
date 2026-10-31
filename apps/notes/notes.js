@@ -545,7 +545,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
         $('clip-text').textContent = text;
         $('clip-text').parentNode.scrollTop = 0;
         clip.hidden = false;
-      } else snack('The clipboard holds text without QATT or Chinese characters', 'Bộ nhớ tạm có văn bản không có ký tự QATT hay chữ Hán');
+      } else snack('The clipboard holds text without QATT or Hán Nôm characters', 'Bộ nhớ tạm có văn bản không có ký tự QATT hay chữ Hán Nôm');
     } catch (e) {   // no permission yet, or the page has no focus: the automatic check tries again later, the manual one says it
       if (manual) snack('The clipboard cannot be read: allow it in the browser', 'Không đọc được bộ nhớ tạm: hãy cho phép trong trình duyệt');
     } finally { clipChecking = false; }
