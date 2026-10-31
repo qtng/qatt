@@ -64,6 +64,13 @@
     #explore { padding-inline: .75rem; }   /* the hard shadow of a theme must not touch the edge of the screen */
     .qatt-words { font-family: "QATT Pen Medium", sans-serif; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; }   /* the glyphs of the symbols card */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
+    /* Qatt.org Notes: the banner with three screens of the app and a button on it that leads to its page (apps/) */
+    .notes-banner { position: relative; display: block; border-radius: 1rem; overflow: hidden; box-shadow: 0 .8rem 2.2rem rgba(0, 0, 0, .28); background: #111; }
+    .notes-banner img { display: block; width: 100%; height: auto; transition: transform .4s ease; }
+    .notes-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, .55)); pointer-events: none; }
+    .notes-banner .on-banner { position: absolute; z-index: 1; left: 50%; bottom: 1.1rem; transform: translateX(-50%); }
+    .notes-banner:hover img { transform: scale(1.015); }
+    @media (max-width: 575.98px) { .notes-banner .on-banner { bottom: .6rem; font-size: .85rem; } }
   </style>
 </head>
 <body>
@@ -131,6 +138,16 @@
 </header>
 
 <main class="container py-2">
+
+  <section class="block" id="notes-app">
+    <a class="notes-banner" href="/apps/" aria-label="Qatt.org Notes">
+      <picture>
+        <source media="(max-width: 575.98px)" srcset="/apps/apps-mobile.jpg" width="900" height="600">
+        <img src="/apps/apps-1800.jpg" srcset="/apps/apps-900.jpg 900w, /apps/apps-1800.jpg 1800w" sizes="(min-width: 1400px) 1296px, 100vw" width="1800" height="600" alt="">
+      </picture>
+      <span class="btn btn-cinnabar btn-pill on-banner">Qatt.org Notes: soạn và đọc QATT</span>
+    </a>
+  </section>
 
   <section class="block" id="name">
     <div class="scr-box" id="scrBox" role="img" aria-label="Quốc Âm Tân Tự in QATT">
