@@ -475,7 +475,7 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <p><strong>Thứ tự thay thế.</strong> Một thành viên của cộng đồng người dùng đề nghị sắp xếp các điểm mã theo dạng thay vì theo cơ sở: trước hết 22 Cán trơn, rồi 22 Cán đánh dấu, rồi 110 Chi. Khi đó mỗi lớp là một dải liên tục, nên một bộ kiểm tra có thể kiểm các mẫu của 5.3 bằng dải thay vì bằng phần dư của độ lệch khi chia cho 7, và nếu UTC hợp nhất Cán đánh dấu với Cán trơn thì một dải được giải phóng thay vì 22 vị trí rời rạc. Một biến thể đặt 22 Cán trơn trước, rồi sáu dạng đánh dấu của từng cơ sở. Cả hai thứ tự đều tách hai loại tổ hợp khi so sánh nhị phân: mọi cặp phiên thiết bắt đầu bằng một Cán trơn và sẽ đứng trước mọi Hợp Thư, vốn bắt đầu bằng một Chi, nên Hợp Thư của một cơ sở không còn đứng cạnh các cặp phiên thiết và các chữ khác của cùng cơ sở. Chỉ một quy tắc đối chiếu (collation) được điều chỉnh riêng mới có thể khôi phục thứ tự, như nó đặt ä sau a, và một chữ viết có cộng đồng người dùng nhỏ khó có được quy tắc như vậy: quy tắc đối chiếu mặc định (DUCET) của một chữ viết mới thường theo thứ tự điểm mã. Trong thứ tự theo cơ sở, mọi chữ có thành phần đầu thuộc cơ sở X đứng cùng nhau, và các thành phần của một cơ sở có chung phụ âm đầu của nó: Cán trơn và Cán đánh dấu, và theo các chú âm Nôm, cả các Chi. Bản thảo giữ thứ tự theo cơ sở, vì nguồn liệt kê các Cán và lập bảng các Chi theo từng khối năm chữ cho mỗi cơ sở, vì khi đó so sánh nhị phân giữ các chữ của một cơ sở cùng nhau, và vì cơ sở và dạng suy ra được từ độ lệch bằng phép chia cho 7. Mọi thành phần có cùng thuộc tính trong cả hai thứ tự (6.2), nên lựa chọn này không ảnh hưởng đến phân đoạn, ngắt dòng hay phông chữ. Các độ lệch ở 7.1 theo thứ tự theo cơ sở.</p>
 <p><strong>Đối chiếu mặc định.</strong> Vì khó có một quy tắc đối chiếu điều chỉnh riêng, các trọng số mặc định trong DUCET trên thực tế là thứ tự sắp xếp của chữ viết này. Bản thảo đề nghị: 154 thành phần nhận trọng số cấp một theo thứ tự điểm mã; tám dấu thanh nhận trọng số cấp hai theo thứ tự ở 7.1, nên các chữ chỉ khác nhau về thanh đứng cạnh nhau và thanh chỉ quyết định sau các thành phần; ký tự nối thành phần và ký tự kết hợp Tham Thư bị bỏ qua, nên một tổ hợp được xếp như các thành phần của nó theo thứ tự lưu trữ. Văn bản không có quy tắc đối chiếu, so sánh theo điểm mã, cho cùng thứ tự các thành phần.</p>
 <h3 id="sec-6-5">6.5 Các ký tự giống về hình thức</h3>
-<p>Một số dạng trơn trông giống các ký tự đã có, phần lớn là chữ Hán (CJK) được tạo từ cùng những nét thẳng. Việc so sánh dưới đây được làm bằng mắt trên bảng mã (7.2) và gồm các dạng trơn. Các dạng có dấu thêm một nét đánh dấu và gần với cùng những ký tự đó. Danh sách này là tạm thời <code>[TBD: xác nhận bằng dữ liệu ký tự dễ nhầm của UTR #36]</code>.</p>
+<p>Một số dạng trơn trông giống các ký tự đã có, phần lớn là chữ Hán (CJK) được tạo từ cùng những nét thẳng. Việc so sánh dưới đây được làm bằng mắt trên bảng mã (7.2) và gồm các dạng trơn cùng các dạng có dấu giống ký tự đã có. Các dạng có dấu khác thêm một nét đánh dấu và gần với các ký tự của dạng trơn tương ứng. Danh sách này là tạm thời <code>[TBD: xác nhận bằng dữ liệu ký tự dễ nhầm của UTR #36]</code>.</p>
 <table>
 <thead>
 <tr>
@@ -516,6 +516,11 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>U+5E72 干, U+4E8E 于</td>
 </tr>
 <tr>
+<td>TRONG MARK-1 (+2B)</td>
+<td><span class="qg" role="img" aria-label="TRONG-MARK-1">󰀫</span></td>
+<td>U+5348 午</td>
+</tr>
+<tr>
 <td>DONG (+31)</td>
 <td><span class="qg" role="img" aria-label="DONG">󰀱</span></td>
 <td>U+571F 土, U+58EB 士</td>
@@ -526,9 +531,44 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>U+5344 卄, U+5EFE 廾</td>
 </tr>
 <tr>
+<td>THONG MARK-1 (+47)</td>
+<td><span class="qg" role="img" aria-label="THONG-MARK-1">󰁇</span></td>
+<td>U+5347 升</td>
+</tr>
+<tr>
+<td>NHONG MARK-1 (+4E)</td>
+<td><span class="qg" role="img" aria-label="NHONG-MARK-1">󰁎</span></td>
+<td>U+5347 升</td>
+</tr>
+<tr>
 <td>CHONG (+54)</td>
 <td><span class="qg" role="img" aria-label="CHONG">󰁔</span></td>
 <td>U+30AD キ KATAKANA LETTER KI</td>
+</tr>
+<tr>
+<td>CHONG MARK-2 (+56)</td>
+<td><span class="qg" role="img" aria-label="CHONG-MARK-2">󰁖</span></td>
+<td>U+725B 牛</td>
+</tr>
+<tr>
+<td>GIONG MARK-2 (+5D)</td>
+<td><span class="qg" role="img" aria-label="GIONG-MARK-2">󰁝</span></td>
+<td>U+725B 牛</td>
+</tr>
+<tr>
+<td>XONG (+62)</td>
+<td><span class="qg" role="img" aria-label="XONG">󰁢</span></td>
+<td>U+005A Z, U+4E4B 之</td>
+</tr>
+<tr>
+<td>SONG (+70)</td>
+<td><span class="qg" role="img" aria-label="SONG">󰁰</span></td>
+<td>U+0418 И CYRILLIC CAPITAL LETTER I</td>
+</tr>
+<tr>
+<td>RONG (+77)</td>
+<td><span class="qg" role="img" aria-label="RONG">󰁷</span></td>
+<td>U+004E N</td>
 </tr>
 <tr>
 <td>MONG (+7E)</td>
@@ -536,14 +576,14 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>U+53C8 又, U+3121 ㄡ BOPOMOFO LETTER OU</td>
 </tr>
 <tr>
-<td>Dấu thanh vòng tròn trên phải (+A1)</td>
+<td>Tone mark circle upper right (+A1)</td>
 <td><span class="qg" role="img" aria-label="TONE-CIRCLE-UPPER-RIGHT">󰂡</span></td>
 <td>U+309A COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK</td>
 </tr>
 <tr>
-<td>Các dấu thanh (+9C..+A3)</td>
+<td>Tone marks (+9C..+A3)</td>
 <td>(7.2)</td>
-<td>U+302A..U+302D dấu thanh của chữ Hán (cùng góc, khác hình, 5.7)</td>
+<td>U+302A..U+302D ideographic tone marks (same corners, different shapes, 5.7)</td>
 </tr>
 </tbody>
 </table>

@@ -28,7 +28,7 @@ blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4
 blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; font-family: "QATT Chart"; font-size: 1.3em; white-space: nowrap; }
 </style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="qatt-unicode-proposal-draft-alpha-1">QATT Unicode Proposal – Draft, Alpha 1</h1>
-<p>Oct 30, 2026 · Nguyễn Quốc Trung</p>
+<p>Oct 31, 2026 · Nguyễn Quốc Trung</p>
 <h2 id="1-summary">1. Summary</h2>
 <p>This proposal encodes Quốc Âm Tân Tự (QATT), a Vietnamese script used inside Hán Nôm texts, as 164 characters in the Supplementary Multilingual Plane.</p>
 <table>
@@ -53,7 +53,7 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Draft date</td>
-<td>2026-10-30</td>
+<td>2026-10-31</td>
 </tr>
 <tr>
 <td>Characters</td>
@@ -474,7 +474,7 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <p><strong>Alternative order.</strong> A member of the user community suggested ordering the code points by form instead of by base: first the 22 unmarked Cán, then the 22 marked Cán, then the 110 Chi. Each class would then be one contiguous range, so a validator could check the patterns of 5.3 by ranges instead of by the offset modulo 7, and if the UTC unified the marked and unmarked Cán, one range would become free instead of 22 single positions. A variant puts the 22 unmarked Cán first and then the six marked forms of each base. Both orders separate the two kinds of combination in a binary comparison: every phiên thiết pair begins with an unmarked Cán and would sort before every Hợp Thư, which begins with a Chi, so the Hợp Thư of a base would no longer stand next to the phiên thiết pairs and the other characters of the same base. Only a tailored collation could restore the order, as it places ä after a, and a script with a small user community is unlikely to get one: the default collation (DUCET) of a new script usually follows the code point order. In the order by base, every character whose first component belongs to base X sorts together, and the components of a base share its initial: the unmarked and the marked Cán, and as far as the Nôm annotations show, the Chi. The draft keeps the order by base, because the source lists the Cán and tabulates the Chi in blocks of five per base, because a binary comparison then keeps the characters of a base together, and because base and form follow from the offset by division by 7. All components have the same properties in either order (6.2), so the choice does not affect segmentation, line breaking or fonts. The offsets in 7.1 follow the order by base.</p>
 <p><strong>Default collation.</strong> As a tailored collation is unlikely, the default weights in the DUCET are in effect the sort order of the script. The draft proposes: the 154 components take primary weights in code point order; the eight tone marks take secondary weights in the order of 7.1, so that characters differing only in tone sort together and the tone decides only after the components; the component joiner and the Tham Thư combiner are ignorable, so a combination sorts like its components in stored order. A text without collation, compared by code points, gives the same order of the components.</p>
 <h3 id="sec-6-5">6.5 Visually similar characters</h3>
-<p>Several unmarked forms look like existing characters, mostly CJK ideographs built from the same straight strokes. The comparison below was made by eye on the code chart (7.2) and covers the unmarked forms. The marked forms add one marking stroke and lie close to the same characters. The list is preliminary <code>[TBD: confirm with the UTR #36 confusables data]</code>.</p>
+<p>Several unmarked forms look like existing characters, mostly CJK ideographs built from the same straight strokes. The comparison below was made by eye on the code chart (7.2) and covers the unmarked forms and the marked forms that look like existing characters. Other marked forms add one marking stroke and lie close to the characters of their unmarked form. The list is preliminary <code>[TBD: confirm with the UTR #36 confusables data]</code>.</p>
 <table>
 <thead>
 <tr>
@@ -515,6 +515,11 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>U+5E72 干, U+4E8E 于</td>
 </tr>
 <tr>
+<td>TRONG MARK-1 (+2B)</td>
+<td><span class="qg" role="img" aria-label="TRONG-MARK-1">󰀫</span></td>
+<td>U+5348 午</td>
+</tr>
+<tr>
 <td>DONG (+31)</td>
 <td><span class="qg" role="img" aria-label="DONG">󰀱</span></td>
 <td>U+571F 土, U+58EB 士</td>
@@ -525,9 +530,44 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>U+5344 卄, U+5EFE 廾</td>
 </tr>
 <tr>
+<td>THONG MARK-1 (+47)</td>
+<td><span class="qg" role="img" aria-label="THONG-MARK-1">󰁇</span></td>
+<td>U+5347 升</td>
+</tr>
+<tr>
+<td>NHONG MARK-1 (+4E)</td>
+<td><span class="qg" role="img" aria-label="NHONG-MARK-1">󰁎</span></td>
+<td>U+5347 升</td>
+</tr>
+<tr>
 <td>CHONG (+54)</td>
 <td><span class="qg" role="img" aria-label="CHONG">󰁔</span></td>
 <td>U+30AD キ KATAKANA LETTER KI</td>
+</tr>
+<tr>
+<td>CHONG MARK-2 (+56)</td>
+<td><span class="qg" role="img" aria-label="CHONG-MARK-2">󰁖</span></td>
+<td>U+725B 牛</td>
+</tr>
+<tr>
+<td>GIONG MARK-2 (+5D)</td>
+<td><span class="qg" role="img" aria-label="GIONG-MARK-2">󰁝</span></td>
+<td>U+725B 牛</td>
+</tr>
+<tr>
+<td>XONG (+62)</td>
+<td><span class="qg" role="img" aria-label="XONG">󰁢</span></td>
+<td>U+005A Z, U+4E4B 之</td>
+</tr>
+<tr>
+<td>SONG (+70)</td>
+<td><span class="qg" role="img" aria-label="SONG">󰁰</span></td>
+<td>U+0418 И CYRILLIC CAPITAL LETTER I</td>
+</tr>
+<tr>
+<td>RONG (+77)</td>
+<td><span class="qg" role="img" aria-label="RONG">󰁷</span></td>
+<td>U+004E N</td>
 </tr>
 <tr>
 <td>MONG (+7E)</td>
