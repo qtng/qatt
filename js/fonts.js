@@ -27,6 +27,7 @@ const QATT_FONTS = [
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
   { family: "QATT Metro",            label: "Metro",               file: "qatt-metro" },
   { family: "QATT N7K",              label: "N7K",                 file: "qatt-n7k" },
+  { family: "QATT Phong Thao",       label: "Phong Thảo",          file: "qatt-phong-thao" },
   { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Khai Wide",        label: "Khai wide (draft)",   file: "qatt-khai-wide", admin: true },
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
