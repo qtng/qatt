@@ -88,8 +88,9 @@
     </div>
   </section>
   <div id="clip" class="clip" hidden>
-    <div class="clip-sheet" role="dialog" aria-modal="true" aria-label="Copied text" data-vi-aria-label="Văn bản đã sao chép">
-      <div id="clip-text" class="clip-text qfont"></div>
+    <div class="clip-sheet" role="dialog" aria-modal="true" aria-labelledby="clip-title">
+      <div id="clip-title" class="clip-title" data-vi="Văn bản từ bộ nhớ tạm">Text from the clipboard</div>
+      <div class="clip-body"><div id="clip-text" class="clip-text qfont"></div></div>
       <div class="clip-actions">
         <button id="clip-save" type="button"><i class="bi bi-check-lg"></i> <span data-vi="Lưu">Save</span></button>
         <button id="clip-close" type="button"><i class="bi bi-x-lg"></i> <span data-vi="Đóng">Close</span></button>
