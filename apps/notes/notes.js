@@ -314,7 +314,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
 
   // ----- menu -----
-  const MENUS = [['menu-btn', 'menu'], ['list-menu-btn', 'list-menu'], ['style-btn', 'style-menu']];
+  const MENUS = [['menu-btn', 'menu'], ['list-menu-btn', 'list-menu'], ['style-btn', 'style-menu'], ['align-btn', 'align-menu'], ['size-btn', 'size-menu']];
   function closeMenu() { for (const [button, menu] of MENUS) { $(menu).hidden = true; $(button).setAttribute('aria-expanded', 'false'); } }
   for (const [button, menu] of MENUS) $(button).addEventListener('click', e => {
     e.stopPropagation();
@@ -325,6 +325,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   });
   document.addEventListener('click', e => { if (!e.target.closest('.menu')) closeMenu(); });
   $('convert').addEventListener('click', () => { editor.convert(); closeMenu(); });
+  for (const id of ['convert', 'set-bold', 'set-italic', 'align-btn', 'size-btn']) $(id).addEventListener('pointerdown', e => e.preventDefault());   // the keyboard stays
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 
   // ----- search, export, import -----
@@ -427,7 +428,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   const setSize = (value, user) => {
     value = Math.min(400, Math.max(50, Number(value) || 100));
-    $('set-size').value = value; $('size-label').textContent = value + '%';
+    $('set-size').value = value; $('size-label').textContent = $('size-btn-label').textContent = value + '%';
     field.style.fontSize = Math.round(value * 0.363) + 'px';   // 100% is 36 pixels as in the editor of qatt.org
     if (user) keepFormat('size', value);
   };
@@ -438,7 +439,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (!['left', 'center', 'vertical-center', 'vertical'].includes(value)) value = 'left';
     field.classList.toggle('vertical', value.startsWith('vertical'));
     field.classList.toggle('align-center', value === 'center' || value === 'vertical-center');
-    document.querySelectorAll('#set-align button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.align === value)));
+    document.querySelectorAll('#set-align button').forEach(b => { const on = b.dataset.align === value; b.setAttribute('aria-checked', String(on)); if (on) $('align-btn').firstElementChild.className = b.firstElementChild.className; });   // the button of the bar shows the icon of the choice
     if (user) keepFormat('align', value);
   };
   document.querySelectorAll('#set-align button').forEach(b => b.addEventListener('click', () => { setAlign(b.dataset.align, true); closeMenu(); }));

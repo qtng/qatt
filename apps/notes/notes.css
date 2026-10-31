@@ -52,9 +52,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-checked="true"] { color: var(--accent); border-color: var(--accent); }
 .aligns .turned { display: inline-block; transform: rotate(90deg); }
 #note-field.align-center { text-align: center; }   /* with the vertical lines the centre is the middle of the line from top to bottom */
-.menu-tools { display: flex; gap: .4rem; padding: .25rem .75rem; }
-.menu .menu-tools button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 .5rem; justify-content: center; gap: .4rem; border: 1px solid var(--line); border-radius: 10px; white-space: nowrap; }
-.menu .menu-tools .wide { flex-grow: 1.6; }
 .menu-sep { height: 1px; margin: .25rem 0; background: var(--line); }
 
 .keybar { position: relative; flex: none; display: flex; align-items: center; gap: .4rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
@@ -89,7 +86,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 #note-field.bold { font-weight: bold; }
 #note-field.italic { font-style: italic; }
-.aligns button:disabled, .menu-tools button:disabled { opacity: .35; }
+.aligns button:disabled { opacity: .35; }
 .py-1 { padding-top: .25rem; padding-bottom: .25rem; }
 .lang-switch { flex: none; display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .lang-switch button { min-width: 2.2rem; padding-left: .5rem; padding-right: .5rem; border: 0; background: transparent; font-size: .8rem; font-weight: 600; color: var(--muted); }
@@ -114,3 +111,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .directbar button:active { background: rgba(255, 255, 255, .12); }
 #set-ime button[aria-checked="true"] { color: var(--accent); }
 .uni { font-size: 1.25em; line-height: 1; vertical-align: -.1em; }
+
+/* the format bar under the title bar of the editor: Convert, undo, redo, bold, italic, alignment and size (the last two open a small menu) */
+.fmtbar { position: relative; z-index: 6; flex: none; display: flex; align-items: center; gap: .25rem; padding: .3rem .5rem; background: var(--bar); border-bottom: 1px solid var(--line); }
+.fmtbar > button, .fmtbar .pop > button { display: flex; align-items: center; justify-content: center; gap: .2rem; width: 100%; min-width: 0; min-height: 40px; padding: 0 .25rem; border: 1px solid var(--line); border-radius: 10px; background: transparent; white-space: nowrap; font-size: 1.1rem; }
+.fmtbar > button { flex: 1 1 0; }
+.fmtbar > .wide { flex-grow: 2.4; font-size: .68rem; gap: .1rem; padding: 0 .1rem; }
+.fmtbar .pop { position: relative; flex: 1.2 1 0; min-width: 0; }
+.fmtbar .pop:last-child { flex-grow: 2.1; }
+.fmtbar #size-btn-label { font-size: .85rem; }
+.fmtbar .caret { font-size: .55rem; opacity: .7; }
+.fmtbar button:active { background: rgba(255, 255, 255, .1); }
+.fmtbar button:disabled { opacity: .35; }
+.fmtbar button[aria-pressed="true"], .fmtbar button[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
+.fmtbar .menu { top: calc(100% + 6px); left: 0; right: auto; min-width: 0; padding: .4rem; }
+.fmtbar .pop.end .menu { left: auto; right: 0; }
+#size-menu .menu-row { width: 260px; padding: 0 .4rem; }
