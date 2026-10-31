@@ -153,6 +153,7 @@ const NotesEditor = (() => {
       else if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
       else if (converts() === 'any' && !e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
       if (!e.isComposing) tidy();
+      before = typer.value;   // changes that fire no beforeinput (direct input's execCommand) must not leave an old text behind: it would pass for a deletion
       o.refresh();
     });
     // keyboards that compose whole words (Android): the space comes with the end of the composition
@@ -305,21 +306,31 @@ const NotesEditor = (() => {
     });
     // The shape k (0–21, the order of VietnameseParser.SHAPES) at the cursor: behind a letter without a joiner before it a joiner too (the two make a pair), else a space
     // right before it goes (the cells are squares). The same button again, as long as a letter of that shape stands right before the cursor (nothing else decides; a space separates two equal letters), goes through the marked forms 2, 3, 4, 5, 6, 1 and back
-    // to the plain shape (the form with stroke 1 is never the second part of a pair: skipped there).
+    // to the plain shape (the form with stroke 1 is never the second part of a pair: skipped there). After it: a plain letter right behind a marked one (not the form with stroke 1, not in a pair already) gets the joiner between them (a Hợp Thư; type the marked letter, a space, then the plain one, or iterate back to the plain form); when the iterated letter is marked and a joiner and a marked letter stand before it, the joiner goes (that is no Hợp Thư).
     function typeShape(k) {
       const base = 7 * DIRECT_ORDER[k], at = field.selectionStart;
       if (at !== field.selectionEnd) return;
       const prev = at >= 2 ? cpBefore(at) : 0;
-      if (prev >= 0xF0000 + base && prev < 0xF0000 + base + 7) {
+      const J = String.fromCodePoint(JOINER), mark = c => (c - 0xF0000) % 7;
+      const marked = c => LETTER(c) && mark(c) !== 0;
+      // a marked letter that may be the first part of a pair: not the form with stroke 1, not itself the second part of a pair or the top of a stack
+      const firstPart = end => end >= 2 && marked(cpBefore(end)) && mark(cpBefore(end)) !== 1 && !(end >= 4 && (cpBefore(end - 2) === JOINER || cpBefore(end - 2) === COMBINER));
+      let from, cp;
+      if (prev >= 0xF0000 + base && prev < 0xF0000 + base + 7) {   // iterate the letter before the cursor
         const inPair = at >= 4 && cpBefore(at - 2) === JOINER;
         let i = MARK_CYCLE.indexOf(prev - 0xF0000 - base);
         do i = (i + 1) % MARK_CYCLE.length; while (inPair && MARK_CYCLE[i] === 1);
-        put(at - 2, at, String.fromCodePoint(0xF0000 + base + MARK_CYCLE[i]));
-      } else if (LETTER(prev) && (prev - 0xF0000) % 7 !== 1 && !(at >= 4 && (cpBefore(at - 2) === JOINER || cpBefore(at - 2) === COMBINER))) {
-        put(at, at, String.fromCodePoint(JOINER, 0xF0000 + base));
+        cp = 0xF0000 + base + MARK_CYCLE[i]; from = at - 2;
+        // marked letter + joiner + marked letter is no Hợp Thư: the joiner goes
+        if (inPair && MARK_CYCLE[i] !== 0 && marked(cpBefore(at - 4))) { put(at - 4, at, String.fromCodePoint(cp)); return; }
+      } else if (LETTER(prev) && mark(prev) !== 1 && !(at >= 4 && (cpBefore(at - 2) === JOINER || cpBefore(at - 2) === COMBINER))) {
+        put(at, at, J + String.fromCodePoint(0xF0000 + base)); return;   // behind a letter: a pair
       } else {
-        put(field.value[at - 1] === ' ' ? at - 1 : at, at, String.fromCodePoint(0xF0000 + base));
+        from = field.value[at - 1] === ' ' ? at - 1 : at;   // a space right before it goes
+        cp = 0xF0000 + base;
       }
+      // a plain letter behind a marked one: the joiner between them makes a Hợp Thư
+      put(from, at, (mark(cp) === 0 && firstPart(from) ? J : '') + String.fromCodePoint(cp));
     }
 
     return {
