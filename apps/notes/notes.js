@@ -517,8 +517,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
     renderList();
   });
 
-  // ----- the clipboard: a text with QATT characters opens in a card (Save makes a note of it), any other text only gets a hint; each text once -----
-  const QATT_CHARS = /[\u{F0000}-\u{F00A3}]/u, CLIP_KEY = 'qattNotesClip';
+  // ----- the clipboard: a text with QATT or Han characters opens in a card (Save makes a note of it), any other text only gets a hint; each text once -----
+  const QATT_CHARS = /[\u{F0000}-\u{F00A3}\p{Script=Han}]/u,   // QATT characters or Han characters (Chinese characters, Chữ Nôm)
+     CLIP_KEY = 'qattNotesClip';
   const clipKey = text => { let h = 5381; for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0; return text.length + ':' + h; };
   const clip = $('clip');
   let clipText = '', clipChecking = false, clipRead = false;
@@ -542,9 +543,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
       if (QATT_CHARS.test(text)) {
         clipText = text;
         $('clip-text').textContent = text;
-        $('clip-text').scrollTop = 0;
+        $('clip-text').parentNode.scrollTop = 0;
         clip.hidden = false;
-      } else snack('The clipboard holds text without QATT characters', 'Bộ nhớ tạm có văn bản không có ký tự QATT');
+      } else snack('The clipboard holds text without QATT or Hán Nôm characters', 'Bộ nhớ tạm có văn bản không có ký tự QATT hay chữ Hán Nôm');
     } catch (e) {   // no permission yet, or the page has no focus: the automatic check tries again later, the manual one says it
       if (manual) snack('The clipboard cannot be read: allow it in the browser', 'Không đọc được bộ nhớ tạm: hãy cho phép trong trình duyệt');
     } finally { clipChecking = false; }
