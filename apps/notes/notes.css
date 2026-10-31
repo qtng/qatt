@@ -56,12 +56,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .keybar { position: relative; flex: none; display: flex; align-items: center; gap: .4rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
 .variants { flex: 1; min-width: 0; display: flex; justify-content: center; gap: .3rem; }   /* the slots share the width, up to a maximum, centred */
-.variant, .key, .more { min-height: 48px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
-.key { min-width: 44px; padding: 0 .6rem; }
+.variant, .more { min-height: 48px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
 .variant { flex: 1 1 0; min-width: 0; max-width: 64px; padding: 0; overflow: hidden; white-space: nowrap; font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.6rem; line-height: 1; }
 .more { flex: 0 0 28px; padding: 0; font-size: .8rem; }
 .variant:disabled, .more:disabled { opacity: .35; }
-.variant:not(:disabled):active, .key:active, .more:not(:disabled):active, .nom-more button:active { background: rgba(255, 255, 255, .12); }
+.variant:not(:disabled):active, .more:not(:disabled):active, .nom-more button:active { background: rgba(255, 255, 255, .12); }
 .more[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
 /* Chữ Nôm: the fonts of the phone, then the supplement of the Chunom site for the rarer characters */
 @font-face { font-family: "Notes Nom"; src: local("Han-Nom Gothic"), url("https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2") format("woff2"); }
@@ -84,8 +83,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 #note-field.bold { font-weight: bold; }
 #note-field.italic { font-style: italic; }
-.history { flex: none; display: inline-flex; gap: .4rem; }
-.key:disabled { opacity: .35; }
+.aligns button:disabled { opacity: .35; }
 .py-1 { padding-top: .25rem; padding-bottom: .25rem; }
 .lang-switch { flex: none; display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .lang-switch button { min-width: 2.2rem; padding-left: .5rem; padding-right: .5rem; border: 0; background: transparent; font-size: .8rem; font-weight: 600; color: var(--muted); }

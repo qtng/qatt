@@ -163,7 +163,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
-    $('convert').hidden = !on;
+    $('menu-tools').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
@@ -226,13 +226,13 @@ window.notesApp = { store, ready, flush() } is for the tests.
     else { history.replaceState(null, '', '#/'); route(); }
   });
 
-  // ----- key bar: undo and redo, then five slots: while a Quốc Ngữ word stands before the cursor its Chữ Nôm candidates (more of them in a list above the bar, opened by the narrow
+  // ----- key bar: slots: while a Quốc Ngữ word stands before the cursor its Chữ Nôm candidates (more of them in a list above the bar, opened by the narrow
   // button with the triangle), else the variants of the QATT characters before the cursor in the middle three. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
   const keybar = $('keybar'), slotBtns = Array.from(document.querySelectorAll('#keybar .variant')), moreBtn = $('nom-more-btn'), morePanel = $('nom-more');
   let shownKeys = null, shown = [], rest = [], slots = 0;
-  // the number of slots follows the width of the bar: 4 on a phone, up to 8 on a wide screen (the three variants stand in the middle ones)
+  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the three variants stand in the middle ones)
   function fitSlots() {
-    const n = Math.max(4, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 150) / 58)));
+    const n = Math.max(5, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 60) / 62)));
     if (!keybar.clientWidth || n === slots) return;
     slots = n; shownKeys = null;
     slotBtns.forEach((btn, i) => { btn.hidden = i >= n; });
