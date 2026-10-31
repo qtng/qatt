@@ -64,13 +64,12 @@
     #explore { padding-inline: .75rem; }   /* the hard shadow of a theme must not touch the edge of the screen */
     .qatt-words { font-family: "QATT Pen Medium", sans-serif; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; }   /* the glyphs of the symbols card */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
-    /* Qatt.org Notes: the banner with three screens of the app and a button on it that leads to its page (apps/) */
-    .notes-banner { position: relative; display: block; border-radius: 1rem; overflow: hidden; box-shadow: 0 .8rem 2.2rem rgba(0, 0, 0, .28); background: #111; }
-    .notes-banner img { display: block; width: 100%; height: auto; transition: transform .4s ease; }
-    .notes-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, .55)); pointer-events: none; }
-    .notes-banner .on-banner { position: absolute; z-index: 1; left: 50%; bottom: 1.1rem; transform: translateX(-50%); }
-    .notes-banner:hover img { transform: scale(1.015); }
-    @media (max-width: 575.98px) { .notes-banner .on-banner { bottom: .6rem; font-size: .85rem; } }
+    /* Qatt.org Notes: the banner with three screens of the app, smaller than the content and faded out to the left and right, with a button on it that leads to its page (apps/) */
+    .notes-banner { position: relative; display: block; max-width: 52rem; margin: 0 auto; -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
+    .notes-banner img { display: block; width: 100%; height: auto; border-radius: .9rem; }
+    .notes-banner::after { content: ""; position: absolute; inset: 0; border-radius: .9rem; background: radial-gradient(ellipse 48% 42% at 50% 78%, rgba(0, 0, 0, .78), rgba(0, 0, 0, .35) 55%, transparent 80%); pointer-events: none; }   /* a dark glow under the button: it stands out from the colourful screens */
+    .notes-banner .on-banner { position: absolute; z-index: 1; left: 50%; bottom: 14%; transform: translateX(-50%); box-shadow: 0 0 0 3px rgba(255, 255, 255, .85), 0 .5rem 1.4rem rgba(0, 0, 0, .6); font-weight: 600; }
+    @media (max-width: 575.98px) { .notes-banner { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); } .notes-banner .on-banner { font-size: .85rem; bottom: 10%; } }
   </style>
 </head>
 <body>
@@ -144,7 +143,7 @@
     <a class="notes-banner" href="/apps/" aria-label="Qatt.org Notes">
       <picture>
         <source media="(max-width: 575.98px)" srcset="/apps/apps-mobile.jpg" width="900" height="600">
-        <img src="/apps/apps-1800.jpg" srcset="/apps/apps-900.jpg 900w, /apps/apps-1800.jpg 1800w" sizes="(min-width: 1400px) 1296px, 100vw" width="1800" height="600" alt="">
+        <img src="/apps/apps-1800.jpg" srcset="/apps/apps-900.jpg 900w, /apps/apps-1800.jpg 1800w" sizes="(min-width: 900px) 52rem, 100vw" width="1800" height="600" alt="">
       </picture>
       <span class="btn btn-cinnabar btn-pill on-banner"><span data-vi="Qatt.org Notes: soạn và đọc QATT">Qatt.org Notes: write and read QATT</span></span>
     </a>
