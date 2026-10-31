@@ -100,3 +100,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .clip-actions button { flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
 #clip-save { color: var(--accent); border-color: var(--accent); }
 .clip-actions button:active { background: rgba(255, 255, 255, .12); }
+
+/* direct input: the 22 shapes in two rows of 11, in the order of the column (top, bottom, next column) */
+.directbar { display: none; flex: 1; min-width: 0; grid-template-rows: repeat(2, 44px); grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: .25rem; }
+.keybar.direct .directbar { display: grid; }
+.keybar.direct .variants, .keybar.direct .nom-more { display: none !important; }
+.directbar button { min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif; font-size: 1.5rem; line-height: 1; overflow: hidden; }
+.directbar button:active { background: rgba(255, 255, 255, .12); }
+#set-ime button[aria-checked="true"] { color: var(--accent); }

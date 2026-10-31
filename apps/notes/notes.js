@@ -277,6 +277,25 @@ window.notesApp = { store, ready, flush() } is for the tests.
   moreBtn.addEventListener('pointerdown', keepFocus);
   moreBtn.addEventListener('click', () => showMore(morePanel.hidden));
   editor.nomReady.then(() => { shownKeys = null; if (!keybar.hidden) renderKeys(); });
+
+  // the input chosen in the menu of the list, for every note: Telex (the key bar above) or direct input (a bar of the 22 shapes; digits 1–8 are tones), localStorage.qattNotesIme
+  const IME_KEY = 'qattNotesIme', directbar = $('directbar');
+  directbar.append(...VietnameseParser.SHAPES.map((shape, k) => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.textContent = editor.shapes[k]; btn.title = shape === 'z' ? '_' : shape;
+    btn.addEventListener('pointerdown', keepFocus);
+    btn.addEventListener('click', () => editor.typeShape(k));
+    return btn;
+  }));
+  function setIme(mode, store) {
+    mode = mode === 'direct' ? 'direct' : 'telex';
+    editor.setMode(mode);
+    keybar.classList.toggle('direct', mode === 'direct');
+    document.querySelectorAll('#set-ime button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.ime === mode)));
+    if (store) try { localStorage.setItem(IME_KEY, mode); } catch (e) { /* not kept */ }
+  }
+  document.querySelectorAll('#set-ime button').forEach(b => b.addEventListener('click', () => { setIme(b.dataset.ime, true); closeMenu(); }));
+  try { setIme(localStorage.getItem(IME_KEY)); } catch (e) { setIme('telex'); }
   field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
   field.addEventListener('blur', () => { keybar.hidden = true; showMore(false); });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
@@ -544,7 +563,47 @@ window.notesApp = { store, ready, flush() } is for the tests.
   document.addEventListener('gesturestart', e => e.preventDefault());   // Safari ignores user-scalable=no
 
   // ----- offline: the service worker (sw.js) -----
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {}));
+  // A new version: the app asks the server for sw.js at the start and when it comes to the front, at most every 15 minutes (about 1–3 KB). A changed sw.js (a new CACHE)
+  // installs itself and takes over (skipWaiting, clients.claim); the page then saves, notes where it was (the note, editing or not, the cursor) and loads again.
+  const UPDATE_EVERY = 15 * 60 * 1000, CHECKED_KEY = 'qattNotesUpdateCheck', RESUME_KEY = 'qattNotesResume';
+  let registration = null, reloading = false;
+  function checkUpdate(force) {
+    if (!registration) return;
+    const now = Date.now();
+    let last = 0;
+    try { last = +localStorage.getItem(CHECKED_KEY) || 0; } catch (e) { /* no storage: every time */ }
+    if (!force && now - last < UPDATE_EVERY) return;
+    try { localStorage.setItem(CHECKED_KEY, String(now)); } catch (e) { /* as above */ }
+    registration.update().catch(() => {});
+  }
+  if ('serviceWorker' in navigator) {
+    const hadController = !!navigator.serviceWorker.controller;   // the first install is no update
+    navigator.serviceWorker.addEventListener('controllerchange', async () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      await save();
+      try {
+        sessionStorage.setItem(RESUME_KEY, JSON.stringify(state.current ? { id: state.current.id, editing: !field.readOnly, start: field.selectionStart, end: field.selectionEnd, scroll: field.scrollTop } : {}));
+      } catch (e) { /* the place is not kept */ }
+      location.reload();
+    });
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' }).then(r => { registration = r; checkUpdate(true); }).catch(() => {}));   // updateViaCache: the check never takes sw.js from the HTTP cache (GitHub Pages: 4 hours)
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(false); });
+  }
+  app.checkUpdate = checkUpdate;
+  // after the reload of an update: the same place again, and a word about it
+  function resume() {
+    let place = null;
+    try { place = JSON.parse(sessionStorage.getItem(RESUME_KEY) || 'null'); sessionStorage.removeItem(RESUME_KEY); } catch (e) { /* nothing to resume */ }
+    if (!place) return;
+    if (place.id && state.current && state.current.id === place.id && place.editing) {
+      setEditing(true);
+      field.focus();
+      field.setSelectionRange(place.start || 0, place.end || 0);
+    }
+    if (place.id && state.current && state.current.id === place.id) field.scrollTop = place.scroll || 0;
+    snack('Updated to the latest version', 'Đã cập nhật lên phiên bản mới nhất');
+  }
 
   // ----- start -----
   (async () => {
@@ -554,6 +613,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     app.store = state.store;
     await route();
     if (state.notes.length === 0 && !state.current) $('new-note').click();   // nothing written yet: straight to the editor
+    resume();
     app.ready = true;
     for (const wait of [0, 700, 2000]) { await new Promise(r => setTimeout(r, wait)); await checkClipboard(); if (clipRead) break; }
   })();
