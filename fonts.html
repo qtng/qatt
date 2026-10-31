@@ -60,6 +60,16 @@
     .overview .quad > div { display: grid; grid-template-columns: repeat(2, 46cqw); justify-content: center; }   /* four equal squares: even gaps in both directions */
     .overview .quad span { height: 38cqw; display: flex; align-items: center; justify-content: center; font-size: 34cqw; line-height: 1; white-space: nowrap; }
     @media (max-width: 767.98px) { .font { grid-template-columns: minmax(0, 1fr); } }
+
+    /* complete list: the name on the left, one line of 28px on the right; fonts for admins only are muted as a whole row */
+    .all { padding: 2.2rem 0 1.6rem; border-top: 1px solid rgba(127, 127, 127, .25); }
+    .all h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.35rem; margin: 0 0 1rem; }
+    .all .row-font { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 0 2rem; align-items: center; padding: .5rem 0; border-top: 1px solid rgba(127, 127, 127, .15); }
+    .all .row-font:first-of-type { border-top: 0; }
+    .all .fname { font-size: .95rem; line-height: 1.25; }
+    .all .fname small { display: block; font-size: .7rem; letter-spacing: .03em; }
+    .all .spec { overflow-x: auto; white-space: nowrap; line-height: 1.6; font-size: 28px; }
+    @media (max-width: 575.98px) { .all .row-font { grid-template-columns: minmax(0, 1fr); gap: 0; } }
     .note { margin: 1.2rem 0 0; font-size: .8rem; opacity: .7; text-align: center; }
   </style>
   <script src="js/navigation.js"></script>
@@ -83,6 +93,10 @@
   </div>
   <div class="overview row row-cols-2 row-cols-md-4 g-3 align-items-stretch justify-content-center" id="overview"></div>
   <div id="fonts"></div>
+  <section class="all" id="all-fonts">
+    <h2 data-vi="Danh sách phông chữ đầy đủ">Complete font list</h2>
+    <div id="all"></div>
+  </section>
   </div>
   <p class="note"><span data-vi="© 2026 qatt.org. Bảo lưu mọi quyền. Phông chữ được dùng để đọc, viết và in văn bản QATT, không được sửa đổi hay dùng làm nền cho phông chữ khác.">© 2026 qatt.org. All rights reserved. The fonts may be used to read, write and print QATT text, not modified or used as the basis of other fonts.</span> <a href="font-license.html" data-vi="Giấy phép">Licence</a></p>
 </main>
@@ -177,9 +191,28 @@
   }
   ovCells.forEach((c, i) => { c.textContent = QattText.convert(['Quốc', 'Âm', 'Tân', 'Tự'][i % 4], parser).trim(); });
 
+  // the complete list: every font of fonts.js, also those for admins only (fonts.js defines @font-face for the ones it offers; the others here)
+  const rest = QATT_FONTS.filter(f => !FONTS.includes(f));
+  if (rest.length) {
+    const st = el('style', '', rest.map(f => `@font-face { font-family: "${f.family}"; src: url(${QATT_FONT_DIR}${f.file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${f.file}.ttf) format("truetype"); }`).join('\n'));
+    document.head.append(st);
+  }
+  const specs = [];
+  for (const f of QATT_FONTS) {
+    const row = el('div', 'row-font' + (f.admin ? ' muted' : '')), name = el('div', 'fname', f.family);
+    if (f.admin) name.append(el('small', '', 'Not released', 'Chưa phát hành'));   // Vietnamese: a draft by Claude
+    const spec = el('div', 'spec');
+    spec.lang = 'zh-Hant';
+    spec.style.fontFamily = `"${f.family}", "Noto Sans CJK TC", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif`;
+    specs.push(spec);
+    row.append(name, spec); $('#all').append(row);
+  }
+
   const render = () => {
     const qatt = QattText.convert($('#text').value.trim() || SAMPLE, parser).replace(/\s+/g, '');   // the sample text until something is typed; no spaces between the QATT cells
-    for (const q of samples) q.textContent = '國音' + qatt;   // 國音 and the QATT cells in one text, to compare size, alignment and spacing
+    for (const q of samples) q.textContent = '國音' + qatt;
+    const short = QattText.convert($('#text').value.trim() || 'Quốc Âm Tân Tự', parser).replace(/\s+/g, '');
+    for (const q of specs) q.textContent = '國音' + short;   // 國音 and the QATT cells in one text, to compare size, alignment and spacing
   };
   $('#text').addEventListener('input', render);
   render();
