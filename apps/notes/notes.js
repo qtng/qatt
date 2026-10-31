@@ -499,17 +499,21 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const clip = $('clip');
   let clipText = '', clipChecking = false, clipRead = false;
   function closeClip() { clip.hidden = true; clipText = ''; }
-  async function checkClipboard() {
-    if (clipChecking || !clip.hidden || document.visibilityState !== 'visible' || !app.ready || !navigator.clipboard || !navigator.clipboard.readText) return;
+  // manual = from the menu of the list: a tap, so Chrome may ask for the permission; the text counts even if it was seen before, and every outcome says something
+  async function checkClipboard(manual = false) {
+    manual = manual === true;
+    if (!clip.hidden) return;
+    if (!manual && (clipChecking || document.visibilityState !== 'visible' || !app.ready || !navigator.clipboard || !navigator.clipboard.readText)) return;
+    if (manual && !(navigator.clipboard && navigator.clipboard.readText)) return snack('The clipboard cannot be read here', 'Không đọc được bộ nhớ tạm ở đây');
     clipChecking = true;
     try {
       const text = await navigator.clipboard.readText();
       clipRead = true;
-      if (!text || !text.trim()) return;
+      if (!text || !text.trim()) { if (manual) snack('The clipboard is empty', 'Bộ nhớ tạm trống'); return; }
       const key = clipKey(text);
       let last = null;
       try { last = localStorage.getItem(CLIP_KEY); } catch (e) { /* no storage: the text may show again */ }
-      if (key === last) return;
+      if (!manual && key === last) return;
       try { localStorage.setItem(CLIP_KEY, key); } catch (e) { /* as above */ }
       if (QATT_CHARS.test(text)) {
         clipText = text;
@@ -517,9 +521,11 @@ window.notesApp = { store, ready, flush() } is for the tests.
         $('clip-text').scrollTop = 0;
         clip.hidden = false;
       } else snack('The clipboard holds text without QATT characters', 'Bộ nhớ tạm có văn bản không có ký tự QATT');
-    } catch (e) { /* no permission yet, or the page has no focus: tried again later */ }
-    finally { clipChecking = false; }
+    } catch (e) {   // no permission yet, or the page has no focus: the automatic check tries again later, the manual one says it
+      if (manual) snack('The clipboard cannot be read: allow it in the browser', 'Không đọc được bộ nhớ tạm: hãy cho phép trong trình duyệt');
+    } finally { clipChecking = false; }
   }
+  $('clip-check').addEventListener('click', () => { closeMenu(); checkClipboard(true); });
   $('clip-close').addEventListener('click', closeClip);
   clip.addEventListener('click', e => { if (e.target === clip) closeClip(); });
   $('clip-save').addEventListener('click', async () => {
@@ -530,8 +536,8 @@ window.notesApp = { store, ready, flush() } is for the tests.
     openNewNote(text);
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !clip.hidden) closeClip(); });
-  document.addEventListener('visibilitychange', checkClipboard);
-  window.addEventListener('focus', checkClipboard);
+  document.addEventListener('visibilitychange', () => checkClipboard());
+  window.addEventListener('focus', () => checkClipboard());
   document.addEventListener('pointerdown', () => { if (!clipRead) checkClipboard(); }, true);   // a tap gives the page the focus it may not have had at the start
   app.checkClipboard = checkClipboard;
 
