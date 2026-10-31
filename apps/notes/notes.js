@@ -587,7 +587,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
       } catch (e) { /* the place is not kept */ }
       location.reload();
     });
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './' }).then(r => { registration = r; checkUpdate(true); }).catch(() => {}));
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' }).then(r => { registration = r; checkUpdate(true); }).catch(() => {}));   // updateViaCache: the check never takes sw.js from the HTTP cache (GitHub Pages: 4 hours)
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(false); });
   }
   app.checkUpdate = checkUpdate;
