@@ -25,7 +25,7 @@ td.g { font-family: "QATT Chart"; font-size: 1.7rem; line-height: 1.2; text-alig
 <body>
 <p><a href="/unicode/draft/" data-vi="← Đề xuất Unicode">← Unicode proposal</a></p>
 <h1 data-vi="Thử sắp xếp QATT">QATT sort demo</h1>
-<p>Every syllable that the draft encoding writes without Tham Thư and without a tone: each Cán with each Chi (a Cán of the same base is written as the Chi alone, 4.2), and the Hợp Thư of the Chi with marking stroke 2, 3 and 4 with the Cán of its base. The reading is that of the decoding <code>qatt</code> from <code>js/parser.js</code>. Sort by the reading, or in binary order of the code points, which is what a text without collation gets (6.4).</p>
+<p>Every syllable that the draft encoding writes without Tham Thư and without a tone: each Cán with each Chi (a Cán of the same base is written as the Chi alone, 4.2), the Hợp Thư of the Chi with marking stroke 2, 3 and 4 with the Cán of its base, and the unmarked and the marked Cán alone (the syllable of the initial with the rhyme ông, the same reading for both). The reading is that of the decoding <code>qatt</code> from <code>js/parser.js</code>. Sort by the reading, or in binary order of the code points, which is what a text without collation gets (6.4).</p>
 <div class="opts">
   <label><input type="radio" name="sort" value="qn" checked> <span data-vi="Sắp xếp theo Quốc Ngữ">Sort by Quốc Ngữ</span></label>
   <label><input type="radio" name="sort" value="qatt"> <span data-vi="Sắp xếp theo QATT">Sort by QATT</span></label>
@@ -47,6 +47,11 @@ td.g { font-family: "QATT Chart"; font-size: 1.7rem; line-height: 1.2; text-alig
   // Cán with Chi: the unmarked form of base x, the joiner and the Chi of base y (marks 2 to 6); of the same base, the Chi stands alone
   for (let x = 0; x < 22; x++) for (let y = 0; y < 22; y++) for (let m = 2; m <= 6; m++)
     add(x === y ? chr(7 * y + m) : chr(7 * x) + JOINER + chr(7 * y + m));
+  // the unmarked Cán alone is the initial with the rhyme ông; the marked Cán stands for the same syllable (4.1)
+  for (let x = 0; x < 22; x++) {
+    const reading = QattText.reading(chr(7 * x), parser);
+    if (reading !== "?") for (const o of [0, 1]) items.push({ reading, cell: chr(7 * x + o) });
+  }
   // Hợp Thư: the Chi with marking stroke 2, 3, 4, the joiner and the unmarked Cán of the same base
   for (let x = 0; x < 22; x++) for (const m of [2, 3, 4]) add(chr(7 * x + m) + JOINER + chr(7 * x));
 
