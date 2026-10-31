@@ -304,14 +304,14 @@ const NotesEditor = (() => {
       put(from, at, String.fromCodePoint(0xF0000 + DIRECT_TONES[+e.data]));
     });
     // The shape k (0–21, the order of VietnameseParser.SHAPES) at the cursor: behind a letter without a joiner before it a joiner too (the two make a pair), else a space
-    // right before it goes (the cells are squares). The same button again within a second (the cursor not moved) goes through the marked forms 2, 3, 4, 5, 6, 1 and back
+    // right before it goes (the cells are squares). The same button again (no time limit, the cursor not moved, no other button between) goes through the marked forms 2, 3, 4, 5, 6, 1 and back
     // to the plain shape (the form with stroke 1 is never the second part of a pair: skipped there).
     let last = null;
     function typeShape(k) {
-      const base = 7 * DIRECT_ORDER[k], at = field.selectionStart, now = Date.now();
+      const base = 7 * DIRECT_ORDER[k], at = field.selectionStart;
       if (at !== field.selectionEnd) return;
       const prev = at >= 2 ? cpBefore(at) : 0;
-      if (last && last.k === k && last.at === at && now - last.time < 1000 && prev >= 0xF0000 + base && prev < 0xF0000 + base + 7) {
+      if (last && last.k === k && last.at === at && prev >= 0xF0000 + base && prev < 0xF0000 + base + 7) {
         const inPair = at >= 4 && cpBefore(at - 2) === JOINER;
         let i = MARK_CYCLE.indexOf(prev - 0xF0000 - base);
         do i = (i + 1) % MARK_CYCLE.length; while (inPair && MARK_CYCLE[i] === 1);
@@ -321,7 +321,7 @@ const NotesEditor = (() => {
       } else {
         put(field.value[at - 1] === ' ' ? at - 1 : at, at, String.fromCodePoint(0xF0000 + base));
       }
-      last = { k, at: field.selectionStart, time: now };
+      last = { k, at: field.selectionStart };
     }
 
     return {
