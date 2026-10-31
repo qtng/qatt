@@ -76,6 +76,12 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (!note || !state.dirty) return saving;
     state.dirty = false;
     if (field.value === '' && !note.title && !state.inStore) return saving;   // a new note that stays empty
+    const clean = NotesCore.cleanText(field.value);
+    if (clean !== field.value) {   // a ZWNJ behind no space is removed; the cursor keeps its place in the text
+      const text = field.value, keep = n => NotesCore.cleanText(text.slice(0, n)).length;
+      const a = keep(field.selectionStart), z = keep(field.selectionEnd);
+      field.value = clean; field.setSelectionRange(a, z);
+    }
     note.text = field.value;
     note.updated = Date.now();
     const copy = { ...note };

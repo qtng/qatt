@@ -73,6 +73,8 @@ const NotesCore = (() => {
     return { notes: Array.from(byId.values()).sort((a, b) => b.updated - a.updated), added, updated };
   };
 
-  return { title, preview, fold, readingText, matches, exportJSON, parseImport, merge };
+  // a zero width non-joiner (U+200C) belongs behind a space (Convert puts the pair between two readings): any other one is removed when a note is saved
+  const cleanText = text => text.replace(/(?<! )\u200C/g, '');
+  return { cleanText, title, preview, fold, readingText, matches, exportJSON, parseImport, merge };
 })();
 if (typeof module !== "undefined") module.exports = NotesCore;
