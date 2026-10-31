@@ -2,13 +2,13 @@
 The styles of the text field of QATT notes (apps/notes/): background (colour, gradients, textures), ink and the effect of the writing (shadow, glow, embossing, 3D by stacked shadows).
 Only the text field and the reading view have a style; the bars and the list keep the look of the app. Textures are small SVG noise patterns drawn by the browser (no image files).
 
-  NotesStyles.list         [{ id, en, vi, bg, ink, shadow }] (bg is a value of the CSS property background)
+  NotesStyles.list         [{ id, en, vi, bg, ink, shadow, seal? }] (bg is a value of the CSS property background; seal the colour of the seal of a note, default seal red)
   NotesStyles.defaultId    the style of a note that has none (Cherry blossom dusk)
   NotesStyles.random()     the style of a new note: any style except the plain ones (white on black, black on white; `plain: true`)
-  NotesStyles.css(style)   the css text of a style: "background: …;\ncolor: …;\ntext-shadow: …;" (what a note stores, not the name of the style)
+  NotesStyles.css(style)   the css text of a style: "background: …;\ncolor: …;\ntext-shadow: …;" and "\n--seal: …;" if it has a seal colour (what a note stores, not the name of the style)
   NotesStyles.encode(css)  / decode(base64): the css text as base64 (UTF-8) and back (null if it is no base64)
-  NotesStyles.parse(css)   { bg, ink, shadow } of css text, or null if it is not plain css of this kind (no address in it: only the built-in data: textures)
-  NotesStyles.apply(parsed) sets --field-bg, --field-ink and --field-shadow on <html>
+  NotesStyles.parse(css)   { bg, ink, shadow, seal } of css text (seal '' if none or no colour), or null if it is not plain css of this kind (no address in it: only the built-in data: textures)
+  NotesStyles.apply(parsed) sets --field-bg, --field-ink, --field-shadow and --seal-color (removed without a seal colour) on <html>
 */
 const NotesStyles = (() => {
   // fibres of paper: noise in the colour r g b (0 to 1) with the opacity a
@@ -24,7 +24,7 @@ const NotesStyles = (() => {
       ink: '#ffffff', shadow: '0 0 10px rgba(255,255,255,.25)' },
     { id: 'red-lacquer', en: 'Red lacquer and gold', vi: 'Sơn mài đỏ và vàng',
       bg: 'radial-gradient(ellipse at 30% 0%, rgba(255,120,90,.38), transparent 55%), linear-gradient(160deg, #8e1b17, #5c0f0d 70%, #3c0a09)',
-      ink: '#f3d27a', shadow: '0 1px 0 #c99a2e, 0 2px 0 #a97a1d, 0 3px 0 #7d5412, 0 4px 6px rgba(0,0,0,.55)' },
+      ink: '#f3d27a', shadow: '0 1px 0 #c99a2e, 0 2px 0 #a97a1d, 0 3px 0 #7d5412, 0 4px 6px rgba(0,0,0,.55)', seal: '#2b0b08' },
     { id: 'jade', en: 'Jade', vi: 'Ngọc bích',
       bg: `radial-gradient(circle at 20% 15%, rgba(190,255,220,.24), transparent 40%), radial-gradient(circle at 80% 85%, rgba(0,60,40,.5), transparent 50%), ${noise(.7, 1, .85, .14)}, linear-gradient(145deg, #2f6f5a, #173f33)`,
       ink: '#eaf7ee', shadow: '0 0 6px rgba(190,255,225,.55), 0 0 16px rgba(120,230,190,.3)' },
@@ -39,7 +39,7 @@ const NotesStyles = (() => {
       ink: '#ffe9f0', shadow: '0 0 8px rgba(255,170,200,.6)' },
     { id: 'peony', en: 'Peony', vi: 'Mẫu đơn',
       bg: 'radial-gradient(ellipse at 50% 0%, rgba(255,200,215,.4), transparent 60%), linear-gradient(165deg, #d6336c, #a21e4f 70%, #7a1238)',
-      ink: '#fff0f4', shadow: '0 1px 0 #7a1238, 0 2px 4px rgba(0,0,0,.4)' },
+      ink: '#fff0f4', shadow: '0 1px 0 #7a1238, 0 2px 4px rgba(0,0,0,.4)', seal: '#4a0a24' },
     { id: 'moon-night', en: 'Mid-autumn moon night', vi: 'Đêm trăng Trung thu',
       bg: 'radial-gradient(circle at 78% 25%, rgba(255,245,200,.95) 0 28px, rgba(255,245,200,.25) 29px 70px, transparent 120px), linear-gradient(180deg, #0e1b3d, #1e2f5c)',
       ink: '#fdf6d8', shadow: '0 0 8px rgba(255,240,180,.6)' },
@@ -54,7 +54,7 @@ const NotesStyles = (() => {
       ink: '#b3261e', shadow: '1px 1px 0 rgba(255,255,255,.75), -1px -1px 0 rgba(90,10,10,.25)' },
   ];
   const defaultId = 'sakura-dusk';
-  const css = s => `background: ${s.bg};\ncolor: ${s.ink};\ntext-shadow: ${s.shadow};`;
+  const css = s => `background: ${s.bg};\ncolor: ${s.ink};\ntext-shadow: ${s.shadow};` + (s.seal ? `\n--seal: ${s.seal};` : '');
   const encode = text => btoa(unescape(encodeURIComponent(text)));
   const decode = b64 => { try { return decodeURIComponent(escape(atob(b64))); } catch (e) { return null; } };
   const parse = text => {
@@ -65,7 +65,9 @@ const NotesStyles = (() => {
     const probe = document.createElement('div').style;
     probe.cssText = text;   // the browser reads it as css: anything it does not understand is dropped
     const bg = probe.getPropertyValue('background'), ink = probe.getPropertyValue('color');
-    return bg && ink ? { bg, ink, shadow: probe.getPropertyValue('text-shadow') || 'none' } : null;
+    const seal = probe.getPropertyValue('--seal').trim(), colour = document.createElement('div').style;
+    colour.color = seal;   // only a colour
+    return bg && ink ? { bg, ink, shadow: probe.getPropertyValue('text-shadow') || 'none', seal: seal && colour.color ? colour.color : '' } : null;
   };
   const random = () => { const pool = list.filter(s => !s.plain); return pool[Math.floor(Math.random() * pool.length)]; };
   const apply = parsed => {
@@ -73,6 +75,7 @@ const NotesStyles = (() => {
     root.setProperty('--field-bg', parsed.bg);
     root.setProperty('--field-ink', parsed.ink);
     root.setProperty('--field-shadow', parsed.shadow);
+    if (parsed.seal) root.setProperty('--seal-color', parsed.seal); else root.removeProperty('--seal-color');
   };
   return { list, defaultId, random, css, encode, decode, parse, apply };
 })();
