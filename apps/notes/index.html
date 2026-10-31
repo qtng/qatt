@@ -58,6 +58,7 @@
       <div id="menu" class="menu" hidden>
         <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
         <div class="menu-sep" role="separator"></div>
+        <button id="menu-seal" type="button"><i class="bi bi-postage"></i> <span id="seal-label" data-vi="Thêm ấn">Add seal</span></button>
         <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
         <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
       </div>
@@ -86,7 +87,10 @@
         </div>
       </span>
     </div>
+    <div class="field-wrap">
     <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
+      <div id="seal" class="seal" hidden aria-hidden="true"></div>
+    </div>
     <div id="keybar" class="keybar" hidden>
       <span class="variants" role="group" aria-label="Chữ Nôm candidates and variants of the characters before the cursor" data-vi-aria-label="Gợi ý Chữ Nôm và biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button id="nom-more-btn" type="button" class="more" disabled aria-expanded="false" aria-controls="nom-more" aria-label="More Chữ Nôm candidates" data-vi-aria-label="Thêm gợi ý Chữ Nôm" title="More Chữ Nôm candidates" data-vi-title="Thêm gợi ý Chữ Nôm"><i class="bi bi-caret-up-fill"></i></button></span>
       <div id="nom-more" class="nom-more" hidden></div>

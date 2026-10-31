@@ -1,6 +1,6 @@
 /*
 The logic of the notes app (apps/notes/) that needs no browser: titles, search text, export and import. Needs the global QattText (js/qatt-text.js) for the cells of QATT text.
-A note is { id, text, created, updated } (milliseconds) and may have format: { font, size, align, decoding, bold, italic } (only what differs from the defaults) and style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped).
+A note is { id, text, created, updated } (milliseconds) and may have format: { font, size, align, decoding, bold, italic } (only what differs from the defaults) and style: the css of its style (background, color, text-shadow) as base64 (a string of at most 50000 characters, else it is dropped), and seal: { text, x, y } (a red seal over the text: its characters (QATT cells separated by spaces, at most 200 characters), the place of its centre as a part of the width and height of the field, 0 to 1).
 
   NotesCore.title(text, custom)               the title set by hand (note.title) if it has a character that is no space, else the first line with a character that is no space, trimmed, at most 80 code points ("" if none)
   NotesCore.preview(text, custom)             the text after the title line (all of it when a title was set by hand) on one line, at most 120 code points
@@ -24,6 +24,9 @@ const NotesCore = (() => {
     if (typeof f.italic === "boolean") out.italic = f.italic;
     return Object.keys(out).length ? out : null;
   };
+  // the seal of a note ({ text, x, y }): null if it is not valid
+  const cleanSeal = s => s && typeof s === "object" && typeof s.text === "string" && /\S/.test(s.text) && s.text.length <= 200 && Number.isFinite(s.x) && Number.isFinite(s.y)
+    ? { text: s.text.trim(), x: Math.min(1, Math.max(0, s.x)), y: Math.min(1, Math.max(0, s.y)) } : null;
   const cut = (s, n) => Array.from(s).slice(0, n).join("");
   const lines = text => text.split(/\r?\n/);
   const titleIndex = text => lines(text).findIndex(l => /\S/.test(l));
@@ -58,7 +61,7 @@ const NotesCore = (() => {
     try { data = JSON.parse(json); } catch (e) { return { ok: false, error: "Not a notes file" }; }
     if (!data || data.version !== 1 || !Array.isArray(data.notes)) return { ok: false, error: "Not a notes file" };
     if (!data.notes.every(validNote)) return { ok: false, error: "The file has an invalid note" };
-    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(typeof n.title === "string" && /\S/.test(n.title) ? { title: cut(n.title.trim(), 80) } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}) })) };
+    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(typeof n.title === "string" && /\S/.test(n.title) ? { title: cut(n.title.trim(), 80) } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}), ...(cleanSeal(n.seal) ? { seal: cleanSeal(n.seal) } : {}) })) };
   };
 
   const merge = (existing, incoming) => {

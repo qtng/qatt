@@ -192,6 +192,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     field.scrollTop = 0;
     applyStyle(note);
     applyFormat(note);
+    showSeal();
     setEditing(fresh);
     if (fresh) field.focus();
   }
@@ -494,6 +495,72 @@ window.notesApp = { store, ready, flush() } is for the tests.
   });
 
   // ----- delete and undo -----
+  // ----- the seal (note.seal = { text, x, y }): red characters in a red frame over the text (inside transparent), its size after its characters, with the characters asked for ("tân tự" at first) in the default QATT font, in columns of two
+  // from right to left; it takes no part in the text (no selection, no focus, no keys), it can only be dragged; x, y = its centre as a part of the width and height of the field.
+  // A new seal stands in the lower left quarter; the menu entry asks again for its text, an empty text removes it -----
+  const seal = $('seal'), SEAL_DEFAULT = 'tân tự';
+  document.documentElement.style.setProperty('--seal-font', `"${QATT_FONTS.find(f => f.default).family}"`);
+  const sealCells = text => text.split(/\s+/).filter(Boolean);
+  function placeSeal() {
+    const s = state.current && state.current.seal;
+    if (!s || seal.hidden) return;
+    const box = seal.parentNode, w = box.clientWidth, h = box.clientHeight, sw = seal.offsetWidth, sh = seal.offsetHeight;
+    seal.style.left = Math.max(0, Math.min(w - sw, s.x * w - sw / 2)) + 'px';
+    seal.style.top = Math.max(0, Math.min(h - sh, s.y * h - sh / 2)) + 'px';
+  }
+  function showSeal() {
+    const s = state.current && state.current.seal;
+    const label = $('seal-label');
+    label.dataset.en = s ? 'Edit seal' : 'Add seal'; label.dataset.vi = s ? 'Sửa ấn' : 'Thêm ấn';   // what lang.js shows
+    label.textContent = Lang.current === 'vi' ? label.dataset.vi : label.dataset.en;
+    seal.hidden = !s;
+    if (!s) return;
+    const cells = sealCells(s.text), one = cells.length === 1, cols = Math.max(1, Math.ceil(cells.length / 2));
+    const em = one ? 1.7 : 1.25;   // the seal grows with its characters: one alone is larger, else columns of two
+    seal.replaceChildren(...Array.from({ length: cols }, (_, c) => {
+      const col = document.createElement('span');
+      col.className = 'col';
+      for (const cell of cells.slice(c * 2, c * 2 + 2)) { const span = document.createElement('span'); span.className = 'cell'; span.textContent = cell; span.style.fontSize = em + 'rem'; col.append(span); }
+      return col;
+    }));
+    placeSeal();
+  }
+  // a word of the text typed: Quốc Ngữ becomes QATT with the decoding of the note, QATT stays
+  const toSealText = text => sealCells(text).map(w => /[\u{F0000}-\u{F00A3}]/u.test(w) ? w : NotesEditor.convertText(w, parser).replace(/[\s‌]+/g, '')).join(' ');
+  const sealReading = text => sealCells(text).map(w => /[\u{F0000}-\u{F00A3}]/u.test(w) ? NotesEditor.convertText(w, parser).replace(/[\s‌]+/g, ' ').trim() : w).join(' ');
+  $('menu-seal').addEventListener('click', () => {
+    closeMenu();
+    const note = state.current;
+    if (!note) return;
+    const answer = window.prompt(Lang.t('Text of the seal', 'Chữ trong ấn'), note.seal ? sealReading(note.seal.text) : SEAL_DEFAULT);
+    if (answer === null) return;   // cancelled: nothing changes
+    const text = toSealText(answer.trim()).slice(0, 200);
+    if (!text) delete note.seal;
+    else note.seal = { text, x: note.seal ? note.seal.x : .25, y: note.seal ? note.seal.y : .75 };
+    showSeal();
+    schedule();
+  });
+  // dragging: the keyboard stays, nothing of the text is selected
+  let drag = null;
+  seal.addEventListener('pointerdown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const r = seal.getBoundingClientRect();
+    drag = { id: e.pointerId, dx: e.clientX - (r.left + r.width / 2), dy: e.clientY - (r.top + r.height / 2) };
+    seal.setPointerCapture(e.pointerId); seal.classList.add('dragging');
+  });
+  seal.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id || !state.current || !state.current.seal) return;
+    const box = seal.parentNode.getBoundingClientRect(), hw = seal.offsetWidth / 2, hh = seal.offsetHeight / 2;
+    const x = Math.max(hw, Math.min(box.width - hw, e.clientX - drag.dx - box.left)), y = Math.max(hh, Math.min(box.height - hh, e.clientY - drag.dy - box.top));
+    state.current.seal.x = x / box.width; state.current.seal.y = y / box.height;
+    placeSeal();
+  });
+  const endDrag = e => { if (!drag || e.pointerId !== drag.id) return; drag = null; seal.classList.remove('dragging'); schedule(); };
+  seal.addEventListener('pointerup', endDrag);
+  seal.addEventListener('pointercancel', endDrag);
+  for (const type of ['click', 'dblclick', 'contextmenu', 'mousedown', 'touchstart']) seal.addEventListener(type, e => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+  window.addEventListener('resize', placeSeal);
+
   $('menu-delete').addEventListener('click', async () => {
     const note = state.current;
     if (!note) return;
