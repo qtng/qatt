@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v30';
+const CACHE = 'qatt-notes-v31';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json'];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2';   // 8 MB: cached when a character needs it, not at install
@@ -15,7 +15,7 @@ const NOM_FONTS = ['https://chunom.org/chunom-assets/fonts/hannom-gothic-supplem
 const FOREVER = 'nom-fonts';   // survives every app version (the name does not start with qatt-notes-): the files never change, so each is fetched once and never checked again
 const PAGE = '/apps/notes/';
 const PRECACHE = [
-  PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js',
+  PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js', '/apps/notes/notes-stats.js',
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
