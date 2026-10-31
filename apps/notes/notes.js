@@ -229,8 +229,14 @@ window.notesApp = { store, ready, flush() } is for the tests.
   // ----- key bar: undo and redo, then five slots: while a Quốc Ngữ word stands before the cursor its Chữ Nôm candidates (more of them in a list above the bar, opened by the narrow
   // button with the triangle), else the variants of the QATT characters before the cursor in the middle three. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
   const keybar = $('keybar'), slotBtns = Array.from(document.querySelectorAll('#keybar .variant')), moreBtn = $('nom-more-btn'), morePanel = $('nom-more');
-  const VARIANT_SLOTS = 1;   // the three variants stand in the slots 1 to 3
-  let shownKeys = null, shown = [], rest = [];
+  let shownKeys = null, shown = [], rest = [], slots = 0;
+  // the number of slots follows the width of the bar: 4 on a phone, up to 8 on a wide screen (the three variants stand in the middle ones)
+  function fitSlots() {
+    const n = Math.max(4, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 150) / 58)));
+    if (!keybar.clientWidth || n === slots) return;
+    slots = n; shownKeys = null;
+    slotBtns.forEach((btn, i) => { btn.hidden = i >= n; });
+  }
   function showMore(on) {
     morePanel.hidden = !on;
     moreBtn.setAttribute('aria-expanded', String(on));
@@ -245,10 +251,11 @@ window.notesApp = { store, ready, flush() } is for the tests.
     morePanel.scrollTop = 0;
   }
   function renderKeys() {
+    fitSlots();
     const nom = editor.candidates();
-    shown = nom.length ? nom.slice(0, slotBtns.length) : [];
-    if (!nom.length) editor.variants().forEach((v, i) => { shown[VARIANT_SLOTS + i] = v; });
-    rest = nom.slice(slotBtns.length);
+    shown = nom.length ? nom.slice(0, slots) : [];
+    if (!nom.length) editor.variants().forEach((v, i) => { shown[Math.ceil((slots - 3) / 2) + i] = v; });
+    rest = nom.slice(slots);
     const key = (nom.length ? 'n' : 'v') + slotBtns.map((b, i) => (shown[i] ? shown[i].glyph || shown[i].id + shown[i].view : '')).join() + '|' + rest.length;
     if (key === shownKeys) return;
     shownKeys = key;
@@ -276,6 +283,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
     $('view-editor').style.bottom = inset + 'px';
   }
+  window.addEventListener('resize', () => { if (!keybar.hidden) renderKeys(); });
   if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
 
   // ----- menu -----
