@@ -64,12 +64,10 @@
     #explore { padding-inline: .75rem; }   /* the hard shadow of a theme must not touch the edge of the screen */
     .qatt-words { font-family: "QATT Pen Medium", sans-serif; -webkit-text-stroke: .02em currentColor; paint-order: stroke fill; }   /* the glyphs of the symbols card */
     @media (max-width: 575.98px) { .glyph-strip tt { font-size: 2rem; } .hero .han { letter-spacing: .3em; } }
-    /* Qatt.org Notes: the banner with three screens of the app, smaller than the content and faded out to the left and right, with a button on it that leads to its page (apps/) */
+    /* Qatt.org Notes: the banner with three screens of the app, smaller than the content and faded out to the left and right, linked to its page (apps/); the button above it leads there too */
     .notes-banner { position: relative; display: block; max-width: 52rem; margin: 0 auto; -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
     .notes-banner img { display: block; width: 100%; height: auto; border-radius: .9rem; }
-    .notes-banner::after { content: ""; position: absolute; inset: 0; border-radius: .9rem; background: radial-gradient(ellipse 48% 42% at 50% 78%, rgba(0, 0, 0, .78), rgba(0, 0, 0, .35) 55%, transparent 80%); pointer-events: none; }   /* a dark glow under the button: it stands out from the colourful screens */
-    .notes-banner .on-banner { position: absolute; z-index: 1; left: 50%; bottom: 14%; transform: translateX(-50%); box-shadow: 0 0 0 3px rgba(255, 255, 255, .85), 0 .5rem 1.4rem rgba(0, 0, 0, .6); font-weight: 600; }
-    @media (max-width: 575.98px) { .notes-banner { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); } .notes-banner .on-banner { font-size: .85rem; bottom: 10%; } }
+    @media (max-width: 575.98px) { .notes-banner { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); } }
   </style>
 </head>
 <body>
@@ -148,13 +146,13 @@
   <section class="block" id="notes-app">
     <div class="rule" aria-hidden="true" data-vi="Qatt.org Notes">Qatt.org Notes</div>
     <h2 class="h3 text-center" data-vi="Viết và đọc QATT, ngay trên điện thoại.">Write and read QATT, right on your phone.</h2>
-    <p class="text-center mx-auto mb-4" style="max-width:38rem" data-vi="Qatt.org Notes là ứng dụng trung tâm của Qatt.org: trình soạn thảo và trình xem văn bản QATT. Gõ tiếng Việt và xem bằng QATT, chuyển qua lại giữa QATT và chữ Quốc Ngữ, lưu ghi chú ngay trên thiết bị, cả khi không có mạng.">Qatt.org Notes is the central app of Qatt.org: the editor and viewer of QATT texts. Type Vietnamese and see it in QATT, convert between QATT and Quốc Ngữ, and keep your notes on your device, also offline.</p>
+    <p class="text-center mx-auto mb-3" style="max-width:38rem" data-vi="Qatt.org Notes là ứng dụng trung tâm của Qatt.org: trình soạn thảo và trình xem văn bản QATT. Gõ tiếng Việt và xem bằng QATT, chuyển qua lại giữa QATT và chữ Quốc Ngữ, lưu ghi chú ngay trên thiết bị, cả khi không có mạng.">Qatt.org Notes is the central app of Qatt.org: the editor and viewer of QATT texts. Type Vietnamese and see it in QATT, convert between QATT and Quốc Ngữ, and keep your notes on your device, also offline.</p>
+    <p class="text-center mb-4"><a class="btn btn-cinnabar btn-pill" href="/apps/" data-vi="Khám phá ứng dụng">Discover the app</a></p>
     <a class="notes-banner" href="/apps/" aria-label="Qatt.org Notes">
       <picture>
         <source media="(max-width: 575.98px)" srcset="/apps/apps-mobile.jpg" width="900" height="600">
         <img src="/apps/apps-1800.jpg" srcset="/apps/apps-900.jpg 900w, /apps/apps-1800.jpg 1800w" sizes="(min-width: 900px) 52rem, 100vw" width="1800" height="600" alt="">
       </picture>
-      <span class="btn btn-cinnabar btn-pill on-banner"><span data-vi="Qatt.org Notes: soạn và đọc QATT">Qatt.org Notes: write and read QATT</span></span>
     </a>
   </section>
 
