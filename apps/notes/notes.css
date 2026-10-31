@@ -113,3 +113,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .directbar button { min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif, var(--nom); font-size: 1.5rem; line-height: 1; overflow: hidden; }
 .directbar button:active { background: rgba(255, 255, 255, .12); }
 #set-ime button[aria-checked="true"] { color: var(--accent); }
+.uni { font-size: 1.25em; line-height: 1; vertical-align: -.1em; }
