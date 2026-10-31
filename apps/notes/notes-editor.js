@@ -9,6 +9,9 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
     ed.variants()   the three slots [marked1, neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
     ed.candidates() the Chữ Nôm candidates of the Quốc Ngữ word before the cursor (dictionaries of ime.js): [{ glyph, reading, definition, run() }], [] without a word
     ed.nomReady     a promise, resolved when the dictionaries are loaded
+    ed.setMode(m)   'telex' (the default: Telex, a word becomes QATT at a space) or 'direct' (no Telex, no conversion; the letters come from ed.typeShape, digits 1–8 are tones)
+    ed.shapes       the 22 plain letters in the order of VietnameseParser.SHAPES
+    ed.typeShape(k) direct input of the shape k (0–21) in the order of VietnameseParser.SHAPES (l first): see typeShape below
     ed.convert()    QATT characters with a reading become Quốc Ngữ, else every Quốc Ngữ word becomes QATT
     ed.setDecoding(name)  every cell is read with the old decoding and written with the new one
   NotesEditor.convertText(text, parser)  the same Convert for a string
@@ -17,6 +20,10 @@ const NotesEditor = (() => {
   const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
   const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B, NEUTRAL = 0xF009C;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
   const WINDOW = 64;
+  // direct input: the shapes in the order of VietnameseParser.SHAPES (l first) as the index of the shape in the block (U+F0000 + 7 * index; the order of js/qatt-text.js:
+  // _ ng h g c l tr d n t th nh ch dz x kh s r m b v ph); the marked forms a button goes through; tone 1..8 -> offset of the tone mark (as TONES of js/qatt-text.js)
+  const DIRECT_ORDER = [5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+  const MARK_CYCLE = [0, 2, 3, 4, 5, 6, 1], DIRECT_TONES = [null, 160, 157, 158, 159, 161, 162, 163, 156];
 
   // The form with marking stroke 1 (code point + 1 of an unmarked letter) has no reading of its own; it is written as the reading of the unmarked form, in capitals, and read back the same way:
   // a word of two letters or more in capitals whose lowercase is one unmarked letter (a syllable that ends in ông, with or without a tone) becomes that letter + 1.
@@ -42,9 +49,10 @@ const NotesEditor = (() => {
   //   o.on()       whether QATT is on now
   //   o.refresh()  called after every change
   //   o.converted() called when a word became QATT (the editor hides its Nôm candidates)
-  //   o.convertOn  'any' (the default): a space, any other character that is no letter, and Enter convert the word before it; 'enter': Enter only
+  //   o.convertOn  'any' (the default): a space, any other character that is no letter, and Enter convert the word before it; 'enter': Enter only; 'none': nothing
+  //                (a string, or a function that gives one)
   function wire(typer, o) {
-    const { parser } = o;
+    const { parser } = o, converts = () => (typeof o.convertOn === 'function' ? o.convertOn() : o.convertOn) || 'any';
     // the word that ends right before `end` becomes QATT characters (if there are any)
     const convertBefore = end => {
       const m = WORD_END.exec(typer.value.slice(0, end));
@@ -141,15 +149,16 @@ const NotesEditor = (() => {
     typer.addEventListener('input', e => {
       if (!o.on()) return;
       repairDeletion();
-      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
-      else if (o.convertOn !== 'enter' && !e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
+      if (converts() === 'none') { /* direct input: no word becomes QATT */ }
+      else if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
+      else if (converts() === 'any' && !e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
       if (!e.isComposing) tidy();
       o.refresh();
     });
     // keyboards that compose whole words (Android): the space comes with the end of the composition
     typer.addEventListener('compositionend', e => setTimeout(() => {
       if (!o.on()) return;
-      if (o.convertOn !== 'enter' && e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)));
+      if (converts() === 'any' && e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)));
       tidy();
       o.refresh();
     }, 0));
@@ -249,7 +258,8 @@ const NotesEditor = (() => {
   function editor(field, opts) {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
-    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: 'any' });
+    let mode = 'telex';
+    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: () => (mode === 'direct' ? 'none' : 'any') });
     const slots = makeVariants(field, { on: () => true, refresh: changed });
     // the Chữ Nôm candidates of the word before the cursor; while a phone keyboard composes, the word is still raw Telex
     const nomReady = ime ? VietIme.load() : Promise.resolve();
@@ -271,10 +281,56 @@ const NotesEditor = (() => {
         }
       } }));
     };
+    // ----- direct input -----
+    // the change goes in as typed text (events, the app's undo): the range [from, to) is replaced by text
+    const put = (from, to, text) => {
+      field.focus({ preventScroll: true });
+      field.setSelectionRange(from, to);
+      if (!document.execCommand('insertText', false, text)) {
+        field.setRangeText(text, from, to, 'end');
+        field.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: text }));
+      }
+    };
+    const cpBefore = at => field.value.codePointAt(at - 2) > 0xFFFF ? field.value.codePointAt(at - 2) : field.value.charCodeAt(at - 1);   // the character that ends at `at`
+    // a digit 1–8 behind a letter (and the tone marks after it) gives that tone; another digit replaces the tone
+    field.addEventListener('beforeinput', e => {
+      if (mode !== 'direct' || e.isComposing || e.inputType !== 'insertText' || !/^[1-8]$/.test(e.data || '')) return;
+      const at = field.selectionStart;
+      if (at !== field.selectionEnd) return;
+      let from = at;
+      while (from >= 2 && cpBefore(from) >= 0xF009C && cpBefore(from) <= 0xF00A3) from -= 2;
+      if (from < 2 || !LETTER(cpBefore(from))) return;   // no letter before it: an ordinary digit
+      e.preventDefault();
+      put(from, at, String.fromCodePoint(0xF0000 + DIRECT_TONES[+e.data]));
+    });
+    // The shape k (0–21, the order of VietnameseParser.SHAPES) at the cursor: behind a letter without a joiner before it a joiner too (the two make a pair), else a space
+    // right before it goes (the cells are squares). The same button again within a second (the cursor not moved) goes through the marked forms 2, 3, 4, 5, 6, 1 and back
+    // to the plain shape (the form with stroke 1 is never the second part of a pair: skipped there).
+    let last = null;
+    function typeShape(k) {
+      const base = 7 * DIRECT_ORDER[k], at = field.selectionStart, now = Date.now();
+      if (at !== field.selectionEnd) return;
+      const prev = at >= 2 ? cpBefore(at) : 0;
+      if (last && last.k === k && last.at === at && now - last.time < 1000 && prev >= 0xF0000 + base && prev < 0xF0000 + base + 7) {
+        const inPair = at >= 4 && cpBefore(at - 2) === JOINER;
+        let i = MARK_CYCLE.indexOf(prev - 0xF0000 - base);
+        do i = (i + 1) % MARK_CYCLE.length; while (inPair && MARK_CYCLE[i] === 1);
+        put(at - 2, at, String.fromCodePoint(0xF0000 + base + MARK_CYCLE[i]));
+      } else if (LETTER(prev) && (prev - 0xF0000) % 7 !== 1 && !(at >= 4 && (cpBefore(at - 2) === JOINER || cpBefore(at - 2) === COMBINER))) {
+        put(at, at, String.fromCodePoint(JOINER, 0xF0000 + base));
+      } else {
+        put(field.value[at - 1] === ' ' ? at - 1 : at, at, String.fromCodePoint(0xF0000 + base));
+      }
+      last = { k, at: field.selectionStart, time: now };
+    }
+
     return {
       field,
       variants: slots,
       candidates,
+      typeShape,
+      shapes: DIRECT_ORDER.map(i => String.fromCodePoint(0xF0000 + 7 * i)),   // the plain letters of the 22 shapes in that order
+      setMode(m) { mode = m === 'direct' ? 'direct' : 'telex'; if (ime) { ime.update({ telex: mode === 'telex' }); ime.hide(); } last = null; },
       nomReady,
       convert() { field.value = convertText(field.value, parser); changed(); },
       setDecoding(name) {

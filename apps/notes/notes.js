@@ -277,6 +277,25 @@ window.notesApp = { store, ready, flush() } is for the tests.
   moreBtn.addEventListener('pointerdown', keepFocus);
   moreBtn.addEventListener('click', () => showMore(morePanel.hidden));
   editor.nomReady.then(() => { shownKeys = null; if (!keybar.hidden) renderKeys(); });
+
+  // the input chosen in the menu of the list, for every note: Telex (the key bar above) or direct input (a bar of the 22 shapes; digits 1–8 are tones), localStorage.qattNotesIme
+  const IME_KEY = 'qattNotesIme', directbar = $('directbar');
+  directbar.append(...VietnameseParser.SHAPES.map((shape, k) => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.textContent = editor.shapes[k]; btn.title = shape === 'z' ? '_' : shape;
+    btn.addEventListener('pointerdown', keepFocus);
+    btn.addEventListener('click', () => editor.typeShape(k));
+    return btn;
+  }));
+  function setIme(mode, store) {
+    mode = mode === 'direct' ? 'direct' : 'telex';
+    editor.setMode(mode);
+    keybar.classList.toggle('direct', mode === 'direct');
+    document.querySelectorAll('#set-ime button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.ime === mode)));
+    if (store) try { localStorage.setItem(IME_KEY, mode); } catch (e) { /* not kept */ }
+  }
+  document.querySelectorAll('#set-ime button').forEach(b => b.addEventListener('click', () => { setIme(b.dataset.ime, true); closeMenu(); }));
+  try { setIme(localStorage.getItem(IME_KEY)); } catch (e) { setIme('telex'); }
   field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
   field.addEventListener('blur', () => { keybar.hidden = true; showMore(false); });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
