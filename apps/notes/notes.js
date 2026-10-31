@@ -163,7 +163,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
-    $('convert').hidden = !on;
+    $('menu-tools').hidden = $('menu-tools-sep').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
@@ -226,24 +226,56 @@ window.notesApp = { store, ready, flush() } is for the tests.
     else { history.replaceState(null, '', '#/'); route(); }
   });
 
-  // ----- key bar: the variants of the characters before the cursor and Convert; it sits above the keyboard (the editor view is cut at the top of the keyboard) -----
-  const keybar = $('keybar'), variantBtns = Array.from(document.querySelectorAll('#keybar .variant'));
-  let shownKeys = null;
+  // ----- key bar: slots: while a Quốc Ngữ word stands before the cursor its Chữ Nôm candidates (more of them in a list above the bar, opened by the narrow
+  // button with the triangle), else the variants of the QATT characters before the cursor in the middle three. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
+  const keybar = $('keybar'), slotBtns = Array.from(document.querySelectorAll('#keybar .variant')), moreBtn = $('nom-more-btn'), morePanel = $('nom-more');
+  let shownKeys = null, shown = [], rest = [], slots = 0;
+  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the three variants stand in the middle ones)
+  function fitSlots() {
+    const n = Math.max(5, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 60) / 62)));
+    if (!keybar.clientWidth || n === slots) return;
+    slots = n; shownKeys = null;
+    slotBtns.forEach((btn, i) => { btn.hidden = i >= n; });
+  }
+  function showMore(on) {
+    morePanel.hidden = !on;
+    moreBtn.setAttribute('aria-expanded', String(on));
+    if (!on) return;
+    morePanel.replaceChildren(...rest.map((c, j) => {
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.textContent = c.glyph; btn.title = c.reading;
+      btn.addEventListener('pointerdown', keepFocus);
+      btn.addEventListener('click', () => { const now = rest[j]; showMore(false); if (now) now.run(); });
+      return btn;
+    }));
+    morePanel.scrollTop = 0;
+  }
   function renderKeys() {
-    const slots = editor.variants(), key = slots.map(v => (v ? v.id + v.view : '')).join();
+    fitSlots();
+    const nom = editor.candidates();
+    shown = nom.length ? nom.slice(0, slots) : [];
+    if (!nom.length) editor.variants().forEach((v, i) => { shown[Math.ceil((slots - 3) / 2) + i] = v; });
+    rest = nom.slice(slots);
+    const key = (nom.length ? 'n' : 'v') + slotBtns.map((b, i) => (shown[i] ? shown[i].glyph || shown[i].id + shown[i].view : '')).join() + '|' + rest.length;
     if (key === shownKeys) return;
     shownKeys = key;
-    variantBtns.forEach((btn, i) => {
-      const v = slots[i];
+    slotBtns.forEach((btn, i) => {
+      const v = shown[i];
       btn.disabled = !v;
-      btn.textContent = v ? v.view : '·';
-      btn.title = v ? Lang.t(v.en, v.vi) : '';
+      btn.classList.toggle('nom', !!nom.length);
+      btn.textContent = v ? v.glyph || v.view : '·';
+      btn.title = !v ? '' : v.glyph ? v.reading : Lang.t(v.en, v.vi);
     });
+    moreBtn.disabled = !rest.length;
+    showMore(false);
   }
   const keepFocus = e => e.preventDefault();   // a click on the bar does not take the focus (and the keyboard) from the field
-  variantBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = editor.variants()[i]; if (v) v.run(); }); });
+  slotBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = shown[i]; if (v) v.run(); }); });
+  moreBtn.addEventListener('pointerdown', keepFocus);
+  moreBtn.addEventListener('click', () => showMore(morePanel.hidden));
+  editor.nomReady.then(() => { shownKeys = null; if (!keybar.hidden) renderKeys(); });
   field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
-  field.addEventListener('blur', () => { keybar.hidden = true; });
+  field.addEventListener('blur', () => { keybar.hidden = true; showMore(false); });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
   document.addEventListener('langchange', () => { shownKeys = null; renderKeys(); });
   const vv = window.visualViewport;
@@ -251,6 +283,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
     $('view-editor').style.bottom = inset + 'px';
   }
+  window.addEventListener('resize', () => { if (!keybar.hidden) renderKeys(); });
   if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
 
   // ----- menu -----

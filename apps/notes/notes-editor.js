@@ -7,6 +7,8 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
     inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
     onChange        called after a change the field did not report itself (a variant, Convert, a new decoding)
     ed.variants()   the three slots [marked1, neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
+    ed.candidates() the Chữ Nôm candidates of the Quốc Ngữ word before the cursor (dictionaries of ime.js): [{ glyph, reading, definition, run() }], [] without a word
+    ed.nomReady     a promise, resolved when the dictionaries are loaded
     ed.convert()    QATT characters with a reading become Quốc Ngữ, else every Quốc Ngữ word becomes QATT
     ed.setDecoding(name)  every cell is read with the old decoding and written with the new one
   NotesEditor.convertText(text, parser)  the same Convert for a string
@@ -249,9 +251,31 @@ const NotesEditor = (() => {
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
     wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: 'any' });
     const slots = makeVariants(field, { on: () => true, refresh: changed });
+    // the Chữ Nôm candidates of the word before the cursor; while a phone keyboard composes, the word is still raw Telex
+    const nomReady = ime ? VietIme.load() : Promise.resolve();
+    let composing = false;
+    field.addEventListener('compositionstart', () => { composing = true; });
+    field.addEventListener('compositionend', () => { composing = false; });
+    const candidates = () => {
+      const at = field.selectionStart, next = field.value.charAt(at);
+      if (!ime || at !== field.selectionEnd || (next && !NOT_LETTER.test(next))) return [];   // not in the middle of a word
+      const m = WORD_END.exec(field.value.slice(0, at));
+      if (!m) return [];
+      const start = at - m[0].length, word = composing ? VietIme.telex(m[0]) : m[0];
+      return VietIme.lookup(word).map(c => ({ ...c, run: () => {   // the glyph takes the place of the word, as typed text (events, the app's undo)
+        field.focus({ preventScroll: true });
+        field.setSelectionRange(start, at);
+        if (!document.execCommand('insertText', false, c.glyph)) {
+          field.setRangeText(c.glyph, start, at, 'end');
+          field.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText', data: c.glyph }));
+        }
+      } }));
+    };
     return {
       field,
       variants: slots,
+      candidates,
+      nomReady,
       convert() { field.value = convertText(field.value, parser); changed(); },
       setDecoding(name) {
         field.value = QattText.recode(field.value, parser, new VietnameseParser(name, parser.extra));
