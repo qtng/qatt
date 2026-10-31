@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v31';
+const CACHE = 'qatt-notes-v32';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json'];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2';   // 8 MB: cached when a character needs it, not at install
@@ -19,7 +19,7 @@ const PRECACHE = [
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  '/fonts/qatt-pen-medium.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2', '/fonts/qatt-hat-gao.woff2', '/fonts/qatt-snip.woff2', '/fonts/qatt-manh.woff2', '/fonts/qatt-metro.woff2', '/fonts/qatt-n7k.woff2',
+  '/fonts/qatt-pen-medium.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2', '/fonts/qatt-hat-gao.woff2', '/fonts/qatt-snip.woff2', '/fonts/qatt-manh.woff2', '/fonts/qatt-metro.woff2', '/fonts/qatt-n7k.woff2', '/fonts/qatt-phong-thao.woff2',
   '/decodings.json',
 ];
 
