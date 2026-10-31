@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qatt.org Notes – write and read QATT on your phone | Qatt.org</title>
+  <meta name="description" content="Qatt.org Notes is the editor and viewer of QATT texts: type Vietnamese with Telex or the 22 shapes, convert between QATT and Quốc Ngữ, Chữ Nôm candidates, all QATT fonts, offline and installable.">
+  <link rel="canonical" href="https://qatt.org/apps/">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Qatt.org">
+  <meta property="og:title" content="Qatt.org Notes – the QATT editor">
+  <meta property="og:description" content="Write and read Quốc Âm Tân Tự on your phone: Telex or the 22 shapes, QATT ⇆ Quốc Ngữ, Chữ Nôm, all QATT fonts, offline.">
+  <meta property="og:url" content="https://qatt.org/apps/">
+  <meta property="og:image" content="https://qatt.org/apps/apps-og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <script src="/js/navigation.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 0 !important;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 40rem; color: var(--bs-secondary-color); }
+    /* the banner: three screens of the app, as wide as the content, rounded, a soft shadow */
+    .banner { display: block; max-width: 72rem; margin: 0 auto; border-radius: 1rem; overflow: hidden; box-shadow: 0 .8rem 2.2rem rgba(0, 0, 0, .28); background: #111; }
+    .banner img { display: block; width: 100%; height: auto; }
+    .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: var(--bs-tertiary-color); font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
+    .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
+    section.block { padding-block: 2.5rem; }
+    section.block h2 { border-bottom: 0 !important; padding-bottom: 0 !important; }
+    .feature .bi { font-size: 1.6rem; color: var(--cinnabar); line-height: 1; }
+    .feature h3 { font-size: 1.05rem; margin: .7rem 0 .4rem; }
+    .feature p { margin: 0; font-size: .93rem; color: var(--bs-secondary-color); }
+    .steps { max-width: 40rem; margin: 0 auto; padding-left: 1.2rem; }
+    .steps li { margin-bottom: .45rem; }
+    #features, #install { padding-inline: .75rem; }   /* the hard shadow of a theme must not touch the edge of the screen */
+  </style>
+</head>
+<body>
+
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2" data-nosnippet>國音新字</div>
+    <h1 class="mb-3">Qatt.org Notes</h1>
+    <p class="lead mx-auto mb-4" data-vi="Ứng dụng trung tâm của Qatt.org: trình soạn thảo và trình xem văn bản Quốc Âm Tân Tự. Gõ tiếng Việt, đọc bằng QATT, ngay trên điện thoại.">The central app of Qatt.org: the editor and viewer of Quốc Âm Tân Tự texts. Type Vietnamese, read it in QATT, right on your phone.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+      <a class="btn btn-cinnabar btn-pill" href="/apps/notes/"><i class="bi bi-pencil-square"></i> <span data-vi="Mở ứng dụng">Open the app</span></a>
+      <a class="btn btn-ink btn-pill" href="#install" data-vi="Cài đặt">Install</a>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <a class="banner" href="/apps/notes/" aria-label="Open Qatt.org Notes" data-vi-aria-label="Mở Qatt.org Notes">
+    <picture>
+      <source media="(max-width: 575.98px)" srcset="/apps/apps-mobile.jpg" width="900" height="600">
+      <img src="/apps/apps-1800.jpg" srcset="/apps/apps-900.jpg 900w, /apps/apps-1800.jpg 1800w" sizes="(min-width: 1200px) 72rem, 100vw" width="1800" height="600" alt="Three screens of Qatt.org Notes: the menu of a note, the list of notes and a note in QATT">
+    </picture>
+  </a>
+
+  <section class="block" id="features">
+    <div class="rule" aria-hidden="true" data-vi="Tính năng">Features</div>
+    <h2 class="h3 text-center mb-4" data-vi="Mọi thứ để viết và đọc QATT.">Everything to write and read QATT.</h2>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-keyboard" aria-hidden="true"></i>
+        <h3 data-vi="Gõ Telex">Type with Telex</h3>
+        <p data-vi="Gõ tiếng Việt như thường lệ; mỗi từ thành chữ QATT khi bấm dấu cách.">Type Vietnamese as usual; every word becomes QATT at the space.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-grid-3x2-gap" aria-hidden="true"></i>
+        <h3 data-vi="Gõ trực tiếp">Direct input</h3>
+        <p data-vi="Một thanh với 22 hình cơ bản: gõ từng hình, bấm lại để chọn dạng có nét đánh dấu, số 1–8 cho thanh điệu.">A bar of the 22 base shapes: tap a shape, tap again for its marked forms, digits 1–8 for the tones.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+        <h3 data-vi="QATT ⇆ Quốc Ngữ">QATT ⇆ Quốc Ngữ</h3>
+        <p data-vi="Chuyển cả văn bản sang chữ Quốc Ngữ và ngược lại, theo cách giải mã qatt.org hoặc Omniglot.">Convert a whole text to Quốc Ngữ and back, with the decoding of qatt.org or Omniglot.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-translate" aria-hidden="true"></i>
+        <h3 data-vi="Chữ Nôm">Chữ Nôm</h3>
+        <p data-vi="Khi gõ một từ, thanh phím gợi ý các chữ Nôm của từ đó; chạm vào là chèn.">While you type a word, the key bar offers its Chữ Nôm characters; a tap puts one in.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-fonts" aria-hidden="true"></i>
+        <h3 data-vi="Phông chữ và bố cục">Fonts and layout</h3>
+        <p data-vi="Các phông chữ QATT của trang web, cỡ chữ, đậm, nghiêng, căn giữa và chữ viết dọc, riêng cho từng ghi chú.">The QATT fonts of the website, size, bold, italic, centred and vertical text, for every note of its own.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-palette" aria-hidden="true"></i>
+        <h3 data-vi="Kiểu nền">Styles</h3>
+        <p data-vi="Mười một kiểu nền với màu chuyển, chữ phát sáng, chữ nổi và 3D.">Eleven styles with gradients, glowing, embossed and 3D letters.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+        <h3 data-vi="Từ bộ nhớ tạm">From the clipboard</h3>
+        <p data-vi="Văn bản QATT hay Hán Nôm đã sao chép sẽ hiện ra khi mở ứng dụng và lưu thành ghi chú chỉ bằng một chạm.">Copied QATT or Hán Nôm text shows up when the app opens and becomes a note with one tap.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <h3 data-vi="Tìm kiếm">Search</h3>
+        <p data-vi="Tìm trong văn bản QATT và cả cách đọc của từng chữ.">Search the QATT text and the readings of its characters.</p>
+      </div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-wifi-off" aria-hidden="true"></i>
+        <h3 data-vi="Ngoại tuyến và riêng tư">Offline and private</h3>
+        <p data-vi="Chạy không cần mạng; ghi chú được lưu tự động trên thiết bị của bạn, sao lưu bằng xuất và nhập JSON.">Works without a network; notes are saved automatically on your device, backed up by export and import as JSON.</p>
+      </div></div></div>
+    </div>
+  </section>
+
+  <section class="block" id="install">
+    <div class="rule" aria-hidden="true" data-vi="Cài đặt">Install</div>
+    <h2 class="h3 text-center mb-3" data-vi="Như một ứng dụng trên màn hình chính.">Like an app on your home screen.</h2>
+    <ol class="steps">
+      <li data-vi="Mở Qatt.org Notes trong Chrome trên điện thoại.">Open Qatt.org Notes in Chrome on your phone.</li>
+      <li data-vi="Chọn menu ⋮ rồi “Cài đặt ứng dụng” (hoặc “Thêm vào màn hình chính”).">Choose the menu ⋮ and “Install app” (or “Add to home screen”).</li>
+      <li data-vi="Ứng dụng tự cập nhật khi có phiên bản mới.">The app updates itself when a new version is out.</li>
+    </ol>
+    <p class="text-center mt-4 mb-0"><a class="btn btn-cinnabar btn-pill" href="/apps/notes/"><i class="bi bi-pencil-square"></i> <span data-vi="Mở ứng dụng">Open the app</span></a></p>
+  </section>
+
+</main>
+<div class="pb-4"></div>
+</body>
+</html>
