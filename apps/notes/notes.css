@@ -52,6 +52,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-checked="true"] { color: var(--accent); border-color: var(--accent); }
 .aligns .turned { display: inline-block; transform: rotate(90deg); }
 #note-field.align-center { text-align: center; }   /* with the vertical lines the centre is the middle of the line from top to bottom */
+.menu-tools { display: flex; gap: .4rem; padding: .25rem .75rem; }
+.menu .menu-tools button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 .5rem; justify-content: center; gap: .4rem; border: 1px solid var(--line); border-radius: 10px; white-space: nowrap; }
+.menu .menu-tools .wide { flex-grow: 1.6; }
 .menu-sep { height: 1px; margin: .25rem 0; background: var(--line); }
 
 .keybar { position: relative; flex: none; display: flex; align-items: center; gap: .4rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }
@@ -83,7 +86,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
 #note-field.bold { font-weight: bold; }
 #note-field.italic { font-style: italic; }
-.aligns button:disabled { opacity: .35; }
+.aligns button:disabled, .menu-tools button:disabled { opacity: .35; }
 .py-1 { padding-top: .25rem; padding-bottom: .25rem; }
 .lang-switch { flex: none; display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
 .lang-switch button { min-width: 2.2rem; padding-left: .5rem; padding-right: .5rem; border: 0; background: transparent; font-size: .8rem; font-weight: 600; color: var(--muted); }

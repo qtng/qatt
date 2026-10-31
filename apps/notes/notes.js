@@ -163,7 +163,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
-    $('menu-tools').hidden = !on;
+    $('menu-tools').hidden = $('menu-tools-sep').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }

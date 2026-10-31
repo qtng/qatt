@@ -50,11 +50,12 @@
       <div id="style-menu" class="menu" hidden><div id="set-style" role="radiogroup"></div></div>
       <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
       <div id="menu" class="menu" hidden>
-        <div id="menu-tools" class="menu-row"><span id="set-tools" class="aligns">
-          <button id="undo-btn" type="button" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i></button>
-          <button id="redo-btn" type="button" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i></button>
-          <button id="convert" type="button" aria-label="Convert QATT" data-vi-aria-label="Chuyển QATT" title="Convert QATT" data-vi-title="Chuyển QATT"><i class="bi bi-arrow-repeat"></i></button>
-        </span></div>
+        <div id="menu-tools" class="menu-tools">
+          <button id="convert" type="button" class="wide" aria-label="Convert QATT" data-vi-aria-label="Chuyển QATT" title="Convert QATT" data-vi-title="Chuyển QATT">QATT <i class="bi bi-arrow-left-right"></i> ABC</button>
+          <button id="undo-btn" type="button" disabled title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i> <span data-vi="Hoàn tác">Undo</span></button>
+          <button id="redo-btn" type="button" disabled title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i> <span data-vi="Làm lại">Redo</span></button>
+        </div>
+        <div id="menu-tools-sep" class="menu-sep" role="separator"></div>
         <div class="menu-row"><span data-vi="Kiểu">Emphasis</span>
           <span id="set-emphasis" class="aligns">
             <button type="button" id="set-bold" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button>
