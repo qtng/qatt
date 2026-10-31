@@ -72,8 +72,9 @@
     </header>
     <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
     <div id="keybar" class="keybar" hidden>
-      <span class="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button></span>
       <span class="history"><button id="undo-btn" type="button" class="key" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" type="button" class="key" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i></button></span>
+      <span class="variants" role="group" aria-label="Chữ Nôm candidates and variants of the characters before the cursor" data-vi-aria-label="Gợi ý Chữ Nôm và biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button id="nom-more-btn" type="button" class="more" disabled aria-expanded="false" aria-controls="nom-more" aria-label="More Chữ Nôm candidates" data-vi-aria-label="Thêm gợi ý Chữ Nôm" title="More Chữ Nôm candidates" data-vi-title="Thêm gợi ý Chữ Nôm"><i class="bi bi-caret-up-fill"></i></button></span>
+      <div id="nom-more" class="nom-more" hidden></div>
     </div>
   </section>
   <div id="snackbar" class="snackbar" role="status" hidden><span id="snackbar-text"></span> <button id="undo" type="button" hidden data-vi="Hoàn tác">Undo</button></div>
