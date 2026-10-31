@@ -31,6 +31,7 @@
       <div id="list-menu" class="menu" hidden>
         <button id="export" type="button"><i class="bi bi-box-arrow-up"></i> <span data-vi="Xuất ghi chú">Export notes</span></button>
         <button id="import" type="button"><i class="bi bi-box-arrow-in-down"></i> <span data-vi="Nhập ghi chú">Import notes</span></button>
+        <button id="clip-check" type="button"><i class="bi bi-clipboard"></i> <span data-vi="Kiểm tra bộ nhớ tạm">Check clipboard</span></button>
       </div>
     </header>
     <div id="search-bar" class="search-bar" hidden><input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search" data-vi-aria-label="Tìm kiếm" placeholder="Search" data-vi-placeholder="Tìm kiếm"></div>
@@ -50,7 +51,12 @@
       <div id="style-menu" class="menu" hidden><div id="set-style" role="radiogroup"></div></div>
       <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
       <div id="menu" class="menu" hidden>
-        <button id="convert" type="button"><i class="bi bi-arrow-repeat"></i> <span data-vi="Chuyển QATT">Convert QATT</span></button>
+        <div id="menu-tools" class="menu-tools">
+          <button id="convert" type="button" class="wide" aria-label="Convert QATT" data-vi-aria-label="Chuyển QATT" title="Convert QATT" data-vi-title="Chuyển QATT">QATT <i class="bi bi-arrow-left-right"></i> ABC</button>
+          <button id="undo-btn" type="button" disabled title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i> <span data-vi="Hoàn tác">Undo</span></button>
+          <button id="redo-btn" type="button" disabled title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i> <span data-vi="Làm lại">Redo</span></button>
+        </div>
+        <div id="menu-tools-sep" class="menu-sep" role="separator"></div>
         <div class="menu-row"><span data-vi="Kiểu">Emphasis</span>
           <span id="set-emphasis" class="aligns">
             <button type="button" id="set-bold" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button>
@@ -72,10 +78,19 @@
     </header>
     <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
     <div id="keybar" class="keybar" hidden>
-      <span class="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button></span>
-      <span class="history"><button id="undo-btn" type="button" class="key" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><i class="bi bi-arrow-counterclockwise"></i></button><button id="redo-btn" type="button" class="key" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><i class="bi bi-arrow-clockwise"></i></button></span>
+      <span class="variants" role="group" aria-label="Chữ Nôm candidates and variants of the characters before the cursor" data-vi-aria-label="Gợi ý Chữ Nôm và biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button id="nom-more-btn" type="button" class="more" disabled aria-expanded="false" aria-controls="nom-more" aria-label="More Chữ Nôm candidates" data-vi-aria-label="Thêm gợi ý Chữ Nôm" title="More Chữ Nôm candidates" data-vi-title="Thêm gợi ý Chữ Nôm"><i class="bi bi-caret-up-fill"></i></button></span>
+      <div id="nom-more" class="nom-more" hidden></div>
     </div>
   </section>
+  <div id="clip" class="clip" hidden>
+    <div class="clip-sheet" role="dialog" aria-modal="true" aria-label="Copied text" data-vi-aria-label="Văn bản đã sao chép">
+      <div id="clip-text" class="clip-text qfont"></div>
+      <div class="clip-actions">
+        <button id="clip-save" type="button"><i class="bi bi-check-lg"></i> <span data-vi="Lưu">Save</span></button>
+        <button id="clip-close" type="button"><i class="bi bi-x-lg"></i> <span data-vi="Đóng">Close</span></button>
+      </div>
+    </div>
+  </div>
   <div id="snackbar" class="snackbar" role="status" hidden><span id="snackbar-text"></span> <button id="undo" type="button" hidden data-vi="Hoàn tác">Undo</button></div>
 </body>
 </html>

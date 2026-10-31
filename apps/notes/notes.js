@@ -163,7 +163,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
-    $('convert').hidden = !on;
+    $('menu-tools').hidden = $('menu-tools-sep').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
@@ -211,12 +211,15 @@ window.notesApp = { store, ready, flush() } is for the tests.
   window.addEventListener('popstate', route);
 
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
-  $('new-note').addEventListener('click', () => {
-    const now = Date.now(), note = { id: newId(), text: '', created: now, updated: now, format: { size: 150 }, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };   // the first note is Neon night, later ones get a random style
+  // a new note (empty, or with the text of the clipboard); the first note ever is Neon night, later ones get a random style
+  function openNewNote(text = '') {
+    const now = Date.now(), note = { id: newId(), text, created: now, updated: now, format: { size: 150 }, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
-  });
+    if (text) { state.dirty = true; save(); }
+  }
+  $('new-note').addEventListener('click', () => openNewNote());
   $('notes').addEventListener('click', e => {
     const row = e.target.closest('.note-row');
     if (row) go('#/n/' + encodeURIComponent(row.dataset.id));
@@ -226,24 +229,56 @@ window.notesApp = { store, ready, flush() } is for the tests.
     else { history.replaceState(null, '', '#/'); route(); }
   });
 
-  // ----- key bar: the variants of the characters before the cursor and Convert; it sits above the keyboard (the editor view is cut at the top of the keyboard) -----
-  const keybar = $('keybar'), variantBtns = Array.from(document.querySelectorAll('#keybar .variant'));
-  let shownKeys = null;
+  // ----- key bar: slots: while a Quốc Ngữ word stands before the cursor its Chữ Nôm candidates (more of them in a list above the bar, opened by the narrow
+  // button with the triangle), else the variants of the QATT characters before the cursor in the middle three. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
+  const keybar = $('keybar'), slotBtns = Array.from(document.querySelectorAll('#keybar .variant')), moreBtn = $('nom-more-btn'), morePanel = $('nom-more');
+  let shownKeys = null, shown = [], rest = [], slots = 0;
+  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the three variants stand in the middle ones)
+  function fitSlots() {
+    const n = Math.max(5, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 60) / 62)));
+    if (!keybar.clientWidth || n === slots) return;
+    slots = n; shownKeys = null;
+    slotBtns.forEach((btn, i) => { btn.hidden = i >= n; });
+  }
+  function showMore(on) {
+    morePanel.hidden = !on;
+    moreBtn.setAttribute('aria-expanded', String(on));
+    if (!on) return;
+    morePanel.replaceChildren(...rest.map((c, j) => {
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.textContent = c.glyph; btn.title = c.reading;
+      btn.addEventListener('pointerdown', keepFocus);
+      btn.addEventListener('click', () => { const now = rest[j]; showMore(false); if (now) now.run(); });
+      return btn;
+    }));
+    morePanel.scrollTop = 0;
+  }
   function renderKeys() {
-    const slots = editor.variants(), key = slots.map(v => (v ? v.id + v.view : '')).join();
+    fitSlots();
+    const nom = editor.candidates();
+    shown = nom.length ? nom.slice(0, slots) : [];
+    if (!nom.length) editor.variants().forEach((v, i) => { shown[Math.ceil((slots - 3) / 2) + i] = v; });
+    rest = nom.slice(slots);
+    const key = (nom.length ? 'n' : 'v') + slotBtns.map((b, i) => (shown[i] ? shown[i].glyph || shown[i].id + shown[i].view : '')).join() + '|' + rest.length;
     if (key === shownKeys) return;
     shownKeys = key;
-    variantBtns.forEach((btn, i) => {
-      const v = slots[i];
+    slotBtns.forEach((btn, i) => {
+      const v = shown[i];
       btn.disabled = !v;
-      btn.textContent = v ? v.view : '·';
-      btn.title = v ? Lang.t(v.en, v.vi) : '';
+      btn.classList.toggle('nom', !!nom.length);
+      btn.textContent = v ? v.glyph || v.view : '·';
+      btn.title = !v ? '' : v.glyph ? v.reading : Lang.t(v.en, v.vi);
     });
+    moreBtn.disabled = !rest.length;
+    showMore(false);
   }
   const keepFocus = e => e.preventDefault();   // a click on the bar does not take the focus (and the keyboard) from the field
-  variantBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = editor.variants()[i]; if (v) v.run(); }); });
+  slotBtns.forEach((btn, i) => { btn.addEventListener('pointerdown', keepFocus); btn.addEventListener('click', () => { const v = shown[i]; if (v) v.run(); }); });
+  moreBtn.addEventListener('pointerdown', keepFocus);
+  moreBtn.addEventListener('click', () => showMore(morePanel.hidden));
+  editor.nomReady.then(() => { shownKeys = null; if (!keybar.hidden) renderKeys(); });
   field.addEventListener('focus', () => { if (field.readOnly) return; keybar.hidden = false; renderKeys(); });
-  field.addEventListener('blur', () => { keybar.hidden = true; });
+  field.addEventListener('blur', () => { keybar.hidden = true; showMore(false); });
   document.addEventListener('selectionchange', () => { if (document.activeElement === field) renderKeys(); });
   document.addEventListener('langchange', () => { shownKeys = null; renderKeys(); });
   const vv = window.visualViewport;
@@ -251,6 +286,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const inset = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
     $('view-editor').style.bottom = inset + 'px';
   }
+  window.addEventListener('resize', () => { if (!keybar.hidden) renderKeys(); });
   if (vv) { vv.addEventListener('resize', fitKeyboard); vv.addEventListener('scroll', fitKeyboard); }
 
   // ----- menu -----
@@ -457,6 +493,54 @@ window.notesApp = { store, ready, flush() } is for the tests.
     renderList();
   });
 
+  // ----- the clipboard: a text with QATT characters opens in a card (Save makes a note of it), any other text only gets a hint; each text once -----
+  const QATT_CHARS = /[\u{F0000}-\u{F00A3}]/u, CLIP_KEY = 'qattNotesClip';
+  const clipKey = text => { let h = 5381; for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0; return text.length + ':' + h; };
+  const clip = $('clip');
+  let clipText = '', clipChecking = false, clipRead = false;
+  function closeClip() { clip.hidden = true; clipText = ''; }
+  // manual = from the menu of the list: a tap, so Chrome may ask for the permission; the text counts even if it was seen before, and every outcome says something
+  async function checkClipboard(manual = false) {
+    manual = manual === true;
+    if (!clip.hidden) return;
+    if (!manual && (clipChecking || document.visibilityState !== 'visible' || !app.ready || !navigator.clipboard || !navigator.clipboard.readText)) return;
+    if (manual && !(navigator.clipboard && navigator.clipboard.readText)) return snack('The clipboard cannot be read here', 'Không đọc được bộ nhớ tạm ở đây');
+    clipChecking = true;
+    try {
+      const text = await navigator.clipboard.readText();
+      clipRead = true;
+      if (!text || !text.trim()) { if (manual) snack('The clipboard is empty', 'Bộ nhớ tạm trống'); return; }
+      const key = clipKey(text);
+      let last = null;
+      try { last = localStorage.getItem(CLIP_KEY); } catch (e) { /* no storage: the text may show again */ }
+      if (!manual && key === last) return;
+      try { localStorage.setItem(CLIP_KEY, key); } catch (e) { /* as above */ }
+      if (QATT_CHARS.test(text)) {
+        clipText = text;
+        $('clip-text').textContent = text;
+        $('clip-text').scrollTop = 0;
+        clip.hidden = false;
+      } else snack('The clipboard holds text without QATT characters', 'Bộ nhớ tạm có văn bản không có ký tự QATT');
+    } catch (e) {   // no permission yet, or the page has no focus: the automatic check tries again later, the manual one says it
+      if (manual) snack('The clipboard cannot be read: allow it in the browser', 'Không đọc được bộ nhớ tạm: hãy cho phép trong trình duyệt');
+    } finally { clipChecking = false; }
+  }
+  $('clip-check').addEventListener('click', () => { closeMenu(); checkClipboard(true); });
+  $('clip-close').addEventListener('click', closeClip);
+  clip.addEventListener('click', e => { if (e.target === clip) closeClip(); });
+  $('clip-save').addEventListener('click', async () => {
+    const text = clipText;
+    closeClip();
+    if (!text) return;
+    await save();
+    openNewNote(text);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !clip.hidden) closeClip(); });
+  document.addEventListener('visibilitychange', () => checkClipboard());
+  window.addEventListener('focus', () => checkClipboard());
+  document.addEventListener('pointerdown', () => { if (!clipRead) checkClipboard(); }, true);   // a tap gives the page the focus it may not have had at the start
+  app.checkClipboard = checkClipboard;
+
   document.addEventListener('gesturestart', e => e.preventDefault());   // Safari ignores user-scalable=no
 
   // ----- offline: the service worker (sw.js) -----
@@ -471,5 +555,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
     await route();
     if (state.notes.length === 0 && !state.current) $('new-note').click();   // nothing written yet: straight to the editor
     app.ready = true;
+    for (const wait of [0, 700, 2000]) { await new Promise(r => setTimeout(r, wait)); await checkClipboard(); if (clipRead) break; }
   })();
 })();
