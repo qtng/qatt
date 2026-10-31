@@ -6,10 +6,11 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) and the Nôm fonts are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v27';
+const CACHE = 'qatt-notes-v28';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json', 'https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2', 'https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2'];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2';   // 8 MB: cached when a character needs it, not at install
+const FOREVER = 'qatt-fonts-forever';   // survives every app version (the name does not start with qatt-notes-): the file never changes, so it is fetched once and never checked again
 const PAGE = '/apps/notes/';
 const PRECACHE = [
   PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js',
@@ -51,6 +52,10 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
   })()));
 
   self.addEventListener('activate', event => event.waitUntil((async () => {
+    try {   // a copy the earlier versions already hold moves to the permanent cache instead of being downloaded again
+      const forever = await caches.open(FOREVER);
+      if (!(await forever.match(NOM_NA_TONG))) { const old = await caches.match(NOM_NA_TONG); if (old) await forever.put(NOM_NA_TONG, old); }
+    } catch (e) { /* downloaded when needed */ }
     for (const key of staleCaches(await caches.keys(), CACHE)) await caches.delete(key);
     await self.clients.claim();
   })()));
@@ -64,6 +69,17 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
         const cache = await caches.open(CACHE);
         try { const res = await fetch(req); if (res.ok) cache.put(url.pathname, res.clone()); return res; }
         catch (e) { return (await cache.match(url.pathname)) || Response.error(); }
+      })());
+      return;
+    }
+    if (req.url === NOM_NA_TONG) {   // cache first, for ever: no check for a new version, no download again
+      event.respondWith((async () => {
+        const forever = await caches.open(FOREVER);
+        const hit = await forever.match(NOM_NA_TONG);
+        if (hit) return hit;
+        const res = await fetch(req);
+        if (res.ok) forever.put(NOM_NA_TONG, res.clone());
+        return res;
       })());
       return;
     }
