@@ -532,9 +532,11 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (manual && !(navigator.clipboard && navigator.clipboard.readText)) return snack('The clipboard cannot be read here', 'Không đọc được bộ nhớ tạm ở đây');
     clipChecking = true;
     try {
-      const text = await navigator.clipboard.readText();
+      let text = await navigator.clipboard.readText();
+      // right after the start the browser may still answer with an empty text: the empty answer is no proof, so ask again before saying "empty"
+      if (!text || !text.trim()) { await new Promise(r => setTimeout(r, 800)); text = await navigator.clipboard.readText(); }
+      if (!text || !text.trim()) { if (manual) snack('The clipboard is empty', 'Bộ nhớ tạm trống'); return; }   // clipRead stays false: the automatic check keeps trying
       clipRead = true;
-      if (!text || !text.trim()) { if (manual) snack('The clipboard is empty', 'Bộ nhớ tạm trống'); return; }
       const key = clipKey(text);
       let last = null;
       try { last = localStorage.getItem(CLIP_KEY); } catch (e) { /* no storage: the text may show again */ }
@@ -621,6 +623,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (state.notes.length === 0 && !state.current) $('new-note').click();   // nothing written yet: straight to the editor
     resume();
     app.ready = true;
-    for (const wait of [0, 700, 2000]) { await new Promise(r => setTimeout(r, wait)); await checkClipboard(); if (clipRead) break; }
+    for (const wait of [0, 700, 2000, 4000]) { await new Promise(r => setTimeout(r, wait)); await checkClipboard(); if (clipRead) break; }
   })();
 })();
