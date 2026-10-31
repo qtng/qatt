@@ -111,6 +111,8 @@ const NotesEditor = (() => {
       if (!o.on() || e.isComposing || (e.inputType !== 'deleteContentBackward' && e.inputType !== 'deleteContentForward')) return;
       const pos = typer.selectionStart;
       if (pos !== typer.selectionEnd) return;
+      const back = e.inputType === 'deleteContentBackward', pair = typer.value.slice(back ? pos - 2 : pos, back ? pos : pos + 2) === ' \u200C';   // the space and the ZWNJ that Convert put between two readings go together
+      if (pair) { e.preventDefault(); typer.setRangeText('', back ? pos - 2 : pos, back ? pos : pos + 2, 'end'); typer.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: e.inputType })); return; }
       const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
       if (!cell || typer.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
       e.preventDefault();
@@ -227,21 +229,21 @@ const NotesEditor = (() => {
   // Tham Thư is treated apart, as if the combiner were not there: the two parts of a stack are read one by one and the combiner becomes the IDS character for "above and below"
   // (U+2FF1) between their readings; the other way round such an IDS character between two QATT cells becomes the combiner again
   function convertText(text, parser) {
-    const IDS_STACK = '\u2FF1', COMBINER_CHAR = String.fromCodePoint(COMBINER), NEUTRAL_CHAR = String.fromCodePoint(NEUTRAL);
-    // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by spaces; other text as it is
+    const IDS_STACK = '\u2FF1', SEP = ' \u200C', COMBINER_CHAR = String.fromCodePoint(COMBINER), NEUTRAL_CHAR = String.fromCodePoint(NEUTRAL);
+    // the QATT characters of a text read as Quốc Ngữ (after the decoding chosen): every cell by its reading, separated by SEP (a space and a zero width non-joiner U+200C behind it: the way back deletes this pair, a typed space has no ZWNJ and stays); other text as it is
     const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
       let out = '', afterCell = false;
       for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
         const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? cellReading(part, parser) : '?';
         const isCell = read !== '?';   // a cell without a reading (the form with marking stroke 1) stays as it is, like any other character
-        if (isCell) out += (afterCell ? ' ' : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
-        else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? ' ' : '') + part;
+        if (isCell) out += (afterCell ? SEP : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
+        else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? SEP : '') + part;
         afterCell = isCell;
       }
       return out;
     }).join(IDS_STACK);
     // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
-    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => wordToQatt(w, parser) ?? w)
+    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => wordToQatt(w, parser) ?? w).replaceAll(SEP, '').replaceAll('\u200C', '')   // the spaces that Convert put between the readings (SEP: a space with a zero width non-joiner behind it) go again, and a ZWNJ left alone
       .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
     // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
     // (the parts of a stack are cells of their own; a cell without a reading, such as the form with marking stroke 1, does not count: it stays as it is, and the field can still be converted back)

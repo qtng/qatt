@@ -76,6 +76,12 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (!note || !state.dirty) return saving;
     state.dirty = false;
     if (field.value === '' && !note.title && !state.inStore) return saving;   // a new note that stays empty
+    const clean = NotesCore.cleanText(field.value);
+    if (clean !== field.value) {   // a ZWNJ behind no space is removed; the cursor keeps its place in the text
+      const text = field.value, keep = n => NotesCore.cleanText(text.slice(0, n)).length;
+      const a = keep(field.selectionStart), z = keep(field.selectionEnd);
+      field.value = clean; field.setSelectionRange(a, z);
+    }
     note.text = field.value;
     note.updated = Date.now();
     const copy = { ...note };
@@ -163,7 +169,6 @@ window.notesApp = { store, ready, flush() } is for the tests.
     icon.className = on ? 'bi bi-check-lg' : 'bi bi-pencil';
     $('edit-btn').setAttribute('aria-pressed', String(on));
     $('edit-btn').setAttribute('aria-label', on ? Lang.t('Done', 'Xong') : Lang.t('Edit', 'Chỉnh sửa'));
-    $('menu-tools').hidden = $('menu-tools-sep').hidden = !on;
     if (!on) { keybar.hidden = true; if (document.activeElement === field) field.blur(); }
     else if (document.activeElement === field) { keybar.hidden = false; renderKeys(); }   // the field kept the focus from the tap in the reading view
   }
