@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>QATT sort demo</title>
+<link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/site.css">
+<script src="/js/navigation.js"></script>
+<style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, th, label, code, small) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style>
+<style>
+@font-face { font-family: "QATT Chart"; src: url(../../fonts/qatt-serif.woff2) format("woff2"), url(../../fonts/qatt-serif.ttf) format("truetype"); }
+body { max-width: 40rem; margin: 2rem auto; padding: 0 1rem; font: 17px/1.55 Georgia, "Times New Roman", serif; color: #111; background: #fff; }
+h1 { font-size: 1.9rem; }
+a { color: #8a2a1f; }
+.opts { display: flex; flex-wrap: wrap; gap: .4rem 1.6rem; margin: 1rem 0; }
+.opts label { cursor: pointer; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .95rem; }
+th, td { border: 1px solid #aaa; padding: .15rem .6rem; vertical-align: middle; } th { background: #eee; text-align: left; position: sticky; top: 0; }
+td.n { text-align: right; color: #666; font-variant-numeric: tabular-nums; }
+td.g { font-family: "QATT Chart"; font-size: 1.7rem; line-height: 1.2; text-align: center; white-space: nowrap; }
+</style>
+</head>
+<body>
+<p><a href="/unicode/draft/" data-vi="← Đề xuất Unicode">← Unicode proposal</a></p>
+<h1 data-vi="Thử sắp xếp QATT">QATT sort demo</h1>
+<p>Every syllable that the draft encoding writes without Tham Thư and without a tone: each Cán with each Chi (a Cán of the same base is written as the Chi alone, 4.2), the Hợp Thư of the Chi with marking stroke 2, 3 and 4 with the Cán of its base, and the unmarked and the marked Cán alone (the syllable of the initial with the rhyme ông, the same reading for both). The reading is that of the decoding <code>qatt</code> from <code>js/parser.js</code>. Sort by the reading, or in binary order of the code points, which is what a text without collation gets (6.4).</p>
+<div class="opts">
+  <label><input type="radio" name="sort" value="qn" checked> <span data-vi="Sắp xếp theo Quốc Ngữ">Sort by Quốc Ngữ</span></label>
+  <label><input type="radio" name="sort" value="qatt"> <span data-vi="Sắp xếp theo QATT">Sort by QATT</span></label>
+</div>
+<p><small id="count"></small></p>
+<table>
+<thead><tr><th>#</th><th>Quốc Ngữ</th><th>QATT</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+<script src="/js/parser.js"></script>
+<script src="/js/qatt-text.js"></script>
+<script>
+(() => {
+  const parser = new VietnameseParser("qatt");
+  const chr = o => String.fromCodePoint(0xF0000 + o), JOINER = chr(154);
+  const items = [];
+  const add = cell => { const reading = QattText.reading(cell, parser); if (reading !== "?") items.push({ reading, cell }); };
+
+  // Cán with Chi: the unmarked form of base x, the joiner and the Chi of base y (marks 2 to 6); of the same base, the Chi stands alone
+  for (let x = 0; x < 22; x++) for (let y = 0; y < 22; y++) for (let m = 2; m <= 6; m++)
+    add(x === y ? chr(7 * y + m) : chr(7 * x) + JOINER + chr(7 * y + m));
+  // the unmarked Cán alone is the initial with the rhyme ông; the marked Cán stands for the same syllable (4.1)
+  for (let x = 0; x < 22; x++) {
+    const reading = QattText.reading(chr(7 * x), parser);
+    if (reading !== "?") for (const o of [0, 1]) items.push({ reading, cell: chr(7 * x + o) });
+  }
+  // Hợp Thư: the Chi with marking stroke 2, 3, 4, the joiner and the unmarked Cán of the same base
+  for (let x = 0; x < 22; x++) for (const m of [2, 3, 4]) add(chr(7 * x + m) + JOINER + chr(7 * x));
+
+  // binary order of the code points (all are in the same plane, so this is also the order of the UTF-16 units)
+  const byCode = (a, b) => { const x = Array.from(a.cell, c => c.codePointAt(0)), y = Array.from(b.cell, c => c.codePointAt(0));
+    for (let i = 0; i < Math.min(x.length, y.length); i++) if (x[i] !== y[i]) return x[i] - y[i];
+    return x.length - y.length; };
+  const collator = new Intl.Collator("vi");
+  const order = { qn: (a, b) => collator.compare(a.reading, b.reading) || byCode(a, b), qatt: byCode };
+
+  const body = document.getElementById("rows");
+  const render = key => {
+    items.sort(order[key]);
+    const frag = document.createDocumentFragment();
+    items.forEach((it, i) => {   // the number belongs to the row, not to the syllable
+      const tr = document.createElement("tr");
+      for (const [cls, text] of [["n", i + 1], ["", it.reading], ["g", it.cell]]) {
+        const td = document.createElement("td"); if (cls) td.className = cls; td.textContent = text; tr.append(td);
+      }
+      frag.append(tr);
+    });
+    body.replaceChildren(frag);
+  };
+  document.getElementById("count").textContent = items.length + " syllables";
+  for (const r of document.querySelectorAll("input[name=sort]")) r.addEventListener("change", () => r.checked && render(r.value));
+  render("qn");
+})();
+</script>
+</body>
+</html>
