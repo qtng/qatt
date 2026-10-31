@@ -4,18 +4,19 @@ Raise CACHE when a file of PRECACHE changes (a new name = a new cache; the old o
 Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
-  - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) and the Nôm font are cached the first time they load, and at install if the network allows
+  - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) and the Nôm fonts are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v19';
+const CACHE = 'qatt-notes-v21';
 const IME = 'https://chunom.org/chunom/js/ime.js';
-const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json', 'https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2'];
+const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json', 'https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2', 'https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2'];
+const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2';   // 8 MB: cached when a character needs it, not at install
 const PAGE = '/apps/notes/';
 const PRECACHE = [
   PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js',
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  '/fonts/qatt-pen-medium.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2', '/fonts/qatt-hat-gao.woff2',
+  '/fonts/qatt-pen-medium.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2', '/fonts/qatt-hat-gao.woff2', '/fonts/qatt-snip.woff2', '/fonts/qatt-manh.woff2', '/fonts/qatt-metro.woff2', '/fonts/qatt-n7k.woff2',
   '/decodings.json',
 ];
 
@@ -30,7 +31,7 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
   };
   const known = req => {
     const url = new URL(req.url);
-    if (CHUNOM.includes(req.url)) return true;
+    if (CHUNOM.includes(req.url) || req.url === NOM_NA_TONG) return true;
     if (url.origin !== location.origin) return false;
     if (req.mode === 'navigate') return url.pathname === PAGE || url.pathname === '/apps/notes/index.html';
     return /^\/fonts\/[\w.-]+\.(woff2|ttf)$/.test(url.pathname) || PRECACHE.some(p => p.split('?')[0] === url.pathname);   // the other fonts (admins) are cached when they load
