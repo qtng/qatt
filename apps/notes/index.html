@@ -56,31 +56,36 @@
       <div id="style-menu" class="menu" hidden><div id="set-style" role="radiogroup"></div></div>
       <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu" data-vi-aria-label="Menu" aria-haspopup="true" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
       <div id="menu" class="menu" hidden>
-        <div id="menu-tools" class="menu-tools">
-          <button id="convert" type="button" class="wide" aria-label="Convert QATT" data-vi-aria-label="Chuyển QATT" title="Convert QATT" data-vi-title="Chuyển QATT">QATT <i class="bi bi-arrow-left-right"></i> ABC</button>
-          <button id="undo-btn" type="button" disabled title="Undo" data-vi-title="Hoàn tác"><span class="uni" aria-hidden="true">↶</span> <span data-vi="Hoàn tác">Undo</span></button>
-          <button id="redo-btn" type="button" disabled title="Redo" data-vi-title="Làm lại"><span class="uni" aria-hidden="true">↷</span> <span data-vi="Làm lại">Redo</span></button>
-        </div>
-        <div id="menu-tools-sep" class="menu-sep" role="separator"></div>
-        <div class="menu-row"><span data-vi="Kiểu">Emphasis</span>
-          <span id="set-emphasis" class="aligns">
-            <button type="button" id="set-bold" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button>
-            <button type="button" id="set-italic" aria-pressed="false" aria-label="Italic" data-vi-aria-label="In nghiêng" title="Italic" data-vi-title="In nghiêng"><i class="bi bi-type-italic"></i></button>
-          </span></div>
         <label class="menu-row"><span data-vi="Cách giải mã">Decoding</span><select id="set-decoding" autocomplete="off"></select></label>
-        <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
-        <div class="menu-row"><span data-vi="Căn lề">Alignment</span>
-          <span id="set-align" class="aligns" role="radiogroup">
-            <button type="button" role="radio" data-align="left" aria-label="Left" data-vi-aria-label="Căn trái" title="Left" data-vi-title="Căn trái"><i class="bi bi-text-left"></i></button>
-            <button type="button" role="radio" data-align="center" aria-label="Centred" data-vi-aria-label="Căn giữa" title="Centred" data-vi-title="Căn giữa"><i class="bi bi-text-center"></i></button>
-            <button type="button" role="radio" data-align="vertical-center" aria-label="Vertical, centred" data-vi-aria-label="Chữ dọc, căn giữa" title="Vertical, centred" data-vi-title="Chữ dọc, căn giữa"><i class="bi bi-text-center turned"></i></button>
-            <button type="button" role="radio" data-align="vertical" aria-label="Vertical" data-vi-aria-label="Chữ dọc" title="Vertical" data-vi-title="Chữ dọc"><i class="bi bi-text-left turned"></i></button>
-          </span></div>
         <div class="menu-sep" role="separator"></div>
         <button id="menu-delete" type="button"><i class="bi bi-trash"></i> <span data-vi="Xóa">Delete</span></button>
         <div class="menu-group"><span class="menu-label" data-vi="Phông chữ">Font</span><div id="set-font" role="radiogroup"></div></div>
       </div>
     </header>
+    <div id="fmtbar" class="fmtbar" role="toolbar" aria-label="Format" data-vi-aria-label="Định dạng">
+      <button id="convert" type="button" class="wide" aria-label="Convert QATT" data-vi-aria-label="Chuyển QATT" title="Convert QATT" data-vi-title="Chuyển QATT">QATT <i class="bi bi-arrow-left-right"></i> ABC</button>
+      <button id="undo-btn" type="button" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><span class="uni" aria-hidden="true">↶</span></button>
+      <button id="redo-btn" type="button" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><span class="uni" aria-hidden="true">↷</span></button>
+      <button type="button" id="set-bold" aria-pressed="false" aria-label="Bold" data-vi-aria-label="In đậm" title="Bold" data-vi-title="In đậm"><i class="bi bi-type-bold"></i></button>
+      <button type="button" id="set-italic" aria-pressed="false" aria-label="Italic" data-vi-aria-label="In nghiêng" title="Italic" data-vi-title="In nghiêng"><i class="bi bi-type-italic"></i></button>
+      <span class="pop end">
+        <button id="align-btn" type="button" aria-label="Alignment" data-vi-aria-label="Căn lề" title="Alignment" data-vi-title="Căn lề" aria-haspopup="true" aria-expanded="false"><i class="bi bi-text-left"></i><i class="bi bi-caret-down-fill caret"></i></button>
+        <div id="align-menu" class="menu" hidden>
+          <span id="set-align" class="aligns" role="radiogroup">
+            <button type="button" role="radio" data-align="left" aria-label="Left" data-vi-aria-label="Căn trái" title="Left" data-vi-title="Căn trái"><i class="bi bi-text-left"></i></button>
+            <button type="button" role="radio" data-align="center" aria-label="Centred" data-vi-aria-label="Căn giữa" title="Centred" data-vi-title="Căn giữa"><i class="bi bi-text-center"></i></button>
+            <button type="button" role="radio" data-align="vertical-center" aria-label="Vertical, centred" data-vi-aria-label="Chữ dọc, căn giữa" title="Vertical, centred" data-vi-title="Chữ dọc, căn giữa"><i class="bi bi-text-center turned"></i></button>
+            <button type="button" role="radio" data-align="vertical" aria-label="Vertical" data-vi-aria-label="Chữ dọc" title="Vertical" data-vi-title="Chữ dọc"><i class="bi bi-text-left turned"></i></button>
+          </span>
+        </div>
+      </span>
+      <span class="pop end">
+        <button id="size-btn" type="button" aria-label="Size" data-vi-aria-label="Cỡ chữ" title="Size" data-vi-title="Cỡ chữ" aria-haspopup="true" aria-expanded="false"><span id="size-btn-label">100%</span><i class="bi bi-caret-down-fill caret"></i></button>
+        <div id="size-menu" class="menu" hidden>
+          <label class="menu-row"><span data-vi="Cỡ chữ">Size</span><input id="set-size" type="range" min="50" max="400" step="10" value="100" autocomplete="off"><output id="size-label">100%</output></label>
+        </div>
+      </span>
+    </div>
     <textarea id="note-field" lang="vi" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Note" data-vi-aria-label="Ghi chú"></textarea>
     <div id="keybar" class="keybar" hidden>
       <span class="variants" role="group" aria-label="Chữ Nôm candidates and variants of the characters before the cursor" data-vi-aria-label="Gợi ý Chữ Nôm và biến thể của các ký tự trước con trỏ"><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button type="button" class="variant" disabled>·</button><button id="nom-more-btn" type="button" class="more" disabled aria-expanded="false" aria-controls="nom-more" aria-label="More Chữ Nôm candidates" data-vi-aria-label="Thêm gợi ý Chữ Nôm" title="More Chữ Nôm candidates" data-vi-title="Thêm gợi ý Chữ Nôm"><i class="bi bi-caret-up-fill"></i></button></span>
