@@ -2,7 +2,7 @@
 QATT code -> text for the QATT fonts (code points from U+F0000, see unicode.html and the code table (admin/view.html?f=fonts&p=admin/codetable.html))
 
   QattText.syllable("t,c5,,5")   // code of VietnameseParser.parse(...).qatt -> onset U+F009A rhyme tone, one cell
-  QattText.syllable("v,,,0")     // no rhyme (Hợp Thư ông): the shape alone
+  QattText.syllable("v,,,0")     // no rhyme: the shape alone, the bare consonant (with stroke 1, "v1,,,0": ông, see parser.js HOP_THU)
   QattText.syllable("v2,v,,0")   // code of VietnameseParser.parse(...).hop (Hợp Thư): marked shape U+F009A plain shape
   QattText.word("tự", parser)    // Quốc Ngữ word -> text, or null if there is no glyph for it
   QattText.cells(text)           // the cells of QATT text: [{ cell, index }] (QattText.CELL is the pattern, CELL_ANY also matches every other character)
@@ -32,7 +32,7 @@ const QattText = (() => {
   // the onset may carry a marking stroke too (Hợp Thư: "v2,v,,0")
   const syllable = code => {
     const [onset, rhyme, , tone] = code.split(",");
-    const on = split(onset), rh = rhyme === "" ? "" : split(rhyme);   // no rhyme: the shape alone (Hợp Thư ông)
+    const on = split(onset), rh = rhyme === "" ? "" : split(rhyme);   // no rhyme: the shape alone (the bare consonant, or with stroke 1 ông)
     if (!on || rh === null) return null;
     const t = TONES[+tone || 0];
     // onset and rhyme of the same shape (mô = m + m2): the marked shape alone is the whole syllable (also the shape without strokes: _ + _2)
@@ -58,7 +58,7 @@ const QattText = (() => {
   const cells = text => Array.from(text.matchAll(CELL), m => ({ cell: m[0], index: m.index }));
 
   // A cell of QATT text as the parts of the syllable (the reverse of syllable): { onset, rhyme, tone, hop } or null (a cell that is no syllable,
-  // e.g. a stack with the combiner). onset: shape of the onset, rhyme: code of the rhyme glyph ("" none), hop: "ong" "ung" "uông" for Hợp Thư.
+  // e.g. a stack with the combiner). onset: shape of the onset, rhyme: code of the rhyme glyph ("" none), hop: "ông" (the form with stroke 1 alone), "ong" "ung" "uông" (Hợp Thư pairs).
   const decode = cell => {
     const cps = Array.from(cell, c => c.codePointAt(0) - BASE);
     const glyph = o => {
@@ -73,7 +73,10 @@ const QattText = (() => {
     let tone = 0;
     for (; i < cps.length; i++) { const t = TONES.indexOf(cps[i]); if (t < 0) return null; tone = t; }
     const code = g => g.shape + (g.mark || "");
-    if (!joined) return first.mark ? { onset: first.shape, rhyme: code(first), tone } : { onset: first.shape, rhyme: "", tone };   // m2 alone is m + m2, a plain shape alone is ông
+    if (!joined) {   // the form with stroke 1 alone is ông, m2 alone is m + m2, a plain shape alone is the bare consonant
+        if (first.mark === 1) return { onset: first.shape, rhyme: "", tone, hop: "ông" };
+        return first.mark ? { onset: first.shape, rhyme: code(first), tone } : { onset: first.shape, rhyme: "", tone };
+    }
     if (first.mark && !second.mark && first.shape === second.shape) return { onset: first.shape, rhyme: "", tone, hop: { 2: "ong", 3: "ung", 4: "uông" }[first.mark] };
     if (first.mark) return null;
     return { onset: first.shape, rhyme: code(second), tone };

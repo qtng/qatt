@@ -304,7 +304,7 @@
       const [onset, rhyme, , t] = c.split(',');
       const on = piece(onset), rh = rhyme ? piece(rhyme) : null;
       let cells;   // role: what the cell stands for, to spell the word again from the cells
-      if (!rh) cells = [{ ...on, role: 'onset' }];                                                          // the shape alone (ông)
+      if (!rh) cells = [{ ...on, mark: 0, role: 'onset' }];                                                 // ông: the form with stroke 1 alone; the game asks for the plain shape of the onset
       else if (rh.mark && !on.mark && on.shape === rh.shape) cells = [{ ...rh, role: 'both' }];             // onset and rhyme of one shape: one marked letter
       else cells = [{ ...on, role: 'onset' }, { ...rh, role: 'rhyme' }];
       return { cells, tone: +t || 0, code: c, hop: !parsed.qatt };
@@ -425,7 +425,7 @@
       $('task').append(c);   // in the card, at the bottom in the middle
       setTimeout(() => c.remove(), 1700);
     };
-    const sayOnset = (shape, b) => { const text = parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0 }); say(text); cloud(b, text); };
+    const sayOnset = (shape, b) => { const text = parser.toQuocNgu({ onset: shape, rhyme: '', tone: 0, hop: 'ông' }); say(text); cloud(b, text); };   // the onset with ông
     // a marked form: the reading of the rhyme character itself with the consonant of its base shape (ngam for the group of ng), as in the popup of symbols.html;
     // not the asked word. The rhymes that have no reading there (ơng, ương, êng, uêng, ing, uyng) have none here either.
     const NO_READING = new Set(['ơng', 'ương', 'êng', 'uêng', 'ing', 'uyng']);
