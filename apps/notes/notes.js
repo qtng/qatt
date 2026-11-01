@@ -380,6 +380,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const setFont = (family, user) => {
     if (!FONTS.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
     document.documentElement.style.setProperty('--qfont', `"${family}"`);
+    document.documentElement.style.setProperty('--qfont-field', qattFieldFont(family));   // the text field only: also the Latin of the font where it has one (Hannom Pen)
     if (user) keepFormat('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
