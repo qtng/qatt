@@ -6,10 +6,10 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v36';
+const CACHE = 'qatt-notes-v37';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json'];
-const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2';   // 8 MB: cached when a character needs it, not at install
+const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB: cached when a character needs it, not at install
 // the Nôm fonts never change: cached for ever, the two small ones at install, the big one when first needed
 const NOM_FONTS = ['https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2', 'https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2', NOM_NA_TONG];
 const FOREVER = 'nom-fonts';   // survives every app version (the name does not start with qatt-notes-): the files never change, so each is fetched once and never checked again
@@ -66,6 +66,7 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
   self.addEventListener('activate', event => event.waitUntil((async () => {
     try {   // a copy the earlier versions already hold moves to the permanent cache instead of being downloaded again
       const forever = await caches.open(FOREVER);
+      await forever.delete('https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2');   // the first file, its vertical metrics were wrong (hhea descent +155): replaced by ?v=2
       for (const url of NOM_FONTS) if (!(await forever.match(url))) { const old = await caches.match(url); if (old) await forever.put(url, old); }
     } catch (e) { /* downloaded when needed */ }
     for (const key of staleCaches(await caches.keys(), CACHE)) await caches.delete(key);
