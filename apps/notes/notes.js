@@ -236,10 +236,10 @@ window.notesApp = { store, ready, flush() } is for the tests.
   });
 
   // ----- key bar: slots: while a Quốc Ngữ word stands before the cursor its Chữ Nôm candidates (more of them in a list above the bar, opened by the narrow
-  // button with the triangle), else the variants of the QATT characters before the cursor in the middle three. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
+  // button with the triangle), else the variants of the QATT characters before the cursor in the middle two. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
   const keybar = $('keybar'), slotBtns = Array.from(document.querySelectorAll('#keybar .variant')), moreBtn = $('nom-more-btn'), morePanel = $('nom-more');
   let shownKeys = null, shown = [], rest = [], slots = 0;
-  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the three variants stand in the middle ones)
+  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the two variants stand in the first ones)
   function fitSlots() {
     const n = Math.max(5, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 60) / 62)));
     if (!keybar.clientWidth || n === slots) return;
@@ -263,7 +263,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     fitSlots();
     const nom = editor.candidates();
     shown = nom.length ? nom.slice(0, slots) : [];
-    if (!nom.length) editor.variants().forEach((v, i) => { shown[Math.ceil((slots - 3) / 2) + i] = v; });
+    if (!nom.length) editor.variants().forEach((v, i) => { shown[i] = v; });
     rest = nom.slice(slots);
     const key = (nom.length ? 'n' : 'v') + slotBtns.map((b, i) => (shown[i] ? shown[i].glyph || shown[i].id + shown[i].view : '')).join() + '|' + rest.length;
     if (key === shownKeys) return;
