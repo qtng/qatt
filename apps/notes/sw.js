@@ -6,12 +6,12 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v43';
+const CACHE = 'qatt-notes-v44';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json'];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB (?v=2: the first file had wrong vertical metrics; a copy kept for ever needs a new address): cached when a character needs it, not at install
 // the Nôm fonts never change: cached for ever, the two small ones at install, the big one when first needed
-const HANNOM_PEN = 'https://qatt.org/fonts/hannom-pen.woff2'; // 9.8 MB, like Nom Na Tong cached when it is first chosen; a replaced file needs a new address (?v=2)
+const HANNOM_PEN = 'https://chunom.org/chunom-assets/fonts/hannom-pen.woff2'; // 9.8 MB, like Nom Na Tong cached when it is first chosen; a replaced file needs a new address (?v=2)
 const NOM_FONTS = ['https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2', 'https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2', NOM_NA_TONG, HANNOM_PEN];
 const FOREVER = 'nom-fonts';   // survives every app version (the name does not start with qatt-notes-): the files never change, so each is fetched once and never checked again
 const PAGE = '/apps/notes/';
