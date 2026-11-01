@@ -320,6 +320,7 @@ const QattWriter = (() => {
     //   count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair, but not the upper part of a stack.
     //   It puts the combiner U+F009B between the two letters.
     // Neutral tone: the cursor stands right behind a letter, so the cell has no tone mark yet; the mark of ngang U+F009C is put behind it.
+    // Unmarked: the letter before the cursor (behind its tone marks) is the form with marking stroke 1 (ông) standing alone; it becomes the unmarked form (code point - 1), so the bare consonant can have a tone.
     // The cursor stays behind the same characters.
     const NEUTRAL = 0xF009C, variantBtns = Array.from(document.querySelectorAll('#variants .btn'));
     const utf16 = c => c > 0xFFFF ? 2 : 1;
@@ -342,14 +343,16 @@ const QattWriter = (() => {
       const tones = before.slice(j + 1);   // the tone marks between the letter and the cursor stand in the preview too
       if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
         list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(...cellEnding(j - 1), COMBINER, before[j], ...tones), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
+      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 1 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // the form with stroke 1 (ông) alone: the unmarked form, e.g. to give the bare consonant a tone
+        list.push({ id: 'plain', en: 'Unmarked', vi: 'Dạng không đánh dấu', view: str(before[j] - 1, ...tones), run: () => edit(pos(j), 2, str(before[j] - 1), at) });
       if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
         list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(...cellEnding(j), NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
       return list;
     };
-    // two small buttons with a place of their own each (neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
-    const SLOTS = ['neutral', 'tham'];
+    // two small buttons with a place of their own each (neutral tone, Tham Thư or unmarked): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
+    const SLOTS = ['neutral', 'tham'];   // the second button is Tham Thư, or Unmarked when the letter before the cursor is the form with stroke 1 (Tham Thư is never possible then)
     let shownVariants = null;
-    const slotted = () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
+    const slotted = () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id) || (id === 'tham' ? list.find(v => v.id === 'plain') : undefined)); };
     function showVariants() {
       const slots = slotted(), key = slots.map(v => v ? v.id + v.view : '').join();
       if (key === shownVariants) return;
