@@ -17,6 +17,7 @@ const QATT_FONTS = [
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters" },
   { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", cjk: true, latin: "qatt-pen-latin", default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
   { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium-letters" },
+  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", cjk: "https://chunom.org/chunom-assets/fonts/migoi.woff2" },   // as QATT Pen and Celluloid: letters here, CJK from the big font
   { family: "QATT Celluloid",     label: "QATT Celluloid",               file: "qatt-celluloid-letters", cjk: "https://chunom.org/chunom-assets/fonts/qatt-celluloid.woff2" },   // as QATT Pen: letters here, CJK from the big font
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
