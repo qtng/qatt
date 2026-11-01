@@ -15,8 +15,8 @@ const QATT_FONTS = [
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
   { family: "QATT Pen ExtraLight",   label: "Qatt.org Pen extra light",     file: "qatt-pen-extralight", admin: true },
   { family: "QATT Pen Light",        label: "Qatt.org Pen light",           file: "qatt-pen-light", admin: true },
-  { family: "QATT Pen",              label: "Qatt.org Pen",                 file: "qatt-pen", admin: true },
-  { family: "QATT Hannom Pen",       label: "QATT Hannom Pen",              file: "qatt-pen-medium", cjk: true, default: true },   // Pen Medium is the subset of Hannom Pen for the QATT letters (U+F0000..F00A3, a small file); the CJK and Nôm characters come from the big file (QATT_CJK_URL), loaded only when one of them is shown
+  { family: "QATT Hannom Pen",       label: "QATT Hannom Pen",              file: "qatt-pen", cjk: true, default: true },   // Pen is the subset of Hannom Pen for the QATT letters (U+F0000..F00A3, a small file, the same strokes); the CJK and Nôm characters come from the big file (QATT_CJK_URL), loaded only when one of them is shown
+  { family: "QATT Pen Medium",       label: "Qatt.org Pen medium",          file: "qatt-pen-medium" },
   { family: "QATT Pen Wide",         label: "Qatt.org Pen wide",            file: "qatt-pen-wide", admin: true },
   { family: "QATT Pen Cut ExtraLight", label: "Qatt.org Pen cut extra light", file: "qatt-pencut-extralight", admin: true },
   { family: "QATT Pen Cut Light",    label: "Qatt.org Pen cut light",       file: "qatt-pencut-light", admin: true },
@@ -60,7 +60,7 @@ const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.cur
   const face = (family, file, range = "") => `@font-face { font-family: "${family}"; src: url(${QATT_FONT_DIR}${file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${file}.ttf) format("truetype");${range ? ` unicode-range: ${range};` : ""} }`;
   style.textContent = FONTS.map(f => f.cjk
     ? face(f.family, f.file, QATT_RANGE) + `\n@font-face { font-family: "${f.family}"; src: url(${QATT_CJK_URL}) format("woff2"); unicode-range: ${QATT_CJK_RANGE}; }`
-    : face(f.family, f.file)).concat(face("QATT Pen Medium", "qatt-pen-medium")).join("\n");   // "QATT Pen Medium" stays as a name for pages that need only the QATT letters
+    : face(f.family, f.file)).concat(face("QATT Pen", "qatt-pen")).join("\n");   // "QATT Pen" stays as a name of the subset for pages that need only the QATT letters
   document.head.append(style);
 
   const fill = (select, items) => {
