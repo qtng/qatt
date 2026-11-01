@@ -65,7 +65,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* Chữ Nôm: the fonts of the phone, then the supplement of the Chunom site for the rarer characters */
 @font-face { font-family: "NomKhai-Supplement"; src: local("__"), url("https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2") format("woff2"); }
 @font-face { font-family: "Han-Nom Gothic Supplement"; src: local("Han-Nom Gothic"), url("https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2") format("woff2"); }
-@font-face { font-family: "Nom Na Tong Supplement"; src: local("Nom Na Tong"), url("https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2") format("woff2"); }   /* 8 MB: loaded only when a character needs it */
+@font-face { font-family: "Nom Na Tong Supplement"; src: local("Nom Na Tong"), url("https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2") format("woff2"); }   /* 8 MB: loaded only when a character needs it */
 :root { --nom: "Nom Na Tong Supplement", "NomKhai-Supplement", "Han-Nom Gothic Supplement"; }   /* the Chữ Nôm fonts of the Chunom site (chunom-assets/fonts/fonts.css), in its order */
 .variant.nom, .nom-more button { font-family: sans-serif, var(--nom); }
 .nom-more { position: absolute; z-index: 5; left: .5rem; right: .5rem; bottom: 100%; max-height: 40vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: .3rem; padding: .4rem;
