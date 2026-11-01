@@ -118,7 +118,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .fmtbar > button { flex: 1 1 0; }
 .fmtbar > .wide { flex-grow: 2.4; font-size: .68rem; gap: .1rem; padding: 0 .1rem; }
 .fmtbar .pop { position: relative; flex: 1.2 1 0; min-width: 0; }
-.fmtbar .pop:last-child { flex-grow: 2.1; }
+.fmtbar .pop ~ .pop { flex-grow: 2.1; }
 .fmtbar #size-btn-label { font-size: .85rem; }
 .fmtbar .caret { font-size: .55rem; opacity: .7; }
 .fmtbar button:active { background: rgba(255, 255, 255, .1); }
