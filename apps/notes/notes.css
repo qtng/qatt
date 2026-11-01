@@ -67,7 +67,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @font-face { font-family: "Han-Nom Gothic Supplement"; src: local("Han-Nom Gothic"), url("https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2") format("woff2"); }
 @font-face { font-family: "Nom Na Tong Supplement"; src: local("Nom Na Tong"), url("https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2") format("woff2"); }   /* 8 MB: loaded only when a character needs it */
 :root { --nom: "Nom Na Tong Supplement", "NomKhai-Supplement", "Han-Nom Gothic Supplement"; }   /* the Chữ Nôm fonts of the Chunom site (chunom-assets/fonts/fonts.css), in its order */
-@font-face { font-family: "QATT Hannom Pen"; src: url("https://chunom.org/chunom-assets/fonts/hannom-pen.woff2") format("woff2"); }   /* 9.8 MB: loaded only when this font is chosen */
 .variant.nom, .nom-more button { font-family: sans-serif, var(--nom); }
 .nom-more { position: absolute; z-index: 5; left: .5rem; right: .5rem; bottom: 100%; max-height: 40vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: .3rem; padding: .4rem;
   background: rgba(58, 51, 42, .9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 -6px 18px rgba(0, 0, 0, .5); }
