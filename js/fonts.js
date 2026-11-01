@@ -13,15 +13,10 @@ const QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
   { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic" },
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
-  { family: "QATT Pen ExtraLight",   label: "Qatt.org Pen extra light",     file: "qatt-pen-extralight", admin: true },
-  { family: "QATT Pen Light",        label: "Qatt.org Pen light",           file: "qatt-pen-light", admin: true },
-  { family: "QATT Hannom Pen",       label: "QATT Hannom Pen",              file: "qatt-pen", cjk: true, latin: "hannom-pen-latin", default: true },   // Pen is the subset of Hannom Pen for the QATT letters (U+F0000..F00A3, a small file, the same strokes); the CJK and Nôm characters come from the big file (QATT_CJK_URL), loaded only when one of them is shown
-  { family: "QATT Pen Medium",       label: "Qatt.org Pen medium",          file: "qatt-pen-medium" },
-  { family: "QATT Pen Wide",         label: "Qatt.org Pen wide",            file: "qatt-pen-wide", admin: true },
-  { family: "QATT Pen Cut ExtraLight", label: "Qatt.org Pen cut extra light", file: "qatt-pencut-extralight", admin: true },
-  { family: "QATT Pen Cut Light",    label: "Qatt.org Pen cut light",       file: "qatt-pencut-light", admin: true },
-  { family: "QATT Pen Cut",          label: "Qatt.org Pen cut",             file: "qatt-pencut", admin: true },
-  { family: "QATT Pen Cut Medium",   label: "Qatt.org Pen cut medium",      file: "qatt-pencut-medium", admin: true },
+  { family: "QATT Pen Thin",        label: "QATT Pen thin",                file: "qatt-pen-thin" },
+  { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light" },
+  { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen", cjk: true, latin: "hannom-pen-latin", default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
+  { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium" },
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
@@ -34,11 +29,11 @@ const QATT_FONTS = [
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
-// Hannom Pen: CJK ideographs, kana, Zhuyin, Hangul compatibility jamo, fullwidth forms and CJK punctuation (the same ranges as chunom-assets/fonts/fonts.css); 9.8 MB, from the Chunom site
+// QATT Pen (the big font): CJK ideographs, kana, Zhuyin, Hangul compatibility jamo, fullwidth forms and CJK punctuation (the same ranges as chunom-assets/fonts/fonts.css); 9.8 MB, from the Chunom site
 const QATT_CJK_URL = "https://chunom.org/chunom-assets/fonts/hannom-pen.woff2";
 const QATT_CJK_RANGE = "U+2E80-2FDF, U+2FF0-303F, U+3040-30FF, U+3100-312F, U+3130-318F, U+31A0-31FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FF00-FFEF, U+16FF0-16FF1, U+20000-3FFFF";
 const QATT_RANGE = "U+F0000-F00A3";
-// latin: a file with the Latin of the font (ASCII, Latin-1, Quốc Ngữ; Hannom Pen: 28 KB), as a family of its own "<family> Latin", so that only a page that asks for it shows
+// latin: a file with the Latin of the font (ASCII, Latin-1, Quốc Ngữ; QATT Pen: 28 KB), as a family of its own "<family> Latin", so that only a page that asks for it shows
 // Latin in that font (the text field of Qatt.org Notes: qattFieldFont); everywhere else Latin stays in the fonts after it
 const qattFieldFont = family => { const f = QATT_FONTS.find(x => x.family === family); return f && f.latin ? `"${family} Latin", "${family}"` : `"${family}"`; };
 const QATT_SIZES = [[20, "60%"], [27, "80%"], [34, "100%", true], [41, "120%"], [51, "150%"], [68, "200%"], [102, "300%"], [136, "400%"]];
@@ -64,7 +59,7 @@ const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.cur
   style.textContent = FONTS.map(f => f.cjk
     ? face(f.family, f.file, QATT_RANGE) + `\n@font-face { font-family: "${f.family}"; src: url(${QATT_CJK_URL}) format("woff2"); unicode-range: ${QATT_CJK_RANGE}; }`
     : face(f.family, f.file)).concat(FONTS.filter(f => f.latin).map(f => `@font-face { font-family: "${f.family} Latin"; src: url(${QATT_FONT_DIR}${f.latin}.woff2) format("woff2"); }`))
-    .concat(face("QATT Pen", "qatt-pen")).join("\n");   // "QATT Pen" stays as a name of the subset for pages that need only the QATT letters
+    .join("\n");
   document.head.append(style);
 
   const fill = (select, items) => {
