@@ -17,6 +17,7 @@ const QATT_FONTS = [
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters" },
   { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", cjk: true, latin: "qatt-pen-latin", default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
   { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium-letters" },
+  { family: "QATT Celluloid",     label: "QATT Celluloid",               file: "qatt-celluloid-letters", cjk: "https://chunom.org/chunom-assets/fonts/qatt-celluloid.woff2" },   // as QATT Pen: letters here, CJK from the big font
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
@@ -57,7 +58,7 @@ const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.cur
   const style = document.createElement("style");
   const face = (family, file, range = "") => `@font-face { font-family: "${family}"; src: url(${QATT_FONT_DIR}${file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${file}.ttf) format("truetype");${range ? ` unicode-range: ${range};` : ""} }`;
   style.textContent = FONTS.map(f => f.cjk
-    ? face(f.family, f.file, QATT_RANGE) + `\n@font-face { font-family: "${f.family}"; src: url(${QATT_CJK_URL}) format("woff2"); unicode-range: ${QATT_CJK_RANGE}; }`
+    ? face(f.family, f.file, QATT_RANGE) + `\n@font-face { font-family: "${f.family}"; src: url(${f.cjk === true ? QATT_CJK_URL : f.cjk}) format("woff2"); unicode-range: ${QATT_CJK_RANGE}; }`
     : face(f.family, f.file)).concat(FONTS.filter(f => f.latin).map(f => `@font-face { font-family: "${f.family} Latin"; src: url(${QATT_FONT_DIR}${f.latin}.woff2) format("woff2"); }`))
     .join("\n");
   document.head.append(style);
