@@ -69,7 +69,7 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
-        <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
+        <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
       </div>
 `;
 
@@ -319,8 +319,6 @@ const QattWriter = (() => {
     // Tham Thư (stack): the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the rhyme of a pair, so it does not
     //   count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair, but not the upper part of a stack.
     //   It puts the combiner U+F009B between the two letters.
-    // Marked 1: the letter before the cursor (behind its tone marks) is an unmarked form (offset 0 of its seven); it becomes the form with marking stroke 1 (code point + 1).
-    //   That form has no reading in any decoding, so Convert leaves it as it is.
     // Neutral tone: the cursor stands right behind a letter, so the cell has no tone mark yet; the mark of ngang U+F009C is put behind it.
     // The cursor stays behind the same characters.
     const NEUTRAL = 0xF009C, variantBtns = Array.from(document.querySelectorAll('#variants .btn'));
@@ -344,14 +342,12 @@ const QattWriter = (() => {
       const tones = before.slice(j + 1);   // the tone marks between the letter and the cursor stand in the preview too
       if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
         list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(...cellEnding(j - 1), COMBINER, before[j], ...tones), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
-      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 0 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // it stands alone: not the second part of a pair or of a stack
-        list.push({ id: 'marked1', en: 'Marked 1', vi: 'Dạng đánh dấu 1', view: str(before[j] + 1, ...tones), run: () => edit(pos(j), 2, str(before[j] + 1), at) });
       if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
         list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(...cellEnding(j), NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
       return list;
     };
-    // three small buttons with a place of their own each (marked 1, neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
-    const SLOTS = ['marked1', 'neutral', 'tham'];
+    // two small buttons with a place of their own each (neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
+    const SLOTS = ['neutral', 'tham'];
     let shownVariants = null;
     const slotted = () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
     function showVariants() {
