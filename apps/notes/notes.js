@@ -239,7 +239,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   // button with the triangle), else the variants of the QATT characters before the cursor in the middle two. It sits above the keyboard (the editor view is cut at the top of the keyboard) -----
   const keybar = $('keybar'), slotBtns = Array.from(document.querySelectorAll('#keybar .variant')), moreBtn = $('nom-more-btn'), morePanel = $('nom-more');
   let shownKeys = null, shown = [], rest = [], slots = 0;
-  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the two variants stand in the first ones)
+  // the number of slots follows the width of the bar: 5 on a phone, up to 10 on a wide screen (the three variants stand in the first ones)
   function fitSlots() {
     const n = Math.max(5, Math.min(slotBtns.length, Math.floor((keybar.clientWidth - 60) / 62)));
     if (!keybar.clientWidth || n === slots) return;

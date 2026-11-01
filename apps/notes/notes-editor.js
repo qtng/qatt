@@ -6,7 +6,7 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
     Telex is always on; a word becomes QATT characters at a space or any other character that is no letter (and at Enter); the cells stay whole (the cursor never sits
     inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
     onChange        called after a change the field did not report itself (a variant, Convert, a new decoding)
-    ed.variants()   the two slots [neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
+    ed.variants()   the three slots [neutral, tham, plain]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
     ed.candidates() the Chữ Nôm candidates of the Quốc Ngữ word before the cursor (dictionaries of ime.js): [{ glyph, reading, definition, run() }], [] without a word
     ed.nomReady     a promise, resolved when the dictionaries are loaded
     ed.setMode(m)   'telex' (the default: Telex, a word becomes QATT at a space) or 'direct' (no Telex, no conversion; the letters come from ed.typeShape, digits 1–8 are tones)
@@ -174,7 +174,7 @@ const NotesEditor = (() => {
     return { convertBefore, tidy };
   }
 
-  // The variants of the characters before the cursor (Tham Thư, Neutral tone): returns a function that gives the two slots in the order neutral, tham
+  // The variants of the characters before the cursor (Tham Thư, Neutral tone, Unmarked): returns a function that gives the three slots in the order neutral, tham, plain
   // (undefined = not possible now).  o.on() whether QATT is on, o.refresh() called after a variant was applied.
   function makeVariants(typer, o) {
     const utf16 = c => c > 0xFFFF ? 2 : 1;
@@ -197,12 +197,14 @@ const NotesEditor = (() => {
       const tones = before.slice(j + 1);   // the tone marks between the letter and the cursor stand in the preview too
       if (j >= 1 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 !== 1 && LETTER(before[j - 1]) && before[j - 2] !== COMBINER)   // not when the second letter is the form with stroke 1
         list.push({ id: 'tham', en: 'Tham Thư', vi: 'Tham Thư', view: str(...cellEnding(j - 1), COMBINER, before[j], ...tones), run: () => edit(pos(j), 0, str(COMBINER), at + 2) });   // before the second letter
+      if (j >= 0 && LETTER(before[j]) && (before[j] - 0xF0000) % 7 === 1 && before[j - 1] !== JOINER && before[j - 1] !== COMBINER)   // the form with stroke 1 (ông) alone: the unmarked form, e.g. to give the bare consonant a tone
+        list.push({ id: 'plain', en: 'Unmarked', vi: 'Dạng không đánh dấu', view: str(before[j] - 1, ...tones), run: () => edit(pos(j), 2, str(before[j] - 1), at) });
       if (j === before.length - 1 && j >= 0 && LETTER(before[j]))
         list.push({ id: 'neutral', en: 'Neutral tone', vi: 'Thanh ngang', view: str(...cellEnding(j), NEUTRAL), run: () => edit(at, 0, str(NEUTRAL), at + 2) });
       return list;
     };
-    // two small buttons with a place of their own each (neutral tone, Tham Thư): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
-    const SLOTS = ['neutral', 'tham'];
+    // three small buttons with a place of their own each (neutral tone, Tham Thư, unmarked): a middot and off, or a preview of the result (a click does it; the mouse does not take the focus from the field)
+    const SLOTS = ['neutral', 'tham', 'plain'];
     return () => { const list = variants(); return SLOTS.map(id => list.find(v => v.id === id)); };
   }
 
@@ -237,7 +239,7 @@ const NotesEditor = (() => {
   // the cells stay whole. The app draws its own buttons.
   //   opts.parser    the VietnameseParser (decoding)
   //   opts.onChange  called after a change the field did not report itself (a variant, Convert, a new decoding)
-  //   variants()     the two slots [neutral, tham]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
+  //   variants()     the three slots [neutral, tham, plain]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
   //   convert()      Convert as the button of the editor; setDecoding(name) writes every cell again after the decoding `name`
   function editor(field, opts) {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
