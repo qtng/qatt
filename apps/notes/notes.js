@@ -373,7 +373,8 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // ----- font, style, size, alignment, decoding -----
   // the format (font, size, alignment, decoding, bold, italic) belongs to the note: note.format holds what differs from the defaults; user = chosen in the menu (stored in the note), else only shown
-  const FONTS = qattFontsShown();   // js/fonts.js decides which fonts this visitor has, and its default is the default here
+  // js/fonts.js decides which fonts this visitor has, and its default is the default here; Hannom Pen (CJK and Chữ Nôm in the Pen style, the QATT letters of Pen at the weight of its strokes) is a font of the app only, chosen in the menu: the Chữ Nôm fallback fonts stay as they are, and only with this font chosen are Chữ Nôm characters drawn in Pen (its @font-face is in notes.css)
+  const FONTS = [...qattFontsShown(), { family: 'QATT Hannom Pen', label: 'Qatt.org Hannom Pen' }];
   const FORMAT_DEFAULTS = { font: (FONTS.find(f => f.default) || FONTS[0]).family, size: 100, align: 'left', decoding: 'qatt', bold: false, italic: false };
   const formatOf = note => ({ ...FORMAT_DEFAULTS, ...(note && note.format && typeof note.format === 'object' ? note.format : {}) });
   const keepFormat = (key, value) => { const note = state.current; if (!note) return; note.format = { ...(note.format || {}), [key]: value }; schedule(); };
