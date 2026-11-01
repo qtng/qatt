@@ -25,7 +25,7 @@ Use:
 */
 
 class VietnameseParser {
-            static ONSETS = ["ngh", "ng", "nh", "gh", "ph", "th", "ch", "tr", "kh", "gi", "qu", "b", "c", "d", "đ", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "v", "x"];
+            static ONSETS = ["ngh", "ng", "nh", "gh", "ph", "th", "ch", "tr", "kh", "gi", "qu", "b", "c", "d", "đ", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "v", "x", "f", "j", "w", "z"];   // f, j, w, z: variants of ph, tr, v, d / gi (QATT_ONSET_MAP)
             static CODAS = ["ng", "nh", "ch", "m", "n", "p", "t", "c"];
             static VALID_VOWELS = [
                 "ai", "ao", "au", "ay", "ây", "âu", "eo", "êu", "ia", "iê", "iêu", "iu", 
@@ -34,7 +34,7 @@ class VietnameseParser {
                 "a", "ă", "â", "e", "ê", "i", "o", "ô", "ơ", "u", "ư", "y"
             ];
             
-            static QATT_ONSET_MAP = {"p": "b", "đ": "d", "d": "dz", "ngh": "ng", "q": "c", "k": "c", "gh": "g", "gi": "dz"};
+            static QATT_ONSET_MAP = {"p": "b", "đ": "d", "d": "dz", "ngh": "ng", "q": "c", "k": "c", "gh": "g", "gi": "dz", "f": "ph", "j": "tr", "w": "v", "z": "dz"};
             // The 22 base shapes in the order of the rhyme tables (row i of a table = shape SHAPES[i]; z is the shape without strokes, written "_" in codes)
             static SHAPES = "l z ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
 
@@ -141,8 +141,8 @@ class VietnameseParser {
 
             // Hợp Thư: the rhymes the tables lack (ong 2, ung 3, uông 4) are written with one shape, the one of the onset: the shape with the marking
             // stroke of the rhyme, a joiner, the plain shape (code of parse(): .hop, e.g. vong -> "v2,v,,0"; the onset field carries the stroke).
-            // ông is the plain shape alone ("v,,,0": no rhyme)
-            static HOP_THU = { "ong": 2, "ung": 3, "uông": 4, "ông": 0 };
+            // ông is the shape with the marking stroke 1 alone ("v1,,,0": no second letter); the plain shape alone is the onset without a syllable ("v,,,0": the bare consonant)
+            static HOP_THU = { "ong": 2, "ung": 3, "uông": 4, "ông": 1 };
 
             // Rhymes the table lacks but writes like another one (tried after the table, see _lookup)
             static RHYME_SUBSTITUTES = { "anh": "ơnh", "oanh": "uơnh" };
@@ -196,7 +196,12 @@ class VietnameseParser {
             // onset: shape of the onset ("_" none), rhyme: code of the rhyme glyph in the table, e.g. "c5" (no rhyme: ông), tone: 0 to 8 as in
             // the qatt code, hop: "ong", "ung", "uông" for the Hợp Thư writing (the onset shape carries the rhyme). null if there is no reading.
             toQuocNgu({ onset, rhyme, tone = 0, hop }) {
-                let rh = hop || (rhyme === "" ? "ông" : this.glyphs.get(rhyme));
+                if (!hop && rhyme === "") { // a bare consonant: the plain shape alone
+                    const BARE = { dz: "d", d: "đ", z: "", "_": "" };
+                    const on = onset in BARE ? BARE[onset] : onset;
+                    return on || null;
+                }
+                let rh = hop || this.glyphs.get(rhyme);
                 if (rh === undefined) return null;
                 const OPEN = { "iê": "ia", "uyê": "uya", "uô": "ua", "ươ": "ưa" }; // the table writes the open rhymes of the diphthongs with their closed form
                 if (rh in OPEN) rh = OPEN[rh];
@@ -244,7 +249,7 @@ class VietnameseParser {
 
             // Result: .code is the older code of the phoneme glyphs (the former renderer.js, removed), .qatt the code of the decoding (qatt.js, see _qattCode)
             parse(word) {
-                if (/[fjwz]/i.test(word) && !word.toLowerCase().startsWith('gi')) return null;
+                if (/[fjwz]/i.test(word.slice(1)) && !word.toLowerCase().startsWith('gi')) return null;   // f, j, w, z are onsets (ph, tr, v, d / gi), nowhere else
 
                 let normalized = word.normalize('NFD').toLowerCase();
                 let tone = 'ngang';
@@ -270,6 +275,11 @@ class VietnameseParser {
                         temp = temp.substring(o.length);
                         break;
                     }
+                }
+                // an onset alone is a bare consonant: the plain shape without a rhyme (not gi: that is the syllable gi)
+                if (res.onset && res.onset !== "gi" && temp === "" && tone === 'ngang') {
+                    const shape = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset;
+                    return { code: shape + ",,,0", qatt: shape + ",,,0", hop: null, onset: res.onset, glide: "", vowel: "", coda: "", tone: tone };
                 }
                 // what is written after the onset, as in the spelling (the rhyme looked up in the decoding)
                 let spelling = temp.normalize('NFC');
@@ -368,7 +378,7 @@ class VietnameseParser {
                 const mark = VietnameseParser.HOP_THU[rhyme];
                 if (mark === undefined || this.rhymes.has(rhyme)) return null;
                 const shape = VietnameseParser.QATT_ONSET_MAP[res.onset] || res.onset || "_";
-                return mark ? [shape + mark, shape, "", tone].join(",") : [shape, "", "", tone].join(",");
+                return mark > 1 ? [shape + mark, shape, "", tone].join(",") : [shape + mark, "", "", tone].join(",");   // ông: the form with stroke 1 alone
             }
 
             _finalize(res, toneChar, spelling) {

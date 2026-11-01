@@ -301,13 +301,11 @@
       const [, shape, mark] = /^(_|[a-z]+?)([1-6]?),/.exec(el.dataset.code), clicked = +mark;
       body.replaceChildren();
       for (let n = 0; n <= 6; n++) {
-        if (n === 1) continue;   // the first marked form is left out
         const code = shape + (n || '') + ',,,0';
-        // the shape alone is the onset with ông, a marked form is a rhyme after the onset of the group (the shape)
+        // the shape alone is the bare consonant, the form with stroke 1 alone the onset with ông, a marked form (2 to 6) a rhyme after the onset of the group (the shape)
         // these rhymes are shown without a reading
-        const lone = n && parser.toQuocNgu({ onset: '_', rhyme: shape + n });
-        let read = NO_READING.has(lone) ? '' : parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
-        if (!n) read = (read || '').toUpperCase();   // the shape alone: everything that rhymes on ÔNG
+        const lone = n > 1 && parser.toQuocNgu({ onset: '_', rhyme: shape + n });
+        const read = n === 1 ? parser.toQuocNgu({ onset: shape, rhyme: '', hop: 'ông' }) : NO_READING.has(lone) ? '' : parser.toQuocNgu({ onset: shape, rhyme: n ? shape + n : '' });
         const v = Object.assign(document.createElement('div'), { className: 'var' + (n === clicked ? ' hit' : '') + (NO_READING.has(lone) ? ' muted' : '') });
         v.append(Object.assign(document.createElement('span'), { className: 'g', textContent: QattText.syllable(code) || '' }), Object.assign(document.createElement('span'), { className: 'r', textContent: read || '' }));
         body.append(v);

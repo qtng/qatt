@@ -25,23 +25,6 @@ const NotesEditor = (() => {
   const DIRECT_ORDER = [5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
   const MARK_CYCLE = [0, 2, 3, 4, 5, 6, 1], DIRECT_TONES = [null, 160, 157, 158, 159, 161, 162, 163, 156];
 
-  // The form with marking stroke 1 (code point + 1 of an unmarked letter) has no reading of its own; it is written as the reading of the unmarked form, in capitals, and read back the same way:
-  // a word of two letters or more in capitals whose lowercase is one unmarked letter (a syllable that ends in ông, with or without a tone) becomes that letter + 1.
-  const UNMARKED_CELL = /^([\u{F0000}-\u{F0099}])([\u{F009C}-\u{F00A3}]*)$/u;
-  const wordToQatt = (w, parser) => {
-    if (w.length > 1 && w === w.toUpperCase() && w !== w.toLowerCase()) {
-      const m = UNMARKED_CELL.exec(QattText.word(w.toLowerCase(), parser) || '');
-      if (m && (m[1].codePointAt(0) - 0xF0000) % 7 === 0) return String.fromCodePoint(m[1].codePointAt(0) + 1) + m[2];
-    }
-    return QattText.word(w, parser);
-  };
-  // the reading of a cell, "?" if there is none; the form with marking stroke 1 alone (+ tone marks) reads as its unmarked form in capitals
-  const cellReading = (cell, parser) => {
-    const r = QattText.reading(cell, parser), m = r === '?' && UNMARKED_CELL.exec(cell);
-    if (!m || (m[1].codePointAt(0) - 0xF0000) % 7 !== 1) return r;
-    const plain = QattText.reading(String.fromCodePoint(m[1].codePointAt(0) - 1) + m[2], parser);
-    return plain === '?' ? plain : plain.toUpperCase();
-  };
 
   // The behaviour of QATT in a text field (every field of the editor of the app): the word before the cursor becomes QATT characters, the cells stay whole (the cursor does not
   // go inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
@@ -56,7 +39,7 @@ const NotesEditor = (() => {
     // the word that ends right before `end` becomes QATT characters (if there are any)
     const convertBefore = end => {
       const m = WORD_END.exec(typer.value.slice(0, end));
-      const text = m && wordToQatt(m[0], parser);
+      const text = m && QattText.word(m[0], parser);
       if (!text) return false;
       const start = end - m[0].length, caret = typer.selectionStart;
       typer.setRangeText(text, start, end, 'end');
@@ -234,8 +217,8 @@ const NotesEditor = (() => {
     const readAsQuocNgu = text => text.split(COMBINER_CHAR).map(piece => {
       let out = '', afterCell = false;
       for (const [part] of piece.matchAll(QattText.CELL_ANY)) {
-        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? cellReading(part, parser) : '?';
-        const isCell = read !== '?';   // a cell without a reading (the form with marking stroke 1) stays as it is, like any other character
+        const read = /^[\u{F0000}-\u{F0099}]/u.test(part) ? QattText.reading(part, parser) : '?';
+        const isCell = read !== '?';   // a cell without a reading (e.g. a pair with a letter of stroke 1) stays as it is, like any other character
         if (isCell) out += (afterCell ? SEP : '') + read + (part.endsWith(NEUTRAL_CHAR) ? NEUTRAL_CHAR : '');   // the mark of the neutral tone stays behind the word
         else out += (afterCell && /[\p{L}\p{N}]/u.test(part) ? SEP : '') + part;
         afterCell = isCell;
@@ -243,11 +226,11 @@ const NotesEditor = (() => {
       return out;
     }).join(IDS_STACK);
     // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
-    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => wordToQatt(w, parser) ?? w).replaceAll(SEP, '').replaceAll('\u200C', '')   // the spaces that Convert put between the readings (SEP: a space with a zero width non-joiner behind it) go again, and a ZWNJ left alone
+    const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => QattText.word(w, parser) ?? w).replaceAll(SEP, '').replaceAll('\u200C', '')   // the spaces that Convert put between the readings (SEP: a space with a zero width non-joiner behind it) go again, and a ZWNJ left alone
       .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
     // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
-    // (the parts of a stack are cells of their own; a cell without a reading, such as the form with marking stroke 1, does not count: it stays as it is, and the field can still be converted back)
-    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => cellReading(c.cell, parser) !== '?'));
+    // (the parts of a stack are cells of their own; a cell without a reading, such as a pair with a letter of stroke 1, does not count: it stays as it is, and the field can still be converted back)
+    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => QattText.reading(c.cell, parser) !== '?'));
     return readable(text) ? readAsQuocNgu(text) : toQatt(text);
   }
 
