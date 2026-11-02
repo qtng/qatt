@@ -25,10 +25,10 @@ const QattWriter = (() => {
       background: color-mix(in srgb, currentColor 3%, transparent); }   /* a tint of the text colour: light on a light theme, dark on a dark one */
     @media (min-width: 768px) { .writer-bar { flex-direction: row; justify-content: space-between; } .opts { order: 1; } .bar-buttons { order: 2; } }   /* wide: the switches on the left, the buttons on the right */
     .writer-bar .btn { font-size: .85rem; padding: .25rem .8rem; }
-    /* the QATT toolbar above the card, centred: everything about QATT (reading, font, convert); it is there while QATT is on (the space stays, so the card does not move),
+    /* the QATT toolbar above the card, centred: everything about QATT (reading, font, convert); the font is always there, the rest while QATT is on (the space stays, so the card does not move),
        it never wraps, the dropdowns give way */
     .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; margin: 0 0 .6rem; min-height: 1.9rem; font-size: .78rem; }
-    body:not(.qatt-on) .qatt-bar .group { visibility: hidden; }
+    body:not(.qatt-on) .qatt-bar .group > :not(#font) { visibility: hidden; }   /* the font is always there, the rest only while QATT is on */
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
@@ -66,8 +66,8 @@ const QattWriter = (() => {
   // the toolbar stands above the card, centred, so that the card is always the same
   const BAR = `
       <div class="group">
-        <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
+        <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
         <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
       </div>
