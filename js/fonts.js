@@ -17,14 +17,14 @@ const QATT_FONTS = [
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters" },
   { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", cjk: true, hasNom: true, latin: "qatt-pen-latin", default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
   { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium-letters" },
-  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", cjk: "https://chunom.org/chunom-assets/fonts/migoi.woff2", hasNom: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font
+  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", cjk: "https://chunom.org/chunom-assets/fonts/migoi.woff2", cjkExt: "https://chunom.org/chunom-assets/fonts/migoi-ext.woff2", hasNom: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font
   { family: "Celluloid",          label: "Celluloid",                    file: "celluloid-letters", cjk: "https://chunom.org/chunom-assets/fonts/celluloid.woff2", hasNom: true },   // as QATT Pen: letters here, CJK from the big font
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
   { family: "QATT Metro",            label: "Metro",               file: "qatt-metro" },
   { family: "QATT N7K",              label: "N7K",                 file: "qatt-n7k" },
-  { family: "QATT Phong Thao",       label: "Phong Thảo",          file: "qatt-phong-thao" },
+  { family: "QATT Phong Thao",       label: "Phong Thảo",          file: "qatt-phong-thao", cjk: "https://chunom.org/chunom-assets/fonts/qatt-phong-thao.woff2", cjkExt: "https://chunom.org/chunom-assets/fonts/qatt-phong-thao-ext.woff2", hasNom: true },   // as Migoi: letters here, CJK from the big font (the ideographs in its pencil strokes, the rest QATT Pen Light)
   { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Khai Wide",        label: "Khai wide (draft)",   file: "qatt-khai-wide", admin: true },
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
@@ -32,9 +32,11 @@ const QATT_FONTS = [
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
 // QATT Pen (the big font): CJK ideographs, kana, Zhuyin, Hangul compatibility jamo, fullwidth forms and CJK punctuation (the same ranges as chunom-assets/fonts/fonts.css); 9.8 MB, from the Chunom site
-const QATT_CJK_URL = "https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=2";
+const QATT_CJK_URL = "https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=3";
 const QATT_CJK_RANGE = "U+2E80-2FDF, U+2FF0-303F, U+3040-30FF, U+3100-312F, U+3130-318F, U+31A0-31FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FF00-FFEF, U+16FF0-16FF1, U+20000-3FFFF";
 const QATT_RANGE = "U+F0000-F00A3";
+// cjkExt: a big font over 30 MB (unpacked) is refused by the browsers (OTS), so it is two files: cjk without the supplementary ideographs, cjkExt only those
+const QATT_CJK_EXT = "U+20000-3FFFF", QATT_CJK_BMP = QATT_CJK_RANGE.replace(", " + QATT_CJK_EXT, "");
 // latin: a file with the Latin of the font (ASCII, Latin-1, Quốc Ngữ; QATT Pen: 28 KB), as a family of its own "<family> Latin", so that only a page that asks for it shows
 // Latin in that font (the text field of Qatt.org Notes: qattFieldFont); everywhere else Latin stays in the fonts after it
 const qattFieldFont = family => { const f = QATT_FONTS.find(x => x.family === family); return f && f.latin ? `"${family} Latin", "${family}"` : `"${family}"`; };
@@ -59,7 +61,8 @@ const QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.cur
   const style = document.createElement("style");
   const face = (family, file, range = "") => `@font-face { font-family: "${family}"; src: url(${QATT_FONT_DIR}${file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${file}.ttf) format("truetype");${range ? ` unicode-range: ${range};` : ""} }`;
   style.textContent = FONTS.map(f => f.cjk
-    ? face(f.family, f.file, QATT_RANGE) + `\n@font-face { font-family: "${f.family}"; src: url(${f.cjk === true ? QATT_CJK_URL : f.cjk}) format("woff2"); unicode-range: ${QATT_CJK_RANGE}; }`
+    ? face(f.family, f.file, QATT_RANGE) + `\n@font-face { font-family: "${f.family}"; src: url(${f.cjk === true ? QATT_CJK_URL : f.cjk}) format("woff2"); unicode-range: ${f.cjkExt ? QATT_CJK_BMP : QATT_CJK_RANGE}; }`
+      + (f.cjkExt ? `\n@font-face { font-family: "${f.family}"; src: url(${f.cjkExt}) format("woff2"); unicode-range: ${QATT_CJK_EXT}; }` : "")
     : face(f.family, f.file)).concat(FONTS.filter(f => f.latin).map(f => `@font-face { font-family: "${f.family} Latin"; src: url(${QATT_FONT_DIR}${f.latin}.woff2) format("woff2"); }`))
     .join("\n");
   document.head.append(style);
