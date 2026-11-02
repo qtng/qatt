@@ -268,9 +268,9 @@ const QattWriter = (() => {
     $('telex-select').addEventListener('change', () => ime && ime.update(imeOptions()));
 
     // ---------- QATT ----------
-    // the fonts of the list of qatt.org (js/fonts.js defines their @font-face rules; admins also get the fonts marked admin)
+    // the fonts of the list of qatt.org (js/fonts.js defines their @font-face rules; admins also get the fonts marked admin; the Chunom writer shows only the fonts marked hasNom, those that also have Chữ Nôm)
     const admin = () => typeof isAdmin === 'function' && isAdmin();
-    const FONTS = typeof QATT_FONTS !== 'undefined' ? QATT_FONTS.filter(f => !f.admin || admin()).map(f => [f.family, f.label]) : [];
+    const FONTS = typeof QATT_FONTS !== 'undefined' ? QATT_FONTS.filter(f => (!f.admin || admin()) && (mode === 'nom' || f.hasNom)).map(f => [f.family, f.label]) : [];
     const DEFAULT_FONT = 'QATT Pen';
     const decoding = $('decoding'), font = $('font'), size = $('size');
     for (const [name, label] of [['qatt', 'qatt.org'], ['omniglot', 'omniglot']]) decoding.append(new Option(label, name, name === 'qatt', name === 'qatt'));

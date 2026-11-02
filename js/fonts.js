@@ -3,7 +3,7 @@ The QATT fonts (fonts/*.woff2) and the sizes offered by the code table (admin/vi
 
   <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>;
                                                 data-qatt-default="QATT Brush" preselects another font than the default of the list
-                                                (the fonts marked admin: true are only offered to admins, see isAdmin below)
+                                                (the fonts marked admin: true are only offered to admins, see isAdmin below; hasNom: true = the font also has Chữ Nôm characters, only those are offered in the Writer of the Chunom site)
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of the code table (admin/view.html?f=fonts&p=admin/codetable.html))
 
 The script defines the @font-face rules itself and fills these selects when it runs, so load it after them (or with defer).
@@ -15,10 +15,10 @@ const QATT_FONTS = [
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide" },
   { family: "QATT Pen Thin",        label: "QATT Pen thin",                file: "qatt-pen-thin-letters" },
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters" },
-  { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", cjk: true, latin: "qatt-pen-latin", default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
+  { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", cjk: true, hasNom: true, latin: "qatt-pen-latin", default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
   { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium-letters" },
-  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", cjk: "https://chunom.org/chunom-assets/fonts/migoi.woff2" },   // as QATT Pen and Celluloid: letters here, CJK from the big font
-  { family: "QATT Celluloid",     label: "QATT Celluloid",               file: "qatt-celluloid-letters", cjk: "https://chunom.org/chunom-assets/fonts/qatt-celluloid.woff2" },   // as QATT Pen: letters here, CJK from the big font
+  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", cjk: "https://chunom.org/chunom-assets/fonts/migoi.woff2", hasNom: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font
+  { family: "Celluloid",          label: "Celluloid",                    file: "celluloid-letters", cjk: "https://chunom.org/chunom-assets/fonts/celluloid.woff2", hasNom: true },   // as QATT Pen: letters here, CJK from the big font
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
