@@ -32,7 +32,7 @@ const QATT_FONTS = [
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
 // QATT Pen (the big font): CJK ideographs, kana, Zhuyin, Hangul compatibility jamo, fullwidth forms and CJK punctuation (the same ranges as chunom-assets/fonts/fonts.css); 9.8 MB, from the Chunom site
-const QATT_CJK_URL = "https://chunom.org/chunom-assets/fonts/qatt-pen.woff2";
+const QATT_CJK_URL = "https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=2";
 const QATT_CJK_RANGE = "U+2E80-2FDF, U+2FF0-303F, U+3040-30FF, U+3100-312F, U+3130-318F, U+31A0-31FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FF00-FFEF, U+16FF0-16FF1, U+20000-3FFFF";
 const QATT_RANGE = "U+F0000-F00A3";
 // latin: a file with the Latin of the font (ASCII, Latin-1, Quốc Ngữ; QATT Pen: 28 KB), as a family of its own "<family> Latin", so that only a page that asks for it shows
