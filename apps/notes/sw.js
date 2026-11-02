@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v54';
+const CACHE = 'qatt-notes-v55';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json'];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB (?v=2: the first file had wrong vertical metrics; a copy kept for ever needs a new address): cached when a character needs it, not at install
