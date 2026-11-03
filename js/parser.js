@@ -355,6 +355,7 @@ class VietnameseParser {
             _lookup(rhyme, res) {
                 const candidates = [rhyme];
                 if (res.onset == "q" && rhyme.startsWith("u")) candidates.push("o" + rhyme.slice(1));
+                for (const r of candidates.slice()) if (r.startsWith("y")) candidates.push("i" + r.slice(1));   // a y at the start of the rhyme is an i (yêu = iêu, y = i, yên = iên, ya = ia)
                 for (const r of candidates.slice()) { const alt = VietnameseParser.RHYME_SUBSTITUTES[r]; if (alt) candidates.push(alt); }
                 for (const r of candidates.slice()) { const m = /^(.*?)(ia|ya|ua|ưa)$/.exec(r); if (m) candidates.push(m[1] + VietnameseParser.OPEN_DIPHTHONG[m[2]]); } // the open ia, ua, ưa are the rhymes iê, uô, ươ where the table has only those (chia = chiê)
                 for (const r of candidates) if (this.rhymes.has(r)) return this.rhymes.get(r);
