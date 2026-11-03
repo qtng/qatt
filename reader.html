@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/navigation.js"></script>
-  <script src="js/fonts.js"></script>
   <style>
     /* the QATT characters (U+F0000 to U+F00A3) always from QATT Pen Medium, in front of every other font (the same files as js/fonts.js, so they are loaded once) */
     @font-face { font-family: "QATT Cells"; src: url(fonts/qatt-pen-medium-letters.woff2) format("woff2"), url(fonts/qatt-pen-medium-letters.ttf) format("truetype"); unicode-range: U+F0000-F00A3; }
@@ -287,14 +286,14 @@
 
     async function load(g) {
       group = g;
-      slides = (await db.getSlides(g, admin)).slice().sort((a, b) => a.order - b.order);
+      slides = ((await db.getSlides(g, admin)) || []).slice().sort((a, b) => a.order - b.order);
     }
 
     let admin = false;
     async function start() {
       admin = typeof isAdmin === 'function' && isAdmin();
       await db.initQuiet();
-      const all = await db.getSlides('', admin);   // for the groups: the collections that have something to read
+      const all = (await db.getSlides('', admin)) || [];   // for the groups: the collections that have something to read (none when the database does not answer)
       const groups = [...new Set(all.map(s => s.group))].sort();
       groupSelect.replaceChildren(...groups.map(g => new Option(g, g)));
       groupSelect.hidden = groups.length < 2;

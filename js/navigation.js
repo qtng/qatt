@@ -238,6 +238,16 @@ window.Theme = window.Theme || (function() {
     };
 })();
 
+// ---------- the QATT fonts: js/fonts.js on every page of both sites ----------
+// js/fonts.js (next to this file) defines every font of the lists (QATT_FONTS) with its @font-face rules, also "QATT Pen", the CJK font of --font-cjk (css/site.css);
+// written into the <head> right after this script while the page is parsed (as the theme), so it runs before the scripts of the page. A page does not load it itself.
+// It may run twice (admin/view.html writes a private page with its own navigation.js into the same window): its globals are var, it adds its rules again.
+(function() {
+    const src = new URL("fonts.js", document.currentScript ? document.currentScript.src : "https://qatt.org/js/navigation.js").href;
+    if (document.readyState === "loading") document.write('<script src="' + src + '"><\/script>');
+    else { const s = document.createElement("script"); s.src = src; document.head.append(s); }
+})();
+
 (function() {
     const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
