@@ -705,8 +705,8 @@
       ensureName();
     }
     let nameAsked = false;
-    async function ensureName() {   // once per visit: a player without a name is not in the ranking; the dialog can be closed
-      if (nameAsked || !signed || !rankingShown()) return;
+    async function ensureName() {   // once per visit: a signed-in player without a name is asked for one (the ranking shows 'Anonymous' for a player without a name); the dialog can be closed
+      if (nameAsked || !signed) return;
       nameAsked = true;
       try { if (!(await db.getDisplayName())) await QattLogin.chooseName(db, { required: false }); } catch (e) {}
       loadBoard();
@@ -853,6 +853,7 @@
         if (me.pending) schedSync();
       } else { me.shadow += me.score; me.score = 0; me.pending = 0; }   // points of an earlier version of the page
       relearnOnce(); saveMe(); showScore(); showStats(); showLock(); loadBoard();
+      ensureName();
     }
     initAccount();
 
