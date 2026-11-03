@@ -99,7 +99,7 @@ window.Lang = window.Lang || (function() {
 
 // ---------- the menu ----------
 // ---------- Theme: the look of the pages ----------
-// localStorage.theme1 (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, in license.html, or ?theme=<name>) says which file
+// localStorage.theme2 (a key of Theme.list, e.g. "classic", "retro", "popart"; chosen with the palette button next to EN | VI, in license.html, or ?theme=<name>) says which file
 // css/theme-<name>.css of qatt.org is part of the page. Every theme is a complete file of its own, none builds on or overrides another; the pages only have their layout
 // (css/site.css has what all themes share). The file is written into the <head> while the page is parsed (document.write, so that the page is not drawn without it)
 // and data-theme is set on <html> (the themes other than classic need it to be more specific than the pages).
@@ -117,7 +117,7 @@ window.Lang = window.Lang || (function() {
 // Everybody can use the icon; without a choice (or after the period it was made for) the clock decides. Only the choice of a theme (the palette button) is for admins.
 //   Theme.dayNight      { available, canToggle, night (is the night theme shown by the clock or the choice), toggle() }; the event "daynightchange" is sent to the document
 window.Theme = window.Theme || (function() {
-    const KEY = "theme1";   // the key was "theme" before: a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
+    const KEY = "theme2";   // the key was "theme" and then "theme1": a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
         neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"], nocturne: ["Nocturne", "Đêm khuya"] };
@@ -130,7 +130,9 @@ window.Theme = window.Theme || (function() {
     let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "nocturne";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, nocturne on qatt.org
     const DEFAULT_THEME = chosen;
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
-    if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s)) chosen = s; } catch (e) {}
+    // a stored choice counts only for an admin (app_metadata.is_admin in the session of this browser): the theme is no longer chosen by the others, so the old choice of a visitor does not hold
+    const adminHere = () => { try { const u = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user; return !!(u && u.app_metadata && u.app_metadata.is_admin === true); } catch (e) { return false; } };
+    if (choosable) try { const s = localStorage.getItem(KEY); if (valid(s) && adminHere()) chosen = s; } catch (e) {}
     // day and night: night is from NIGHT_START to DAY_START o'clock (the clock of the visitor); then the theme NIGHT_THEME is shown instead of the chosen one
     // the hours of the night: 22:00 to 06:00 is night everywhere; for the main audience (Vietnam: the sun sets between 17:30 and 18:30 all year) it is more exact: 18:00 to 06:00.
     // Rules by time zone of the browser (the name as Intl gives it; Asia/Saigon is the older name of Asia/Ho_Chi_Minh); start must be later than end.
