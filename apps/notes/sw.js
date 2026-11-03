@@ -6,10 +6,10 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v59';
+const CACHE = 'qatt-notes-v60';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
-const LATIN = ['qatt-pen', 'qatt-pen-thin', 'qatt-pen-light', 'qatt-pen-medium', 'migoi', 'celluloid', 'qatt-phong-thao'].map(n => `https://chunom.org/chunom-assets/fonts/web/${n}-latin.woff2`);
+const LATIN = ['qatt-pen', 'qatt-pen-thin', 'qatt-pen-light', 'qatt-pen-medium', 'migoi', 'celluloid', 'phongthao'].map(n => `https://chunom.org/chunom-assets/fonts/web/${n}-latin.woff2`);
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json', ...LATIN];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB (?v=2: the first file had wrong vertical metrics; a copy kept for ever needs a new address): cached when a character needs it, not at install
 // the Nôm fonts never change: cached for ever, the two small ones at install, the big one when first needed
@@ -24,7 +24,7 @@ const PRECACHE = [
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  '/fonts/qatt-pen-letters.woff2', '/fonts/qatt-pen-medium-letters.woff2', '/fonts/celluloid-letters.woff2', '/fonts/migoi-letters.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2', '/fonts/qatt-hat-gao.woff2', '/fonts/qatt-snip.woff2', '/fonts/qatt-manh.woff2', '/fonts/qatt-metro.woff2', '/fonts/qatt-n7k.woff2', '/fonts/qatt-phong-thao.woff2',
+  '/fonts/qatt-pen-letters.woff2', '/fonts/qatt-pen-medium-letters.woff2', '/fonts/celluloid-letters.woff2', '/fonts/migoi-letters.woff2', '/fonts/qatt-serif.woff2', '/fonts/qatt-gothic.woff2', '/fonts/qatt-gothic-wide.woff2', '/fonts/qatt-hat-gao.woff2', '/fonts/qatt-snip.woff2', '/fonts/qatt-manh.woff2', '/fonts/qatt-metro.woff2', '/fonts/qatt-n7k.woff2', '/fonts/phongthao-letters.woff2',
   '/decodings.json',
 ];
 
