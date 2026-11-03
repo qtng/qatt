@@ -8,21 +8,18 @@
   <meta name="description" content="The eight pages of the source of Quốc Âm Tân Tự (國音新字), transcribed sentence by sentence with an English translation.">
   <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/site.css">
-  <link rel="stylesheet" href="https://chunom.org/chunom-assets/fonts/fonts.css">
   <script src="/js/navigation.js"></script>
   <style>
-    @font-face { font-family: "QATT Pen Medium"; src: url(/fonts/qatt-pen-medium-letters.woff2) format("woff2"), url(/fonts/qatt-pen-medium-letters.ttf) format("truetype"); }
-    :root { --nom-font: 'Nom Na Tong Supplement', 'NomKhai-Supplement', 'Han-Nom Gothic Supplement', serif; }
     .hero { padding: 2.5rem 0 1.5rem; text-align: center; }
-    .hero h1 { font-family: Georgia, "Times New Roman", var(--nom-font); font-weight: 400; font-size: clamp(2rem, 6vw, 3.2rem); }
-    .hero .han { font-family: var(--nom-font); font-size: 1.4rem; letter-spacing: .4em; padding-left: .4em; }
+    .hero h1 { font-family: Georgia, "Times New Roman", var(--font-cjk); font-weight: 400; font-size: clamp(2rem, 6vw, 3.2rem); }
+    .hero .han { font-family: var(--font-cjk); font-size: 1.4rem; letter-spacing: .4em; padding-left: .4em; }
     .hero .lead { max-width: 44rem; margin: .6rem auto 0; font-size: 1rem; }
     .page-card { padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
     .page-card h2 { font-size: 1.5rem; margin: 0 0 1rem; }
     .blk { margin-bottom: 1.1rem; }
-    .orig { font-family: var(--bs-font-sans-serif), var(--nom-font); font-size: 1.4rem; line-height: 2.3; margin: 0; overflow-wrap: anywhere; }
+    .orig { font-family: var(--bs-font-sans-serif), var(--font-cjk); font-size: 1.4rem; line-height: 2.3; margin: 0; overflow-wrap: anywhere; }
     h3.orig { font-size: 1.9rem; font-weight: 400; }
-    .orig rt { font-size: .55em; line-height: 1; font-family: var(--bs-font-sans-serif), var(--nom-font); opacity: .8; }
+    .orig rt { font-size: .55em; line-height: 1; font-family: var(--bs-font-sans-serif), var(--font-cjk); opacity: .8; }
     .qt { font-family: "QATT Pen Medium"; }
     .orig ruby { margin: 0 .08em; }
     .taboo { background: color-mix(in srgb, #2fd32f 30%, transparent); border-radius: .2em; padding: 0 .1em; }
@@ -33,9 +30,9 @@
     .fn .qt { font-size: 1.3em; }
     .rc { color: #d0453a; }
     .em { text-decoration: underline dashed #d0453a; text-decoration-thickness: .08em; text-underline-offset: .3em; text-decoration-skip-ink: none; }
-    .en { font-family: var(--bs-font-sans-serif), var(--nom-font); margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid color-mix(in srgb, currentColor 25%, transparent); }
-    .vi { opacity: .9;  font-family: var(--bs-font-sans-serif), var(--nom-font); font-style: italic; margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid color-mix(in srgb, #c9a227 55%, transparent); }
-    .pa { font-family: var(--bs-font-sans-serif), var(--nom-font); margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid #c0392b; }
+    .en { font-family: var(--bs-font-sans-serif), var(--font-cjk); margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid color-mix(in srgb, currentColor 25%, transparent); }
+    .vi { opacity: .9;  font-family: var(--bs-font-sans-serif), var(--font-cjk); font-style: italic; margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid color-mix(in srgb, #c9a227 55%, transparent); }
+    .pa { font-family: var(--bs-font-sans-serif), var(--font-cjk); margin: .15rem 0 0; padding-left: .8rem; border-left: 3px solid #c0392b; }
     .pa + .vi { margin-top: .3rem; }
     .vi + .en { margin-top: .3rem; }
     .tr-h { font-style: italic; }
