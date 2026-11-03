@@ -11,7 +11,7 @@ and not open source.
 
 What is in the fonts
   - The QATT letters (U+F0000-U+F00A3) are designed and drawn by qatt.org.
-  - All other characters (Han characters and Chu Nom, kana, Zhuyin, Hangul,
+  - All other characters (Han characters and Chu Nom,
     Latin with Quoc Ngu, punctuation) are drawn by qatt.org with its own
     stroke designs on the stroke skeletons of GlyphWiki
     (https://glyphwiki.org/), used under the terms of GlyphWiki. This licence
