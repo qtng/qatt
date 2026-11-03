@@ -25,7 +25,12 @@ You may
     (QATT, Chu Nom, Han characters, Quoc Ngu and the others), for yourself
     and for others;
   - embed them, as subsets, in documents such as PDF files so that the text
-    shows as written.
+    shows as written;
+  - use them on web pages by loading them from qatt.org or chunom.org as
+    described at https://chunom.org/chunom/fonts/ (section "For websites"),
+    so that the text of the pages shows in them (loading from there is not
+    hosting; copying the font files to your own server still needs written
+    permission).
 Text and images that you set with the fonts belong to you.
 
 You may not, without written permission of qatt.org,
