@@ -1,13 +1,29 @@
-QATT fonts
+Fonts of qatt.org
 Copyright (c) 2026 qatt.org. All rights reserved.
 
-This licence covers the font files in this folder (qatt-*.ttf, qatt-*.woff2) and the
-glyph data they are built from (kage.json, glyphs.json, brush.json). They are not
-free software and not open source.
+This licence covers
+  - the QATT fonts of qatt.org (the files in this folder, .ttf and .woff2);
+  - the CJK fonts of chunom.org: QATT Pen (Thin, Light, Regular, Medium),
+    Migoi, Celluloid and Phong Thao (the .ttf files offered for download and
+    the web files cut from them);
+and the glyph data and tools they are built from. They are not free software
+and not open source.
+
+What is in the fonts
+  - The QATT letters (U+F0000-U+F00A3) are designed and drawn by qatt.org.
+  - All other characters (Han characters and Chu Nom, kana, Zhuyin, Hangul,
+    Latin with Quoc Ngu, punctuation) are drawn by qatt.org with its own
+    stroke designs on the stroke skeletons of GlyphWiki
+    (https://glyphwiki.org/), used under the terms of GlyphWiki. This licence
+    covers the work of qatt.org; it does not restrict the GlyphWiki data
+    itself, which stays available under its own terms.
 
 You may
-  - use the fonts to read, write and print text in the QATT script
-    (Quoc Am Tan Tu), for yourself and for others;
+  - download the fonts from qatt.org and chunom.org and install them on your
+    own devices;
+  - use them to read, write and print text in the scripts they contain
+    (QATT, Chu Nom, Han characters, Quoc Ngu and the others), for yourself
+    and for others;
   - embed them, as subsets, in documents such as PDF files so that the text
     shows as written.
 Text and images that you set with the fonts belong to you.
