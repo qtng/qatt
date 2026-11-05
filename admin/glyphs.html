@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glyph Editor</title>
+    <title>KAGE Glyph Editor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Verhindert Text-Markierung beim schnellen Klicken auf die Steuerungs-Buttons */
@@ -13,12 +14,13 @@
 <body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8 min-h-screen flex flex-col">
 
     <!-- Header -->
-    <div class="mb-6 pb-4 border-b border-slate-200 flex justify-between items-center">
+    <div class="mb-6 pb-4 border-b border-slate-200 flex justify-between items-center relative">
         <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">KAGE Editor</h1>
             <p class="text-sm text-slate-500">200x200 Grid · Canvas skalierbar</p>
         </div>
-        <div id="toastMsg" class="opacity-0 transition-opacity duration-300 bg-slate-800 text-white px-4 py-2 rounded shadow-md text-sm font-medium">
+        <!-- Toast ist jetzt fixiert oben rechts und schwebt über allem -->
+        <div id="toastMsg" class="fixed top-5 right-5 z-50 opacity-0 transition-opacity duration-300 bg-slate-900 text-white px-5 py-3 rounded-lg shadow-xl text-sm font-bold pointer-events-none">
             Aktion erfolgreich!
         </div>
     </div>
@@ -276,11 +278,17 @@
                     });
                 });
 
-                // Glyphe Speichern
+                // Speichern Panel ...
                 document.getElementById('saveGlyphBtn').addEventListener('click', () => this.saveCurrentGlyph());
 
                 // GlyphWiki Import
-                document.getElementById('importGwBtn').addEventListener('click', () => this.importFromGlyphWiki());
+                const importBtn = document.getElementById('importGwBtn');
+                const importInput = document.getElementById('gwInput');
+                
+                importBtn.addEventListener('click', () => this.importFromGlyphWiki());
+                importInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.importFromGlyphWiki();
+                });
 
                 // Linienbreite Slider
                 const widthSlider = document.getElementById('lineWidthSlider');
@@ -488,30 +496,70 @@
             }
 
             async importFromGlyphWiki() {
-                const id = document.getElementById('gwInput').value.trim();
+                const input = document.getElementById('gwInput');
+                const btn = document.getElementById('importGwBtn');
+                const id = input.value.trim();
+                
                 if (!id) {
                     this.showToast('Bitte eine GlyphWiki ID eingeben!');
                     return;
                 }
                 
                 try {
-                    // AllOrigins Proxy um CORS-Probleme zu umgehen (GlyphWiki erlaubt direkten Fetch nicht immer)
-                    const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://glyphwiki.org/glyph/' + id + '.kage')}`;
+                    // Button Feedback
+                    btn.disabled = true;
+                    btn.textContent = 'Lädt...';
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    
+                    this.showToast('Lade Daten von GlyphWiki...');
+                    console.log(`[Import] Frage GlyphWiki ab für ID: ${id}`);
+                    
+                    // AllOrigins Proxy um CORS-Probleme zu umgehen
+                    const targetUrl = `https://glyphwiki.org/glyph/${id}.kage`;
+                    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+                    
+                    console.log(`[Import] Fetch URL: ${url}`);
                     const response = await fetch(url);
-                    if (!response.ok) throw new Error('Netzwerkfehler');
+                    
+                    if (!response.ok) {
+                        throw new Error(`Netzwerkfehler: HTTP ${response.status}`);
+                    }
                     
                     const data = await response.json();
-                    if (!data.contents) throw new Error('Glyphe nicht gefunden oder leer.');
+                    
+                    if (data.status && data.status.http_code === 404) {
+                         throw new Error(`Glyphe '${id}' nicht gefunden.`);
+                    }
+                    
+                    if (!data.contents) {
+                        throw new Error('Leere Antwort vom Proxy erhalten.');
+                    }
+                    
+                    if (data.contents.trim().toLowerCase().startsWith('<!doctype') || data.contents.includes('<html')) {
+                        throw new Error('Ungültige Antwort (HTML erhalten). ID falsch?');
+                    }
                     
                     this.parseKageData(data.contents);
-                    this.showToast(`Glyphe '${id}' erfolgreich importiert!`);
                     
-                    // Code ins Speicher-Feld übernehmen, falls man sie gleich ablegen will
+                    // Code ins Speicher-Feld übernehmen
                     document.getElementById('saveCodeInput').value = id;
                     
+                    // UI wiederherstellen
+                    btn.disabled = false;
+                    btn.textContent = 'Importieren';
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    this.showToast(`Glyphe '${id}' erfolgreich importiert!`);
+                    
                 } catch (error) {
-                    console.error(error);
-                    this.showToast('Fehler beim Importieren von GlyphWiki.');
+                    console.error("[Import] Fehler:", error);
+                    
+                    // UI wiederherstellen bei Fehler
+                    btn.disabled = false;
+                    btn.textContent = 'Importieren';
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    this.showToast(`Import fehlgeschlagen: ${error.message}`);
                 }
             }
 
@@ -520,6 +568,8 @@
                 const lines = rawData.split(/[\n\r\$]+/);
                 const newStrokes = [];
                 
+                console.log(`[Parse] Untersuche ${lines.length} KAGE-Einträge...`);
+                
                 lines.forEach(line => {
                     const parts = line.split(/[:,]/);
                     if (parts.length < 7) return; // Zu kurz für gültige KAGE-Daten
@@ -527,6 +577,7 @@
                     const type = parseInt(parts[0]);
                     
                     if (type === 99) {
+                        console.log("[Parse] Referenz (Typ 99) übersprungen:", line);
                         return; // Referenzen (99) sollen übersprungen werden
                     }
                     
@@ -556,6 +607,7 @@
                 });
                 
                 if (newStrokes.length > 0) {
+                    console.log(`[Parse] Erfolgreich ${newStrokes.length} Linien/Kurven extrahiert.`);
                     this.strokes = newStrokes;
                     this.currentPoints = [];
                     this.selectedStrokeIdx = null;
@@ -565,7 +617,7 @@
                     this.updateEditInfo();
                     this.render();
                 } else {
-                    this.showToast('Keine unterstützten Linien (Typ 1/2) in dieser Glyphe gefunden.');
+                    throw new Error('Keine unterstützten Linien (Typ 1 oder 2) in dieser Glyphe gefunden.');
                 }
             }
 
@@ -766,9 +818,15 @@
                 const toast = document.getElementById('toastMsg');
                 if (msg) toast.innerText = msg;
                 toast.classList.remove('opacity-0');
-                setTimeout(() => {
+                
+                // Alten Timeout löschen, falls ein neuer Toast direkt hinterhergeschossen wird
+                if (this.toastTimeout) {
+                    clearTimeout(this.toastTimeout);
+                }
+                
+                this.toastTimeout = setTimeout(() => {
                     toast.classList.add('opacity-0');
-                }, 3000);
+                }, 3500);
             }
         }
 
