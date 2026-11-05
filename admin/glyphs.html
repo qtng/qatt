@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glyph Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Verhindert Text-Markierung beim schnellen Klicken auf die Steuerungs-Buttons */
+        .no-select { user-select: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <div class="mb-6 pb-4 border-b border-slate-200 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">KAGE Editor</h1>
+            <p class="text-sm text-slate-500">200x200 Grid · Canvas skalierbar</p>
+        </div>
+        <div id="toastMsg" class="opacity-0 transition-opacity duration-300 bg-slate-800 text-white px-4 py-2 rounded shadow-md text-sm font-medium">
+            Aktion erfolgreich!
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex flex-col lg:flex-row gap-8 flex-grow">
+        
+        <!-- Linke Spalte: Werkzeuge & Canvas -->
+        <div class="flex flex-col gap-4">
+            
+            <!-- Toolbar -->
+            <div class="flex flex-col gap-3 bg-white p-3 rounded-lg shadow-sm border border-slate-200 w-fit min-w-[384px]">
+                
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span class="text-sm font-bold text-slate-500 uppercase tracking-wider">Hinzufügen</span>
+                    <button id="clearBtn" class="px-3 py-1 rounded text-red-600 hover:bg-red-50 transition-colors font-medium text-sm">
+                        Leeren
+                    </button>
+                </div>
+
+                <!-- Zeichen-Werkzeuge (One-Shot Buttons) -->
+                <div id="drawTools" class="flex flex-wrap items-center gap-2">
+                    <button class="tool-add-btn px-4 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-sm" data-tool="1">
+                        + Linie (2 Pkt)
+                    </button>
+                    <button class="tool-add-btn px-4 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-sm" data-tool="2">
+                        + Kurve (3 Pkt)
+                    </button>
+                    <button class="tool-add-btn px-4 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-sm" data-tool="99">
+                        + Box (Ref)
+                    </button>
+                </div>
+
+                <!-- Status Anzeige für Add-Modus -->
+                <div id="addStatusMsg" class="hidden text-sm text-indigo-600 font-medium bg-indigo-50 p-2 rounded border border-indigo-100">
+                    Klicke in das Raster, um Punkte zu setzen...
+                </div>
+
+                <!-- Liniendicke Slider -->
+                <div class="mt-2 border-t border-slate-100 pt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="lineWidthSlider" class="text-sm font-bold text-slate-500 uppercase tracking-wider">Linienbreite</label>
+                        <span id="lineWidthVal" class="text-xs font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">4px</span>
+                    </div>
+                    <input type="range" id="lineWidthSlider" min="1" max="20" value="4" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                </div>
+
+                <div class="mt-2 border-t border-slate-100 pt-2">
+                    <span class="text-sm font-bold text-slate-500 uppercase tracking-wider block mb-2">Auswahl Bearbeiten</span>
+                    <!-- Bearbeiten-Werkzeuge (Fadenkreuz) -->
+                    <div id="editTools" class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
+                            <span id="editInfo" class="text-sm font-medium text-slate-700">Nichts ausgewählt</span>
+                            <div class="grid grid-cols-3 gap-1 w-24 no-select">
+                                <div></div>
+                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="0" data-dy="-1">▲</button>
+                                <div></div>
+                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="-1" data-dy="0">◀</button>
+                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="0" data-dy="1">▼</button>
+                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="1" data-dy="0">▶</button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500">Klicke Elemente an, um sie zu markieren und zu verschieben.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Wrapper -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 w-fit">
+                <canvas id="kageCanvas" width="200" height="200" 
+                        class="border border-slate-300 bg-white cursor-crosshair shadow-inner" 
+                        style="width: 400px; height: 400px;"></canvas>
+            </div>
+
+            <!-- Anleitung -->
+            <div class="text-sm text-slate-500 bg-blue-50 p-4 rounded-lg">
+                <h4 class="font-bold text-blue-800 mb-1">Anleitung:</h4>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Hinzufügen:</strong> Klicke einen blauen Button, um ein Element zu zeichnen. Danach wechselt das Werkzeug automatisch wieder zur Auswahl.</li>
+                    <li><strong>Bearbeiten:</strong> Klicke Punkte oder Linien auf dem Raster an und verschiebe sie mit den Pfeil-Buttons.</li>
+                    <li><strong>Speichern & Laden:</strong> Speichere Glyphen rechts ab. Klicke auf eine gespeicherte Glyphe unten rechts, um sie wieder zu laden und anzupassen.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Rechte Spalte: KAGE Daten & Speichern -->
+        <div class="flex flex-col flex-grow gap-4">
+            
+            <!-- GlyphWiki Import Panel -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex gap-3 items-end">
+                <div class="flex-grow">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wide">Aus GlyphWiki importieren</label>
+                    <input type="text" id="gwInput" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="ID (z.B. u5b57 oder u20000-v)">
+                </div>
+                <button id="importGwBtn" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-sm">
+                    Importieren
+                </button>
+            </div>
+
+            <!-- Speichern Panel -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex gap-3 items-end">
+                <div class="flex-grow">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wide">Als Glyphe Speichern</label>
+                    <input type="text" id="saveCodeInput" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm" placeholder="Code (z.B. U+1234 oder part_a)">
+                </div>
+                <button id="saveGlyphBtn" class="px-4 py-2 bg-emerald-600 text-white font-medium rounded-md hover:bg-emerald-700 transition-colors">
+                    Speichern
+                </button>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="flex flex-col bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden" style="min-height: 250px;">
+                <div class="bg-slate-100 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700">Generierte KAGE Daten</h3>
+                    <button id="copyBtn" class="px-3 py-1 bg-white border border-slate-300 rounded hover:bg-slate-50 text-sm font-medium transition-colors shadow-sm">
+                        Kopieren
+                    </button>
+                </div>
+                <textarea id="kageOutput" class="w-full flex-grow p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" readonly placeholder="Zeichne Formen, um hier KAGE-Daten zu generieren..."></textarea>
+            </div>
+
+            <!-- Gespeicherte Glyphen Panel -->
+            <div class="flex flex-col flex-grow bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+                <h3 class="font-bold text-slate-700 mb-3 border-b border-slate-100 pb-2">Gespeicherte Glyphen</h3>
+                <div id="savedGlyphsContainer" class="flex flex-wrap gap-4 items-start">
+                    <p class="text-sm text-slate-400 italic" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal für Komponenten-Namen -->
+    <div id="nameModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+            <div class="p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-2">Komponente hinzufügen</h3>
+                <p class="text-sm text-slate-500 mb-4">Bitte gib den Code der referenzierten Glyphe ein oder wähle aus gespeicherten Codes.</p>
+                <input type="text" id="compNameInput" list="savedGlyphList" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm" placeholder="Glyphen Code" autocomplete="off">
+                <datalist id="savedGlyphList"></datalist>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+                <button id="cancelNameBtn" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-md transition-colors">Abbrechen</button>
+                <button id="submitNameBtn" class="px-4 py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-md transition-colors shadow-sm">Bestätigen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class KageEditor {
+            constructor() {
+                this.canvas = document.getElementById('kageCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.output = document.getElementById('kageOutput');
+                
+                this.updateScale();
+                window.addEventListener('resize', () => this.updateScale());
+                
+                this.strokes = [];
+                this.currentPoints = [];
+                this.activeTool = null; 
+                this.isPrompting = false;
+                
+                // Status-Variablen für das Bearbeiten
+                this.appMode = 'edit'; // 'add' | 'edit'
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null; // null bedeutet: ganze Linie ausgewählt
+                this.strokeWidth = 4; // Aktuelle Linienbreite
+                
+                // Vorgegebene Glyphen beim Start laden
+                this.savedGlyphs = {
+                    "D": [
+                        { type: 1, points: [{x: 17, y: 58}, {x: 79, y: 61}], refName: "" },
+                        { type: 2, points: [{x: 53, y: 18}, {x: 61, y: 127}, {x: 25, y: 180}], refName: "" },
+                        { type: 2, points: [{x: 29, y: 105}, {x: 90, y: 169}, {x: 183, y: 176}], refName: "" }
+                    ],
+                    "x": [
+                        { type: 1, points: [{x: 55, y: 67}, {x: 157, y: 68}], refName: "" },
+                        { type: 1, points: [{x: 19, y: 127}, {x: 181, y: 126}], refName: "" },
+                        { type: 1, points: [{x: 99, y: 17}, {x: 103, y: 185}], refName: "" }
+                    ],
+                    "Dx": [
+                        { type: 99, points: [{x: 3, y: 9}, {x: 194, y: 192}], refName: "D" },
+                        { type: 99, points: [{x: 81, y: 20}, {x: 186, y: 154}], refName: "x" }
+                    ],
+                    "L": [
+                        { type: 1, points: [{x: 99, y: 15}, {x: 102, y: 184}], refName: "" },
+                        { type: 1, points: [{x: 65, y: 45}, {x: 30, y: 100}], refName: "" },
+                        { type: 1, points: [{x: 129, y: 48}, {x: 161, y: 108}], refName: "" }
+                    ],
+                    "Lx": [
+                        { type: 99, points: [{x: 0, y: 0}, {x: 77, y: 200}], refName: "L" },
+                        { type: 99, points: [{x: 77, y: 0}, {x: 200, y: 200}], refName: "x" }
+                    ]
+                };
+
+                // Modal Elements
+                this.modal = document.getElementById('nameModal');
+                this.nameInput = document.getElementById('compNameInput');
+                
+                this.initEvents();
+                this.updateDatalist();
+                this.renderSavedGlyphPreviews();
+                this.render();
+            }
+
+            updateScale() {
+                const rect = this.canvas.getBoundingClientRect();
+                // KAGE intern ist IMMER 200x200
+                this.scaleX = rect.width / this.canvas.width;
+                this.scaleY = rect.height / this.canvas.height;
+            }
+
+            initEvents() {
+                // One-Shot Hinzufügen Buttons
+                document.querySelectorAll('.tool-add-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.appMode = 'add';
+                        this.activeTool = parseInt(e.target.dataset.tool);
+                        this.currentPoints = [];
+                        this.selectedStrokeIdx = null;
+                        this.selectedPointIdx = null;
+                        
+                        document.getElementById('addStatusMsg').classList.remove('hidden');
+                        this.updateEditInfo();
+                        this.render();
+                    });
+                });
+
+                // Canvas Klick (Zeichnen & Auswählen)
+                this.canvas.addEventListener('mousedown', (e) => this.handleCanvasClick(e));
+
+                // Aktionen
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.strokes = [];
+                    this.currentPoints = [];
+                    this.selectedStrokeIdx = null;
+                    this.selectedPointIdx = null;
+                    this.updateOutput();
+                    this.updateEditInfo();
+                    this.render();
+                });
+
+                document.getElementById('copyBtn').addEventListener('click', () => {
+                    this.output.select();
+                    document.execCommand('copy');
+                    this.showToast('Daten in die Zwischenablage kopiert!');
+                });
+
+                // D-Pad Steuerung (Pfeiltasten)
+                document.querySelectorAll('.dpad-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const dx = parseInt(e.target.dataset.dx);
+                        const dy = parseInt(e.target.dataset.dy);
+                        this.moveSelection(dx, dy);
+                    });
+                });
+
+                // Glyphe Speichern
+                document.getElementById('saveGlyphBtn').addEventListener('click', () => this.saveCurrentGlyph());
+
+                // GlyphWiki Import
+                document.getElementById('importGwBtn').addEventListener('click', () => this.importFromGlyphWiki());
+
+                // Linienbreite Slider
+                const widthSlider = document.getElementById('lineWidthSlider');
+                const widthVal = document.getElementById('lineWidthVal');
+                widthSlider.addEventListener('input', (e) => {
+                    this.strokeWidth = parseInt(e.target.value);
+                    widthVal.textContent = this.strokeWidth + 'px';
+                    this.render();
+                    this.renderSavedGlyphPreviews(); // Auch Vorschaubilder aktualisieren
+                });
+
+                // Modal Events
+                document.getElementById('submitNameBtn').addEventListener('click', () => this.handleModalSubmit());
+                document.getElementById('cancelNameBtn').addEventListener('click', () => {
+                    this.modal.classList.add('hidden');
+                    this.isPrompting = false;
+                    this.currentPoints = [];
+                    this.render();
+                });
+                
+                this.nameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleModalSubmit();
+                });
+            }
+
+            handleCanvasClick(e) {
+                if (this.isPrompting) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = Math.round((e.clientX - rect.left) / this.scaleX);
+                const y = Math.round((e.clientY - rect.top) / this.scaleY);
+
+                if (x < 0 || x > 200 || y < 0 || y > 200) return;
+
+                // Bearbeiten-Modus: Elemente auswählen
+                if (this.appMode === 'edit') {
+                    this.handleEditClick(x, y);
+                    return;
+                }
+
+                // Hinzufügen-Modus: Punkte setzen
+                if (this.appMode === 'add') {
+                    this.currentPoints.push({ x, y });
+
+                    let pointsNeeded = this.activeTool === 1 ? 2 : (this.activeTool === 2 ? 3 : 2);
+                    
+                    if (this.currentPoints.length === pointsNeeded) {
+                        if (this.activeTool === 99) {
+                            this.isPrompting = true;
+                            this.nameInput.value = '';
+                            this.modal.classList.remove('hidden');
+                            setTimeout(() => this.nameInput.focus(), 100);
+                        } else {
+                            this.addStroke(this.activeTool, [...this.currentPoints]);
+                            this.resetToAddOrEdit();
+                        }
+                    }
+                    
+                    this.render();
+                }
+            }
+
+            resetToAddOrEdit() {
+                this.appMode = 'edit';
+                this.activeTool = null;
+                this.currentPoints = [];
+                document.getElementById('addStatusMsg').classList.add('hidden');
+            }
+
+            handleModalSubmit() {
+                const refName = this.nameInput.value.trim();
+                if (refName) {
+                    this.addStroke(this.activeTool, [...this.currentPoints], refName);
+                }
+                this.modal.classList.add('hidden');
+                this.isPrompting = false;
+                this.resetToAddOrEdit();
+                this.render();
+            }
+
+            // --- BEARBEITUNGS-METHODEN ---
+
+            handleEditClick(x, y) {
+                const hitT = 8; // Toleranz-Radius für das Anklicken
+                let found = null;
+                
+                // 1. Zuerst Punkte prüfen (haben Priorität)
+                for (let i = this.strokes.length - 1; i >= 0 && !found; i--) {
+                    const stroke = this.strokes[i];
+                    for (let j = 0; j < stroke.points.length; j++) {
+                        const p = stroke.points[j];
+                        if (Math.hypot(p.x - x, p.y - y) <= hitT) {
+                            found = { s: i, p: j };
+                            break;
+                        }
+                    }
+                }
+
+                // 2. Dann Linien/Kurven/Boxen prüfen
+                if (!found) {
+                    for (let i = this.strokes.length - 1; i >= 0 && !found; i--) {
+                        const stroke = this.strokes[i];
+                        if (stroke.type === 1) { // Gerade
+                            if (this.distToSegment(x, y, stroke.points[0], stroke.points[1]) <= hitT) found = { s: i, p: null };
+                        } else if (stroke.type === 2) { // Kurve (Punkte abtasten)
+                            for(let t = 0; t <= 1; t += 0.1) {
+                                const px = (1-t)*(1-t)*stroke.points[0].x + 2*(1-t)*t*stroke.points[1].x + t*t*stroke.points[2].x;
+                                const py = (1-t)*(1-t)*stroke.points[0].y + 2*(1-t)*t*stroke.points[1].y + t*t*stroke.points[2].y;
+                                if (Math.hypot(px - x, py - y) <= hitT) { found = { s: i, p: null }; break; }
+                            }
+                        } else if (stroke.type === 99) { // Box
+                            const x1 = Math.min(stroke.points[0].x, stroke.points[1].x);
+                            const x2 = Math.max(stroke.points[0].x, stroke.points[1].x);
+                            const y1 = Math.min(stroke.points[0].y, stroke.points[1].y);
+                            const y2 = Math.max(stroke.points[0].y, stroke.points[1].y);
+                            // Prüft ob der Klick innerhalb der Bounding-Box war
+                            if (x >= x1 && x <= x2 && y >= y1 && y <= y2) found = { s: i, p: null };
+                        }
+                    }
+                }
+
+                if (found) {
+                    this.selectedStrokeIdx = found.s;
+                    this.selectedPointIdx = found.p;
+                } else {
+                    this.selectedStrokeIdx = null;
+                    this.selectedPointIdx = null;
+                }
+                
+                this.updateEditInfo();
+                this.render();
+            }
+
+            distToSegment(px, py, p1, p2) {
+                const l2 = (p2.x - p1.x)**2 + (p2.y - p1.y)**2;
+                if (l2 === 0) return Math.hypot(px - p1.x, py - p1.y);
+                let t = ((px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y)) / l2;
+                t = Math.max(0, Math.min(1, t));
+                return Math.hypot(px - (p1.x + t * (p2.x - p1.x)), py - (p1.y + t * (p2.y - p1.y)));
+            }
+
+            moveSelection(dx, dy) {
+                if (this.selectedStrokeIdx === null) return;
+                const stroke = this.strokes[this.selectedStrokeIdx];
+                
+                if (this.selectedPointIdx !== null) {
+                    // Nur den ausgewählten Punkt verschieben
+                    stroke.points[this.selectedPointIdx].x += dx;
+                    stroke.points[this.selectedPointIdx].y += dy;
+                } else {
+                    // Ganze Form verschieben
+                    stroke.points.forEach(p => { p.x += dx; p.y += dy; });
+                }
+                
+                this.updateEditInfo();
+                this.updateOutput();
+                this.render();
+            }
+
+            updateEditInfo() {
+                const info = document.getElementById('editInfo');
+                if (this.selectedStrokeIdx === null) {
+                    info.textContent = 'Nichts ausgewählt';
+                    return;
+                }
+                const stroke = this.strokes[this.selectedStrokeIdx];
+                if (this.selectedPointIdx !== null) {
+                    const p = stroke.points[this.selectedPointIdx];
+                    info.innerHTML = `Punkt markiert: <span class="font-mono bg-white px-1 rounded border shadow-sm">${p.x}, ${p.y}</span>`;
+                } else {
+                    const typeNames = {1: 'Gerade', 2: 'Kurve', 99: 'Box'};
+                    info.textContent = `Ganze ${typeNames[stroke.type]} markiert`;
+                }
+            }
+
+            updateDatalist() {
+                const dl = document.getElementById('savedGlyphList');
+                dl.innerHTML = '';
+                Object.keys(this.savedGlyphs).forEach(k => {
+                    const opt = document.createElement('option');
+                    opt.value = k;
+                    dl.appendChild(opt);
+                });
+            }
+
+            saveCurrentGlyph() {
+                const code = document.getElementById('saveCodeInput').value.trim();
+                if (!code) {
+                    this.showToast('Bitte einen Code eingeben!');
+                    return;
+                }
+                if (this.strokes.length === 0) {
+                    this.showToast('Keine Striche zum Speichern!');
+                    return;
+                }
+
+                // Deep Copy der aktuellen Strokes speichern (Überschreibt, wenn Code existiert)
+                this.savedGlyphs[code] = JSON.parse(JSON.stringify(this.strokes));
+                
+                // Datalist für das Dropdown im Modal aktualisieren
+                this.updateDatalist();
+                
+                this.renderSavedGlyphPreviews();
+                this.showToast(`Erfolgreich als '${code}' gespeichert!`);
+            }
+
+            async importFromGlyphWiki() {
+                const id = document.getElementById('gwInput').value.trim();
+                if (!id) {
+                    this.showToast('Bitte eine GlyphWiki ID eingeben!');
+                    return;
+                }
+                
+                try {
+                    // AllOrigins Proxy um CORS-Probleme zu umgehen (GlyphWiki erlaubt direkten Fetch nicht immer)
+                    const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://glyphwiki.org/glyph/' + id + '.kage')}`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Netzwerkfehler');
+                    
+                    const data = await response.json();
+                    if (!data.contents) throw new Error('Glyphe nicht gefunden oder leer.');
+                    
+                    this.parseKageData(data.contents);
+                    this.showToast(`Glyphe '${id}' erfolgreich importiert!`);
+                    
+                    // Code ins Speicher-Feld übernehmen, falls man sie gleich ablegen will
+                    document.getElementById('saveCodeInput').value = id;
+                    
+                } catch (error) {
+                    console.error(error);
+                    this.showToast('Fehler beim Importieren von GlyphWiki.');
+                }
+            }
+
+            parseKageData(rawData) {
+                // GlyphWiki nutzt oft '$' oder Zeilenumbrüche als Trenner
+                const lines = rawData.split(/[\n\r\$]+/);
+                const newStrokes = [];
+                
+                lines.forEach(line => {
+                    const parts = line.split(/[:,]/);
+                    if (parts.length < 7) return; // Zu kurz für gültige KAGE-Daten
+                    
+                    const type = parseInt(parts[0]);
+                    
+                    if (type === 99) {
+                        return; // Referenzen (99) sollen übersprungen werden
+                    }
+                    
+                    if (type === 1) {
+                        newStrokes.push({
+                            type: 1,
+                            points: [
+                                { x: parseInt(parts[3]), y: parseInt(parts[4]) },
+                                { x: parseInt(parts[5]), y: parseInt(parts[6]) }
+                            ],
+                            refName: ""
+                        });
+                    } else if (type === 2) {
+                        // KAGE Kurve: 3 Punkte
+                        if (parts.length >= 9) {
+                            newStrokes.push({
+                                type: 2,
+                                points: [
+                                    { x: parseInt(parts[3]), y: parseInt(parts[4]) },
+                                    { x: parseInt(parts[5]), y: parseInt(parts[6]) },
+                                    { x: parseInt(parts[7]), y: parseInt(parts[8]) }
+                                ],
+                                refName: ""
+                            });
+                        }
+                    }
+                });
+                
+                if (newStrokes.length > 0) {
+                    this.strokes = newStrokes;
+                    this.currentPoints = [];
+                    this.selectedStrokeIdx = null;
+                    this.selectedPointIdx = null;
+                    this.resetToAddOrEdit();
+                    this.updateOutput();
+                    this.updateEditInfo();
+                    this.render();
+                } else {
+                    this.showToast('Keine unterstützten Linien (Typ 1/2) in dieser Glyphe gefunden.');
+                }
+            }
+
+            loadGlyph(code) {
+                if (!this.savedGlyphs[code]) return;
+                
+                // Lade Kopie in den Editor
+                this.strokes = JSON.parse(JSON.stringify(this.savedGlyphs[code]));
+                this.currentPoints = [];
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.resetToAddOrEdit();
+                
+                // Setze Input Feld
+                document.getElementById('saveCodeInput').value = code;
+                
+                this.updateOutput();
+                this.updateEditInfo();
+                this.render();
+                this.showToast(`Glyphe '${code}' geladen.`);
+            }
+
+            renderSavedGlyphPreviews() {
+                const container = document.getElementById('savedGlyphsContainer');
+                const keys = Object.keys(this.savedGlyphs);
+                
+                if (keys.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-slate-400 italic" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                keys.forEach(code => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'flex flex-col items-center gap-1 cursor-pointer p-2 rounded-lg hover:bg-slate-50 border-2 border-transparent hover:border-blue-200 transition-all group';
+                    wrap.onclick = () => this.loadGlyph(code);
+                    
+                    const can = document.createElement('canvas');
+                    can.width = 60;
+                    can.height = 60;
+                    can.className = 'border border-slate-200 bg-white shadow-sm rounded group-hover:shadow transition-shadow';
+                    const ctx = can.getContext('2d');
+                    
+                    // Skalieren für Thumbnail (200 -> 60, Faktor 0.3)
+                    ctx.scale(0.3, 0.3);
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    
+                    this.savedGlyphs[code].forEach(stroke => {
+                        this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
+                    });
+                    
+                    const label = document.createElement('span');
+                    label.className = 'text-xs font-mono text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded';
+                    label.textContent = code;
+                    
+                    wrap.appendChild(can);
+                    wrap.appendChild(label);
+                    container.appendChild(wrap);
+                });
+            }
+
+            // --- ZEICHNEN & RENDER METHODEN ---
+
+            addStroke(type, points, refName = "") {
+                this.strokes.push({ type, points, refName });
+                this.updateOutput();
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Grid Linien zeichnen
+                this.ctx.lineWidth = 1;
+                for(let i=0; i<=200; i+=50) {
+                    this.ctx.strokeStyle = i % 100 === 0 ? '#cbd5e1' : '#e2e8f0';
+                    this.ctx.beginPath(); this.ctx.moveTo(i, 0); this.ctx.lineTo(i, 200); this.ctx.stroke();
+                    this.ctx.beginPath(); this.ctx.moveTo(0, i); this.ctx.lineTo(200, i); this.ctx.stroke();
+                }
+
+                this.ctx.lineWidth = this.strokeWidth;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                // Bereits erstellte Striche rendern
+                this.strokes.forEach((stroke, idx) => {
+                    const isSelected = (this.appMode === 'edit' && this.selectedStrokeIdx === idx);
+                    this.drawShape(this.ctx, stroke.type, stroke.points, stroke.refName, isSelected);
+                });
+
+                // Im Edit-Modus die Punkte des ausgewählten Strokes hervorheben
+                if (this.appMode === 'edit' && this.selectedStrokeIdx !== null) {
+                    const stroke = this.strokes[this.selectedStrokeIdx];
+                    stroke.points.forEach((p, pIdx) => {
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, this.selectedPointIdx === pIdx ? 7 : 5, 0, Math.PI * 2);
+                        this.ctx.fillStyle = this.selectedPointIdx === pIdx ? '#fbbf24' : '#3b82f6'; // Gelb wenn Punkt ausgewählt, sonst Blau
+                        this.ctx.fill();
+                        this.ctx.strokeStyle = '#fff';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.stroke();
+                    });
+                }
+
+                // Aktuelle (noch unfertige) Klick-Punkte beim Zeichnen rendern
+                if (this.appMode === 'add') {
+                    this.ctx.fillStyle = '#ef4444'; // Rot
+                    this.currentPoints.forEach((p, index) => {
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        if (this.activeTool === 2 && index === 0) {
+                            this.ctx.font = '10px sans-serif';
+                            this.ctx.fillText("Start", p.x + 6, p.y - 6);
+                        } else if (this.activeTool === 2 && index === 1) {
+                            this.ctx.font = '10px sans-serif';
+                            this.ctx.fillText("Kontrollpkt", p.x + 6, p.y - 6);
+                        }
+                    });
+                }
+            }
+
+            drawShape(ctx, type, points, refName, isSelected = false, depth = 0) {
+                if (depth > 10) return; // Verhindert Endlosschleifen durch zirkuläre Referenzen
+
+                ctx.beginPath();
+                ctx.strokeStyle = isSelected ? '#3b82f6' : '#0f172a'; // Blau wenn ausgewählt
+                ctx.lineWidth = isSelected ? this.strokeWidth + 2 : this.strokeWidth;
+
+                if (type === 1) { 
+                    // Gerade
+                    ctx.moveTo(points[0].x, points[0].y);
+                    ctx.lineTo(points[1].x, points[1].y);
+                    ctx.stroke();
+                } else if (type === 2) { 
+                    // Kurve (Quadratische Bezier-Kurve)
+                    ctx.moveTo(points[0].x, points[0].y);
+                    ctx.quadraticCurveTo(points[1].x, points[1].y, points[2].x, points[2].y);
+                    ctx.stroke();
+                } else if (type === 99) { 
+                    // Komponente (Bounding Box)
+                    const [p1, p2] = points;
+                    const x = Math.min(p1.x, p2.x);
+                    const y = Math.min(p1.y, p2.y);
+                    const w = Math.abs(p2.x - p1.x);
+                    const h = Math.abs(p2.y - p1.y);
+
+                    ctx.save();
+                    ctx.strokeStyle = isSelected ? '#2563eb' : '#94a3b8'; // Helleres Grau für die Box
+                    ctx.fillStyle = isSelected ? 'rgba(37, 99, 235, 0.1)' : 'transparent';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 4]);
+                    
+                    ctx.fillRect(x, y, w, h);
+                    ctx.strokeRect(x, y, w, h);
+                    
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = isSelected ? '#1e40af' : '#64748b';
+                    ctx.font = '10px monospace';
+                    ctx.fillText(refName, x + 4, y + 12);
+                    ctx.restore();
+
+                    // Render die referenzierte Glyphe in der Box, falls sie existiert
+                    if (this.savedGlyphs && this.savedGlyphs[refName]) {
+                        this.savedGlyphs[refName].forEach(subStroke => {
+                            // KAGE 200x200 Rasterpunkte auf die Box-Dimensionen umrechnen
+                            const mappedPoints = subStroke.points.map(p => ({
+                                x: x + (p.x / 200) * w,
+                                y: y + (p.y / 200) * h
+                            }));
+                            this.drawShape(ctx, subStroke.type, mappedPoints, subStroke.refName, isSelected, depth + 1);
+                        });
+                    }
+                }
+            }
+
+            updateOutput() {
+                const kageLines = this.strokes.map(stroke => {
+                    const t = stroke.type;
+                    const p = stroke.points;
+                    if (t === 1) {
+                        return `1,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
+                    } else if (t === 2) {
+                        return `2,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
+                    } else if (t === 99) {
+                        const x1 = p[0].x, y1 = p[0].y;
+                        const x2 = p[1].x, y2 = p[1].y;
+                        return `99,0,0,${x1},${y1},${x2},${y1},${x1},${y2},${x2},${y2},${stroke.refName}`;
+                    }
+                });
+                
+                this.output.value = kageLines.join('\n');
+            }
+
+            showToast(msg) {
+                const toast = document.getElementById('toastMsg');
+                if (msg) toast.innerText = msg;
+                toast.classList.remove('opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('opacity-0');
+                }, 3000);
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            new KageEditor();
+        });
+    </script>
+</body>
+</html>
+
