@@ -1040,12 +1040,10 @@
                 this.render();
             }
 
-            // Vorschau-Canvas: das ganze Raster mit einem Rand von einer Strichbreite, damit Striche an der Kante
-            // (Breite und Linienende ragen über 0/200 hinaus) nicht abgeschnitten werden
+            // Vorschau-Canvas wie bei GlyphWiki: genau 0..200 auf das Canvas, 1:1, kein Rand, keine Korrektur
+            // (was über die Box hinausragt, wird abgeschnitten)
             previewTransform(ctx, size) {
-                const pad = this.strokeWidth;
-                const k = size / (GRID + 2 * pad);
-                ctx.setTransform(k, 0, 0, k, pad * k, pad * k);
+                ctx.setTransform(size / GRID, 0, 0, size / GRID, 0, 0);
             }
 
             renderSavedGlyphPreviews() {
