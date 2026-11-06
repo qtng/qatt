@@ -275,38 +275,15 @@
 
                 this.glyphMeta = this.loadStored(META_KEY) ?? {}; // Kommentare auf Glyphen- und Dateiebene
 
-                // Gespeicherte Glyphen aus dem localStorage, sonst die Vorgaben
-                this.savedGlyphs = this.loadStored() ?? {
-                    "D": [
-                        { type: 1, points: [{x: 17, y: 58}, {x: 79, y: 61}], refName: "" },
-                        { type: 2, points: [{x: 53, y: 18}, {x: 61, y: 127}, {x: 25, y: 180}], refName: "" },
-                        { type: 2, points: [{x: 29, y: 105}, {x: 90, y: 169}, {x: 183, y: 176}], refName: "" }
-                    ],
-                    "x": [
-                        { type: 1, points: [{x: 55, y: 67}, {x: 157, y: 68}], refName: "" },
-                        { type: 1, points: [{x: 19, y: 127}, {x: 181, y: 126}], refName: "" },
-                        { type: 1, points: [{x: 99, y: 17}, {x: 103, y: 185}], refName: "" }
-                    ],
-                    "Dx": [
-                        { type: 99, points: [{x: 3, y: 9}, {x: 194, y: 192}], refName: "D" },
-                        { type: 99, points: [{x: 81, y: 20}, {x: 186, y: 154}], refName: "x" }
-                    ],
-                    "L": [
-                        { type: 1, points: [{x: 99, y: 15}, {x: 102, y: 184}], refName: "" },
-                        { type: 1, points: [{x: 65, y: 45}, {x: 30, y: 100}], refName: "" },
-                        { type: 1, points: [{x: 129, y: 48}, {x: 161, y: 108}], refName: "" }
-                    ],
-                    "Lx": [
-                        { type: 99, points: [{x: 0, y: 0}, {x: 77, y: 200}], refName: "L" },
-                        { type: 99, points: [{x: 77, y: 0}, {x: 200, y: 200}], refName: "x" }
-                    ]
-                };
+                // Gespeicherte Glyphen aus dem localStorage, sonst leer (die Kombinationen entstehen automatisch)
+                this.savedGlyphs = this.loadStored() ?? {};
 
                 // Fehlende Zeichen als leere Glyphen anlegen (vorhandene bleiben unverändert, auch mit Breite)
                 const bases = new Set(Object.keys(this.savedGlyphs).map(k => splitName(k).base));
                 [...PRESET_CODES, ...PRESET_CODES.map(c => c.toLowerCase())].forEach(c => {
                     if (!bases.has(c)) this.savedGlyphs[c] = [];
                 });
+                this.syncCombos();
                 this.persist();
 
                 this.initEvents();
@@ -820,6 +797,7 @@
                         delete this.glyphMeta[old];
                     }
                 }
+                this.syncCombos();
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.showToast(`Erfolgreich als '${code}' gespeichert!`);
@@ -838,6 +816,36 @@
                 this.render();
             }
 
+            // Alle Kombinationen Großbuchstabe + Kleinbuchstabe als gespeicherte Glyphen (Name: BASIS + klein, z. B.
+            // "TRnh"), aufgebaut wie die Vorschau: der Großbuchstabe füllt 0 bis zu seiner Breite, der Kleinbuchstabe
+            // sitzt in der Box, die der Versatz des Großbuchstabens vorgibt. Es sind Verweise (99) auf die beiden
+            // Glyphen, sie folgen also jeder Änderung. Gleichnamige Glyphen werden überschrieben, Kombinationen,
+            // deren Teile nicht mehr (oder nur leer) existieren, entfallen. Leere Glyphen ergeben keine Kombination.
+            syncCombos() {
+                const keys = Object.keys(this.savedGlyphs);
+                const upperKeys = keys.filter(k => isUpperName(splitName(k).base) && this.savedGlyphs[k].length);
+                const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k) && this.savedGlyphs[k].length);
+                const combos = {};
+                upperKeys.forEach(u => {
+                    const { base, width, offset } = splitName(u);
+                    lowerKeys.forEach(l => {
+                        const strokes = [{ type: 99, points: [{ x: 0, y: 0 }, { x: width, y: GRID }], refName: u }];
+                        if (offset.x < GRID && offset.y > 0) {
+                            const box = offset.y > GRID / 2
+                                ? [offset.x, 0, GRID, offset.y]
+                                : [offset.x, offset.y, GRID, GRID];
+                            strokes.push({ type: 99, points: [{ x: box[0], y: box[1] }, { x: box[2], y: box[3] }], refName: l });
+                        }
+                        combos[base + l] = strokes;
+                    });
+                });
+                keys.filter(k => /^[A-Z]+[a-z]+$/.test(k) && !combos[k]).forEach(k => {
+                    delete this.savedGlyphs[k];
+                    delete this.glyphMeta[k];
+                });
+                Object.assign(this.savedGlyphs, combos);
+            }
+
             renameReferences(from, to) {
                 Object.values(this.savedGlyphs).forEach(strokes => strokes.forEach(s => {
                     if (s.type === 99 && s.refName === from) s.refName = to;
@@ -848,6 +856,7 @@
                 if (!confirm(`Glyphe '${code}' löschen?`)) return;
                 delete this.savedGlyphs[code];
                 delete this.glyphMeta[code];
+                this.syncCombos();
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.render(); // Komponenten, die darauf verweisen, sind jetzt leer
@@ -1005,6 +1014,7 @@
                     else delete this.glyphMeta[code];
                 });
                 if (fileMeta.header.length || fileMeta.footer.length) this.glyphMeta[''] = fileMeta;
+                this.syncCombos();
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.render();
@@ -1028,6 +1038,14 @@
                 this.updateOutput();
                 this.updateEditInfo();
                 this.render();
+            }
+
+            // Vorschau-Canvas: das ganze Raster mit einem Rand von einer Strichbreite, damit Striche an der Kante
+            // (Breite und Linienende ragen über 0/200 hinaus) nicht abgeschnitten werden
+            previewTransform(ctx, size) {
+                const pad = this.strokeWidth;
+                const k = size / (GRID + 2 * pad);
+                ctx.setTransform(k, 0, 0, k, pad * k, pad * k);
             }
 
             renderSavedGlyphPreviews() {
@@ -1065,7 +1083,7 @@
                     can.height = 60;
                     can.className = 'bg-white rounded';
                     const ctx = can.getContext('2d');
-                    ctx.scale(60 / GRID, 60 / GRID);
+                    this.previewTransform(ctx, 60);
                     ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
                     this.savedGlyphs[code].forEach(stroke => {
@@ -1299,8 +1317,8 @@
 
                 combos.forEach((c, i) => {
                     const ctx = this.previewCanvases[i].getContext('2d');
-                    ctx.setTransform(96 / GRID, 0, 0, 96 / GRID, 0, 0);
-                    ctx.clearRect(0, 0, GRID, GRID);
+                    this.previewTransform(ctx, 96);
+                    ctx.clearRect(-GRID, -GRID, 3 * GRID, 3 * GRID);
                     ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
                     const { width, offset } = c.upper ? splitName(c.upper) : { width: this.glyphWidth, offset: this.offset };
