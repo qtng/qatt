@@ -19,6 +19,7 @@ var QATT_FONTS = [
   { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", big: "qatt-pen", cjk: true, default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
   { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium-letters", big: "qatt-pen-medium", cjk: true },
   { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", big: "migoi", cjk: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font
+  { family: "Migoi B",            label: "Migoi B",                      file: "migoi-b" },   // QATT letters only (no CJK), drawn in the Migoi style from the KAGE glyphs of admin/glyphs.html (private repository: tools/build_kage_font.py, build_all.py)
   { family: "Celluloid",          label: "Celluloid",                    file: "celluloid-letters", big: "celluloid", cjk: true },   // as QATT Pen: letters here, CJK from the big font
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
