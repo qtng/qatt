@@ -1035,7 +1035,7 @@
                 const keys = Object.keys(this.savedGlyphs).sort(glyphOrder);
 
                 if (keys.length === 0) {
-                    container.innerHTML = '<p class="small text-body-secondary fst-italic mb-0" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>';
+                    container.innerHTML = '<p class="small bg-light text-body-secondary fst-italic mb-0" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>';
                     return;
                 }
 
@@ -1282,7 +1282,7 @@
                     box.innerHTML = '';
                     this.previewCanvases = combos.map(c => {
                         const tile = document.createElement('div');
-                        tile.className = 'text-center flex-shrink-0';
+                        tile.className = 'text-center flex-shrink-0 p-1';
                         const can = document.createElement('canvas');
                         can.width = 96;
                         can.height = 96;
