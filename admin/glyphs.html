@@ -1,201 +1,217 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAGE Glyph Editor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>QATT Glyphs Creator</title>
+    <script src="../js/navigation.js"></script>
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/site.css" rel="stylesheet">
     <style>
         /* Verhindert Text-Markierung beim schnellen Klicken auf die Steuerungs-Buttons */
         .no-select { user-select: none; }
+        #kageCanvas { width: min(520px, 100%); aspect-ratio: 1; cursor: crosshair; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-8 min-h-screen flex flex-col">
+<body class="bg-body-tertiary">
 
-    <!-- Header -->
-    <div class="mb-6 pb-4 border-b border-slate-200 flex justify-between items-center relative">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">KAGE Editor</h1>
-            <p class="text-sm text-slate-500">200x200 Grid · Canvas skalierbar</p>
-        </div>
-        <!-- Toast ist jetzt fixiert oben rechts und schwebt über allem -->
-        <div id="toastMsg" class="fixed top-5 right-5 z-50 opacity-0 transition-opacity duration-300 bg-slate-900 text-white px-5 py-3 rounded-lg shadow-xl text-sm font-bold pointer-events-none">
-            Aktion erfolgreich!
-        </div>
+    <!-- Toast ist fixiert oben rechts und schwebt über allem -->
+    <div id="toastMsg" class="position-fixed top-0 end-0 m-3 opacity-0 bg-dark text-white px-4 py-2 rounded shadow small fw-bold pe-none"
+         style="z-index: 1090; transition: opacity .3s;">
+        Aktion erfolgreich!
     </div>
 
-    <!-- Main Content -->
-    <div class="flex flex-col lg:flex-row gap-8 flex-grow">
-        
-        <!-- Linke Spalte: Werkzeuge & Canvas -->
-        <div class="flex flex-col gap-4">
-            
-            <!-- Toolbar -->
-            <div class="flex flex-col gap-3 bg-white p-3 rounded-lg shadow-sm border border-slate-200 w-fit min-w-[384px]">
-                
-                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                    <span class="text-sm font-bold text-slate-500 uppercase tracking-wider">Hinzufügen</span>
-                    <button id="clearBtn" class="px-3 py-1 rounded text-red-600 hover:bg-red-50 transition-colors font-medium text-sm">
-                        Leeren
-                    </button>
-                </div>
+    <div class="container-xl py-3" style="max-width: 1200px;">
+        <h1 class="h5 fw-bold mb-3">KAGE Editor</h1>
 
-                <!-- Zeichen-Werkzeuge (One-Shot Buttons) -->
-                <div id="drawTools" class="flex flex-wrap items-center gap-2">
-                    <button class="tool-add-btn px-4 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-sm" data-tool="1">
-                        + Linie (2 Pkt)
-                    </button>
-                    <button class="tool-add-btn px-4 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-sm" data-tool="2">
-                        + Kurve (3 Pkt)
-                    </button>
-                    <button class="tool-add-btn px-4 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors shadow-sm" data-tool="99">
-                        + Box (Ref)
-                    </button>
-                </div>
+        <div class="row g-3">
 
-                <!-- Status Anzeige für Add-Modus -->
-                <div id="addStatusMsg" class="hidden text-sm text-indigo-600 font-medium bg-indigo-50 p-2 rounded border border-indigo-100">
-                    Klicke in das Raster, um Punkte zu setzen...
-                </div>
+            <!-- Editor: Werkzeuge direkt am Canvas (auf dem Handy zuerst) -->
+            <div class="col-lg-auto">
+                <div class="card shadow-sm no-select">
+                    <!-- Vorschau der Kombinationen; width 0 + min-width 100 %, damit die Leiste die Spalte nicht verbreitert -->
+                    <div id="comboPreview" class="card-header d-none d-flex gap-2 overflow-auto py-2" style="width: 0; min-width: 100%;"></div>
 
-                <!-- Liniendicke Slider -->
-                <div class="mt-2 border-t border-slate-100 pt-3">
-                    <div class="flex justify-between items-center mb-1">
-                        <label for="lineWidthSlider" class="text-sm font-bold text-slate-500 uppercase tracking-wider">Linienbreite</label>
-                        <span id="lineWidthVal" class="text-xs font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">4px</span>
+                    <div class="card-body p-2 text-center">
+                        <canvas id="kageCanvas" width="600" height="600" class="border bg-white d-block mx-auto"></canvas>
                     </div>
-                    <input type="range" id="lineWidthSlider" min="1" max="20" value="4" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                </div>
 
-                <div class="mt-2 border-t border-slate-100 pt-2">
-                    <span class="text-sm font-bold text-slate-500 uppercase tracking-wider block mb-2">Auswahl Bearbeiten</span>
-                    <!-- Bearbeiten-Werkzeuge (Fadenkreuz) -->
-                    <div id="editTools" class="flex flex-col gap-2">
-                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
-                            <span id="editInfo" class="text-sm font-medium text-slate-700">Nichts ausgewählt</span>
-                            <div class="grid grid-cols-3 gap-1 w-24 no-select">
-                                <div></div>
-                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="0" data-dy="-1">▲</button>
-                                <div></div>
-                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="-1" data-dy="0">◀</button>
-                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="0" data-dy="1">▼</button>
-                                <button class="dpad-btn bg-slate-200 hover:bg-slate-300 rounded pb-1 text-center font-bold" data-dx="1" data-dy="0">▶</button>
+                    <!-- Toolbar: Handy = Fadenkreuz über den Buttons, Desktop = Buttons links, Fadenkreuz rechts -->
+                    <div id="editTools" class="card-footer d-flex flex-column-reverse flex-lg-row align-items-center gap-2 py-2">
+                        <div class="d-flex flex-column gap-2 align-self-stretch justify-content-center flex-grow-1">
+                            <div class="d-flex align-items-center gap-2">
+                                <div id="drawTools" class="btn-group btn-group-sm" role="group" aria-label="Element hinzufügen">
+                                    <button class="btn btn-outline-primary tool-add-btn" data-tool="1">+ Linie</button>
+                                    <button class="btn btn-outline-primary tool-add-btn" data-tool="2">+ Kurve</button>
+                                    <button class="btn btn-outline-primary tool-add-btn" data-tool="99">+ Komponente</button>
+                                </div>
+                                <button id="clearBtn" class="btn btn-sm btn-outline-danger ms-auto">Leeren</button>
+                            </div>
+                            <div class="d-flex align-items-center gap-2" style="min-height: 31px;">
+                                <span id="editInfo" class="small text-body-secondary me-auto">Nichts ausgewählt</span>
+                                <button id="resolveBtn" class="d-none btn btn-sm btn-warning">Auflösen</button>
+                                <button id="deleteStrokeBtn" class="d-none btn btn-sm btn-outline-danger" title="Ausgewählte Form entfernen (Entf)">Entfernen</button>
                             </div>
                         </div>
-                        
-                        <button id="resolveBtn" class="hidden w-full py-1.5 bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-300 rounded text-sm font-bold transition-colors shadow-sm">
-                            Komponente in Pfade auflösen
-                        </button>
-
-                        <p class="text-xs text-slate-500">Klicke Elemente an, um sie zu markieren und zu verschieben.</p>
+                        <div class="d-grid gap-1" style="grid-template-columns: repeat(3, 2.25rem);" role="group" aria-label="Auswahl verschieben">
+                            <div></div>
+                            <button class="dpad-btn btn btn-sm btn-light border" data-dx="0" data-dy="-1" aria-label="Hoch">▲</button>
+                            <div></div>
+                            <button class="dpad-btn btn btn-sm btn-light border" data-dx="-1" data-dy="0" aria-label="Links">◀</button>
+                            <button class="dpad-btn btn btn-sm btn-light border" data-dx="0" data-dy="1" aria-label="Runter">▼</button>
+                            <button class="dpad-btn btn btn-sm btn-light border" data-dx="1" data-dy="0" aria-label="Rechts">▶</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Canvas Wrapper -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 w-fit">
-                <canvas id="kageCanvas" width="200" height="200" 
-                        class="border border-slate-300 bg-white cursor-crosshair shadow-inner" 
-                        style="width: 400px; height: 400px;"></canvas>
-            </div>
-
-            <!-- Anleitung -->
-            <div class="text-sm text-slate-500 bg-blue-50 p-4 rounded-lg">
-                <h4 class="font-bold text-blue-800 mb-1">Anleitung:</h4>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li><strong>Hinzufügen:</strong> Klicke einen blauen Button, um ein Element zu zeichnen. Danach wechselt das Werkzeug automatisch wieder zur Auswahl.</li>
-                    <li><strong>Bearbeiten:</strong> Klicke Punkte oder Linien auf dem Raster an und verschiebe sie mit den Pfeil-Buttons.</li>
-                    <li><strong>Speichern & Laden:</strong> Speichere Glyphen rechts ab. Klicke auf eine gespeicherte Glyphe unten rechts, um sie wieder zu laden und anzupassen.</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Rechte Spalte: KAGE Daten & Speichern -->
-        <div class="flex flex-col flex-grow gap-4">
-            
-            <!-- GlyphWiki Import Panel -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex gap-3 items-end">
-                <div class="flex-grow">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wide">Aus GlyphWiki importieren</label>
-                    <input type="text" id="gwInput" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="ID (z.B. u5b57 oder u20000-v)">
+            <!-- Daten: Speichern & Glyphen am Canvas, Import und Ausgabe darunter -->
+            <div class="col-lg order-lg-first d-flex flex-column gap-3">
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex flex-column gap-2 p-2">
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="saveCodeInput" class="form-control font-monospace" placeholder="Code, z.B. U+1234 oder part_a" aria-label="Glyphen-Code">
+                            <button id="saveGlyphBtn" class="btn btn-success">Speichern</button>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="gwInput" class="form-control font-monospace" placeholder="GlyphWiki-ID, z.B. u5b57" aria-label="GlyphWiki-ID">
+                            <button id="importGwBtn" class="btn btn-outline-primary">Importieren</button>
+                        </div>
+                        <label for="lineWidthSlider" class="d-flex align-items-center gap-2 small mb-0 px-1">
+                            <span class="flex-shrink-0" style="width: 6.5em;">Strichbreite</span>
+                            <input type="range" id="lineWidthSlider" min="1" max="30" value="12" class="form-range flex-grow-1">
+                            <span id="lineWidthVal" class="font-monospace text-body-secondary flex-shrink-0" style="width: 4em;">12</span>
+                        </label>
+                        <label for="lineCapSlider" class="d-flex align-items-center gap-2 small mb-0 px-1">
+                            <span class="flex-shrink-0" style="width: 6.5em;">Linienende</span>
+                            <input type="range" id="lineCapSlider" min="0" max="2" step="1" value="1" class="form-range flex-grow-1">
+                            <span id="lineCapVal" class="font-monospace text-body-secondary flex-shrink-0" style="width: 4em;">square</span>
+                        </label>
+                    </div>
                 </div>
-                <button id="importGwBtn" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-sm">
-                    Importieren
-                </button>
-            </div>
 
-            <!-- Speichern Panel -->
-            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex gap-3 items-end">
-                <div class="flex-grow">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wide">Als Glyphe Speichern</label>
-                    <input type="text" id="saveCodeInput" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm" placeholder="Code (z.B. U+1234 oder part_a)">
+                <div id="savedGlyphsCard" class="card shadow-sm">
+                    <div class="card-header py-2 small fw-bold">Gespeicherte Glyphen</div>
+                    <div id="savedGlyphsContainer" class="card-body p-2 d-flex flex-wrap gap-2 align-items-start">
+                        <p class="small text-body-secondary fst-italic mb-0" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>
+                    </div>
                 </div>
-                <button id="saveGlyphBtn" class="px-4 py-2 bg-emerald-600 text-white font-medium rounded-md hover:bg-emerald-700 transition-colors">
-                    Speichern
-                </button>
-            </div>
 
-            <!-- Output Panel -->
-            <div class="flex flex-col bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden" style="min-height: 250px;">
-                <div class="bg-slate-100 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Generierte KAGE Daten</h3>
-                    <button id="copyBtn" class="px-3 py-1 bg-white border border-slate-300 rounded hover:bg-slate-50 text-sm font-medium transition-colors shadow-sm">
-                        Kopieren
-                    </button>
+                <div class="card shadow-sm overflow-hidden">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <span class="small fw-bold">KAGE-Daten</span>
+                        <div class="btn-group btn-group-sm">
+                            <button id="kageImportBtn" class="btn btn-outline-primary py-0" title="Daten aus dem Feld auf die Malfläche übernehmen">Import</button>
+                            <button id="kageExportBtn" class="btn btn-outline-secondary py-0" title="Als .kage-Datei herunterladen">Export</button>
+                        </div>
+                    </div>
+                    <textarea id="kageOutput" rows="6" class="form-control font-monospace small border-0 rounded-0" style="resize: vertical;" placeholder="KAGE-Daten einfügen" aria-label="KAGE-Daten"></textarea>
                 </div>
-                <textarea id="kageOutput" class="w-full flex-grow p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" readonly placeholder="Zeichne Formen, um hier KAGE-Daten zu generieren..."></textarea>
-            </div>
-
-            <!-- Gespeicherte Glyphen Panel -->
-            <div class="flex flex-col flex-grow bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-                <h3 class="font-bold text-slate-700 mb-3 border-b border-slate-100 pb-2">Gespeicherte Glyphen</h3>
-                <div id="savedGlyphsContainer" class="flex flex-wrap gap-4 items-start">
-                    <p class="text-sm text-slate-400 italic" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom Modal für Komponenten-Namen -->
-    <div id="nameModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
-            <div class="p-6">
-                <h3 class="text-lg font-bold text-slate-900 mb-2">Komponente hinzufügen</h3>
-                <p class="text-sm text-slate-500 mb-4">Bitte gib den Code der referenzierten Glyphe ein oder wähle aus gespeicherten Codes.</p>
-                <input type="text" id="compNameInput" list="savedGlyphList" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm" placeholder="Glyphen Code" autocomplete="off">
-                <datalist id="savedGlyphList"></datalist>
-            </div>
-            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-                <button id="cancelNameBtn" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-md transition-colors">Abbrechen</button>
-                <button id="submitNameBtn" class="px-4 py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-md transition-colors shadow-sm">Bestätigen</button>
             </div>
         </div>
     </div>
 
     <script>
+        const GRID = 200; // KAGE intern ist IMMER 200x200
+        const MARGIN = 12; // Hilfsrahmen vom Rand
+        const STORAGE_KEY = 'kage.savedGlyphs';
+        const LINE_CAPS = ['butt', 'square', 'round'];
+        const PRESET_CODES = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
+
+        // Glyphen aus Großbuchstaben tragen Breite und Versatz im Namen: "TR-120-10-180" (BASIS-Breite-X-Y).
+        // Der Versatz ist die untere linke Ecke der anderen Komponente in der Vorschau: X verschiebt ihre
+        // linke Kante, Y ist ihre Unterkante; neutral ist 0/200 (unten links).
+        // Standardwerte am Ende fallen weg: "TR-120" (Versatz 0/200), "TR" (Breite 200, Versatz 0/200).
+        // Ein altes "TR-120-80" (Hilfslinie) wird als neutral gelesen und beim Speichern umbenannt.
+        const NEUTRAL_OFFSET = { x: 0, y: GRID };
+        const isUpperName = (base) => /^[A-Z]+$/.test(base);
+        function splitName(code) {
+            const m = code.match(/^([A-Z]+)(?:-(\d+)(?:-(\d+)(?:-(\d+))?)?)?$/);
+            if (!m) return { base: code, width: GRID, offset: { ...NEUTRAL_OFFSET } };
+            const offset = m[4] ? { x: parseInt(m[3]), y: parseInt(m[4]) } : { ...NEUTRAL_OFFSET };
+            return { base: m[1], width: m[2] ? parseInt(m[2]) : GRID, offset };
+        }
+        function joinName(base, width, offset) {
+            if (!isUpperName(base)) return base;
+            if (offset.x !== NEUTRAL_OFFSET.x || offset.y !== NEUTRAL_OFFSET.y) return `${base}-${width}-${offset.x}-${offset.y}`;
+            return width !== GRID ? `${base}-${width}` : base;
+        }
+
+        // Anfasser: Ecke (untere linke Ecke des Kleinbuchstabens, startet unten links bei 0/200, zieht frei) und
+        // Breite (vertikaler Guide, Anfasser auf der unteren Kante, zieht nur horizontal).
+        // Die Ecke steht zuerst: sie wird zuerst getroffen und zuletzt (also oben) gezeichnet.
+        const HANDLES = {
+            offset: {
+                label: 'Ecke', axes: ['x', 'y'],
+                get: e => ({ ...e.offset }),
+                set: (e, p) => {
+                    e.offset = p;
+                    if (p.y === GRID) e.glyphWidth = p.x; // auf der Unterkante nimmt die Ecke die Breite mit
+                },
+            },
+            width: {
+                label: 'Breite', axes: ['x'],
+                get: e => ({ x: e.glyphWidth, y: GRID }),
+                set: (e, p) => { e.glyphWidth = p.x; },
+            },
+        };
+
+        // Sortierung der Glyphen-Liste: Großbuchstaben, dann Kleinbuchstaben, dann gemischt;
+        // innerhalb der Gruppe in der Reihenfolge von PRESET_CODES, alle anderen danach alphabetisch.
+        // Gemischte Codes zuerst nach dem großen Anfang, dann nach dem kleinen Rest (TRnh: TR, dann nh).
+        function glyphOrder(a, b) {
+            const group = c => c === c.toUpperCase() ? 0 : c === c.toLowerCase() ? 1 : 2;
+            const rank = c => {
+                const i = PRESET_CODES.indexOf(splitName(c).base.toUpperCase());
+                return i === -1 ? PRESET_CODES.length : i;
+            };
+            const cmp = (x, y) => rank(x) - rank(y) || x.localeCompare(y);
+            const split = c => c.match(/^([^a-z]*)(.*)$/).slice(1);
+
+            const g = group(a) - group(b);
+            if (g) return g;
+            if (group(a) === 2) {
+                const [aUpper, aLower] = split(a);
+                const [bUpper, bLower] = split(b);
+                return cmp(aUpper, bUpper) || cmp(aLower, bLower);
+            }
+            return cmp(a, b);
+        }
+        const SNAP_RADIUS = 10;
+        // Guides: Mittellinie und 6x6-Raster innerhalb des Hilfsrahmens; Rahmen selbst rastet auch ein
+        const RASTER = 6;
+        const CENTER_GUIDES = [GRID / 2];
+        const THIRD_GUIDES = Array.from({ length: RASTER - 1 }, (_, k) => Math.round(MARGIN + (k + 1) * (GRID - 2 * MARGIN) / RASTER))
+            .filter(v => v !== GRID / 2); // die Mitte zeichnet schon die Mittellinie
+        // Unsichtbares Einrastgitter: jedes Rasterfeld in 4 Schritte geteilt (Viertel zwischen zwei Rasterlinien)
+        const SUBDIV = 4;
+        const FINE_STEPS = Array.from({ length: RASTER * SUBDIV + 1 }, (_, k) => Math.round(MARGIN + k * (GRID - 2 * MARGIN) / (RASTER * SUBDIV)));
+        const SNAP_LINES = [...new Set([0, ...FINE_STEPS, ...CENTER_GUIDES, GRID])];
+
         class KageEditor {
             constructor() {
                 this.canvas = document.getElementById('kageCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.output = document.getElementById('kageOutput');
-                
-                this.updateScale();
-                window.addEventListener('resize', () => this.updateScale());
-                
+
                 this.strokes = [];
                 this.currentPoints = [];
-                this.activeTool = null; 
-                this.isPrompting = false;
-                
+                this.activeTool = null;
+
                 // Status-Variablen für das Bearbeiten
                 this.appMode = 'edit'; // 'add' | 'edit'
                 this.selectedStrokeIdx = null;
                 this.selectedPointIdx = null; // null bedeutet: ganze Linie ausgewählt
-                this.strokeWidth = 4; // Aktuelle Linienbreite
-                
-                // Vorgegebene Glyphen beim Start laden
-                this.savedGlyphs = {
+                this.strokeWidth = 12; // in KAGE-Einheiten
+                this.lineCap = 'square'; // Linienende, per Regler: butt, square, round
+                this.drag = null; // { x, y, orig } während die Maus zieht
+                this.glyphWidth = GRID; // Breite der Glyphe (nur bei Namen aus Großbuchstaben)
+                this.offset = { ...NEUTRAL_OFFSET }; // Versatz der anderen Komponente in der Vorschau (nur Großbuchstaben)
+                this.handleSelected = null; // ausgewählter grüner Anfasser: 'width' | 'offset' | null
+                this.loadedCode = null; // Name, unter dem die geladene Glyphe gespeichert ist
+
+                // Gespeicherte Glyphen aus dem localStorage, sonst die Vorgaben
+                this.savedGlyphs = this.loadStored() ?? {
                     "D": [
                         { type: 1, points: [{x: 17, y: 58}, {x: 79, y: 61}], refName: "" },
                         { type: 2, points: [{x: 53, y: 18}, {x: 61, y: 127}, {x: 25, y: 180}], refName: "" },
@@ -221,236 +237,422 @@
                     ]
                 };
 
-                // Modal Elements
-                this.modal = document.getElementById('nameModal');
-                this.nameInput = document.getElementById('compNameInput');
-                
+                // Fehlende Zeichen als leere Glyphen anlegen (vorhandene bleiben unverändert, auch mit Breite)
+                const bases = new Set(Object.keys(this.savedGlyphs).map(k => splitName(k).base));
+                [...PRESET_CODES, ...PRESET_CODES.map(c => c.toLowerCase())].forEach(c => {
+                    if (!bases.has(c)) this.savedGlyphs[c] = [];
+                });
+                this.persist();
+
                 this.initEvents();
-                this.updateDatalist();
                 this.renderSavedGlyphPreviews();
                 this.render();
             }
 
-            updateScale() {
+            loadStored() {
+                try {
+                    return JSON.parse(localStorage.getItem(STORAGE_KEY));
+                } catch {
+                    return null;
+                }
+            }
+
+            persist() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.savedGlyphs));
+                } catch {
+                    this.showToast('Speichern im Browser nicht möglich!');
+                }
+            }
+
+            // Bildschirm-Koordinaten -> 200er Raster (Canvas ist per CSS skaliert)
+            toGrid(e) {
                 const rect = this.canvas.getBoundingClientRect();
-                // KAGE intern ist IMMER 200x200
-                this.scaleX = rect.width / this.canvas.width;
-                this.scaleY = rect.height / this.canvas.height;
+                return {
+                    x: Math.round((e.clientX - rect.left) * GRID / rect.width),
+                    y: Math.round((e.clientY - rect.top) * GRID / rect.height)
+                };
             }
 
             initEvents() {
                 // One-Shot Hinzufügen Buttons
                 document.querySelectorAll('.tool-add-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        this.appMode = 'add';
-                        this.activeTool = parseInt(e.target.dataset.tool);
+                        this.activeTool = parseInt(e.currentTarget.dataset.tool);
+                        // Komponente: der nächste Klick auf eine gespeicherte Glyphe fügt sie ein
+                        this.appMode = this.activeTool === 99 ? 'pick' : 'add';
                         this.currentPoints = [];
                         this.selectedStrokeIdx = null;
                         this.selectedPointIdx = null;
-                        
-                        document.getElementById('addStatusMsg').classList.remove('hidden');
+                        this.handleSelected = null;
                         this.updateEditInfo();
                         this.render();
                     });
                 });
 
-                // Canvas Klick (Zeichnen & Auswählen)
-                this.canvas.addEventListener('mousedown', (e) => this.handleCanvasClick(e));
+                // Der Breiten-Anfasser hängt am Namen: nur bei Großbuchstaben sichtbar
+                document.getElementById('saveCodeInput').addEventListener('input', () => {
+                    if (!this.showsWidth()) this.handleSelected = null;
+                    this.updateEditInfo();
+                    this.render();
+                });
 
-                // Aktionen
+                // Canvas: Maus wählt beim Drücken aus und zieht. Touch/Stift wählen nur per Tippen aus,
+                // Wischen bleibt Scrollen (der Browser schickt dann pointercancel statt pointerup).
+                this.canvas.addEventListener('pointerdown', (e) => {
+                    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+                    const { x, y } = this.toGrid(e);
+                    this.handleCanvasClick(x, y);
+                    if (this.appMode !== 'edit') return;
+                    if (this.handleSelected) {
+                        this.drag = { x, y, start: HANDLES[this.handleSelected].get(this) };
+                    } else if (this.selectedStrokeIdx !== null) {
+                        const stroke = this.strokes[this.selectedStrokeIdx];
+                        this.drag = { x, y, orig: stroke.points.map(p => ({ ...p })) };
+                    } else {
+                        return;
+                    }
+                    this.canvas.setPointerCapture(e.pointerId);
+                });
+                this.canvas.addEventListener('pointermove', (e) => {
+                    if (e.pointerType !== 'mouse') return;
+                    const { x, y } = this.toGrid(e);
+                    if (!this.drag) {
+                        let cursor = 'crosshair';
+                        const handle = this.appMode === 'edit' ? this.handleHit(x, y) : null;
+                        if (handle) cursor = HANDLES[handle].axes.length === 1 ? 'ew-resize' : 'move';
+                        else if (this.appMode === 'edit' && this.hitTest(x, y)) cursor = 'move';
+                        this.canvas.style.cursor = cursor;
+                        return;
+                    }
+                    this.applyDrag(x, y);
+                });
+                this.canvas.addEventListener('pointerup', (e) => {
+                    if (e.pointerType === 'mouse') {
+                        if (this.drag) {
+                            this.drag = null;
+                            this.render(); // Fangradius ausblenden
+                        }
+                        return;
+                    }
+                    const { x, y } = this.toGrid(e);
+                    this.handleCanvasClick(x, y);
+                });
+                this.canvas.addEventListener('pointercancel', () => { this.drag = null; });
+
                 document.getElementById('clearBtn').addEventListener('click', () => {
                     this.strokes = [];
                     this.currentPoints = [];
                     this.selectedStrokeIdx = null;
                     this.selectedPointIdx = null;
+                    this.handleSelected = null;
                     this.updateOutput();
                     this.updateEditInfo();
                     this.render();
                 });
 
-                document.getElementById('copyBtn').addEventListener('click', () => {
-                    this.output.select();
-                    document.execCommand('copy');
-                    this.showToast('Daten in die Zwischenablage kopiert!');
+                document.getElementById('kageImportBtn').addEventListener('click', () => {
+                    try {
+                        this.parseKageData(this.output.value);
+                    } catch (error) {
+                        this.showToast(`Import fehlgeschlagen: ${error.message}`);
+                    }
                 });
 
-                // D-Pad Steuerung (Pfeiltasten)
+                document.getElementById('kageExportBtn').addEventListener('click', () => {
+                    if (this.strokes.length === 0) {
+                        this.showToast('Keine Striche zum Exportieren!');
+                        return;
+                    }
+                    const code = document.getElementById('saveCodeInput').value.trim() || 'glyph';
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob([this.output.value + '\n'], { type: 'text/plain' }));
+                    a.download = `${code}.kage`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                });
+
+                // Fadenkreuz: springt zur nächsten Einrastposition
                 document.querySelectorAll('.dpad-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        const dx = parseInt(e.target.dataset.dx);
-                        const dy = parseInt(e.target.dataset.dy);
-                        this.moveSelection(dx, dy);
+                        this.moveSelection(parseInt(e.currentTarget.dataset.dx), parseInt(e.currentTarget.dataset.dy));
                     });
                 });
 
-                // Button für das Auflösen von Komponenten
                 document.getElementById('resolveBtn').addEventListener('click', () => this.resolveSelectedComponent());
-
-                // Speichern Panel ...
+                document.getElementById('deleteStrokeBtn').addEventListener('click', () => this.deleteSelectedStroke());
+                // Entf/Rücktaste entfernt die ausgewählte Form, außer beim Tippen in ein Feld
+                window.addEventListener('keydown', (e) => {
+                    if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+                    if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+                    if (this.selectedStrokeIdx === null) return;
+                    e.preventDefault();
+                    this.deleteSelectedStroke();
+                });
                 document.getElementById('saveGlyphBtn').addEventListener('click', () => this.saveCurrentGlyph());
+                document.getElementById('saveCodeInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.saveCurrentGlyph();
+                });
 
-                // GlyphWiki Import
-                const importBtn = document.getElementById('importGwBtn');
-                const importInput = document.getElementById('gwInput');
-                
-                importBtn.addEventListener('click', () => this.importFromGlyphWiki());
-                importInput.addEventListener('keypress', (e) => {
+                document.getElementById('importGwBtn').addEventListener('click', () => this.importFromGlyphWiki());
+                document.getElementById('gwInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.importFromGlyphWiki();
                 });
 
-                // Linienbreite Slider
-                const widthSlider = document.getElementById('lineWidthSlider');
                 const widthVal = document.getElementById('lineWidthVal');
-                widthSlider.addEventListener('input', (e) => {
+                document.getElementById('lineWidthSlider').addEventListener('input', (e) => {
                     this.strokeWidth = parseInt(e.target.value);
-                    widthVal.textContent = this.strokeWidth + 'px';
+                    widthVal.textContent = this.strokeWidth;
                     this.render();
-                    this.renderSavedGlyphPreviews(); // Auch Vorschaubilder aktualisieren
+                    this.renderSavedGlyphPreviews();
                 });
 
-                // Modal Events
-                document.getElementById('submitNameBtn').addEventListener('click', () => this.handleModalSubmit());
-                document.getElementById('cancelNameBtn').addEventListener('click', () => {
-                    this.modal.classList.add('hidden');
-                    this.isPrompting = false;
-                    this.currentPoints = [];
+                // Linienende: 0 = butt, 1 = square, 2 = round
+                const capVal = document.getElementById('lineCapVal');
+                document.getElementById('lineCapSlider').addEventListener('input', (e) => {
+                    this.lineCap = LINE_CAPS[parseInt(e.target.value)];
+                    capVal.textContent = this.lineCap;
                     this.render();
-                });
-                
-                this.nameInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.handleModalSubmit();
+                    this.renderSavedGlyphPreviews();
                 });
             }
 
-            handleCanvasClick(e) {
-                if (this.isPrompting) return;
+            handleCanvasClick(x, y) {
+                if (x < 0 || x > GRID || y < 0 || y > GRID) return;
 
-                const rect = this.canvas.getBoundingClientRect();
-                const x = Math.round((e.clientX - rect.left) / this.scaleX);
-                const y = Math.round((e.clientY - rect.top) / this.scaleY);
+                // Klick auf die Malfläche bricht die Komponenten-Auswahl ab und wählt normal aus
+                if (this.appMode === 'pick') this.resetToAddOrEdit();
 
-                if (x < 0 || x > 200 || y < 0 || y > 200) return;
-
-                // Bearbeiten-Modus: Elemente auswählen
                 if (this.appMode === 'edit') {
                     this.handleEditClick(x, y);
                     return;
                 }
 
-                // Hinzufügen-Modus: Punkte setzen
-                if (this.appMode === 'add') {
-                    this.currentPoints.push({ x, y });
+                // Hinzufügen-Modus: Punkte setzen; Endpunkte rasten ein wie beim Ziehen, der Kontrollpunkt
+                // einer Kurve (zweiter Klick) bleibt frei
+                const isControlPoint = this.activeTool === 2 && this.currentPoints.length === 1;
+                const p = isControlPoint ? { x, y } : this.snapPoint({ x, y }, null);
+                this.currentPoints.push({ x: Math.round(p.x), y: Math.round(p.y) });
+                const pointsNeeded = this.activeTool === 2 ? 3 : 2;
 
-                    let pointsNeeded = this.activeTool === 1 ? 2 : (this.activeTool === 2 ? 3 : 2);
-                    
-                    if (this.currentPoints.length === pointsNeeded) {
-                        if (this.activeTool === 99) {
-                            this.isPrompting = true;
-                            this.nameInput.value = '';
-                            this.modal.classList.remove('hidden');
-                            setTimeout(() => this.nameInput.focus(), 100);
-                        } else {
-                            this.addStroke(this.activeTool, [...this.currentPoints]);
-                            this.resetToAddOrEdit();
-                        }
-                    }
-                    
-                    this.render();
+                if (this.currentPoints.length === pointsNeeded) {
+                    this.addStroke(this.activeTool, [...this.currentPoints]);
+                    this.resetToAddOrEdit();
                 }
+                this.render();
             }
 
             resetToAddOrEdit() {
                 this.appMode = 'edit';
                 this.activeTool = null;
                 this.currentPoints = [];
-                document.getElementById('addStatusMsg').classList.add('hidden');
+                this.handleSelected = null;
             }
 
-            handleModalSubmit() {
-                const refName = this.nameInput.value.trim();
-                if (refName) {
-                    this.addStroke(this.activeTool, [...this.currentPoints], refName);
-                }
-                this.modal.classList.add('hidden');
-                this.isPrompting = false;
+            // Anfasser für Breite und Versatz nur für Namen aus Großbuchstaben
+            showsWidth() {
+                return isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
+            }
+
+            // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | null
+            handleHit(x, y) {
+                if (!this.showsWidth()) return null;
+                return Object.keys(HANDLES).find(k => {
+                    const p = HANDLES[k].get(this);
+                    return Math.hypot(x - p.x, y - p.y) <= 8;
+                }) ?? null;
+            }
+
+            // Gespeicherte Glyphe als KAGE-99-Referenz über die ganze Fläche einfügen und auswählen
+            addComponent(code) {
+                this.addStroke(99, [{ x: 0, y: 0 }, { x: GRID, y: GRID }], code);
                 this.resetToAddOrEdit();
+                this.selectedStrokeIdx = this.strokes.length - 1;
+                this.selectedPointIdx = null;
+                this.updateEditInfo();
                 this.render();
             }
 
             // --- BEARBEITUNGS-METHODEN ---
 
-            handleEditClick(x, y) {
+            // Liefert { s, p } des Elements unter (x, y); p = null heißt ganze Form
+            hitTest(x, y) {
                 const hitT = 8; // Toleranz-Radius für das Anklicken
-                let found = null;
-                
+
                 // 1. Zuerst Punkte prüfen (haben Priorität)
-                for (let i = this.strokes.length - 1; i >= 0 && !found; i--) {
-                    const stroke = this.strokes[i];
-                    for (let j = 0; j < stroke.points.length; j++) {
-                        const p = stroke.points[j];
-                        if (Math.hypot(p.x - x, p.y - y) <= hitT) {
-                            found = { s: i, p: j };
-                            break;
-                        }
+                for (let i = this.strokes.length - 1; i >= 0; i--) {
+                    const pts = this.strokes[i].points;
+                    for (let j = 0; j < pts.length; j++) {
+                        if (Math.hypot(pts[j].x - x, pts[j].y - y) <= hitT) return { s: i, p: j };
                     }
                 }
 
                 // 2. Dann Linien/Kurven/Boxen prüfen
-                if (!found) {
-                    for (let i = this.strokes.length - 1; i >= 0 && !found; i--) {
-                        const stroke = this.strokes[i];
-                        if (stroke.type === 1) { // Gerade
-                            if (this.distToSegment(x, y, stroke.points[0], stroke.points[1]) <= hitT) found = { s: i, p: null };
-                        } else if (stroke.type === 2) { // Kurve (Punkte abtasten)
-                            for(let t = 0; t <= 1; t += 0.1) {
-                                const px = (1-t)*(1-t)*stroke.points[0].x + 2*(1-t)*t*stroke.points[1].x + t*t*stroke.points[2].x;
-                                const py = (1-t)*(1-t)*stroke.points[0].y + 2*(1-t)*t*stroke.points[1].y + t*t*stroke.points[2].y;
-                                if (Math.hypot(px - x, py - y) <= hitT) { found = { s: i, p: null }; break; }
-                            }
-                        } else if (stroke.type === 99) { // Box
-                            const x1 = Math.min(stroke.points[0].x, stroke.points[1].x);
-                            const x2 = Math.max(stroke.points[0].x, stroke.points[1].x);
-                            const y1 = Math.min(stroke.points[0].y, stroke.points[1].y);
-                            const y2 = Math.max(stroke.points[0].y, stroke.points[1].y);
-                            // Prüft ob der Klick innerhalb der Bounding-Box war
-                            if (x >= x1 && x <= x2 && y >= y1 && y <= y2) found = { s: i, p: null };
+                for (let i = this.strokes.length - 1; i >= 0; i--) {
+                    const stroke = this.strokes[i];
+                    const pts = stroke.points;
+                    if (stroke.type === 1) {
+                        if (this.distToSegment(x, y, pts[0], pts[1]) <= hitT) return { s: i, p: null };
+                    } else if (stroke.type === 2) {
+                        for (let t = 0; t <= 1; t += 0.1) {
+                            const px = (1-t)*(1-t)*pts[0].x + 2*(1-t)*t*pts[1].x + t*t*pts[2].x;
+                            const py = (1-t)*(1-t)*pts[0].y + 2*(1-t)*t*pts[1].y + t*t*pts[2].y;
+                            if (Math.hypot(px - x, py - y) <= hitT) return { s: i, p: null };
                         }
+                    } else if (stroke.type === 99) {
+                        const x1 = Math.min(pts[0].x, pts[1].x), x2 = Math.max(pts[0].x, pts[1].x);
+                        const y1 = Math.min(pts[0].y, pts[1].y), y2 = Math.max(pts[0].y, pts[1].y);
+                        if (x >= x1 && x <= x2 && y >= y1 && y <= y2) return { s: i, p: null };
                     }
                 }
+                return null;
+            }
 
-                if (found) {
-                    this.selectedStrokeIdx = found.s;
-                    this.selectedPointIdx = found.p;
-                } else {
-                    this.selectedStrokeIdx = null;
-                    this.selectedPointIdx = null;
-                }
-                
+            handleEditClick(x, y) {
+                this.handleSelected = this.handleHit(x, y);
+                const found = this.handleSelected ? null : this.hitTest(x, y);
+                this.selectedStrokeIdx = found ? found.s : null;
+                this.selectedPointIdx = found ? found.p : null;
                 this.updateEditInfo();
                 this.render();
             }
 
-            distToSegment(px, py, p1, p2) {
-                const l2 = (p2.x - p1.x)**2 + (p2.y - p1.y)**2;
-                if (l2 === 0) return Math.hypot(px - p1.x, py - p1.y);
-                let t = ((px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y)) / l2;
-                t = Math.max(0, Math.min(1, t));
-                return Math.hypot(px - (p1.x + t * (p2.x - p1.x)), py - (p1.y + t * (p2.y - p1.y)));
+            // Ziehen von (drag.x, drag.y) nach (x, y), magnetisch eingerastet: ein gezogener Punkt selbst,
+            // bei der ganzen Form der Punkt, der am nächsten an einem Ziel liegt (x und y getrennt)
+            applyDrag(x, y) {
+                const d = this.drag;
+                d.raw = { x, y };
+
+                // Anfasser für Breite/Versatz: nur entlang seiner Achsen, mit denselben Einrastzielen
+                if (this.handleSelected) {
+                    const h = HANDLES[this.handleSelected];
+                    const raw = {
+                        x: d.start.x + (h.axes.includes('x') ? x - d.x : 0),
+                        y: d.start.y + (h.axes.includes('y') ? y - d.y : 0),
+                    };
+                    const r = this.snapPoint(raw, null);
+                    const clamp = v => Math.max(0, Math.min(GRID, Math.round(v)));
+                    h.set(this, {
+                        x: h.axes.includes('x') ? clamp(r.sx ? r.x : raw.x) : d.start.x,
+                        y: h.axes.includes('y') ? clamp(r.sy ? r.y : raw.y) : d.start.y,
+                    });
+                    this.updateEditInfo();
+                    this.render();
+                    return;
+                }
+
+                const stroke = this.strokes[this.selectedStrokeIdx];
+                const o = d.orig;
+                const pi = this.selectedPointIdx;
+                let dx = x - d.x;
+                let dy = y - d.y;
+
+                const sources = pi !== null ? [o[pi]] : this.snapSources(stroke, o);
+                let shiftX = null, shiftY = null;
+                sources.forEach(p => {
+                    const moved = { x: p.x + dx, y: p.y + dy };
+                    const r = this.snapPoint(moved, this.selectedStrokeIdx);
+                    if (r.sx && (shiftX === null || Math.abs(r.x - moved.x) < Math.abs(shiftX))) shiftX = r.x - moved.x;
+                    if (r.sy && (shiftY === null || Math.abs(r.y - moved.y) < Math.abs(shiftY))) shiftY = r.y - moved.y;
+                });
+                dx += shiftX ?? 0;
+                dy += shiftY ?? 0;
+
+                o.forEach((p, i) => {
+                    if (pi === null || pi === i) {
+                        stroke.points[i].x = Math.round(p.x + dx);
+                        stroke.points[i].y = Math.round(p.y + dy);
+                    }
+                });
+                this.updateEditInfo();
+                this.updateOutput();
+                this.render();
             }
 
+            // Einrasten im Umkreis von SNAP_RADIUS: zuerst Punkte anderer Formen, sonst Guides und Randlinien
+            // (x und y getrennt, so rasten auch Kreuzungen ein). Die eigene Form wird übersprungen.
+            // sx/sy sagen, ob die Achse eingerastet ist.
+            snapPoint(p, skipIdx) {
+                let best = null;
+                let bestDist = SNAP_RADIUS;
+                this.strokes.forEach((s, i) => {
+                    if (i === skipIdx) return;
+                    s.points.forEach(q => {
+                        const dist = Math.hypot(q.x - p.x, q.y - p.y);
+                        if (dist <= bestDist) { best = q; bestDist = dist; }
+                    });
+                });
+                if (best) return { x: best.x, y: best.y, sx: true, sy: true };
+
+                const nearest = (v) => SNAP_LINES.reduce((m, g) => Math.abs(g - v) < Math.abs(m - v) ? g : m);
+                const gx = nearest(p.x), gy = nearest(p.y);
+                const sx = Math.abs(gx - p.x) <= SNAP_RADIUS;
+                const sy = Math.abs(gy - p.y) <= SNAP_RADIUS;
+                return { x: sx ? gx : p.x, y: sy ? gy : p.y, sx, sy };
+            }
+
+            // Punkte einer Form, die beim Verschieben einrasten: alle außer dem Kurven-Kontrollpunkt
+            snapSources(stroke, pts) {
+                return pts.filter((_, i) => !(stroke.type === 2 && i === 1));
+            }
+
+            closestOnSegment(px, py, p1, p2) {
+                const l2 = (p2.x - p1.x)**2 + (p2.y - p1.y)**2;
+                if (l2 === 0) return { x: p1.x, y: p1.y };
+                let t = ((px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y)) / l2;
+                t = Math.max(0, Math.min(1, t));
+                return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
+            }
+
+            distToSegment(px, py, p1, p2) {
+                const q = this.closestOnSegment(px, py, p1, p2);
+                return Math.hypot(px - q.x, py - q.y);
+            }
+
+            // Fadenkreuz: springt zur nächsten Einrastposition in Pfeilrichtung (Guides, Randlinien und
+            // die Koordinaten der Punkte anderer Formen). Bei der ganzen Form entscheidet der Punkt, der
+            // als erster eine Einrastposition erreicht (ohne Kurven-Kontrollpunkt).
             moveSelection(dx, dy) {
+                if (this.handleSelected) {
+                    const h = HANDLES[this.handleSelected];
+                    const axis = dx !== 0 ? 'x' : 'y';
+                    const dir = dx + dy;
+                    if (!h.axes.includes(axis)) return; // die Breite nur horizontal
+                    const p = h.get(this);
+                    const targets = [...SNAP_LINES];
+                    this.strokes.forEach(s => s.points.forEach(q => targets.push(q[axis])));
+                    const next = dir > 0
+                        ? Math.min(...targets.filter(t => t > p[axis]))
+                        : Math.max(...targets.filter(t => t < p[axis]));
+                    if (isFinite(next)) {
+                        p[axis] = Math.max(0, Math.min(GRID, next));
+                        h.set(this, p);
+                    }
+                    this.updateEditInfo();
+                    this.render();
+                    return;
+                }
                 if (this.selectedStrokeIdx === null) return;
                 const stroke = this.strokes[this.selectedStrokeIdx];
-                
-                if (this.selectedPointIdx !== null) {
-                    // Nur den ausgewählten Punkt verschieben
-                    stroke.points[this.selectedPointIdx].x += dx;
-                    stroke.points[this.selectedPointIdx].y += dy;
-                } else {
-                    // Ganze Form verschieben
-                    stroke.points.forEach(p => { p.x += dx; p.y += dy; });
-                }
-                
+                const axis = dx !== 0 ? 'x' : 'y';
+                const dir = dx + dy; // +1 oder -1
+
+                const targets = [...SNAP_LINES];
+                this.strokes.forEach((s, i) => { if (i !== this.selectedStrokeIdx) s.points.forEach(q => targets.push(q[axis])); });
+                const sources = this.selectedPointIdx !== null
+                    ? [stroke.points[this.selectedPointIdx]]
+                    : this.snapSources(stroke, stroke.points);
+
+                let step = Infinity;
+                sources.forEach(p => targets.forEach(t => {
+                    const dist = (t - p[axis]) * dir;
+                    if (dist > 0 && dist < step) step = dist;
+                }));
+                if (step === Infinity) return;
+
+                const moved = this.selectedPointIdx !== null ? [stroke.points[this.selectedPointIdx]] : stroke.points;
+                moved.forEach(p => { p[axis] += step * dir; });
+
                 this.updateEditInfo();
                 this.updateOutput();
                 this.render();
@@ -459,87 +661,86 @@
             updateEditInfo() {
                 const info = document.getElementById('editInfo');
                 const resolveBtn = document.getElementById('resolveBtn');
+                const deleteBtn = document.getElementById('deleteStrokeBtn');
 
+                if (this.handleSelected) {
+                    info.textContent = HANDLES[this.handleSelected].label;
+                    resolveBtn.classList.add('d-none');
+                    deleteBtn.classList.add('d-none');
+                    return;
+                }
                 if (this.selectedStrokeIdx === null) {
                     info.textContent = 'Nichts ausgewählt';
-                    resolveBtn.classList.add('hidden');
+                    resolveBtn.classList.add('d-none');
+                    deleteBtn.classList.add('d-none');
                     return;
                 }
 
                 const stroke = this.strokes[this.selectedStrokeIdx];
-                
-                // Auflösen-Button nur anzeigen, wenn eine ganze Box (Typ 99) markiert ist
-                if (stroke.type === 99 && this.selectedPointIdx === null) {
-                    resolveBtn.classList.remove('hidden');
-                } else {
-                    resolveBtn.classList.add('hidden');
-                }
+                deleteBtn.classList.remove('d-none'); // auch bei ausgewähltem Punkt: entfernt die ganze Form
+
+                // Auflösen nur für eine ganze Box (Typ 99)
+                resolveBtn.classList.toggle('d-none', !(stroke.type === 99 && this.selectedPointIdx === null));
 
                 if (this.selectedPointIdx !== null) {
-                    const p = stroke.points[this.selectedPointIdx];
-                    info.innerHTML = `Punkt markiert: <span class="font-mono bg-white px-1 rounded border shadow-sm">${p.x}, ${p.y}</span>`;
+                    info.textContent = 'Punkt';
                 } else {
-                    const typeNames = {1: 'Gerade', 2: 'Kurve', 99: 'Box'};
-                    info.textContent = `Ganze ${typeNames[stroke.type]} markiert`;
+                    const typeNames = {1: 'Linie', 2: 'Kurve', 99: `Komponente ${stroke.refName}`};
+                    info.textContent = typeNames[stroke.type];
                 }
+            }
+
+            deleteSelectedStroke() {
+                if (this.selectedStrokeIdx === null) return;
+                this.strokes.splice(this.selectedStrokeIdx, 1);
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.updateEditInfo();
+                this.updateOutput();
+                this.render();
             }
 
             resolveSelectedComponent() {
                 if (this.selectedStrokeIdx === null) return;
-                
+
                 const targetIdx = this.selectedStrokeIdx;
                 const stroke = this.strokes[targetIdx];
-                
                 if (stroke.type !== 99) return;
-                
+
                 const refName = stroke.refName;
-                if (!this.savedGlyphs || !this.savedGlyphs[refName]) {
+                if (!this.savedGlyphs[refName]) {
                     this.showToast(`Fehler: Glyphe '${refName}' nicht in den gespeicherten Daten gefunden!`);
                     return;
                 }
-                
-                // Koordinaten der Bounding Box
+
                 const [p1, p2] = stroke.points;
                 const x = Math.min(p1.x, p2.x);
                 const y = Math.min(p1.y, p2.y);
                 const w = Math.abs(p2.x - p1.x);
                 const h = Math.abs(p2.y - p1.y);
-                
-                // Alle Striche der referenzierten Glyphe kopieren und an die Box anpassen
+
                 const resolvedStrokes = this.savedGlyphs[refName].map(subStroke => {
                     const newStroke = JSON.parse(JSON.stringify(subStroke));
                     newStroke.points = newStroke.points.map(p => ({
-                        x: Math.round(x + (p.x / 200) * w),
-                        y: Math.round(y + (p.y / 200) * h)
+                        x: Math.round(x + (p.x / GRID) * w),
+                        y: Math.round(y + (p.y / GRID) * h)
                     }));
                     return newStroke;
                 });
-                
-                // Ersetze die Box (Typ 99) in den aktuellen Strichen durch die aufgelösten Einzelteile
+
                 this.strokes.splice(targetIdx, 1, ...resolvedStrokes);
-                
                 this.selectedStrokeIdx = null;
                 this.selectedPointIdx = null;
-                
+
                 this.updateEditInfo();
                 this.updateOutput();
                 this.render();
                 this.showToast(`Komponente '${refName}' erfolgreich aufgelöst.`);
             }
 
-            updateDatalist() {
-                const dl = document.getElementById('savedGlyphList');
-                dl.innerHTML = '';
-                Object.keys(this.savedGlyphs).forEach(k => {
-                    const opt = document.createElement('option');
-                    opt.value = k;
-                    dl.appendChild(opt);
-                });
-            }
-
             saveCurrentGlyph() {
-                const code = document.getElementById('saveCodeInput').value.trim();
-                if (!code) {
+                const input = document.getElementById('saveCodeInput').value.trim();
+                if (!input) {
                     this.showToast('Bitte einen Code eingeben!');
                     return;
                 }
@@ -548,81 +749,90 @@
                     return;
                 }
 
-                // Deep Copy der aktuellen Strokes speichern (Überschreibt, wenn Code existiert)
+                // Name mit Breite (nur Großbuchstaben); eine im Feld getippte Breite zählt nicht, der Anfasser gilt
+                const { base } = splitName(input);
+                const code = joinName(base, this.glyphWidth, this.offset);
+
+                // Deep Copy (überschreibt, wenn der Code existiert)
                 this.savedGlyphs[code] = JSON.parse(JSON.stringify(this.strokes));
-                
-                // Datalist für das Dropdown im Modal aktualisieren
-                this.updateDatalist();
-                
+
+                // Nur die Breite geändert: alte Glyphe umbenennen und Verweise in anderen Glyphen nachziehen
+                const old = this.loadedCode;
+                if (old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
+                    delete this.savedGlyphs[old];
+                    this.renameReferences(old, code);
+                }
+                this.persist();
                 this.renderSavedGlyphPreviews();
                 this.showToast(`Erfolgreich als '${code}' gespeichert!`);
+
+                // Für das nächste Zeichen zurücksetzen
+                document.getElementById('saveCodeInput').value = '';
+                this.loadedCode = null;
+                this.glyphWidth = GRID;
+                this.offset = { ...NEUTRAL_OFFSET };
+                this.strokes = [];
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.resetToAddOrEdit();
+                this.updateOutput();
+                this.updateEditInfo();
+                this.render();
+            }
+
+            renameReferences(from, to) {
+                Object.values(this.savedGlyphs).forEach(strokes => strokes.forEach(s => {
+                    if (s.type === 99 && s.refName === from) s.refName = to;
+                }));
+            }
+
+            deleteGlyph(code) {
+                if (!confirm(`Glyphe '${code}' löschen?`)) return;
+                delete this.savedGlyphs[code];
+                this.persist();
+                this.renderSavedGlyphPreviews();
+                this.render(); // Komponenten, die darauf verweisen, sind jetzt leer
             }
 
             async importFromGlyphWiki() {
                 const input = document.getElementById('gwInput');
                 const btn = document.getElementById('importGwBtn');
                 const id = input.value.trim();
-                
+
                 if (!id) {
                     this.showToast('Bitte eine GlyphWiki ID eingeben!');
                     return;
                 }
-                
+
+                btn.disabled = true;
+                btn.textContent = 'Lädt...';
                 try {
-                    // Button Feedback
-                    btn.disabled = true;
-                    btn.textContent = 'Lädt...';
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    
                     this.showToast('Lade Daten von GlyphWiki...');
-                    console.log(`[Import] Frage GlyphWiki ab für ID: ${id}`);
-                    
+
                     // AllOrigins Proxy um CORS-Probleme zu umgehen
                     const targetUrl = `https://glyphwiki.org/glyph/${id}.kage`;
-                    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                    
-                    console.log(`[Import] Fetch URL: ${url}`);
-                    const response = await fetch(url);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Netzwerkfehler: HTTP ${response.status}`);
-                    }
-                    
+                    const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                    if (!response.ok) throw new Error(`Netzwerkfehler: HTTP ${response.status}`);
+
                     const data = await response.json();
-                    
-                    if (data.status && data.status.http_code === 404) {
-                         throw new Error(`Glyphe '${id}' nicht gefunden.`);
-                    }
-                    
-                    if (!data.contents) {
-                        throw new Error('Leere Antwort vom Proxy erhalten.');
-                    }
-                    
+                    if (data.status && data.status.http_code === 404) throw new Error(`Glyphe '${id}' nicht gefunden.`);
+                    if (!data.contents) throw new Error('Leere Antwort vom Proxy erhalten.');
                     if (data.contents.trim().toLowerCase().startsWith('<!doctype') || data.contents.includes('<html')) {
                         throw new Error('Ungültige Antwort (HTML erhalten). ID falsch?');
                     }
-                    
+
                     this.parseKageData(data.contents);
-                    
-                    // Code ins Speicher-Feld übernehmen
                     document.getElementById('saveCodeInput').value = id;
-                    
-                    // UI wiederherstellen
-                    btn.disabled = false;
-                    btn.textContent = 'Importieren';
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    
+                    this.loadedCode = null;
+                    this.glyphWidth = GRID;
+                    this.offset = { ...NEUTRAL_OFFSET };
                     this.showToast(`Glyphe '${id}' erfolgreich importiert!`);
-                    
                 } catch (error) {
                     console.error("[Import] Fehler:", error);
-                    
-                    // UI wiederherstellen bei Fehler
+                    this.showToast(`Import fehlgeschlagen: ${error.message}`);
+                } finally {
                     btn.disabled = false;
                     btn.textContent = 'Importieren';
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    
-                    this.showToast(`Import fehlgeschlagen: ${error.message}`);
                 }
             }
 
@@ -630,148 +840,130 @@
                 // GlyphWiki nutzt oft '$' oder Zeilenumbrüche als Trenner
                 const lines = rawData.split(/[\n\r\$]+/);
                 const newStrokes = [];
-                
-                console.log(`[Parse] Untersuche ${lines.length} KAGE-Einträge...`);
-                
+
                 lines.forEach(line => {
                     const parts = line.split(/[:,]/);
                     if (parts.length < 7) return; // Zu kurz für gültige KAGE-Daten
-                    
+
                     const type = parseInt(parts[0]);
-                    
+
                     if (type === 99) {
                         if (parts.length >= 12) {
                             const x1 = parseInt(parts[3]);
                             const y1 = parseInt(parts[4]);
                             const x2 = parseInt(parts[9]);
                             const y2 = parseInt(parts[10]);
-                            const refName = parts.slice(11).join(':').trim();
-                            
                             newStrokes.push({
                                 type: 99,
                                 points: [
                                     { x: isNaN(x1) ? 0 : x1, y: isNaN(y1) ? 0 : y1 },
                                     { x: isNaN(x2) ? 200 : x2, y: isNaN(y2) ? 200 : y2 }
                                 ],
-                                refName: refName
+                                refName: parts.slice(11).join(':').trim()
                             });
-                            console.log(`[Parse] Referenz (Typ 99) importiert: ${refName}`);
                         }
-                        return; 
+                        return;
                     }
-                    
-                    // Konvertiere alle anderen KAGE-Typen in Typ 1 (Gerade) oder Typ 2 (Kurve)
-                    // basierend auf der Anzahl der übergebenen Koordinaten.
-                    // (Index 3 bis Ende enthalten die x,y Werte)
+
+                    // Alle anderen KAGE-Typen nach Anzahl der Koordinaten in Linie oder Kurve umwandeln
                     const coords = parts.slice(3).map(p => parseInt(p)).filter(n => !isNaN(n));
-                    
+
                     if (coords.length >= 8) {
-                        // 4 Punkte (oft Haken/Bögen) -> Wir machen eine 3-Punkt Kurve daraus (Start, Kontrollpunkt 1, Ende)
-                        newStrokes.push({
-                            type: 2,
-                            points: [
-                                { x: coords[0], y: coords[1] },
-                                { x: coords[2], y: coords[3] },
-                                { x: coords[6], y: coords[7] }
-                            ],
-                            refName: ""
-                        });
+                        // 4 Punkte -> 3-Punkt-Kurve (Start, Kontrollpunkt 1, Ende)
+                        newStrokes.push({ type: 2, points: [
+                            { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[6], y: coords[7] }
+                        ], refName: "" });
                     } else if (coords.length >= 6) {
-                        // 3 Punkte -> Normale Kurve (Typ 2)
-                        newStrokes.push({
-                            type: 2,
-                            points: [
-                                { x: coords[0], y: coords[1] },
-                                { x: coords[2], y: coords[3] },
-                                { x: coords[4], y: coords[5] }
-                            ],
-                            refName: ""
-                        });
+                        newStrokes.push({ type: 2, points: [
+                            { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[4], y: coords[5] }
+                        ], refName: "" });
                     } else if (coords.length >= 4) {
-                        // 2 Punkte -> Gerade (Typ 1)
-                        newStrokes.push({
-                            type: 1,
-                            points: [
-                                { x: coords[0], y: coords[1] },
-                                { x: coords[2], y: coords[3] }
-                            ],
-                            refName: ""
-                        });
+                        newStrokes.push({ type: 1, points: [
+                            { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }
+                        ], refName: "" });
                     }
                 });
-                
-                if (newStrokes.length > 0) {
-                    console.log(`[Parse] Erfolgreich ${newStrokes.length} Linien/Kurven extrahiert.`);
-                    this.strokes = newStrokes;
-                    this.currentPoints = [];
-                    this.selectedStrokeIdx = null;
-                    this.selectedPointIdx = null;
-                    this.resetToAddOrEdit();
-                    this.updateOutput();
-                    this.updateEditInfo();
-                    this.render();
-                } else {
+
+                if (newStrokes.length === 0) {
                     throw new Error('Keine Linien in dieser Glyphe gefunden (möglicherweise nur Referenzen).');
                 }
+                this.strokes = newStrokes;
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.resetToAddOrEdit();
+                this.updateOutput();
+                this.updateEditInfo();
+                this.render();
             }
 
             loadGlyph(code) {
                 if (!this.savedGlyphs[code]) return;
-                
-                // Lade Kopie in den Editor
+
                 this.strokes = JSON.parse(JSON.stringify(this.savedGlyphs[code]));
-                this.currentPoints = [];
                 this.selectedStrokeIdx = null;
                 this.selectedPointIdx = null;
                 this.resetToAddOrEdit();
-                
-                // Setze Input Feld
-                document.getElementById('saveCodeInput').value = code;
-                
+                // Im Feld steht der Name ohne Breite; die Breite steht am grünen Anfasser
+                const { base, width, offset } = splitName(code);
+                document.getElementById('saveCodeInput').value = base;
+                this.glyphWidth = width;
+                this.offset = offset;
+                this.loadedCode = code;
+
                 this.updateOutput();
                 this.updateEditInfo();
                 this.render();
-                this.showToast(`Glyphe '${code}' geladen.`);
             }
 
             renderSavedGlyphPreviews() {
                 const container = document.getElementById('savedGlyphsContainer');
-                const keys = Object.keys(this.savedGlyphs);
-                
+                const keys = Object.keys(this.savedGlyphs).sort(glyphOrder);
+
                 if (keys.length === 0) {
-                    container.innerHTML = '<p class="text-sm text-slate-400 italic" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>';
+                    container.innerHTML = '<p class="small text-body-secondary fst-italic mb-0" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>';
                     return;
                 }
-                
+
                 container.innerHTML = '';
-                
                 keys.forEach(code => {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'flex flex-col items-center gap-1 cursor-pointer p-2 rounded-lg hover:bg-slate-50 border-2 border-transparent hover:border-blue-200 transition-all group';
-                    wrap.onclick = () => this.loadGlyph(code);
-                    
+                    const tile = document.createElement('div');
+                    tile.className = 'position-relative';
+
+                    const wrap = document.createElement('button');
+                    wrap.type = 'button';
+                    wrap.className = 'btn btn-light border d-flex flex-column align-items-center gap-1 p-1';
+                    wrap.title = `${code} laden`;
+                    wrap.onclick = () => this.appMode === 'pick' ? this.addComponent(code) : this.loadGlyph(code);
+
+                    const del = document.createElement('button');
+                    del.type = 'button';
+                    del.className = 'btn-close position-absolute top-0 end-0 bg-white rounded-circle border';
+                    del.style.cssText = 'font-size: .5rem; padding: .3rem; transform: translate(35%, -35%);';
+                    del.title = `${code} löschen`;
+                    del.setAttribute('aria-label', `${code} löschen`);
+                    del.onclick = () => this.deleteGlyph(code);
+                    tile.appendChild(wrap);
+                    tile.appendChild(del);
+
                     const can = document.createElement('canvas');
                     can.width = 60;
                     can.height = 60;
-                    can.className = 'border border-slate-200 bg-white shadow-sm rounded group-hover:shadow transition-shadow';
+                    can.className = 'bg-white rounded';
                     const ctx = can.getContext('2d');
-                    
-                    // Skalieren für Thumbnail (200 -> 60, Faktor 0.3)
-                    ctx.scale(0.3, 0.3);
-                    ctx.lineCap = 'round';
+                    ctx.scale(60 / GRID, 60 / GRID);
+                    ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
-                    
                     this.savedGlyphs[code].forEach(stroke => {
                         this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
                     });
-                    
+
                     const label = document.createElement('span');
-                    label.className = 'text-xs font-mono text-slate-700 font-bold bg-slate-100 px-2 py-0.5 rounded';
+                    label.className = 'small font-monospace fw-bold';
                     label.textContent = code;
-                    
+
                     wrap.appendChild(can);
                     wrap.appendChild(label);
-                    container.appendChild(wrap);
+                    container.appendChild(tile);
                 });
             }
 
@@ -783,152 +975,256 @@
             }
 
             render() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Grid Linien zeichnen
-                this.ctx.lineWidth = 1;
-                for(let i=0; i<=200; i+=50) {
-                    this.ctx.strokeStyle = i % 100 === 0 ? '#cbd5e1' : '#e2e8f0';
-                    this.ctx.beginPath(); this.ctx.moveTo(i, 0); this.ctx.lineTo(i, 200); this.ctx.stroke();
-                    this.ctx.beginPath(); this.ctx.moveTo(0, i); this.ctx.lineTo(200, i); this.ctx.stroke();
-                }
+                // Canvas hat mehr Pixel als das Raster, damit es skaliert scharf bleibt
+                this.ctx.setTransform(this.canvas.width / GRID, 0, 0, this.canvas.height / GRID, 0, 0);
+                this.ctx.clearRect(0, 0, GRID, GRID);
 
-                this.ctx.lineWidth = this.strokeWidth;
-                this.ctx.lineCap = 'round';
+                // Aktives Werkzeug hervorheben
+                document.querySelectorAll('.tool-add-btn').forEach(b => {
+                    b.classList.toggle('active', this.appMode !== 'edit' && parseInt(b.dataset.tool) === this.activeTool);
+                });
+                // Im Auswahlmodus die Glyphen-Liste als Ziel hervorheben
+                document.getElementById('savedGlyphsCard').classList.toggle('border-primary', this.appMode === 'pick');
+
+                // Guides: 3x3-Raster heller, Mittellinien kräftiger
+                this.ctx.lineWidth = 0.5;
+                const guide = (v, color) => {
+                    this.ctx.strokeStyle = color;
+                    this.ctx.beginPath(); this.ctx.moveTo(v, 0); this.ctx.lineTo(v, GRID); this.ctx.stroke();
+                    this.ctx.beginPath(); this.ctx.moveTo(0, v); this.ctx.lineTo(GRID, v); this.ctx.stroke();
+                };
+                THIRD_GUIDES.forEach(v => guide(v, '#e2e8f0'));
+                [MARGIN, GRID - MARGIN].forEach(v => guide(v, '#fca5a5')); // Randlinien 12 Einheiten vom Rand
+                CENTER_GUIDES.forEach(v => guide(v, '#cbd5e1'));
+
+                this.ctx.lineCap = this.lineCap;
                 this.ctx.lineJoin = 'round';
 
-                // Bereits erstellte Striche rendern
                 this.strokes.forEach((stroke, idx) => {
                     const isSelected = (this.appMode === 'edit' && this.selectedStrokeIdx === idx);
                     this.drawShape(this.ctx, stroke.type, stroke.points, stroke.refName, isSelected);
                 });
 
-                // Im Edit-Modus die Punkte des ausgewählten Strokes hervorheben
-                if (this.appMode === 'edit' && this.selectedStrokeIdx !== null) {
-                    const stroke = this.strokes[this.selectedStrokeIdx];
-                    stroke.points.forEach((p, pIdx) => {
+                // Breite (grüner vertikaler Guide, Anfasser auf der unteren Kante) und Versatz (grüner Punkt)
+                if (this.showsWidth()) {
+                    Object.entries(HANDLES).reverse().forEach(([key, h]) => {
+                        const p = h.get(this);
+                        const selected = this.handleSelected === key;
+                        if (key === 'width') {
+                            this.ctx.strokeStyle = '#22c55e';
+                            this.ctx.lineWidth = 0.75;
+                            this.ctx.beginPath(); this.ctx.moveTo(p.x, 0); this.ctx.lineTo(p.x, GRID); this.ctx.stroke();
+                        }
                         this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, this.selectedPointIdx === pIdx ? 7 : 5, 0, Math.PI * 2);
-                        this.ctx.fillStyle = this.selectedPointIdx === pIdx ? '#fbbf24' : '#3b82f6'; // Gelb wenn Punkt ausgewählt, sonst Blau
+                        this.ctx.arc(p.x, p.y, selected ? 6 : 5, 0, Math.PI * 2);
+                        this.ctx.fillStyle = '#16a34a';
                         this.ctx.fill();
                         this.ctx.strokeStyle = '#fff';
-                        this.ctx.lineWidth = 2;
+                        this.ctx.lineWidth = 1.5;
                         this.ctx.stroke();
-                    });
-                }
-
-                // Aktuelle (noch unfertige) Klick-Punkte beim Zeichnen rendern
-                if (this.appMode === 'add') {
-                    this.ctx.fillStyle = '#ef4444'; // Rot
-                    this.currentPoints.forEach((p, index) => {
-                        this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-                        this.ctx.fill();
-                        
-                        if (this.activeTool === 2 && index === 0) {
-                            this.ctx.font = '10px sans-serif';
-                            this.ctx.fillText("Start", p.x + 6, p.y - 6);
-                        } else if (this.activeTool === 2 && index === 1) {
-                            this.ctx.font = '10px sans-serif';
-                            this.ctx.fillText("Kontrollpkt", p.x + 6, p.y - 6);
+                        if (selected) {
+                            const text = key === 'width' ? `${p.x}` : `${p.x},${p.y}`;
+                            this.drawLabel(text, p.x, key === 'width' ? GRID - 8 : Math.max(p.y, 12));
                         }
                     });
                 }
+
+                // Fangradius um den Mauszeiger beim Ziehen
+                if (this.drag?.raw) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.drag.raw.x, this.drag.raw.y, SNAP_RADIUS, 0, Math.PI * 2);
+                    this.ctx.fillStyle = 'rgba(100, 116, 139, 0.15)';
+                    this.ctx.fill();
+                }
+
+                // Punkte des ausgewählten Strokes hervorheben
+                if (this.appMode === 'edit' && this.selectedStrokeIdx !== null) {
+                    this.strokes[this.selectedStrokeIdx].points.forEach((p, pIdx) => {
+                        const active = this.selectedPointIdx === pIdx;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, active ? 5 : 4, 0, Math.PI * 2);
+                        this.ctx.fillStyle = active ? '#fbbf24' : '#3b82f6';
+                        this.ctx.fill();
+                        this.ctx.strokeStyle = '#fff';
+                        this.ctx.lineWidth = 1.5;
+                        this.ctx.stroke();
+                    });
+                    this.strokes[this.selectedStrokeIdx].points.forEach(p => this.drawCoord(p));
+                }
+
+                // Unfertige Klick-Punkte beim Zeichnen
+                if (this.appMode === 'add') {
+                    this.currentPoints.forEach((p, index) => {
+                        this.ctx.fillStyle = '#ef4444';
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        const prefix = this.activeTool === 2 ? (index === 0 ? 'Start ' : 'Kontrollpkt ') : '';
+                        this.drawCoord(p, prefix);
+                    });
+                }
+
+                this.renderPreview();
             }
 
-            drawShape(ctx, type, points, refName, isSelected = false, depth = 0) {
+            // Koordinaten neben einem Punkt; auf dem Canvas gezeichnet, blockiert also keine Klicks
+            drawCoord(p, prefix = '') {
+                this.drawLabel(`${prefix}${p.x},${p.y}`, p.x, p.y);
+            }
+
+            drawLabel(text, x, y) {
+                const c = this.ctx;
+                c.save();
+                c.font = '5px monospace';
+                const tx = Math.min(x + 5, GRID - c.measureText(text).width - 1);
+                const ty = Math.max(y - 5, 6);
+                c.lineWidth = 1.5;
+                c.lineJoin = 'round';
+                c.strokeStyle = '#fff';
+                c.strokeText(text, tx, ty);
+                c.fillStyle = '#1e3a8a';
+                c.fillText(text, tx, ty);
+                c.restore();
+            }
+
+            // frame = false zeichnet Komponenten ohne gestrichelten Rahmen und Namen (für die Vorschau)
+            drawShape(ctx, type, points, refName, isSelected = false, depth = 0, frame = true) {
                 if (depth > 10) return; // Verhindert Endlosschleifen durch zirkuläre Referenzen
 
                 ctx.beginPath();
-                ctx.strokeStyle = isSelected ? '#3b82f6' : '#0f172a'; // Blau wenn ausgewählt
+                ctx.strokeStyle = isSelected ? '#3b82f6' : '#0f172a';
                 ctx.lineWidth = isSelected ? this.strokeWidth + 2 : this.strokeWidth;
 
-                if (type === 1) { 
-                    // Gerade
+                if (type === 1) {
                     ctx.moveTo(points[0].x, points[0].y);
                     ctx.lineTo(points[1].x, points[1].y);
                     ctx.stroke();
-                } else if (type === 2) { 
-                    // Kurve (Quadratische Bezier-Kurve)
+                } else if (type === 2) {
                     ctx.moveTo(points[0].x, points[0].y);
                     ctx.quadraticCurveTo(points[1].x, points[1].y, points[2].x, points[2].y);
                     ctx.stroke();
-                } else if (type === 99) { 
-                    // Komponente (Bounding Box)
+                } else if (type === 99) {
                     const [p1, p2] = points;
                     const x = Math.min(p1.x, p2.x);
                     const y = Math.min(p1.y, p2.y);
                     const w = Math.abs(p2.x - p1.x);
                     const h = Math.abs(p2.y - p1.y);
 
-                    ctx.save();
-                    ctx.strokeStyle = isSelected ? '#2563eb' : '#94a3b8'; // Helleres Grau für die Box
-                    ctx.fillStyle = isSelected ? 'rgba(37, 99, 235, 0.1)' : 'transparent';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([4, 4]);
-                    
-                    ctx.fillRect(x, y, w, h);
-                    ctx.strokeRect(x, y, w, h);
-                    
-                    ctx.setLineDash([]);
-                    ctx.fillStyle = isSelected ? '#1e40af' : '#64748b';
-                    ctx.font = '10px monospace';
-                    ctx.fillText(refName, x + 4, y + 12);
-                    ctx.restore();
-
-                    // Render die referenzierte Glyphe in der Box, falls sie existiert
-                    if (this.savedGlyphs && this.savedGlyphs[refName]) {
-                        this.savedGlyphs[refName].forEach(subStroke => {
-                            // KAGE 200x200 Rasterpunkte auf die Box-Dimensionen umrechnen
-                            const mappedPoints = subStroke.points.map(p => ({
-                                x: x + (p.x / 200) * w,
-                                y: y + (p.y / 200) * h
-                            }));
-                            this.drawShape(ctx, subStroke.type, mappedPoints, subStroke.refName, isSelected, depth + 1);
-                        });
+                    if (frame) {
+                        ctx.save();
+                        ctx.strokeStyle = isSelected ? '#2563eb' : '#94a3b8';
+                        ctx.fillStyle = isSelected ? 'rgba(37, 99, 235, 0.1)' : 'transparent';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([4, 4]);
+                        ctx.fillRect(x, y, w, h);
+                        ctx.strokeRect(x, y, w, h);
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = isSelected ? '#1e40af' : '#64748b';
+                        ctx.font = '10px monospace';
+                        ctx.fillText(refName, x + 4, y + 12);
+                        ctx.restore();
                     }
+
+                    // Referenzierte Glyphe in die Box einpassen
+                    this.drawInBox(ctx, this.savedGlyphs[refName] || [], x, y, w, h, isSelected, depth + 1, frame);
                 }
             }
 
-            updateOutput() {
-                const kageLines = this.strokes.map(stroke => {
-                    const t = stroke.type;
-                    const p = stroke.points;
-                    if (t === 1) {
-                        return `1,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
-                    } else if (t === 2) {
-                        return `2,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
-                    } else if (t === 99) {
-                        const x1 = p[0].x, y1 = p[0].y;
-                        const x2 = p[1].x, y2 = p[1].y;
-                        return `99,0,0,${x1},${y1},${x2},${y1},${x1},${y2},${x2},${y2},${stroke.refName}`;
+            // Striche einer Glyphe (200er Raster) in eine Box einpassen
+            drawInBox(ctx, strokes, x, y, w, h, isSelected = false, depth = 0, frame = true) {
+                strokes.forEach(s => {
+                    const mapped = s.points.map(p => ({ x: x + (p.x / GRID) * w, y: y + (p.y / GRID) * h }));
+                    this.drawShape(ctx, s.type, mapped, s.refName, isSelected, depth, frame);
+                });
+            }
+
+            // Vorschau über der Malfläche: alle Kombinationen Großbuchstabe + Kleinbuchstabe, die die Glyphe im
+            // Namensfeld enthalten (nur reine Groß- oder Kleinbuchstaben, die gespeichert sind). Nichts davon wird
+            // gespeichert. Der Großbuchstabe füllt 0 bis zu seiner Breite, der Kleinbuchstabe den Rest. Die
+            // bearbeitete Glyphe kommt live von der Malfläche (Striche und Breite).
+            renderPreview() {
+                const box = document.getElementById('comboPreview');
+                const name = document.getElementById('saveCodeInput').value.trim();
+                const keys = Object.keys(this.savedGlyphs).sort(glyphOrder);
+                const upperKeys = keys.filter(k => isUpperName(splitName(k).base));
+                const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k));
+
+                // Live von der Malfläche nur, wenn die Glyphe im Namensfeld auch geladen ist
+                const live = this.loadedCode !== null && splitName(this.loadedCode).base === name;
+                let combos = [];
+                const upperKey = upperKeys.find(k => splitName(k).base === name);
+                if (isUpperName(name) && upperKey) {
+                    combos = lowerKeys.map(l => ({ label: name + l, upper: live ? null : upperKey, lower: l }));
+                } else if (/^[a-z]+$/.test(name) && this.savedGlyphs[name]) {
+                    combos = upperKeys.map(u => ({ label: splitName(u).base + name, upper: u, lower: live ? null : name }));
+                }
+                box.classList.toggle('d-none', combos.length === 0);
+
+                // DOM nur neu bauen, wenn sich die Liste ändert; sonst nur neu zeichnen (auch beim Ziehen)
+                const listKey = combos.map(c => c.label).join(',');
+                if (listKey !== this.previewKey) {
+                    this.previewKey = listKey;
+                    box.innerHTML = '';
+                    this.previewCanvases = combos.map(c => {
+                        const tile = document.createElement('div');
+                        tile.className = 'text-center flex-shrink-0';
+                        const can = document.createElement('canvas');
+                        can.width = 96;
+                        can.height = 96;
+                        can.className = 'd-block bg-white border rounded';
+                        can.style.width = '48px';
+                        const label = document.createElement('span');
+                        label.className = 'small font-monospace';
+                        label.textContent = c.label;
+                        tile.append(can, label);
+                        box.appendChild(tile);
+                        return can;
+                    });
+                }
+
+                combos.forEach((c, i) => {
+                    const ctx = this.previewCanvases[i].getContext('2d');
+                    ctx.setTransform(96 / GRID, 0, 0, 96 / GRID, 0, 0);
+                    ctx.clearRect(0, 0, GRID, GRID);
+                    ctx.lineCap = this.lineCap;
+                    ctx.lineJoin = 'round';
+                    const { width, offset } = c.upper ? splitName(c.upper) : { width: this.glyphWidth, offset: this.offset };
+                    const upperStrokes = c.upper ? this.savedGlyphs[c.upper] : this.strokes;
+                    const lowerStrokes = c.lower ? this.savedGlyphs[c.lower] : this.strokes;
+                    this.drawInBox(ctx, upperStrokes, 0, 0, width, GRID, false, 0, false);
+                    // Die andere Komponente ist eine 200x200-Glyphe: linke Kante bei X, Unterkante bei Y, rechts und
+                    // oben fest (bei 0/200 unverändert). Ist die Box leer, wird nichts gezeichnet (keine Spiegelung).
+                    if (offset.x < GRID && offset.y > 0) {
+                        this.drawInBox(ctx, lowerStrokes, offset.x, 0, GRID - offset.x, offset.y, false, 0, false);
                     }
                 });
-                
-                this.output.value = kageLines.join('\n');
+            }
+
+            updateOutput() {
+                this.output.value = this.strokes.map(stroke => {
+                    const p = stroke.points;
+                    if (stroke.type === 1) {
+                        return `1,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
+                    } else if (stroke.type === 2) {
+                        return `2,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
+                    }
+                    const x1 = p[0].x, y1 = p[0].y, x2 = p[1].x, y2 = p[1].y;
+                    return `99,0,0,${x1},${y1},${x2},${y1},${x1},${y2},${x2},${y2},${stroke.refName}`;
+                }).join('\n');
             }
 
             showToast(msg) {
                 const toast = document.getElementById('toastMsg');
                 if (msg) toast.innerText = msg;
                 toast.classList.remove('opacity-0');
-                
-                // Alten Timeout löschen, falls ein neuer Toast direkt hinterhergeschossen wird
-                if (this.toastTimeout) {
-                    clearTimeout(this.toastTimeout);
-                }
-                
-                this.toastTimeout = setTimeout(() => {
-                    toast.classList.add('opacity-0');
-                }, 3500);
+                clearTimeout(this.toastTimeout);
+                this.toastTimeout = setTimeout(() => toast.classList.add('opacity-0'), 3500);
             }
         }
 
-        // Init
         document.addEventListener('DOMContentLoaded', () => {
             new KageEditor();
         });
     </script>
 </body>
 </html>
-
