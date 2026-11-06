@@ -101,11 +101,12 @@
                     <div class="card-header py-2 d-flex justify-content-between align-items-center">
                         <span class="small fw-bold">KAGE-Daten</span>
                         <div class="btn-group btn-group-sm">
-                            <button id="kageImportBtn" class="btn btn-outline-primary py-0" title="Daten aus dem Feld auf die Malfläche übernehmen">Import</button>
-                            <button id="kageExportBtn" class="btn btn-outline-secondary py-0" title="Als .kage-Datei herunterladen">Export</button>
+                            <button id="kageImportBtn" class="btn btn-outline-primary py-0" title="Alle Glyphen aus einer Datei importieren">Import</button>
+                            <button id="kageExportBtn" class="btn btn-outline-secondary py-0" title="Alle Glyphen als Datei herunterladen">Export</button>
                         </div>
+                        <input type="file" id="kageImportFile" accept=".yaml,.yml,.txt" class="d-none">
                     </div>
-                    <textarea id="kageOutput" rows="6" class="form-control font-monospace small border-0 rounded-0" style="resize: vertical;" placeholder="KAGE-Daten einfügen" aria-label="KAGE-Daten"></textarea>
+                    <textarea id="kageOutput" rows="6" class="form-control font-monospace small border-0 rounded-0" style="resize: vertical;" readonly aria-label="KAGE-Daten"></textarea>
                 </div>
             </div>
         </div>
@@ -115,6 +116,9 @@
         const GRID = 200; // KAGE intern ist IMMER 200x200
         const MARGIN = 12; // Hilfsrahmen vom Rand
         const STORAGE_KEY = 'kage.savedGlyphs';
+        // Kommentare auf Glyphen-Ebene { NAME: { before, comment, after }, '': { header, footer } };
+        // Kommentare an Strichen stehen direkt am Strich (before, comment)
+        const META_KEY = 'kage.glyphMeta';
         const LINE_CAPS = ['butt', 'square', 'round'];
         const PRESET_CODES = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
 
@@ -188,6 +192,65 @@
         const FINE_STEPS = Array.from({ length: RASTER * SUBDIV + 1 }, (_, k) => Math.round(MARGIN + k * (GRID - 2 * MARGIN) / (RASTER * SUBDIV)));
         const SNAP_LINES = [...new Set([0, ...FINE_STEPS, ...CENTER_GUIDES, GRID])];
 
+        // Ein Strich als KAGE-Zeile
+        function strokeToKage(stroke) {
+            const p = stroke.points;
+            if (stroke.type === 1) return `1,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
+            if (stroke.type === 2) return `2,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
+            const x1 = p[0].x, y1 = p[0].y, x2 = p[1].x, y2 = p[1].y;
+            return `99,0,0,${x1},${y1},${x2},${y1},${x1},${y2},${x2},${y2},${stroke.refName}`;
+        }
+
+        // KAGE-Daten in Striche umwandeln; GlyphWiki nutzt '$' oder Zeilenumbrüche als Trenner
+        function kageToStrokes(rawData) {
+            const lines = rawData.split(/[\n\r\$]+/);
+            const newStrokes = [];
+
+            lines.forEach(line => {
+                const parts = line.split(/[:,]/);
+                if (parts.length < 7) return; // Zu kurz für gültige KAGE-Daten
+
+                const type = parseInt(parts[0]);
+
+                if (type === 99) {
+                    if (parts.length >= 12) {
+                        const x1 = parseInt(parts[3]);
+                        const y1 = parseInt(parts[4]);
+                        const x2 = parseInt(parts[9]);
+                        const y2 = parseInt(parts[10]);
+                        newStrokes.push({
+                            type: 99,
+                            points: [
+                                { x: isNaN(x1) ? 0 : x1, y: isNaN(y1) ? 0 : y1 },
+                                { x: isNaN(x2) ? 200 : x2, y: isNaN(y2) ? 200 : y2 }
+                            ],
+                            refName: parts.slice(11).join(':').trim()
+                        });
+                    }
+                    return;
+                }
+
+                // Alle anderen KAGE-Typen nach Anzahl der Koordinaten in Linie oder Kurve umwandeln
+                const coords = parts.slice(3).map(p => parseInt(p)).filter(n => !isNaN(n));
+
+                if (coords.length >= 8) {
+                    // 4 Punkte -> 3-Punkt-Kurve (Start, Kontrollpunkt 1, Ende)
+                    newStrokes.push({ type: 2, points: [
+                        { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[6], y: coords[7] }
+                    ], refName: "" });
+                } else if (coords.length >= 6) {
+                    newStrokes.push({ type: 2, points: [
+                        { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[4], y: coords[5] }
+                    ], refName: "" });
+                } else if (coords.length >= 4) {
+                    newStrokes.push({ type: 1, points: [
+                        { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }
+                    ], refName: "" });
+                }
+            });
+            return newStrokes;
+        }
+
         class KageEditor {
             constructor() {
                 this.canvas = document.getElementById('kageCanvas');
@@ -209,6 +272,8 @@
                 this.offset = { ...NEUTRAL_OFFSET }; // Versatz der anderen Komponente in der Vorschau (nur Großbuchstaben)
                 this.handleSelected = null; // ausgewählter grüner Anfasser: 'width' | 'offset' | null
                 this.loadedCode = null; // Name, unter dem die geladene Glyphe gespeichert ist
+
+                this.glyphMeta = this.loadStored(META_KEY) ?? {}; // Kommentare auf Glyphen- und Dateiebene
 
                 // Gespeicherte Glyphen aus dem localStorage, sonst die Vorgaben
                 this.savedGlyphs = this.loadStored() ?? {
@@ -249,9 +314,9 @@
                 this.render();
             }
 
-            loadStored() {
+            loadStored(key = STORAGE_KEY) {
                 try {
-                    return JSON.parse(localStorage.getItem(STORAGE_KEY));
+                    return JSON.parse(localStorage.getItem(key));
                 } catch {
                     return null;
                 }
@@ -260,6 +325,7 @@
             persist() {
                 try {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.savedGlyphs));
+                    localStorage.setItem(META_KEY, JSON.stringify(this.glyphMeta));
                 } catch {
                     this.showToast('Speichern im Browser nicht möglich!');
                 }
@@ -351,26 +417,14 @@
                     this.render();
                 });
 
-                document.getElementById('kageImportBtn').addEventListener('click', () => {
-                    try {
-                        this.parseKageData(this.output.value);
-                    } catch (error) {
-                        this.showToast(`Import fehlgeschlagen: ${error.message}`);
-                    }
+                // Import/Export: alle Glyphen als eine Textdatei
+                const importFile = document.getElementById('kageImportFile');
+                document.getElementById('kageImportBtn').addEventListener('click', () => importFile.click());
+                importFile.addEventListener('change', async () => {
+                    if (importFile.files[0]) await this.importAll(importFile.files[0]);
+                    importFile.value = ''; // dieselbe Datei erneut wählbar
                 });
-
-                document.getElementById('kageExportBtn').addEventListener('click', () => {
-                    if (this.strokes.length === 0) {
-                        this.showToast('Keine Striche zum Exportieren!');
-                        return;
-                    }
-                    const code = document.getElementById('saveCodeInput').value.trim() || 'glyph';
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(new Blob([this.output.value + '\n'], { type: 'text/plain' }));
-                    a.download = `${code}.kage`;
-                    a.click();
-                    URL.revokeObjectURL(a.href);
-                });
+                document.getElementById('kageExportBtn').addEventListener('click', () => this.exportAll());
 
                 // Fadenkreuz: springt zur nächsten Einrastposition
                 document.querySelectorAll('.dpad-btn').forEach(btn => {
@@ -761,6 +815,10 @@
                 if (old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
                     delete this.savedGlyphs[old];
                     this.renameReferences(old, code);
+                    if (this.glyphMeta[old]) { // Kommentare der Glyphe wandern mit
+                        this.glyphMeta[code] = this.glyphMeta[old];
+                        delete this.glyphMeta[old];
+                    }
                 }
                 this.persist();
                 this.renderSavedGlyphPreviews();
@@ -789,6 +847,7 @@
             deleteGlyph(code) {
                 if (!confirm(`Glyphe '${code}' löschen?`)) return;
                 delete this.savedGlyphs[code];
+                delete this.glyphMeta[code];
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.render(); // Komponenten, die darauf verweisen, sind jetzt leer
@@ -837,53 +896,7 @@
             }
 
             parseKageData(rawData) {
-                // GlyphWiki nutzt oft '$' oder Zeilenumbrüche als Trenner
-                const lines = rawData.split(/[\n\r\$]+/);
-                const newStrokes = [];
-
-                lines.forEach(line => {
-                    const parts = line.split(/[:,]/);
-                    if (parts.length < 7) return; // Zu kurz für gültige KAGE-Daten
-
-                    const type = parseInt(parts[0]);
-
-                    if (type === 99) {
-                        if (parts.length >= 12) {
-                            const x1 = parseInt(parts[3]);
-                            const y1 = parseInt(parts[4]);
-                            const x2 = parseInt(parts[9]);
-                            const y2 = parseInt(parts[10]);
-                            newStrokes.push({
-                                type: 99,
-                                points: [
-                                    { x: isNaN(x1) ? 0 : x1, y: isNaN(y1) ? 0 : y1 },
-                                    { x: isNaN(x2) ? 200 : x2, y: isNaN(y2) ? 200 : y2 }
-                                ],
-                                refName: parts.slice(11).join(':').trim()
-                            });
-                        }
-                        return;
-                    }
-
-                    // Alle anderen KAGE-Typen nach Anzahl der Koordinaten in Linie oder Kurve umwandeln
-                    const coords = parts.slice(3).map(p => parseInt(p)).filter(n => !isNaN(n));
-
-                    if (coords.length >= 8) {
-                        // 4 Punkte -> 3-Punkt-Kurve (Start, Kontrollpunkt 1, Ende)
-                        newStrokes.push({ type: 2, points: [
-                            { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[6], y: coords[7] }
-                        ], refName: "" });
-                    } else if (coords.length >= 6) {
-                        newStrokes.push({ type: 2, points: [
-                            { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[4], y: coords[5] }
-                        ], refName: "" });
-                    } else if (coords.length >= 4) {
-                        newStrokes.push({ type: 1, points: [
-                            { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }
-                        ], refName: "" });
-                    }
-                });
-
+                const newStrokes = kageToStrokes(rawData);
                 if (newStrokes.length === 0) {
                     throw new Error('Keine Linien in dieser Glyphe gefunden (möglicherweise nur Referenzen).');
                 }
@@ -894,6 +907,108 @@
                 this.updateOutput();
                 this.updateEditInfo();
                 this.render();
+            }
+
+            // Alle Glyphen als YAML-artige Textdatei (gültiges YAML, wird aber ohne YAML-Parser gelesen):
+            //   NAME: |-
+            //     KAGE-Zeile
+            //     KAGE-Zeile
+            // Gespeicherte Kommentare werden an ihrer Stelle wieder ausgegeben (siehe importAll).
+            exportAll() {
+                const file = this.glyphMeta[''] ?? {};
+                const withComment = (text, comment) => comment ? `${text} ${comment}` : text;
+                const lines = file.header?.length ? [...file.header, ''] : [];
+                Object.keys(this.savedGlyphs).sort(glyphOrder).forEach(code => {
+                    const meta = this.glyphMeta[code] ?? {};
+                    lines.push(...(meta.before ?? []));
+                    lines.push(withComment(`${code}: |-`, meta.comment));
+                    this.savedGlyphs[code].forEach(s => {
+                        lines.push(...(s.before ?? []).map(c => `  ${c}`));
+                        lines.push(withComment(`  ${strokeToKage(s)}`, s.comment));
+                    });
+                    lines.push(...(meta.after ?? []).map(c => `  ${c}`));
+                });
+                lines.push(...(file.footer ?? []));
+                const text = lines.join('\n') + '\n';
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+                a.download = 'kage-glyphen.yaml';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+
+            // Datei aus exportAll einlesen, nur nach Einrückung: eine Zeile ohne Einrückung "NAME: |-" beginnt eine
+            // Glyphe, eingerückte Zeilen sind ihre KAGE-Zeilen (Einrückung beliebig, Leerzeichen oder Tabs).
+            // Leerzeilen zählen nicht. Kommentare (# am Zeilenanfang, auch eingerückt, oder am Zeilenende mit
+            // Leerraum davor) werden gespeichert, für die Verarbeitung aber entfernt:
+            //   - am Ende einer KAGE-Zeile und eingerückte Kommentarzeilen davor: am Strich (wandert mit ihm)
+            //   - am Ende der Namenszeile und nicht eingerückte Kommentarzeilen davor: an der Glyphe
+            //   - eingerückt nach dem letzten Strich: am Ende der Glyphe
+            //   - vor der ersten Glyphe bis zur letzten Leerzeile davor, und am Dateiende: Kopf und Fuß der Datei
+            // Gleichnamige Glyphen werden überschrieben, alle anderen bleiben.
+            async importAll(file) {
+                const glyphs = {};
+                const metas = {};
+                const fileMeta = { header: [], footer: [] };
+                let current = null;
+                let pendingTop = []; // nicht eingerückte Kommentarzeilen
+                let pendingIndented = []; // eingerückte Kommentarzeilen
+                const splitComment = (line) => {
+                    const m = line.match(/^(.*?)(\s+#.*)?$/);
+                    return [m[1], m[2] ? m[2].trim() : ''];
+                };
+
+                (await file.text()).split(/\r?\n/).forEach(line => {
+                    if (!line.trim()) {
+                        // Vor der ersten Glyphe trennt eine Leerzeile den Dateikopf vom Kommentar der Glyphe
+                        if (current === null) fileMeta.header.push(...pendingTop.splice(0));
+                        return;
+                    }
+                    const indented = /^\s/.test(line);
+                    if (/^\s*#/.test(line)) {
+                        (indented && current !== null ? pendingIndented : pendingTop).push(line.trim());
+                        return;
+                    }
+                    const [content, comment] = splitComment(line);
+                    if (indented) {
+                        if (current === null) return;
+                        const [stroke] = kageToStrokes(content);
+                        if (stroke) {
+                            if (pendingIndented.length) stroke.before = pendingIndented;
+                            if (comment) stroke.comment = comment;
+                            glyphs[current].push(stroke);
+                        }
+                        pendingIndented = [];
+                        return;
+                    }
+                    // Neue Glyphe: offene eingerückte Kommentare gehören ans Ende der vorigen
+                    if (current !== null && pendingIndented.length) metas[current].after = pendingIndented;
+                    current = content.replace(/:\s*\|-?\s*$/, '').trim();
+                    glyphs[current] = [];
+                    metas[current] = { before: pendingTop, comment, after: [] };
+                    pendingTop = [];
+                    pendingIndented = [];
+                });
+                if (current !== null && pendingIndented.length) metas[current].after = pendingIndented;
+                fileMeta.footer = pendingTop;
+
+                const codes = Object.keys(glyphs);
+                const count = codes.length;
+                if (count === 0) {
+                    this.showToast('Import fehlgeschlagen: keine Glyphen in der Datei.');
+                    return;
+                }
+                codes.forEach(code => {
+                    this.savedGlyphs[code] = glyphs[code];
+                    const m = metas[code];
+                    if (m.before.length || m.comment || m.after.length) this.glyphMeta[code] = m;
+                    else delete this.glyphMeta[code];
+                });
+                if (fileMeta.header.length || fileMeta.footer.length) this.glyphMeta[''] = fileMeta;
+                this.persist();
+                this.renderSavedGlyphPreviews();
+                this.render();
+                this.showToast(`${count} Glyphen importiert.`);
             }
 
             loadGlyph(code) {
@@ -1201,16 +1316,7 @@
             }
 
             updateOutput() {
-                this.output.value = this.strokes.map(stroke => {
-                    const p = stroke.points;
-                    if (stroke.type === 1) {
-                        return `1,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
-                    } else if (stroke.type === 2) {
-                        return `2,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
-                    }
-                    const x1 = p[0].x, y1 = p[0].y, x2 = p[1].x, y2 = p[1].y;
-                    return `99,0,0,${x1},${y1},${x2},${y1},${x1},${y2},${x2},${y2},${stroke.refName}`;
-                }).join('\n');
+                this.output.value = this.strokes.map(strokeToKage).join('\n');
             }
 
             showToast(msg) {
