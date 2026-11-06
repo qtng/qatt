@@ -1310,7 +1310,11 @@
                     // Die andere Komponente ist eine 200x200-Glyphe: linke Kante bei X, Unterkante bei Y, rechts und
                     // oben fest (bei 0/200 unverändert). Ist die Box leer, wird nichts gezeichnet (keine Spiegelung).
                     if (offset.x < GRID && offset.y > 0) {
-                        this.drawInBox(ctx, lowerStrokes, offset.x, 0, GRID - offset.x, offset.y, false, 0, false);
+                        if (offset.y > GRID / 2) {
+                            this.drawInBox(ctx, lowerStrokes, offset.x, 0, GRID - offset.x, offset.y, false, 0, false);
+                        } else {
+                            this.drawInBox(ctx, lowerStrokes, offset.x, offset.y, GRID - offset.x, GRID - offset.y, false, 0, false);
+                        }
                     }
                 });
             }
