@@ -39,13 +39,21 @@
                     <!-- Toolbar: Handy = Fadenkreuz über den Buttons, Desktop = Buttons links, Fadenkreuz rechts -->
                     <div id="editTools" class="card-footer d-flex flex-column-reverse flex-lg-row align-items-center gap-2 py-2">
                         <div class="d-flex flex-column gap-2 align-self-stretch justify-content-center flex-grow-1">
+                            <!-- Ebene: nur ihre Striche sind bearbeitbar, die der anderen gedämpft (Einrasten an allen) -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div id="layerTools" class="btn-group btn-group-sm" role="group" aria-label="Ebene">
+                                    <button type="button" class="layer-btn btn btn-primary" data-layer="glyph" aria-pressed="true">Glyph</button>
+                                    <button type="button" class="layer-btn btn btn-outline-primary" data-layer="marks" aria-pressed="false" title="Die 6 Markierungen der markierten Formen">Marks <span id="marksCount" class="font-monospace">0/6</span></button>
+                                </div>
+                                <span class="small text-body-secondary">Ebene</span>
+                            </div>
                             <div class="d-flex align-items-center gap-2">
                                 <div id="drawTools" class="btn-group btn-group-sm" role="group" aria-label="Element hinzufügen">
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="1">+ Linie</button>
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="2">+ Kurve</button>
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="99">+ Komponente</button>
                                 </div>
-                                <button id="clearBtn" class="btn btn-sm btn-outline-danger ms-auto">Leeren</button>
+                                <button id="clearBtn" class="btn btn-sm btn-outline-danger ms-auto" title="Alle Striche der aktuellen Ebene entfernen">Leeren</button>
                             </div>
                             <div class="d-flex align-items-center gap-2" style="min-height: 31px;">
                                 <span id="editInfo" class="small text-body-secondary me-auto">Nichts ausgewählt</span>
@@ -181,6 +189,24 @@
             }
             return cmp(a, b);
         }
+        // Marks: die 6 Markierungen eines Kleinbuchstabens (für die markierten Formen 1–6), je ein Strich.
+        // In den KAGE-Daten stehen sie hinter den Strichen der Glyphe: hat eine Form MARKS_MIN_PARTS oder mehr Teile,
+        // sind die letzten MARK_COUNT die Marks. Im Editor trägt jeder Strich seine Ebene (layer), gespeichert wird
+        // sie nicht (nur die Reihenfolge).
+        const MARK_COUNT = 6;
+        const MARKS_MIN_PARTS = 9;
+        const hasMarks = (strokes) => strokes.length >= MARKS_MIN_PARTS;
+        const glyphPart = (strokes) => hasMarks(strokes) ? strokes.slice(0, -MARK_COUNT) : strokes;
+        const marksPart = (strokes) => hasMarks(strokes) ? strokes.slice(-MARK_COUNT) : [];
+        // Gespeicherte Striche -> Editor-Striche mit Ebene (Kopie)
+        const withLayers = (strokes) => {
+            const n = strokes.length - (hasMarks(strokes) ? MARK_COUNT : 0);
+            return JSON.parse(JSON.stringify(strokes)).map((s, i) => ({ ...s, layer: i < n ? 'glyph' : 'marks' }));
+        };
+        // Editor-Striche -> gespeicherte Reihenfolge: erst die Glyphe, dann die Marks, ohne Ebene
+        const withoutLayers = (strokes) => [...strokes.filter(s => s.layer !== 'marks'), ...strokes.filter(s => s.layer === 'marks')]
+            .map(({ layer, ...s }) => JSON.parse(JSON.stringify(s)));
+
         const SNAP_RADIUS = 10;
         // Guides: Mittellinie und 6x6-Raster innerhalb des Hilfsrahmens; Rahmen selbst rastet auch ein
         const RASTER = 6;
@@ -260,6 +286,7 @@
                 this.strokes = [];
                 this.currentPoints = [];
                 this.activeTool = null;
+                this.layer = 'glyph'; // bearbeitete Ebene: 'glyph' | 'marks'
 
                 // Status-Variablen für das Bearbeiten
                 this.appMode = 'edit'; // 'add' | 'edit'
@@ -318,6 +345,10 @@
             }
 
             initEvents() {
+                document.querySelectorAll('.layer-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.setLayer(btn.dataset.layer));
+                });
+
                 // One-Shot Hinzufügen Buttons
                 document.querySelectorAll('.tool-add-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
@@ -384,7 +415,7 @@
                 this.canvas.addEventListener('pointercancel', () => { this.drag = null; });
 
                 document.getElementById('clearBtn').addEventListener('click', () => {
-                    this.strokes = [];
+                    this.strokes = this.strokes.filter(s => s.layer !== this.layer);
                     this.currentPoints = [];
                     this.selectedStrokeIdx = null;
                     this.selectedPointIdx = null;
@@ -473,6 +504,16 @@
                 this.render();
             }
 
+            // Ebene wechseln: Auswahl und angefangenes Zeichnen fallen weg
+            setLayer(layer) {
+                this.layer = layer;
+                this.resetToAddOrEdit();
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.updateEditInfo();
+                this.render();
+            }
+
             resetToAddOrEdit() {
                 this.appMode = 'edit';
                 this.activeTool = null;
@@ -512,6 +553,7 @@
 
                 // 1. Zuerst Punkte prüfen (haben Priorität)
                 for (let i = this.strokes.length - 1; i >= 0; i--) {
+                    if (this.strokes[i].layer !== this.layer) continue; // nur die Striche der aktuellen Ebene
                     const pts = this.strokes[i].points;
                     for (let j = 0; j < pts.length; j++) {
                         if (Math.hypot(pts[j].x - x, pts[j].y - y) <= hitT) return { s: i, p: j };
@@ -521,6 +563,7 @@
                 // 2. Dann Linien/Kurven/Boxen prüfen
                 for (let i = this.strokes.length - 1; i >= 0; i--) {
                     const stroke = this.strokes[i];
+                    if (stroke.layer !== this.layer) continue;
                     const pts = stroke.points;
                     if (stroke.type === 1) {
                         if (this.distToSegment(x, y, pts[0], pts[1]) <= hitT) return { s: i, p: null };
@@ -750,8 +793,9 @@
                 const w = Math.abs(p2.x - p1.x);
                 const h = Math.abs(p2.y - p1.y);
 
-                const resolvedStrokes = this.savedGlyphs[refName].map(subStroke => {
+                const resolvedStrokes = glyphPart(this.savedGlyphs[refName]).map(subStroke => {
                     const newStroke = JSON.parse(JSON.stringify(subStroke));
+                    newStroke.layer = stroke.layer;
                     newStroke.points = newStroke.points.map(p => ({
                         x: Math.round(x + (p.x / GRID) * w),
                         y: Math.round(y + (p.y / GRID) * h)
@@ -779,13 +823,28 @@
                     this.showToast('Keine Striche zum Speichern!');
                     return;
                 }
+                // Marks: keine oder genau 6 Striche; die Anzahl der Teile muss sie beim Laden wieder erkennen lassen
+                const marks = this.strokes.filter(s => s.layer === 'marks');
+                const glyphCount = this.strokes.length - marks.length;
+                let problem = null;
+                if (marks.length && marks.length !== MARK_COUNT) {
+                    problem = `Die Ebene Marks hat ${marks.length} Striche, sie braucht genau ${MARK_COUNT}.`;
+                } else if (marks.length && glyphCount + MARK_COUNT < MARKS_MIN_PARTS) {
+                    problem = `Mit Marks braucht die Ebene Glyph mindestens ${MARKS_MIN_PARTS - MARK_COUNT} Teile (sie hat ${glyphCount}).`;
+                } else if (!marks.length && glyphCount >= MARKS_MIN_PARTS) {
+                    problem = `Ohne Marks darf die Glyphe höchstens ${MARKS_MIN_PARTS - 1} Teile haben (sie hat ${glyphCount}), sonst gelten die letzten ${MARK_COUNT} als Marks.`;
+                }
+                if (problem) {
+                    this.showToast(`Nicht gespeichert: ${problem}`);
+                    return;
+                }
 
                 // Name mit Breite (nur Großbuchstaben); eine im Feld getippte Breite zählt nicht, der Anfasser gilt
                 const { base } = splitName(input);
                 const code = joinName(base, this.glyphWidth, this.offset);
 
                 // Deep Copy (überschreibt, wenn der Code existiert)
-                this.savedGlyphs[code] = JSON.parse(JSON.stringify(this.strokes));
+                this.savedGlyphs[code] = withoutLayers(this.strokes);
 
                 // Nur die Breite geändert: alte Glyphe umbenennen und Verweise in anderen Glyphen nachziehen
                 const old = this.loadedCode;
@@ -909,7 +968,7 @@
                 if (newStrokes.length === 0) {
                     throw new Error('Keine Linien in dieser Glyphe gefunden (möglicherweise nur Referenzen).');
                 }
-                this.strokes = newStrokes;
+                this.strokes = withLayers(newStrokes);
                 this.selectedStrokeIdx = null;
                 this.selectedPointIdx = null;
                 this.resetToAddOrEdit();
@@ -1024,7 +1083,7 @@
             loadGlyph(code) {
                 if (!this.savedGlyphs[code]) return;
 
-                this.strokes = JSON.parse(JSON.stringify(this.savedGlyphs[code]));
+                this.strokes = withLayers(this.savedGlyphs[code]);
                 this.selectedStrokeIdx = null;
                 this.selectedPointIdx = null;
                 this.resetToAddOrEdit();
@@ -1084,9 +1143,14 @@
                     this.previewTransform(ctx, 60);
                     ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
-                    this.savedGlyphs[code].forEach(stroke => {
+                    glyphPart(this.savedGlyphs[code]).forEach(stroke => {
                         this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
                     });
+                    ctx.globalAlpha = 0.3; // Marks gedämpft
+                    marksPart(this.savedGlyphs[code]).forEach(stroke => {
+                        this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
+                    });
+                    ctx.globalAlpha = 1;
 
                     const label = document.createElement('span');
                     label.className = 'small font-monospace fw-bold';
@@ -1101,7 +1165,7 @@
             // --- ZEICHNEN & RENDER METHODEN ---
 
             addStroke(type, points, refName = "") {
-                this.strokes.push({ type, points, refName });
+                this.strokes.push({ type, points, refName, layer: this.layer });
                 this.updateOutput();
             }
 
@@ -1114,6 +1178,16 @@
                 document.querySelectorAll('.tool-add-btn').forEach(b => {
                     b.classList.toggle('active', this.appMode !== 'edit' && parseInt(b.dataset.tool) === this.activeTool);
                 });
+                document.querySelectorAll('.layer-btn').forEach(btn => {
+                    const on = btn.dataset.layer === this.layer;
+                    btn.classList.toggle('btn-primary', on);
+                    btn.classList.toggle('btn-outline-primary', !on);
+                    btn.setAttribute('aria-pressed', on);
+                });
+                const markCount = this.strokes.filter(s => s.layer === 'marks').length;
+                const counter = document.getElementById('marksCount');
+                counter.textContent = `${markCount}/${MARK_COUNT}`;
+                counter.classList.toggle('text-danger', markCount !== 0 && markCount !== MARK_COUNT);
                 // Im Auswahlmodus die Glyphen-Liste als Ziel hervorheben
                 document.getElementById('savedGlyphsCard').classList.toggle('border-primary', this.appMode === 'pick');
 
@@ -1131,10 +1205,25 @@
                 this.ctx.lineCap = this.lineCap;
                 this.ctx.lineJoin = 'round';
 
+                // Erst die andere Ebene gedämpft, darüber die aktuelle
                 this.strokes.forEach((stroke, idx) => {
+                    if (stroke.layer === this.layer) return;
+                    this.ctx.globalAlpha = 0.2;
+                    this.drawShape(this.ctx, stroke.type, stroke.points, stroke.refName, false);
+                    this.ctx.globalAlpha = 1;
+                });
+                this.strokes.forEach((stroke, idx) => {
+                    if (stroke.layer !== this.layer) return;
                     const isSelected = (this.appMode === 'edit' && this.selectedStrokeIdx === idx);
                     this.drawShape(this.ctx, stroke.type, stroke.points, stroke.refName, isSelected);
                 });
+                // Ebene Marks: Nummer jeder Markierung (Reihenfolge = markierte Form 1–6) an ihrer Mitte
+                if (this.layer === 'marks') {
+                    this.strokes.filter(s => s.layer === 'marks').forEach((s, n) => {
+                        const a = s.points[0], b = s.points[s.points.length - 1];
+                        this.drawLabel(`${n + 1}`, (a.x + b.x) / 2, (a.y + b.y) / 2);
+                    });
+                }
 
                 // Breite (grüner vertikaler Guide, Anfasser auf der unteren Kante) und Versatz (grüner Punkt)
                 if (this.showsWidth()) {
@@ -1257,7 +1346,7 @@
                     }
 
                     // Referenzierte Glyphe in die Box einpassen
-                    this.drawInBox(ctx, this.savedGlyphs[refName] || [], x, y, w, h, isSelected, depth + 1, frame);
+                    this.drawInBox(ctx, glyphPart(this.savedGlyphs[refName] || []), x, y, w, h, isSelected, depth + 1, frame);
                 }
             }
 
@@ -1320,8 +1409,9 @@
                     ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
                     const { width, offset } = c.upper ? splitName(c.upper) : { width: this.glyphWidth, offset: this.offset };
-                    const upperStrokes = c.upper ? this.savedGlyphs[c.upper] : this.strokes;
-                    const lowerStrokes = c.lower ? this.savedGlyphs[c.lower] : this.strokes;
+                    const canvasGlyph = this.strokes.filter(s => s.layer !== 'marks');
+                    const upperStrokes = c.upper ? glyphPart(this.savedGlyphs[c.upper]) : canvasGlyph;
+                    const lowerStrokes = c.lower ? glyphPart(this.savedGlyphs[c.lower]) : canvasGlyph;
                     this.drawInBox(ctx, upperStrokes, 0, 0, width, GRID, false, 0, false);
                     // Die andere Komponente ist eine 200x200-Glyphe: linke Kante bei X, Unterkante bei Y, rechts und
                     // oben fest (bei 0/200 unverändert). Ist die Box leer, wird nichts gezeichnet (keine Spiegelung).
@@ -1336,7 +1426,7 @@
             }
 
             updateOutput() {
-                this.output.value = this.strokes.map(strokeToKage).join('\n');
+                this.output.value = withoutLayers(this.strokes).map(strokeToKage).join('\n'); // so wie gespeichert
             }
 
             showToast(msg) {
