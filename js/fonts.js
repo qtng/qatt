@@ -18,16 +18,15 @@ var QATT_FONTS = [
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters", big: "qatt-pen-light", cjk: true },
   { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", big: "qatt-pen", cjk: true, default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
   { family: "QATT Pen Medium",      label: "QATT Pen medium",              file: "qatt-pen-medium-letters", big: "qatt-pen-medium", cjk: true },
-  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", big: "migoi", cjk: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font
-  { family: "Migoi B",            label: "Migoi B",                      file: "migoi-b" },   // QATT letters only (no CJK), drawn in the Migoi style from the KAGE glyphs of admin/glyphs.html (private repository: tools/build_kage_font.py, build_all.py)
+  { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", big: "migoi", cjk: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font; the QATT letters are drawn from the KAGE glyphs of admin/glyphs.html (private repository: tools/build_kage_font.py, build_all.py)
   { family: "Celluloid",          label: "Celluloid",                    file: "celluloid-letters", big: "celluloid", cjk: true },   // as QATT Pen: letters here, CJK from the big font
-  { family: "Celluloid B",        label: "Celluloid B",                  file: "celluloid-b" },   // QATT letters only (no CJK), the Celluloid strokes from the KAGE glyphs (as Migoi B)
+  { family: "Celluloid B",        label: "Celluloid B",                  file: "celluloid-b" },   // QATT letters only (no CJK), the Celluloid strokes from the KAGE glyphs
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
   { family: "QATT Metro",            label: "Metro",               file: "qatt-metro" },
   { family: "QATT N7K",              label: "N7K",                 file: "qatt-n7k" },
-  { family: "PhongThao",       label: "Phong Thảo",          file: "phongthao-letters", big: "phongthao", cjk: true },   // as Migoi: letters here, CJK from the big font (the ideographs in its pencil strokes, the rest QATT Pen Light; the QATT letters drawn from the KAGE glyphs of admin/glyphs.html, as Migoi B)
+  { family: "PhongThao",       label: "Phong Thảo",          file: "phongthao-letters", big: "phongthao", cjk: true },   // as Migoi: letters here, CJK from the big font (the ideographs in its pencil strokes, the rest QATT Pen Light; the QATT letters drawn from the KAGE glyphs of admin/glyphs.html, as Migoi)
   { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Khai Wide",        label: "Khai wide (draft)",   file: "qatt-khai-wide", admin: true },
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
