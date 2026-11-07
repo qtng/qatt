@@ -99,7 +99,7 @@
     <li>The <strong>first block</strong> joins the onset (a Hán Nôm character on the left) and the vowel (a mark on the right). Every syllable has it.</li>
     <li>The <strong>second block</strong> holds the coda and the tone: the coda is a Hán Nôm character, the tone a small mark in it. A syllable with a tone but no coda gets the tone mark alone; a syllable with neither has no second block.</li>
   </ul>
-  <p>Optionally the two blocks can be stacked into one square, like a Chữ Nôm character (see the <a href="#composition">joiner</a> in the specification). The next font will offer both forms.</p>
+  <p>Optionally the two blocks can be stacked into one square, like a Chữ Nôm character (see the <a href="#composition">combiner</a> in the specification). The next font will offer both forms.</p>
   <div class="pa sample" aria-label="thuyền in PA">&#xE26F;&#xE03D;</div>
   <p class="text-center small text-body-secondary">th<span class="v">uyê</span> + <span class="c">n</span><span class="t"> (huyền)</span> → <em>thuyền</em></p>
   <p>Colours on this page: <span class="c">black</span> onsets and codas, <span class="v">blue</span> vowels, <span class="t">red</span> tones.</p>
@@ -144,108 +144,115 @@
   <h2 id="spec" class="part" data-vi="Đặc tả">Specification</h2>
   <p class="status small"><strong>Draft.</strong> Version 0.1. The specification defines the character repertoire, its code points and how a font composes the glyphs. The code points are provisional and lie in the Supplementary Private Use Area-A. There is no reference font yet, so the tables of the specification show no glyphs.</p>
 <h3 id="grammar" data-vi="Ngữ pháp âm tiết">Syllable grammar</h3>
-  <p>A syllable is written with the four kinds of component of a Vietnamese syllable: <em>onset</em> (A), <em>nucleus</em> (N), <em>coda</em> (C) and <em>tone</em> (T), and an optional <em>joiner</em> (J). The nucleus includes the glide: <code>oa</code>, <code>uy</code> and similar are nuclei of their own.</p>
-<pre>Syllable  = Stem [ [ J ] Extension ]
-Stem      = A N
-Extension = C [ T ]  |  T</pre>
+  <p>A syllable is written with the four kinds of component of a Vietnamese syllable: <em>onset</em> (A), <em>nucleus</em> (N), <em>coda</em> (C) and <em>tone</em> (T). The nucleus includes the glide: <code>oa</code>, <code>uy</code> and similar are nuclei of their own. As in QATT two control characters build the cells: the <em>joiner</em> J (<code>U+F009A</code>) puts two parts side by side into one cell, the <em>combiner</em> K (<code>U+F009B</code>) stacks two cells into one. They are the characters of QATT and are shared with it.</p>
+<pre>Stem     = A J N
+Syllable = Stem [ T ]            one cell: the stem with a small tone mark
+         | Stem C [ T ]          two cells: the stem, then the coda with its tone
+         | Stem K Ext            one cell: the stem above the extension
+Ext      = C [ T ]  |  T
+Alone    = A | N | C [ T ] | T   a cell of its own, full size</pre>
   <ul>
-    <li>A stem always has an onset. A syllable without an onset uses the onset <code>_</code>, which has a shape of its own.</li>
-    <li>A coda without a tone is a valid extension (<em>tai</em>, ngang tone). A tone alone is a valid extension (an open syllable with a tone).</li>
-    <li>A nucleus never stands without an onset. An onset may stand alone (a lone consonant).</li>
+    <li>A stem always has an onset. A syllable without an onset uses the onset <code>ZERO</code> (written <code>z</code> in code), which has a shape of its own: <code>z J N</code>.</li>
+    <li>Without J the onset and the nucleus are two cells (each in its full size); a stem needs J.</li>
+    <li>A coda without a tone is valid (<em>tai</em>, ngang tone, which can also be written with the tone mark ngang). A tone alone is valid (an open syllable with a tone).</li>
+    <li>A tone belongs to the character before it if that is a stem or a coda, and after K it is part of the stack. Anywhere else (alone, behind an onset or a nucleus that stands alone) it is a cell of its own, in full size.</li>
+    <li>J is only valid between an onset and a nucleus, K only between a stem and an extension.</li>
   </ul>
-  <p>The joiner J chooses the layout, and it is optional:</p>
+  <p>K chooses the layout, and it is optional:</p>
   <ul>
-    <li><strong>Without J</strong> a syllable has at most two cells side by side: the <em>stem cell</em> (A and N in one glyph) and the <em>extension cell</em> (C and T in one glyph, or C alone, or T alone).</li>
-    <li><strong>With J</strong> between stem and extension both form <em>one cell</em>: the stem above, the extension below, in one em square like a CJK character. This is the form for vertical text and for mixing with Chữ Nôm.</li>
+    <li><strong>Without K</strong> a syllable has at most two cells side by side: the <em>stem cell</em> (with a small tone mark, if the tone follows the stem directly) and the <em>coda cell</em> (C and T in one glyph, or C alone).</li>
+    <li><strong>With K</strong> between stem and extension both form <em>one cell</em>: the stem above, the extension below, in one em square like a CJK character. This is the form for vertical text and for mixing with Chữ Nôm.</li>
   </ul>
-  <p>J is only valid between a stem and an extension.</p>
 
   <h3 id="repertoire" data-vi="Bộ ký tự">Character repertoire</h3>
-  <p>23 onsets, 22 nuclei, 10 codas, 6 tones and the joiner are encoded, 62 characters in all. The combined glyphs are not encoded: the font builds them from sequences (see <a href="#composition">Composition</a>).</p>
+  <p>23 onsets, 22 nuclei, 10 codas and 6 tones are encoded, 61 characters in all; the joiner and the combiner are those of QATT. The combined glyphs are not encoded: the font builds them from sequences (see <a href="#composition">Composition</a>).</p>
   <table class="table table-sm w-auto">
     <thead><tr><th>Class</th><th>Count</th><th>Combined with</th></tr></thead>
     <tbody>
-      <tr><td>A onset</td><td>23</td><td>N: 23 × 22 = 506 stem glyphs</td></tr>
+      <tr><td>A onset</td><td>23</td><td>J N: 23 × 22 = 506 stem glyphs</td></tr>
       <tr><td>N nucleus</td><td>22</td><td>—</td></tr>
-      <tr><td>C coda</td><td>10</td><td>T: 10 × 6 = 60 extension glyphs</td></tr>
+      <tr><td>C coda</td><td>10</td><td>T: 10 × 6 = 60 coda glyphs</td></tr>
       <tr><td>T tone</td><td>6</td><td>—</td></tr>
-      <tr><td>J joiner</td><td>1</td><td>stem and extension into one cell</td></tr>
+      <tr><td>J joiner (QATT)</td><td>—</td><td>onset and nucleus into a stem</td></tr>
+      <tr><td>K combiner (QATT)</td><td>—</td><td>stem and extension into one stacked cell</td></tr>
     </tbody>
   </table>
 
   <h3 id="codes" data-vi="Mã ký tự">Code points</h3>
-  <p>The classes lie in separate ranges, so the class of a character is known from its code point and a sequence is validated with a regular expression. The block starts at <code>U+F0800</code>, well behind the provisional QATT range (<code>U+F0000</code>..<code>U+F00AF</code>), which stays free for growth.</p>
+  <p>The classes lie in separate ranges, so the class of a character is known from its code point and a sequence is validated with a regular expression. The block starts at <code>U+F00B0</code>, directly behind the provisional QATT range (<code>U+F0000</code>..<code>U+F00AF</code>) and next to the joiner <code>U+F009A</code> and the combiner <code>U+F009B</code>, and ends at <code>U+F00FF</code>.</p>
   <table class="table table-sm w-auto">
     <thead><tr><th>Class</th><th>Range</th><th>Used</th><th>Code point</th></tr></thead>
     <tbody>
-      <tr><td>A onset</td><td><code>U+F0800</code>..<code>U+F081F</code></td><td>23</td><td><code>F0800 + i</code></td></tr>
-      <tr><td>N nucleus</td><td><code>U+F0820</code>..<code>U+F083F</code></td><td>22</td><td><code>F0820 + i</code></td></tr>
-      <tr><td>C coda</td><td><code>U+F0840</code>..<code>U+F084F</code></td><td>10</td><td><code>F0840 + i</code></td></tr>
-      <tr><td>T tone</td><td><code>U+F0850</code>..<code>U+F085F</code></td><td>6</td><td><code>F0850 + (tone − 1)</code></td></tr>
-      <tr><td>J joiner</td><td><code>U+F0860</code> <code>PA JOINER</code></td><td>1</td><td><code>F0860</code></td></tr>
+      <tr><td>A onset</td><td><code>U+F00B0</code>..<code>U+F00CF</code></td><td>23</td><td><code>F00B0 + i</code></td></tr>
+      <tr><td>N nucleus</td><td><code>U+F00D0</code>..<code>U+F00EF</code></td><td>22</td><td><code>F00D0 + i</code></td></tr>
+      <tr><td>C coda</td><td><code>U+F00F0</code>..<code>U+F00F9</code></td><td>10</td><td><code>F00F0 + i</code></td></tr>
+      <tr><td>T tone</td><td><code>U+F00FA</code>..<code>U+F00FF</code></td><td>6</td><td><code>F00FA + (tone − 1)</code></td></tr>
+      <tr><td>J joiner (QATT)</td><td><code>U+F009A</code></td><td>1</td><td>shared with QATT</td></tr>
+      <tr><td>K combiner (QATT)</td><td><code>U+F009B</code></td><td>1</td><td>shared with QATT</td></tr>
     </tbody>
   </table>
-<pre>[U+F0800-F0816] [U+F0820-F0835]? ( U+F0860? ( [U+F0840-F0849] [U+F0850-F0855]? | [U+F0850-F0855] ) )?</pre>
+<pre>[U+F00B0-F00C6] ( U+F009A [U+F00D0-F00E5] ( [U+F00FA-F00FF] | U+F009B? [U+F00F0-F00F9] [U+F00FA-F00FF]? | U+F009B [U+F00FA-F00FF] )? )?
+| [U+F00D0-F00E5] | [U+F00F0-F00F9] [U+F00FA-F00FF]? | [U+F00FA-F00FF]</pre>
   <p>The order inside each class is that of the earlier PA font, see <a href="#legacy">The earlier font</a>.</p>
 
   <h4>A: onsets</h4>
   <div class="table-responsive"><table class="table table-sm w-auto">
     <thead><tr><th>i</th><th>Code point</th><th>Character name</th><th>Legacy name</th><th>Quốc Ngữ</th></tr></thead>
     <tbody>
-<tr><td class="num">0</td><td class="code">U+F0800</td><td><code>PA ONSET ZERO</code></td><td><code>_</code></td><td>none (placeholder shape)</td></tr>
-<tr><td class="num">1</td><td class="code">U+F0801</td><td><code>PA ONSET B</code></td><td><code>b</code></td><td>b</td></tr>
-<tr><td class="num">2</td><td class="code">U+F0802</td><td><code>PA ONSET C</code></td><td><code>c</code></td><td>c, k, q</td></tr>
-<tr><td class="num">3</td><td class="code">U+F0803</td><td><code>PA ONSET CH</code></td><td><code>ch</code></td><td>ch</td></tr>
-<tr><td class="num">4</td><td class="code">U+F0804</td><td><code>PA ONSET DD</code></td><td><code>d</code></td><td>đ</td></tr>
-<tr><td class="num">5</td><td class="code">U+F0805</td><td><code>PA ONSET D</code></td><td><code>dz</code></td><td>d</td></tr>
-<tr><td class="num">6</td><td class="code">U+F0806</td><td><code>PA ONSET PH</code></td><td><code>ph</code></td><td>ph</td></tr>
-<tr><td class="num">7</td><td class="code">U+F0807</td><td><code>PA ONSET G</code></td><td><code>g</code></td><td>g, gh</td></tr>
-<tr><td class="num">8</td><td class="code">U+F0808</td><td><code>PA ONSET GI</code></td><td><code>gi</code></td><td>gi</td></tr>
-<tr><td class="num">9</td><td class="code">U+F0809</td><td><code>PA ONSET H</code></td><td><code>h</code></td><td>h</td></tr>
-<tr><td class="num">10</td><td class="code">U+F080A</td><td><code>PA ONSET KH</code></td><td><code>kh</code></td><td>kh</td></tr>
-<tr><td class="num">11</td><td class="code">U+F080B</td><td><code>PA ONSET L</code></td><td><code>l</code></td><td>l</td></tr>
-<tr><td class="num">12</td><td class="code">U+F080C</td><td><code>PA ONSET M</code></td><td><code>m</code></td><td>m</td></tr>
-<tr><td class="num">13</td><td class="code">U+F080D</td><td><code>PA ONSET N</code></td><td><code>n</code></td><td>n</td></tr>
-<tr><td class="num">14</td><td class="code">U+F080E</td><td><code>PA ONSET NG</code></td><td><code>ng</code></td><td>ng, ngh</td></tr>
-<tr><td class="num">15</td><td class="code">U+F080F</td><td><code>PA ONSET NH</code></td><td><code>nh</code></td><td>nh</td></tr>
-<tr><td class="num">16</td><td class="code">U+F0810</td><td><code>PA ONSET R</code></td><td><code>r</code></td><td>r</td></tr>
-<tr><td class="num">17</td><td class="code">U+F0811</td><td><code>PA ONSET S</code></td><td><code>s</code></td><td>s</td></tr>
-<tr><td class="num">18</td><td class="code">U+F0812</td><td><code>PA ONSET T</code></td><td><code>t</code></td><td>t</td></tr>
-<tr><td class="num">19</td><td class="code">U+F0813</td><td><code>PA ONSET TH</code></td><td><code>th</code></td><td>th</td></tr>
-<tr><td class="num">20</td><td class="code">U+F0814</td><td><code>PA ONSET TR</code></td><td><code>tr</code></td><td>tr</td></tr>
-<tr><td class="num">21</td><td class="code">U+F0815</td><td><code>PA ONSET V</code></td><td><code>v</code></td><td>v</td></tr>
-<tr><td class="num">22</td><td class="code">U+F0816</td><td><code>PA ONSET X</code></td><td><code>x</code></td><td>x</td></tr>
+<tr><td class="num">0</td><td class="code">U+F00B0</td><td><code>PA ONSET ZERO</code></td><td><code>_</code></td><td>none (placeholder shape)</td></tr>
+<tr><td class="num">1</td><td class="code">U+F00B1</td><td><code>PA ONSET B</code></td><td><code>b</code></td><td>b</td></tr>
+<tr><td class="num">2</td><td class="code">U+F00B2</td><td><code>PA ONSET C</code></td><td><code>c</code></td><td>c, k, q</td></tr>
+<tr><td class="num">3</td><td class="code">U+F00B3</td><td><code>PA ONSET CH</code></td><td><code>ch</code></td><td>ch</td></tr>
+<tr><td class="num">4</td><td class="code">U+F00B4</td><td><code>PA ONSET DD</code></td><td><code>d</code></td><td>đ</td></tr>
+<tr><td class="num">5</td><td class="code">U+F00B5</td><td><code>PA ONSET D</code></td><td><code>dz</code></td><td>d</td></tr>
+<tr><td class="num">6</td><td class="code">U+F00B6</td><td><code>PA ONSET PH</code></td><td><code>ph</code></td><td>ph</td></tr>
+<tr><td class="num">7</td><td class="code">U+F00B7</td><td><code>PA ONSET G</code></td><td><code>g</code></td><td>g, gh</td></tr>
+<tr><td class="num">8</td><td class="code">U+F00B8</td><td><code>PA ONSET GI</code></td><td><code>gi</code></td><td>gi</td></tr>
+<tr><td class="num">9</td><td class="code">U+F00B9</td><td><code>PA ONSET H</code></td><td><code>h</code></td><td>h</td></tr>
+<tr><td class="num">10</td><td class="code">U+F00BA</td><td><code>PA ONSET KH</code></td><td><code>kh</code></td><td>kh</td></tr>
+<tr><td class="num">11</td><td class="code">U+F00BB</td><td><code>PA ONSET L</code></td><td><code>l</code></td><td>l</td></tr>
+<tr><td class="num">12</td><td class="code">U+F00BC</td><td><code>PA ONSET M</code></td><td><code>m</code></td><td>m</td></tr>
+<tr><td class="num">13</td><td class="code">U+F00BD</td><td><code>PA ONSET N</code></td><td><code>n</code></td><td>n</td></tr>
+<tr><td class="num">14</td><td class="code">U+F00BE</td><td><code>PA ONSET NG</code></td><td><code>ng</code></td><td>ng, ngh</td></tr>
+<tr><td class="num">15</td><td class="code">U+F00BF</td><td><code>PA ONSET NH</code></td><td><code>nh</code></td><td>nh</td></tr>
+<tr><td class="num">16</td><td class="code">U+F00C0</td><td><code>PA ONSET R</code></td><td><code>r</code></td><td>r</td></tr>
+<tr><td class="num">17</td><td class="code">U+F00C1</td><td><code>PA ONSET S</code></td><td><code>s</code></td><td>s</td></tr>
+<tr><td class="num">18</td><td class="code">U+F00C2</td><td><code>PA ONSET T</code></td><td><code>t</code></td><td>t</td></tr>
+<tr><td class="num">19</td><td class="code">U+F00C3</td><td><code>PA ONSET TH</code></td><td><code>th</code></td><td>th</td></tr>
+<tr><td class="num">20</td><td class="code">U+F00C4</td><td><code>PA ONSET TR</code></td><td><code>tr</code></td><td>tr</td></tr>
+<tr><td class="num">21</td><td class="code">U+F00C5</td><td><code>PA ONSET V</code></td><td><code>v</code></td><td>v</td></tr>
+<tr><td class="num">22</td><td class="code">U+F00C6</td><td><code>PA ONSET X</code></td><td><code>x</code></td><td>x</td></tr>
     </tbody>
   </table></div>
-  <p class="small text-body-secondary">The character names are Unicode style (<code>PA ONSET …</code>, <code>PA VOWEL …</code>, <code>PA CODA …</code>, <code>PA TONE …</code>, <code>PA JOINER</code>) and spelled in Telex, after the main spelling of the sound: <code>DD</code> = đ, <code>D</code> = d, <code>AW</code> = ă, <code>AA</code> = â, <code>OW</code> = ơ, <code>UW</code> = ư, <code>EE</code> = ê, <code>OO</code> = ô. The drawings of these characters are the full-size master forms; every other form (smaller onsets, stacked forms) is derived from them. In code (glyph names, input methods) the zero onset is written <code>z</code>. The legacy name is that of the earlier font.</p>
+  <p class="small text-body-secondary">The character names are Unicode style (<code>PA ONSET …</code>, <code>PA VOWEL …</code>, <code>PA CODA …</code>, <code>PA TONE …</code>) and spelled in Telex, after the main spelling of the sound: <code>DD</code> = đ, <code>D</code> = d, <code>AW</code> = ă, <code>AA</code> = â, <code>OW</code> = ơ, <code>UW</code> = ư, <code>EE</code> = ê, <code>OO</code> = ô. The drawings of these characters are the full-size master forms; every other form (smaller onsets, stacked forms) is derived from them. In code (glyph names, input methods) the zero onset is written <code>z</code>. The legacy name is that of the earlier font.</p>
   <p class="small text-body-secondary"><code>dz</code> is the sound written <em>d</em>, <code>d</code> the sound written <em>đ</em>. The shape of an onset depends on the nucleus it stands with (large, small, extra small); that is part of the stem glyph, not of the encoding.</p>
 
   <h4>N: nuclei</h4>
   <div class="table-responsive"><table class="table table-sm w-auto">
     <thead><tr><th>i</th><th>Code point</th><th>Character name</th><th>Legacy name</th><th>Shape</th><th>Quốc Ngữ</th></tr></thead>
     <tbody>
-<tr><td class="num">0</td><td class="code">U+F0820</td><td><code>PA VOWEL A</code></td><td><code>a</code></td><td><code>a</code></td><td>a</td></tr>
-<tr><td class="num">1</td><td class="code">U+F0821</td><td><code>PA VOWEL OW</code></td><td><code>ar</code></td><td><code>a2</code></td><td>ơ</td></tr>
-<tr><td class="num">2</td><td class="code">U+F0822</td><td><code>PA VOWEL AW</code></td><td><code>ae</code></td><td><code>aw</code></td><td>ă</td></tr>
-<tr><td class="num">3</td><td class="code">U+F0823</td><td><code>PA VOWEL AA</code></td><td><code>aer</code></td><td><code>aw2</code></td><td>â</td></tr>
-<tr><td class="num">4</td><td class="code">U+F0824</td><td><code>PA VOWEL EE</code></td><td><code>e</code></td><td><code>e</code></td><td>ê</td></tr>
-<tr><td class="num">5</td><td class="code">U+F0825</td><td><code>PA VOWEL E</code></td><td><code>er</code></td><td><code>e2</code></td><td>e</td></tr>
-<tr><td class="num">6</td><td class="code">U+F0826</td><td><code>PA VOWEL I</code></td><td><code>i</code></td><td><code>i</code></td><td>i</td></tr>
-<tr><td class="num">7</td><td class="code">U+F0827</td><td><code>PA VOWEL IEE</code></td><td><code>ir</code></td><td><code>i2</code></td><td>iê, ia, yê, ya</td></tr>
-<tr><td class="num">8</td><td class="code">U+F0828</td><td><code>PA VOWEL OO</code></td><td><code>o</code></td><td><code>o</code></td><td>ô</td></tr>
-<tr><td class="num">9</td><td class="code">U+F0829</td><td><code>PA VOWEL O</code></td><td><code>or</code></td><td><code>o2</code></td><td>o</td></tr>
-<tr><td class="num">10</td><td class="code">U+F082A</td><td><code>PA VOWEL U</code></td><td><code>u</code></td><td><code>u</code></td><td>u</td></tr>
-<tr><td class="num">11</td><td class="code">U+F082B</td><td><code>PA VOWEL UOO</code></td><td><code>ur</code></td><td><code>u2</code></td><td>uô, ua</td></tr>
-<tr><td class="num">12</td><td class="code">U+F082C</td><td><code>PA VOWEL UW</code></td><td><code>y</code></td><td><code>y</code></td><td>ư</td></tr>
-<tr><td class="num">13</td><td class="code">U+F082D</td><td><code>PA VOWEL UWOW</code></td><td><code>yr</code></td><td><code>y2</code></td><td>ươ, ưa</td></tr>
-<tr><td class="num">14</td><td class="code">U+F082E</td><td><code>PA VOWEL OA</code></td><td><code>wa</code></td><td><code>wa</code></td><td>oa</td></tr>
-<tr><td class="num">15</td><td class="code">U+F082F</td><td><code>PA VOWEL UOW</code></td><td><code>war</code></td><td><code>wa2</code></td><td>uơ</td></tr>
-<tr><td class="num">16</td><td class="code">U+F0830</td><td><code>PA VOWEL OAW</code></td><td><code>wae</code></td><td><code>waw</code></td><td>oă</td></tr>
-<tr><td class="num">17</td><td class="code">U+F0831</td><td><code>PA VOWEL UAA</code></td><td><code>waer</code></td><td><code>waw2</code></td><td>uâ</td></tr>
-<tr><td class="num">18</td><td class="code">U+F0832</td><td><code>PA VOWEL UEE</code></td><td><code>we</code></td><td><code>we</code></td><td>uê</td></tr>
-<tr><td class="num">19</td><td class="code">U+F0833</td><td><code>PA VOWEL OE</code></td><td><code>wer</code></td><td><code>we2</code></td><td>oe</td></tr>
-<tr><td class="num">20</td><td class="code">U+F0834</td><td><code>PA VOWEL UY</code></td><td><code>wi</code></td><td><code>wi</code></td><td>uy</td></tr>
-<tr><td class="num">21</td><td class="code">U+F0835</td><td><code>PA VOWEL UYEE</code></td><td><code>wir</code></td><td><code>wi2</code></td><td>uyê, uya</td></tr>
+<tr><td class="num">0</td><td class="code">U+F00D0</td><td><code>PA VOWEL A</code></td><td><code>a</code></td><td><code>a</code></td><td>a</td></tr>
+<tr><td class="num">1</td><td class="code">U+F00D1</td><td><code>PA VOWEL OW</code></td><td><code>ar</code></td><td><code>a2</code></td><td>ơ</td></tr>
+<tr><td class="num">2</td><td class="code">U+F00D2</td><td><code>PA VOWEL AW</code></td><td><code>ae</code></td><td><code>aw</code></td><td>ă</td></tr>
+<tr><td class="num">3</td><td class="code">U+F00D3</td><td><code>PA VOWEL AA</code></td><td><code>aer</code></td><td><code>aw2</code></td><td>â</td></tr>
+<tr><td class="num">4</td><td class="code">U+F00D4</td><td><code>PA VOWEL EE</code></td><td><code>e</code></td><td><code>e</code></td><td>ê</td></tr>
+<tr><td class="num">5</td><td class="code">U+F00D5</td><td><code>PA VOWEL E</code></td><td><code>er</code></td><td><code>e2</code></td><td>e</td></tr>
+<tr><td class="num">6</td><td class="code">U+F00D6</td><td><code>PA VOWEL I</code></td><td><code>i</code></td><td><code>i</code></td><td>i</td></tr>
+<tr><td class="num">7</td><td class="code">U+F00D7</td><td><code>PA VOWEL IEE</code></td><td><code>ir</code></td><td><code>i2</code></td><td>iê, ia, yê, ya</td></tr>
+<tr><td class="num">8</td><td class="code">U+F00D8</td><td><code>PA VOWEL OO</code></td><td><code>o</code></td><td><code>o</code></td><td>ô</td></tr>
+<tr><td class="num">9</td><td class="code">U+F00D9</td><td><code>PA VOWEL O</code></td><td><code>or</code></td><td><code>o2</code></td><td>o</td></tr>
+<tr><td class="num">10</td><td class="code">U+F00DA</td><td><code>PA VOWEL U</code></td><td><code>u</code></td><td><code>u</code></td><td>u</td></tr>
+<tr><td class="num">11</td><td class="code">U+F00DB</td><td><code>PA VOWEL UOO</code></td><td><code>ur</code></td><td><code>u2</code></td><td>uô, ua</td></tr>
+<tr><td class="num">12</td><td class="code">U+F00DC</td><td><code>PA VOWEL UW</code></td><td><code>y</code></td><td><code>y</code></td><td>ư</td></tr>
+<tr><td class="num">13</td><td class="code">U+F00DD</td><td><code>PA VOWEL UWOW</code></td><td><code>yr</code></td><td><code>y2</code></td><td>ươ, ưa</td></tr>
+<tr><td class="num">14</td><td class="code">U+F00DE</td><td><code>PA VOWEL OA</code></td><td><code>wa</code></td><td><code>wa</code></td><td>oa</td></tr>
+<tr><td class="num">15</td><td class="code">U+F00DF</td><td><code>PA VOWEL UOW</code></td><td><code>war</code></td><td><code>wa2</code></td><td>uơ</td></tr>
+<tr><td class="num">16</td><td class="code">U+F00E0</td><td><code>PA VOWEL OAW</code></td><td><code>wae</code></td><td><code>waw</code></td><td>oă</td></tr>
+<tr><td class="num">17</td><td class="code">U+F00E1</td><td><code>PA VOWEL UAA</code></td><td><code>waer</code></td><td><code>waw2</code></td><td>uâ</td></tr>
+<tr><td class="num">18</td><td class="code">U+F00E2</td><td><code>PA VOWEL UEE</code></td><td><code>we</code></td><td><code>we</code></td><td>uê</td></tr>
+<tr><td class="num">19</td><td class="code">U+F00E3</td><td><code>PA VOWEL OE</code></td><td><code>wer</code></td><td><code>we2</code></td><td>oe</td></tr>
+<tr><td class="num">20</td><td class="code">U+F00E4</td><td><code>PA VOWEL UY</code></td><td><code>wi</code></td><td><code>wi</code></td><td>uy</td></tr>
+<tr><td class="num">21</td><td class="code">U+F00E5</td><td><code>PA VOWEL UYEE</code></td><td><code>wir</code></td><td><code>wi2</code></td><td>uyê, uya</td></tr>
     </tbody>
   </table></div>
   <p class="small text-body-secondary">The names are those of the earlier font. <em>Shape</em> is the name of the base stroke in the drawing; a nucleus starting with <code>w</code> is a glide nucleus (the stroke of the glide plus the stroke of the vowel).</p>
@@ -254,16 +261,16 @@ Extension = C [ T ]  |  T</pre>
   <div class="table-responsive"><table class="table table-sm w-auto">
     <thead><tr><th>i</th><th>Code point</th><th>Character name</th><th>Legacy name</th><th>Quốc Ngữ</th></tr></thead>
     <tbody>
-<tr><td class="num">0</td><td class="code">U+F0840</td><td><code>PA CODA U</code></td><td><code>U</code></td><td>u, o</td></tr>
-<tr><td class="num">1</td><td class="code">U+F0841</td><td><code>PA CODA I</code></td><td><code>I</code></td><td>i, y</td></tr>
-<tr><td class="num">2</td><td class="code">U+F0842</td><td><code>PA CODA M</code></td><td><code>M</code></td><td>m</td></tr>
-<tr><td class="num">3</td><td class="code">U+F0843</td><td><code>PA CODA N</code></td><td><code>N</code></td><td>n</td></tr>
-<tr><td class="num">4</td><td class="code">U+F0844</td><td><code>PA CODA NG</code></td><td><code>NG</code></td><td>ng</td></tr>
-<tr><td class="num">5</td><td class="code">U+F0845</td><td><code>PA CODA NH</code></td><td><code>NH</code></td><td>nh</td></tr>
-<tr><td class="num">6</td><td class="code">U+F0846</td><td><code>PA CODA P</code></td><td><code>P</code></td><td>p</td></tr>
-<tr><td class="num">7</td><td class="code">U+F0847</td><td><code>PA CODA T</code></td><td><code>T</code></td><td>t</td></tr>
-<tr><td class="num">8</td><td class="code">U+F0848</td><td><code>PA CODA C</code></td><td><code>C</code></td><td>c</td></tr>
-<tr><td class="num">9</td><td class="code">U+F0849</td><td><code>PA CODA CH</code></td><td><code>CH</code></td><td>ch</td></tr>
+<tr><td class="num">0</td><td class="code">U+F00F0</td><td><code>PA CODA U</code></td><td><code>U</code></td><td>u, o</td></tr>
+<tr><td class="num">1</td><td class="code">U+F00F1</td><td><code>PA CODA I</code></td><td><code>I</code></td><td>i, y</td></tr>
+<tr><td class="num">2</td><td class="code">U+F00F2</td><td><code>PA CODA M</code></td><td><code>M</code></td><td>m</td></tr>
+<tr><td class="num">3</td><td class="code">U+F00F3</td><td><code>PA CODA N</code></td><td><code>N</code></td><td>n</td></tr>
+<tr><td class="num">4</td><td class="code">U+F00F4</td><td><code>PA CODA NG</code></td><td><code>NG</code></td><td>ng</td></tr>
+<tr><td class="num">5</td><td class="code">U+F00F5</td><td><code>PA CODA NH</code></td><td><code>NH</code></td><td>nh</td></tr>
+<tr><td class="num">6</td><td class="code">U+F00F6</td><td><code>PA CODA P</code></td><td><code>P</code></td><td>p</td></tr>
+<tr><td class="num">7</td><td class="code">U+F00F7</td><td><code>PA CODA T</code></td><td><code>T</code></td><td>t</td></tr>
+<tr><td class="num">8</td><td class="code">U+F00F8</td><td><code>PA CODA C</code></td><td><code>C</code></td><td>c</td></tr>
+<tr><td class="num">9</td><td class="code">U+F00F9</td><td><code>PA CODA CH</code></td><td><code>CH</code></td><td>ch</td></tr>
     </tbody>
   </table></div>
 
@@ -271,56 +278,57 @@ Extension = C [ T ]  |  T</pre>
   <div class="table-responsive"><table class="table table-sm w-auto">
     <thead><tr><th>Tone</th><th>Code point</th><th>Character name</th><th>Vietnamese</th></tr></thead>
     <tbody>
-<tr><td class="num">1</td><td class="code">U+F0850</td><td><code>PA TONE SAC</code></td><td>sắc</td></tr>
-<tr><td class="num">2</td><td class="code">U+F0851</td><td><code>PA TONE HUYEN</code></td><td>huyền</td></tr>
-<tr><td class="num">3</td><td class="code">U+F0852</td><td><code>PA TONE HOI</code></td><td>hỏi</td></tr>
-<tr><td class="num">4</td><td class="code">U+F0853</td><td><code>PA TONE NGA</code></td><td>ngã</td></tr>
-<tr><td class="num">5</td><td class="code">U+F0854</td><td><code>PA TONE NANG</code></td><td>nặng</td></tr>
-<tr><td class="num">6</td><td class="code">U+F0855</td><td><code>PA TONE NGANG</code></td><td>ngang (level tone, an explicit mark)</td></tr>
+<tr><td class="num">1</td><td class="code">U+F00FA</td><td><code>PA TONE SAC</code></td><td>sắc</td></tr>
+<tr><td class="num">2</td><td class="code">U+F00FB</td><td><code>PA TONE HUYEN</code></td><td>huyền</td></tr>
+<tr><td class="num">3</td><td class="code">U+F00FC</td><td><code>PA TONE HOI</code></td><td>hỏi</td></tr>
+<tr><td class="num">4</td><td class="code">U+F00FD</td><td><code>PA TONE NGA</code></td><td>ngã</td></tr>
+<tr><td class="num">5</td><td class="code">U+F00FE</td><td><code>PA TONE NANG</code></td><td>nặng</td></tr>
+<tr><td class="num">6</td><td class="code">U+F00FF</td><td><code>PA TONE NGANG</code></td><td>ngang (level tone, an explicit mark)</td></tr>
     </tbody>
   </table></div>
 
   <h3 id="composition" data-vi="Ghép ký tự">Composition</h3>
-  <p>A font renders the sequences with glyph substitution (OpenType <code>ccmp</code>). The classes tell what belongs together within a cell, so no control character is needed there. The joiner is the only one: it joins two cells into one.</p>
+  <p>A font renders the sequences with glyph substitution (OpenType <code>ccmp</code>). The classes tell what belongs together within a cell; the joiner and the combiner, the same characters as in QATT, build the cells.</p>
   <table class="table table-sm">
     <thead><tr><th>Sequence</th><th>Result</th></tr></thead>
     <tbody>
-      <tr><td>A N</td><td>stem glyph (506)</td></tr>
-      <tr><td>C T</td><td>extension glyph with coda and tone (60)</td></tr>
-      <tr><td>A</td><td>onset cell alone (23)</td></tr>
-      <tr><td>C</td><td>coda cell alone (10)</td></tr>
-      <tr><td>T</td><td>tone cell alone (6)</td></tr>
-      <tr><td>A N J E (E = C T, C or T)</td><td>one cell: the stem in its stacked form above, the extension in its stacked form below (see below)</td></tr>
-      <tr><td>N without A in front</td><td>not valid; an input method inserts the onset <code>_</code></td></tr>
+      <tr><td>A, N, C, T</td><td>one cell each in the full size: the master drawings (23 + 22 + 10 + 6)</td></tr>
+      <tr><td>A J N</td><td>stem glyph, onset and nucleus reduced to fit one cell (506)</td></tr>
+      <tr><td>A J N T</td><td>the stem with a small tone mark inside the cell (the tone becomes a mark without width, 6)</td></tr>
+      <tr><td>C T</td><td>coda glyph with its tone (60)</td></tr>
+      <tr><td>A J N C [T]</td><td>two cells: the stem, then the coda</td></tr>
+      <tr><td>A J N K E (E = C T, C or T)</td><td>one cell: the stem in its stacked form above, the extension in its stacked form below (see below)</td></tr>
+      <tr><td>N without an onset</td><td>the nucleus alone in its full size; for a syllable without an onset an input method writes <code>z J N</code></td></tr>
     </tbody>
   </table>
-  <p>A stem followed by a tone alone (<code>A N T</code>) is two cells. Every cell is one em wide.</p>
-  <h4>The joined cell</h4>
-  <p>With the joiner stem and extension share one em square, like a CJK character; without it they are two cells. Both forms come from the drawings of PA 1 Normal. The stacked forms are <em>drawn for the stack</em>, they are not squeezed copies of the separate forms, and the font has them as glyphs of their own.</p>
-  <p>Top to bottom the joined cell holds the stem, then the tone mark, then the coda. The stem is drawn in one of three heights, which depends on what follows the joiner:</p>
+  <p>Every cell is one em wide.</p>
+  <h4>The stacked cell</h4>
+  <p>With the combiner stem and extension share one em square, like a CJK character; without it they are two cells. Both forms come from the drawings of PA 1 Normal. The stacked forms are <em>drawn for the stack</em>, they are not squeezed copies of the separate forms, and the font has them as glyphs of their own.</p>
+  <p>Top to bottom the stacked cell holds the stem, then the tone mark, then the coda. The stem is drawn in one of three heights, which depends on what follows the combiner:</p>
   <table class="table table-sm">
-    <thead><tr><th>After <code>A N J</code></th><th>Stem form</th><th>Height of the stem</th></tr></thead>
+    <thead><tr><th>After <code>A J N K</code></th><th>Stem form</th><th>Height of the stem</th></tr></thead>
     <tbody>
       <tr><td>C T (coda and tone)</td><td>Z</td><td>smallest, about a quarter of the cell</td></tr>
       <tr><td>C alone, or T alone (not tone 2)</td><td>ZZ</td><td>about a third to a half of the cell</td></tr>
       <tr><td>T2 alone (huyền)</td><td>ZZZ</td><td>largest, more than half: tone 2 is a single bar at the bottom</td></tr>
     </tbody>
   </table>
-  <p>So the joined cell is not a precomposed glyph for every pair (506 × 76 = 38,456 glyphs). The font substitutes the three parts separately, as the stack of QATT does:</p>
+  <p>So the stacked cell is not a precomposed glyph for every pair (506 × 76 = 38,456 glyphs). The font substitutes the three parts separately, as the stack of QATT does:</p>
   <ul>
-    <li>the stem becomes its <em>upper</em> form Z, ZZ or ZZZ (3 × 506 glyphs), chosen by a contextual rule that looks at the characters after the joiner;</li>
-    <li>the joiner becomes a glyph without width;</li>
+    <li>the stem becomes its <em>upper</em> form Z, ZZ or ZZZ (3 × 506 glyphs), chosen by a contextual rule that looks at the characters after the combiner;</li>
+    <li>the combiner becomes a glyph without width (the same as in QATT);</li>
     <li>the extension becomes its <em>lower</em> form with no advance, drawn over the cell of the stem (76 glyphs: 60 coda and tone, 10 codas, 6 tones). The coda of a coda and tone pair has three drawings by tone (for tones 1 and 2, for 3, 4 and 6, for 5), as in the separate form.</li>
   </ul>
   <p>Where the drawings of the ZZZ form are missing (the onsets <code>ph, ng, t, th, tr</code> and the glide bars), the font uses the ZZ form.</p>
+  <p>The forms of a stem (for the nucleus: large, small, extra small onsets; the stacked heights) are all derived from the full-size master drawings of the characters; where a derived form does not look right, the drawing of PA 1 Normal replaces it.</p>
 
   <h3 id="qatt" data-vi="Một phông chữ với QATT">One font with QATT</h3>
-  <p>PA is designed to share one font file with QATT. For that the two scripts must not touch each other:</p>
+  <p>PA is designed to share one font file with QATT, and it uses the same two control characters. For that the two scripts must not touch each other:</p>
   <ul>
-    <li><strong>Code points.</strong> QATT uses <code>U+F0000</code>..<code>U+F00AF</code>, PA <code>U+F0800</code>..<code>U+F085F</code>. Nothing overlaps, and QATT keeps room to grow.</li>
-    <li><strong>Control characters.</strong> PA has its own joiner (<code>U+F0860</code>) and no combiner. The QATT joiner (<code>U+F009A</code>), combiner (<code>U+F009B</code>) and tone marks (<code>U+F009C</code>..<code>U+F00A3</code>) have no meaning in PA text, and a PA tone is not a QATT tone mark.</li>
-    <li><strong>Rules.</strong> The substitutions of each script act only on the classes of that script (<code>@A @N @C @T</code> for PA), so a QATT cell next to a PA cell is never combined with it. The two sets of rules can sit in the same <code>ccmp</code> feature as separate lookups.</li>
-    <li><strong>Size.</strong> PA adds 2,200 glyphs: 605 for the cells without the joiner (506 stems, 60 extensions with coda and tone, 39 single cells), 1,595 for the joined cell (1,518 upper forms, 76 lower forms and the joiner). That is well inside the glyph limit of a font next to the QATT forms and pairs.</li>
+    <li><strong>Code points.</strong> QATT uses <code>U+F0000</code>..<code>U+F00AF</code>, PA <code>U+F00B0</code>..<code>U+F00FF</code>, directly behind it. The page <code>U+F0000</code>..<code>U+F00FF</code> is then full; whatever either script adds later goes behind <code>U+F00FF</code>.</li>
+    <li><strong>Control characters.</strong> The joiner (<code>U+F009A</code>) and the combiner (<code>U+F009B</code>) are those of QATT, with the same meaning (side by side in one cell, stacked in one cell) and the same glyphs without width. The QATT tone marks (<code>U+F009C</code>..<code>U+F00A3</code>) have no meaning in PA text, and a PA tone is not a QATT tone mark.</li>
+    <li><strong>Rules.</strong> The substitutions of each script act only on the classes of that script (<code>@A @N @C @T</code> for PA, the letters for QATT) before and after the joiner or the combiner, so a QATT letter next to a PA character is never combined with it. The two sets of rules can sit in the same <code>ccmp</code> feature as separate lookups.</li>
+    <li><strong>Size.</strong> PA adds 2,227 glyphs: 61 master cells, 506 stems, 60 coda glyphs, 6 small tone marks, 1,518 upper forms and 76 lower forms of the stacked cell. That is well inside the glyph limit of a font next to the QATT forms and pairs.</li>
     <li><strong>Metrics.</strong> Both scripts use the same square cell, so mixed text keeps one line height and advance.</li>
   </ul>
 
@@ -328,10 +336,10 @@ Extension = C [ T ]  |  T</pre>
   <p>A syllable of Quốc Ngữ is split into onset, nucleus, coda and tone, then mapped to the names above.</p>
   <ul>
     <li><strong>Tone.</strong> The accent of the vowel gives the tone and is removed: sắc 1, huyền 2, hỏi 3, ngã 4, nặng 5. No accent: no tone.</li>
-    <li><strong>Onset.</strong> <em>k</em> and <em>q</em> are <code>c</code>; <em>gh</em> is <code>g</code>; <em>ngh</em> is <code>ng</code>; <em>d</em> is <code>dz</code>; <em>đ</em> is <code>d</code>; <em>g</em> before <em>i</em> is <code>gi</code>. No onset is <code>_</code>.</li>
-    <li><strong>Glide.</strong> <em>qu</em> is the onset <code>c</code> plus a glide nucleus (<em>quô</em> is read as <em>uâ</em>). The glide forms <em>oa, oă, uơ, uâ, uê, oe, uy, uyê</em> are the nuclei <code>wa</code>, <code>wae</code>, <code>war</code>, <code>waer</code>, <code>we</code>, <code>wer</code>, <code>wi</code>, <code>wir</code>.</li>
-    <li><strong>Coda.</strong> <em>o</em> after the nucleus is <code>U</code>, <em>y</em> is <code>I</code>.</li>
-    <li><strong>Short a.</strong> <em>a</em> before the codas <em>u, y, nh, ch</em> is written with the nucleus <code>ae</code> (<em>ă</em>).</li>
+    <li><strong>Onset.</strong> <em>k</em> and <em>q</em> are <code>C</code>; <em>gh</em> is <code>G</code>; <em>ngh</em> is <code>NG</code>; <em>d</em> is <code>D</code>; <em>đ</em> is <code>DD</code>; <em>g</em> before <em>i</em> is <code>GI</code> (the names of the characters, <code>PA ONSET …</code>). No onset is <code>ZERO</code>.</li>
+    <li><strong>Glide.</strong> <em>qu</em> is the onset <code>C</code> plus a glide nucleus (<em>quô</em> is read as <em>uâ</em>). The glide forms <em>oa, oă, uơ, uâ, uê, oe, uy, uyê</em> are the nuclei <code>OA</code>, <code>OAW</code>, <code>UOW</code>, <code>UAA</code>, <code>UEE</code>, <code>OE</code>, <code>UY</code>, <code>UYEE</code>.</li>
+    <li><strong>Coda.</strong> <em>o</em> after the nucleus is the coda <code>U</code>, <em>y</em> is <code>I</code>.</li>
+    <li><strong>Short a.</strong> <em>a</em> before the codas <em>u, y, nh, ch</em> is written with the nucleus <code>AW</code> (<em>ă</em>).</li>
   </ul>
 
   <h3 id="legacy" data-vi="Phông chữ trước đây">The earlier font</h3>
@@ -348,8 +356,7 @@ Extension = C [ T ]  |  T</pre>
 
   <h3 id="open" data-vi="Điểm còn mở">Open points</h3>
   <ol>
-    <li><strong>Tone after a stem.</strong> The drawings have two forms: a small tone inside the stem cell and a full-size tone as a cell of its own. Proposal: the full-size cell is the default (as in the earlier font); the small form is chosen with the variation selector <code>U+FE00</code> after the tone.</li>
-    <li><strong>Joiner character.</strong> An own joiner <code>U+F0860</code> (as QATT has) or the standard zero width joiner <code>U+200D</code>, which a fallback font shows as nothing. Proposal: the own joiner, so that the two scripts stay independent.</li>
+    <li><strong>Tone marks.</strong> PA has its own six tone characters. They could instead use the tone marks of QATT (<code>U+F009C</code>..<code>U+F00A3</code>), which already follow a letter and belong to its cell; but their set (eight marks, no ngang) differs. Proposal: keep the own characters.</li>
     <li><strong>Unfinished drawings.</strong> Tone 6 (ngang) is not complete in the source: its stacked forms with a coda (<code>z-_t6</code>) are missing, the stacked tone alone is a copy of the unstacked one, and the unstacked large tone 6 is a copy of tone 5. Its list of onsets also marks <code>x</code> as “todo”.</li>
     <li><strong>Combinations that Vietnamese does not use</strong> (for instance <code>b</code> with a glide nucleus). Proposal: the font draws all 506 stems, the input method decides what is offered.</li>
   </ol>
