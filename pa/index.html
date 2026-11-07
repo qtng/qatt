@@ -78,7 +78,7 @@
           <li><a href="#repertoire">Character repertoire</a></li>
           <li><a href="#codes">Code points</a></li>
           <li><a href="#composition">Composition</a></li>
-          <li><a href="#qatt">One font with QATT</a></li>
+          <li><a href="#qatt">PA and QATT</a></li>
           <li><a href="#reading">Reading Quốc Ngữ</a></li>
           <li><a href="#legacy">The earlier font</a></li>
           <li><a href="#open">Open points</a></li>
@@ -322,14 +322,14 @@ Alone    = A | N | C [ T ] | T   a cell of its own, full size</pre>
   <p>Where the drawings of the ZZZ form are missing (the onsets <code>ph, ng, t, th, tr</code> and the glide bars), the font uses the ZZ form.</p>
   <p>The forms of a stem (for the nucleus: large, small, extra small onsets; the stacked heights) are all derived from the full-size master drawings of the characters; where a derived form does not look right, the drawing of PA 1 Normal replaces it.</p>
 
-  <h3 id="qatt" data-vi="Một phông chữ với QATT">One font with QATT</h3>
-  <p>PA is designed to share one font file with QATT, and it uses the same two control characters. For that the two scripts must not touch each other:</p>
+  <h3 id="qatt" data-vi="PA và QATT">PA and QATT</h3>
+  <p>PA is a constructed script made for this website. Its font is a file of its own, not part of the QATT fonts and not part of the big Chữ Nôm fonts:</p>
   <ul>
-    <li><strong>Code points.</strong> QATT uses <code>U+F0000</code>..<code>U+F00AF</code>, PA <code>U+F00B0</code>..<code>U+F00FF</code>, directly behind it. The page <code>U+F0000</code>..<code>U+F00FF</code> is then full; whatever either script adds later goes behind <code>U+F00FF</code>.</li>
-    <li><strong>Control characters.</strong> The joiner (<code>U+F009A</code>) and the combiner (<code>U+F009B</code>) are those of QATT, with the same meaning (side by side in one cell, stacked in one cell) and the same glyphs without width. The QATT tone marks (<code>U+F009C</code>..<code>U+F00A3</code>) have no meaning in PA text, and a PA tone is not a QATT tone mark.</li>
-    <li><strong>Rules.</strong> The substitutions of each script act only on the classes of that script (<code>@A @N @C @T</code> for PA, the letters for QATT) before and after the joiner or the combiner, so a QATT letter next to a PA character is never combined with it. The two sets of rules can sit in the same <code>ccmp</code> feature as separate lookups.</li>
-    <li><strong>Size.</strong> PA adds 2,227 glyphs: 61 master cells, 506 stems, 60 coda glyphs, 6 small tone marks, 1,518 upper forms and 76 lower forms of the stacked cell. That is well inside the glyph limit of a font next to the QATT forms and pairs.</li>
-    <li><strong>Metrics.</strong> Both scripts use the same square cell, so mixed text keeps one line height and advance.</li>
+    <li><strong>Own font.</strong> The family is loaded only by pages that show PA. The glyph rules (stems, stacked cells) are those of this font alone and need no coordination with the QATT rules.</li>
+    <li><strong>Code points.</strong> QATT uses <code>U+F0000</code>..<code>U+F00AF</code>, PA <code>U+F00B0</code>..<code>U+F00FF</code>, directly behind it, so nothing overlaps and the two fonts could be merged later.</li>
+    <li><strong>Control characters.</strong> The joiner (<code>U+F009A</code>) and the combiner (<code>U+F009B</code>) are those of QATT, with the same meaning (side by side in one cell, stacked in one cell). The PA font has its own copies of these two glyphs without width, so PA text works without the QATT font. The QATT tone marks (<code>U+F009C</code>..<code>U+F00A3</code>) have no meaning in PA text, and a PA tone is not a QATT tone mark.</li>
+    <li><strong>Mixed text.</strong> A page with both scripts names both families; each font draws its own code points and the controls keep their meaning.</li>
+    <li><strong>Size.</strong> The PA font has about 2,227 glyphs: 61 master cells, 506 stems, 60 coda glyphs, 6 small tone marks, 1,518 upper forms and 76 lower forms of the stacked cell. Its cell is square like that of QATT, so mixed text keeps one line height.</li>
   </ul>
 
   <h3 id="reading" data-vi="Đọc chữ quốc ngữ">Reading Quốc Ngữ</h3>
