@@ -15,11 +15,12 @@ Needs (loaded before) js/parser.js, js/qatt-text.js, js/fonts.js (the fonts of t
 may put an element with the class `qatt-only` anywhere: it is shown while QATT is on (the class `qatt-on` on <body>).
 */
 const QattWriter = (() => {
+  const BASE = document.currentScript && document.currentScript.src;   // js/pa-text.js is loaded from next to this file when the page has not loaded it
   const CSS = `
     .writer { padding: 0; overflow: hidden; }
     .writer-pad { padding: .25rem; }
     #field { display: block; width: 100%; min-height: 11.4rem; padding: .75rem .9rem; font-size: 1.5rem; line-height: 1.5; border: none; outline: none; background: transparent;
-      color: var(--ink); resize: none; font-family: var(--qfont), system-ui, sans-serif; }
+      color: var(--ink); resize: none; font-family: var(--qfont), var(--pafont, "PA"), system-ui, sans-serif; }
     #field.vertical { writing-mode: vertical-rl; height: 24rem; min-height: 0; resize: horizontal; overflow: auto; }   /* vertical, lines from right to left */
     .writer-bar { display: flex; flex-direction: column; align-items: center; gap: 1.3rem; padding: .7rem .6rem; border-top: 1px solid var(--line);
       background: color-mix(in srgb, currentColor 3%, transparent); }   /* a tint of the text colour: light on a light theme, dark on a dark one */
@@ -42,9 +43,12 @@ const QattWriter = (() => {
     .size-bar input[type=range] { flex: 1 1 auto; width: 0; min-width: 4rem; accent-color: var(--accent); }
     @media (max-width: 419.98px) { #convert-btn .lbl { display: none; } }   /* on a very narrow screen the button is only its symbol */
     #size-label { min-width: 2.6em; color: var(--muted); }
-    .qatt-only { display: none; }
+    .qatt-only, .pa-only { display: none; }
+    .opts .key-pick { display: flex; align-items: center; gap: .3rem; margin: 0; font-size: .85rem; white-space: nowrap; }
+    .opts .key-pick select { padding-top: .1rem; padding-bottom: .1rem; font-size: .85rem; }
     .qatt-on .qatt-only { display: inline-block; }
     .qatt-on li.qatt-only { display: list-item; }
+    .pa-on .pa-only { display: block; }
     .bar-buttons, .opts { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
     .opts { gap: .2rem 1.5rem; }
     .opts .form-check { margin: 0; }
@@ -88,8 +92,14 @@ const QattWriter = (() => {
       </div>
       <div class="opts">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="mode-select" autocomplete="off">
-          <label class="form-check-label" for="mode-select" id="mode-label"></label>
+          <input class="form-check-input" type="checkbox" role="switch" id="mode-select" autocomplete="off" checked>
+          <label class="form-check-label" for="mode-select" id="mode-label" title="The list of Chữ Nôm candidates under the cursor, a click picks one"></label>
+        </div>
+        <label class="key-pick" title="What the space bar converts the word before the cursor to"><span data-vi="Phím cách">Space</span> <select id="key-space" class="form-select form-select-sm" autocomplete="off"></select></label>
+        <label class="key-pick" title="What Enter converts the word before the cursor to"><span>Enter</span> <select id="key-enter" class="form-select form-select-sm" autocomplete="off"></select></label>
+        <div class="form-check form-switch pa-only">
+          <input class="form-check-input" type="checkbox" role="switch" id="pa-stack" autocomplete="off" checked>
+          <label class="form-check-label" for="pa-stack" data-vi="PA xếp chồng">PA stacked</label>
         </div>
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" role="switch" id="telex-select" autocomplete="off" checked>
@@ -106,6 +116,8 @@ const QattWriter = (() => {
   const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
   const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
   const WINDOW = 64;
+  // the cells of all scripts (QATT, and PA when js/pa-text.js is there)
+  const cellAny = () => typeof PaText === 'undefined' ? QattText.CELL_ANY : new RegExp(QattText.CELL.source + '|' + PaText.CELL.source + '|[\\u{F009A}-\\u{F00A3}]+|[\\u{F00B0}\\u{F00B1}]|[^]', 'gu');
 
 
   // The behaviour of QATT in a text field (the editor and every field of `attach`): the word before the cursor becomes QATT characters, the cells stay whole (the cursor does not
@@ -115,12 +127,15 @@ const QattWriter = (() => {
   //   o.refresh()  called after every change
   //   o.converted() called when a word became QATT (the editor hides its Nôm candidates)
   //   o.convertOn  'any' (the default): a space, any other character that is no letter, and Enter convert the word before it; 'enter': Enter only
+  //   o.keys()     { space, enter }: what each converts the word before the cursor to ('qatt', 'pa', or 'nom' / 'none': nothing here); instead of convertOn
+  //   o.paOptions() the options of PaText.word (stacked)
   function wire(typer, o) {
     const { parser } = o;
-    // the word that ends right before `end` becomes QATT characters (if there are any)
-    const convertBefore = end => {
+    const keys = () => o.keys ? o.keys() : { space: o.convertOn === 'enter' ? 'none' : 'qatt', enter: 'qatt' };
+    // the word that ends right before `end` becomes the characters of a script (if there are any)
+    const convertBefore = (end, script = 'qatt') => {
       const m = WORD_END.exec(typer.value.slice(0, end));
-      const text = m && QattText.word(m[0], parser);
+      const text = m && (script === 'pa' ? (typeof PaText !== 'undefined' && PaText.word(m[0], parser, o.paOptions ? o.paOptions() : {})) : QattText.word(m[0], parser));
       if (!text) return false;
       const start = end - m[0].length, caret = typer.selectionStart;
       typer.setRangeText(text, start, end, 'end');
@@ -133,7 +148,7 @@ const QattWriter = (() => {
     // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
     const cellAt = (text, pos, which) => {
       const from = Math.max(0, pos - WINDOW), part = text.slice(from, pos + WINDOW);
-      for (const m of part.matchAll(QattText.CELL_ANY)) {
+      for (const m of part.matchAll(cellAny())) {
         const start = from + m.index, end = start + m[0].length;
         if (which === 'before' ? (start < pos && pos <= end) : which === 'after' ? (start <= pos && pos < end) : (start < pos && pos < end)) return { start, end };
       }
@@ -202,10 +217,11 @@ const QattWriter = (() => {
 
     // The character just typed ends the word before it. Space and Enter are swallowed when the word was converted (the cells are squares,
     // there is no space between them); any other character stays.
-    const flush = (length, swallow) => {
+    const flush = (length, swallow, script = 'qatt') => {
+      if (script !== 'qatt' && script !== 'pa') return;   // 'nom' (the candidates of ime.js) and 'none' convert nothing here
       const pos = typer.selectionStart;
       if (pos !== typer.selectionEnd || pos < length) return;
-      if (!NOT_LETTER.test(typer.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
+      if (!NOT_LETTER.test(typer.value.slice(pos - length, pos)) || !convertBefore(pos - length, script)) return;
       o.converted();   // the word is QATT now: no Nôm candidates
       if (!swallow) return;
       const at = typer.selectionStart;
@@ -214,15 +230,15 @@ const QattWriter = (() => {
     typer.addEventListener('input', e => {
       if (!o.on()) return;
       repairDeletion();
-      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
-      else if (o.convertOn !== 'enter' && !e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
+      if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true, keys().enter);
+      else if (!e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data), keys().space);
       if (!e.isComposing) tidy();
       o.refresh();
     });
     // keyboards that compose whole words (Android): the space comes with the end of the composition
     typer.addEventListener('compositionend', e => setTimeout(() => {
       if (!o.on()) return;
-      if (o.convertOn !== 'enter' && e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)));
+      if (e.data && NOT_LETTER.test(e.data.slice(-1))) flush(1, /\s/.test(e.data.slice(-1)), keys().space);
       tidy();
       o.refresh();
     }, 0));
@@ -251,19 +267,34 @@ const QattWriter = (() => {
 
     const parser = typeof VietnameseParser !== 'undefined' ? new VietnameseParser() : null;
     const haveQatt = !!parser && typeof QattText !== 'undefined', haveIme = typeof VietIme !== 'undefined';
-    // the switch: QATT (Chunom site) or Chữ Nôm (qatt.org); the other part is always on
-    const modeBox = $('mode-select');
-    $('mode-label').innerHTML = mode === 'qatt' ? 'Quốc Âm Tân Tự' : 'Chữ Nôm';
-    if (mode === 'qatt' ? !haveQatt : !haveIme) modeBox.closest('.form-check').hidden = true;
-    if (!haveIme) $('telex-select').closest('.form-check').hidden = true;
-    let qatt = false, nom = false;   // what is on now
+    let havePa = !!parser && typeof PaText !== 'undefined';
+    // What the two keys do with the word before the cursor: Space and Enter each become QATT, PA or Chữ Nôm (the first Nôm candidate), or nothing; the list of Nôm candidates
+    // is there (a click picks one) when its switch is on or a key picks from it. The defaults by site (options.keys overrides them): qatt.org (switch 'nom'): Space QATT, Enter PA;
+    // the Chunom writer (switch 'qatt'): Space PA, Enter Chữ Nôm. What somebody chose is kept.
+    const keySpace = $('key-space'), keyEnter = $('key-enter'), modeBox = $('mode-select'), paStack = $('pa-stack');
+    const KEY_DEFAULT = options.keys || (mode === 'qatt' ? { space: 'pa', enter: 'nom' } : { space: 'qatt', enter: 'pa' });
+    $('mode-label').innerHTML = 'Chữ Nôm';
+    if (!haveIme) { modeBox.closest('.form-check').hidden = true; $('telex-select').closest('.form-check').hidden = true; }
+    const KEY_CHOICES = [['qatt', 'QATT', () => haveQatt], ['pa', 'PA', () => havePa], ['nom', 'Chữ Nôm', () => haveIme], ['none', '–', () => true]];
+    const keys = { space: 'none', enter: 'none' };
+    let qatt = false, pa = false, nom = false;   // what is on now
+    const fillKeys = () => {
+      for (const [select, key] of [[keySpace, 'space'], [keyEnter, 'enter']]) {
+        const saved = store.get(key, KEY_DEFAULT[key]);
+        select.textContent = '';
+        for (const [value, label, ok] of KEY_CHOICES) if (ok()) select.append(new Option(label, value));
+        select.value = [...select.options].some(o => o.value === saved) ? saved : 'none';
+      }
+    };
     const apply = () => {
-      if (mode === 'qatt') { qatt = haveQatt && modeBox.checked; nom = haveIme; }
-      else { qatt = haveQatt; nom = haveIme && modeBox.checked; }
+      keys.space = keySpace.value; keys.enter = keyEnter.value;
+      qatt = haveQatt && (keys.space === 'qatt' || keys.enter === 'qatt');
+      pa = havePa && (keys.space === 'pa' || keys.enter === 'pa');
+      nom = haveIme && (modeBox.checked || keys.space === 'nom' || keys.enter === 'nom');
     };
 
-    // Enter picks the first Nôm character; Space does too, except with QATT on, where it converts
-    const imeOptions = () => ({ telex: $('telex-select').checked, candidates: nom, returnSelect: nom, spaceSelect: nom && !qatt });
+    // Enter and Space pick the first Nôm character when they are set to Chữ Nôm
+    const imeOptions = () => ({ telex: $('telex-select').checked, candidates: nom, returnSelect: nom && keys.enter === 'nom', spaceSelect: nom && keys.space === 'nom' });
     const ime = haveIme ? new VietIme(typer, imeOptions()) : null;
     $('telex-select').addEventListener('change', () => ime && ime.update(imeOptions()));
 
@@ -283,7 +314,8 @@ const QattWriter = (() => {
     // QATT characters are in the private use area: the field needs a QATT font in front of the Nôm fonts, also with QATT off (existing QATT characters keep their look)
     function applyFont() {
       document.documentElement.style.setProperty('--qfont', `"${font.value}"`);
-      if (ime) ime.update({ fontList: [font.value] });
+      document.documentElement.style.setProperty('--pafont', font.value === 'PhongThao' ? '"PA Phong Thao", "PA"' : '"PA"');   // the PA font of the same style
+      if (ime) ime.update({ fontList: [font.value, ...(font.value === 'PhongThao' ? ['PA Phong Thao'] : []), 'PA'] });   // ime.js sets the font of the field: the QATT font, then the PA font of its style
       typer.style.fontSize = Math.round(size.value * 0.363) + 'px';   // 100% is 36 pixels
       $('size-label').textContent = size.value + '%';
     }
@@ -298,20 +330,24 @@ const QattWriter = (() => {
     size.addEventListener('input', () => { store.set('size', size.value); applyFont(); });
     $('vertical-select').addEventListener('change', () => { typer.classList.toggle('vertical', $('vertical-select').checked); typer.focus(); });
 
+    const NAME = { qatt: 'QATT', pa: 'PA', nom: 'the first Hán Nôm candidate' };
     function setState() {
       apply();
-      document.body.classList.toggle('qatt-on', qatt);
-      status.innerHTML = qatt && nom ? '<b>Space</b> converts QATT, <b>Enter</b> picks first Hán Nôm'
-        : nom ? '<b>Space</b> and <b>Enter</b> pick first Hán Nôm'
-        : qatt ? '<b>Space</b> and <b>Enter</b> convert QATT'
-        : '';
+      document.body.classList.toggle('qatt-on', qatt || pa);
+      document.body.classList.toggle('pa-on', pa);
+      $('decoding').hidden = !qatt;
+      $('variants').hidden = !qatt;
+      status.innerHTML = ['space', 'enter'].filter(k => NAME[keys[k]]).map(k => `<b>${k === 'space' ? 'Space' : 'Enter'}</b> ${keys[k] === 'nom' ? 'picks' : 'converts to'} ${NAME[keys[k]]}`).join(', ');
       if (ime) { ime.update(imeOptions()); if (!nom) ime.hide(); }
       applyFont();
       refresh();
     }
-    modeBox.addEventListener('change', () => { store.set('on', modeBox.checked); setState(); });   // kept only when somebody chose it
+    modeBox.addEventListener('change', () => { store.set('cand', modeBox.checked); setState(); });   // kept only when somebody chose it
+    keySpace.addEventListener('change', () => { store.set('space', keySpace.value); setState(); });
+    keyEnter.addEventListener('change', () => { store.set('enter', keyEnter.value); setState(); });
+    paStack.addEventListener('change', () => store.set('pastack', paStack.checked));
 
-    wire(typer, { parser, on: () => qatt, refresh: () => refresh(), converted: () => ime && ime.hide(), convertOn: 'any' });
+    wire(typer, { parser, on: () => qatt || pa, keys: () => keys, paOptions: () => ({ stacked: paStack.checked }), refresh: () => refresh(), converted: () => ime && ime.hide() });
 
     // what depends on the text and the cursor: the dropdown of the variants
     function refresh() { showVariants(); }
@@ -392,12 +428,20 @@ const QattWriter = (() => {
       .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
     // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both with the decoding chosen
     // (the parts of a stack are cells of their own; a cell without a reading, such as a pair with a letter of stroke 1, does not count: it stays as it is, and the field can still be converted back)
-    const readable = text => text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => QattText.reading(c.cell, parser) !== '?'));
+    const readable = text => (haveQatt && text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => QattText.reading(c.cell, parser) !== '?'))) || (havePa && new RegExp(PaText.SYL.source, 'u').test(text));
+    // PA is read too (its syllables become Quốc Ngữ); the script that Convert writes is the one of Space, else of Enter
+    const readAll = text => havePa ? PaText.read(haveQatt ? readAsQuocNgu(text) : text, parser) : readAsQuocNgu(text);
+    const target = () => [keys.space, keys.enter].find(k => (k === 'qatt' && haveQatt) || (k === 'pa' && havePa)) || (haveQatt ? 'qatt' : 'pa');
+    const toScript = text => target() === 'pa' ? PaText.convert(text, parser, { stacked: paStack.checked }) : toQatt(text);
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
-      typer.value = readable(typer.value) ? readAsQuocNgu(typer.value) : toQatt(typer.value);
+      typer.value = readable(typer.value) ? readAll(typer.value) : toScript(typer.value);
       refresh();
     });
-    $('example-btn').addEventListener('click', () => { typer.value = QattText.convert('Quốc âm tân tự là tiếng Việt', parser).replace(/\s+/g, ''); refresh(); });   // without the spaces
+    $('example-btn').addEventListener('click', () => {
+      const text = 'Quốc âm tân tự là tiếng Việt';
+      typer.value = target() === 'pa' ? PaText.convert(text, parser, { stacked: paStack.checked }) : QattText.convert(text, parser).replace(/\s+/g, '');   // without the spaces
+      refresh();
+    });
 
     // ---------- buttons ----------
     const copyBtn = $('copy-btn');
@@ -416,8 +460,17 @@ const QattWriter = (() => {
 
     font.value = DEFAULT_FONT;
     size.value = store.get('size', '100');
-    modeBox.checked = store.get('on', 'false') === 'true';   // off at the start, on both sites (QATT on the Chunom site, Chữ Nôm on qatt.org)
+    modeBox.checked = store.get('cand', 'true') === 'true';
+    paStack.checked = store.get('pastack', 'true') === 'true';
+    fillKeys();
     setState();
+    // js/pa-text.js next to this file, when the page has not loaded it: PA is there from the moment it has arrived
+    if (!havePa && BASE && parser) {
+      const tag = document.createElement('script');
+      tag.src = new URL('pa-text.js', BASE).href;
+      tag.onload = () => { havePa = typeof PaText !== 'undefined'; if (havePa) { fillKeys(); setState(); } };
+      document.head.append(tag);
+    }
     return { field: typer };
   }
   // QATT in any text field, without the editor around it: Telex is always on, Enter turns the word before the cursor into QATT characters (a space stays a space), the

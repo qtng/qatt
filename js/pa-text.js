@@ -71,14 +71,16 @@ const PaText = (() => {
     if (s && on === 'GI') s = s.replace(/^gi(?=[iíìỉĩị])/, 'g');
     return s;
   };
-  // PA cells stand without spaces between them, so the readings of syllables that touch get a space
+  // PA cells stand without spaces between them (and no space is typed between a cell and the letters next to it), so a reading gets a space where it touches
+  // another syllable or a letter
   const read = (text, parser) => {
     let last = -1;
     return text.replace(SYL, (...a) => {
-      const m = a.slice(0, 6), at = a[a.length - 2] ?? a[6];
+      const m = a.slice(0, 6), at = a[a.length - 2], str = a[a.length - 1];
       const r = readMatch(m, parser) ?? m[0];
-      const out = (at === last ? ' ' : '') + r;
-      last = at + m[0].length;
+      const end = at + m[0].length;
+      const out = (at === last || (at > 0 && /\p{L}/u.test(str[at - 1])) ? ' ' : '') + r + (/^\p{L}/u.test(str.slice(end)) ? ' ' : '');
+      last = end;
       return out;
     });
   };
