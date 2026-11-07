@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v66';
+const CACHE = 'qatt-notes-v67';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/';   // the font files (js/fonts.js, QATT_CDN: this address first, then CDN_PAGES)
@@ -16,7 +16,7 @@ const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB (?v=2: the first file had wrong vertical metrics; a copy kept for ever needs a new address): cached when a character needs it, not at install
 // the Nôm fonts never change: cached for ever, the two small ones at install, the big one when first needed
 // the CJK of QATT Pen, Migoi, Celluloid, Phong Thảo: small slices (js/fonts.js), each cached in CACHE when the page first needs it, like the other fonts of qtng/cdn
-const CJK_SLICES = /^https:\/\/(?:cdn\.jsdelivr\.net\/gh\/qtng\/cdn@main|chunom\.org\/cdn)\/fonts\/(?:web\/)?[\w.-]+\.woff2$/;   // every font file of qtng/cdn, from either address
+const CJK_SLICES = /^https:\/\/(?:cdn\.jsdelivr\.net\/gh\/qtng\/cdn@main|chunom\.org\/cdn)\/fonts\/(?:web\/)?[\w.-]+\.woff2(?:\?v=[\w%.-]+)?$/;   // every font file of qtng/cdn, from either address, with the version of js/fonts.js (?v=<date of the font>) or without
 const OLD_FOREVER = ['https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=2', 'https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=3'];   // the whole font before the slices: removed from the permanent cache
 const NOM_FONTS = ['https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2', 'https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2', NOM_NA_TONG];
 const FOREVER = 'nom-fonts';   // survives every app version (the name does not start with qatt-notes-): the files never change, so each is fetched once and never checked again
@@ -108,7 +108,21 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
     if (!known(req)) return;
     event.respondWith((async () => {
       const cache = await caches.open(CACHE), key = keyOf(req);
-      const hit = await cache.match(key, { ignoreSearch: true });
+      const font = CJK_SLICES.test(req.url);
+      if (font && req.url.includes('?v=')) {   // a font file with its version: a new date is a new address, so cache first and never asked again; the copies of older versions of it go
+        const hit = await cache.match(req.url);
+        if (hit) return hit;
+        try {
+          const res = await fetch(req);
+          if (res.ok) {
+            const path = req.url.split('?')[0];
+            for (const k of await cache.keys()) if (k.url !== req.url && k.url.split('?')[0] === path) await cache.delete(k);
+            cache.put(req.url, res.clone());
+          }
+          return res;
+        } catch (e) { const old = await cache.match(req.url.split('?')[0]); if (old) return old; throw e; }   // offline: the copy without a version
+      }
+      const hit = await cache.match(key, { ignoreSearch: !font });
       const refresh = fetch(new Request(req, { cache: 'no-cache' })).then(res => { if (res.ok) cache.put(key, res.clone()); return res; });   // no-cache: asks the server (a 304 costs nothing) even when the HTTP cache still holds the file (jsDelivr: 7 days), so a new font is there at the next start
       if (hit) { event.waitUntil(refresh.catch(() => {})); return hit; }
       return refresh;
