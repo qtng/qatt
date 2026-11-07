@@ -140,7 +140,7 @@ var qattFontCheck = async () => {
     if (Date.now() - (stored.at || 0) < QATT_FONT_CHECK) return;
     const keep = Object.assign({}, stored, { at: Date.now() });   // the time is kept also when the request fails: not again within 5 minutes
     try { localStorage.qattFontVer = JSON.stringify(keep); } catch (e) { /* no storage: no versions */ }
-    for (const base of QATT_CDN) {
+    for (const base of [...QATT_CDN].reverse()) {   // GitHub Pages first: jsDelivr serves the file of an older commit of @main for hours (the cache buster does not help), Pages renews it within 10 minutes
       try {
         const res = await fetch(`${base}version.json?t=${Date.now()}`);
         const list = res.ok && await res.json();
