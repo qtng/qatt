@@ -103,9 +103,9 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   var verOf = function (key) { var v = (ver.fonts || {})[key]; return v && v !== (ver.base || {})[key] ? "?v=" + encodeURIComponent(v) : ""; };
   var css = [], face = function (family, weight, bases, file, range, key) {
     return '@font-face { font-family: "' + family + '"; font-style: normal; font-weight: ' + weight + "; font-display: " + display + "; src: " +
-      bases.map(function (b, i) {
-        var q = verOf(key);   // a changed font comes from the tag of its build (jsDelivr keeps a tag unchanged for ever, @main may show an older commit for hours), the second address is Pages
-        return "url(" + (q && i === 0 && ver.build ? b.replace("@main", "@fonts-" + ver.build) : b) + file + ".woff2" + q + ') format("woff2")';
+      (verOf(key) ? bases.slice(1).concat(bases.slice(0, 1)) : bases).map(function (b) {
+        var q = verOf(key);   // a changed font comes from Pages first (renewed within 10 minutes; jsDelivr may show an older commit of @main for hours), the second address is the tag of its build on jsDelivr (never changes)
+        return "url(" + (q && ver.build ? b.replace("@main", "@fonts-" + ver.build) : b) + file + ".woff2" + q + ') format("woff2")';
       }).join(", ") + "; unicode-range: " + range + "; }";
   };
   url.searchParams.getAll("family").forEach(function (spec) {
