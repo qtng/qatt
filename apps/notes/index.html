@@ -13,6 +13,7 @@
   <script src="lang.js"></script>
   <script src="/js/parser.js"></script>
   <script src="/js/qatt-text.js"></script>
+  <script src="/js/pa-text.js"></script>
   <script src="https://chunom.org/chunom/js/ime.js" crossorigin="anonymous"></script>
   <script src="notes-editor.js"></script>
   <script src="notes-core.js"></script>
@@ -70,8 +71,9 @@
       <button id="undo-btn" type="button" disabled aria-label="Undo" data-vi-aria-label="Hoàn tác" title="Undo" data-vi-title="Hoàn tác"><span class="uni" aria-hidden="true">↶</span></button>
       <button id="redo-btn" type="button" disabled aria-label="Redo" data-vi-aria-label="Làm lại" title="Redo" data-vi-title="Làm lại"><span class="uni" aria-hidden="true">↷</span></button>
       <select id="set-ime" class="ime-select" autocomplete="off" aria-label="Input" data-vi-aria-label="Cách nhập" title="Input" data-vi-title="Cách nhập">
-        <option value="telex" data-vi="Telex">Telex</option>
-        <option value="direct" data-vi="Nhập trực tiếp">Direct input</option>
+        <option value="telex" data-vi="QATT Telex">QATT Telex</option>
+        <option value="direct" data-vi="QATT nhập trực tiếp">QATT Direct input</option>
+        <option value="pa" data-vi="PA Telex">PA Telex</option>
       </select>
       <span class="pop end">
         <button id="align-btn" type="button" aria-label="Alignment" data-vi-aria-label="Căn lề" title="Alignment" data-vi-title="Căn lề" aria-haspopup="true" aria-expanded="false"><i class="bi bi-text-left"></i><i class="bi bi-caret-down-fill caret"></i></button>

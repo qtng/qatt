@@ -110,6 +110,8 @@ const QattWriter = (() => {
 
   const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
   const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
+  const PA_J = 0xF00B0, PA_K = 0xF00B1, PA_ONSET = c => c >= 0xF00B2 && c <= 0xF00C8, PA_NUC = c => c >= 0xF00C9 && c <= 0xF00DE, PA_END = c => c >= 0xF00DF && c <= 0xF00EE;   // the code points of PA (js/pa-text.js)
+  const IS_LINK = s => /^[\u{F009A}\u{F009B}\u{F00B0}\u{F00B1}]$/u.test(s);   // a joiner or combiner (QATT or PA)
   const WINDOW = 64;
   // the cells of all scripts (QATT, and PA when js/pa-text.js is there)
   const cellAny = () => typeof PaText === 'undefined' ? QattText.CELL_ANY : new RegExp(QattText.CELL.source + '|' + PaText.CELL.source + '|[\\u{F009A}-\\u{F00A3}]+|[\\u{F00B0}\\u{F00B1}]|[^]', 'gu');
@@ -160,6 +162,8 @@ const QattWriter = (() => {
         if (LETTER(c)) open = prev !== JOINER && prev !== COMBINER;
         else if (c === JOINER) { keep = open && LETTER(next); open = false; }
         else if (c === COMBINER) { keep = LETTER(prev) && LETTER(next); open = false; }
+        else if (c === PA_J) { keep = PA_ONSET(prev) && PA_NUC(next); open = false; }   // PA: a joiner sits between an onset and a nucleus, a combiner between a stem and a coda or tone
+        else if (c === PA_K) { keep = PA_NUC(prev) && PA_END(next); open = false; }
         else open = false;
         if (keep) { out += String.fromCodePoint(c); prev = c; }
         else { if (i < caret) dropBeforeStart += len; if (i < end) dropBeforeEnd += len; }
@@ -188,8 +192,13 @@ const QattWriter = (() => {
       const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
       if (!cell || typer.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
       e.preventDefault();
-      typer.setRangeText('', cell.start, cell.end, 'end');
-      typer.setSelectionRange(cell.start, cell.start);
+      // the joiners and combiners around the cell go with it (also when they stand next to it alone)
+      const text = typer.value;
+      let from = cell.start, to = cell.end;
+      while (from >= 2 && IS_LINK(text.slice(from - 2, from))) from -= 2;
+      while (to < text.length && IS_LINK(text.slice(to, to + 2))) to += 2;
+      typer.setRangeText('', from, to, 'end');
+      typer.setSelectionRange(from, from);
       tidy();
       o.refresh();
     });

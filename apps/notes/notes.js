@@ -284,7 +284,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   moreBtn.addEventListener('click', () => showMore(morePanel.hidden));
   editor.nomReady.then(() => { shownKeys = null; if (!keybar.hidden) renderKeys(); });
 
-  // the input chosen in the bar above the field (select #set-ime), for every note: Telex (the key bar above) or direct input (a bar of the 22 shapes; digits 1–8 are tones), localStorage.qattNotesIme
+  // the input chosen in the bar above the field (select #set-ime), for every note: QATT Telex (the key bar above), QATT direct input or PA Telex (a word becomes PA) (a bar of the 22 shapes; digits 1–8 are tones), localStorage.qattNotesIme
   const IME_KEY = 'qattNotesIme', directbar = $('directbar');
   directbar.append(...VietnameseParser.SHAPES.map((shape, k) => {
     const btn = document.createElement('button');
@@ -294,7 +294,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     return btn;
   }));
   function setIme(mode, store) {
-    mode = mode === 'direct' ? 'direct' : 'telex';
+    mode = mode === 'direct' ? 'direct' : mode === 'pa' ? 'pa' : 'telex';   // QATT Telex, QATT direct input, PA Telex
     editor.setMode(mode);
     keybar.classList.toggle('direct', mode === 'direct');
     $('set-ime').value = mode;
@@ -380,6 +380,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const setFont = (family, user) => {
     if (!FONTS.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
     document.documentElement.style.setProperty('--qfont', `"${family}"`);
+    document.documentElement.style.setProperty('--pafont', family === 'PhongThao' ? '"PA Phong Thao", "PA"' : '"PA"');   // the PA font behind the font chosen (PA text: U+F00B0.., js/fonts.js PA_FONTS)
     document.documentElement.style.setProperty('--qfont-field', qattFieldFont(family));   // the text field only: also the Latin of the font where it has a big font (js/fonts.js, big)
     if (user) keepFormat('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
