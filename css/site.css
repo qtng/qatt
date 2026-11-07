@@ -6,7 +6,7 @@
 :root { --ink: #2b2118; --cinnabar: #a8362a; --retro-hover: #fff1c9; --retro-active: #ffe39a; }
 
 /* The CJK font of both websites (Chữ Nôm, Chinese characters): one place. Use font-family: var(--font-cjk) (or behind a Latin font: Georgia, var(--font-cjk)).
-   The family QATT Pen is defined by js/fonts.js, which js/navigation.js loads on every page (its CJK in small slices, chunom-assets/fonts/web/qatt-pen-NN.woff2,
+   The family QATT Pen is defined by js/fonts.js, which js/navigation.js loads on every page (its CJK in small slices, fonts/web/qatt-pen-NN.woff2 of qtng/cdn,
    each with its unicode-range, so a page loads only the slices of the characters it shows): a page without navigation.js has no QATT Pen. */
 :root { --font-cjk: "QATT Pen"; }
 .han { font-family: var(--font-cjk); }   /* the Nôm label of a hero or of the editor head */
