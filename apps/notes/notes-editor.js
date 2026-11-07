@@ -9,7 +9,8 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
     ed.variants()   the three slots [neutral, tham, plain]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
     ed.candidates() the Chữ Nôm candidates of the Quốc Ngữ word before the cursor (dictionaries of ime.js): [{ glyph, reading, definition, run() }], [] without a word
     ed.nomReady     a promise, resolved when the dictionaries are loaded
-    ed.setMode(m)   'telex' (the default: Telex, a word becomes QATT at a space) or 'direct' (no Telex, no conversion; the letters come from ed.typeShape, digits 1–8 are tones)
+    ed.setMode(m)   'telex' (the default: Telex, a word becomes QATT at a space), 'direct' (no Telex, no conversion; the letters come from ed.typeShape, digits 1–8 are tones)
+                    or 'pa' (Telex, a word becomes PA, the phonetic script, at a space; js/pa-text.js; Convert reads and writes PA)
     ed.shapes       the 22 plain letters in the order of VietnameseParser.SHAPES
     ed.typeShape(k) direct input of the shape k (0–21) in the order of VietnameseParser.SHAPES (l first): see typeShape below
     ed.convert()    QATT characters with a reading become Quốc Ngữ, else every Quốc Ngữ word becomes QATT
@@ -19,7 +20,11 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
 const NotesEditor = (() => {
   const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
   const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B, NEUTRAL = 0xF009C;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
+  const PA_J = 0xF00B0, PA_K = 0xF00B1, PA_ONSET = c => c >= 0xF00B2 && c <= 0xF00C8, PA_NUC = c => c >= 0xF00C9 && c <= 0xF00DE, PA_END = c => c >= 0xF00DF && c <= 0xF00EE;   // the code points of PA (js/pa-text.js)
+  const IS_LINK = s => /^[\u{F009A}\u{F009B}\u{F00B0}\u{F00B1}]$/u.test(s);   // a joiner or combiner (QATT or PA)
   const WINDOW = 64;
+  // the cells of all scripts: QATT, and PA when js/pa-text.js is loaded
+  const cellAny = () => typeof PaText === 'undefined' ? QattText.CELL_ANY : new RegExp(QattText.CELL.source + '|' + PaText.CELL.source + '|[\\u{F009A}-\\u{F00A3}]+|[\\u{F00B0}\\u{F00B1}]|[^]', 'gu');
   // direct input: the shapes in the order of VietnameseParser.SHAPES (l first) as the index of the shape in the block (U+F0000 + 7 * index; the order of js/qatt-text.js:
   // _ ng h g c l tr d n t th nh ch dz x kh s r m b v ph); the marked forms a button goes through; tone 1..8 -> offset of the tone mark (as TONES of js/qatt-text.js)
   const DIRECT_ORDER = [5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
@@ -32,6 +37,7 @@ const NotesEditor = (() => {
   //   o.on()       whether QATT is on now
   //   o.refresh()  called after every change
   //   o.converted() called when a word became QATT (the editor hides its Nôm candidates)
+  //   o.script()   the script a word becomes: 'qatt' (the default) or 'pa'
   //   o.convertOn  'any' (the default): a space, any other character that is no letter, and Enter convert the word before it; 'enter': Enter only; 'none': nothing
   //                (a string, or a function that gives one)
   function wire(typer, o) {
@@ -39,7 +45,7 @@ const NotesEditor = (() => {
     // the word that ends right before `end` becomes QATT characters (if there are any)
     const convertBefore = end => {
       const m = WORD_END.exec(typer.value.slice(0, end));
-      const text = m && QattText.word(m[0], parser);
+      const text = m && (o.script && o.script() === 'pa' ? (typeof PaText !== 'undefined' && PaText.word(m[0], parser, { stacked: true })) : QattText.word(m[0], parser));
       if (!text) return false;
       const start = end - m[0].length, caret = typer.selectionStart;
       typer.setRangeText(text, start, end, 'end');
@@ -52,7 +58,7 @@ const NotesEditor = (() => {
     // the cell that ends after the position ('before'), starts before it ('after') or contains it (no `which`): {start, end}
     const cellAt = (text, pos, which) => {
       const from = Math.max(0, pos - WINDOW), part = text.slice(from, pos + WINDOW);
-      for (const m of part.matchAll(QattText.CELL_ANY)) {
+      for (const m of part.matchAll(cellAny())) {
         const start = from + m.index, end = start + m[0].length;
         if (which === 'before' ? (start < pos && pos <= end) : which === 'after' ? (start <= pos && pos < end) : (start < pos && pos < end)) return { start, end };
       }
@@ -69,6 +75,8 @@ const NotesEditor = (() => {
         if (LETTER(c)) open = prev !== JOINER && prev !== COMBINER;
         else if (c === JOINER) { keep = open && LETTER(next); open = false; }
         else if (c === COMBINER) { keep = LETTER(prev) && LETTER(next); open = false; }
+        else if (c === PA_J) { keep = PA_ONSET(prev) && PA_NUC(next); open = false; }   // PA: a joiner sits between an onset and a nucleus, a combiner between a stem and a coda or tone
+        else if (c === PA_K) { keep = PA_NUC(prev) && PA_END(next); open = false; }
         else open = false;
         if (keep) { out += String.fromCodePoint(c); prev = c; }
         else { if (i < caret) dropBeforeStart += len; if (i < end) dropBeforeEnd += len; }
@@ -99,8 +107,13 @@ const NotesEditor = (() => {
       const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
       if (!cell || typer.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
       e.preventDefault();
-      typer.setRangeText('', cell.start, cell.end, 'end');
-      typer.setSelectionRange(cell.start, cell.start);
+      // the joiners and combiners around the cell go with it (also when they stand next to it alone)
+      const text = typer.value;
+      let from = cell.start, to = cell.end;
+      while (from >= 2 && IS_LINK(text.slice(from - 2, from))) from -= 2;
+      while (to < text.length && IS_LINK(text.slice(to, to + 2))) to += 2;
+      typer.setRangeText('', from, to, 'end');
+      typer.setSelectionRange(from, from);
       tidy();
       o.refresh();
     });
@@ -235,6 +248,11 @@ const NotesEditor = (() => {
   }
 
 
+  // Convert for PA: PA syllables in the text become Quốc Ngữ, else every Quốc Ngữ word becomes PA (stacked)
+  function convertPa(text, parser) {
+    return new RegExp(PaText.SYL.source, 'u').test(text) ? PaText.read(text, parser) : PaText.convert(text, parser, { stacked: true });
+  }
+
   // The editor of an app (apps/notes/): QATT in a text area without any editor around it. Telex always on (ime.js), a word becomes QATT at a space or other character that is no letter,
   // the cells stay whole. The app draws its own buttons.
   //   opts.parser    the VietnameseParser (decoding)
@@ -245,8 +263,8 @@ const NotesEditor = (() => {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
     let mode = 'telex';
-    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: () => (mode === 'direct' ? 'none' : 'any') });
-    const slots = makeVariants(field, { on: () => true, refresh: changed });
+    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: () => (mode === 'direct' ? 'none' : 'any'), script: () => (mode === 'pa' ? 'pa' : 'qatt') });
+    const slots = makeVariants(field, { on: () => mode !== 'pa', refresh: changed });   // the variants are those of QATT
     // the Chữ Nôm candidates of the word before the cursor; while a phone keyboard composes, the word is still raw Telex
     const nomReady = ime ? VietIme.load() : Promise.resolve();
     let composing = false;
@@ -324,9 +342,9 @@ const NotesEditor = (() => {
       candidates,
       typeShape,
       shapes: DIRECT_ORDER.map(i => String.fromCodePoint(0xF0000 + 7 * i)),   // the plain letters of the 22 shapes in that order
-      setMode(m) { mode = m === 'direct' ? 'direct' : 'telex'; if (ime) { ime.update({ telex: mode === 'telex' }); ime.hide(); } last = null; },
+      setMode(m) { mode = m === 'direct' ? 'direct' : m === 'pa' && typeof PaText !== 'undefined' ? 'pa' : 'telex'; if (ime) { ime.update({ telex: mode === 'telex' }); ime.hide(); } last = null; },
       nomReady,
-      convert() { field.value = convertText(field.value, parser); changed(); },
+      convert() { field.value = mode === 'pa' ? convertPa(field.value, parser) : convertText(field.value, parser); changed(); },
       setDecoding(name) {
         field.value = QattText.recode(field.value, parser, new VietnameseParser(name, parser.extra));
         parser.setDecoding(name);

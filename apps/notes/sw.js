@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v79';
+const CACHE = 'qatt-notes-v80';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.qatt.org/fonts/';   // the font files (js/fonts.js, QATT_CDN): the R2 bucket
@@ -23,7 +23,7 @@ const PAGE = '/apps/notes/';
 const PRECACHE = [
   PAGE, '/apps/notes/notes.css', '/apps/notes/notes.js', '/apps/notes/notes-core.js', '/apps/notes/notes-db.js', '/apps/notes/notes-styles.js', '/apps/notes/lang.js', '/apps/notes/notes-stats.js',
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
-  '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/apps/notes/notes-editor.js',
+  '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/js/pa-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
   ...['qatt-pen-letters.woff2', 'qatt-pen-medium-letters.woff2', 'celluloid-letters.woff2', 'migoi-letters.woff2', 'qatt-serif.woff2', 'qatt-gothic.woff2', 'qatt-gothic-wide.woff2', 'qatt-hat-gao.woff2', 'qatt-snip.woff2', 'qatt-manh.woff2', 'qatt-metro.woff2', 'qatt-n7k.woff2', 'phongthao-letters.woff2'].map(n => CDN + n),
   '/decodings.json',
