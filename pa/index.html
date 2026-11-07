@@ -47,6 +47,7 @@
       <li><a href="#repertoire">Character repertoire</a></li>
       <li><a href="#codes">Code points</a></li>
       <li><a href="#composition">Composition</a></li>
+      <li><a href="#qatt">One font with QATT</a></li>
       <li><a href="#reading">Reading Quốc Ngữ</a></li>
       <li><a href="#legacy">The earlier font</a></li>
       <li><a href="#open">Open points</a></li>
@@ -196,6 +197,16 @@ Extension = C [ T ]  |  T</pre>
     </tbody>
   </table>
   <p>A stem followed by a tone alone (<code>A N T</code>) is two cells. Every glyph is one cell wide.</p>
+
+  <h2 id="qatt" data-vi="Một phông chữ với QATT">One font with QATT</h2>
+  <p>PA is designed to share one font file with QATT. For that the two scripts must not touch each other:</p>
+  <ul>
+    <li><strong>Code points.</strong> QATT uses <code>U+F0000</code>..<code>U+F00AF</code>, PA <code>U+F0800</code>..<code>U+F085F</code>. Nothing overlaps, and QATT keeps room to grow.</li>
+    <li><strong>Control characters.</strong> PA uses no joiner or combiner. The QATT joiner (<code>U+F009A</code>), combiner (<code>U+F009B</code>) and tone marks (<code>U+F009C</code>..<code>U+F00A3</code>) have no meaning in PA text, and a PA tone is not a QATT tone mark.</li>
+    <li><strong>Rules.</strong> The substitutions of each script act only on the classes of that script (<code>@A @N @C @T</code> for PA), so a QATT cell next to a PA cell is never combined with it. The two sets of rules can sit in the same <code>ccmp</code> feature as separate lookups.</li>
+    <li><strong>Size.</strong> PA adds 605 glyphs (506 stems, 60 extensions and 39 single cells), well inside the glyph limit of a font next to the QATT forms and pairs.</li>
+    <li><strong>Metrics.</strong> Both scripts use the same square cell, so mixed text keeps one line height and advance.</li>
+  </ul>
 
   <h2 id="reading" data-vi="Đọc chữ quốc ngữ">Reading Quốc Ngữ</h2>
   <p>A syllable of Quốc Ngữ is split into onset, nucleus, coda and tone, then mapped to the names above.</p>
