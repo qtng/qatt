@@ -695,6 +695,13 @@ window.notesApp = { store, ready, flush() } is for the tests.
   // the menu entry "Font versions": the build of the fonts (fonts/version.json of qtng/cdn) and, per font of the list, the date of the last change of its files (UTC, as in the list):
   // the QATT letters and, for a font with Chữ Nôm, the big font (its slices and Latin); a date later than the first list this browser saw (the base) is marked: that file is loaded with ?v=<date>
   const fontinfo = $('fontinfo');
+  // the age of a date of the list (UTC): whole days "3d", under a day whole hours "5h"
+  function fontAge(d) {
+    const ms = Date.now() - Date.parse(d.replace(' ', 'T') + ':00Z');
+    if (!(ms >= 0)) return '0h';
+    const days = Math.floor(ms / 864e5);
+    return days > 0 ? days + 'd' : Math.floor(ms / 36e5) + 'h';
+  }
   function showFontInfo() {
     let ver = {};
     try { ver = JSON.parse(localStorage.qattFontVer) || {}; } catch (e) { /* no list yet */ }
@@ -713,7 +720,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
       keys.forEach((k, i) => {
         const line = document.createElement('div');
         const d = fonts[k];
-        line.textContent = (keys.length > 1 ? (i ? 'Nôm ' : 'QATT ') : '') + (d || '–');
+        line.textContent = (keys.length > 1 ? (i ? 'Nôm ' : 'QATT ') : '') + (d ? d + ' ' + fontAge(d) : '–');
         if (d && base[k] !== d) { line.className = 'fontinfo-new'; line.textContent += ' ↑'; }
         dates.appendChild(line);
       });
