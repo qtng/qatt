@@ -103,7 +103,10 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   var verOf = function (key) { var v = (ver.fonts || {})[key]; return v && v !== (ver.base || {})[key] ? "?v=" + encodeURIComponent(v) : ""; };
   var css = [], face = function (family, weight, bases, file, range, key) {
     return '@font-face { font-family: "' + family + '"; font-style: normal; font-weight: ' + weight + "; font-display: " + display + "; src: " +
-      bases.map(function (b) { return "url(" + b + file + ".woff2" + verOf(key) + ') format("woff2")'; }).join(", ") + "; unicode-range: " + range + "; }";
+      bases.map(function (b, i) {
+        var q = verOf(key);   // a changed font comes from the tag of its build (jsDelivr keeps a tag unchanged for ever, @main may show an older commit for hours), the second address is Pages
+        return "url(" + (q && i === 0 && ver.build ? b.replace("@main", "@fonts-" + ver.build) : b) + file + ".woff2" + q + ') format("woff2")';
+      }).join(", ") + "; unicode-range: " + range + "; }";
   };
   url.searchParams.getAll("family").forEach(function (spec) {
     var i = spec.indexOf(":"), asked = (i < 0 ? spec : spec.slice(0, i)).replace(/\+/g, " ").trim(), name = Object.keys(FONTS).filter(function (k) { return k.toLowerCase() === asked.toLowerCase(); })[0], f = FONTS[name];   // upper and lower case do not matter
