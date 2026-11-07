@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v75';
+const CACHE = 'qatt-notes-v76';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/';   // the font files (js/fonts.js, QATT_CDN: this address first, then CDN_PAGES)
