@@ -8,7 +8,7 @@ The QATT fonts (fonts/*.woff2) and the sizes offered by the code table (admin/vi
 
 Every page of both sites gets this file from js/navigation.js (written into the <head> right after it); a page does not load it itself (only Qatt.org Notes,
 which has no navigation.js). It defines the @font-face rules of every font, also "QATT Pen", the CJK font of --font-cjk (css/site.css), and fills these selects
-as soon as the parser has added them. Its globals are var: it may run twice (admin/view.html). The font files are in the repository qtng/cdn (QATT_CDN).
+as soon as the parser has added them. Its globals are var: it may run twice (admin/view.html). The font files are in the R2 bucket at cdn.qatt.org (QATT_CDN).
 */
 var QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
@@ -112,10 +112,11 @@ var isAdmin = () => {
 // the fonts this visitor may use (all for an admin, else those not marked admin: true); other scripts (apps/notes/) use this list instead of their own
 var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 
-// where the font files are (the repository qtng/cdn, filled by cdn_sync.py / the build of the private repository): jsDelivr first, then the GitHub Pages of that repository;
-// the browser takes the next address of src when one fails. qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
-var QATT_CDN = ["https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/", "https://chunom.org/cdn/fonts/"];
-// versions: fonts/version.json of qtng/cdn (written by its action) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "qatt-serif"; the slices and the Latin
+// where the font files are (the Cloudflare R2 bucket qatt-fonts at cdn.qatt.org, filled by r2_publish.py of the private repository; no Git history, a changed file is overwritten): that address first, then the
+// GitHub Pages of the repository qtng/cdn (an older copy, only for the case that the first fails); the browser takes the next address of src when one fails.
+// qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
+var QATT_CDN = ["https://cdn.qatt.org/fonts/", "https://chunom.org/cdn/fonts/"];
+// versions: fonts/version.json of the bucket (written by r2_publish.py) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "qatt-serif"; the slices and the Latin
 // of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, epoch, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
 // with the time as a cache buster. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice for a visitor when nothing changed); when its date is later than the base,
 // the date goes behind its files (?v=<date>), so a changed font has a new address and the next page load takes it (the page that is open keeps what it has).
@@ -132,9 +133,7 @@ var qattFontVer = (() => {
 var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin)$/, "$1");
 var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
-  // a changed font comes from Pages first (renewed within 10 minutes; jsDelivr may show an older commit of @main for hours), the second address is the tag of its build on jsDelivr (@fonts-<N>, never changes)
-  const bases = q && qattFontVer.build ? QATT_CDN.slice(1).concat([QATT_CDN[0].replace("@main", "@fonts-" + qattFontVer.build)]) : q ? QATT_CDN.slice(1).concat(QATT_CDN.slice(0, 1)) : QATT_CDN;
-  return bases.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
+  return QATT_CDN.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
 };
 // qattFontCheck(force): true = a list of a new build was stored (its dates apply from the next page load), false = the same build, null = the list could not be read; force skips the 5 minutes
 var qattFontCheck = async (force) => {
@@ -143,7 +142,7 @@ var qattFontCheck = async (force) => {
     if (!force && Date.now() - (stored.at || 0) < QATT_FONT_CHECK) return false;
     const keep = Object.assign({}, stored, { at: Date.now() });   // the time is kept also when the request fails: not again within 5 minutes
     try { localStorage.qattFontVer = JSON.stringify(keep); } catch (e) { /* no storage: no versions */ }
-    for (const base of [...QATT_CDN].reverse()) {   // GitHub Pages first: jsDelivr serves the file of an older commit of @main for hours (the cache buster does not help), Pages renews it within 10 minutes
+    for (const base of QATT_CDN.slice(0, 1)) {   // only the bucket: the list of the older copy on Pages would be an older build
       try {
         const res = await fetch(`${base}version.json?t=${Date.now()}`);
         const list = res.ok && await res.json();
