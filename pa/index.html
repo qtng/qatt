@@ -119,7 +119,7 @@
   <div class="cells"><div class="cell"><span class="pa v">&#xE026;</span><span class="sp">-u, -o</span></div><div class="cell"><span class="pa v">&#xE027;</span><span class="sp">-i, -y</span></div><div class="cell"><span class="pa c">&#xE028;</span><span class="sp">-m</span></div><div class="cell"><span class="pa c">&#xE029;</span><span class="sp">-n</span></div><div class="cell"><span class="pa c">&#xE02A;</span><span class="sp">-ng</span></div><div class="cell"><span class="pa c">&#xE02B;</span><span class="sp">-nh</span></div><div class="cell"><span class="pa c">&#xE02C;</span><span class="sp">-p</span></div><div class="cell"><span class="pa c">&#xE02D;</span><span class="sp">-t</span></div><div class="cell"><span class="pa c">&#xE02E;</span><span class="sp">-c</span></div><div class="cell"><span class="pa c">&#xE02F;</span><span class="sp">-ch</span></div></div>
 
   <h3 id="tones" data-vi="Thanh điệu">Tones</h3>
-  <p>The five tone marks (sắc, huyền, hỏi, ngã, nặng; the level tone has no mark). After a syllable without a coda the tone is a mark of its own:</p>
+  <p>The five tone marks (sắc, huyền, hỏi, ngã, nặng; the earlier font has no mark for the level tone, the next one has a sixth mark for it). After a syllable without a coda the tone is a mark of its own:</p>
   <div class="cells"><div class="cell"><span class="pa t">&#xE001;</span><span class="sp">sắc</span></div><div class="cell"><span class="pa t">&#xE002;</span><span class="sp">huyền</span></div><div class="cell"><span class="pa t">&#xE003;</span><span class="sp">hỏi</span></div><div class="cell"><span class="pa t">&#xE004;</span><span class="sp">ngã</span></div><div class="cell"><span class="pa t">&#xE005;</span><span class="sp">nặng</span></div></div>
   <p>With a coda the mark is part of the coda block (here after <em>-m</em>):</p>
   <div class="cells"><div class="cell"><span class="pa c">&#xE032;</span><span class="sp">sắc + -m</span></div><div class="cell"><span class="pa c">&#xE03C;</span><span class="sp">huyền + -m</span></div><div class="cell"><span class="pa c">&#xE046;</span><span class="sp">hỏi + -m</span></div><div class="cell"><span class="pa c">&#xE050;</span><span class="sp">ngã + -m</span></div><div class="cell"><span class="pa c">&#xE05A;</span><span class="sp">nặng + -m</span></div></div>
@@ -275,7 +275,7 @@ Extension = C [ T ]  |  T</pre>
 <tr><td class="num">3</td><td class="code">U+F0852</td><td>hỏi</td></tr>
 <tr><td class="num">4</td><td class="code">U+F0853</td><td>ngã</td></tr>
 <tr><td class="num">5</td><td class="code">U+F0854</td><td>nặng</td></tr>
-<tr><td class="num">6</td><td class="code">U+F0855</td><td>reserved</td></tr>
+<tr><td class="num">6</td><td class="code">U+F0855</td><td>ngang (level tone, an explicit mark)</td></tr>
     </tbody>
   </table></div>
 
@@ -289,13 +289,29 @@ Extension = C [ T ]  |  T</pre>
       <tr><td>A</td><td>onset cell alone (23)</td></tr>
       <tr><td>C</td><td>coda cell alone (10)</td></tr>
       <tr><td>T</td><td>tone cell alone (6)</td></tr>
-      <tr><td>A N J E (E = C T, C or T)</td><td>one cell: the stem glyph squeezed into the upper part, the extension glyph squeezed into the lower part</td></tr>
+      <tr><td>A N J E (E = C T, C or T)</td><td>one cell: the stem in its stacked form above, the extension in its stacked form below (see below)</td></tr>
       <tr><td>N without A in front</td><td>not valid; an input method inserts the onset <code>_</code></td></tr>
     </tbody>
   </table>
   <p>A stem followed by a tone alone (<code>A N T</code>) is two cells. Every cell is one em wide.</p>
   <h4>The joined cell</h4>
-  <p>The joined cell is not a precomposed glyph for every pair, which would be 506 × 76 = 38,456 glyphs. Like the stack of QATT the font swaps both parts for squeezed forms: the stem becomes its <em>upper</em> form (506 glyphs), the joiner a glyph without width, and the extension its <em>lower</em> form (76 glyphs: 60 coda and tone, 10 codas, 6 tones) with no advance, drawn over the cell of the stem. The parts are squeezed in height only, the strokes keep their width.</p>
+  <p>With the joiner stem and extension share one em square, like a CJK character; without it they are two cells. Both forms come from the drawings of PA 1 Normal. The stacked forms are <em>drawn for the stack</em>, they are not squeezed copies of the separate forms, and the font has them as glyphs of their own.</p>
+  <p>Top to bottom the joined cell holds the stem, then the tone mark, then the coda. The stem is drawn in one of three heights, which depends on what follows the joiner:</p>
+  <table class="table table-sm">
+    <thead><tr><th>After <code>A N J</code></th><th>Stem form</th><th>Height of the stem</th></tr></thead>
+    <tbody>
+      <tr><td>C T (coda and tone)</td><td>Z</td><td>smallest, about a quarter of the cell</td></tr>
+      <tr><td>C alone, or T alone (not tone 2)</td><td>ZZ</td><td>about a third to a half of the cell</td></tr>
+      <tr><td>T2 alone (huyền)</td><td>ZZZ</td><td>largest, more than half: tone 2 is a single bar at the bottom</td></tr>
+    </tbody>
+  </table>
+  <p>So the joined cell is not a precomposed glyph for every pair (506 × 76 = 38,456 glyphs). The font substitutes the three parts separately, as the stack of QATT does:</p>
+  <ul>
+    <li>the stem becomes its <em>upper</em> form Z, ZZ or ZZZ (3 × 506 glyphs), chosen by a contextual rule that looks at the characters after the joiner;</li>
+    <li>the joiner becomes a glyph without width;</li>
+    <li>the extension becomes its <em>lower</em> form with no advance, drawn over the cell of the stem (76 glyphs: 60 coda and tone, 10 codas, 6 tones). The coda of a coda and tone pair has three drawings by tone (for tones 1 and 2, for 3, 4 and 6, for 5), as in the separate form.</li>
+  </ul>
+  <p>Where the drawings of the ZZZ form are missing (the onsets <code>ph, ng, t, th, tr</code> and the glide bars), the font uses the ZZ form.</p>
 
   <h3 id="qatt" data-vi="Một phông chữ với QATT">One font with QATT</h3>
   <p>PA is designed to share one font file with QATT. For that the two scripts must not touch each other:</p>
@@ -303,7 +319,7 @@ Extension = C [ T ]  |  T</pre>
     <li><strong>Code points.</strong> QATT uses <code>U+F0000</code>..<code>U+F00AF</code>, PA <code>U+F0800</code>..<code>U+F085F</code>. Nothing overlaps, and QATT keeps room to grow.</li>
     <li><strong>Control characters.</strong> PA has its own joiner (<code>U+F0860</code>) and no combiner. The QATT joiner (<code>U+F009A</code>), combiner (<code>U+F009B</code>) and tone marks (<code>U+F009C</code>..<code>U+F00A3</code>) have no meaning in PA text, and a PA tone is not a QATT tone mark.</li>
     <li><strong>Rules.</strong> The substitutions of each script act only on the classes of that script (<code>@A @N @C @T</code> for PA), so a QATT cell next to a PA cell is never combined with it. The two sets of rules can sit in the same <code>ccmp</code> feature as separate lookups.</li>
-    <li><strong>Size.</strong> PA adds 1,188 glyphs: 605 for the cells without the joiner (506 stems, 60 extensions with coda and tone, 39 single cells), 582 squeezed forms for the joined cell (506 upper, 76 lower) and the joiner. That is well inside the glyph limit of a font next to the QATT forms and pairs.</li>
+    <li><strong>Size.</strong> PA adds 2,200 glyphs: 605 for the cells without the joiner (506 stems, 60 extensions with coda and tone, 39 single cells), 1,595 for the joined cell (1,518 upper forms, 76 lower forms and the joiner). That is well inside the glyph limit of a font next to the QATT forms and pairs.</li>
     <li><strong>Metrics.</strong> Both scripts use the same square cell, so mixed text keeps one line height and advance.</li>
   </ul>
 
@@ -332,8 +348,8 @@ Extension = C [ T ]  |  T</pre>
   <h3 id="open" data-vi="Điểm còn mở">Open points</h3>
   <ol>
     <li><strong>Tone after a stem.</strong> The drawings have two forms: a small tone inside the stem cell and a full-size tone as a cell of its own. Proposal: the full-size cell is the default (as in the earlier font); the small form is chosen with the variation selector <code>U+FE00</code> after the tone.</li>
-    <li><strong>Joined cell.</strong> The proportions of the stack (proposal: stem 55 %, extension 45 % of the height, as in the QATT stack) and whether the parts keep their width or are narrowed. The character: an own joiner <code>U+F0860</code> (as QATT has) or the standard zero width joiner <code>U+200D</code>, which a fallback font shows as nothing.</li>
-    <li><strong>Tone 6.</strong> The drawings have a sixth tone mark; its meaning is not yet decided (for example an explicit level tone).</li>
+    <li><strong>Joiner character.</strong> An own joiner <code>U+F0860</code> (as QATT has) or the standard zero width joiner <code>U+200D</code>, which a fallback font shows as nothing. Proposal: the own joiner, so that the two scripts stay independent.</li>
+    <li><strong>Unfinished drawings.</strong> Tone 6 (ngang) is not complete in the source: its stacked forms with a coda (<code>z-_t6</code>) are missing, the stacked tone alone is a copy of the unstacked one, and the unstacked large tone 6 is a copy of tone 5. Its list of onsets also marks <code>x</code> as “todo”.</li>
     <li><strong>Combinations that Vietnamese does not use</strong> (for instance <code>b</code> with a glide nucleus). Proposal: the font draws all 506 stems, the input method decides what is offered.</li>
   </ol>
 </main>
