@@ -109,12 +109,13 @@
                     <div class="card-header py-2 d-flex justify-content-between align-items-center">
                         <span class="small fw-bold">KAGE-Daten</span>
                         <div class="btn-group btn-group-sm">
+                            <button id="kageApplyBtn" class="btn btn-outline-success py-0" title="Die KAGE-Zeilen im Feld als Striche der Glyphe übernehmen (Strg+Enter); danach Speichern">Übernehmen</button>
                             <button id="kageImportBtn" class="btn btn-outline-primary py-0" title="Alle Glyphen aus einer Datei importieren">Import</button>
                             <button id="kageExportBtn" class="btn btn-outline-secondary py-0" title="Alle Glyphen als Datei herunterladen">Export</button>
                         </div>
                         <input type="file" id="kageImportFile" accept=".yaml,.yml,.txt" class="d-none">
                     </div>
-                    <textarea id="kageOutput" rows="6" class="form-control font-monospace small border-0 rounded-0" style="resize: vertical;" readonly aria-label="KAGE-Daten"></textarea>
+                    <textarea id="kageOutput" rows="6" class="form-control font-monospace small border-0 rounded-0" style="resize: vertical;" spellcheck="false" aria-label="KAGE-Daten"></textarea>
                 </div>
             </div>
         </div>
@@ -450,6 +451,14 @@
                     if (this.selectedStrokeIdx === null) return;
                     e.preventDefault();
                     this.deleteSelectedStroke();
+                });
+                // KAGE-Daten von Hand: das Feld zeigt die Zeilen der Glyphe (wie gespeichert: erst die Glyphe, dann die 6 Marks) und kann bearbeitet werden;
+                // „Übernehmen“ (oder Strg+Enter) macht daraus die Striche des Editors, gespeichert wird wie sonst mit „Speichern“
+                const applyBtn = document.getElementById('kageApplyBtn');
+                applyBtn.addEventListener('click', () => this.applyKageText());
+                this.output.addEventListener('input', () => { this.outputDirty = true; applyBtn.classList.replace('btn-outline-success', 'btn-success'); });
+                this.output.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); this.applyKageText(); }
                 });
                 document.getElementById('saveGlyphBtn').addEventListener('click', () => this.saveCurrentGlyph());
                 document.getElementById('saveCodeInput').addEventListener('keypress', (e) => {
@@ -1427,6 +1436,29 @@
 
             updateOutput() {
                 this.output.value = withoutLayers(this.strokes).map(strokeToKage).join('\n'); // so wie gespeichert
+                this.outputDirty = false;
+                document.getElementById('kageApplyBtn').classList.replace('btn-success', 'btn-outline-success');
+            }
+
+            // Die Zeilen des Feldes als Striche übernehmen (Name, Breite und Versatz der geladenen Glyphe bleiben); hat sie 9 oder mehr Teile,
+            // sind die letzten 6 die Marks. Zeilen, die keine Striche ergeben (Kommentare, zu kurz), werden gemeldet.
+            applyKageText() {
+                const text = this.output.value;
+                const lines = text.split(/[\n\r$]+/).map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+                const strokes = kageToStrokes(lines.join('\n'));
+                if (!strokes.length) { this.showToast('Keine gültigen KAGE-Zeilen im Feld.'); return; }
+                const skipped = lines.length - strokes.length;
+                const refs = strokes.filter(st => st.type === 99 && !this.savedGlyphs[st.refName]).map(st => st.refName);
+                this.strokes = withLayers(strokes);
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.resetToAddOrEdit();
+                this.updateOutput();
+                this.updateEditInfo();
+                this.render();
+                const marks = hasMarks(strokes) ? ` (davon ${MARK_COUNT} Marks)` : '';
+                this.showToast(`${strokes.length} Striche übernommen${marks}` + (skipped > 0 ? `, ${skipped} Zeile(n) übersprungen` : '') +
+                    (refs.length ? `; unbekannte Komponente: ${[...new Set(refs)].join(', ')}` : '') + '. Zum Sichern „Speichern“.');
             }
 
             showToast(msg) {
