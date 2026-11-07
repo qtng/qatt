@@ -112,10 +112,9 @@ var isAdmin = () => {
 // the fonts this visitor may use (all for an admin, else those not marked admin: true); other scripts (apps/notes/) use this list instead of their own
 var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 
-// where the font files are (the Cloudflare R2 bucket qatt-fonts at cdn.qatt.org, filled by r2_publish.py of the private repository; no Git history, a changed file is overwritten): that address first, then the
-// GitHub Pages of the repository qtng/cdn (an older copy, only for the case that the first fails); the browser takes the next address of src when one fails.
-// qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
-var QATT_CDN = ["https://cdn.qatt.org/fonts/", "https://chunom.org/cdn/fonts/"];
+// where the font files are (the Cloudflare R2 bucket qatt-fonts at cdn.qatt.org, filled by r2_publish.py of the private repository; no Git history, a changed file is overwritten);
+// a list, so that another address could be put behind the first (the browser takes the next address of src when one fails). qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
+var QATT_CDN = ["https://cdn.qatt.org/fonts/"];
 // versions: fonts/version.json of the bucket (written by r2_publish.py) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "qatt-serif"; the slices and the Latin
 // of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, epoch, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
 // with the time as a cache buster. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice for a visitor when nothing changed); when its date is later than the base,
@@ -142,7 +141,7 @@ var qattFontCheck = async (force) => {
     if (!force && Date.now() - (stored.at || 0) < QATT_FONT_CHECK) return false;
     const keep = Object.assign({}, stored, { at: Date.now() });   // the time is kept also when the request fails: not again within 5 minutes
     try { localStorage.qattFontVer = JSON.stringify(keep); } catch (e) { /* no storage: no versions */ }
-    for (const base of QATT_CDN.slice(0, 1)) {   // only the bucket: the list of the older copy on Pages would be an older build
+    for (const base of QATT_CDN.slice(0, 1)) {   // the first address only: a list at another address could be an older build
       try {
         const res = await fetch(`${base}version.json?t=${Date.now()}`);
         const list = res.ok && await res.json();

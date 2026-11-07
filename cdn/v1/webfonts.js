@@ -16,7 +16,7 @@ A LONG-TERM PROMISE: this address and this query stay valid, whatever is behind 
   - a new syntax would be a new address (/cdn/v2/webfonts.js), this file stays;
   - where the font files are (BASES below) may change at any time: only these two lines change;
   - plain ES5, no dependencies, no build (the check for new versions of the files is skipped where there is no fetch).
-Every file is tried at the first address first (cdn.qatt.org, Cloudflare R2) and at the second (an older copy on GitHub Pages) if that fails.
+Every file is loaded from cdn.qatt.org (Cloudflare R2); the lists below could take another address behind the first.
 The slices and the table of their ranges are written by hannom_web_slices.py of the private repository qtng/chunom-private (feature fonts); the notes on the
 succession of the domain are there too (docs). Licence: https://qatt.org/fonts/LICENSE.txt */
 (function () {
@@ -25,8 +25,8 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   if (!me || !me.src) return;
   var url = new URL(me.src);
   // where the files are: [first, fallback]; all in the repository qtng/cdn (jsDelivr, then its GitHub Pages): the CJK slices (fonts/web/), the QATT letters (fonts/)
-  var SLICE_BASES = ["https://cdn.qatt.org/fonts/web/", "https://chunom.org/cdn/fonts/web/"];
-  var LETTER_BASES = ["https://cdn.qatt.org/fonts/", "https://chunom.org/cdn/fonts/"];
+  var SLICE_BASES = ["https://cdn.qatt.org/fonts/web/"];
+  var LETTER_BASES = ["https://cdn.qatt.org/fonts/"];
   /* slices: begin */
   var SLICES = [
     "U+2FF0, U+31F4, U+340C, U+35C2, U+3D4B, U+4E09, U+4E10, U+4E8B, U+4E9B, U+4EBA, U+4ECD, U+4F53, U+5040, U+5099, U+50B3, U+5143, U+5171, U+518A, U+522B, U+5289, U+5357, U+53EA, U+5400, U+5404, U+540C, U+540F, U+5427, U+543B, U+5450, U+547D, U+548D, U+54FF, U+554F, U+5583, U+56FA, U+570B, U+5728, U+5740, U+578C, U+57CE, U+5973-5974, U+5982, U+5991, U+59AC, U+59D1, U+5B57, U+5C3C, U+5C40, U+5C71, U+5E73-5E74, U+5E95, U+5F79, U+6044, U+606A, U+6144, U+61A2, U+6208, U+6210, U+6237, U+624D, U+62F1, U+6307, U+6392, U+6539, U+65B0, U+65BC, U+65E6, U+660C, U+6625, U+6642, U+6708, U+6731, U+6842, U+68CB, U+694A, U+6B23, U+6B3A, U+6B4C, U+6B62, U+6B66, U+6C9B, U+6CA1, U+6CCA, U+6E03, U+6F14, U+6FDF, U+722B, U+7232, U+7279, U+72C0, U+74CA, U+751F, U+7576, U+788E, U+79AE, U+7A7A, U+7A96, U+7B54, U+7CA6, U+7D30, U+7D42, U+7F85, U+7F8E, U+7FA4, U+7FC1, U+8012, U+80E1, U+81EA, U+826F, U+82B1, U+82F1, U+8339, U+88AB, U+8A13, U+8A5E, U+8A69, U+8A9E, U+8AA0, U+8C9D, U+8CA2, U+8CE6, U+8D8A, U+8E22, U+8ECD, U+8FB0, U+9054, U+9076, U+9285, U+962E, U+9673, U+96C6, U+97F3, U+9999, U+9EBB, U+FF1A, U+20027, U+200E9, U+20129, U+2013C, U+201CD, U+2029A-2029B, U+204E8, U+2052D, U+209B3, U+20AFE, U+20B20, U+20C4A, U+2139D, U+215C9, U+21890, U+21975-21982, U+21A38, U+221A5, U+229DA, U+2321C, U+2412F, U+24BE9, U+24F93, U+24FF0, U+25669, U+25A9D, U+25FD7, U+2629A, U+264B9, U+2693E, U+27289, U+275F1, U+2784A, U+27D51, U+2825F, U+2846E, U+2856D, U+285B2, U+2B968, U+2BBF3, U+2C65E, U+31EB5",
@@ -133,8 +133,7 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   var keep = {}; for (var k in stored) keep[k] = stored[k];
   keep.at = Date.now(); verSave(keep);   // the time is kept also when the request fails: not again within 5 minutes
   var ask = function (i) {
-    if (i >= 1) return;
-    // only the bucket: the list on Pages (an older copy) would be an older build
+    if (i >= LETTER_BASES.length) return;
     fetch(LETTER_BASES[i] + "version.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
       if (!list || !list.fonts) return ask(i + 1);
       if (list.build !== stored.build || !stored.base) verSave({ at: keep.at, build: list.build, epoch: EPOCH, base: stored.base || (stored.fonts ? {} : list.fonts), fonts: list.fonts });   // the same build: nothing changed
