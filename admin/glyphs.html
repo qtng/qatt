@@ -11,6 +11,13 @@
         /* Verhindert Text-Markierung beim schnellen Klicken auf die Steuerungs-Buttons */
         .no-select { user-select: none; }
         #kageCanvas { width: min(520px, 100%); aspect-ratio: 1; cursor: crosshair; }
+        /* gespeicherte Glyphen: gleich breite Kacheln, schlichter Rahmen mit einer Rundung, weiße Fläche, der Name darf umbrechen */
+        .glyph-tile { position: relative; width: 76px; }
+        .glyph-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; padding: 4px; border: 1px solid var(--bs-border-color); border-radius: 8px;
+                     background: var(--bs-secondary-bg); color: var(--bs-body-color); white-space: normal; text-align: center; }
+        .glyph-btn:hover { border-color: var(--bs-primary); }
+        .glyph-btn canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; border-radius: 4px; background: #fff; }
+        .glyph-btn .glyph-name { max-width: 100%; font-size: .72rem; line-height: 1.15; overflow-wrap: anywhere; }
     </style>
 </head>
 <body class="bg-body-tertiary">
@@ -1139,11 +1146,11 @@
                 container.innerHTML = '';
                 keys.forEach(code => {
                     const tile = document.createElement('div');
-                    tile.className = 'position-relative';
+                    tile.className = 'glyph-tile';
 
                     const wrap = document.createElement('button');
                     wrap.type = 'button';
-                    wrap.className = 'btn btn-light border d-flex flex-column align-items-center gap-1 p-1';
+                    wrap.className = 'glyph-btn';
                     wrap.title = `${code} laden`;
                     wrap.onclick = () => this.appMode === 'pick' ? this.addComponent(code) : this.loadGlyph(code);
 
@@ -1160,13 +1167,16 @@
                     const can = document.createElement('canvas');
                     can.width = 60;
                     can.height = 60;
-                    can.className = 'bg-white rounded';
                     const ctx = can.getContext('2d');
                     this.previewTransform(ctx, 60);
                     ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
                     glyphPart(this.savedGlyphs[code]).forEach(stroke => {
-                        this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
+                        const ref = stroke.type === 99 ? this.savedGlyphs[stroke.refName] : null;
+                        if (ref) { // ein Verweis zeigt die Glyphe selbst in ihrer Box (ohne Rahmen und Beschriftung)
+                            const [a, b] = stroke.points;
+                            this.drawInBox(ctx, glyphPart(ref), Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), false, 0, false);
+                        } else this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
                     });
                     ctx.globalAlpha = 0.3; // Marks gedämpft
                     marksPart(this.savedGlyphs[code]).forEach(stroke => {
@@ -1175,7 +1185,7 @@
                     ctx.globalAlpha = 1;
 
                     const label = document.createElement('span');
-                    label.className = 'small font-monospace fw-bold';
+                    label.className = 'glyph-name font-monospace fw-bold';
                     label.textContent = code;
 
                     wrap.appendChild(can);
