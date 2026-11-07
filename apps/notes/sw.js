@@ -6,7 +6,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v63';
+const CACHE = 'qatt-notes-v64';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/';   // the font files (js/fonts.js, QATT_CDN: this address first, then CDN_PAGES)
@@ -109,7 +109,7 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
     event.respondWith((async () => {
       const cache = await caches.open(CACHE), key = keyOf(req);
       const hit = await cache.match(key, { ignoreSearch: true });
-      const refresh = fetch(req).then(res => { if (res.ok) cache.put(key, res.clone()); return res; });
+      const refresh = fetch(new Request(req, { cache: 'no-cache' })).then(res => { if (res.ok) cache.put(key, res.clone()); return res; });   // no-cache: asks the server (a 304 costs nothing) even when the HTTP cache still holds the file (jsDelivr: 7 days), so a new font is there at the next start
       if (hit) { event.waitUntil(refresh.catch(() => {})); return hit; }
       return refresh;
     })());
