@@ -192,7 +192,7 @@
   // the complete list: every font of fonts.js, also those for admins only (fonts.js defines @font-face for the ones it offers; the others here)
   const rest = QATT_FONTS.filter(f => !FONTS.includes(f));
   if (rest.length) {
-    const st = el('style', '', rest.map(f => `@font-face { font-family: "${f.family}"; src: url(${QATT_FONT_DIR}${f.file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${f.file}.ttf) format("truetype"); }`).join('\n'));
+    const st = el('style', '', rest.map(f => `@font-face { font-family: "${f.family}"; src: ${qattFontSrc(f.file + ".woff2")}; }`).join('\n'));
     document.head.append(st);
   }
   const specs = [];
