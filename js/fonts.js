@@ -21,12 +21,14 @@ var QATT_FONTS = [
   { family: "Migoi",              label: "Migoi",                        file: "migoi-letters", big: "migoi", cjk: true },   // as QATT Pen and Celluloid: letters here, CJK from the big font
   { family: "Migoi B",            label: "Migoi B",                      file: "migoi-b" },   // QATT letters only (no CJK), drawn in the Migoi style from the KAGE glyphs of admin/glyphs.html (private repository: tools/build_kage_font.py, build_all.py)
   { family: "Celluloid",          label: "Celluloid",                    file: "celluloid-letters", big: "celluloid", cjk: true },   // as QATT Pen: letters here, CJK from the big font
+  { family: "Celluloid B",        label: "Celluloid B",                  file: "celluloid-b" },   // QATT letters only (no CJK), the Celluloid strokes from the KAGE glyphs (as Migoi B)
   { family: "QATT Hat Gao",          label: "Hạt Gạo",             file: "qatt-hat-gao" },
   { family: "QATT Snip",             label: "Snip",                file: "qatt-snip" },
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
   { family: "QATT Metro",            label: "Metro",               file: "qatt-metro" },
   { family: "QATT N7K",              label: "N7K",                 file: "qatt-n7k" },
   { family: "PhongThao",       label: "Phong Thảo",          file: "phongthao-letters", big: "phongthao", cjk: true },   // as Migoi: letters here, CJK from the big font (the ideographs in its pencil strokes, the rest QATT Pen Light)
+  { family: "PhongThao B",       label: "Phong Thảo B",        file: "phongthao-b" },   // QATT letters only (no CJK), the pencil strokes of Phong Thảo from the KAGE glyphs (as Migoi B)
   { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Khai Wide",        label: "Khai wide (draft)",   file: "qatt-khai-wide", admin: true },
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
