@@ -43,7 +43,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <div id="layerTools" class="btn-group btn-group-sm" role="group" aria-label="Ebene">
                                     <button type="button" class="layer-btn btn btn-primary" data-layer="glyph" aria-pressed="true">Glyph</button>
-                                    <button type="button" class="layer-btn btn btn-outline-primary" data-layer="marks" aria-pressed="false" title="Die 6 Markierungen der markierten Formen (gerade Striche)">Marks <span id="marksCount" class="font-monospace">0/6</span></button>
+                                    <button type="button" class="layer-btn btn btn-outline-primary" data-layer="marks" aria-pressed="false" title="Die 6 Markierungen der markierten Formen">Marks <span id="marksCount" class="font-monospace">0/6</span></button>
                                 </div>
                                 <span class="small text-body-secondary">Ebene</span>
                             </div>
@@ -189,7 +189,7 @@
             }
             return cmp(a, b);
         }
-        // Marks: die 6 Markierungen eines Kleinbuchstabens (für die markierten Formen 1–6), je ein gerader Strich.
+        // Marks: die 6 Markierungen eines Kleinbuchstabens (für die markierten Formen 1–6), je ein Strich.
         // In den KAGE-Daten stehen sie hinter den Strichen der Glyphe: hat eine Form MARKS_MIN_PARTS oder mehr Teile,
         // sind die letzten MARK_COUNT die Marks. Im Editor trägt jeder Strich seine Ebene (layer), gespeichert wird
         // sie nicht (nur die Reihenfolge).
@@ -823,14 +823,12 @@
                     this.showToast('Keine Striche zum Speichern!');
                     return;
                 }
-                // Marks: keine oder genau 6 gerade Striche; die Anzahl der Teile muss sie beim Laden wieder erkennen lassen
+                // Marks: keine oder genau 6 Striche; die Anzahl der Teile muss sie beim Laden wieder erkennen lassen
                 const marks = this.strokes.filter(s => s.layer === 'marks');
                 const glyphCount = this.strokes.length - marks.length;
                 let problem = null;
                 if (marks.length && marks.length !== MARK_COUNT) {
                     problem = `Die Ebene Marks hat ${marks.length} Striche, sie braucht genau ${MARK_COUNT}.`;
-                } else if (marks.some(s => s.type !== 1)) {
-                    problem = 'Marks müssen gerade Linien sein.';
                 } else if (marks.length && glyphCount + MARK_COUNT < MARKS_MIN_PARTS) {
                     problem = `Mit Marks braucht die Ebene Glyph mindestens ${MARKS_MIN_PARTS - MARK_COUNT} Teile (sie hat ${glyphCount}).`;
                 } else if (!marks.length && glyphCount >= MARKS_MIN_PARTS) {
@@ -1179,7 +1177,6 @@
                 // Aktives Werkzeug hervorheben
                 document.querySelectorAll('.tool-add-btn').forEach(b => {
                     b.classList.toggle('active', this.appMode !== 'edit' && parseInt(b.dataset.tool) === this.activeTool);
-                    b.disabled = this.layer === 'marks' && b.dataset.tool !== '1'; // Marks sind gerade Striche
                 });
                 document.querySelectorAll('.layer-btn').forEach(btn => {
                     const on = btn.dataset.layer === this.layer;
@@ -1223,7 +1220,7 @@
                 // Ebene Marks: Nummer jeder Markierung (Reihenfolge = markierte Form 1–6) an ihrer Mitte
                 if (this.layer === 'marks') {
                     this.strokes.filter(s => s.layer === 'marks').forEach((s, n) => {
-                        const [a, b] = s.points;
+                        const a = s.points[0], b = s.points[s.points.length - 1];
                         this.drawLabel(`${n + 1}`, (a.x + b.x) / 2, (a.y + b.y) / 2);
                     });
                 }
