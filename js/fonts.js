@@ -27,8 +27,7 @@ var QATT_FONTS = [
   { family: "QATT Manh",             label: "Mảnh",                file: "qatt-manh" },
   { family: "QATT Metro",            label: "Metro",               file: "qatt-metro" },
   { family: "QATT N7K",              label: "N7K",                 file: "qatt-n7k" },
-  { family: "PhongThao",       label: "Phong Thảo",          file: "phongthao-letters", big: "phongthao", cjk: true },   // as Migoi: letters here, CJK from the big font (the ideographs in its pencil strokes, the rest QATT Pen Light)
-  { family: "PhongThao B",       label: "Phong Thảo B",        file: "phongthao-b" },   // QATT letters only (no CJK), the pencil strokes of Phong Thảo from the KAGE glyphs (as Migoi B)
+  { family: "PhongThao",       label: "Phong Thảo",          file: "phongthao-letters", big: "phongthao", cjk: true },   // as Migoi: letters here, CJK from the big font (the ideographs in its pencil strokes, the rest QATT Pen Light; the QATT letters drawn from the KAGE glyphs of admin/glyphs.html, as Migoi B)
   { family: "QATT Khai",             label: "Khai (draft)",        file: "qatt-khai", admin: true },
   { family: "QATT Khai Wide",        label: "Khai wide (draft)",   file: "qatt-khai-wide", admin: true },
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
