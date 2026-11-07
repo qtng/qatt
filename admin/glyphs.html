@@ -173,10 +173,7 @@
             offset: {
                 label: 'Ecke unten links', axes: ['x', 'y'],
                 get: e => ({ ...e.offset }),
-                set: (e, p) => {
-                    e.offset = p;
-                    if (p.y === GRID) e.glyphWidth = p.x; // auf der Unterkante nimmt die Ecke die Breite mit
-                },
+                set: (e, p) => { e.offset = p; }, // die Breite bleibt, auch auf der Unterkante
             },
             width: {
                 label: 'Breite', axes: ['x'],
