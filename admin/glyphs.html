@@ -333,7 +333,11 @@
         const FULL_REF = (name) => `99,0,0,0,0,200,0,0,200,200,200,${name}`;
         function glyphsToFile(saved) {
             const codes = Object.keys(saved).filter(c => saved[c].length); // leere Glyphen (die Vorgaben des Editors) nicht
-            const upperOf = i => codes.find(c => !COMBO_NAME.test(c) && isUpperName(splitName(c).base) && splitName(c).base === CP_KEYS[i].toUpperCase());
+            // der Großbuchstabe eines Symbols: gibt es mehrere mit derselben Basis (eine ältere Fassung unter anderem Namen), der, den die Kombinationen
+            // nehmen (syncCombos: der letzte); die anderen werden nicht exportiert (stale)
+            const uppersOf = i => codes.filter(c => !COMBO_NAME.test(c) && isUpperName(splitName(c).base) && splitName(c).base === CP_KEYS[i].toUpperCase());
+            const upperOf = i => uppersOf(i).pop();
+            const stale = new Set(CP_KEYS.flatMap((k, i) => uppersOf(i).slice(0, -1)));
             const fileName = {};
             CP_KEYS.forEach((k, i) => {
                 if (codes.includes(k)) fileName[k] = cpName(i);
@@ -359,7 +363,8 @@
             });
             CP_KEYS.forEach((k, i) => { const u = upperOf(i); if (u) glyph(fileName[u], saved[u]); });
             codes.filter(c => COMBO_NAME.test(c) && fileName[c]).sort((a, b) => fileName[a].localeCompare(fileName[b])).forEach(c => glyph(fileName[c], saved[c]));
-            codes.filter(c => !fileName[c]).sort(glyphOrder).forEach(c => glyph(c, saved[c]));
+            codes.filter(c => !fileName[c] && !stale.has(c)).sort(glyphOrder).forEach(c => glyph(c, saved[c]));
+            glyphsToFile.stale = [...stale];
             return out.join('\n') + '\n';
         }
         // Die Datei zurück in die Glyphen des Editors (die Kombinationen nicht: sie entstehen im Editor aus den Großbuchstaben).
@@ -1119,6 +1124,7 @@
                 a.download = 'kage-glyphen.yaml';
                 a.click();
                 URL.revokeObjectURL(a.href);
+                if (glyphsToFile.stale.length) this.showToast(`Nicht exportiert (ältere Fassung eines Großbuchstaben, die Kombinationen nehmen die neuere): ${glyphsToFile.stale.join(', ')}`);
             }
 
             // Datei aus exportAll einlesen (auch eine ältere mit den Namen des Editors, siehe fileToGlyphs).
