@@ -115,7 +115,37 @@ var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 // where the font files are (the repository qtng/cdn, filled by cdn_sync.py / the build of the private repository): jsDelivr first, then the GitHub Pages of that repository;
 // the browser takes the next address of src when one fails. qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
 var QATT_CDN = ["https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/", "https://chunom.org/cdn/fonts/"];
-var qattFontSrc = path => QATT_CDN.map(base => `url(${base}${path}) format("woff2")`).join(", ");   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
+// versions: fonts/version.json of qtng/cdn (written by its action) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "qatt-serif"; the slices and the Latin
+// of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
+// with the time as a cache buster. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice for a visitor when nothing changed); when its date is later than the base,
+// the date goes behind its files (?v=<date>), so a changed font has a new address and the next page load takes it (the page that is open keeps what it has).
+var QATT_FONT_CHECK = 5 * 60 * 1000;
+var qattFontVer = (() => { try { return JSON.parse(localStorage.qattFontVer) || {}; } catch (e) { return {}; } })();
+var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin)$/, "$1");
+var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
+  const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
+  return QATT_CDN.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
+};
+var qattFontCheck = async () => {
+  try {
+    const stored = (() => { try { return JSON.parse(localStorage.qattFontVer) || {}; } catch (e) { return {}; } })();   // read again: another tab may have asked a moment ago
+    if (Date.now() - (stored.at || 0) < QATT_FONT_CHECK) return;
+    const keep = Object.assign({}, stored, { at: Date.now() });   // the time is kept also when the request fails: not again within 5 minutes
+    try { localStorage.qattFontVer = JSON.stringify(keep); } catch (e) { /* no storage: no versions */ }
+    for (const base of QATT_CDN) {
+      try {
+        const res = await fetch(`${base}version.json?t=${Date.now()}`);
+        const list = res.ok && await res.json();
+        if (list && list.fonts) {
+          if (list.build !== stored.build || !stored.base) localStorage.qattFontVer = JSON.stringify({ at: keep.at, build: list.build, base: stored.base || list.fonts, fonts: list.fonts });   // the same build: nothing changed
+          return;
+        }
+      } catch (e) { /* the next address */ }
+    }
+  } catch (e) { /* the versions stay as they are */ }
+};
+qattFontCheck();
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") qattFontCheck(); });
 
 (() => {
   const FONTS = qattFontsShown();
