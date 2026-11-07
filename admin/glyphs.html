@@ -131,31 +131,47 @@
         const LINE_CAPS = ['butt', 'square', 'round'];
         const PRESET_CODES = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'NH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
 
-        // Glyphen aus Großbuchstaben tragen Breite und Versatz im Namen: "TR-120-10-180" (BASIS-Breite-X-Y).
-        // Der Versatz ist die untere linke Ecke der anderen Komponente in der Vorschau: X verschiebt ihre
-        // linke Kante, Y ist ihre Unterkante; neutral ist 0/200 (unten links).
-        // Standardwerte am Ende fallen weg: "TR-120" (Versatz 0/200), "TR" (Breite 200, Versatz 0/200).
-        // Ein altes "TR-120-80" (Hilfslinie) wird als neutral gelesen und beim Speichern umbenannt.
+        // Glyphen aus Großbuchstaben tragen Breite und die Box der anderen Komponente im Namen:
+        // "TR-120-10-180-190-20" (BASIS-Breite-X-Y-X2-Y2).
+        // Die andere Komponente sitzt in der Box zwischen zwei Ecken: der Versatz (X, Y) ist ihre untere linke Ecke
+        // (X = linke Kante, Y = Unterkante), die Ecke (X2, Y2) ihre obere rechte (X2 = rechte Kante, Y2 = Oberkante).
+        // Neutral: untere linke Ecke 0/200 (unten links), obere rechte Ecke 200/0 (oben rechts), also die ganze Fläche.
+        // Standardwerte am Ende fallen weg: "TR-120-10-180" (obere rechte Ecke 200/0), "TR-120" (auch die untere linke
+        // Ecke neutral), "TR" (Breite 200). Namen mit 3 Zahlen lesen sich so; ein altes "TR-120-80" (Hilfslinie)
+        // wird als neutral gelesen. Alte Namen aus der Zeit der 50-%-Grenze werden nicht umgerechnet.
         const NEUTRAL_OFFSET = { x: 0, y: GRID };
+        const NEUTRAL_CORNER = { x: GRID, y: 0 };
         const isUpperName = (base) => /^[A-Z]+$/.test(base);
         function splitName(code) {
-            const m = code.match(/^([A-Z]+)(?:-(\d+)(?:-(\d+)(?:-(\d+))?)?)?$/);
-            if (!m) return { base: code, width: GRID, offset: { ...NEUTRAL_OFFSET } };
+            const m = code.match(/^([A-Z]+)(?:-(\d+)(?:-(\d+)(?:-(\d+)(?:-(\d+)-(\d+))?)?)?)?$/);
+            if (!m) return { base: code, width: GRID, offset: { ...NEUTRAL_OFFSET }, corner: { ...NEUTRAL_CORNER } };
             const offset = m[4] ? { x: parseInt(m[3]), y: parseInt(m[4]) } : { ...NEUTRAL_OFFSET };
-            return { base: m[1], width: m[2] ? parseInt(m[2]) : GRID, offset };
+            const corner = m[6] ? { x: parseInt(m[5]), y: parseInt(m[6]) } : { ...NEUTRAL_CORNER };
+            return { base: m[1], width: m[2] ? parseInt(m[2]) : GRID, offset, corner };
         }
-        function joinName(base, width, offset) {
+        function joinName(base, width, offset, corner = NEUTRAL_CORNER) {
             if (!isUpperName(base)) return base;
+            if (corner.x !== NEUTRAL_CORNER.x || corner.y !== NEUTRAL_CORNER.y) return `${base}-${width}-${offset.x}-${offset.y}-${corner.x}-${corner.y}`;
             if (offset.x !== NEUTRAL_OFFSET.x || offset.y !== NEUTRAL_OFFSET.y) return `${base}-${width}-${offset.x}-${offset.y}`;
             return width !== GRID ? `${base}-${width}` : base;
         }
+        // Die Box der anderen Komponente [x1, y1, x2, y2] aus den zwei Ecken; null, wenn sie leer ist (dann wird nichts gezeichnet)
+        function cornerBox(offset, corner) {
+            return offset.x < corner.x && corner.y < offset.y ? [offset.x, corner.y, corner.x, offset.y] : null;
+        }
 
-        // Anfasser: Ecke (untere linke Ecke des Kleinbuchstabens, startet unten links bei 0/200, zieht frei) und
-        // Breite (vertikaler Guide, Anfasser auf der unteren Kante, zieht nur horizontal).
-        // Die Ecke steht zuerst: sie wird zuerst getroffen und zuletzt (also oben) gezeichnet.
+        // Anfasser: zwei Ecken der anderen Komponente (untere linke, startet unten links bei 0/200, und obere rechte,
+        // startet oben rechts bei 200/0; beide ziehen frei) und Breite (vertikaler Guide, Anfasser auf der unteren
+        // Kante, zieht nur horizontal).
+        // Die Ecken stehen zuerst: sie werden zuerst getroffen und zuletzt (also oben) gezeichnet.
         const HANDLES = {
+            corner: {
+                label: 'Ecke oben rechts', axes: ['x', 'y'],
+                get: e => ({ ...e.corner }),
+                set: (e, p) => { e.corner = p; },
+            },
             offset: {
-                label: 'Ecke', axes: ['x', 'y'],
+                label: 'Ecke unten links', axes: ['x', 'y'],
                 get: e => ({ ...e.offset }),
                 set: (e, p) => {
                     e.offset = p;
@@ -297,8 +313,9 @@
                 this.lineCap = 'square'; // Linienende, per Regler: butt, square, round
                 this.drag = null; // { x, y, orig } während die Maus zieht
                 this.glyphWidth = GRID; // Breite der Glyphe (nur bei Namen aus Großbuchstaben)
-                this.offset = { ...NEUTRAL_OFFSET }; // Versatz der anderen Komponente in der Vorschau (nur Großbuchstaben)
-                this.handleSelected = null; // ausgewählter grüner Anfasser: 'width' | 'offset' | null
+                this.offset = { ...NEUTRAL_OFFSET }; // untere linke Ecke der anderen Komponente in der Vorschau (nur Großbuchstaben)
+                this.corner = { ...NEUTRAL_CORNER }; // obere rechte Ecke der anderen Komponente (nur Großbuchstaben)
+                this.handleSelected = null; // ausgewählter grüner Anfasser: 'width' | 'offset' | 'corner' | null
                 this.loadedCode = null; // Name, unter dem die geladene Glyphe gespeichert ist
 
                 this.glyphMeta = this.loadStored(META_KEY) ?? {}; // Kommentare auf Glyphen- und Dateiebene
@@ -535,7 +552,7 @@
                 return isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
             }
 
-            // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | null
+            // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | 'corner' | null
             handleHit(x, y) {
                 if (!this.showsWidth()) return null;
                 return Object.keys(HANDLES).find(k => {
@@ -850,7 +867,7 @@
 
                 // Name mit Breite (nur Großbuchstaben); eine im Feld getippte Breite zählt nicht, der Anfasser gilt
                 const { base } = splitName(input);
-                const code = joinName(base, this.glyphWidth, this.offset);
+                const code = joinName(base, this.glyphWidth, this.offset, this.corner);
 
                 // Deep Copy (überschreibt, wenn der Code existiert)
                 this.savedGlyphs[code] = withoutLayers(this.strokes);
@@ -875,6 +892,7 @@
                 this.loadedCode = null;
                 this.glyphWidth = GRID;
                 this.offset = { ...NEUTRAL_OFFSET };
+                this.corner = { ...NEUTRAL_CORNER };
                 this.strokes = [];
                 this.selectedStrokeIdx = null;
                 this.selectedPointIdx = null;
@@ -895,15 +913,11 @@
                 const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k) && this.savedGlyphs[k].length);
                 const combos = {};
                 upperKeys.forEach(u => {
-                    const { base, width, offset } = splitName(u);
+                    const { base, width, offset, corner } = splitName(u);
+                    const box = cornerBox(offset, corner);
                     lowerKeys.forEach(l => {
                         const strokes = [{ type: 99, points: [{ x: 0, y: 0 }, { x: width, y: GRID }], refName: u }];
-                        if (offset.x < GRID && offset.y > 0) {
-                            const box = offset.y > GRID / 2
-                                ? [offset.x, 0, GRID, offset.y]
-                                : [offset.x, offset.y, GRID, GRID];
-                            strokes.push({ type: 99, points: [{ x: box[0], y: box[1] }, { x: box[2], y: box[3] }], refName: l });
-                        }
+                        if (box) strokes.push({ type: 99, points: [{ x: box[0], y: box[1] }, { x: box[2], y: box[3] }], refName: l });
                         combos[base + l] = strokes;
                     });
                 });
@@ -962,6 +976,7 @@
                     this.loadedCode = null;
                     this.glyphWidth = GRID;
                     this.offset = { ...NEUTRAL_OFFSET };
+                    this.corner = { ...NEUTRAL_CORNER };
                     this.showToast(`Glyphe '${id}' erfolgreich importiert!`);
                 } catch (error) {
                     console.error("[Import] Fehler:", error);
@@ -1097,10 +1112,11 @@
                 this.selectedPointIdx = null;
                 this.resetToAddOrEdit();
                 // Im Feld steht der Name ohne Breite; die Breite steht am grünen Anfasser
-                const { base, width, offset } = splitName(code);
+                const { base, width, offset, corner } = splitName(code);
                 document.getElementById('saveCodeInput').value = base;
                 this.glyphWidth = width;
                 this.offset = offset;
+                this.corner = corner;
                 this.loadedCode = code;
 
                 this.updateOutput();
@@ -1417,20 +1433,15 @@
                     ctx.clearRect(-GRID, -GRID, 3 * GRID, 3 * GRID);
                     ctx.lineCap = this.lineCap;
                     ctx.lineJoin = 'round';
-                    const { width, offset } = c.upper ? splitName(c.upper) : { width: this.glyphWidth, offset: this.offset };
+                    const { width, offset, corner } = c.upper ? splitName(c.upper) : { width: this.glyphWidth, offset: this.offset, corner: this.corner };
                     const canvasGlyph = this.strokes.filter(s => s.layer !== 'marks');
                     const upperStrokes = c.upper ? glyphPart(this.savedGlyphs[c.upper]) : canvasGlyph;
                     const lowerStrokes = c.lower ? glyphPart(this.savedGlyphs[c.lower]) : canvasGlyph;
                     this.drawInBox(ctx, upperStrokes, 0, 0, width, GRID, false, 0, false);
-                    // Die andere Komponente ist eine 200x200-Glyphe: linke Kante bei X, Unterkante bei Y, rechts und
-                    // oben fest (bei 0/200 unverändert). Ist die Box leer, wird nichts gezeichnet (keine Spiegelung).
-                    if (offset.x < GRID && offset.y > 0) {
-                        if (offset.y > GRID / 2) {
-                            this.drawInBox(ctx, lowerStrokes, offset.x, 0, GRID - offset.x, offset.y, false, 0, false);
-                        } else {
-                            this.drawInBox(ctx, lowerStrokes, offset.x, offset.y, GRID - offset.x, GRID - offset.y, false, 0, false);
-                        }
-                    }
+                    // Die andere Komponente ist eine 200x200-Glyphe in der Box zwischen den zwei Ecken: unten links (X/Y) und
+                    // oben rechts. Ist die Box leer, wird nichts gezeichnet (keine Spiegelung).
+                    const box = cornerBox(offset, corner);
+                    if (box) this.drawInBox(ctx, lowerStrokes, box[0], box[1], box[2] - box[0], box[3] - box[1], false, 0, false);
                 });
             }
 
