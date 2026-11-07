@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PA script specification</title>
+  <meta name="description" content="Specification of the PA script for Vietnamese: the syllable grammar, the character repertoire, the provisional code points and the rules for composing glyphs.">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/navigation.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --line: #e4d9c0; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 1px solid #e8dcc0;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .lead { max-width: 40rem; margin-inline: auto; color: var(--bs-secondary-color); }
+    .spec { max-width: 52rem; }
+    .spec h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; margin: 2.4rem 0 .8rem; padding-top: .4rem; border-top: 1px solid var(--line); }
+    .spec h3 { font-size: 1.1rem; margin: 1.6rem 0 .6rem; }
+    .spec pre { padding: .8rem 1rem; border: 1px solid var(--line); background: color-mix(in srgb, currentColor 4%, transparent); overflow-x: auto; }
+    .spec table { font-size: .92rem; }
+    .spec td.num, .spec td.code { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .spec td.code { font-family: var(--bs-font-monospace); }
+    .status { border-left: 3px solid var(--cinnabar); padding: .5rem 1rem; background: color-mix(in srgb, currentColor 4%, transparent); }
+    .toc { columns: 2 14rem; column-gap: 2rem; padding-left: 1.2rem; }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <h1 class="mb-3" data-vi="Đặc tả chữ PA">PA script specification</h1>
+    <p class="lead">A phonetic script for Vietnamese syllables: a stem cell for onset and nucleus, an extension cell for coda and tone.</p>
+  </div>
+</header>
+
+<main class="container spec py-4">
+  <p class="status small"><strong>Draft.</strong> Version 0.1. The code points are provisional and lie in the Supplementary Private Use Area-A. There is no reference font yet, so this page shows no glyphs.</p>
+
+  <nav aria-label="Contents">
+    <ol class="toc">
+      <li><a href="#grammar">Syllable grammar</a></li>
+      <li><a href="#repertoire">Character repertoire</a></li>
+      <li><a href="#codes">Code points</a></li>
+      <li><a href="#composition">Composition</a></li>
+      <li><a href="#reading">Reading Quốc Ngữ</a></li>
+      <li><a href="#legacy">The earlier font</a></li>
+      <li><a href="#open">Open points</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="grammar" data-vi="Ngữ pháp âm tiết">Syllable grammar</h2>
+  <p>A syllable is written with the four kinds of component of a Vietnamese syllable: <em>onset</em> (A), <em>nucleus</em> (N), <em>coda</em> (C) and <em>tone</em> (T). The nucleus includes the glide: <code>oa</code>, <code>uy</code> and similar are nuclei of their own.</p>
+<pre>Syllable  = Stem [ Extension ]
+Stem      = A N
+Extension = C [ T ]  |  T</pre>
+  <ul>
+    <li>A stem always has an onset. A syllable without an onset uses the onset <code>_</code>, which has a shape of its own.</li>
+    <li>A coda without a tone is a valid extension (<em>tai</em>, ngang tone). A tone alone is a valid extension (an open syllable with a tone).</li>
+    <li>A nucleus never stands without an onset. An onset may stand alone (a lone consonant).</li>
+  </ul>
+  <p>Visually a syllable has at most two cells: the <em>stem cell</em> (A and N in one glyph) and the <em>extension cell</em> (C and T in one glyph, or C alone, or T alone).</p>
+
+  <h2 id="repertoire" data-vi="Bộ ký tự">Character repertoire</h2>
+  <p>23 onsets, 22 nuclei, 10 codas and 6 tones are encoded, 61 characters in all. The combined glyphs are not encoded: the font builds them from sequences (see <a href="#composition">Composition</a>).</p>
+  <table class="table table-sm w-auto">
+    <thead><tr><th>Class</th><th>Count</th><th>Combined with</th></tr></thead>
+    <tbody>
+      <tr><td>A onset</td><td>23</td><td>N: 23 × 22 = 506 stem glyphs</td></tr>
+      <tr><td>N nucleus</td><td>22</td><td>—</td></tr>
+      <tr><td>C coda</td><td>10</td><td>T: 10 × 6 = 60 extension glyphs</td></tr>
+      <tr><td>T tone</td><td>6</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="codes" data-vi="Mã ký tự">Code points</h2>
+  <p>The classes lie in separate ranges, so the class of a character is known from its code point and a sequence is validated with a regular expression. The block starts at <code>U+F0800</code>, well behind the provisional QATT range (<code>U+F0000</code>..<code>U+F00AF</code>), which stays free for growth.</p>
+  <table class="table table-sm w-auto">
+    <thead><tr><th>Class</th><th>Range</th><th>Used</th><th>Code point</th></tr></thead>
+    <tbody>
+      <tr><td>A onset</td><td><code>U+F0800</code>..<code>U+F081F</code></td><td>23</td><td><code>F0800 + i</code></td></tr>
+      <tr><td>N nucleus</td><td><code>U+F0820</code>..<code>U+F083F</code></td><td>22</td><td><code>F0820 + i</code></td></tr>
+      <tr><td>C coda</td><td><code>U+F0840</code>..<code>U+F084F</code></td><td>10</td><td><code>F0840 + i</code></td></tr>
+      <tr><td>T tone</td><td><code>U+F0850</code>..<code>U+F085F</code></td><td>6</td><td><code>F0850 + (tone − 1)</code></td></tr>
+    </tbody>
+  </table>
+<pre>[U+F0800-F0816] [U+F0820-F0835]? ( [U+F0840-F0849] [U+F0850-F0855]? | [U+F0850-F0855] )?</pre>
+  <p>The order inside each class is that of the earlier PA font, see <a href="#legacy">The earlier font</a>.</p>
+
+  <h3>A: onsets</h3>
+  <div class="table-responsive"><table class="table table-sm w-auto">
+    <thead><tr><th>i</th><th>Code point</th><th>Name</th><th>Quốc Ngữ</th></tr></thead>
+    <tbody>
+<tr><td class="num">0</td><td class="code">U+F0800</td><td><code>_</code></td><td>none (placeholder shape)</td></tr>
+<tr><td class="num">1</td><td class="code">U+F0801</td><td><code>b</code></td><td>b</td></tr>
+<tr><td class="num">2</td><td class="code">U+F0802</td><td><code>c</code></td><td>c, k, q</td></tr>
+<tr><td class="num">3</td><td class="code">U+F0803</td><td><code>ch</code></td><td>ch</td></tr>
+<tr><td class="num">4</td><td class="code">U+F0804</td><td><code>d</code></td><td>đ</td></tr>
+<tr><td class="num">5</td><td class="code">U+F0805</td><td><code>dz</code></td><td>d</td></tr>
+<tr><td class="num">6</td><td class="code">U+F0806</td><td><code>ph</code></td><td>ph</td></tr>
+<tr><td class="num">7</td><td class="code">U+F0807</td><td><code>g</code></td><td>g, gh</td></tr>
+<tr><td class="num">8</td><td class="code">U+F0808</td><td><code>gi</code></td><td>gi</td></tr>
+<tr><td class="num">9</td><td class="code">U+F0809</td><td><code>h</code></td><td>h</td></tr>
+<tr><td class="num">10</td><td class="code">U+F080A</td><td><code>kh</code></td><td>kh</td></tr>
+<tr><td class="num">11</td><td class="code">U+F080B</td><td><code>l</code></td><td>l</td></tr>
+<tr><td class="num">12</td><td class="code">U+F080C</td><td><code>m</code></td><td>m</td></tr>
+<tr><td class="num">13</td><td class="code">U+F080D</td><td><code>n</code></td><td>n</td></tr>
+<tr><td class="num">14</td><td class="code">U+F080E</td><td><code>ng</code></td><td>ng, ngh</td></tr>
+<tr><td class="num">15</td><td class="code">U+F080F</td><td><code>nh</code></td><td>nh</td></tr>
+<tr><td class="num">16</td><td class="code">U+F0810</td><td><code>r</code></td><td>r</td></tr>
+<tr><td class="num">17</td><td class="code">U+F0811</td><td><code>s</code></td><td>s</td></tr>
+<tr><td class="num">18</td><td class="code">U+F0812</td><td><code>t</code></td><td>t</td></tr>
+<tr><td class="num">19</td><td class="code">U+F0813</td><td><code>th</code></td><td>th</td></tr>
+<tr><td class="num">20</td><td class="code">U+F0814</td><td><code>tr</code></td><td>tr</td></tr>
+<tr><td class="num">21</td><td class="code">U+F0815</td><td><code>v</code></td><td>v</td></tr>
+<tr><td class="num">22</td><td class="code">U+F0816</td><td><code>x</code></td><td>x</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small text-body-secondary"><code>dz</code> is the sound written <em>d</em>, <code>d</code> the sound written <em>đ</em>. The shape of an onset depends on the nucleus it stands with (large, small, extra small); that is part of the stem glyph, not of the encoding.</p>
+
+  <h3>N: nuclei</h3>
+  <div class="table-responsive"><table class="table table-sm w-auto">
+    <thead><tr><th>i</th><th>Code point</th><th>Name</th><th>Shape</th><th>Quốc Ngữ</th></tr></thead>
+    <tbody>
+<tr><td class="num">0</td><td class="code">U+F0820</td><td><code>a</code></td><td><code>a</code></td><td>a</td></tr>
+<tr><td class="num">1</td><td class="code">U+F0821</td><td><code>ar</code></td><td><code>a2</code></td><td>ơ</td></tr>
+<tr><td class="num">2</td><td class="code">U+F0822</td><td><code>ae</code></td><td><code>aw</code></td><td>ă</td></tr>
+<tr><td class="num">3</td><td class="code">U+F0823</td><td><code>aer</code></td><td><code>aw2</code></td><td>â</td></tr>
+<tr><td class="num">4</td><td class="code">U+F0824</td><td><code>e</code></td><td><code>e</code></td><td>ê</td></tr>
+<tr><td class="num">5</td><td class="code">U+F0825</td><td><code>er</code></td><td><code>e2</code></td><td>e</td></tr>
+<tr><td class="num">6</td><td class="code">U+F0826</td><td><code>i</code></td><td><code>i</code></td><td>i</td></tr>
+<tr><td class="num">7</td><td class="code">U+F0827</td><td><code>ir</code></td><td><code>i2</code></td><td>iê, ia, yê, ya</td></tr>
+<tr><td class="num">8</td><td class="code">U+F0828</td><td><code>o</code></td><td><code>o</code></td><td>ô</td></tr>
+<tr><td class="num">9</td><td class="code">U+F0829</td><td><code>or</code></td><td><code>o2</code></td><td>o</td></tr>
+<tr><td class="num">10</td><td class="code">U+F082A</td><td><code>u</code></td><td><code>u</code></td><td>u</td></tr>
+<tr><td class="num">11</td><td class="code">U+F082B</td><td><code>ur</code></td><td><code>u2</code></td><td>uô, ua</td></tr>
+<tr><td class="num">12</td><td class="code">U+F082C</td><td><code>y</code></td><td><code>y</code></td><td>ư</td></tr>
+<tr><td class="num">13</td><td class="code">U+F082D</td><td><code>yr</code></td><td><code>y2</code></td><td>ươ, ưa</td></tr>
+<tr><td class="num">14</td><td class="code">U+F082E</td><td><code>wa</code></td><td><code>wa</code></td><td>oa</td></tr>
+<tr><td class="num">15</td><td class="code">U+F082F</td><td><code>war</code></td><td><code>wa2</code></td><td>uơ</td></tr>
+<tr><td class="num">16</td><td class="code">U+F0830</td><td><code>wae</code></td><td><code>waw</code></td><td>oă</td></tr>
+<tr><td class="num">17</td><td class="code">U+F0831</td><td><code>waer</code></td><td><code>waw2</code></td><td>uâ</td></tr>
+<tr><td class="num">18</td><td class="code">U+F0832</td><td><code>we</code></td><td><code>we</code></td><td>uê</td></tr>
+<tr><td class="num">19</td><td class="code">U+F0833</td><td><code>wer</code></td><td><code>we2</code></td><td>oe</td></tr>
+<tr><td class="num">20</td><td class="code">U+F0834</td><td><code>wi</code></td><td><code>wi</code></td><td>uy</td></tr>
+<tr><td class="num">21</td><td class="code">U+F0835</td><td><code>wir</code></td><td><code>wi2</code></td><td>uyê, uya</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small text-body-secondary">The names are those of the earlier font. <em>Shape</em> is the name of the base stroke in the drawing; a nucleus starting with <code>w</code> is a glide nucleus (the stroke of the glide plus the stroke of the vowel).</p>
+
+  <h3>C: codas</h3>
+  <div class="table-responsive"><table class="table table-sm w-auto">
+    <thead><tr><th>i</th><th>Code point</th><th>Name</th><th>Quốc Ngữ</th></tr></thead>
+    <tbody>
+<tr><td class="num">0</td><td class="code">U+F0840</td><td><code>U</code></td><td>u, o</td></tr>
+<tr><td class="num">1</td><td class="code">U+F0841</td><td><code>I</code></td><td>i, y</td></tr>
+<tr><td class="num">2</td><td class="code">U+F0842</td><td><code>M</code></td><td>m</td></tr>
+<tr><td class="num">3</td><td class="code">U+F0843</td><td><code>N</code></td><td>n</td></tr>
+<tr><td class="num">4</td><td class="code">U+F0844</td><td><code>NG</code></td><td>ng</td></tr>
+<tr><td class="num">5</td><td class="code">U+F0845</td><td><code>NH</code></td><td>nh</td></tr>
+<tr><td class="num">6</td><td class="code">U+F0846</td><td><code>P</code></td><td>p</td></tr>
+<tr><td class="num">7</td><td class="code">U+F0847</td><td><code>T</code></td><td>t</td></tr>
+<tr><td class="num">8</td><td class="code">U+F0848</td><td><code>C</code></td><td>c</td></tr>
+<tr><td class="num">9</td><td class="code">U+F0849</td><td><code>CH</code></td><td>ch</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>T: tones</h3>
+  <div class="table-responsive"><table class="table table-sm w-auto">
+    <thead><tr><th>Tone</th><th>Code point</th><th>Name</th></tr></thead>
+    <tbody>
+<tr><td class="num">1</td><td class="code">U+F0850</td><td>sắc</td></tr>
+<tr><td class="num">2</td><td class="code">U+F0851</td><td>huyền</td></tr>
+<tr><td class="num">3</td><td class="code">U+F0852</td><td>hỏi</td></tr>
+<tr><td class="num">4</td><td class="code">U+F0853</td><td>ngã</td></tr>
+<tr><td class="num">5</td><td class="code">U+F0854</td><td>nặng</td></tr>
+<tr><td class="num">6</td><td class="code">U+F0855</td><td>reserved</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="composition" data-vi="Ghép ký tự">Composition</h2>
+  <p>A font renders the sequences with glyph substitution (OpenType <code>ccmp</code>, ligatures). No joiner or other control character is needed, because the classes tell what belongs together.</p>
+  <table class="table table-sm">
+    <thead><tr><th>Sequence</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>A N</td><td>stem glyph (506)</td></tr>
+      <tr><td>C T</td><td>extension glyph with coda and tone (60)</td></tr>
+      <tr><td>A</td><td>onset cell alone (23)</td></tr>
+      <tr><td>C</td><td>coda cell alone (10)</td></tr>
+      <tr><td>T</td><td>tone cell alone (6)</td></tr>
+      <tr><td>N without A in front</td><td>not valid; an input method inserts the onset <code>_</code></td></tr>
+    </tbody>
+  </table>
+  <p>A stem followed by a tone alone (<code>A N T</code>) is two cells. Every glyph is one cell wide.</p>
+
+  <h2 id="reading" data-vi="Đọc chữ quốc ngữ">Reading Quốc Ngữ</h2>
+  <p>A syllable of Quốc Ngữ is split into onset, nucleus, coda and tone, then mapped to the names above.</p>
+  <ul>
+    <li><strong>Tone.</strong> The accent of the vowel gives the tone and is removed: sắc 1, huyền 2, hỏi 3, ngã 4, nặng 5. No accent: no tone.</li>
+    <li><strong>Onset.</strong> <em>k</em> and <em>q</em> are <code>c</code>; <em>gh</em> is <code>g</code>; <em>ngh</em> is <code>ng</code>; <em>d</em> is <code>dz</code>; <em>đ</em> is <code>d</code>; <em>g</em> before <em>i</em> is <code>gi</code>. No onset is <code>_</code>.</li>
+    <li><strong>Glide.</strong> <em>qu</em> is the onset <code>c</code> plus a glide nucleus (<em>quô</em> is read as <em>uâ</em>). The glide forms <em>oa, oă, uơ, uâ, uê, oe, uy, uyê</em> are the nuclei <code>wa</code>, <code>wae</code>, <code>war</code>, <code>waer</code>, <code>we</code>, <code>wer</code>, <code>wi</code>, <code>wir</code>.</li>
+    <li><strong>Coda.</strong> <em>o</em> after the nucleus is <code>U</code>, <em>y</em> is <code>I</code>.</li>
+    <li><strong>Short a.</strong> <em>a</em> before the codas <em>u, y, nh, ch</em> is written with the nucleus <code>ae</code> (<em>ă</em>).</li>
+  </ul>
+
+  <h2 id="legacy" data-vi="Phông chữ trước đây">The earlier font</h2>
+  <p>The earlier PA font <code>pa.ttf</code> of the old site has the same repertoire in the Basic Multilingual Plane private use area (<code>U+E001</code>..<code>U+E272</code>, with the tone 6 missing). Its code points convert to this block:</p>
+  <table class="table table-sm">
+    <thead><tr><th>Earlier code point</th><th>New</th></tr></thead>
+    <tbody>
+      <tr><td>stem <code>E062 + a + 23·(1 + b)</code></td><td>A = <code>a</code>, N = <code>b</code></td></tr>
+      <tr><td>onset alone <code>E062 + a</code></td><td>A = <code>a</code></td></tr>
+      <tr><td>coda and tone <code>E026 + 10·t + c</code></td><td>C = <code>c</code>, T = <code>t</code> (t = 0: no tone)</td></tr>
+      <tr><td>tone alone <code>E001</code>..<code>E005</code></td><td>T = 1..5</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="open" data-vi="Điểm còn mở">Open points</h2>
+  <ol>
+    <li><strong>Tone after a stem.</strong> The drawings have two forms: a small tone inside the stem cell and a full-size tone as a cell of its own. Proposal: the full-size cell is the default (as in the earlier font); the small form is chosen with the variation selector <code>U+FE00</code> after the tone.</li>
+    <li><strong>Tone 6.</strong> The drawings have a sixth tone mark; its meaning is not yet decided (for example an explicit level tone).</li>
+    <li><strong>Combinations that Vietnamese does not use</strong> (for instance <code>b</code> with a glide nucleus). Proposal: the font draws all 506 stems, the input method decides what is offered.</li>
+  </ol>
+</main>
+
+<footer class="container pb-4 text-secondary small"><p>PA script · specification draft</p></footer>
+</body>
+</html>
