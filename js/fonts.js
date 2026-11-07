@@ -132,8 +132,8 @@ var qattFontVer = (() => {
 var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin)$/, "$1");
 var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
-  // a changed font comes from the tag of its build (@fonts-<N> of qtng/cdn: jsDelivr keeps a tag unchanged for ever, while @main may show an older commit for hours), the second address is Pages
-  const bases = q && qattFontVer.build ? [QATT_CDN[0].replace("@main", "@fonts-" + qattFontVer.build)].concat(QATT_CDN.slice(1)) : QATT_CDN;
+  // a changed font comes from Pages first (renewed within 10 minutes; jsDelivr may show an older commit of @main for hours), the second address is the tag of its build on jsDelivr (@fonts-<N>, never changes)
+  const bases = q && qattFontVer.build ? QATT_CDN.slice(1).concat([QATT_CDN[0].replace("@main", "@fonts-" + qattFontVer.build)]) : q ? QATT_CDN.slice(1).concat(QATT_CDN.slice(0, 1)) : QATT_CDN;
   return bases.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
 };
 // qattFontCheck(force): true = a list of a new build was stored (its dates apply from the next page load), false = the same build, null = the list could not be read; force skips the 5 minutes
