@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>PA font test</title>
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/navigation.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --line: #e4d9c0; }
+    .hero { background: linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%); border-bottom: 1px solid #e8dcc0; color: var(--ink); }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2rem, 6vw, 3rem); }
+    .tool { max-width: 52rem; }
+    @font-face {
+      font-family: "Qatt.org-PA";
+      src: url(https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/pa.woff2) format('woff2'), url(https://chunom.org/cdn/fonts/pa.woff2) format('woff2');
+      font-display: swap;
+    }
+    .pa { font-family: "Qatt.org-PA", serif; font-weight: 400; }
+    #out { font-size: 5rem; line-height: 1.25; min-height: 6.5rem; overflow-wrap: anywhere; }
+    #out .raw { font-family: var(--bs-body-font-family); font-size: 1.2rem; color: var(--bs-danger); }
+    #codes { font-family: var(--bs-font-monospace); font-size: .8rem; color: var(--bs-secondary-color); white-space: pre-wrap; }
+    .status { border-left: 3px solid var(--cinnabar); padding: .5rem 1rem; background: color-mix(in srgb, currentColor 4%, transparent); }
+  </style>
+</head>
+<body>
+<header class="hero pt-4 pb-3">
+  <div class="container text-center">
+    <h1 class="mb-2">PA font test</h1>
+    <p class="mb-0 text-secondary">Type Quốc Ngữ, see it in the PA font. <a href="./">The PA script</a></p>
+  </div>
+</header>
+
+<main class="container tool py-4">
+  <p class="status small">A test page for the draft font (not part of the specification). The font is loaded from the qtng/cdn repository. Syllables are converted by the rules of the section “Reading Quốc Ngữ” of the specification; a word that does not fit is shown as it is, in red.</p>
+
+  <label class="form-label" for="in" data-vi="Văn bản">Text</label>
+  <textarea id="in" class="form-control mb-2" rows="2" spellcheck="false">thuyền bản bà bá tai quê ngang</textarea>
+
+  <div class="d-flex flex-wrap gap-3 mb-3">
+    <div class="form-check"><input class="form-check-input" type="checkbox" id="stack" checked><label class="form-check-label" for="stack"><span data-vi="Xếp chồng">Stacked</span> (combiner)</label></div>
+    <div class="form-check"><input class="form-check-input" type="checkbox" id="ngang"><label class="form-check-label" for="ngang"><span data-vi="Ghi thanh ngang">Mark the ngang tone</span></label></div>
+  </div>
+
+  <div id="out" class="pa" aria-live="polite"></div>
+  <details class="mt-3"><summary class="small">Code points</summary><div id="codes" class="mt-2"></div></details>
+</main>
+
+<script>
+(function () {
+  const J = 0xF00B0, K = 0xF00B1, A0 = 0xF00B2, N0 = 0xF00C9, C0 = 0xF00DF, T0 = 0xF00E9;
+  const ONSETS = 'Z B C CH DD D PH G GI H KH L M N NG NH R S T TH TR V X'.split(' ');
+  const NUCLEI = 'A OW AW AA EE E I IEE OO O U UOO UW UWOW OA UOW OAW UAA UEE OE UY UYEE'.split(' ');
+  const CODAS = 'U I M N NG NH P T C CH'.split(' ');
+  const ON = { b: 'B', c: 'C', k: 'C', q: 'C', ch: 'CH', d: 'D', 'đ': 'DD', g: 'G', gh: 'G', gi: 'GI', h: 'H', kh: 'KH', l: 'L', m: 'M', n: 'N', ng: 'NG', ngh: 'NG', nh: 'NH', ph: 'PH', r: 'R', s: 'S', t: 'T', th: 'TH', tr: 'TR', v: 'V', x: 'X' };
+  const ONSET_KEYS = Object.keys(ON).sort((a, b) => b.length - a.length);
+  // nucleus spellings (without tone) -> name; ia, ya, yê, uya are spelled variants
+  const NUC = { a: 'A', 'ơ': 'OW', 'ă': 'AW', 'â': 'AA', 'ê': 'EE', e: 'E', i: 'I', 'iê': 'IEE', ia: 'IEE', 'yê': 'IEE', ya: 'IEE', y: 'I', 'ô': 'OO', o: 'O', u: 'U', 'uô': 'UOO', ua: 'UOO', 'ư': 'UW', 'ươ': 'UWOW', 'ưa': 'UWOW',
+    oa: 'OA', 'uơ': 'UOW', 'oă': 'OAW', 'uâ': 'UAA', 'uê': 'UEE', oe: 'OE', uy: 'UY', 'uyê': 'UYEE', uya: 'UYEE' };
+  const NUC_KEYS = Object.keys(NUC).sort((a, b) => b.length - a.length);
+  const CODA_OF = { ch: 'CH', nh: 'NH', ng: 'NG', c: 'C', m: 'M', n: 'N', p: 'P', t: 'T', i: 'I', y: 'I', o: 'U', u: 'U' };
+  const GLIDE = { a: 'OA', 'ơ': 'UOW', 'ă': 'OAW', 'â': 'UAA', e: 'OE', 'ê': 'UEE', i: 'UY', y: 'UY', 'yê': 'UYEE', 'iê': 'UYEE' };
+  const TONE = { '́': 1, '̀': 2, '̉': 3, '̃': 4, '̣': 5 };
+
+  function splitTone(word) {
+    let tone = 0;
+    const s = word.normalize('NFD').replace(/[̣̀́̃̉]/g, (m) => { tone = TONE[m]; return ''; });
+    return { text: s.normalize('NFC'), tone };
+  }
+
+  // one syllable -> { onset, nucleus, coda, tone } or null
+  function parse(word) {
+    const { text, tone } = splitTone(word.toLowerCase());
+    let rest = text, onset = 'Z', qu = false;
+    if (/^qu./.test(rest)) { onset = 'C'; rest = rest.slice(2); qu = true; }
+    else if (/^gi(?![aeiouyăâêôơưáàảãạ])/.test(rest) && rest.length > 2) { onset = 'G'; rest = rest.slice(1); }   // gì: g + i
+    else {
+      for (const k of ONSET_KEYS) if (rest.startsWith(k)) { onset = ON[k]; rest = rest.slice(k.length); break; }
+      if (onset === 'GI' && rest === '') { onset = 'G'; rest = 'i'; }
+    }
+    let best = null;
+    for (const nk of NUC_KEYS) {
+      if (!rest.startsWith(nk)) continue;
+      const tail = rest.slice(nk.length);
+      if (tail === '' || CODA_OF[tail]) { best = { nk, coda: tail ? CODA_OF[tail] : null }; break; }
+    }
+    if (!best) return null;
+    let nucleus = NUC[best.nk];
+    if (qu) nucleus = GLIDE[best.nk] || null;
+    if (!nucleus) return null;
+    // short a before u, y, nh, ch
+    if (nucleus === 'A' && (best.coda === 'U' && /u$/.test(rest) || best.coda === 'I' && /y$/.test(rest) || best.coda === 'NH' || best.coda === 'CH')) nucleus = 'AW';
+    return { onset, nucleus, coda: best.coda, tone };
+  }
+
+  function encode(syl, stacked, markNgang) {
+    const cp = [A0 + ONSETS.indexOf(syl.onset), J, N0 + NUCLEI.indexOf(syl.nucleus)];
+    const tone = syl.tone || (markNgang ? 6 : 0);
+    if (stacked && (syl.coda || tone)) cp.push(K);
+    if (syl.coda) cp.push(C0 + CODAS.indexOf(syl.coda));
+    if (tone) cp.push(T0 + tone - 1);
+    return cp;
+  }
+
+  const $ = (id) => document.getElementById(id);
+  function render() {
+    const out = $('out'), codes = [];
+    out.textContent = '';
+    for (const tok of $('in').value.split(/([^\p{L}\p{M}]+)/u)) {
+      if (!tok) continue;
+      if (!/[\p{L}\p{M}]/u.test(tok)) { out.append(tok.includes('\n') ? document.createElement('br') : tok.replace(/ /g, '\u00a0 ').trimEnd() + ' '); continue; }
+      const syl = parse(tok);
+      const el = document.createElement('span');
+      if (syl && syl.onset && ONSETS.includes(syl.onset)) {
+        const cps = encode(syl, $('stack').checked, $('ngang').checked);
+        el.textContent = String.fromCodePoint(...cps);
+        codes.push(tok + ': ' + cps.map((c) => 'U+' + c.toString(16).toUpperCase()).join(' '));
+      } else { el.className = 'raw'; el.textContent = tok; }
+      out.append(el);
+    }
+    $('codes').textContent = codes.join('\n');
+  }
+  $('in').addEventListener('input', render);
+  $('stack').addEventListener('change', render);
+  $('ngang').addEventListener('change', render);
+  render();
+})();
+</script>
+</body>
+</html>
