@@ -692,6 +692,45 @@ window.notesApp = { store, ready, flush() } is for the tests.
     else snack('You have the latest version', 'Bạn đang dùng phiên bản mới nhất');
   }
   $('update-check').addEventListener('click', () => { closeMenu(); checkUpdateByHand(); });
+  // the menu entry "Font versions": the build of the fonts (fonts/version.json of qtng/cdn) and, per font of the list, the date of the last change of its files (UTC, as in the list):
+  // the QATT letters and, for a font with Chữ Nôm, the big font (its slices and Latin); a date later than the first list this browser saw (the base) is marked: that file is loaded with ?v=<date>
+  const fontinfo = $('fontinfo');
+  function showFontInfo() {
+    let ver = {};
+    try { ver = JSON.parse(localStorage.qattFontVer) || {}; } catch (e) { /* no list yet */ }
+    const fonts = ver.fonts || {}, base = ver.base || {};
+    $('fontinfo-title').textContent = Lang.t('Fonts', 'Phông chữ') + ' · Build ' + (ver.build || '–') + ' · UTC';
+    const list = $('fontinfo-list');
+    list.textContent = '';
+    for (const f of qattFontsShown()) {
+      const li = document.createElement('li');
+      const name = document.createElement('span');
+      name.className = 'fontinfo-name';
+      name.textContent = f.label;
+      const dates = document.createElement('span');
+      dates.className = 'fontinfo-dates';
+      const keys = [f.file].concat(f.big ? [f.big] : []);
+      keys.forEach((k, i) => {
+        const line = document.createElement('div');
+        const d = fonts[k];
+        line.textContent = (keys.length > 1 ? (i ? 'Nôm ' : 'QATT ') : '') + (d || '–');
+        if (d && base[k] !== d) { line.className = 'fontinfo-new'; line.textContent += ' ↑'; }
+        dates.appendChild(line);
+      });
+      li.append(name, dates);
+      list.appendChild(li);
+    }
+    const note = document.createElement('li');
+    note.className = 'fontinfo-note';
+    note.textContent = (ver.at ? Lang.t('Checked', 'Đã kiểm tra') + ' ' + new Date(ver.at).toLocaleString() + ' · ' : '') + Lang.t('↑ = newer than the first list of this device', '↑ = mới hơn danh sách đầu tiên của thiết bị này');
+    list.appendChild(note);
+    list.parentNode.scrollTop = 0;
+    fontinfo.hidden = false;
+  }
+  $('font-list').addEventListener('click', () => { closeMenu(); showFontInfo(); });
+  $('fontinfo-close').addEventListener('click', () => { fontinfo.hidden = true; });
+  fontinfo.addEventListener('click', e => { if (e.target === fontinfo) fontinfo.hidden = true; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fontinfo.hidden = true; });
   $('list-menu-btn').addEventListener('click', showVersion);
   if ('serviceWorker' in navigator) {
     const hadController = !!navigator.serviceWorker.controller;   // the first install is no update

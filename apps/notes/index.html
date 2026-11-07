@@ -33,6 +33,7 @@
         <button id="export" type="button"><i class="bi bi-box-arrow-up"></i> <span data-vi="Xuất ghi chú">Export notes</span></button>
         <button id="import" type="button"><i class="bi bi-box-arrow-in-down"></i> <span data-vi="Nhập ghi chú">Import notes</span></button>
         <button id="clip-check" type="button"><i class="bi bi-clipboard"></i> <span data-vi="Kiểm tra bộ nhớ tạm">Check clipboard</span></button>
+        <button id="font-list" type="button"><i class="bi bi-fonts"></i> <span data-vi="Phiên bản phông chữ">Font versions</span></button>
         <button id="update-check" type="button"><i class="bi bi-arrow-repeat"></i> <span data-vi="Kiểm tra cập nhật">Check for updates</span></button>
         <div id="version" class="menu-version"></div>
       </div>
@@ -108,6 +109,15 @@
       <div class="clip-actions">
         <button id="clip-save" type="button"><i class="bi bi-check-lg"></i> <span data-vi="Lưu">Save</span></button>
         <button id="clip-close" type="button"><i class="bi bi-x-lg"></i> <span data-vi="Đóng">Close</span></button>
+      </div>
+    </div>
+  </div>
+  <div id="fontinfo" class="clip" hidden>
+    <div class="clip-sheet" role="dialog" aria-modal="true" aria-labelledby="fontinfo-title">
+      <div id="fontinfo-title" class="clip-title"></div>
+      <div class="clip-body"><ul id="fontinfo-list" class="fontinfo-list"></ul></div>
+      <div class="clip-actions">
+        <button id="fontinfo-close" type="button"><i class="bi bi-x-lg"></i> <span data-vi="Đóng">Close</span></button>
       </div>
     </div>
   </div>
