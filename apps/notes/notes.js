@@ -653,17 +653,49 @@ window.notesApp = { store, ready, flush() } is for the tests.
     try { localStorage.setItem(CHECKED_KEY, String(now)); } catch (e) { /* as above */ }
     registration.update().catch(() => {});
   }
+  // saves, notes the place (the note, editing or not, the cursor, the scroll) and loads the page again; resume() then says that the app was updated
+  async function reloadKeepingPlace() {
+    if (reloading) return;
+    reloading = true;
+    await save();
+    try {
+      sessionStorage.setItem(RESUME_KEY, JSON.stringify(state.current ? { id: state.current.id, editing: !field.readOnly, start: field.selectionStart, end: field.selectionEnd, scroll: field.scrollTop } : {}));
+    } catch (e) { /* the place is not kept */ }
+    location.reload();
+  }
+  // the version of the app (the number of its cache, qatt-notes-vN of sw.js) and the build of the fonts (fonts/version.json of qtng/cdn), under the menu of the list
+  async function showVersion() {
+    let v = '';
+    try { v = ((await caches.keys()).map(k => /^qatt-notes-v(\d+)$/.exec(k)).filter(Boolean).map(m => +m[1]).sort((a, b) => b - a)[0]) || ''; } catch (e) { /* no cache: no number */ }
+    let fonts = '';
+    try { fonts = JSON.parse(localStorage.qattFontVer).build || ''; } catch (e) { /* no list yet */ }
+    $('version').textContent = Lang.t('Version', 'Phiên bản') + ' ' + (v || '–') + ' · ' + Lang.t('Fonts', 'Phông chữ') + ' ' + (fonts || '–');
+  }
+  // the menu entry "Check for updates": asks the server for a new app (sw.js) and for new fonts at once, and says what it found
+  let checking = false;
+  async function checkUpdateByHand() {
+    if (checking) return;
+    checking = true;
+    snack('Checking for updates…', 'Đang kiểm tra cập nhật…', { sticky: true });
+    let appNew = false, failed = false;
+    if (registration) {
+      try { const reg = (await registration.update()) || registration; appNew = !!(reg.installing || reg.waiting); } catch (e) { failed = true; }
+    } else failed = true;
+    let fontsNew = false;
+    if (typeof qattFontCheck === 'function') { const r = await qattFontCheck(true); if (r === null) failed = true; else fontsNew = r; }
+    try { localStorage.setItem(CHECKED_KEY, String(Date.now())); } catch (e) { /* as above */ }
+    checking = false;
+    if (appNew) { snack('New version found, updating…', 'Đã tìm thấy phiên bản mới, đang cập nhật…', { sticky: true }); return; }   // the new worker takes over and the page loads again
+    if (fontsNew) { snack('New fonts found, updating…', 'Đã tìm thấy phông chữ mới, đang cập nhật…', { sticky: true }); setTimeout(reloadKeepingPlace, 600); return; }
+    await showVersion();
+    if (failed) snack('Could not check for updates (offline?)', 'Không thể kiểm tra cập nhật (đang ngoại tuyến?)');
+    else snack('You have the latest version', 'Bạn đang dùng phiên bản mới nhất');
+  }
+  $('update-check').addEventListener('click', () => { closeMenu(); checkUpdateByHand(); });
+  $('list-menu-btn').addEventListener('click', showVersion);
   if ('serviceWorker' in navigator) {
     const hadController = !!navigator.serviceWorker.controller;   // the first install is no update
-    navigator.serviceWorker.addEventListener('controllerchange', async () => {
-      if (!hadController || reloading) return;
-      reloading = true;
-      await save();
-      try {
-        sessionStorage.setItem(RESUME_KEY, JSON.stringify(state.current ? { id: state.current.id, editing: !field.readOnly, start: field.selectionStart, end: field.selectionEnd, scroll: field.scrollTop } : {}));
-      } catch (e) { /* the place is not kept */ }
-      location.reload();
-    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) reloadKeepingPlace(); });
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' }).then(r => { registration = r; checkUpdate(true); }).catch(() => {}));   // updateViaCache: the check never takes sw.js from the HTTP cache (GitHub Pages: 4 hours)
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(false); });
   }
