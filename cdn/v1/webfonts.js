@@ -15,7 +15,7 @@ A LONG-TERM PROMISE: this address and this query stay valid, whatever is behind 
   - what once worked keeps working (names of the families, the weights, the parameters); an unknown parameter or weight is ignored (a warning in the console);
   - a new syntax would be a new address (/cdn/v2/webfonts.js), this file stays;
   - where the font files are (BASES below) may change at any time: only these two lines change;
-  - plain ES5, no dependencies, no build.
+  - plain ES5, no dependencies, no build (the check for new versions of the files is skipped where there is no fetch).
 Every file is tried at the first address first (jsDelivr, a CDN that also takes the load off GitHub Pages) and at the second if that fails.
 The slices and the table of their ranges are written by hannom_web_slices.py of the private repository qtng/chunom-private (feature fonts); the notes on the
 succession of the domain are there too (docs). Licence: https://qatt.org/fonts/LICENSE.txt */
@@ -91,9 +91,17 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   };
   var DISPLAYS = ["auto", "block", "swap", "fallback", "optional"];
   var display = url.searchParams.get("display"); if (DISPLAYS.indexOf(display) < 0) display = "swap";
-  var css = [], face = function (family, weight, bases, file, range) {
+  /* versions: fonts/version.json of qtng/cdn lists the date of the last change of every font (the name of its TTF). The browser keeps the list (localStorage.chunomFontVer: { at, build, base, fonts }) and asks for it
+     at most every 5 minutes (with the time as cache buster) when a page starts. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice when nothing changed);
+     a font with a later date gets it behind its files (?v=<date>), so a changed font has a new address, from the next page load on. Without a list the files have no version. */
+  var VER_KEY = "chunomFontVer", VER_EVERY = 5 * 60 * 1000;
+  var verLoad = function () { try { return JSON.parse(localStorage.getItem(VER_KEY)) || {}; } catch (e) { return {}; } };
+  var verSave = function (o) { try { localStorage.setItem(VER_KEY, JSON.stringify(o)); } catch (e) { /* no storage: no versions */ } };
+  var ver = verLoad();
+  var verOf = function (key) { var v = (ver.fonts || {})[key]; return v && v !== (ver.base || {})[key] ? "?v=" + encodeURIComponent(v) : ""; };
+  var css = [], face = function (family, weight, bases, file, range, key) {
     return '@font-face { font-family: "' + family + '"; font-style: normal; font-weight: ' + weight + "; font-display: " + display + "; src: " +
-      bases.map(function (b) { return "url(" + b + file + '.woff2) format("woff2")'; }).join(", ") + "; unicode-range: " + range + "; }";
+      bases.map(function (b) { return "url(" + b + file + ".woff2" + verOf(key) + ') format("woff2")'; }).join(", ") + "; unicode-range: " + range + "; }";
   };
   url.searchParams.getAll("family").forEach(function (spec) {
     var i = spec.indexOf(":"), asked = (i < 0 ? spec : spec.slice(0, i)).replace(/\+/g, " ").trim(), name = Object.keys(FONTS).filter(function (k) { return k.toLowerCase() === asked.toLowerCase(); })[0], f = FONTS[name];   // upper and lower case do not matter
@@ -106,8 +114,8 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
     want.forEach(function (w) {
       var file = f.weights[w];
       if (!file) { console.warn("Chunom Fonts: " + name + " has no weight " + w + " (" + Object.keys(f.weights).join(", ") + ")"); return; }
-      css.push(face(name, w, LETTER_BASES, file[1], LETTERS));
-      SLICES.forEach(function (range, k) { css.push(face(name, w, SLICE_BASES, file[0] + "-" + (k < 10 ? "0" : "") + k, range)); });
+      css.push(face(name, w, LETTER_BASES, file[1], LETTERS, file[1]));
+      SLICES.forEach(function (range, k) { css.push(face(name, w, SLICE_BASES, file[0] + "-" + (k < 10 ? "0" : "") + k, range, file[0])); });
     });
   });
   if (!css.length) return;
@@ -115,4 +123,17 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   style.setAttribute("data-chunom-fonts", "");
   style.textContent = css.join("\n");
   (document.head || document.documentElement).appendChild(style);
+  // the list of the versions for the next page load
+  var stored = verLoad();
+  if (typeof fetch !== "function" || Date.now() - (stored.at || 0) < VER_EVERY) return;
+  var keep = {}; for (var k in stored) keep[k] = stored[k];
+  keep.at = Date.now(); verSave(keep);   // the time is kept also when the request fails: not again within 5 minutes
+  var ask = function (i) {
+    if (i >= LETTER_BASES.length) return;
+    fetch(LETTER_BASES[i] + "version.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
+      if (!list || !list.fonts) return ask(i + 1);
+      if (list.build !== stored.build || !stored.base) verSave({ at: keep.at, build: list.build, base: stored.base || list.fonts, fonts: list.fonts });   // the same build: nothing changed
+    }, function () { ask(i + 1); });
+  };
+  ask(0);
 })();
