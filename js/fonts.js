@@ -116,11 +116,19 @@ var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 // the browser takes the next address of src when one fails. qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
 var QATT_CDN = ["https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/", "https://chunom.org/cdn/fonts/"];
 // versions: fonts/version.json of qtng/cdn (written by its action) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "qatt-serif"; the slices and the Latin
-// of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
+// of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, epoch, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
 // with the time as a cache buster. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice for a visitor when nothing changed); when its date is later than the base,
 // the date goes behind its files (?v=<date>), so a changed font has a new address and the next page load takes it (the page that is open keeps what it has).
 var QATT_FONT_CHECK = 5 * 60 * 1000;
-var qattFontVer = (() => { try { return JSON.parse(localStorage.qattFontVer) || {}; } catch (e) { return {}; } })();
+// QATT_FONT_EPOCH: raise it when every browser must load the fonts anew (an older copy sits in a cache under the plain address): a browser that has a list of an other epoch takes no base, so every font gets its date (?v=) at once
+var QATT_FONT_EPOCH = 1;
+var qattFontVer = (() => {
+  try {
+    const v = JSON.parse(localStorage.qattFontVer) || {};
+    if (v.fonts && v.epoch !== QATT_FONT_EPOCH) { v.epoch = QATT_FONT_EPOCH; v.base = {}; localStorage.qattFontVer = JSON.stringify(v); }
+    return v;
+  } catch (e) { return {}; }
+})();
 var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin)$/, "$1");
 var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
@@ -137,7 +145,7 @@ var qattFontCheck = async () => {
         const res = await fetch(`${base}version.json?t=${Date.now()}`);
         const list = res.ok && await res.json();
         if (list && list.fonts) {
-          if (list.build !== stored.build || !stored.base) localStorage.qattFontVer = JSON.stringify({ at: keep.at, build: list.build, base: stored.base || list.fonts, fonts: list.fonts });   // the same build: nothing changed
+          if (list.build !== stored.build || !stored.base) localStorage.qattFontVer = JSON.stringify({ at: keep.at, build: list.build, epoch: QATT_FONT_EPOCH, base: stored.base || (stored.fonts ? {} : list.fonts), fonts: list.fonts });   // the same build: nothing changed
           return;
         }
       } catch (e) { /* the next address */ }
