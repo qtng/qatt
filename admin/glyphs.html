@@ -164,6 +164,7 @@
         const NEUTRAL_OFFSET = { x: 0, y: GRID };
         const NEUTRAL_CORNER = { x: GRID, y: 0 };
         const isUpperName = (base) => /^[A-Z]+$/.test(base);
+        const COMBO_NAME = /^[A-Z]+[a-z]+$/; // Name einer automatisch erzeugten Kombination: TRnh
         function splitName(code) {
             const m = code.match(/^([A-Z]+)(?:-(\d+)(?:-(\d+)(?:-(\d+)(?:-(\d+)-(\d+))?)?)?)?$/);
             if (!m) return { base: code, width: GRID, offset: { ...NEUTRAL_OFFSET }, corner: { ...NEUTRAL_CORNER } };
@@ -403,7 +404,7 @@
 
                 // Kombinationen: Schalter Mischen (an: neue zufällige Reihenfolge, aus: sortiert)
                 document.getElementById('comboShuffle').addEventListener('change', (e) => {
-                    this.comboRank = e.target.checked ? new Map() : null; // Zufallszahl je Kombination, solange der Schalter an ist
+                    this.comboRank = e.target.checked ? new Map() : null; // Zufallszahl und Markierung je Kombination, solange der Schalter an ist
                     this.renderSavedGlyphPreviews();
                 });
 
@@ -1035,7 +1036,9 @@
                 const file = this.glyphMeta[''] ?? {};
                 const withComment = (text, comment) => comment ? `${text} ${comment}` : text;
                 const lines = file.header?.length ? [...file.header, ''] : [];
-                Object.keys(this.savedGlyphs).sort(glyphOrder).forEach(code => {
+                // Die Kombinationen (Großbuchstabe + Kleinbuchstabe) werden nicht exportiert: sie entstehen aus den Glyphen
+                // (beim Einlesen und Speichern hier, beim Bau der Schrift aus den Namen der Großbuchstaben)
+                Object.keys(this.savedGlyphs).filter(code => !COMBO_NAME.test(code)).sort(glyphOrder).forEach(code => {
                     const meta = this.glyphMeta[code] ?? {};
                     lines.push(...(meta.before ?? []));
                     lines.push(withComment(`${code}: |-`, meta.comment));
@@ -1156,7 +1159,8 @@
             }
 
             // Eine gespeicherte Glyphe (Striche, Marks gedämpft; Verweise als die Glyphe selbst in ihrer Box) auf ein Canvas der Größe size
-            drawGlyphThumb(ctx, code, size) {
+            // mark: 1 bis 6 setzt die Markierung dieser Nummer an den Kleinbuchstaben der Kombination (hat er Marks)
+            drawGlyphThumb(ctx, code, size, mark = 0) {
                 this.previewTransform(ctx, size);
                 ctx.lineCap = this.lineCap;
                 ctx.lineJoin = 'round';
@@ -1164,7 +1168,9 @@
                     const ref = stroke.type === 99 ? this.savedGlyphs[stroke.refName] : null;
                     if (ref) { // ein Verweis zeigt die Glyphe selbst in ihrer Box (ohne Rahmen und Beschriftung)
                         const [a, b] = stroke.points;
-                        this.drawInBox(ctx, glyphPart(ref), Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), false, 0, false);
+                        const parts = [...glyphPart(ref)];
+                        if (mark && /^[a-z]+$/.test(stroke.refName)) parts.push(...marksPart(ref).slice(mark - 1, mark)); // der Kleinbuchstabe mit seiner Markierung
+                        this.drawInBox(ctx, parts, Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), false, 0, false);
                     } else this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
                 });
                 ctx.globalAlpha = 0.3; // Marks gedämpft
@@ -1180,15 +1186,20 @@
                 const card = document.getElementById('comboCard'), flow = document.getElementById('comboFlow');
                 card.classList.toggle('d-none', codes.length === 0);
                 flow.innerHTML = '';
-                const rank = (code) => { if (!this.comboRank.has(code)) this.comboRank.set(code, Math.random()); return this.comboRank.get(code); };
-                const order = this.comboRank ? [...codes].sort((a, b) => rank(a) - rank(b)) : codes;
+                // Zufall (Schalter Mischen): je Kombination eine Zufallszahl für die Reihenfolge und eine zufällige Markierung 1–6;
+                // ohne Zufall sortiert und ohne Markierung
+                const info = (code) => {
+                    if (!this.comboRank.has(code)) this.comboRank.set(code, { rank: Math.random(), mark: 1 + Math.floor(Math.random() * MARK_COUNT) });
+                    return this.comboRank.get(code);
+                };
+                const order = this.comboRank ? [...codes].sort((a, b) => info(a).rank - info(b).rank) : codes;
                 order.forEach(code => {
                     const can = document.createElement('canvas');
                     can.width = 64;
                     can.height = 64;
                     can.title = code;
                     can.onclick = () => this.appMode === 'pick' ? this.addComponent(code) : this.loadGlyph(code);
-                    this.drawGlyphThumb(can.getContext('2d'), code, 64);
+                    this.drawGlyphThumb(can.getContext('2d'), code, 64, this.comboRank ? info(code).mark : 0);
                     flow.appendChild(can);
                 });
             }
@@ -1196,7 +1207,7 @@
             renderSavedGlyphPreviews() {
                 const container = document.getElementById('savedGlyphsContainer');
                 const all = Object.keys(this.savedGlyphs).sort(glyphOrder);
-                const isCombo = k => /^[A-Z]+[a-z]+$/.test(k);
+                const isCombo = k => COMBO_NAME.test(k);
                 this.renderCombos(all.filter(isCombo));
                 const keys = all.filter(k => !isCombo(k));
 
