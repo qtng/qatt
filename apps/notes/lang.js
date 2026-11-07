@@ -2,7 +2,8 @@
 The language of QATT notes (apps/notes/), English or Vietnamese; the app has no code of the website. Same idea as Lang of the site:
 every tag with data-vi (and no tags inside) shows that text in Vietnamese, the English text stays in the tag and returns; the attributes
 data-vi-aria-label, data-vi-placeholder, data-vi-title and data-vi-label do the same for the attribute without the prefix.
-The language is the choice kept on this device (localStorage "qattNotesLang"), else the first of English and Vietnamese in the languages of the browser.
+The language is the choice kept on this device (localStorage "qattNotesLang", and a cookie of the same name as a second copy: the browser may drop the storage of a site that is not
+persistent, then the cookie still has the choice, and it is written to the storage again), else the first of English and Vietnamese in the languages of the browser.
 
   Lang.current     "en" or "vi"
   Lang.set("vi")   choose and keep it; the page changes at once; the event "langchange" goes to the document
@@ -11,7 +12,14 @@ The language is the choice kept on this device (localStorage "qattNotesLang"), e
 window.Lang = (() => {
   const KEY = 'qattNotesLang', ATTRS = ['aria-label', 'placeholder', 'title', 'label'];
   let current = 'en';
-  try { const kept = localStorage.getItem(KEY); current = kept === 'vi' || kept === 'en' ? kept : null; } catch (e) { current = null; }
+  const ok = v => v === 'vi' || v === 'en' ? v : null;
+  const fromCookie = () => { try { return ok((document.cookie.match(/(?:^|;\s*)qattNotesLang=(\w+)/) || [])[1]); } catch (e) { return null; } };
+  const toCookie = l => { try { document.cookie = `${KEY}=${l}; max-age=31536000; path=/apps/notes/; SameSite=Lax`; } catch (e) { /* no cookies */ } };
+  try { current = ok(localStorage.getItem(KEY)); } catch (e) { current = null; }
+  if (!current) {   // the storage has no choice: the cookie may have it (the storage was dropped), then it is kept in the storage again
+    current = fromCookie();
+    if (current) try { localStorage.setItem(KEY, current); } catch (e) { /* storage may be blocked */ }
+  } else toCookie(current);
   if (!current) {
     current = 'en';
     for (const l of navigator.languages || [navigator.language || '']) {
@@ -56,6 +64,7 @@ window.Lang = (() => {
       if (l !== 'en' && l !== 'vi') return;
       current = l;
       try { localStorage.setItem(KEY, l); } catch (e) { /* storage may be blocked */ }
+      toCookie(l);
       all();
       document.dispatchEvent(new Event('langchange'));
     },
