@@ -3,12 +3,12 @@ The QATT fonts (fonts/*.woff2) and the sizes offered by the code table (admin/vi
 
   <select id="font" data-qatt-fonts></select>   all fonts as options (value = CSS family), the choice sets --qfont on <html>;
                                                 data-qatt-default="QATT Brush" preselects another font than the default of the list
-                                                (the fonts marked admin: true are only offered to admins, see isAdmin below; cjk: true = the font also has Chữ Nôm characters (its CJK slices, see QATT_CJK_DIR), only those are offered in the Writer of the Chunom site)
+                                                (the fonts marked admin: true are only offered to admins, see isAdmin below; cjk: true = the font also has Chữ Nôm characters (its CJK slices, see QATT_CDN), only those are offered in the Writer of the Chunom site)
   <select id="size" data-qatt-sizes></select>   the sizes (value = pixels of a glyph in the grid of the code table (admin/view.html?f=fonts&p=admin/codetable.html))
 
 Every page of both sites gets this file from js/navigation.js (written into the <head> right after it); a page does not load it itself (only Qatt.org Notes,
 which has no navigation.js). It defines the @font-face rules of every font, also "QATT Pen", the CJK font of --font-cjk (css/site.css), and fills these selects
-as soon as the parser has added them. Its globals are var: it may run twice (admin/view.html). The font files are found next to the script (../fonts/).
+as soon as the parser has added them. Its globals are var: it may run twice (admin/view.html). The font files are in the repository qtng/cdn (QATT_CDN).
 */
 var QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
@@ -33,13 +33,13 @@ var QATT_FONTS = [
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
-// big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in QATT_CJK_DIR (hannom_web_slices.py):
+// big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack
 // before its first character appeared): the browser loads only the slices whose characters are shown. Slice 00 holds the characters of Level 1 of
 // chunom/dict.csv (the most frequent words), of the headings of the homepages, of the Top 100 and of the Bookshelf teaser of the search, 01 the rest of dict.csv, the others the remaining characters in the order of the code points; the same for every font.
 // The table is written by hannom_web_slices.py of the private repository (feature fonts); font-display: swap, so a character is shown in the next font until its slice is there.
-var QATT_CJK_DIR = "https://chunom.org/chunom-assets/fonts/web/";
+// the files: see QATT_CDN below (fonts/ = the letters and the fonts of the lists, fonts/web/ = the slices and the Latin)
 /* slices: begin */
 var QATT_CJK_SLICES = [
   "U+2FF0, U+31F4, U+340C, U+35C2, U+3D4B, U+4E09, U+4E10, U+4E8B, U+4E9B, U+4EBA, U+4ECD, U+4F53, U+5040, U+5099, U+50B3, U+5143, U+5171, U+518A, U+522B, U+5289, U+5357, U+53EA, U+5400, U+5404, U+540C, U+540F, U+5427, U+543B, U+5450, U+547D, U+548D, U+54FF, U+554F, U+5583, U+56FA, U+570B, U+5728, U+5740, U+578C, U+57CE, U+5973-5974, U+5982, U+5991, U+59AC, U+59D1, U+5B57, U+5C3C, U+5C40, U+5C71, U+5E73-5E74, U+5E95, U+5F79, U+6044, U+606A, U+6144, U+61A2, U+6208, U+6210, U+6237, U+624D, U+62F1, U+6307, U+6392, U+6539, U+65B0, U+65BC, U+65E6, U+660C, U+6625, U+6642, U+6708, U+6731, U+6842, U+68CB, U+694A, U+6B23, U+6B3A, U+6B4C, U+6B62, U+6B66, U+6C9B, U+6CA1, U+6CCA, U+6E03, U+6F14, U+6FDF, U+722B, U+7232, U+7279, U+72C0, U+74CA, U+751F, U+7576, U+788E, U+79AE, U+7A7A, U+7A96, U+7B54, U+7CA6, U+7D30, U+7D42, U+7F85, U+7F8E, U+7FA4, U+7FC1, U+8012, U+80E1, U+81EA, U+826F, U+82B1, U+82F1, U+8339, U+88AB, U+8A13, U+8A5E, U+8A69, U+8A9E, U+8AA0, U+8C9D, U+8CA2, U+8CE6, U+8D8A, U+8E22, U+8ECD, U+8FB0, U+9054, U+9076, U+9285, U+962E, U+9673, U+96C6, U+97F3, U+9999, U+9EBB, U+FF1A, U+20027, U+200E9, U+20129, U+2013C, U+201CD, U+2029A-2029B, U+204E8, U+2052D, U+209B3, U+20AFE, U+20B20, U+20C4A, U+2139D, U+215C9, U+21890, U+21975-21982, U+21A38, U+221A5, U+229DA, U+2321C, U+2412F, U+24BE9, U+24F93, U+24FF0, U+25669, U+25A9D, U+25FD7, U+2629A, U+264B9, U+2693E, U+27289, U+275F1, U+2784A, U+27D51, U+2825F, U+2846E, U+2856D, U+285B2, U+2B968, U+2BBF3, U+2C65E, U+31EB5",
@@ -112,15 +112,18 @@ var isAdmin = () => {
 // the fonts this visitor may use (all for an admin, else those not marked admin: true); other scripts (apps/notes/) use this list instead of their own
 var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 
-var QATT_FONT_DIR = new URL("../fonts/", document.currentScript ? document.currentScript.src : location.href).href;   // the folder fonts/ of qatt.org
+// where the font files are (the repository qtng/cdn, filled by cdn_sync.py / the build of the private repository): jsDelivr first, then the GitHub Pages of that repository;
+// the browser takes the next address of src when one fails. qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
+var QATT_CDN = ["https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/", "https://chunom.org/cdn/fonts/"];
+var qattFontSrc = path => QATT_CDN.map(base => `url(${base}${path}) format("woff2")`).join(", ");   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
 
 (() => {
   const FONTS = qattFontsShown();
   const style = document.createElement("style");
-  const face = (family, file, range = "") => `@font-face { font-family: "${family}"; src: url(${QATT_FONT_DIR}${file}.woff2) format("woff2"), url(${QATT_FONT_DIR}${file}.ttf) format("truetype");${range ? ` unicode-range: ${range};` : ""} }`;
+  const face = (family, file, range = "") => `@font-face { font-family: "${family}"; src: ${qattFontSrc(file + ".woff2")};${range ? ` unicode-range: ${range};` : ""} }`;
   style.textContent = FONTS.map(f => f.cjk
-    ? face(f.family, f.file, QATT_RANGE) + QATT_CJK_SLICES.map((range, i) => `\n@font-face { font-family: "${f.family}"; src: url(${QATT_CJK_DIR}${f.big}-${String(i).padStart(2, "0")}.woff2) format("woff2"); font-display: swap; unicode-range: ${range}; }`).join("")
-    : face(f.family, f.file)).concat(FONTS.filter(f => f.big).map(f => `@font-face { font-family: "${f.family} Latin"; src: url(${QATT_CJK_DIR}${f.big}-latin.woff2) format("woff2"); }`))
+    ? face(f.family, f.file, QATT_RANGE) + QATT_CJK_SLICES.map((range, i) => `\n@font-face { font-family: "${f.family}"; src: ${qattFontSrc(`web/${f.big}-${String(i).padStart(2, "0")}.woff2`)}; font-display: swap; unicode-range: ${range}; }`).join("")
+    : face(f.family, f.file)).concat(FONTS.filter(f => f.big).map(f => `@font-face { font-family: "${f.family} Latin"; src: ${qattFontSrc(`web/${f.big}-latin.woff2`)}; }`))
     // "pa": the characters of the Chunom site in the private use area (U+E000.., not in Unicode yet; the decks, the practice: var(--font-cjk), 'pa')
     .concat(`@font-face { font-family: "pa"; src: local("HanaMinA"), url(https://chunom.org/chunom-assets/fonts/pa-Regular.woff2) format("woff2"); }`)
     .join("\n");
