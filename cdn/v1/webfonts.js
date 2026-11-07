@@ -132,7 +132,8 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   keep.at = Date.now(); verSave(keep);   // the time is kept also when the request fails: not again within 5 minutes
   var ask = function (i) {
     if (i >= LETTER_BASES.length) return;
-    fetch(LETTER_BASES[i] + "version.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
+    // GitHub Pages first: jsDelivr serves the file of an older commit of @main for hours (the cache buster does not help), Pages renews it within 10 minutes
+    fetch(LETTER_BASES[LETTER_BASES.length - 1 - i] + "version.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
       if (!list || !list.fonts) return ask(i + 1);
       if (list.build !== stored.build || !stored.base) verSave({ at: keep.at, build: list.build, epoch: EPOCH, base: stored.base || (stored.fonts ? {} : list.fonts), fonts: list.fonts });   // the same build: nothing changed
     }, function () { ask(i + 1); });
