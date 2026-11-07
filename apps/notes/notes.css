@@ -109,7 +109,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .keybar.direct .variants, .keybar.direct .nom-more { display: none !important; }
 .directbar button { min-width: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-family: var(--qfont, "QATT Pen Medium"), system-ui, sans-serif, var(--nom); font-size: 1.5rem; line-height: 1; overflow: hidden; }
 .directbar button:active { background: rgba(255, 255, 255, .12); }
-#set-ime button[aria-checked="true"] { color: var(--accent); }
 .uni { font-size: 1.25em; line-height: 1; vertical-align: -.1em; }
 
 /* the format bar under the title bar of the editor: Convert, undo, redo, bold, italic, alignment and size (the last two open a small menu) */
@@ -139,3 +138,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .seal.dragging { cursor: grabbing; }
 .seal .col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; }
 .seal .cell { display: block; line-height: 1; white-space: nowrap; }
+
+/* the input (Telex or direct) is a dropdown in the format bar; bold and italic are two toggles in the menu of the editor */
+.fmtbar .ime-select { flex: 2.4 1 0; min-width: 0; min-height: 40px; padding: 0 .25rem; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit; font-size: .8rem; }
+.fmtbar .ime-select option { color: var(--ink); background: var(--bg); }
+.menu-toggles { display: flex; }
+.menu-toggles button { flex: 1 1 0; }
+.menu-toggles button[aria-pressed="true"] { color: var(--accent); }
