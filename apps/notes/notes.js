@@ -640,9 +640,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
   document.addEventListener('gesturestart', e => e.preventDefault());   // Safari ignores user-scalable=no
 
   // ----- offline: the service worker (sw.js) -----
-  // A new version: the app asks the server for sw.js at the start and when it comes to the front, at most every 15 minutes (about 1–3 KB). A changed sw.js (a new CACHE)
+  // A new version: the app asks the server for sw.js at the start and when it comes to the front, at most every 5 minutes (about 1–3 KB). A changed sw.js (a new CACHE)
   // installs itself and takes over (skipWaiting, clients.claim); the page then saves, notes where it was (the note, editing or not, the cursor) and loads again.
-  const UPDATE_EVERY = 15 * 60 * 1000, CHECKED_KEY = 'qattNotesUpdateCheck', RESUME_KEY = 'qattNotesResume';
+  const UPDATE_EVERY = 5 * 60 * 1000, CHECKED_KEY = 'qattNotesUpdateCheck', RESUME_KEY = 'qattNotesResume';
   let registration = null, reloading = false;
   function checkUpdate(force) {
     if (!registration) return;
