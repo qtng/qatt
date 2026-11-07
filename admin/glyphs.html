@@ -154,9 +154,6 @@
         const GRID = 200; // KAGE intern ist IMMER 200x200
         const MARGIN = 12; // Hilfsrahmen vom Rand
         const STORAGE_KEY = 'kage.savedGlyphs';
-        // Kommentare auf Glyphen-Ebene { NAME: { before, comment, after }, '': { header, footer } };
-        // Kommentare an Strichen stehen direkt am Strich (before, comment)
-        const META_KEY = 'kage.glyphMeta';
         const LINE_CAPS = ['butt', 'square', 'round'];
         const PRESET_CODES = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'NH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
 
@@ -321,6 +318,89 @@
             return newStrokes;
         }
 
+        // Die Datei der Glyphen (Export, Import; data/kage-glyphs.yaml des Schriftbaus) nennt die Glyphen nach ihren Codepunkten,
+        // wie GlyphWiki sie nennen würde; die Namen des Editors (l, TR-200-71-27, TRnh) bleiben im Editor:
+        //   uf0000 … uf0099           die 154 Einzelformen, 7 je Symbol in der Reihenfolge von CP_KEYS: Form 0 die Glyphe ohne ihre Marks,
+        //                             die Formen 1–6 ein Verweis (99) auf Form 0 und ihre eine Markierung
+        //   uXXXXX-uf009a             der Großbuchstabe des Symbols XXXXX (die Form vor dem Verbinder U+F009A, das Onset eines Paars)
+        //   uXXXXX-uf009a-uYYYYY      die Kombination von Onset XXXXX und Reim YYYYY (Verweise auf die beiden)
+        //   jeder andere Name         bleibt, wie er ist; Verweise (99) tragen den Namen der Datei
+        // Vorneweg der Abschnitt "boxes:": die Zahlen aus dem Namen jedes Großbuchstaben (Breite, x, y, x2, y2; Standardwerte am Ende
+        // fallen weg wie im Namen). Gültiges YAML, aber ohne YAML-Parser gelesen (nach Einrückung). Kommentare (#) werden überlesen.
+        const CP_KEYS = ['z', 'ng', 'h', 'g', 'c', 'l', 'tr', 'dd', 'n', 't', 'th', 'nh', 'ch', 'dz', 'x', 'kh', 's', 'r', 'm', 'b', 'v', 'ph'];
+        const JOINER_CP = 'uf009a';
+        const cpName = (i, m = 0) => 'u' + (0xF0000 + 7 * i + m).toString(16);
+        const FULL_REF = (name) => `99,0,0,0,0,200,0,0,200,200,200,${name}`;
+        function glyphsToFile(saved) {
+            const codes = Object.keys(saved).filter(c => saved[c].length); // leere Glyphen (die Vorgaben des Editors) nicht
+            const upperOf = i => codes.find(c => !COMBO_NAME.test(c) && isUpperName(splitName(c).base) && splitName(c).base === CP_KEYS[i].toUpperCase());
+            const fileName = {};
+            CP_KEYS.forEach((k, i) => {
+                if (codes.includes(k)) fileName[k] = cpName(i);
+                const u = upperOf(i);
+                if (u) fileName[u] = cpName(i) + '-' + JOINER_CP;
+            });
+            codes.forEach(c => {
+                const m = c.match(/^([A-Z]+)([a-z]+)$/);
+                const i = m ? CP_KEYS.indexOf(m[1].toLowerCase()) : -1, j = m ? CP_KEYS.indexOf(m[2]) : -1;
+                if (i >= 0 && j >= 0) fileName[c] = `${cpName(i)}-${JOINER_CP}-${cpName(j)}`;
+            });
+            const line = s => strokeToKage(s.type === 99 ? { ...s, refName: fileName[s.refName] ?? s.refName } : s);
+            const out = ['boxes:'];
+            CP_KEYS.forEach((k, i) => {
+                const u = upperOf(i), nums = u ? (u.match(/-\d+/g) || []).map(x => x.slice(1)) : [];
+                if (nums.length) out.push(`  ${fileName[u]}: [${nums.join(', ')}]`);
+            });
+            const glyph = (name, strokes) => { out.push(`${name}: |-`, ...strokes.map(s => `  ${typeof s === 'string' ? s : line(s)}`)); };
+            CP_KEYS.forEach((k, i) => {
+                if (!fileName[k]) return;
+                glyph(cpName(i), glyphPart(saved[k]));
+                marksPart(saved[k]).forEach((s, m) => glyph(cpName(i, m + 1), [FULL_REF(cpName(i)), line(s)]));
+            });
+            CP_KEYS.forEach((k, i) => { const u = upperOf(i); if (u) glyph(fileName[u], saved[u]); });
+            codes.filter(c => COMBO_NAME.test(c) && fileName[c]).sort((a, b) => fileName[a].localeCompare(fileName[b])).forEach(c => glyph(fileName[c], saved[c]));
+            codes.filter(c => !fileName[c]).sort(glyphOrder).forEach(c => glyph(c, saved[c]));
+            return out.join('\n') + '\n';
+        }
+        // Die Datei zurück in die Glyphen des Editors (die Kombinationen nicht: sie entstehen im Editor aus den Großbuchstaben).
+        // Eine ältere Datei mit den Namen des Editors (ohne uf0000) wird so übernommen, wie sie ist.
+        function fileToGlyphs(text) {
+            const raw = {}, boxes = {};
+            let current = null;
+            text.split(/\r?\n/).forEach(line => {
+                const content = line.replace(/(^|\s+)#.*$/, '');
+                if (!content.trim()) return;
+                if (!/^\s/.test(content)) {
+                    current = content.trim() === 'boxes:' ? '' : content.replace(/:\s*\|-?\s*$/, '').trim();
+                    if (current) raw[current] = [];
+                } else if (current === '') {
+                    const m = content.trim().match(/^(\S+):\s*\[([\d,\s]*)\]$/);
+                    if (m) boxes[m[1]] = m[2].split(',').map(x => x.trim()).filter(Boolean);
+                } else if (current !== null) raw[current].push(content.trim());
+            });
+            const toStrokes = lines => lines.flatMap(l => kageToStrokes(l));
+            if (!raw[cpName(0)]) return Object.fromEntries(Object.entries(raw).map(([n, l]) => [n, toStrokes(l)]));
+            const editorName = {}, glyphs = {};
+            CP_KEYS.forEach((k, i) => {
+                editorName[cpName(i)] = k;
+                const u = cpName(i) + '-' + JOINER_CP;
+                if (raw[u]) editorName[u] = k.toUpperCase() + (boxes[u] || []).map(n => '-' + n).join('');
+            });
+            const back = strokes => strokes.map(s => s.type === 99 ? { ...s, refName: editorName[s.refName] ?? s.refName } : s);
+            const formOf = name => { const m = name.match(/^u(f00[0-9a-f]{2})$/); const o = m ? parseInt(m[1], 16) - 0xF0000 : -1; return o >= 0 && o < 154 ? o : -1; };
+            Object.keys(raw).forEach(name => {
+                const o = formOf(name);
+                if (o >= 0 && o % 7) return;                                              // eine markierte Form: ihre Markierung gehört zu Form 0
+                if (/^u[0-9a-f]+-uf009a-u[0-9a-f]+$/.test(name)) return;                   // eine Kombination
+                if (o >= 0) {
+                    const marks = [1, 2, 3, 4, 5, 6].map(m => raw[cpName(o / 7, m)]).filter(Boolean)
+                        .map(l => toStrokes(l).filter(s => !(s.type === 99 && s.refName === name)).pop()).filter(Boolean);
+                    glyphs[editorName[name]] = back([...toStrokes(raw[name]), ...(marks.length === MARK_COUNT ? marks : [])]);
+                } else glyphs[editorName[name] ?? name] = back(toStrokes(raw[name]));
+            });
+            return glyphs;
+        }
+
         class KageEditor {
             constructor() {
                 this.canvas = document.getElementById('kageCanvas');
@@ -345,7 +425,7 @@
                 this.handleSelected = null; // ausgewählter grüner Anfasser: 'width' | 'offset' | 'corner' | null
                 this.loadedCode = null; // Name, unter dem die geladene Glyphe gespeichert ist
 
-                this.glyphMeta = this.loadStored(META_KEY) ?? {}; // Kommentare auf Glyphen- und Dateiebene
+                try { localStorage.removeItem('kage.glyphMeta'); } catch {} // früher: Kommentare der Datei (Export und Import kennen keine mehr)
 
                 // Gespeicherte Glyphen aus dem localStorage, sonst leer (die Kombinationen entstehen automatisch)
                 this.savedGlyphs = this.loadStored() ?? {};
@@ -374,7 +454,6 @@
             persist() {
                 try {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.savedGlyphs));
-                    localStorage.setItem(META_KEY, JSON.stringify(this.glyphMeta));
                 } catch {
                     this.showToast('Speichern im Browser nicht möglich!');
                 }
@@ -915,10 +994,6 @@
                 if (old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
                     delete this.savedGlyphs[old];
                     this.renameReferences(old, code);
-                    if (this.glyphMeta[old]) { // Kommentare der Glyphe wandern mit
-                        this.glyphMeta[code] = this.glyphMeta[old];
-                        delete this.glyphMeta[old];
-                    }
                 }
                 this.syncCombos();
                 this.persist();
@@ -961,7 +1036,6 @@
                 });
                 keys.filter(k => /^[A-Z]+[a-z]+$/.test(k) && !combos[k]).forEach(k => {
                     delete this.savedGlyphs[k];
-                    delete this.glyphMeta[k];
                 });
                 Object.assign(this.savedGlyphs, combos);
             }
@@ -975,7 +1049,6 @@
             deleteGlyph(code) {
                 if (!confirm(`Glyphe '${code}' löschen?`)) return;
                 delete this.savedGlyphs[code];
-                delete this.glyphMeta[code];
                 this.syncCombos();
                 this.persist();
                 this.renderSavedGlyphPreviews();
@@ -1039,109 +1112,30 @@
                 this.render();
             }
 
-            // Alle Glyphen als YAML-artige Textdatei (gültiges YAML, wird aber ohne YAML-Parser gelesen):
-            //   NAME: |-
-            //     KAGE-Zeile
-            //     KAGE-Zeile
-            // Gespeicherte Kommentare werden an ihrer Stelle wieder ausgegeben (siehe importAll).
+            // Alle Glyphen als Datei (data/kage-glyphs.yaml des Schriftbaus); Format siehe glyphsToFile
             exportAll() {
-                const file = this.glyphMeta[''] ?? {};
-                const withComment = (text, comment) => comment ? `${text} ${comment}` : text;
-                const lines = file.header?.length ? [...file.header, ''] : [];
-                // Die Kombinationen (Großbuchstabe + Kleinbuchstabe) werden nicht exportiert: sie entstehen aus den Glyphen
-                // (beim Einlesen und Speichern hier, beim Bau der Schrift aus den Namen der Großbuchstaben)
-                Object.keys(this.savedGlyphs).filter(code => !COMBO_NAME.test(code)).sort(glyphOrder).forEach(code => {
-                    const meta = this.glyphMeta[code] ?? {};
-                    lines.push(...(meta.before ?? []));
-                    lines.push(withComment(`${code}: |-`, meta.comment));
-                    this.savedGlyphs[code].forEach(s => {
-                        lines.push(...(s.before ?? []).map(c => `  ${c}`));
-                        lines.push(withComment(`  ${strokeToKage(s)}`, s.comment));
-                    });
-                    lines.push(...(meta.after ?? []).map(c => `  ${c}`));
-                });
-                lines.push(...(file.footer ?? []));
-                const text = lines.join('\n') + '\n';
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+                a.href = URL.createObjectURL(new Blob([glyphsToFile(this.savedGlyphs)], { type: 'text/plain' }));
                 a.download = 'kage-glyphen.yaml';
                 a.click();
                 URL.revokeObjectURL(a.href);
             }
 
-            // Datei aus exportAll einlesen, nur nach Einrückung: eine Zeile ohne Einrückung "NAME: |-" beginnt eine
-            // Glyphe, eingerückte Zeilen sind ihre KAGE-Zeilen (Einrückung beliebig, Leerzeichen oder Tabs).
-            // Leerzeilen zählen nicht. Kommentare (# am Zeilenanfang, auch eingerückt, oder am Zeilenende mit
-            // Leerraum davor) werden gespeichert, für die Verarbeitung aber entfernt:
-            //   - am Ende einer KAGE-Zeile und eingerückte Kommentarzeilen davor: am Strich (wandert mit ihm)
-            //   - am Ende der Namenszeile und nicht eingerückte Kommentarzeilen davor: an der Glyphe
-            //   - eingerückt nach dem letzten Strich: am Ende der Glyphe
-            //   - vor der ersten Glyphe bis zur letzten Leerzeile davor, und am Dateiende: Kopf und Fuß der Datei
-            // Gleichnamige Glyphen werden überschrieben, alle anderen bleiben.
+            // Datei aus exportAll einlesen (auch eine ältere mit den Namen des Editors, siehe fileToGlyphs).
+            // Gleichnamige Glyphen werden überschrieben, alle anderen bleiben; die Kombinationen entstehen neu.
             async importAll(file) {
-                const glyphs = {};
-                const metas = {};
-                const fileMeta = { header: [], footer: [] };
-                let current = null;
-                let pendingTop = []; // nicht eingerückte Kommentarzeilen
-                let pendingIndented = []; // eingerückte Kommentarzeilen
-                const splitComment = (line) => {
-                    const m = line.match(/^(.*?)(\s+#.*)?$/);
-                    return [m[1], m[2] ? m[2].trim() : ''];
-                };
-
-                (await file.text()).split(/\r?\n/).forEach(line => {
-                    if (!line.trim()) {
-                        // Vor der ersten Glyphe trennt eine Leerzeile den Dateikopf vom Kommentar der Glyphe
-                        if (current === null) fileMeta.header.push(...pendingTop.splice(0));
-                        return;
-                    }
-                    const indented = /^\s/.test(line);
-                    if (/^\s*#/.test(line)) {
-                        (indented && current !== null ? pendingIndented : pendingTop).push(line.trim());
-                        return;
-                    }
-                    const [content, comment] = splitComment(line);
-                    if (indented) {
-                        if (current === null) return;
-                        const [stroke] = kageToStrokes(content);
-                        if (stroke) {
-                            if (pendingIndented.length) stroke.before = pendingIndented;
-                            if (comment) stroke.comment = comment;
-                            glyphs[current].push(stroke);
-                        }
-                        pendingIndented = [];
-                        return;
-                    }
-                    // Neue Glyphe: offene eingerückte Kommentare gehören ans Ende der vorigen
-                    if (current !== null && pendingIndented.length) metas[current].after = pendingIndented;
-                    current = content.replace(/:\s*\|-?\s*$/, '').trim();
-                    glyphs[current] = [];
-                    metas[current] = { before: pendingTop, comment, after: [] };
-                    pendingTop = [];
-                    pendingIndented = [];
-                });
-                if (current !== null && pendingIndented.length) metas[current].after = pendingIndented;
-                fileMeta.footer = pendingTop;
-
+                const glyphs = fileToGlyphs(await file.text());
                 const codes = Object.keys(glyphs);
-                const count = codes.length;
-                if (count === 0) {
+                if (codes.length === 0) {
                     this.showToast('Import fehlgeschlagen: keine Glyphen in der Datei.');
                     return;
                 }
-                codes.forEach(code => {
-                    this.savedGlyphs[code] = glyphs[code];
-                    const m = metas[code];
-                    if (m.before.length || m.comment || m.after.length) this.glyphMeta[code] = m;
-                    else delete this.glyphMeta[code];
-                });
-                if (fileMeta.header.length || fileMeta.footer.length) this.glyphMeta[''] = fileMeta;
+                codes.forEach(code => { this.savedGlyphs[code] = glyphs[code]; });
                 this.syncCombos();
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.render();
-                this.showToast(`${count} Glyphen importiert.`);
+                this.showToast(`${codes.filter(c => !COMBO_NAME.test(c)).length} Glyphen importiert.`);
             }
 
             loadGlyph(code) {
