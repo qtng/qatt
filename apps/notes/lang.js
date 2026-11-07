@@ -3,7 +3,8 @@ The language of QATT notes (apps/notes/), English or Vietnamese; the app has no 
 every tag with data-vi (and no tags inside) shows that text in Vietnamese, the English text stays in the tag and returns; the attributes
 data-vi-aria-label, data-vi-placeholder, data-vi-title and data-vi-label do the same for the attribute without the prefix.
 The language is the choice kept on this device (localStorage "qattNotesLang", and a cookie of the same name as a second copy: the browser may drop the storage of a site that is not
-persistent, then the cookie still has the choice, and it is written to the storage again), else the first of English and Vietnamese in the languages of the browser.
+persistent, then the cookie still has the choice, and it is written to the storage again), else the main language of the browser (the first of its list): Vietnamese if that is
+Vietnamese, any other language English (a list like German, Vietnamese, English no longer gives Vietnamese).
 
   Lang.current     "en" or "vi"
   Lang.set("vi")   choose and keep it; the page changes at once; the event "langchange" goes to the document
@@ -21,11 +22,8 @@ window.Lang = (() => {
     if (current) try { localStorage.setItem(KEY, current); } catch (e) { /* storage may be blocked */ }
   } else toCookie(current);
   if (!current) {
-    current = 'en';
-    for (const l of navigator.languages || [navigator.language || '']) {
-      const code = l.slice(0, 2).toLowerCase();
-      if (code === 'vi' || code === 'en') { current = code; break; }
-    }
+    const main = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+    current = main.slice(0, 2).toLowerCase() === 'vi' ? 'vi' : 'en';
   }
   const SELECTOR = ['[data-vi]'].concat(ATTRS.map(a => `[data-vi-${a}]`)).join(',');
 
