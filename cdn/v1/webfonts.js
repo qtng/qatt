@@ -97,7 +97,9 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   var VER_KEY = "chunomFontVer", VER_EVERY = 5 * 60 * 1000;
   var verLoad = function () { try { return JSON.parse(localStorage.getItem(VER_KEY)) || {}; } catch (e) { return {}; } };
   var verSave = function (o) { try { localStorage.setItem(VER_KEY, JSON.stringify(o)); } catch (e) { /* no storage: no versions */ } };
+  var EPOCH = 1;   // raise it when every browser must load the fonts anew: a browser with a list of an other epoch takes no base, so every font gets its date (?v=) at once
   var ver = verLoad();
+  if (ver.fonts && ver.epoch !== EPOCH) { ver.epoch = EPOCH; ver.base = {}; verSave(ver); }
   var verOf = function (key) { var v = (ver.fonts || {})[key]; return v && v !== (ver.base || {})[key] ? "?v=" + encodeURIComponent(v) : ""; };
   var css = [], face = function (family, weight, bases, file, range, key) {
     return '@font-face { font-family: "' + family + '"; font-style: normal; font-weight: ' + weight + "; font-display: " + display + "; src: " +
@@ -132,7 +134,7 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
     if (i >= LETTER_BASES.length) return;
     fetch(LETTER_BASES[i] + "version.json?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (list) {
       if (!list || !list.fonts) return ask(i + 1);
-      if (list.build !== stored.build || !stored.base) verSave({ at: keep.at, build: list.build, base: stored.base || list.fonts, fonts: list.fonts });   // the same build: nothing changed
+      if (list.build !== stored.build || !stored.base) verSave({ at: keep.at, build: list.build, epoch: EPOCH, base: stored.base || (stored.fonts ? {} : list.fonts), fonts: list.fonts });   // the same build: nothing changed
     }, function () { ask(i + 1); });
   };
   ask(0);
