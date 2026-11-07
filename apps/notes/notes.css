@@ -38,7 +38,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .snackbar button { min-height: 40px; padding: 0 .5rem; border: 0; background: transparent; color: var(--accent); font-weight: 600; text-transform: uppercase; }
 
 #note-field.vertical { writing-mode: vertical-rl; overflow-x: auto; overflow-y: hidden; }
-.menu { max-height: calc(100vh - 72px - env(safe-area-inset-top)); overflow-y: auto; }
+.menu { max-height: calc(100vh - 72px - env(safe-area-inset-top)); max-height: calc(100dvh - 72px - env(safe-area-inset-top)); overflow-y: auto; }   /* dvh: the visible height (in a browser tab 100vh is the height without the address bar, so the last entry was cut off) */
 .menu-group { padding: .25rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .menu-label { display: block; padding: .25rem 1rem; color: var(--muted); font-size: .8rem; }
 #set-font button { padding-left: 1.25rem; }
@@ -68,7 +68,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @font-face { font-family: "Nom Na Tong Supplement"; src: local("Nom Na Tong"), url("https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2") format("woff2"); }   /* 8 MB: loaded only when a character needs it */
 :root { --nom: "Nom Na Tong Supplement", "NomKhai-Supplement", "Han-Nom Gothic Supplement"; }   /* the Chữ Nôm fonts of the Chunom site (chunom-assets/fonts/fonts.css), in its order */
 .variant.nom, .nom-more button { font-family: sans-serif, var(--nom); }
-.nom-more { position: absolute; z-index: 5; left: .5rem; right: .5rem; bottom: 100%; max-height: 40vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: .3rem; padding: .4rem;
+.nom-more { position: absolute; z-index: 5; left: .5rem; right: .5rem; bottom: 100%; max-height: 40vh; max-height: 40dvh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: .3rem; padding: .4rem;
   background: rgba(58, 51, 42, .9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 -6px 18px rgba(0, 0, 0, .5); }
 .nom-more button { min-height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font-size: 1.6rem; line-height: 1; }
 
@@ -94,7 +94,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* the text of the clipboard (QATT characters): a card with a margin, the app stays visible behind it */
 .clip { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 1.25rem calc(1.25rem + env(safe-area-inset-right)) calc(1.25rem + env(safe-area-inset-bottom)) calc(1.25rem + env(safe-area-inset-left)); background: rgba(0, 0, 0, .45); }
-.clip-sheet { display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: 65vh; border: 1px solid var(--line); border-radius: 16px; background: var(--menu); box-shadow: 0 8px 28px rgba(0, 0, 0, .65); overflow: hidden; }
+.clip-sheet { display: flex; flex-direction: column; width: 100%; max-width: 560px; max-height: 65vh; max-height: 65dvh; border: 1px solid var(--line); border-radius: 16px; background: var(--menu); box-shadow: 0 8px 28px rgba(0, 0, 0, .65); overflow: hidden; }
 .clip-title { padding: .65rem 1rem .5rem; border-bottom: 1px solid var(--line); font-size: .85rem; letter-spacing: .02em; opacity: .75; }
 .clip-body { flex: 1; min-height: 0; padding: 1rem; overflow-y: auto; display: flex; justify-content: center; }   /* the text in a box of its own: a short text is centred, a long one fills the width and reads left-aligned */
 .clip-text { max-width: 100%; margin: auto 0; font-size: 1.9rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; text-align: left; }
