@@ -33,6 +33,11 @@ var QATT_FONTS = [
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
+// PA, the phonetic script (pa/index.html; the font of PA is a file of its own, not in the list above): the families "PA" and "PA Phong Thao", used by the writer behind the QATT font
+var PA_FONTS = [
+  { family: "PA",             file: "pa" },
+  { family: "PA Phong Thao",  file: "pa-phongthao" },
+];
 // big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack
@@ -165,6 +170,8 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
   style.textContent = FONTS.map(f => f.cjk
     ? face(f.family, f.file, QATT_RANGE) + QATT_CJK_SLICES.map((range, i) => `\n@font-face { font-family: "${f.family}"; src: ${qattFontSrc(`web/${f.big}-${String(i).padStart(2, "0")}.woff2`)}; font-display: swap; unicode-range: ${range}; }`).join("")
     : face(f.family, f.file)).concat(FONTS.filter(f => f.big).map(f => `@font-face { font-family: "${f.family} Latin"; src: ${qattFontSrc(`web/${f.big}-latin.woff2`)}; }`))
+    // PA (pa/index.html): its own font files, not in the lists of the QATT fonts; U+F00B0..U+F00EE next to the QATT block; the style of the QATT font chosen in the writer picks the one
+    .concat(PA_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: ${qattFontSrc(f.file + ".woff2")}; unicode-range: U+F00B0-F00EE; font-display: swap; }`))
     // "pa": the characters of the Chunom site in the private use area (U+E000.., not in Unicode yet; the decks, the practice: var(--font-cjk), 'pa')
     .concat(`@font-face { font-family: "pa"; src: local("HanaMinA"), url(https://chunom.org/chunom-assets/fonts/pa-Regular.woff2) format("woff2"); }`)
     .join("\n");
