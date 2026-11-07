@@ -18,7 +18,13 @@
       src: url(https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/pa.woff2) format('woff2'), url(https://chunom.org/cdn/fonts/pa.woff2) format('woff2');
       font-display: swap;
     }
+    @font-face {
+      font-family: "Qatt.org-PA Phong Thao";
+      src: url(https://cdn.jsdelivr.net/gh/qtng/cdn@main/fonts/pa-phongthao.woff2) format('woff2'), url(https://chunom.org/cdn/fonts/pa-phongthao.woff2) format('woff2');
+      font-display: swap;
+    }
     .pa { font-family: "Qatt.org-PA", serif; font-weight: 400; }
+    #out.phongthao { font-family: "Qatt.org-PA Phong Thao", "Qatt.org-PA", serif; }
     #out { font-size: 5rem; line-height: 1.25; min-height: 6.5rem; overflow-wrap: anywhere; }
     #out .raw { font-family: var(--bs-body-font-family); font-size: 1.2rem; color: var(--bs-danger); }
     #codes { font-family: var(--bs-font-monospace); font-size: .8rem; color: var(--bs-secondary-color); white-space: pre-wrap; }
@@ -39,7 +45,9 @@
   <label class="form-label" for="in" data-vi="Văn bản">Text</label>
   <textarea id="in" class="form-control mb-2" rows="2" spellcheck="false">thuyền bản bà bá tai quê ngang</textarea>
 
-  <div class="d-flex flex-wrap gap-3 mb-3">
+  <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
+    <label class="d-flex align-items-center gap-2"><span data-vi="Kiểu chữ">Style</span>
+      <select id="style" class="form-select form-select-sm w-auto"><option value="">Plain</option><option value="phongthao">Phong Thao</option></select></label>
     <div class="form-check"><input class="form-check-input" type="checkbox" id="stack" checked><label class="form-check-label" for="stack"><span data-vi="Xếp chồng">Stacked</span> (combiner)</label></div>
     <div class="form-check"><input class="form-check-input" type="checkbox" id="ngang"><label class="form-check-label" for="ngang"><span data-vi="Ghi thanh ngang">Mark the ngang tone</span></label></div>
   </div>
@@ -125,6 +133,7 @@
   $('in').addEventListener('input', render);
   $('stack').addEventListener('change', render);
   $('ngang').addEventListener('change', render);
+  $('style').addEventListener('change', () => { $('out').className = 'pa ' + $('style').value; });
   render();
 })();
 </script>
