@@ -52,6 +52,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .aligns button[aria-checked="true"] { color: var(--accent); border-color: var(--accent); }
 .aligns .turned { display: inline-block; transform: rotate(90deg); }
 #note-field.align-center { text-align: center; }   /* with the vertical lines the centre is the middle of the line from top to bottom */
+.menu-version { padding: .4rem 1rem .5rem; font-size: .75rem; color: var(--muted, rgba(255, 255, 255, .55)); user-select: text; }
 .menu-sep { height: 1px; margin: .25rem 0; background: var(--line); }
 
 .keybar { position: relative; flex: none; display: flex; align-items: center; gap: .4rem; padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom)); background: var(--bar); border-top: 1px solid var(--line); }

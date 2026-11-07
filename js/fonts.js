@@ -134,10 +134,11 @@ var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
   return QATT_CDN.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
 };
-var qattFontCheck = async () => {
+// qattFontCheck(force): true = a list of a new build was stored (its dates apply from the next page load), false = the same build, null = the list could not be read; force skips the 5 minutes
+var qattFontCheck = async (force) => {
   try {
     const stored = (() => { try { return JSON.parse(localStorage.qattFontVer) || {}; } catch (e) { return {}; } })();   // read again: another tab may have asked a moment ago
-    if (Date.now() - (stored.at || 0) < QATT_FONT_CHECK) return;
+    if (!force && Date.now() - (stored.at || 0) < QATT_FONT_CHECK) return false;
     const keep = Object.assign({}, stored, { at: Date.now() });   // the time is kept also when the request fails: not again within 5 minutes
     try { localStorage.qattFontVer = JSON.stringify(keep); } catch (e) { /* no storage: no versions */ }
     for (const base of [...QATT_CDN].reverse()) {   // GitHub Pages first: jsDelivr serves the file of an older commit of @main for hours (the cache buster does not help), Pages renews it within 10 minutes
@@ -145,12 +146,14 @@ var qattFontCheck = async () => {
         const res = await fetch(`${base}version.json?t=${Date.now()}`);
         const list = res.ok && await res.json();
         if (list && list.fonts) {
-          if (list.build !== stored.build || !stored.base) localStorage.qattFontVer = JSON.stringify({ at: keep.at, build: list.build, epoch: QATT_FONT_EPOCH, base: stored.base || (stored.fonts ? {} : list.fonts), fonts: list.fonts });   // the same build: nothing changed
-          return;
+          const fresh = list.build !== stored.build;   // the same build: nothing changed, the list is not written again
+          if (fresh || !stored.base) localStorage.qattFontVer = JSON.stringify({ at: keep.at, build: list.build, epoch: QATT_FONT_EPOCH, base: stored.base || (stored.fonts ? {} : list.fonts), fonts: list.fonts });
+          return fresh && !!stored.build;   // the first list of a browser is no news
         }
       } catch (e) { /* the next address */ }
     }
-  } catch (e) { /* the versions stay as they are */ }
+    return null;
+  } catch (e) { return null; }
 };
 qattFontCheck();
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") qattFontCheck(); });
