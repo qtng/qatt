@@ -61,7 +61,7 @@
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1, pairFine: 's', kFine: 5, useDens: 1, kDens: 5, densStruct: 0 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1, pairFine: 's', kFine: 5, useDens: 1, kDens: 5, densStruct: 0, densMix: null };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -100,11 +100,19 @@
     }
     var box = g.slice(0, 4), measured = m && m[4] >= o.nMin, dn = null, mg = m && m[5];
     if (o.sizeGeneric) measured = false;   // a test: the measured sizes are not used (the glyph forms are)
-    if (!measured && o.useDens && P.dens && sibs && (H_OPS[role[0]] || V_OPS[role[0]])) {   // no measurement: parts of this density next to such partners
+    // densMix (0–1, a test of admin/ids.html): every part, measured or not, is mixed with the cell of the density table by that share (0: no table,
+    // the measurements and the old fallback; 1: the table only); null (the default): the table for the parts without measurements only
+    var mix = o.densMix != null, cell = null;
+    var densCell = function () {
+      if (!(P.dens && sibs && (H_OPS[role[0]] || V_OPS[role[0]]))) return null;
       var ax = H_OPS[role[0]] ? 0 : 1, own = feat(node, P)[ax], pl = 0, idx = +role.slice(1);
       sibs.forEach(function (sb, j) { if (j !== idx) pl += feat(sb, P)[ax]; });
       var db = function (x) { return Math.max(0, Math.min(9, Math.floor(x * 2))); };
-      dn = P.dens(role, db(own), db(pl));
+      return P.dens(role, db(own), db(pl));
+    };
+    if (mix) cell = densCell();
+    if (!measured && !mix && o.useDens && P.dens && sibs && (H_OPS[role[0]] || V_OPS[role[0]])) {   // no measurement: parts of this density next to such partners
+      dn = densCell();
       if (dn && dn[4] >= o.kDens) { var wd = dn[4] / (dn[4] + o.kDens); box = box.map(function (v, i) { return v * (1 - wd) + dn[i] * wd; }); } else dn = null;
     }
     if (!measured && node.op && o.useStruct && P.struct && (!dn || o.densStruct)) {   // a part of parts: the size of parts of its structure in this role
@@ -134,6 +142,8 @@
     }
     // how sure the size is: measured in that role (by the count), else 0 (a guess from the role, the structure, the density)
     var conf = measured ? m[4] / (m[4] + o.kConf) : 0;
+    if (mix && cell && o.densMix > 0) { var t = Math.max(0, Math.min(1, o.densMix)); box = box.map(function (v, i) { return v * (1 - t) + cell[i] * t; }); }
+    if (mix && o.densMix >= 1 && cell) conf = 0;   // the table only: no part keeps a measured size
     return { box: box, glyph: measured && o.useRoleGlyph ? m[5] : o.sizeGeneric && mg && o.useRoleGlyph ? mg : vg, conf: conf };
   }
 
@@ -334,6 +344,7 @@
 //   A part that the slices do not have (a character newer than the data) is read from GlyphWiki (glyphwiki.org/api, its references too), flattened,
 //   and measured here like in the build (ink box, layers, strokes: IdsInk): it is then laid out as a part without measurements (the density
 //   table). opt.glyphwiki === false turns this off. r.fromGlyphWiki: how many parts came from there.
+//   opt.onlyGlyphWiki: every part from GlyphWiki, none of the slices (a test: what the layout does with no data of ours but meta.json).
 (function (root) {
   'use strict';
   var SCRIPT = document.currentScript && document.currentScript.src;
@@ -426,6 +437,7 @@
       var data = {};
       var loadAll = function (ks) { var list = Object.keys(ks).map(Number).filter(function (k) { return !(k in data); });
         return Promise.all(list.map(loadSlice)).then(function (got) { list.forEach(function (k, i) { data[k] = got[i]; }); }); };
+      if (opt.onlyGlyphWiki) { M = Object.assign({}, M, { canon: {} }); loadAll = function () { return Promise.resolve(); }; }
       return loadAll(keys).then(function () {   // the characters that parts of parts are (⿱宀子 = 字) need their own slices too
         var P0 = provider(M, data), more = {};
         (function walk(n) {
@@ -436,7 +448,7 @@
         })(tree);
         return loadAll(more);
       }).then(function () {   // parts the slices do not have: from GlyphWiki
-        if (opt.glyphwiki === false) return 0;
+        if (opt.glyphwiki === false && !opt.onlyGlyphWiki) return 0;
         var P0 = provider(M, data), need = {};
         root.IdsParse.leaves(tree).forEach(function (l) { if (!l.unknown) { var cp = P0.canon(l.ch.codePointAt(0)); if (!P0.char(cp)) need[cp] = 1; } });
         var list = Object.keys(need).map(Number);
