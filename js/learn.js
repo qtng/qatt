@@ -6,7 +6,7 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
         build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes, then onRebuild(parser))
-        item = { glyph | parts: [a, b], show, small, speak }               (glyph: QATT text; show: the reading in the band; small: a line below it)
+        item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading in the band; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
 Needs parser.js and qatt-text.js; css/learn.css.
 */
@@ -34,7 +34,7 @@ const Learn = (() => {
   const consonant = shape => {
     const main = parser.toQuocNgu({ onset: code(shape), rhyme: '', tone: 0 });
     const alt = Object.entries(VietnameseParser.QATT_ONSET_MAP).filter(([k, v]) => v === shape && k !== main && !/^[fjwz]$/.test(k)).map(([k]) => k);
-    return main ? { show: main, small: alt.join(', '), speak: main + 'ờ' } : { show: 'ʔ', small: 'no consonant', speak: 'ờ' };
+    return main ? { show: main, small: alt.join(', '), speak: main + 'ờ' } : { show: 'ʔ', small: 'no consonant', smallVi: 'không phụ âm', speak: 'ờ' };
   };
 
   // progress of this browser: { <lesson id>: true }
@@ -57,6 +57,11 @@ const Learn = (() => {
     const steps = document.getElementById('learnSteps');
     if (steps) {
       const ol = el('ol', 'steps');
+      const home = el('li', 'home'), back = el('a', 'step-nav'); back.href = BASE;   // the overview first: a grid icon
+      back.setAttribute('aria-label', 'Overview'); back.dataset.viAriaLabel = 'Tổng quan';
+      const icon = el('span', 'num'); icon.append(el('i', 'bi bi-grid-3x3-gap-fill'));
+      back.append(icon, tr('span', 't', 'Overview', 'Tổng quan'));
+      home.append(back); ol.append(home);
       LESSONS.forEach((l, i) => {
         const li = el('li', (i === at ? 'now' : '') + (l.soon ? ' soon' : '')); li.dataset.lesson = l.id;
         const a = el('a', 'step-nav'); a.href = href(l);   // "nav" in the class: the themes leave the colour of such links alone
@@ -214,7 +219,7 @@ const Learn = (() => {
       const reading = item => {
         const r = el('span', 'r'); r.lang = 'vi';
         r.append(el('span', 'big', item.show ?? ''));
-        if (item.small) r.append(el('span', 'small', item.small));
+        if (item.small) r.append(tr('span', 'small', item.small, item.smallVi));
         return r;
       };
       const [a, b] = rows[row];
