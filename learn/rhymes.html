@@ -41,12 +41,12 @@ const MARKS = [1, 2, 3, 4, 5, 6];   // stroke 1: the rhyme is always ông
 const ABSENT = new Set(['hoam', 'nhoăm', 'chêng', 'duêng', 'duêm', 'xơng', 'khuơng', 'khuyêng', 'sing', 'ruyng', 'ruym']);
 const tabOf = (a, b, by = a) => parser => ({   // by: the shape on the tab
   label: Learn.consonant(by).show, sample: Learn.glyph(by, 0),
-  apart: true,   // stroke 1 (always ông) stands apart and is skipped when a tab is entered
-  rows: MARKS.map(m => [a, b].map(s => {
+  apart: 2,   // the heading row (the initials) and stroke 1 (always ông) stand apart and are skipped when a tab is entered
+  rows: [[a, b].map(s => ({ glyph: Learn.glyph(s, 0), show: Learn.consonant(s).show.toUpperCase(), speak: '' }))].concat(MARKS.map(m => [a, b].map(s => {
     const g = Learn.glyph(s, m), r = QattText.reading(g, parser);
     if (ABSENT.has(r)) return { glyph: '—', show: '—', speak: '' };
     return { glyph: g, show: r, speak: r === '?' ? '' : r };
-  })),
+  }))),
 });
 Learn.board(document.getElementById('board'), {
   tabRows: 2,

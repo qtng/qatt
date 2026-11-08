@@ -5,7 +5,7 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
 
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
-        build(parser) -> [{ label, vi, sample, apart, rows: [[item, item], …] }]   (apart: the first row stands apart, a line below it, and is skipped when a tab is entered)
+        build(parser) -> [{ label, vi, sample, apart, rows: [[item, item], …] }]   (apart: that many first rows stand apart, a line below the last of them, and are skipped when a tab is entered; true = 1)
           (called again when the decoding changes, then onRebuild(parser)); tabRows: the tabs in that many rows
         item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading, in the middle of the row; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
@@ -186,7 +186,7 @@ const Learn = (() => {
       rowEls.forEach(r => r.div.remove());
       rowEls = tabs[tab].rows.map((pair, r) => {
         const div = el('div', 'row-pair'); div.style.setProperty('--i', r);
-        if (r === 0 && tabs[tab].apart) div.classList.add('apart');   // a line below it
+        if (r === +tabs[tab].apart - 1) div.classList.add('apart');   // a line below it
         const cells = pair.map(item => { const c = el('div', 'g'); drawGlyph(c, item); return c; });
         const mid = el('div', 'pair'); mid.append(reading(pair[0]), el('span', 'dot', '·'), reading(pair[1]));
         div.append(cells[0], mid, cells[1]);
@@ -248,7 +248,7 @@ const Learn = (() => {
       }, step);
     };
     const silent = r => tabs[tab].rows[r].every(i => !i.speak);   // nothing to read (e.g. both syllables absent): playing skips the row
-    const first = () => { let r = tabs[tab].apart && tabs[tab].rows.length > 1 ? 1 : 0; while (r < tabs[tab].rows.length - 1 && silent(r)) r++; return r; };   // apart: the first row of a tab stands apart and is skipped when a tab is entered
+    const first = () => { let r = Math.min(+tabs[tab].apart || 0, tabs[tab].rows.length - 1); while (r < tabs[tab].rows.length - 1 && silent(r)) r++; return r; };   // apart: the first row of a tab stands apart and is skipped when a tab is entered
     const go = () => { show(playing); schedule(); };
     const pick = () => started ? go() : setPlaying(true);
     const setPlaying = on => {
