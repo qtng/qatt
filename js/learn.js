@@ -5,7 +5,8 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
 
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
-        build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes, then onRebuild(parser)); tabRows: the tabs in that many rows
+        build(parser) -> [{ label, vi, sample, apart, rows: [[item, item], …] }]   (apart: the first row stands apart, a line below it, and is skipped when a tab is entered)
+          (called again when the decoding changes, then onRebuild(parser)); tabRows: the tabs in that many rows
         item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading, in the middle of the row; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
 Needs parser.js and qatt-text.js; css/learn.css.
@@ -135,7 +136,7 @@ const Learn = (() => {
   const speak = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };   // read aloud (unless the sound of the board is off)
 
   // the board
-  const board = (root, { build, step = 4000, decoding = true, lesson = current, onRebuild, tabRows = 1 } = {}) => {
+  const board = (root, { build, step = 2500, decoding = true, lesson = current, onRebuild, tabRows = 1 } = {}) => {
     root.style.setProperty('--step', step / 1000 + 's');
     const html = `
       <div class="d-flex justify-content-center align-items-center gap-2 tools mb-3">
@@ -185,6 +186,7 @@ const Learn = (() => {
       rowEls.forEach(r => r.div.remove());
       rowEls = tabs[tab].rows.map((pair, r) => {
         const div = el('div', 'row-pair'); div.style.setProperty('--i', r);
+        if (r === 0 && tabs[tab].apart) div.classList.add('apart');   // a line below it
         const cells = pair.map(item => { const c = el('div', 'g'); drawGlyph(c, item); return c; });
         const mid = el('div', 'pair'); mid.append(reading(pair[0]), el('span', 'dot', '·'), reading(pair[1]));
         div.append(cells[0], mid, cells[1]);
@@ -205,7 +207,7 @@ const Learn = (() => {
       tabEls = tabs.map((t, i) => {
         const b = el('button'); b.type = 'button'; b.setAttribute('role', 'tab');
         b.append(el('span', 'g', t.sample || ''), tr('span', 'n', t.label, t.vi));
-        b.addEventListener('click', () => { setTab(i, true); row = 0; pick(); });
+        b.addEventListener('click', () => { setTab(i, true); row = first(); pick(); });
         $('marks').append(b);
         return b;
       });
@@ -239,10 +241,11 @@ const Learn = (() => {
       if (!playing) return;
       timer = setTimeout(() => {
         if (row < tabs[tab].rows.length - 1) row++;
-        else { row = 0; setTab(tab + 1, true); }            // end of the tab: the next one
+        else { setTab(tab + 1, true); row = first(); }     // end of the tab: the next one
         show(true); schedule();
       }, step);
     };
+    const first = () => tabs[tab].apart && tabs[tab].rows.length > 1 ? 1 : 0;   // apart: the first row of a tab stands apart and is skipped when a tab is entered
     const go = () => { show(playing); schedule(); };
     const pick = () => started ? go() : setPlaying(true);
     const setPlaying = on => {
@@ -264,7 +267,7 @@ const Learn = (() => {
     };
     const rebuild = animate => {
       tabs = build(parser).filter(t => t.rows.length);
-      drawTabs(); setTab(Math.min(tab, tabs.length - 1), animate); show(false);
+      drawTabs(); setTab(Math.min(tab, tabs.length - 1), animate); if (!started) row = first(); show(false);
       if (onRebuild) onRebuild(parser);                   // the rest of the page follows the decoding too
     };
 
@@ -291,8 +294,8 @@ const Learn = (() => {
       if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
-      else if (e.key === 'ArrowRight' && tabs.length > 1) { setTab(tab + 1, true); row = 0; go(); }
-      else if (e.key === 'ArrowLeft' && tabs.length > 1) { setTab(tab - 1, true); row = 0; go(); }
+      else if (e.key === 'ArrowRight' && tabs.length > 1) { setTab(tab + 1, true); row = first(); go(); }
+      else if (e.key === 'ArrowLeft' && tabs.length > 1) { setTab(tab - 1, true); row = first(); go(); }
     });
     window.addEventListener('resize', placePill);
     if (document.fonts) document.fonts.ready.then(placePill);
