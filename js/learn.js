@@ -242,12 +242,13 @@ const Learn = (() => {
       clearTimeout(timer);
       if (!playing) return;
       timer = setTimeout(() => {
-        if (row < tabs[tab].rows.length - 1) row++;
+        if (row < tabs[tab].rows.length - 1) { row++; while (silent(row) && row < tabs[tab].rows.length - 1) row++; }
         else { setTab(tab + 1, true); row = first(); }     // end of the tab: the next one
         show(true); schedule();
       }, step);
     };
-    const first = () => tabs[tab].apart && tabs[tab].rows.length > 1 ? 1 : 0;   // apart: the first row of a tab stands apart and is skipped when a tab is entered
+    const silent = r => tabs[tab].rows[r].every(i => !i.speak);   // nothing to read (e.g. both syllables absent): playing skips the row
+    const first = () => { let r = tabs[tab].apart && tabs[tab].rows.length > 1 ? 1 : 0; while (r < tabs[tab].rows.length - 1 && silent(r)) r++; return r; };   // apart: the first row of a tab stands apart and is skipped when a tab is entered
     const go = () => { show(playing); schedule(); };
     const pick = () => started ? go() : setPlaying(true);
     const setPlaying = on => {
@@ -259,6 +260,7 @@ const Learn = (() => {
     };
     const move = d => {
       row += d;
+      while (silent(Math.max(0, Math.min(row, tabs[tab].rows.length - 1))) && row + d >= 0 && row + d < tabs[tab].rows.length) row += d;
       if (row >= tabs[tab].rows.length) { row = 0; setTab(tab + 1, true); }
       if (row < 0) { setTab(tab - 1, true); row = tabs[tab].rows.length - 1; }
       go();
