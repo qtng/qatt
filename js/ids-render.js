@@ -60,7 +60,7 @@
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1, pairFine: 's', kFine: 5 };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -78,11 +78,24 @@
 
   // the box of a child in its role (relative to the parent): measured median, mixed with the median of the role by the count, and the density
   var bucket = function (x) { return x <= 1.5 ? 0 : x <= 2.5 ? 1 : x <= 3.5 ? 2 : 3; };
+  // finer splits of the partner (the same as FINE of tools/stats.mjs): l = layers in steps of 0.5, s = strokes (the default: +0.0014;
+  // the coverage of the ink and the partner's own size were worse, see docs/PROGRESS.md)
+  function strokes(node, P) {
+    if (node.ch !== undefined) { var c = node.unknown ? null : P.char(keyOf(node, P)); return c && c.n ? c.n : 5; }
+    return node.args.reduce(function (s, a) { return s + strokes(a, P); }, 0);
+  }
+  function first(a, x) { for (var i = 0; i < a.length; i++) if (x <= a[i]) return i; return a.length; }
+  var FINE = {
+    l: function (node, P, lay) { return Math.min(7, Math.floor(lay * 2)); },
+    s: function (node, P) { return first([3, 5, 7, 9, 11, 14, 18], strokes(node, P)); }
+  };
   function est(node, role, P, o, partner) {
     var g = P.op(role) || [0, 0, 1, 1, 0], k = keyOf(node, P), m = k != null ? P.role(k, role) : null;
     if (m && partner && o.usePair && P.pair) {   // the box of this part next to partners like this one
-      var pf = feat(partner, P), pm = P.pair(k, role, bucket(role[0] === '⿰' ? pf[0] : pf[1]));
+      var pf = feat(partner, P), lay = role[0] === '⿰' ? pf[0] : pf[1], pm = P.pair(k, role, bucket(lay));
       if (pm && pm[4] >= o.nPair) { var wp = pm[4] / (pm[4] + o.kPair); m = m.slice(); for (var q = 0; q < 4; q++) m[q] = m[q] * (1 - wp) + pm[q] * wp; }
+      var fb = o.pairFine && FINE[o.pairFine] ? FINE[o.pairFine](partner, P, lay) : null, fm2 = fb != null ? P.pair(k, role, o.pairFine + fb) : null;
+      if (fm2 && fm2[4] >= o.nPair) { var wf = fm2[4] / (fm2[4] + o.kFine); m = m.slice(); for (var q2 = 0; q2 < 4; q2++) m[q2] = m[q2] * (1 - wf) + fm2[q2] * wf; }
     }
     var box = g.slice(0, 4), measured = m && m[4] >= o.nMin;
     if (!measured && node.op && o.useStruct && P.struct) {   // a part of parts: the size of parts of its structure in this role
@@ -274,6 +287,7 @@
     return {
       char: function (cp) { return rec(cp); }, glyph: glyphs, canon: canon,
       role: function (cp, role) { var r = rec(cp); return (r && r.r && r.r[role]) || null; },
+      pair: function (cp, role, b) { var r = rec(cp); return (r && r.p && r.p[role + b]) || null; },
       inner: function (cp, op) { var r = rec(cp); return (r && r.i && r.i[op]) || null; },
       root: function (op, cp) { if (cp == null) return M.root[op] || null; var r = rec(cp); return (r && r.ro && r.ro[op]) || null; },
       struct: function (op, role) { return (M.struct && M.struct[op] && M.struct[op][role]) || null; },
