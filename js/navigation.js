@@ -279,11 +279,12 @@ window.Theme = window.Theme || (function() {
         links: [
             { name: "Chunom.org home", vi: "Trang chủ Chunom.org", bar: "Home", barVi: "Trang chủ", barOrder: 1, url: "/chunom/index.html", icon: "bi-house" },
             { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
-            { name: "Chữ Nôm writer", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
-            { name: "Nôm converter", vi: "Bộ chuyển đổi", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
+            { name: "Write Chữ Nôm", vi: "Viết chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
+            { name: "Translate Chữ Nôm", vi: "Dịch chữ Nôm", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
             { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
             { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, url: "/chunom/shelf/", icon: "bi-book" },
+            { name: "Learn PA", vi: "Học PA", url: "/chunom/pa/", icon: "bi-type" },
         ]
     };
     // what differs between the sites: brand, logo, icons, the colour of the bottom bar; own block first
