@@ -257,6 +257,63 @@ window.Theme = window.Theme || (function() {
 // May be called before the bar exists (a defer script): it is put in place when the bar is made.
 window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._tools = { el, opt: opt || {} }; if (this._place) this._place(); } };
 
+// ---------- the readings of Chữ Nôm: Readings ----------
+// Which readings stand next to Chữ Nôm on the Chunom site: PA (Phiên âm tự), QATT and Quốc Ngữ, any of them together, in this order; none = no reading.
+// Turning PA on turns the other two off (they can be turned on again). One setting for the whole site (localStorage.readings1 = { pa, qatt, qn }, per origin),
+// switched in the bars (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
+// Readings.state, .shown() (the kinds on, in order), .toggle(kind), the event "readingschange" on document (also when another tab changes it);
+// Readings.ready() loads parser.js, pa-text.js and qatt-text.js of qatt.org when PA or QATT is first wanted; then Readings.text(qn, kind) writes a Quốc Ngữ text
+// in that script and Readings.fill(element, qn) puts the readings shown into an element (plain text for Quốc Ngữ alone, else a span .rd-<kind> each).
+window.Readings = window.Readings || (function() {
+    const KEY = 'readings1', KINDS = ['pa', 'qatt', 'qn'];
+    const BASE = new URL('.', document.currentScript ? document.currentScript.src : 'https://qatt.org/js/navigation.js').href;
+    const state = { pa: false, qatt: false, qn: true };
+    const read = () => {
+        try {
+            let s = JSON.parse(localStorage.getItem(KEY) || 'null');
+            if (!s) {   // taken over from the Bookshelf, which had it before
+                const o = JSON.parse(localStorage.getItem('shelf1') || '{}');
+                s = { pa: !!o.pa || o.reading === 'pa', qatt: !!o.qatt, qn: o.reading ? o.reading === 'qn' : o.ruby === false ? false : o.qn !== false };
+            }
+            KINDS.forEach(k => { state[k] = !!s[k]; });
+        } catch (e) { /* storage may be blocked */ }
+    };
+    read();
+    const changed = () => document.dispatchEvent(new CustomEvent('readingschange', { detail: { ...state } }));
+    window.addEventListener('storage', e => { if (e.key === KEY) { read(); changed(); } });
+    function toggle(k) {
+        state[k] = !state[k];
+        if (k === 'pa' && state.pa) state.qatt = state.qn = false;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+        changed();
+    }
+    const loaded = {};
+    const load = (name, exists) => loaded[name] || (loaded[name] = exists() ? Promise.resolve() : new Promise((ok, fail) => {   // once, and not when the page has it
+        const sc = document.createElement('script'); sc.src = BASE + name; sc.onload = ok; sc.onerror = () => fail(new Error(name)); document.head.appendChild(sc);
+    }));
+    let ready = null, parser = null;
+    function getReady() {
+        return ready || (ready = load('parser.js', () => typeof VietnameseParser !== 'undefined')
+            .then(() => Promise.all([load('pa-text.js', () => typeof PaText !== 'undefined'), load('qatt-text.js', () => typeof QattText !== 'undefined')]))
+            .then(() => { parser = new VietnameseParser('qatt'); }));
+    }
+    function text(qn, kind) {
+        if (kind === 'qn' || !parser) return qn;
+        const f = kind === 'pa' ? PaText.word : QattText.word;
+        return qn.replace(/[\p{L}\p{M}]+/gu, w => f(w.toLowerCase(), parser) || w);
+    }
+    function fill(el, qn) {
+        const shown = KINDS.filter(k => state[k]);
+        const put = () => {
+            if (shown.length === 1 && shown[0] === 'qn') { el.textContent = qn; return; }
+            el.replaceChildren(...shown.map(k => { const s = document.createElement('span'); s.className = 'rd-' + k; s.textContent = text(qn, k); return s; }));
+        };
+        el.dataset.readings = shown.join(' ') || 'off';
+        if ((state.pa || state.qatt) && !parser) { el.textContent = state.qn ? qn : ''; getReady().then(put, () => { el.textContent = qn; }); } else put();
+    }
+    return { state, KINDS, shown: () => KINDS.filter(k => state[k]), toggle, ready: getReady, text, fill };
+})();
+
 (function() {
     const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
@@ -474,6 +531,18 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
             .nav-tools-side { padding: 0 1.25rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, .12); }
             .nav-tools-side .nav-section-header { padding-left: 0; padding-right: 0; color: rgba(255, 255, 255, .55); }
             .nav-tools-side .nav-tools { flex-wrap: wrap; }
+            .nav-readings { display: inline-flex; align-items: center; gap: .2rem; }
+            .nav-readings .lbl { margin-right: .35rem; }
+            .nav-tools-side .nav-readings .lbl { display: none; }
+            .nav-readings button { padding: .05rem .55rem; border: 1px solid rgba(255, 255, 255, .3); border-radius: 1rem; background: transparent; color: rgba(255, 255, 255, .8); font-size: .82rem; line-height: 1.5; white-space: nowrap; }
+            .nav-readings button:hover { color: #fff; border-color: rgba(255, 255, 255, .6); }
+            .nav-readings button.active { background: var(--bar-accent); border-color: var(--bar-accent); color: #212529; font-weight: 600; }
+            .nav-readings .what { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; margin-left: .2rem; border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%; color: rgba(255, 255, 255, .6); font-size: .75rem; text-decoration: none; }
+            .nav-readings .what:hover { color: #fff; }
+            /* the readings written by Readings.fill: in one line, PA and QATT in their fonts */
+            .rd-pa { font-family: "PA Pen", "PA", sans-serif; font-size: 1.2em; }
+            .rd-qatt { font-family: "QATT Pen", sans-serif; font-size: 1.2em; }
+            .rd-pa + span, .rd-qatt + span { margin-left: .3em; }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
             .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
             .powered-by a { color: inherit; opacity: .45; text-decoration: none; }
@@ -602,7 +671,7 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
                 <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2">${navConfig.brand(logo, brandTitle, true)}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
-            <div class="offcanvas-body p-0"><div class="nav-tools-side" hidden><div class="nav-section-header" data-vi="Cài đặt trang">Page settings</div></div>${sectionsHtml}</div>
+            <div class="offcanvas-body p-0"><div class="nav-tools-side" hidden><div class="nav-section-header nav-tools-title"></div></div>${sectionsHtml}</div>
         `;
 
         offcanvas.querySelectorAll('.nav-section-toggle').forEach(btn => btn.addEventListener('click', () => {
@@ -721,6 +790,7 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
         const desktop = window.matchMedia('(min-width: 992px)');
         const toolsBar = document.createElement('div');
         toolsBar.className = 'nav-tools-bar'; toolsBar.hidden = true;
+        toolsBar.style.setProperty('--bar-accent', navConfig.accent); offcanvas.style.setProperty('--bar-accent', navConfig.accent);
         const toolsSide = offcanvas.querySelector('.nav-tools-side');
         const rightGroup = header.querySelector('.ms-auto');
         const setHeight = h => { document.documentElement.style.setProperty('--nav-h', h + 'px'); document.body.style.paddingTop = h + 'px'; };
@@ -729,12 +799,28 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
             if (!t) { fitDesk(); return; }
             t.el.classList.add('nav-tools');
             toolsBar.hidden = true; toolsSide.hidden = true; setHeight(60);
-            if (!desktop.matches) { toolsSide.append(t.el); toolsSide.hidden = false; fitDesk(); return; }
+            if (!desktop.matches) {
+                const title = toolsSide.querySelector('.nav-tools-title');
+                title.textContent = t.opt.title || 'Page settings'; title.setAttribute('data-vi', t.opt.vi || 'Cài đặt trang');
+                toolsSide.append(t.el); toolsSide.hidden = false; fitDesk(); return;
+            }
             rightGroup.before(t.el);
             fitDesk();
             if (deskUl.classList.contains('icons-only')) { toolsBar.append(t.el); toolsBar.hidden = false; setHeight(104); fitDesk(); }
         };
         Nav._place = place;
+        // the switches of the readings (Readings), on every page of the Chunom site
+        if (onChunom && !Nav._tools) {
+            const rd = document.createElement('div');
+            rd.className = 'nav-readings'; rd.setAttribute('role', 'group'); rd.setAttribute('aria-label', 'Readings'); rd.setAttribute('data-vi-aria-label', 'Cách đọc');
+            rd.innerHTML = '<span class="lbl" data-vi="Cách đọc">Readings</span><button type="button" data-k="pa" title="Phiên âm tự">PA</button><button type="button" data-k="qatt" title="Quốc Âm Tân Tự">QATT</button><button type="button" data-k="qn">Quốc Ngữ</button>'
+                + `<a class="what" href="${CHUNOM_SITE}/chunom/pa/" title="Phiên âm tự">?</a>`;
+            const mark = () => rd.querySelectorAll('button').forEach(b => { const on = Readings.state[b.dataset.k]; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+            rd.addEventListener('click', e => { const b = e.target.closest('button'); if (b) Readings.toggle(b.dataset.k); });
+            document.addEventListener('readingschange', mark);
+            mark();
+            Nav._tools = { el: rd, opt: { title: 'Readings', vi: 'Cách đọc' } };
+        }
         place();
         window.addEventListener('resize', place);
         document.addEventListener('langchange', place);
