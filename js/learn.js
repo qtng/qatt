@@ -282,11 +282,14 @@ const Learn = (() => {
     });
     if (decoding) {
       const sel = $('decoding');
-      const want = new URLSearchParams(location.search).get('decoding');
+      // the choice is kept for the lessons only (this tab, until it is closed); ?decoding= wins; the rest of the site never reads it
+      let kept = null; try { kept = sessionStorage.getItem('qattLearnDecoding'); } catch (e) {}
+      const want = new URLSearchParams(location.search).get('decoding') || kept;
       if (want && [...sel.options].some(o => o.value === want)) sel.value = want;
       parser.setDecoding(sel.value);
       sel.addEventListener('change', () => {
         parser.setDecoding(sel.value);
+        try { sessionStorage.setItem('qattLearnDecoding', sel.value); } catch (e) {}
         const u = new URL(location.href); u.searchParams.set('decoding', sel.value); history.replaceState(null, '', u);
         rebuild(true);
       });
