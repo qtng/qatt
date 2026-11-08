@@ -186,6 +186,13 @@ window.Theme = window.Theme || (function() {
     else { const s = document.createElement("script"); s.src = src; document.head.append(s); }
 })();
 
+// ---------- settings of a page in the bars: Nav.tools(element) ----------
+// A page hands over one element with its own settings (the readings of the Bookshelf): on the desktop it stands in the menu bar if it fits there
+// together with the links in text, else in a second bar below it (fixed as the first; --nav-h on <html> is the height of both, 60 or 104px);
+// below 992px it is at the top of the side menu, under "Page settings". The element is moved, not copied, so its listeners stay.
+// May be called before the bar exists (a defer script): it is put in place when the bar is made.
+window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._tools = { el, opt: opt || {} }; if (this._place) this._place(); } };
+
 (function() {
     const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
@@ -383,6 +390,17 @@ window.Theme = window.Theme || (function() {
             .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
             .to-top.show { opacity: 1; pointer-events: auto; }
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
+            /* the settings of the page (Nav.tools): in the bar, in a second bar, or in the side menu */
+            :root { --nav-h: 60px; }
+            .nav-tools { display: flex; align-items: center; color: rgba(255, 255, 255, .75); font-size: .88rem; }
+            .nav-backdrop .nav-tools { margin-right: 1rem; white-space: nowrap; }
+            .nav-tools-bar { position: fixed; top: 60px; left: 0; right: 0; z-index: 1029; height: 44px; display: flex; align-items: center; padding: 0 1rem; overflow-x: auto;
+                background: color-mix(in srgb, var(--nav-bg) var(--nav-alpha), transparent); backdrop-filter: blur(15px);
+                border-bottom: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bg) 72%, #fff)); }
+            .nav-tools-bar[hidden], .nav-tools-side[hidden] { display: none; }
+            .nav-tools-side { padding: 0 1.25rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+            .nav-tools-side .nav-section-header { padding-left: 0; padding-right: 0; color: rgba(255, 255, 255, .55); }
+            .nav-tools-side .nav-tools { flex-wrap: wrap; }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
             .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
             .powered-by a { color: inherit; opacity: .45; text-decoration: none; }
@@ -510,7 +528,7 @@ window.Theme = window.Theme || (function() {
                 <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2">${navConfig.brand(logo, brandTitle, true)}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
-            <div class="offcanvas-body p-0">${sectionsHtml}</div>
+            <div class="offcanvas-body p-0"><div class="nav-tools-side" hidden><div class="nav-section-header" data-vi="Cài đặt trang">Page settings</div></div>${sectionsHtml}</div>
         `;
 
         offcanvas.querySelectorAll('.nav-section-toggle').forEach(btn => btn.addEventListener('click', () => {
@@ -611,11 +629,30 @@ window.Theme = window.Theme || (function() {
             const wrapped = () => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || deskUl.scrollWidth > deskUl.clientWidth;
             if (wrapped()) deskUl.classList.add('icons-only');
         };
-        fitDesk();
-        window.addEventListener('resize', fitDesk);
-        document.addEventListener('langchange', fitDesk);
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDesk);
-        window.addEventListener('load', fitDesk);
+        // the settings of the page (Nav.tools): in the bar if they fit there with the links in text, else in a second bar; in the side menu below 992px
+        const desktop = window.matchMedia('(min-width: 992px)');
+        const toolsBar = document.createElement('div');
+        toolsBar.className = 'nav-tools-bar'; toolsBar.hidden = true;
+        const toolsSide = offcanvas.querySelector('.nav-tools-side');
+        const rightGroup = header.querySelector('.ms-auto');
+        const setHeight = h => { document.documentElement.style.setProperty('--nav-h', h + 'px'); document.body.style.paddingTop = h + 'px'; };
+        const place = () => {
+            const t = Nav._tools;
+            if (!t) { fitDesk(); return; }
+            t.el.classList.add('nav-tools');
+            toolsBar.hidden = true; toolsSide.hidden = true; setHeight(60);
+            if (!desktop.matches) { toolsSide.append(t.el); toolsSide.hidden = false; fitDesk(); return; }
+            rightGroup.before(t.el);
+            fitDesk();
+            if (deskUl.classList.contains('icons-only')) { toolsBar.append(t.el); toolsBar.hidden = false; setHeight(104); fitDesk(); }
+        };
+        Nav._place = place;
+        place();
+        window.addEventListener('resize', place);
+        document.addEventListener('langchange', place);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+        window.addEventListener('load', place);
+        header.after(toolsBar);
         document.body.appendChild(offcanvas);
         if (!ownBottomBar) injectFooter(navConfig.license);
 
