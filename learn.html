@@ -27,7 +27,7 @@
     .tools { flex-wrap: wrap; }
 
     /* the seven marks: a row of tabs with a sliding pill behind the active one */
-    .marks { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: .25rem; padding: .3rem; border-radius: 1.1rem; background: color-mix(in srgb, currentColor 6%, transparent); color: var(--ink); }
+    .marks { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: .25rem; padding: .3rem; border-radius: 1.1rem; background: color-mix(in srgb, currentColor 6%, transparent); color: var(--ink); }
     .marks .pill { position: absolute; top: .3rem; bottom: .3rem; left: 0; width: 0; border-radius: .85rem; background: var(--cinnabar); box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--cinnabar) 40%, transparent); transition: transform .55s cubic-bezier(.65, 0, .35, 1), width .55s cubic-bezier(.65, 0, .35, 1); z-index: 0; }
     .marks button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: .05rem; padding: .35rem 0 .3rem; border: 0; border-radius: .85rem; background: none; color: inherit; transition: color .35s; }
     .marks button:hover { color: var(--cinnabar); }
@@ -141,19 +141,19 @@
     return { show: r, speak: r === '?' ? '' : r };
   };
 
-  let mark = 0, row = 0, playing = false, timer = null, sound = true;
+  const MARKS = [2, 3, 4, 5, 6];                                // the five columns of the rhyme table (plain = the consonants, 1 = ông: other lessons)
+  let tab = 0, mark = MARKS[0], row = 0, playing = false, timer = null, sound = true;
   try { sound = localStorage.getItem('qattLearnSound') !== '0'; } catch (e) {}
 
   // the tabs
-  const LABELS = [['Plain', 'Không nét'], ['1'], ['2'], ['3'], ['4'], ['5'], ['6']];
-  const tabs = LABELS.map(([en, vi], m) => {
+  const tabs = MARKS.map((m, i) => {
     const b = document.createElement('button');
     b.type = 'button'; b.setAttribute('role', 'tab');
     const g = document.createElement('span'); g.className = 'g'; g.textContent = glyph('l', m);
-    const n = document.createElement('span'); n.className = 'n'; n.textContent = en; if (vi) n.dataset.vi = vi;
-    if (m) b.setAttribute('aria-label', 'Marking stroke ' + m);
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = m;
+    b.setAttribute('aria-label', 'Marking stroke ' + m);
     b.append(g, n);
-    b.addEventListener('click', () => { setMark(m, true); row = 0; go(); });
+    b.addEventListener('click', () => { setMark(i, true); row = 0; go(); });
     $('marks').append(b);
     return b;
   });
@@ -170,7 +170,7 @@
   });
 
   const placePill = () => {
-    const t = tabs[mark], box = $('marks').getBoundingClientRect(), tb = t.getBoundingClientRect();
+    const t = tabs[tab], box = $('marks').getBoundingClientRect(), tb = t.getBoundingClientRect();
     $('pill').style.width = tb.width + 'px';
     $('pill').style.transform = `translateX(${tb.left - box.left}px)`;
   };
@@ -178,8 +178,8 @@
   const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
 
   function setMark(m, animate) {
-    mark = (m + 7) % 7;
-    tabs.forEach((t, i) => { t.classList.toggle('active', i === mark); t.setAttribute('aria-selected', i === mark); });
+    tab = (m + MARKS.length) % MARKS.length; mark = MARKS[tab];
+    tabs.forEach((t, i) => { t.classList.toggle('active', i === tab); t.setAttribute('aria-selected', i === tab); });
     placePill();
     rows.forEach((rw, r) => rw.cells.forEach((c, k) => {
       c.textContent = glyph(PAIRS[r][k], mark);
@@ -230,7 +230,7 @@
     if (!playing) return;
     timer = setTimeout(() => {
       if (row < PAIRS.length - 1) { row++; show(true); schedule(); return; }
-      row = 0; setMark(mark + 1, true);                           // end of the column: the next marking stroke
+      row = 0; setMark(tab + 1, true);                           // end of the column: the next marking stroke
       show(true); schedule();
     }, STEP);
   }
@@ -247,8 +247,8 @@
 
   const step = d => {
     row += d;
-    if (row >= PAIRS.length) { row = 0; setMark(mark + 1, true); }
-    if (row < 0) { row = PAIRS.length - 1; setMark(mark - 1, true); }
+    if (row >= PAIRS.length) { row = 0; setMark(tab + 1, true); }
+    if (row < 0) { row = PAIRS.length - 1; setMark(tab - 1, true); }
     go();
   };
 
@@ -270,8 +270,8 @@
     if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }
     else if (e.key === 'ArrowDown') { e.preventDefault(); step(1); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
-    else if (e.key === 'ArrowRight') { setMark(mark + 1, true); row = 0; go(); }
-    else if (e.key === 'ArrowLeft') { setMark(mark - 1, true); row = 0; go(); }
+    else if (e.key === 'ArrowRight') { setMark(tab + 1, true); row = 0; go(); }
+    else if (e.key === 'ArrowLeft') { setMark(tab - 1, true); row = 0; go(); }
   });
   window.addEventListener('resize', placePill);
   document.fonts && document.fonts.ready.then(placePill);
