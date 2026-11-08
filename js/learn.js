@@ -18,7 +18,6 @@ const Learn = (() => {
     { id: 'tones', en: 'Tones', vi: 'Thanh điệu', sample: 'mán', about: 'Eight tone marks after the syllable.', aboutVi: 'Tám dấu thanh sau âm tiết.' },
     { id: 'hop-thu', en: 'Hợp Thư', vi: 'Hợp Thư', sample: 'không', about: 'ông, ong, ung and uông in their short forms.', aboutVi: 'ông, ong, ung và uông viết gọn.' },
     { id: 'reading', en: 'Reading', vi: 'Đọc', sample: 'đọc', about: 'Read words and short sentences.', aboutVi: 'Đọc từ và câu ngắn.' },
-    { id: 'typing', en: 'Typing', vi: 'Gõ chữ', sample: 'gõ', soon: true, about: 'Type QATT with Telex in the writer and the Notes app.', aboutVi: 'Gõ QATT bằng Telex trong trình soạn thảo và ứng dụng Notes.' },
   ];
   const BASE = '/learn/';
   const href = l => BASE + l.id + '.html';
@@ -100,10 +99,15 @@ const Learn = (() => {
       a.append(el('div', 'g', sampleOf(l)), text, check);
       container.append(a);
     });
-    const a = el('a', 'card-box lesson-card'); a.href = PRACTICE.href;
-    const text = el('div'); text.append(el('div', 'no', '→'), tr('h2', '', 'Spell it!', 'Đánh vần!'), tr('p', '', 'Practise what you learned: spell words with the symbols.', 'Luyện tập: đánh vần từ bằng các ký hiệu.'));
-    a.append(el('div', 'g', cell('vần')), text);
-    container.append(a);
+    // after the course: practice and writing (no lessons of their own)
+    const extra = (url, sample, en, vi, about, aboutVi) => {
+      const a = el('a', 'card-box lesson-card'); a.href = url;
+      const text = el('div'); text.append(el('div', 'no', '→'), tr('h2', '', en, vi), tr('p', '', about, aboutVi));
+      a.append(el('div', 'g', cell(sample)), text);
+      container.append(a);
+    };
+    extra(PRACTICE.href, 'vần', 'Spell it!', 'Đánh vần!', 'Practise what you learned: spell words with the symbols.', 'Luyện tập: đánh vần từ bằng các ký hiệu.');
+    extra('/editor.html', 'viết', 'Write QATT', 'Viết QATT', 'Type with Telex in the writer of this site or in the Qatt.org Notes app: a word becomes QATT at the space.', 'Gõ Telex trong trình soạn thảo hoặc ứng dụng Qatt.org Notes: từ thành QATT khi gõ dấu cách.');
   };
 
   // speech of the Chunom site (decks/audiomanager.js: the browser voice, else Google TTS), as in spell.html
