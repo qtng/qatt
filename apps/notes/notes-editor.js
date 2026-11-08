@@ -37,15 +37,16 @@ const NotesEditor = (() => {
   //   o.on()       whether QATT is on now
   //   o.refresh()  called after every change
   //   o.converted() called when a word became QATT (the editor hides its Nôm candidates)
-  //   o.script()   the script a word becomes: 'qatt' (the default) or 'pa'
+  //   o.script()   the script a word becomes at a space: 'qatt' (the default) or 'pa'
+  //   o.enterScript() the script a word becomes at Enter (the other one: it is the first slot of the key bar), undefined = as o.script()
   //   o.convertOn  'any' (the default): a space, any other character that is no letter, and Enter convert the word before it; 'enter': Enter only; 'none': nothing
   //                (a string, or a function that gives one)
   function wire(typer, o) {
     const { parser } = o, converts = () => (typeof o.convertOn === 'function' ? o.convertOn() : o.convertOn) || 'any';
     // the word that ends right before `end` becomes QATT characters (if there are any)
-    const convertBefore = end => {
+    const convertBefore = (end, script = o.script ? o.script() : 'qatt') => {
       const m = WORD_END.exec(typer.value.slice(0, end));
-      const text = m && (o.script && o.script() === 'pa' ? (typeof PaText !== 'undefined' && PaText.word(m[0], parser, { stacked: true })) : QattText.word(m[0], parser));
+      const text = m && (script === 'pa' ? (typeof PaText !== 'undefined' && PaText.word(m[0], parser, { stacked: true })) : QattText.word(m[0], parser));
       if (!text) return false;
       const start = end - m[0].length, caret = typer.selectionStart;
       typer.setRangeText(text, start, end, 'end');
@@ -135,10 +136,10 @@ const NotesEditor = (() => {
 
     // The character just typed ends the word before it. Space and Enter are swallowed when the word was converted (the cells are squares,
     // there is no space between them); any other character stays.
-    const flush = (length, swallow) => {
+    const flush = (length, swallow, script) => {
       const pos = typer.selectionStart;
       if (pos !== typer.selectionEnd || pos < length) return;
-      if (!NOT_LETTER.test(typer.value.slice(pos - length, pos)) || !convertBefore(pos - length)) return;
+      if (!NOT_LETTER.test(typer.value.slice(pos - length, pos)) || !convertBefore(pos - length, script)) return;
       o.converted();   // the word is QATT now: no Nôm candidates
       if (!swallow) return;
       const at = typer.selectionStart;
@@ -148,7 +149,7 @@ const NotesEditor = (() => {
       if (!o.on()) return;
       repairDeletion();
       if (converts() === 'none') { /* direct input: no word becomes QATT */ }
-      else if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true);
+      else if (!e.isComposing && (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph')) flush(1, true, o.enterScript && o.enterScript());   // Enter takes the first slot of the key bar: the word in the other script
       else if (converts() === 'any' && !e.isComposing && e.inputType === 'insertText' && e.data && NOT_LETTER.test(e.data)) flush(e.data.length, /^\s+$/.test(e.data));
       if (!e.isComposing) tidy();
       before = typer.value;   // changes that fire no beforeinput (direct input's execCommand) must not leave an old text behind: it would pass for a deletion
@@ -263,7 +264,7 @@ const NotesEditor = (() => {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
     let mode = 'telex';
-    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: () => (mode === 'direct' ? 'none' : 'any'), script: () => (mode === 'pa' ? 'pa' : 'qatt') });
+    wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: () => (mode === 'direct' ? 'none' : 'any'), script: () => (mode === 'pa' ? 'pa' : 'qatt'), enterScript: () => (mode === 'pa' ? 'qatt' : 'pa') });
     const slots = makeVariants(field, { on: () => mode !== 'pa', refresh: changed });   // the variants are those of QATT
     // the Chữ Nôm candidates of the word before the cursor; while a phone keyboard composes, the word is still raw Telex
     const nomReady = ime ? VietIme.load() : Promise.resolve();
@@ -284,6 +285,28 @@ const NotesEditor = (() => {
           field.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText', data: c.glyph }));
         }
       } }));
+    };
+    // ----- the other script -----
+    // the word before the cursor in the script that does not stand in the text: with QATT Telex PA, with PA Telex QATT (the first slot of the key bar; Enter takes it): { glyph, script, run() } or null
+    const alternate = () => {
+      const script = mode === 'pa' ? 'qatt' : mode === 'telex' && typeof PaText !== 'undefined' ? 'pa' : null;
+      const at = field.selectionStart, next = field.value.charAt(at);
+      if (!script || at !== field.selectionEnd || (next && !NOT_LETTER.test(next))) return null;
+      const m = WORD_END.exec(field.value.slice(0, at));
+      if (!m) return null;
+      const word = composing ? VietIme.telex(m[0]) : m[0];
+      const glyph = script === 'pa' ? PaText.word(word, parser, { stacked: true }) : QattText.word(word, parser);
+      if (!glyph) return null;
+      const start = at - m[0].length;
+      return { glyph, script, run: () => {
+        field.focus({ preventScroll: true });
+        field.setSelectionRange(start, at);
+        if (!document.execCommand('insertText', false, glyph)) {
+          field.setRangeText(glyph, start, at, 'end');
+          field.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText', data: glyph }));
+        }
+        if (ime) ime.hide();
+      } };
     };
     // ----- direct input -----
     // the change goes in as typed text (events, the app's undo): the range [from, to) is replaced by text
@@ -340,6 +363,7 @@ const NotesEditor = (() => {
       field,
       variants: slots,
       candidates,
+      alternate,
       typeShape,
       shapes: DIRECT_ORDER.map(i => String.fromCodePoint(0xF0000 + 7 * i)),   // the plain letters of the 22 shapes in that order
       setMode(m) { mode = m === 'direct' ? 'direct' : m === 'pa' && typeof PaText !== 'undefined' ? 'pa' : 'telex'; if (ime) { ime.update({ telex: mode === 'telex' }); ime.hide(); } last = null; },

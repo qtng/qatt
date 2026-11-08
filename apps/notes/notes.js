@@ -261,19 +261,19 @@ window.notesApp = { store, ready, flush() } is for the tests.
   }
   function renderKeys() {
     fitSlots();
-    const nom = editor.candidates();
-    shown = nom.length ? nom.slice(0, slots) : [];
-    if (!nom.length) editor.variants().forEach((v, i) => { shown[i] = v; });
-    rest = nom.slice(slots);
-    const key = (nom.length ? 'n' : 'v') + slotBtns.map((b, i) => (shown[i] ? shown[i].glyph || shown[i].id + shown[i].view : '')).join() + '|' + rest.length;
+    const alt = editor.alternate(), nom = editor.candidates(), list = alt ? [alt, ...nom] : nom;   // the first slot is the word in the other script (PA or QATT), then the Chữ Nôm candidates
+    shown = list.length ? list.slice(0, slots) : [];
+    if (!list.length) editor.variants().forEach((v, i) => { shown[i] = v; });
+    rest = list.slice(slots);
+    const key = (list.length ? 'n' : 'v') + slotBtns.map((b, i) => (shown[i] ? shown[i].glyph || shown[i].id + shown[i].view : '')).join() + '|' + rest.length;
     if (key === shownKeys) return;
     shownKeys = key;
     slotBtns.forEach((btn, i) => {
       const v = shown[i];
       btn.disabled = !v;
-      btn.classList.toggle('nom', !!nom.length);
+      btn.classList.toggle('nom', !!(v && v.glyph && !v.script));   // the Chữ Nôm candidates are drawn in the Nôm fonts, the PA or QATT of the first slot in its own font
       btn.textContent = v ? v.glyph || v.view : '·';
-      btn.title = !v ? '' : v.glyph ? v.reading : Lang.t(v.en, v.vi);
+      btn.title = !v ? '' : v.script ? (v.script === 'pa' ? 'PA' : 'QATT') : v.glyph ? v.reading : Lang.t(v.en, v.vi);
     });
     moreBtn.disabled = !rest.length;
     showMore(false);
