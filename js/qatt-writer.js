@@ -31,9 +31,9 @@ const QattWriter = (() => {
     .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; margin: 0 0 .6rem; min-height: 1.9rem; font-size: .78rem; }
     body:not(.qatt-on) .qatt-bar .group > :not(#font) { visibility: hidden; }   /* the font is always there, the rest only while QATT is on */
     body.pa-site .qatt-bar .group > :not(#font) { visibility: visible; }   /* the Chunom writer: Convert and the PA button are always there, also with PA off */
-    .qatt-bar .pa-help { flex: none; font-size: .72rem; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
-    @media (max-width: 419.98px) { .qatt-bar .pa-help { display: none; } }   /* the info box has the link too */
-    .qatt-bar #pa-btn, html .qatt-bar #pa-btn, html[data-theme] .qatt-bar #pa-btn { font-family: var(--pafont, "PA"), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .45rem; min-width: 2.1rem; letter-spacing: 0; text-transform: none; }   /* the preview is a PA cell */
+    .pa-help { display: block; width: fit-content; margin-top: -.1rem; font-size: .72rem; line-height: 1.2; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }   /* under the switch Phonetic annotation */
+    .pa-help[hidden] { display: none; }
+    .qatt-bar #pa-btn, html .qatt-bar #pa-btn, html[data-theme] .qatt-bar #pa-btn { font-family: var(--pafont, "PA"), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .5rem; min-width: 2.4rem; min-height: 1.9rem; display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0; text-transform: none; }   /* the preview is a PA cell, as high as the Convert button */
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
@@ -51,7 +51,7 @@ const QattWriter = (() => {
     .qatt-on li.qatt-only { display: list-item; }
     .pa-on .pa-only { display: block; }
     .bar-buttons, .opts { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
-    .opts { gap: .2rem 1.5rem; }
+    .opts { gap: .2rem 1.5rem; align-items: flex-start; }   /* the switches at one height (the PA switch has its link below) */
     .opts .form-check { margin: 0; }
     @media (max-width: 575.98px) {   /* on a phone the switches are a little tighter, and in one row from 360 px on */
       .opts { gap: .2rem .8rem; }
@@ -75,7 +75,6 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
         <button type="button" class="btn btn-quiet" id="pa-btn" hidden disabled>·</button>
-        <a id="pa-help" class="pa-help" href="https://chunom.org/chunom/pa/" target="_blank" rel="noopener" hidden data-vi="phiên âm là gì?">what is PA?</a>
         <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
       </div>
 `;
@@ -97,6 +96,7 @@ const QattWriter = (() => {
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" role="switch" id="mode-select" autocomplete="off">
           <label class="form-check-label" for="mode-select" id="mode-label" ></label>
+          <a id="pa-help" class="pa-help" href="https://chunom.org/chunom/pa/" target="_blank" rel="noopener" hidden data-vi="PA là gì?">what is PA?</a>
         </div>
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" role="switch" id="telex-select" autocomplete="off" checked>
