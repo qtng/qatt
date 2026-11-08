@@ -13,7 +13,7 @@ Needs parser.js and qatt-text.js; css/learn.css.
 const Learn = (() => {
   const LESSONS = [
     { id: 'consonants', en: 'Consonants', vi: 'Phụ âm', sample: ['h', 0], about: 'The 22 base shapes stand for the initial consonants.', aboutVi: '22 hình cơ bản là các phụ âm đầu.' },
-    { id: 'rhymes', en: 'Rhymes', vi: 'Vần', sample: ['ng', 3], about: 'Marking strokes 2 to 6 turn a shape into a rhyme.', aboutVi: 'Nét đánh dấu 2 đến 6 biến hình thành vần.' },
+    { id: 'rhymes', en: 'Rhymes', vi: 'Vần', sample: ['ng', 3], about: 'Marking strokes 1 to 6 turn a shape into a rhyme.', aboutVi: 'Nét đánh dấu 1 đến 6 biến hình thành vần.' },
     { id: 'pairs', en: 'Phiên thiết pairs', vi: 'Cặp phiên thiết', sample: 'con', about: 'An initial and a rhyme join into one syllable.', aboutVi: 'Phụ âm đầu và vần ghép thành một âm tiết.' },
     { id: 'tones', en: 'Tones', vi: 'Thanh điệu', sample: 'mán', about: 'Eight tone marks after the syllable.', aboutVi: 'Tám dấu thanh sau âm tiết.' },
     { id: 'hop-thu', en: 'Hợp Thư', vi: 'Hợp Thư', sample: 'không', about: 'ông, ong, ung and uông in their short forms.', aboutVi: 'ông, ong, ung và uông viết gọn.' },

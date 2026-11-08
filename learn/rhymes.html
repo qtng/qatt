@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rhymes · Learn QATT</title>
-  <meta name="description" content="Lesson 2 of Learn QATT: the rhymes of Quốc Âm Tân Tự, the 22 base shapes with the marking strokes 2 to 6, read aloud.">
+  <meta name="description" content="Lesson 2 of Learn QATT: the rhymes of Quốc Âm Tân Tự, the 22 base shapes with the marking strokes 1 to 6, read aloud.">
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/site.css">
@@ -19,14 +19,14 @@
   <div class="container text-center">
     <div class="kicker mb-2" id="lessonNo"></div>
     <h1 class="mb-3" data-vi="Vần">Rhymes</h1>
-    <p class="lead mx-auto mb-0" data-vi="Nét đánh dấu 2 đến 6 biến hình thành vần.">Marking strokes 2 to 6 make a shape a rhyme.</p>
+    <p class="lead mx-auto mb-0" data-vi="Nét đánh dấu 1 đến 6 biến hình thành vần.">Marking strokes 1 to 6 make a shape a rhyme.</p>
   </div>
 </header>
 
 <main class="container py-4" id="content">
   <div class="learn mx-auto">
     <nav id="learnSteps" aria-label="Lessons"></nav>
-    <p class="intro"><span data-vi="Nét đánh dấu biến một hình cơ bản thành vần. Với các nét từ 2 đến 6, mỗi hình trong 22 hình cho năm vần: tất cả là 110 vần. Các hình đi thành 11 cặp, hình thứ hai là ảnh soi gương của hình thứ nhất: mỗi thẻ là một cặp, các dòng là các nét từ 2 đến 6 trên cả hai hình. Một hình có nét đánh dấu đứng riêng được đọc với chính hình đó làm phụ âm đầu, nên các dòng đọc là lơ, nga, ghe … Nét 1 thì đặc biệt: xem bài Hợp Thư.">A marking stroke turns a base shape into a rhyme. With the strokes 2 to 6, each of the 22 shapes gives five rhymes, 110 rhymes in all. The shapes come in 11 pairs, the second the mirror image of the first: every tab is one pair, its rows are the strokes 2 to 6 on both. A marked shape that stands alone is read with its own shape as the initial, so the rows read lơ, nga, ghe … Stroke 1 is special: see the lesson Hợp Thư.</span></p>
+    <p class="intro"><span data-vi="Nét đánh dấu biến một hình cơ bản thành vần. Các hình đi thành 11 cặp, hình thứ hai là ảnh soi gương của hình thứ nhất: mỗi thẻ là một cặp, các dòng là các nét từ 1 đến 6 trên cả hai hình. Nét 1 luôn cho vần ông; với các nét từ 2 đến 6, mỗi hình trong 22 hình cho năm vần: tất cả là 110 vần. Một hình có nét đánh dấu đứng riêng được đọc với chính hình đó làm phụ âm đầu, nên các dòng đọc là lông, lơ, … Thêm về ông và các vần gần nó: xem bài Hợp Thư.">A marking stroke turns a base shape into a rhyme. The shapes come in 11 pairs, the second the mirror image of the first: every tab is one pair, its rows are the strokes 1 to 6 on both. Stroke 1 always gives the rhyme ông; with the strokes 2 to 6, each of the 22 shapes gives five rhymes, 110 in all. A marked shape that stands alone is read with its own shape as the initial, so the rows read lông, lơ, … More about ông and the rhymes near it: see the lesson Hợp Thư.</span></p>
     <div id="board"></div>
     <nav id="learnPager"></nav>
   </div>
@@ -34,8 +34,8 @@
 
 <script>
 Learn.page('rhymes');
-const MARKS = [2, 3, 4, 5, 6];
-// a tab for each pair of shapes (the second is the mirror of the first, so the tab shows only the first, unmarked); its rows: the strokes 2 to 6 on both
+const MARKS = [1, 2, 3, 4, 5, 6];   // stroke 1: the rhyme is always ông
+// a tab for each pair of shapes (the second is the mirror of the first, so the tab shows only the first, unmarked); its rows: the strokes 1 to 6 on both
 Learn.board(document.getElementById('board'), {
   tabRows: 2,
   build: parser => pairsOf(Learn.SHAPES).map(([a, b]) => ({
