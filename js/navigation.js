@@ -352,7 +352,7 @@ window.Readings = window.Readings || (function() {
             @media (min-width: 768px) {
                 #navTogglerCustom { display: none; }
                 .desk-tiles { display: flex; align-items: stretch; align-self: stretch; margin: 0 auto 0 .5rem; padding: 0; list-style: none; }
-                .desk-other { display: block; position: relative; margin-right: 1rem; }
+                .desk-other { display: block; position: relative; margin-left: .3rem; }
                 .nav-backdrop.compact .desk-other, .nav-backdrop.compact .desk-tiles .more { display: none; }
             }
             .desk-tiles .menu-li { display: none; }
@@ -371,10 +371,12 @@ window.Readings = window.Readings || (function() {
             .desk-other.open .desk-menu { display: block; }
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
-            .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
-            .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
+            /* EN | VI: one widget (a segmented pill: the language of the page filled), unlike the readings next to it, which are plain text toggles */
+            .lang-switch { display: flex; align-items: center; margin-right: .3rem; padding: 2px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 999px; font-size: .75rem; }
+            .lang-switch > span { display: none; }
+            .lang-switch button { background: none; border: 0; border-radius: 999px; padding: .12rem .5rem; color: rgba(255, 255, 255, .65); font-weight: 600; letter-spacing: .04em; line-height: 1.3; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
-            .lang-switch button.active { color: #fff; text-decoration: underline; text-underline-offset: .3em; }
+            .lang-switch button.active { background: rgba(255, 255, 255, .88); color: #212529; }
             /* the theme: a palette button next to EN | VI with a small list of the themes */
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
@@ -456,7 +458,7 @@ window.Readings = window.Readings || (function() {
             .readings-switch .short { display: none; }
             @media (max-width: 575.98px) { .readings-switch .long { display: none; } .readings-switch .short { display: inline; } .readings-switch { margin-right: .3rem; gap: .2rem; } }
             .readings-switch[hidden] { display: none; }
-            @media (max-width: 389.98px) { .readings-switch > span { display: none; } .readings-switch { gap: .45rem; margin-right: .25rem; } .lang-switch { margin-right: .1rem; gap: .2rem; } }
+            @media (max-width: 389.98px) { .readings-switch > span { display: none; } .readings-switch { gap: .45rem; margin-right: .25rem; } .lang-switch { margin-right: .1rem; } .lang-switch button { padding: .12rem .4rem; } }
             @media (max-width: 359.98px) { .nav-backdrop > .container-fluid { padding-left: .4rem; padding-right: .3rem; } .nav-backdrop .navbar-brand { margin-right: .3rem; } #navTogglerCustom { padding: .25rem .2rem; } .readings-switch { gap: .3rem; } }
             /* the readings written by Readings.fill: in one line, PA and QATT in their fonts */
             .rd-pa { font-family: "PA Pen", "PA", sans-serif; font-size: 1.2em; }
@@ -551,10 +553,6 @@ window.Readings = window.Readings || (function() {
                     ${navConfig.brand(logo, brandTitle, false)}
                 </a>
                 <ul class="desk-tiles">${tileLinks}</ul>
-                <div class="desk-other">
-                    <button type="button" aria-haspopup="true" aria-expanded="false">${otherLabel} <i class="bi bi-chevron-down small"></i></button>
-                    <div class="desk-menu">${otherLinks}</div>
-                </div>
                 <div class="ms-auto d-flex align-items-center">
                     <div class="theme-switch"${Theme.choosable && isAdmin() ? '' : ' hidden'}>
                         <button type="button" aria-haspopup="true" aria-expanded="false" title="Theme" data-vi-title="Giao diện" aria-label="Theme" data-vi-aria-label="Giao diện"><i class="bi bi-palette"></i></button>
@@ -566,6 +564,10 @@ window.Readings = window.Readings || (function() {
                     </div>
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
+                    </div>
+                    <div class="desk-other">
+                        <button type="button" aria-haspopup="true" aria-expanded="false">${otherLabel} <i class="bi bi-chevron-down small"></i></button>
+                        <div class="desk-menu">${otherLinks}</div>
                     </div>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
