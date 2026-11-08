@@ -98,7 +98,8 @@
       var fb = o.pairFine && FINE[o.pairFine] ? FINE[o.pairFine](partner, P, lay) : null, fm2 = fb != null ? P.pair(k, role, o.pairFine + fb) : null;
       if (fm2 && fm2[4] >= o.nPair) { var wf = fm2[4] / (fm2[4] + o.kFine); m = m.slice(); for (var q2 = 0; q2 < 4; q2++) m[q2] = m[q2] * (1 - wf) + fm2[q2] * wf; }
     }
-    var box = g.slice(0, 4), measured = m && m[4] >= o.nMin, dn = null;
+    var box = g.slice(0, 4), measured = m && m[4] >= o.nMin, dn = null, mg = m && m[5];
+    if (o.sizeGeneric) measured = false;   // a test: the measured sizes are not used (the glyph forms are)
     if (!measured && o.useDens && P.dens && sibs && (H_OPS[role[0]] || V_OPS[role[0]])) {   // no measurement: parts of this density next to such partners
       var ax = H_OPS[role[0]] ? 0 : 1, own = feat(node, P)[ax], pl = 0, idx = +role.slice(1);
       sibs.forEach(function (sb, j) { if (j !== idx) pl += feat(sb, P)[ax]; });
@@ -133,7 +134,7 @@
     }
     // how sure the size is: measured in that role (by the count), else 0 (a guess from the role, the structure, the density)
     var conf = measured ? m[4] / (m[4] + o.kConf) : 0;
-    return { box: box, glyph: measured && o.useRoleGlyph ? m[5] : vg, conf: conf };
+    return { box: box, glyph: measured && o.useRoleGlyph ? m[5] : o.sizeGeneric && mg && o.useRoleGlyph ? mg : vg, conf: conf };
   }
 
   // places the children of a row (H) or a column of parts: their extents along the axis from the estimated boxes, in order, scaled to fill
@@ -264,9 +265,75 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.IdsLayout = api;
 })(typeof self !== 'undefined' ? self : this);
 
+// The ink of a glyph, the same in the build (lib/gw.mjs) and the browser (js/ids-render.js): plain strokes as KAGE data, ink box,
+// a bitmap of the 200 frame, and the density (coverage, layers h and v) of a bitmap inside the ink box.
+(function (root) {
+  'use strict';
+  const NFIELDS = { 1: 7, 2: 9, 3: 9, 4: 9, 12: 9, 6: 11, 7: 11 };   // fields a stroke type uses (the rest is dropped)
+  function strokesToData(strokes) {
+    return strokes.map((s) => {
+      const f = [s.a1_opt * 100 + s.a1_100, s.a2_opt * 100 + s.a2_100, s.a3_opt * 100 + s.a3_100, s.x1, s.y1, s.x2, s.y2, s.x3, s.y3, s.x4, s.y4]
+        .map((v) => (Number.isFinite(v) ? Math.round(v) : 0));
+      return f.slice(0, (s.a1_opt === 0 && NFIELDS[s.a1_100]) || 11).join(':');
+    }).join('$');
+  }
+  function inkBox(polys) {
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    for (const poly of polys) for (const [x, y] of poly) { if (x < x1) x1 = x; if (x > x2) x2 = x; if (y < y1) y1 = y; if (y > y2) y2 = y; }
+    return x1 === Infinity ? null : [x1, y1, x2, y2];
+  }
+  // bitmap of the 200 x 200 frame (size px), every polygon filled even-odd and OR-ed
+  function raster(polys, size = 64) {
+    const bm = new Uint8Array(size * size), s = size / 200;
+    for (const poly of polys) {
+      const n = poly.length; if (n < 3) continue;
+      let ymin = Infinity, ymax = -Infinity;
+      for (const [, y] of poly) { if (y < ymin) ymin = y; if (y > ymax) ymax = y; }
+      const r0 = Math.max(0, Math.floor(ymin * s)), r1 = Math.min(size - 1, Math.ceil(ymax * s));
+      for (let r = r0; r <= r1; r++) {
+        const yc = (r + 0.5) / s, xs = [];
+        for (let i = 0, j = n - 1; i < n; j = i++) {
+          const [xi, yi] = poly[i], [xj, yj] = poly[j];
+          if ((yi > yc) !== (yj > yc)) xs.push(xi + (yc - yi) * (xj - xi) / (yj - yi));
+        }
+        xs.sort((a, b) => a - b);
+        for (let q = 0; q + 1 < xs.length; q += 2) {
+          const c0 = Math.max(0, Math.ceil(xs[q] * s - 0.5)), c1 = Math.min(size - 1, Math.floor(xs[q + 1] * s - 0.5));
+          for (let c = c0; c <= c1; c++) bm[r * size + c] = 1;
+        }
+      }
+    }
+    return bm;
+  }
+  // density of a bitmap inside the ink box: coverage, layers across (h: runs along columns = horizontal strokes stacked) and v
+  function density(bm, box, size = 64) {
+    const s = size / 200;
+    const c0 = Math.max(0, Math.floor(box[0] * s)), c1 = Math.min(size - 1, Math.ceil(box[2] * s) - 1);
+    const r0 = Math.max(0, Math.floor(box[1] * s)), r1 = Math.min(size - 1, Math.ceil(box[3] * s) - 1);
+    let ink = 0, area = 0, mx = 0, my = 0;
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) { area++; if (bm[r * size + c]) { ink++; mx += c; my += r; } }
+    const runsCol = (c) => { let n = 0, prev = 0; for (let r = r0; r <= r1; r++) { const v = bm[r * size + c]; if (v && !prev) n++; prev = v; } return n; };
+    const runsRow = (r) => { let n = 0, prev = 0; for (let c = c0; c <= c1; c++) { const v = bm[r * size + c]; if (v && !prev) n++; prev = v; } return n; };
+    const sample = (a, b, f) => { const out = []; for (let i = 1; i <= 9; i++) out.push(f(Math.round(a + (b - a) * i / 10))); out.sort((x, y) => x - y); return out; };
+    const hs = sample(c0, c1, runsCol), vs = sample(r0, r1, runsRow);
+    const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    return {
+      cov: area ? ink / area : 0,
+      h: mean(hs), v: mean(vs), hMax: hs[8], vMax: vs[8],
+      cx: ink ? (mx / ink + 0.5) / s : 100, cy: ink ? (my / ink + 0.5) / s : 100,
+    };
+  }
+
+  var api = { strokesToData: strokesToData, inkBox: inkBox, raster: raster, density: density };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.IdsInk = api;
+})(typeof self !== 'undefined' ? self : this);
+
 // The browser part of js/ids-render.js (qtng/qatt): loads the slices of cdn.qatt.org/ids/, lays an IDS out with IdsLayout and draws it with KAGE.
 //   IdsRender.draw(ids, { size: '1.3em', title }) -> Promise<{ svg, missing }>   (missing: parts without data; the caller may show the text then)
 //   IdsRender.parse(ids) -> tree or null;  IdsRender.base: the address of the data
+//   A part that the slices do not have (a character newer than the data) is read from GlyphWiki (glyphwiki.org/api, its references too), flattened,
+//   and measured here like in the build (ink box, layers, strokes: IdsInk): it is then laid out as a part without measurements (the density
+//   table). opt.glyphwiki === false turns this off. r.fromGlyphWiki: how many parts came from there.
 (function (root) {
   'use strict';
   var SCRIPT = document.currentScript && document.currentScript.src;
@@ -282,6 +349,33 @@
     return kagePromise || (kagePromise = new Promise(function (ok, fail) {
       var s = document.createElement('script'); s.src = QATT + 'js/kage-engine.min.js'; s.onload = ok; s.onerror = fail; document.head.appendChild(s);
     }));
+  }
+
+  // GlyphWiki: a glyph and everything it references (names without @version), as { name: data }
+  var GW = 'https://glyphwiki.org/api/glyph?name=', gwCache = {};
+  function gwLoad(name, into) {
+    if (into[name] !== undefined) return Promise.resolve();
+    var p = gwCache[name] || (gwCache[name] = json(GW + encodeURIComponent(name)).then(function (j) { return j && j.data ? j.data.replace(/@\d+/g, '') : null; }).catch(function () { return null; }));
+    return p.then(function (d) {
+      into[name] = d; if (!d) return;
+      return Promise.all(d.split('$').map(function (l) { return l.split(':'); }).filter(function (f) { return f[0] === '99' && f[7]; })
+        .map(function (f) { return gwLoad(f[7], into); }));
+    });
+  }
+  // the record of a code point from GlyphWiki, measured as in the build (tools/measure.mjs): { d, b, v, h, n, cov }
+  function gwRecord(cp) {
+    var name = 'u' + cp.toString(16), all = {};
+    return gwLoad(name, all).then(function () {
+      if (!all[name]) return null;
+      var k = new root.Kage(); k.kShotai = k.kMincho;
+      Object.keys(all).forEach(function (n) { if (all[n]) k.kBuhin.push(n, all[n]); });
+      var st = k.getEachStrokes(all[name]); if (!st.length) return null;
+      var po = new root.Kage.Polygons(); k.kFont.getDrawers(st).forEach(function (dr) { dr(po); });
+      var polys = po.array.map(function (q) { return q.array.map(function (pt) { return [pt.x, pt.y]; }); }), b = root.IdsInk.inkBox(polys);
+      if (!b) return null;
+      var dn = root.IdsInk.density(root.IdsInk.raster(polys), b), r1 = function (v) { return Math.round(v * 10) / 10; };
+      return { d: root.IdsInk.strokesToData(st), b: b.map(Math.round), n: st.length, cov: Math.round(dn.cov * 1000) / 1000, h: r1(dn.h), v: r1(dn.v), gw: 1 };
+    }).catch(function () { return null; });
   }
 
   function provider(M, data) {
@@ -341,13 +435,23 @@
           n.args.forEach(walk);
         })(tree);
         return loadAll(more);
-      }).then(function () {
+      }).then(function () {   // parts the slices do not have: from GlyphWiki
+        if (opt.glyphwiki === false) return 0;
+        var P0 = provider(M, data), need = {};
+        root.IdsParse.leaves(tree).forEach(function (l) { if (!l.unknown) { var cp = P0.canon(l.ch.codePointAt(0)); if (!P0.char(cp)) need[cp] = 1; } });
+        var list = Object.keys(need).map(Number);
+        return Promise.all(list.map(gwRecord)).then(function (recs) {
+          var n = 0;
+          list.forEach(function (cp, i) { if (recs[i]) { var k = cp >> 8; data[k] = data[k] || {}; data[k][cp] = recs[i]; n++; } });
+          return n;
+        });
+      }).then(function (nGw) {
         var P = provider(M, data), L;
         if (tree.ch !== undefined) {   // a single character: its own glyph
           var c = tree.unknown ? null : P.char(P.canon(tree.ch.codePointAt(0)));
           L = c ? { data: c.d, missing: 0 } : { data: '', missing: 1 };
         } else L = root.IdsLayout.layout(tree, P, null, opt.layout);
-        return { svg: L.data ? svgOf(L.data, opt.size || '1.3em', opt.title === undefined ? ids : opt.title) : '', missing: L.missing, data: L.data };
+        return { svg: L.data ? svgOf(L.data, opt.size || '1.3em', opt.title === undefined ? ids : opt.title) : '', missing: L.missing, data: L.data, fromGlyphWiki: nGw || 0 };
       });
     });
   }
