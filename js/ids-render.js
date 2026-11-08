@@ -34,7 +34,12 @@
   function str(n) { return n.ch !== undefined ? n.ch : n.op + n.args.map(str).join(''); }
   function leaves(n, out) { out = out || []; if (n.ch !== undefined) out.push(n); else n.args.forEach(function (a) { leaves(a, out); }); return out; }
 
-  var api = { ARITY: ARITY, parse: parse, str: str, leaves: leaves };
+  // the key of a subtree for the lookup of the character it describes: the IDS with every part replaced by its canonical code point (⺡ -> 氵)
+  function key(n, canon) {
+    if (n.ch !== undefined) return n.unknown ? n.ch : String.fromCodePoint(canon(n.ch.codePointAt(0)));
+    return n.op + n.args.map(function (a) { return key(a, canon); }).join('');
+  }
+  var api = { ARITY: ARITY, parse: parse, str: str, leaves: leaves, key: key };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.IdsParse = api;
 })(typeof self !== 'undefined' ? self : this);
 
@@ -46,13 +51,15 @@
 //   P.inner(cp, op)   [x1, y1, x2, y2, n] where the enclosed part sits in this enclosing part, or null
 //   P.op(role)        [x1, y1, x2, y2, n] all parts of a role;  P.feat(role) [v, h] their median layers
 //   P.canon(cp)       the canonical code point (⺡ -> 氵)
+//   P.struct(op, role) [x1, y1, x2, y2, n] parts built with the operator op in that role, or null
+//   P.idsChar(key)    the code point of the character whose IDS (canonical parts, IdsParse.key) this is, or null (a part made of parts that is a character)
 //   P.variant(cp, sfx) the name of the GlyphWiki variant uXXXX-<sfx> if it exists (and P.glyph has it), or null
 //   P.root(op, cp)    [x1, y1, x2, y2, n] the ink box of whole characters of the operator (cp: of that first part), or null
 // layout(tree, P, target, opt) -> KAGE data (plain strokes) of the composition, its ink in the box target [x1, y1, x2, y2] of the 200 frame.
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, gamma: 0, vRef: 3, hRef: 3 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3 };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -72,6 +79,10 @@
   function est(node, role, P, o) {
     var g = P.op(role) || [0, 0, 1, 1, 0], k = keyOf(node, P), m = k != null ? P.role(k, role) : null;
     var box = g.slice(0, 4), measured = m && m[4] >= o.nMin;
+    if (!measured && node.op && o.useStruct && P.struct) {   // a part of parts: the size of parts of its structure in this role
+      var st = P.struct(node.op, role);
+      if (st && st[4] >= 3) { var ws = st[4] / (st[4] + o.k0s); box = box.map(function (v, i) { return v * (1 - ws) + st[i] * ws; }); }
+    }
     if (measured) {
       var w = m[4] / (m[4] + o.k0);
       box = box.map(function (v, i) { return v * (1 - w) + m[i] * w; });
@@ -172,8 +183,21 @@
     node.args.forEach(function (a, i) { draw(a, mapBox(boxes[i], T), P, o, e[i].glyph, out, enc ? (i ? o.dIn : o.dOut) : o.dHV); });
   }
 
+  // a part of the sequence that is a character of its own (⿱宀子 = 字) is drawn as that character: its measured sizes, role glyphs and real glyph
+  function recognise(node, P, isRoot, o) {
+    if (node.ch !== undefined) return node;
+    if (o.recognise && P.idsChar && (!isRoot || o.recRoot)) {
+      var cp = P.idsChar(o.key(node, P.canon));
+      if (cp != null && P.char(P.canon(cp))) return { ch: String.fromCodePoint(cp), from: node };
+    }
+    return { op: node.op, args: node.args.map(function (a) { return recognise(a, P, false, o); }) };
+  }
+
   function layout(tree, P, target, opt) {
     var o = {}, k; for (k in DEF) o[k] = DEF[k]; for (k in opt || {}) o[k] = opt[k];
+    o.key = (typeof IdsParse !== 'undefined' ? IdsParse : (typeof require === 'function' ? require('./ids.cjs') : null)).key;
+    tree = recognise(tree, P, true, o);
+    if (tree.ch !== undefined) { var c = P.char(P.canon(tree.ch.codePointAt(0))); return { data: c ? c.d : '', missing: c ? 0 : 1 }; }
     var out = []; out.fx = false; out.fy = false;
     if (!target && tree.op && P.root) {   // the ink box of characters like this one: the first part's own, else the operator's
       var k0 = keyOf(tree.args[0], P), r = (k0 != null && P.root(tree.op, k0)) || P.root(tree.op);
@@ -226,6 +250,12 @@
       role: function (cp, role) { var r = rec(cp); return (r && r.r && r.r[role]) || null; },
       inner: function (cp, op) { var r = rec(cp); return (r && r.i && r.i[op]) || null; },
       root: function (op, cp) { if (cp == null) return M.root[op] || null; var r = rec(cp); return (r && r.ro && r.ro[op]) || null; },
+      struct: function (op, role) { return (M.struct && M.struct[op] && M.struct[op][role]) || null; },
+      idsChar: function (key) {
+        var first = Array.from(key).find(function (c) { return !root.IdsParse.ARITY[c]; }); if (!first) return null;
+        var s = data[first.codePointAt(0) >> 8], i = s && s['~i'];
+        return i && i[key] != null ? i[key] : null;
+      },
       variant: function (cp, sfx) { var r = rec(cp); return (r && r.vr && r.vr[sfx]) || null; },
       op: function (role) { return M.ops[role] || null; }, feat: function (role) { return M.feat[role] || null; }
     };
@@ -250,9 +280,19 @@
         if (l.unknown) return;
         var cp = l.ch.codePointAt(0), c = M.canon[cp]; keys[cp >> 8] = 1; if (c != null) keys[c >> 8] = 1;
       });
-      var list = Object.keys(keys).map(Number);
-      return Promise.all(list.map(loadSlice)).then(function (got) {
-        var data = {}; list.forEach(function (k, i) { data[k] = got[i]; });
+      var data = {};
+      var loadAll = function (ks) { var list = Object.keys(ks).map(Number).filter(function (k) { return !(k in data); });
+        return Promise.all(list.map(loadSlice)).then(function (got) { list.forEach(function (k, i) { data[k] = got[i]; }); }); };
+      return loadAll(keys).then(function () {   // the characters that parts of parts are (⿱宀子 = 字) need their own slices too
+        var P0 = provider(M, data), more = {};
+        (function walk(n) {
+          if (n.ch !== undefined) return;
+          var cp = P0.idsChar(root.IdsParse.key(n, P0.canon));
+          if (cp != null) { more[cp >> 8] = 1; var c = M.canon[cp]; if (c != null) more[c >> 8] = 1; }
+          n.args.forEach(walk);
+        })(tree);
+        return loadAll(more);
+      }).then(function () {
         var P = provider(M, data), L;
         if (tree.ch !== undefined) {   // a single character: its own glyph
           var c = tree.unknown ? null : P.char(P.canon(tree.ch.codePointAt(0)));
