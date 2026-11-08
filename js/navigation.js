@@ -256,11 +256,10 @@ window.Readings = window.Readings || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Qatt.org home", vi: "Trang chủ Qatt.org", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "Unicode", bar: "Unicode", barOrder: 5, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
-            { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 4, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
-            { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 3, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "Learn QATT", vi: "Học QATT", bar: "Learn", barOrder: 2, barVi: "Học", barPrefix: "/learn/", url: "/learn/", icon: "bi-easel" },
-            { name: "Symbols", vi: "Bảng chữ", tile: "Symbols", tileVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
+            { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 3, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
+            { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 4, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
+            { name: "Unicode", bar: "Unicode", barOrder: 5, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "Decodings", vi: "Giải mã", tile: "Decodings", tileVi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Wiki", tile: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
