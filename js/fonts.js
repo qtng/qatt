@@ -13,6 +13,7 @@ as soon as the parser has added them. Its globals are var: it may run twice (adm
 var QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
   { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic-letters", big: "gothic", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
+  { family: "QATT Gothic Rounded",   label: "Gothic rounded",      file: "qatt-gothic-rounded-letters", big: "qatt-gothic-rounded", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "gothic", cjk: true },   // its CJK: the same big font
   { family: "QATT Pen Thin",        label: "QATT Pen thin",                file: "qatt-pen-thin-letters", big: "qatt-pen-thin", cjk: true },
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters", big: "qatt-pen-light", cjk: true },
@@ -40,10 +41,11 @@ var PA_FONTS = [
   { family: "PA Migoi",       file: "pa-migoi" },
   { family: "PA Gothic",      file: "pa-gothic" },
   { family: "PA Celluloid",   file: "pa-celluloid" },
+  { family: "PA Gothic Rounded", file: "pa-gothic-rounded" },
   { family: "PA Phong Thao",  file: "pa-phongthao" },
 ];
 // the PA fonts that go behind a QATT font (the fonts of PA text in the Chunom writer and in Notes): the one of its stroke style, then the plain one
-var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : /^QATT Gothic/.test(family) ? "PA Gothic" : /^Celluloid/.test(family) ? "PA Celluloid" : null; return own ? [own, "PA"] : ["PA"]; };
+var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : family === "QATT Gothic Rounded" ? "PA Gothic Rounded" : /^QATT Gothic/.test(family) ? "PA Gothic" : /^Celluloid/.test(family) ? "PA Celluloid" : null; return own ? [own, "PA"] : ["PA"]; };
 // big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack
