@@ -48,6 +48,7 @@
 //   P.char(cp)        { d, b, h, v } the glyph of the code point alone (flattened KAGE data, ink box, layers), or null
 //   P.role(cp, role)  [x1, y1, x2, y2, n, glyph] the median box of the part in that role (relative to the parent's ink box), or null
 //   P.glyph(name)     { d, b } a glyph used for a role, or null
+//   P.pair(cp, role, bucket) [x1, y1, x2, y2, n] the median box by the partner's layers (bucket 0–3), or null
 //   P.inner(cp, op)   [x1, y1, x2, y2, n] where the enclosed part sits in this enclosing part, or null
 //   P.op(role)        [x1, y1, x2, y2, n] all parts of a role;  P.feat(role) [v, h] their median layers
 //   P.canon(cp)       the canonical code point (⺡ -> 氵)
@@ -59,7 +60,7 @@
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3 };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -76,8 +77,13 @@
   }
 
   // the box of a child in its role (relative to the parent): measured median, mixed with the median of the role by the count, and the density
-  function est(node, role, P, o) {
+  var bucket = function (x) { return x <= 1.5 ? 0 : x <= 2.5 ? 1 : x <= 3.5 ? 2 : 3; };
+  function est(node, role, P, o, partner) {
     var g = P.op(role) || [0, 0, 1, 1, 0], k = keyOf(node, P), m = k != null ? P.role(k, role) : null;
+    if (m && partner && o.usePair && P.pair) {   // the box of this part next to partners like this one
+      var pf = feat(partner, P), pm = P.pair(k, role, bucket(role[0] === '⿰' ? pf[0] : pf[1]));
+      if (pm && pm[4] >= o.nPair) { var wp = pm[4] / (pm[4] + o.kPair); m = m.slice(); for (var q = 0; q < 4; q++) m[q] = m[q] * (1 - wp) + pm[q] * wp; }
+    }
     var box = g.slice(0, 4), measured = m && m[4] >= o.nMin;
     if (!measured && node.op && o.useStruct && P.struct) {   // a part of parts: the size of parts of its structure in this role
       var st = P.struct(node.op, role);
@@ -163,7 +169,7 @@
       draw(node.args[0], T, P, o, null, out); out.fx = ofx; out.fy = ofy; return;
     }
     if (op === '㇯') { draw(node.args[0], T, P, o, null, out); return; }   // subtraction: the first part (approximation)
-    var e = node.args.map(function (a, i) { return est(a, roles[i], P, o); });
+    var e = node.args.map(function (a, i) { return est(a, roles[i], P, o, (op === '⿰' || op === '⿱') ? node.args[1 - i] : null); });
     var boxes = e.map(function (x) { return x.box; });
     if (H_OPS[op]) boxes = row(boxes, true);
     else if (V_OPS[op]) boxes = row(boxes, false);
