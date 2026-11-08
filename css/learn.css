@@ -28,10 +28,11 @@
 .steps .home .num { font-size: .8rem; }
 @media (max-width: 576px) { .steps { flex-wrap: nowrap; gap: .2rem; } .steps li:not(.now) .t { display: none; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
 
-/* the tabs: a row with a sliding pill behind the active one */
+/* the tabs: a row (or rows: .rows, tabRows of Learn.board) with a sliding pill behind the active one */
+.marks.rows { grid-auto-flow: row; }
 .tools { flex-wrap: wrap; }
 .marks { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .25rem; padding: .3rem; border-radius: 1.1rem; background: color-mix(in srgb, currentColor 6%, transparent); color: var(--ink); }
-.marks .pill { position: absolute; top: .3rem; bottom: .3rem; left: 0; width: 0; border-radius: .85rem; background: var(--cinnabar); box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--cinnabar) 40%, transparent); transition: transform .55s cubic-bezier(.65, 0, .35, 1), width .55s cubic-bezier(.65, 0, .35, 1); z-index: 0; }
+.marks .pill { position: absolute; top: 0; left: 0; width: 0; height: 0; border-radius: .85rem; background: var(--cinnabar); box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--cinnabar) 40%, transparent); transition: transform .55s cubic-bezier(.65, 0, .35, 1), width .55s cubic-bezier(.65, 0, .35, 1), height .55s cubic-bezier(.65, 0, .35, 1); z-index: 0; }
 .marks button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: .05rem; padding: .35rem .2rem .3rem; border: 0; border-radius: .85rem; background: none; color: inherit; transition: color .35s; min-width: 0; }
 .marks button:hover { color: var(--cinnabar); }
 .marks button.active { color: #fff; }

@@ -5,7 +5,7 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
 
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
-        build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes, then onRebuild(parser))
+        build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes, then onRebuild(parser)); tabRows: the tabs in that many rows
         item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading, in the middle of the row; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
 Needs parser.js and qatt-text.js; css/learn.css.
@@ -135,7 +135,7 @@ const Learn = (() => {
   const speak = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };   // read aloud (unless the sound of the board is off)
 
   // the board
-  const board = (root, { build, step = 4000, decoding = true, lesson = current, onRebuild } = {}) => {
+  const board = (root, { build, step = 4000, decoding = true, lesson = current, onRebuild, tabRows = 1 } = {}) => {
     root.style.setProperty('--step', step / 1000 + 's');
     const html = `
       <div class="d-flex justify-content-center align-items-center gap-2 tools mb-3">
@@ -165,8 +165,8 @@ const Learn = (() => {
     const placePill = () => {
       const t = tabEls[tab]; if (!t) return;
       const box = $('marks').getBoundingClientRect(), tb = t.getBoundingClientRect();
-      $('pill').style.width = tb.width + 'px';
-      $('pill').style.transform = `translateX(${tb.left - box.left}px)`;
+      $('pill').style.width = tb.width + 'px'; $('pill').style.height = tb.height + 'px';
+      $('pill').style.transform = `translate(${tb.left - box.left}px, ${tb.top - box.top}px)`;
     };
     const drawGlyph = (target, item) => {
       if (item.parts) {
@@ -209,6 +209,9 @@ const Learn = (() => {
         $('marks').append(b);
         return b;
       });
+      // tabRows: the tabs in that many rows (the rhymes: 11 pairs of shapes in two rows)
+      if (tabRows > 1) $('marks').style.gridTemplateColumns = `repeat(${Math.ceil(tabs.length / tabRows)}, minmax(0, 1fr))`;
+      $('marks').classList.toggle('rows', tabRows > 1);
       $('marks').hidden = tabs.length < 2;
       $('progress').parentElement.hidden = tabs.length < 2;
     };
