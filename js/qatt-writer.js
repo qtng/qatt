@@ -30,6 +30,8 @@ const QattWriter = (() => {
        it never wraps, the dropdowns give way */
     .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; margin: 0 0 .6rem; min-height: 1.9rem; font-size: .78rem; }
     body:not(.qatt-on) .qatt-bar .group > :not(#font) { visibility: hidden; }   /* the font is always there, the rest only while QATT is on */
+    body.pa-site .qatt-bar .group > :not(#font) { visibility: visible; }   /* the Chunom writer: Convert and the PA button are always there, also with PA off */
+    .qatt-bar #pa-btn, html .qatt-bar #pa-btn, html[data-theme] .qatt-bar #pa-btn { font-family: var(--pafont, "PA"), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .45rem; min-width: 2.1rem; letter-spacing: 0; text-transform: none; }   /* the preview is a PA cell */
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
@@ -70,6 +72,7 @@ const QattWriter = (() => {
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
+        <button type="button" class="btn btn-quiet" id="pa-btn" hidden disabled>·</button>
         <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
       </div>
 `;
@@ -91,10 +94,6 @@ const QattWriter = (() => {
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" role="switch" id="mode-select" autocomplete="off">
           <label class="form-check-label" for="mode-select" id="mode-label" ></label>
-        </div>
-        <div class="form-check form-switch pa-only">
-          <input class="form-check-input" type="checkbox" role="switch" id="pa-stack" autocomplete="off" checked>
-          <label class="form-check-label" for="pa-stack" data-vi="PA xếp chồng">PA stacked</label>
         </div>
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" role="switch" id="telex-select" autocomplete="off" checked>
@@ -277,7 +276,7 @@ const QattWriter = (() => {
     // converts the word before the cursor to PA (js/pa-text.js, loaded from next to this file when the page has not loaded it), Enter picks the first candidate. The address
     // writer.html?pa=1 has it on from the start (?pa=0 off).
     const paSite = mode === 'qatt';
-    const modeBox = $('mode-select'), paStack = $('pa-stack');
+    const modeBox = $('mode-select'), paBtn = $('pa-btn');
     $('mode-label').innerHTML = paSite ? 'Phonetic annotation' : 'Chữ Nôm';
     if (paSite) $('mode-label').setAttribute('data-vi', 'Phiên âm');
     if (paSite ? !havePa : !haveIme) modeBox.closest('.form-check').hidden = true;   // the PA switch is shown when js/pa-text.js has arrived
@@ -330,6 +329,8 @@ const QattWriter = (() => {
       apply();
       document.body.classList.toggle('qatt-on', qatt || pa);
       document.body.classList.toggle('pa-on', pa);
+      document.body.classList.toggle('pa-site', paSite);
+      paBtn.hidden = !paSite;
       $('decoding').hidden = !qatt;
       $('variants').hidden = !qatt;
       status.innerHTML = paSite ? (pa ? '<b>Space</b> converts PA, <b>Enter</b> picks first Hán Nôm' : '<b>Space</b> and <b>Enter</b> pick first Hán Nôm')
@@ -342,12 +343,41 @@ const QattWriter = (() => {
       refresh();
     }
     modeBox.addEventListener('change', () => { store.set(paSite ? 'pa' : 'on', modeBox.checked); setState(); });   // kept only when somebody chose it (not from the address)
-    paStack.addEventListener('change', () => store.set('pastack', paStack.checked));
 
-    wire(typer, { parser, on: () => qatt || pa, keys: () => keys, paOptions: () => ({ stacked: paStack.checked }), refresh: () => refresh(), converted: () => ime && ime.hide() });
+    wire(typer, { parser, on: () => qatt || pa, keys: () => keys, paOptions: () => ({ stacked: true }), refresh: () => refresh(), converted: () => ime && ime.hide() });
 
     // what depends on the text and the cursor: the dropdown of the variants
-    function refresh() { showVariants(); }
+    function refresh() { showVariants(); showPaPreview(); }
+    // The PA button (the Chunom writer, always there, also with PA off): the word before the cursor as a PA cell, live; a click puts it in the place of the word
+    const paWord = () => {
+      if (!paSite || !havePa || typer.selectionStart !== typer.selectionEnd) return null;
+      const at = typer.selectionStart, next = typer.value.charAt(at);
+      if (next && !NOT_LETTER.test(next)) return null;   // not in the middle of a word
+      const m = WORD_END.exec(typer.value.slice(0, at));
+      const text = m && PaText.word(m[0], parser, { stacked: true });
+      return text ? { text, start: at - m[0].length, end: at } : null;
+    };
+    let shownPa = null;
+    function showPaPreview() {
+      const w = paWord(), key = w ? w.text : '';
+      if (key === shownPa) return;
+      shownPa = key;
+      paBtn.disabled = !w;
+      paBtn.textContent = w ? w.text : '·';
+      paBtn.title = w ? (window.Lang && Lang.t ? Lang.t('Insert as PA', 'Chèn phiên âm') : 'Insert as PA') : '';
+      if (w) paBtn.setAttribute('aria-label', paBtn.title); else paBtn.removeAttribute('aria-label');
+    }
+    paBtn.addEventListener('mousedown', e => e.preventDefault());   // the field keeps the focus
+    paBtn.addEventListener('click', () => {
+      const w = paWord();
+      if (!w) return;
+      typer.focus({ preventScroll: true });
+      typer.setRangeText(w.text, w.start, w.end, 'end');
+      if (ime) ime.hide();
+      shownPa = null;
+      refresh();
+    });
+    document.addEventListener('langchange', () => { shownPa = null; showPaPreview(); });
     // Variants (the dropdown next to Convert): what can be done to the characters before the cursor, offered in this order (the dropdown is on when there is something, else off):
     // Tham Thư (stack): the cursor stands behind two letters of QATT (U+F0000..U+F0099) whose second is a single letter (a letter after a joiner is the rhyme of a pair, so it does not
     //   count); the tone marks of the second one may stand between it and the cursor. The first can be a single letter or the end of a pair, but not the upper part of a stack.
@@ -434,12 +464,12 @@ const QattWriter = (() => {
     }
     $('convert-btn').addEventListener('click', () => {   // no focus: the keyboard of a phone stays closed
       const v = typer.value;
-      typer.value = paSite ? (readable(v) ? PaText.read(v, parser) : PaText.convert(v, parser, { stacked: paStack.checked })) : (readable(v) ? readAsQuocNgu(v) : toQatt(v));
+      typer.value = paSite ? (readable(v) ? PaText.read(v, parser) : PaText.convert(v, parser, { stacked: true })) : (readable(v) ? readAsQuocNgu(v) : toQatt(v));
       refresh();
     });
     $('example-btn').addEventListener('click', () => {
       const text = 'Quốc âm tân tự là tiếng Việt';
-      typer.value = paSite ? PaText.convert(text, parser, { stacked: paStack.checked }) : QattText.convert(text, parser).replace(/\s+/g, '');   // without the spaces
+      typer.value = paSite ? PaText.convert(text, parser, { stacked: true }) : QattText.convert(text, parser).replace(/\s+/g, '');   // without the spaces
       refresh();
     });
 
@@ -463,7 +493,6 @@ const QattWriter = (() => {
     modeBox.checked = store.get(paSite ? 'pa' : 'on', 'false') === 'true';   // off at the start on both sites
     const asked = new URLSearchParams(location.search).get('pa');   // writer.html?pa=1: PA on (the Chunom writer)
     if (paSite && asked !== null) modeBox.checked = !['0', 'off', 'false', 'no'].includes(asked.toLowerCase());
-    paStack.checked = store.get('pastack', 'true') === 'true';
     setState();
     // js/pa-text.js next to this file, when the page has not loaded it: PA is there from the moment it has arrived
     if (paSite && !havePa && BASE && parser) {
