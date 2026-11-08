@@ -43,7 +43,7 @@
 
 /* the board: rows of two items with their readings in the middle (muted); the band lies across the row being read, which is shown fully */
 .board { position: relative; padding: .6rem 0; color: var(--ink); }
-.row-pair { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr var(--mid) 1fr; align-items: center; height: var(--row); cursor: pointer; }
+.row-pair { scroll-margin: 5rem 0 6rem; position: relative; z-index: 1; display: grid; grid-template-columns: 1fr var(--mid) 1fr; align-items: center; height: var(--row); cursor: pointer; }
 .row-pair .g { display: flex; align-items: center; justify-content: center; gap: .3rem; font-family: var(--qfont), sans-serif; font-size: 3.1rem; line-height: 1; transition: color .6s, transform .6s cubic-bezier(.34, 1.56, .64, 1), opacity .6s; opacity: .7; }
 .row-pair .g .part { font-size: 2.3rem; }
 .row-pair .g .plus { font-family: Georgia, serif; font-size: 1.1rem; opacity: .6; }

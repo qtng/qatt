@@ -223,7 +223,7 @@ const Learn = (() => {
       $('band').classList.add('voice'); setTimeout(() => $('band').classList.remove('voice'), 1400);
       speak(text);
     };
-    const show = speak => {
+    const show = (speak, scroll = true) => {
       const rows = tabs[tab].rows;
       row = Math.min(row, rows.length - 1);
       $('band').style.transform = `translateY(calc(${row} * var(--row)))`;
@@ -232,7 +232,9 @@ const Learn = (() => {
       restart(rowEls[row].mid, 'in');
       $('progress').style.width = ((row + 1) / rows.length * 100) + '%';
       const tick = $('tick'); tick.classList.remove('run'); void tick.offsetWidth;
-      if (playing) { tick.classList.add('run'); rowEls[row].div.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+      if (playing) tick.classList.add('run');
+      // the row being read scrolls into view when it lies outside it (scroll-margin of .row-pair keeps it clear of the bars); not when the board is only built
+      if (scroll) rowEls[row].div.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       if (speak) setTimeout(() => say([a.speak, b.speak].filter(Boolean).join(', ')), 350);   // when the band has nearly arrived
       if (lesson && tab === tabs.length - 1 && row === rows.length - 1) done(lesson);
     };
@@ -267,7 +269,7 @@ const Learn = (() => {
     };
     const rebuild = animate => {
       tabs = build(parser).filter(t => t.rows.length);
-      drawTabs(); setTab(Math.min(tab, tabs.length - 1), animate); if (!started) row = first(); show(false);
+      drawTabs(); setTab(Math.min(tab, tabs.length - 1), animate); if (!started) row = first(); show(false, false);
       if (onRebuild) onRebuild(parser);                   // the rest of the page follows the decoding too
     };
 
