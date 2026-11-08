@@ -111,6 +111,7 @@ window.Lang = window.Lang || (function() {
 //   Theme.choosable     whether a theme can be chosen on this page
 //   Theme.reset()       forget the stored choice (the "Default" entry of the menu)
 //   Theme.set("popart") choose and remember a theme, the page changes at once; the event "themechange" is sent to the document
+// There is no day and night mode any more (the theme nocturne at night, a sun/moon icon): the theme chosen is shown at any time.
 window.Theme = window.Theme || (function() {
     const KEY = "theme2";   // the key was "theme" and then "theme1": a new key, so that the choices made earlier no longer count (the default theme is bohemian now)
     const list = { classic: ["Classic", "Cổ điển"], retro: ["Retro", "Retro"], popart: ["Pop art", "Pop art"], editorial: ["Editorial", "Tạp chí"], swiss: ["Swiss", "Thụy Sĩ"],
@@ -186,12 +187,62 @@ window.Theme = window.Theme || (function() {
     else { const s = document.createElement("script"); s.src = src; document.head.append(s); }
 })();
 
-// ---------- settings of a page in the bars: Nav.tools(element) ----------
-// A page hands over one element with its own settings (the readings of the Bookshelf): on the desktop it stands in the menu bar if it fits there
-// together with the links in text, else in a second bar below it (fixed as the first; --nav-h on <html> is the height of both, 60 or 104px);
-// below 992px it is at the top of the side menu, under "Page settings". The element is moved, not copied, so its listeners stay.
-// May be called before the bar exists (a defer script): it is put in place when the bar is made.
-window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._tools = { el, opt: opt || {} }; if (this._place) this._place(); } };
+// ---------- the readings of Chữ Nôm: Readings ----------
+// Which readings stand next to Chữ Nôm on the Chunom site: PA (Phiên âm tự), QATT and Quốc Ngữ, any of them together, in this order; none = no reading.
+// Turning PA on turns the other two off (they can be turned on again). One setting for the whole site (localStorage.readings1 = { pa, qatt, qn }, per origin),
+// switched next to EN | VI in the menu bar (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
+// Readings.state, .shown() (the kinds on, in order), .toggle(kind), the event "readingschange" on document (also when another tab changes it);
+// Readings.ready() loads parser.js, pa-text.js and qatt-text.js of qatt.org when PA or QATT is first wanted; then Readings.text(qn, kind) writes a Quốc Ngữ text
+// in that script and Readings.fill(element, qn) puts the readings shown into an element (plain text for Quốc Ngữ alone, else a span .rd-<kind> each).
+window.Readings = window.Readings || (function() {
+    const KEY = 'readings1', KINDS = ['pa', 'qatt', 'qn'];
+    const BASE = new URL('.', document.currentScript ? document.currentScript.src : 'https://qatt.org/js/navigation.js').href;
+    const state = { pa: false, qatt: false, qn: true };
+    const read = () => {
+        try {
+            let s = JSON.parse(localStorage.getItem(KEY) || 'null');
+            if (!s) {   // taken over from the Bookshelf, which had it before
+                const o = JSON.parse(localStorage.getItem('shelf1') || '{}');
+                s = { pa: !!o.pa || o.reading === 'pa', qatt: !!o.qatt, qn: o.reading ? o.reading === 'qn' : o.ruby === false ? false : o.qn !== false };
+            }
+            KINDS.forEach(k => { state[k] = !!s[k]; });
+        } catch (e) { /* storage may be blocked */ }
+    };
+    read();
+    const changed = () => document.dispatchEvent(new CustomEvent('readingschange', { detail: { ...state } }));
+    window.addEventListener('storage', e => { if (e.key === KEY) { read(); changed(); } });
+    function toggle(k) {
+        state[k] = !state[k];
+        if (k === 'pa' && state.pa) state.qatt = state.qn = false;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+        changed();
+    }
+    const loaded = {};
+    const load = (name, exists) => loaded[name] || (loaded[name] = exists() ? Promise.resolve() : new Promise((ok, fail) => {   // once, and not when the page has it
+        const sc = document.createElement('script'); sc.src = BASE + name; sc.onload = ok; sc.onerror = () => fail(new Error(name)); document.head.appendChild(sc);
+    }));
+    let ready = null, parser = null;
+    function getReady() {
+        return ready || (ready = load('parser.js', () => typeof VietnameseParser !== 'undefined')
+            .then(() => Promise.all([load('pa-text.js', () => typeof PaText !== 'undefined'), load('qatt-text.js', () => typeof QattText !== 'undefined')]))
+            .then(() => { parser = new VietnameseParser('qatt'); }));
+    }
+    function text(qn, kind) {
+        if (kind === 'qn' || !parser) return qn;
+        const f = kind === 'pa' ? PaText.word : QattText.word;
+        return qn.replace(/[\p{L}\p{M}]+/gu, w => f(w.toLowerCase(), parser) || w);
+    }
+    function fill(el, qn) {
+        const shown = KINDS.filter(k => state[k]);
+        const put = () => {
+            if (shown.length === 1 && shown[0] === 'qn') { el.textContent = qn; return; }
+            el.replaceChildren(...shown.map(k => { const s = document.createElement('span'); s.className = 'rd-' + k; s.textContent = text(qn, k); return s; }));
+        };
+        el.dataset.readings = shown.join(' ') || 'off';
+        if ((state.pa || state.qatt) && !parser) { el.textContent = state.qn ? qn : ''; getReady().then(put, () => { el.textContent = qn; }); } else put();
+    }
+    return { state, KINDS, shown: () => KINDS.filter(k => state[k]), toggle, ready: getReady, text, fill };
+})();
 
 (function() {
     const CHUNOM_SITE = "https://chunom.org";
@@ -209,9 +260,9 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "Learn QATT", vi: "Học QATT", bar: "Learn", barOrder: 2, barVi: "Học", barPrefix: "/learn/", url: "/learn/", icon: "bi-easel" },
-            { name: "Symbols", vi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
-            { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
-            { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
+            { name: "Symbols", vi: "Bảng chữ", tile: "Symbols", tileVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
+            { name: "Decodings", vi: "Giải mã", tile: "Decodings", tileVi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
+            { name: "Wiki", tile: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
     };
     const nomBlock = {
@@ -224,10 +275,10 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
             { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
             { name: "Write Chữ Nôm", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
             { name: "Translate Chữ Nôm", vi: "Dịch chữ Nôm", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
-            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-book" },
-            { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
-            { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, url: "/chunom/shelf/", icon: "bi-book" },
-            { name: "Phiên âm tự (PA)", vi: "Phiên âm tự (PA)", url: "/chunom/pa/", icon: "bi-type" },
+            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", tile: "Génibrel", url: "/chunom/dict/genibrel.html", icon: "bi-journal-text" },
+            { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", tile: "Bonet", url: "/chunom/dict/bonet.html", icon: "bi-journal-bookmark" },
+            { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, barPrefix: "/chunom/shelf/", url: "/chunom/shelf/", icon: "bi-bookshelf" },
+            { name: "Phiên âm tự (PA)", vi: "Phiên âm tự (PA)", tile: "PA", url: "/chunom/pa/", icon: "bi-type" },
         ]
     };
     // what differs between the sites: brand, logo, icons, the colour of the bottom bar; own block first
@@ -295,28 +346,37 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
               border-bottom: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bg) 72%, #fff));
             }
             /* desktop: the links of the own block in the bar, the other site in a dropdown; below 992px the offcanvas menu and the bottom bar do it */
-            .desk-links, .desk-other { display: none; }
-            @media (min-width: 992px) {
+            /* from 768px (tablet and desktop) the bar has the links as tiles, the phone has the side menu and the bottom bar. When not all fit, the bar is "compact":
+               the entries of the bottom bar and Menu, which opens the side menu (the rest, and the other site), as on the phone; when even that does not fit, icons only */
+            .desk-tiles, .desk-other { display: none; }
+            @media (min-width: 768px) {
                 #navTogglerCustom { display: none; }
-                .desk-links { display: flex; align-items: stretch; gap: .15rem; align-self: stretch; margin: 0 auto 0 .5rem; padding: 0; list-style: none; }
-                .desk-other { display: block; position: relative; margin-right: 1rem; }
+                .desk-tiles { display: flex; align-items: stretch; align-self: stretch; margin: 0 auto 0 .5rem; padding: 0; list-style: none; }
+                .desk-other { display: block; position: relative; margin-left: .3rem; }
+                .nav-backdrop.compact .desk-other, .nav-backdrop.compact .desk-tiles .more { display: none; }
             }
-            .desk-links a, .desk-other > button { display: flex; align-items: center; gap: .4rem; height: 100%; padding: 0 .6rem; color: rgba(255, 255, 255, .65); text-decoration: none; background: none; border: 0; border-bottom: 3px solid transparent; font-size: .92rem; white-space: nowrap; }
-            .desk-links a:hover, .desk-other > button:hover { color: #fff; }
-            .desk-links a.active { color: #fff; border-bottom-color: var(--bar-accent); }
+            .desk-tiles .menu-li { display: none; }
+            .nav-backdrop.compact .desk-tiles .menu-li { display: block; }
+            .desk-tiles a, .desk-tiles button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 3.6rem; height: 100%; padding: 0 .5rem; color: rgba(255, 255, 255, .65); background: none; border: 0; border-bottom: 3px solid transparent; font-size: .68rem; text-decoration: none; white-space: nowrap; }
+            .desk-tiles i { font-size: 1.25rem; line-height: 1; }
+            .desk-tiles a:hover, .desk-tiles button:hover { color: #fff; }
+            .desk-tiles a.active { color: #fff; border-bottom-color: var(--bar-accent); }
+            .desk-tiles a.active i { color: var(--bar-accent); }
+            .desk-tiles.icons-only span { display: none; }
+            .desk-tiles.icons-only a, .desk-tiles.icons-only button { min-width: 0; padding: 0 .6rem; }
+            .desk-other > button { display: flex; align-items: center; gap: .4rem; padding: 0 .6rem; color: rgba(255, 255, 255, .65); background: none; font-size: .92rem; white-space: nowrap; }
+            .desk-other > button:hover { color: #fff; }
             .desk-other > button { height: 36px; border: 1px solid rgba(255, 255, 255, .25); border-radius: .4rem; }
             .desk-other .desk-menu { display: none; position: absolute; right: 0; top: calc(100% + .6rem); min-width: 14rem; padding: .4rem 0; background: color-mix(in srgb, var(--nav-bg) 98%, transparent); border: 1px solid rgba(255, 255, 255, .15); border-radius: .5rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .4); }
             .desk-other.open .desk-menu { display: block; }
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
-            .desk-links i { display: none; }
-            .desk-links.icons-only i { display: inline; font-size: 1.15rem; }
-            .desk-links.icons-only .dl-text { display: none; }
-            .desk-links.icons-only a { padding: 0 .75rem; }
-            .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
-            .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
+            /* EN | VI: one widget (a segmented pill: the language of the page filled), unlike the readings next to it, which are plain text toggles */
+            .lang-switch { display: flex; align-items: center; margin-right: .3rem; padding: 2px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 999px; font-size: .75rem; }
+            .lang-switch > span { display: none; }
+            .lang-switch button { background: none; border: 0; border-radius: 999px; padding: .12rem .5rem; color: rgba(255, 255, 255, .65); font-weight: 600; letter-spacing: .04em; line-height: 1.3; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
-            .lang-switch button.active { color: #fff; text-decoration: underline; text-underline-offset: .3em; }
+            .lang-switch button.active { background: rgba(255, 255, 255, .88); color: #212529; }
             /* the theme: a palette button next to EN | VI with a small list of the themes */
             .theme-switch { position: relative; margin-right: .4rem; }
             .theme-switch > button { background: none; border: 0; padding: .25rem .35rem; color: rgba(255, 255, 255, .6); font-size: 1.05rem; line-height: 1; cursor: pointer; }
@@ -390,17 +450,20 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
             .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
             .to-top.show { opacity: 1; pointer-events: auto; }
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
-            /* the settings of the page (Nav.tools): in the bar, in a second bar, or in the side menu */
-            :root { --nav-h: 60px; }
-            .nav-tools { display: flex; align-items: center; color: rgba(255, 255, 255, .75); font-size: .88rem; }
-            .nav-backdrop .nav-tools { margin-right: 1rem; white-space: nowrap; }
-            .nav-tools-bar { position: fixed; top: 60px; left: 0; right: 0; z-index: 1029; height: 44px; display: flex; align-items: center; padding: 0 1rem; overflow-x: auto;
-                background: color-mix(in srgb, var(--nav-bg) var(--nav-alpha), transparent); backdrop-filter: blur(15px);
-                border-bottom: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bg) 72%, #fff)); }
-            .nav-tools-bar[hidden], .nav-tools-side[hidden] { display: none; }
-            .nav-tools-side { padding: 0 1.25rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, .12); }
-            .nav-tools-side .nav-section-header { padding-left: 0; padding-right: 0; color: rgba(255, 255, 255, .55); }
-            .nav-tools-side .nav-tools { flex-wrap: wrap; }
+            /* the readings next to EN | VI (Chunom site): PA | QATT | Quốc Ngữ in the look of the language switch, any of them on; "QN" on narrow screens */
+            .readings-switch { display: flex; align-items: center; gap: .3rem; margin-right: .6rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
+            .readings-switch button { background: none; border: 0; padding: .25rem .1rem; color: rgba(255, 255, 255, .5); font-weight: 600; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
+            .readings-switch button:hover { color: #fff; }
+            .readings-switch button.active { color: var(--bar-accent); text-decoration: underline; text-underline-offset: .3em; }
+            .readings-switch .short { display: none; }
+            @media (max-width: 575.98px) { .readings-switch .long { display: none; } .readings-switch .short { display: inline; } .readings-switch { margin-right: .3rem; gap: .2rem; } }
+            .readings-switch[hidden] { display: none; }
+            @media (max-width: 389.98px) { .readings-switch > span { display: none; } .readings-switch { gap: .45rem; margin-right: .25rem; } .lang-switch { margin-right: .1rem; } .lang-switch button { padding: .12rem .4rem; } }
+            @media (max-width: 359.98px) { .nav-backdrop > .container-fluid { padding-left: .4rem; padding-right: .3rem; } .nav-backdrop .navbar-brand { margin-right: .3rem; } #navTogglerCustom { padding: .25rem .2rem; } .readings-switch { gap: .3rem; } }
+            /* the readings written by Readings.fill: in one line, PA and QATT in their fonts */
+            .rd-pa { font-family: "PA Pen", "PA", sans-serif; font-size: 1.2em; }
+            .rd-qatt { font-family: "QATT Pen", sans-serif; font-size: 1.2em; }
+            .rd-pa + span, .rd-qatt + span { margin-left: .3em; }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
             .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
             .powered-by a { color: inherit; opacity: .45; text-decoration: none; }
@@ -463,8 +526,14 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
         const ownSection = sections.find(sec => sec.linkClass === navConfig.own) || sections[0];
         const otherSection = sections.find(sec => sec !== ownSection);
         const isActive = (sec, link) => !sec.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
-        const deskLinks = ownSection.links.map(link =>
-            `<li><a href="${ownSection.site || ''}${link.url}" title="${link.name}" class="${isActive(ownSection, link) ? 'active' : ''}"><i class="bi ${link.icon}"></i><span class="dl-text${link.vi ? '" data-vi="' + link.vi : ''}">${link.name}</span></a></li>`).join('');
+        // the bar (from 768px) shows the links as tiles (icon above a short label: bar, else tile, else name): first the entries of the bottom bar in its order, then the others;
+        // when they do not all fit, it is compact: only the entries of the bottom bar and Menu, which opens the side menu (the rest and the other site), as on the phone
+        const barActive = link => currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '') || (link.barPrefix && currentPath.startsWith(link.barPrefix));
+        const tileOrder = [...ownSection.links.filter(l => l.bar).sort((a, b) => (a.barOrder ?? 0) - (b.barOrder ?? 0)), ...ownSection.links.filter(l => !l.bar)];
+        const tileLinks = tileOrder.map(link => {
+            const label = link.bar || link.tile || link.name, vi = link.bar ? link.barVi : link.tile ? link.tileVi : link.vi;
+            return `<li${link.bar ? '' : ' class="more"'}><a href="${ownSection.site || ''}${link.barUrl || link.url}" title="${link.name}" class="${!ownSection.site && barActive(link) ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${vi ? ` data-vi="${vi}"` : ''}>${label}</span></a></li>`;
+        }).join('') + '<li class="menu-li"><button type="button" class="desk-menu-btn" aria-label="Menu"><i class="bi bi-list"></i><span>Menu</span></button></li>';
         const otherLabel = onChunom ? 'QATT' : 'Chữ Nôm';
         const otherLinks = otherSection.links.map(link =>
             `<a href="${otherSection.site || ''}${link.url}"><i class="bi ${link.icon}"></i><span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span></a>`).join('');
@@ -483,19 +552,22 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="${home}">
                     ${navConfig.brand(logo, brandTitle, false)}
                 </a>
-                <ul class="desk-links">${deskLinks}</ul>
-                <div class="desk-other">
-                    <button type="button" aria-haspopup="true" aria-expanded="false">${otherLabel} <i class="bi bi-chevron-down small"></i></button>
-                    <div class="desk-menu">${otherLinks}</div>
-                </div>
+                <ul class="desk-tiles">${tileLinks}</ul>
                 <div class="ms-auto d-flex align-items-center">
                     <div class="theme-switch"${Theme.choosable && isAdmin() ? '' : ' hidden'}>
                         <button type="button" aria-haspopup="true" aria-expanded="false" title="Theme" data-vi-title="Giao diện" aria-label="Theme" data-vi-aria-label="Giao diện"><i class="bi bi-palette"></i></button>
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
                     <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
+                    <div class="readings-switch" role="group" aria-label="Readings" data-vi-aria-label="Cách đọc"${onChunom ? '' : ' hidden'}>
+                        <button type="button" data-k="pa" title="Phiên âm tự">PA</button><span aria-hidden="true">|</span><button type="button" data-k="qatt" title="Quốc Âm Tân Tự">QATT</button><span aria-hidden="true">|</span><button type="button" data-k="qn" title="Quốc Ngữ"><span class="long">Quốc Ngữ</span><span class="short">QN</span></button>
+                    </div>
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
+                    </div>
+                    <div class="desk-other">
+                        <button type="button" aria-haspopup="true" aria-expanded="false">${otherLabel} <i class="bi bi-chevron-down small"></i></button>
+                        <div class="desk-menu">${otherLinks}</div>
                     </div>
                     <button class="navbar-toggler border-0" type="button" id="navTogglerCustom">
                         <span class="navbar-toggler-icon"></span>
@@ -528,7 +600,7 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
                 <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2">${navConfig.brand(logo, brandTitle, true)}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
-            <div class="offcanvas-body p-0"><div class="nav-tools-side" hidden><div class="nav-section-header" data-vi="Cài đặt trang">Page settings</div></div>${sectionsHtml}</div>
+            <div class="offcanvas-body p-0">${sectionsHtml}</div>
         `;
 
         offcanvas.querySelectorAll('.nav-section-toggle').forEach(btn => btn.addEventListener('click', () => {
@@ -621,38 +693,27 @@ window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._
 
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
-        // the horizontal menu shows text only; when it no longer fits (the controls on the right wrap to a second row) it shows icons only
-        const deskUl = header.querySelector('.desk-links'), deskBrand = header.querySelector('.navbar-brand');
+        // the tiles: all of them if they fit (the controls on the right do not wrap to a second row), else compact, else icons only
+        const tilesUl = header.querySelector('.desk-tiles'), deskBrand = header.querySelector('.navbar-brand');
+        const wrapped = () => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || tilesUl.scrollWidth > tilesUl.clientWidth;
         const fitDesk = () => {
-            deskUl.classList.remove('icons-only');
-            if (!deskUl.offsetParent) return;
-            const wrapped = () => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || deskUl.scrollWidth > deskUl.clientWidth;
-            if (wrapped()) deskUl.classList.add('icons-only');
+            header.classList.remove('compact'); tilesUl.classList.remove('icons-only');
+            if (!tilesUl.offsetParent || !wrapped()) return;
+            header.classList.add('compact');
+            if (wrapped()) tilesUl.classList.add('icons-only');
         };
-        // the settings of the page (Nav.tools): in the bar if they fit there with the links in text, else in a second bar; in the side menu below 992px
-        const desktop = window.matchMedia('(min-width: 992px)');
-        const toolsBar = document.createElement('div');
-        toolsBar.className = 'nav-tools-bar'; toolsBar.hidden = true;
-        const toolsSide = offcanvas.querySelector('.nav-tools-side');
-        const rightGroup = header.querySelector('.ms-auto');
-        const setHeight = h => { document.documentElement.style.setProperty('--nav-h', h + 'px'); document.body.style.paddingTop = h + 'px'; };
-        const place = () => {
-            const t = Nav._tools;
-            if (!t) { fitDesk(); return; }
-            t.el.classList.add('nav-tools');
-            toolsBar.hidden = true; toolsSide.hidden = true; setHeight(60);
-            if (!desktop.matches) { toolsSide.append(t.el); toolsSide.hidden = false; fitDesk(); return; }
-            rightGroup.before(t.el);
-            fitDesk();
-            if (deskUl.classList.contains('icons-only')) { toolsBar.append(t.el); toolsBar.hidden = false; setHeight(104); fitDesk(); }
-        };
-        Nav._place = place;
-        place();
-        window.addEventListener('resize', place);
-        document.addEventListener('langchange', place);
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
-        window.addEventListener('load', place);
-        header.after(toolsBar);
+        tilesUl.querySelector('.desk-menu-btn').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
+        fitDesk();
+        window.addEventListener('resize', fitDesk);
+        document.addEventListener('langchange', fitDesk);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDesk);
+        window.addEventListener('load', fitDesk);
+        // the readings (Readings): PA | QATT | Quốc Ngữ next to EN | VI, on the Chunom site
+        const rd = header.querySelector('.readings-switch');
+        const markReadings = () => rd.querySelectorAll('button').forEach(b => { const on = Readings.state[b.dataset.k]; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+        rd.addEventListener('click', e => { const b = e.target.closest('button'); if (b) Readings.toggle(b.dataset.k); });
+        document.addEventListener('readingschange', markReadings);
+        markReadings();
         document.body.appendChild(offcanvas);
         if (!ownBottomBar) injectFooter(navConfig.license);
 
