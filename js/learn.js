@@ -139,7 +139,7 @@ const Learn = (() => {
     root.style.setProperty('--step', step / 1000 + 's');
     const html = `
       <div class="d-flex justify-content-center align-items-center gap-2 tools mb-3">
-        ${decoding ? `<select class="form-select form-select-sm w-auto" data-k="decoding" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select>` : ''}
+        ${decoding ? `<select class="form-select form-select-sm w-auto" data-k="decoding" aria-label="Decoding" data-vi-aria-label="Cách giải mã"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select>` : ''}
         <select data-qatt-fonts data-qatt-default="QATT Pen" class="form-select form-select-sm w-auto" aria-label="Font"></select>
       </div>
       <div class="marks" role="tablist" data-k="marks"><div class="pill" data-k="pill"></div></div>
