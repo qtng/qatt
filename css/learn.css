@@ -28,10 +28,11 @@
 .steps .home .num { font-size: .8rem; }
 @media (max-width: 576px) { .steps { flex-wrap: nowrap; gap: .2rem; } .steps li:not(.now) .t { display: none; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
 
-/* the tabs: a row with a sliding pill behind the active one */
+/* the tabs: a row (or rows: .rows, tabRows of Learn.board) with a sliding pill behind the active one */
+.marks.rows { grid-auto-flow: row; }
 .tools { flex-wrap: wrap; }
 .marks { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: .25rem; padding: .3rem; border-radius: 1.1rem; background: color-mix(in srgb, currentColor 6%, transparent); color: var(--ink); }
-.marks .pill { position: absolute; top: .3rem; bottom: .3rem; left: 0; width: 0; border-radius: .85rem; background: var(--cinnabar); box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--cinnabar) 40%, transparent); transition: transform .55s cubic-bezier(.65, 0, .35, 1), width .55s cubic-bezier(.65, 0, .35, 1); z-index: 0; }
+.marks .pill { position: absolute; top: 0; left: 0; width: 0; height: 0; border-radius: .85rem; background: var(--cinnabar); box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--cinnabar) 40%, transparent); transition: transform .55s cubic-bezier(.65, 0, .35, 1), width .55s cubic-bezier(.65, 0, .35, 1), height .55s cubic-bezier(.65, 0, .35, 1); z-index: 0; }
 .marks button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: .05rem; padding: .35rem .2rem .3rem; border: 0; border-radius: .85rem; background: none; color: inherit; transition: color .35s; min-width: 0; }
 .marks button:hover { color: var(--cinnabar); }
 .marks button.active { color: #fff; }
@@ -40,13 +41,12 @@
 .progress-line { height: 3px; margin: .55rem .9rem 0; border-radius: 3px; background: color-mix(in srgb, currentColor 10%, transparent); overflow: hidden; color: var(--ink); }
 .progress-line > div { height: 100%; width: 0; background: var(--cinnabar); transition: width .9s cubic-bezier(.65, 0, .35, 1); }
 
-/* the board: rows of two items, the band lies across the row being read */
+/* the board: rows of two items with their readings in the middle (muted); the band lies across the row being read, which is shown fully */
 .board { position: relative; padding: .6rem 0; color: var(--ink); }
 .row-pair { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr var(--mid) 1fr; align-items: center; height: var(--row); cursor: pointer; }
-.row-pair .g { display: flex; align-items: center; justify-content: center; gap: .3rem; font-family: var(--qfont), sans-serif; font-size: 3.1rem; line-height: 1; transition: color .6s, transform .6s cubic-bezier(.34, 1.56, .64, 1), opacity .6s; opacity: .55; }
+.row-pair .g { display: flex; align-items: center; justify-content: center; gap: .3rem; font-family: var(--qfont), sans-serif; font-size: 3.1rem; line-height: 1; transition: color .6s, transform .6s cubic-bezier(.34, 1.56, .64, 1), opacity .6s; opacity: .7; }
 .row-pair .g .part { font-size: 2.3rem; }
 .row-pair .g .plus { font-family: Georgia, serif; font-size: 1.1rem; opacity: .6; }
-.row-pair.done .g { opacity: .3; }
 .row-pair.now .g { opacity: 1; color: var(--cinnabar); transform: scale(1.15); }
 .row-pair:hover .g { opacity: .9; }
 .row-pair.in .g { animation: glyphIn .55s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 35ms); }
@@ -57,15 +57,15 @@
   border: 1px solid color-mix(in srgb, var(--cinnabar) 35%, transparent);
   box-shadow: 0 .6rem 1.6rem -.6rem color-mix(in srgb, var(--cinnabar) 45%, transparent), inset 0 1px 0 color-mix(in srgb, #fff 45%, transparent);
   transition: transform .9s cubic-bezier(.65, 0, .35, 1); overflow: hidden; }
-.band .say { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr var(--mid) 1fr; align-items: center; }
-.band .pair { grid-column: 2; display: flex; justify-content: center; align-items: center; gap: .5rem; font-family: Georgia, "Times New Roman", serif; white-space: nowrap; color: var(--ink); }
-.band .pair .dot { color: var(--cinnabar); opacity: .7; }
-.band .r { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
-.band .r .big { font-size: 1.5rem; }
-.band .r .small { font-family: var(--bs-body-font-family); font-size: .68rem; letter-spacing: .03em; color: var(--bs-secondary-color); }
-.band .pair.in .r { animation: sayIn .5s cubic-bezier(.2, .8, .2, 1) both; }
-.band .pair.in .r:last-child { animation-delay: .12s; }
-@keyframes sayIn { from { opacity: 0; transform: translateY(.6rem); filter: blur(3px); } }
+.row-pair .pair { display: flex; justify-content: center; align-items: center; gap: .5rem; font-family: Georgia, "Times New Roman", serif; white-space: nowrap; color: var(--ink); opacity: .5; transition: opacity .6s; }
+.row-pair .pair .dot { color: var(--cinnabar); opacity: .7; }
+.row-pair .r { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.row-pair .r .big { font-size: 1.5rem; }
+.row-pair .r .small { font-family: var(--bs-body-font-family); font-size: .68rem; letter-spacing: .03em; color: var(--bs-secondary-color); }
+.row-pair.now .pair { opacity: 1; }
+.row-pair .pair.in .r { animation: sayIn .5s cubic-bezier(.2, .8, .2, 1) both; }
+.row-pair .pair.in .r:last-child { animation-delay: .12s; }
+@keyframes sayIn { from { opacity: .3; transform: translateY(.4rem); } }
 .band .tick { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; transform-origin: left; transform: scaleX(0); background: var(--cinnabar); opacity: .55; }
 .band .tick.run { animation: tick var(--step) linear forwards; }
 @keyframes tick { to { transform: scaleX(1); } }
@@ -135,10 +135,10 @@
   :root { --row: 4rem; --mid: 8rem; }
   .row-pair .g { font-size: 2.6rem; }
   .row-pair .g .part { font-size: 1.9rem; }
-  .band .r .big { font-size: 1.2rem; }
+  .row-pair .r .big { font-size: 1.2rem; }
   .marks .n { font-size: .62rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .band, .marks .pill, .row-pair .g { transition-duration: .01s; }
-  .row-pair.in .g, .band .pair.in .r { animation: none; }
+  .row-pair.in .g, .row-pair .pair.in .r { animation: none; }
 }
