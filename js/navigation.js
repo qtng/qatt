@@ -250,17 +250,10 @@ window.Theme = window.Theme || (function() {
     else { const s = document.createElement("script"); s.src = src; document.head.append(s); }
 })();
 
-// ---------- settings of a page in the bars: Nav.tools(element) ----------
-// A page hands over one element with its own settings (the readings of the Bookshelf): on the desktop it stands in the menu bar if it fits there
-// together with the links in text, else in a second bar below it (fixed as the first; --nav-h on <html> is the height of both, 60 or 104px);
-// below 992px it is at the top of the side menu, under "Page settings". The element is moved, not copied, so its listeners stay.
-// May be called before the bar exists (a defer script): it is put in place when the bar is made.
-window.Nav = window.Nav || { _tools: null, _place: null, tools(el, opt) { this._tools = { el, opt: opt || {} }; if (this._place) this._place(); } };
-
 // ---------- the readings of Chữ Nôm: Readings ----------
 // Which readings stand next to Chữ Nôm on the Chunom site: PA (Phiên âm tự), QATT and Quốc Ngữ, any of them together, in this order; none = no reading.
 // Turning PA on turns the other two off (they can be turned on again). One setting for the whole site (localStorage.readings1 = { pa, qatt, qn }, per origin),
-// switched in the bars (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
+// switched next to EN | VI in the menu bar (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
 // Readings.state, .shown() (the kinds on, in order), .toggle(kind), the event "readingschange" on document (also when another tab changes it);
 // Readings.ready() loads parser.js, pa-text.js and qatt-text.js of qatt.org when PA or QATT is first wanted; then Readings.text(qn, kind) writes a Quốc Ngữ text
 // in that script and Readings.fill(element, qn) puts the readings shown into an element (plain text for Quốc Ngữ alone, else a span .rd-<kind> each).
@@ -520,25 +513,16 @@ window.Readings = window.Readings || (function() {
             .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
             .to-top.show { opacity: 1; pointer-events: auto; }
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
-            /* the settings of the page (Nav.tools): in the bar, in a second bar, or in the side menu */
-            :root { --nav-h: 60px; }
-            .nav-tools { display: flex; align-items: center; color: rgba(255, 255, 255, .75); font-size: .88rem; }
-            .nav-backdrop .nav-tools { margin-right: 1rem; white-space: nowrap; }
-            .nav-tools-bar { position: fixed; top: 60px; left: 0; right: 0; z-index: 1029; height: 44px; display: flex; align-items: center; padding: 0 1rem; overflow-x: auto;
-                background: color-mix(in srgb, var(--nav-bg) var(--nav-alpha), transparent); backdrop-filter: blur(15px);
-                border-bottom: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bg) 72%, #fff)); }
-            .nav-tools-bar[hidden], .nav-tools-side[hidden] { display: none; }
-            .nav-tools-side { padding: 0 1.25rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, .12); }
-            .nav-tools-side .nav-section-header { padding-left: 0; padding-right: 0; color: rgba(255, 255, 255, .55); }
-            .nav-tools-side .nav-tools { flex-wrap: wrap; }
-            .nav-readings { display: inline-flex; align-items: center; gap: .2rem; }
-            .nav-readings .lbl { margin-right: .35rem; }
-            .nav-tools-side .nav-readings .lbl { display: none; }
-            .nav-readings button { padding: .05rem .55rem; border: 1px solid rgba(255, 255, 255, .3); border-radius: 1rem; background: transparent; color: rgba(255, 255, 255, .8); font-size: .82rem; line-height: 1.5; white-space: nowrap; }
-            .nav-readings button:hover { color: #fff; border-color: rgba(255, 255, 255, .6); }
-            .nav-readings button.active { background: var(--bar-accent); border-color: var(--bar-accent); color: #212529; font-weight: 600; }
-            .nav-readings .what { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem; margin-left: .2rem; border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%; color: rgba(255, 255, 255, .6); font-size: .75rem; text-decoration: none; }
-            .nav-readings .what:hover { color: #fff; }
+            /* the readings next to EN | VI (Chunom site): PA | QATT | Quốc Ngữ in the look of the language switch, any of them on; "QN" on narrow screens */
+            .readings-switch { display: flex; align-items: center; gap: .3rem; margin-right: .6rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
+            .readings-switch button { background: none; border: 0; padding: .25rem .1rem; color: rgba(255, 255, 255, .5); font-weight: 600; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
+            .readings-switch button:hover { color: #fff; }
+            .readings-switch button.active { color: var(--bar-accent); text-decoration: underline; text-underline-offset: .3em; }
+            .readings-switch .short { display: none; }
+            @media (max-width: 575.98px) { .readings-switch .long { display: none; } .readings-switch .short { display: inline; } .readings-switch { margin-right: .3rem; gap: .2rem; } }
+            .readings-switch[hidden] { display: none; }
+            @media (max-width: 389.98px) { .readings-switch > span { display: none; } .readings-switch { gap: .45rem; margin-right: .25rem; } .daynight-switch { padding: .25rem .15rem; margin-right: .15rem; } .lang-switch { margin-right: .1rem; gap: .2rem; } }
+            @media (max-width: 359.98px) { .nav-backdrop > .container-fluid { padding-left: .4rem; padding-right: .3rem; } .nav-backdrop .navbar-brand { margin-right: .3rem; } #navTogglerCustom { padding: .25rem .2rem; } .readings-switch { gap: .3rem; } }
             /* the readings written by Readings.fill: in one line, PA and QATT in their fonts */
             .rd-pa { font-family: "PA Pen", "PA", sans-serif; font-size: 1.2em; }
             .rd-qatt { font-family: "QATT Pen", sans-serif; font-size: 1.2em; }
@@ -636,6 +620,9 @@ window.Readings = window.Readings || (function() {
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
                     <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
+                    <div class="readings-switch" role="group" aria-label="Readings" data-vi-aria-label="Cách đọc"${onChunom ? '' : ' hidden'}>
+                        <button type="button" data-k="pa" title="Phiên âm tự">PA</button><span aria-hidden="true">|</span><button type="button" data-k="qatt" title="Quốc Âm Tân Tự">QATT</button><span aria-hidden="true">|</span><button type="button" data-k="qn" title="Quốc Ngữ"><span class="long">Quốc Ngữ</span><span class="short">QN</span></button>
+                    </div>
                     <button type="button" class="daynight-switch"${Theme.dayNight.available ? '' : ' hidden'}${Theme.dayNight.canToggle ? '' : ' disabled'}><i class="bi bi-sun-fill"></i></button>
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
@@ -671,7 +658,7 @@ window.Readings = window.Readings || (function() {
                 <h5 class="offcanvas-title fw-bold text-white d-flex align-items-center gap-2">${navConfig.brand(logo, brandTitle, true)}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
             </div>
-            <div class="offcanvas-body p-0"><div class="nav-tools-side" hidden><div class="nav-section-header nav-tools-title"></div></div>${sectionsHtml}</div>
+            <div class="offcanvas-body p-0">${sectionsHtml}</div>
         `;
 
         offcanvas.querySelectorAll('.nav-section-toggle').forEach(btn => btn.addEventListener('click', () => {
@@ -786,47 +773,17 @@ window.Readings = window.Readings || (function() {
             const wrapped = () => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || deskUl.scrollWidth > deskUl.clientWidth;
             if (wrapped()) deskUl.classList.add('icons-only');
         };
-        // the settings of the page (Nav.tools): in the bar if they fit there with the links in text, else in a second bar; in the side menu below 992px
-        const desktop = window.matchMedia('(min-width: 992px)');
-        const toolsBar = document.createElement('div');
-        toolsBar.className = 'nav-tools-bar'; toolsBar.hidden = true;
-        toolsBar.style.setProperty('--bar-accent', navConfig.accent); offcanvas.style.setProperty('--bar-accent', navConfig.accent);
-        const toolsSide = offcanvas.querySelector('.nav-tools-side');
-        const rightGroup = header.querySelector('.ms-auto');
-        const setHeight = h => { document.documentElement.style.setProperty('--nav-h', h + 'px'); document.body.style.paddingTop = h + 'px'; };
-        const place = () => {
-            const t = Nav._tools;
-            if (!t) { fitDesk(); return; }
-            t.el.classList.add('nav-tools');
-            toolsBar.hidden = true; toolsSide.hidden = true; setHeight(60);
-            if (!desktop.matches) {
-                const title = toolsSide.querySelector('.nav-tools-title');
-                title.textContent = t.opt.title || 'Page settings'; title.setAttribute('data-vi', t.opt.vi || 'Cài đặt trang');
-                toolsSide.append(t.el); toolsSide.hidden = false; fitDesk(); return;
-            }
-            rightGroup.before(t.el);
-            fitDesk();
-            if (deskUl.classList.contains('icons-only')) { toolsBar.append(t.el); toolsBar.hidden = false; setHeight(104); fitDesk(); }
-        };
-        Nav._place = place;
-        // the switches of the readings (Readings), on every page of the Chunom site
-        if (onChunom && !Nav._tools) {
-            const rd = document.createElement('div');
-            rd.className = 'nav-readings'; rd.setAttribute('role', 'group'); rd.setAttribute('aria-label', 'Readings'); rd.setAttribute('data-vi-aria-label', 'Cách đọc');
-            rd.innerHTML = '<span class="lbl" data-vi="Cách đọc">Readings</span><button type="button" data-k="pa" title="Phiên âm tự">PA</button><button type="button" data-k="qatt" title="Quốc Âm Tân Tự">QATT</button><button type="button" data-k="qn">Quốc Ngữ</button>'
-                + `<a class="what" href="${CHUNOM_SITE}/chunom/pa/" title="Phiên âm tự">?</a>`;
-            const mark = () => rd.querySelectorAll('button').forEach(b => { const on = Readings.state[b.dataset.k]; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-            rd.addEventListener('click', e => { const b = e.target.closest('button'); if (b) Readings.toggle(b.dataset.k); });
-            document.addEventListener('readingschange', mark);
-            mark();
-            Nav._tools = { el: rd, opt: { title: 'Readings', vi: 'Cách đọc' } };
-        }
-        place();
-        window.addEventListener('resize', place);
-        document.addEventListener('langchange', place);
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
-        window.addEventListener('load', place);
-        header.after(toolsBar);
+        fitDesk();
+        window.addEventListener('resize', fitDesk);
+        document.addEventListener('langchange', fitDesk);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDesk);
+        window.addEventListener('load', fitDesk);
+        // the readings (Readings): PA | QATT | Quốc Ngữ next to EN | VI, on the Chunom site
+        const rd = header.querySelector('.readings-switch');
+        const markReadings = () => rd.querySelectorAll('button').forEach(b => { const on = Readings.state[b.dataset.k]; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+        rd.addEventListener('click', e => { const b = e.target.closest('button'); if (b) Readings.toggle(b.dataset.k); });
+        document.addEventListener('readingschange', markReadings);
+        markReadings();
         document.body.appendChild(offcanvas);
         if (!ownBottomBar) injectFooter(navConfig.license);
 
