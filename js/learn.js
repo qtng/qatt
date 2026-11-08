@@ -5,7 +5,7 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
 
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
-        build(parser) -> [{ label, vi, sample, apart, rows: [[item, item], …] }]   (apart: the first row stands apart, a line below it, and is skipped when a tab is entered)
+        build(parser) -> [{ label, vi, sample, apart, rows: [[item, item], …] }]   (apart: that many first rows stand apart, a line below the last of them, and are skipped when a tab is entered; true = 1)
           (called again when the decoding changes, then onRebuild(parser)); tabRows: the tabs in that many rows
         item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading, in the middle of the row; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
@@ -59,7 +59,7 @@ const Learn = (() => {
     if (steps) {
       const ol = el('ol', 'steps');
       const home = el('li', 'home'), back = el('a', 'step-nav'); back.href = BASE;   // the overview first: a grid icon
-      back.setAttribute('aria-label', 'Overview'); back.dataset.viAriaLabel = 'Tổng quan';
+      back.title = 'Overview'; back.dataset.viTitle = 'Tổng quan'; back.setAttribute('aria-label', 'Overview'); back.dataset.viAriaLabel = 'Tổng quan';
       const icon = el('span', 'num'); icon.append(el('i', 'bi bi-grid-3x3-gap-fill'));
       back.append(icon, tr('span', 't', 'Overview', 'Tổng quan'));
       home.append(back); ol.append(home);
@@ -67,6 +67,7 @@ const Learn = (() => {
         const li = el('li', (i === at ? 'now' : '') + (l.soon ? ' soon' : '')); li.dataset.lesson = l.id;
         const a = el('a', 'step-nav'); a.href = href(l);   // "nav" in the class: the themes leave the colour of such links alone
         if (i === at) a.setAttribute('aria-current', 'step');
+        a.title = l.en; a.dataset.viTitle = l.vi; a.setAttribute('aria-label', l.en); a.dataset.viAriaLabel = l.vi;   // only the number shows (the name on hover)
         a.append(el('span', 'num', i + 1), tr('span', 't', l.en, l.vi));
         li.append(a); ol.append(li);
       });
@@ -186,7 +187,7 @@ const Learn = (() => {
       rowEls.forEach(r => r.div.remove());
       rowEls = tabs[tab].rows.map((pair, r) => {
         const div = el('div', 'row-pair'); div.style.setProperty('--i', r);
-        if (r === 0 && tabs[tab].apart) div.classList.add('apart');   // a line below it
+        if (r === +tabs[tab].apart - 1) div.classList.add('apart');   // a line below it
         const cells = pair.map(item => { const c = el('div', 'g'); drawGlyph(c, item); return c; });
         const mid = el('div', 'pair'); mid.append(reading(pair[0]), el('span', 'dot', '·'), reading(pair[1]));
         div.append(cells[0], mid, cells[1]);
@@ -242,12 +243,13 @@ const Learn = (() => {
       clearTimeout(timer);
       if (!playing) return;
       timer = setTimeout(() => {
-        if (row < tabs[tab].rows.length - 1) row++;
+        if (row < tabs[tab].rows.length - 1) { row++; while (silent(row) && row < tabs[tab].rows.length - 1) row++; }
         else { setTab(tab + 1, true); row = first(); }     // end of the tab: the next one
         show(true); schedule();
       }, step);
     };
-    const first = () => tabs[tab].apart && tabs[tab].rows.length > 1 ? 1 : 0;   // apart: the first row of a tab stands apart and is skipped when a tab is entered
+    const silent = r => tabs[tab].rows[r].every(i => !i.speak);   // nothing to read (e.g. both syllables absent): playing skips the row
+    const first = () => { let r = Math.min(+tabs[tab].apart || 0, tabs[tab].rows.length - 1); while (r < tabs[tab].rows.length - 1 && silent(r)) r++; return r; };   // apart: the first row of a tab stands apart and is skipped when a tab is entered
     const go = () => { show(playing); schedule(); };
     const pick = () => started ? go() : setPlaying(true);
     const setPlaying = on => {
@@ -259,6 +261,7 @@ const Learn = (() => {
     };
     const move = d => {
       row += d;
+      while (silent(Math.max(0, Math.min(row, tabs[tab].rows.length - 1))) && row + d >= 0 && row + d < tabs[tab].rows.length) row += d;
       if (row >= tabs[tab].rows.length) { row = 0; setTab(tab + 1, true); }
       if (row < 0) { setTab(tab - 1, true); row = tabs[tab].rows.length - 1; }
       go();
