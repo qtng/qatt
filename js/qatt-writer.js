@@ -31,6 +31,8 @@ const QattWriter = (() => {
     .qatt-bar { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; margin: 0 0 .6rem; min-height: 1.9rem; font-size: .78rem; }
     body:not(.qatt-on) .qatt-bar .group > :not(#font) { visibility: hidden; }   /* the font is always there, the rest only while QATT is on */
     body.pa-site .qatt-bar .group > :not(#font) { visibility: visible; }   /* the Chunom writer: Convert and the PA button are always there, also with PA off */
+    .qatt-bar .pa-help { flex: none; font-size: .72rem; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+    @media (max-width: 419.98px) { .qatt-bar .pa-help { display: none; } }   /* the info box has the link too */
     .qatt-bar #pa-btn, html .qatt-bar #pa-btn, html[data-theme] .qatt-bar #pa-btn { font-family: var(--pafont, "PA"), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .45rem; min-width: 2.1rem; letter-spacing: 0; text-transform: none; }   /* the preview is a PA cell */
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
@@ -73,6 +75,7 @@ const QattWriter = (() => {
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Reading of the rhyme table" title="Reading of the rhyme table"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
         <button type="button" class="btn btn-quiet" id="pa-btn" hidden disabled>·</button>
+        <a id="pa-help" class="pa-help" href="https://chunom.org/chunom/pa/" target="_blank" rel="noopener" hidden data-vi="phiên âm là gì?">what is PA?</a>
         <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
       </div>
 `;
@@ -309,8 +312,8 @@ const QattWriter = (() => {
     // QATT characters are in the private use area: the field needs a QATT font in front of the Nôm fonts, also with QATT off (existing QATT characters keep their look)
     function applyFont() {
       document.documentElement.style.setProperty('--qfont', `"${font.value}"`);
-      document.documentElement.style.setProperty('--pafont', font.value === 'PhongThao' ? '"PA Phong Thao", "PA"' : '"PA"');   // the PA font of the same style
-      if (ime) ime.update({ fontList: [font.value, ...(paSite ? [...(font.value === 'PhongThao' ? ['PA Phong Thao'] : []), 'PA'] : [])] });   // ime.js sets the font of the field: the QATT font, then the PA font of its style
+      document.documentElement.style.setProperty('--pafont', paFontStack(font.value).map(f => `"${f}"`).join(', '));   // the PA font of the same style (js/fonts.js)
+      if (ime) ime.update({ fontList: [font.value, ...(paSite ? paFontStack(font.value) : [])] });   // ime.js sets the font of the field: the QATT font, then the PA font of its style
       typer.style.fontSize = Math.round(size.value * 0.363) + 'px';   // 100% is 36 pixels
       $('size-label').textContent = size.value + '%';
     }
@@ -330,7 +333,7 @@ const QattWriter = (() => {
       document.body.classList.toggle('qatt-on', qatt || pa);
       document.body.classList.toggle('pa-on', pa);
       document.body.classList.toggle('pa-site', paSite);
-      paBtn.hidden = !paSite;
+      paBtn.hidden = $('pa-help').hidden = !paSite;
       $('decoding').hidden = !qatt;
       $('variants').hidden = !qatt;
       status.innerHTML = paSite ? (pa ? '<b>Space</b> converts PA, <b>Enter</b> picks first Hán Nôm' : '<b>Space</b> and <b>Enter</b> pick first Hán Nôm')
