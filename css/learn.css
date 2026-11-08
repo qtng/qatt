@@ -25,7 +25,7 @@
 .steps .done .num { background: color-mix(in srgb, var(--bs-success) 25%, transparent); color: var(--bs-success); }
 #content .steps .now a { background: var(--cinnabar); color: #fff; }
 .steps .now .num { background: rgba(255, 255, 255, .25); color: #fff; }
-@media (max-width: 576px) { .steps li:not(.now) .t { display: none; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
+@media (max-width: 576px) { .steps { flex-wrap: nowrap; gap: .2rem; } .steps li:not(.now) .t { display: none; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
 
 /* the tabs: a row with a sliding pill behind the active one */
 .tools { flex-wrap: wrap; }
@@ -78,6 +78,16 @@
 /* the pager at the end of a lesson */
 .pager { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
 .pager .btn { display: inline-flex; align-items: center; gap: .4rem; }
+
+/* lessons that are not written yet (soon: true in js/learn.js) */
+.steps .soon:not(.now) a { opacity: .55; }
+#content .lesson-card.soon { opacity: .6; }
+#content .lesson-card.soon:hover { opacity: .85; }
+.badge-soon { margin-left: .5rem; padding: .05rem .45rem; border-radius: 1rem; font-size: .62rem; letter-spacing: .06em; background: color-mix(in srgb, var(--cinnabar) 15%, transparent); color: var(--cinnabar); }
+.soon-box { text-align: center; padding: 2.2rem 1.2rem; color: var(--ink); }
+.soon-box .bi { font-size: 2.2rem; color: var(--cinnabar); }
+.soon-box h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.6rem; margin: .6rem 0 .4rem; }
+.soon-box p { color: var(--bs-secondary-color); max-width: 28rem; margin: 0 auto 1.2rem; }
 
 /* the overview */
 .lessons { display: grid; gap: .9rem; max-width: 46rem; }

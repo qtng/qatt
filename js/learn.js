@@ -3,7 +3,7 @@ The lessons of learn/ (the course "Learn QATT"): the list of the lessons, the st
 and the board: rows of two items, a band that moves down row by row every few seconds and reads the row aloud, tabs above it that change the rows.
 Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodings of the site), nothing is kept here.
 
-  Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager)
+  Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
         build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes)
         item = { glyph | parts: [a, b], show, small, speak }               (glyph: QATT text; show: the reading in the band; small: a line below it)
@@ -17,6 +17,8 @@ const Learn = (() => {
     { id: 'pairs', en: 'Phiên thiết pairs', vi: 'Cặp phiên thiết', sample: 'con', about: 'An initial and a rhyme join into one syllable.', aboutVi: 'Phụ âm đầu và vần ghép thành một âm tiết.' },
     { id: 'tones', en: 'Tones', vi: 'Thanh điệu', sample: 'mán', about: 'Eight tone marks after the syllable.', aboutVi: 'Tám dấu thanh sau âm tiết.' },
     { id: 'hop-thu', en: 'Hợp Thư', vi: 'Hợp Thư', sample: 'không', about: 'ông, ong, ung and uông in their short forms.', aboutVi: 'ông, ong, ung và uông viết gọn.' },
+    { id: 'reading', en: 'Reading', vi: 'Đọc', sample: 'đọc', soon: true, about: 'Read words and short sentences.', aboutVi: 'Đọc từ và câu ngắn.' },
+    { id: 'typing', en: 'Typing', vi: 'Gõ chữ', sample: 'gõ', soon: true, about: 'Type QATT with Telex in the writer and the Notes app.', aboutVi: 'Gõ QATT bằng Telex trong trình soạn thảo và ứng dụng Notes.' },
   ];
   const BASE = '/learn/';
   const href = l => BASE + l.id + '.html';
@@ -57,7 +59,7 @@ const Learn = (() => {
     if (steps) {
       const ol = el('ol', 'steps');
       LESSONS.forEach((l, i) => {
-        const li = el('li', i === at ? 'now' : ''); li.dataset.lesson = l.id;
+        const li = el('li', (i === at ? 'now' : '') + (l.soon ? ' soon' : '')); li.dataset.lesson = l.id;
         const a = el('a', 'step-nav'); a.href = href(l);   // "nav" in the class: the themes leave the colour of such links alone
         if (i === at) a.setAttribute('aria-current', 'step');
         a.append(el('span', 'num', i + 1), tr('span', 't', l.en, l.vi));
@@ -89,9 +91,11 @@ const Learn = (() => {
   // the overview: a card for every lesson, and the practice at the end
   const overview = container => {
     LESSONS.forEach((l, i) => {
-      const a = el('a', 'card-box lesson-card'); a.href = href(l); a.dataset.lesson = l.id;
+      const a = el('a', 'card-box lesson-card' + (l.soon ? ' soon' : '')); a.href = href(l); a.dataset.lesson = l.id;
       const text = el('div');
-      text.append(el('div', 'no', `${i + 1}`), tr('h2', '', l.en, l.vi), tr('p', '', l.about, l.aboutVi));
+      const no = el('div', 'no', `${i + 1}`);
+      if (l.soon) no.append(tr('span', 'badge-soon', 'Coming soon', 'Sắp ra mắt'));
+      text.append(no, tr('h2', '', l.en, l.vi), tr('p', '', l.about, l.aboutVi));
       const check = el('i', 'bi bi-check-circle-fill check'); check.hidden = !isDone(l.id); check.setAttribute('aria-label', 'done');
       a.append(el('div', 'g', sampleOf(l)), text, check);
       container.append(a);
