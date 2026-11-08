@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tones · Learn QATT</title>
+  <meta name="description" content="Lesson 4 of Learn QATT: the eight tone marks of Quốc Âm Tân Tự, read aloud.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/learn.css">
+  <script src="/js/navigation.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <script src="/js/learn.js"></script>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="kicker mb-2" id="lessonNo"></div>
+    <h1 class="mb-3" data-vi="Thanh điệu">Tones</h1>
+    <p class="lead mx-auto mb-0" data-vi="Tám dấu thanh đứng sau âm tiết.">Eight tone marks after the syllable.</p>
+  </div>
+</header>
+
+<main class="container py-4" id="content">
+  <div class="learn mx-auto">
+    <nav id="learnSteps" aria-label="Lessons"></nav>
+    <p class="intro">The tone mark comes after the syllable. A syllable without a mark is <b>ngang</b>; mark 8 writes ngang out. Marks 6 and 7 are the <b>entering tones</b>, sắc and nặng of a syllable that ends in p, t, c or ch: QATT writes its nasal twin (n for t, ng for c, m for p, nh for ch) and the mark makes it a stop, so <i>man</i> becomes <i>mát, mạt</i>.</p>
+    <div id="board"></div>
+    <nav id="learnPager"></nav>
+  </div>
+</main>
+
+<script>
+Learn.page('tones');
+const WORDS = ['man', 'lang', 'tinh', 'cam'];
+const ROWS = [[8, 1], [2, 3], [4, 5], [6, 7]];
+const NAMES = { 1: 'sắc', 2: 'huyền', 3: 'hỏi', 4: 'ngã', 5: 'nặng', 6: 'sắc · stop', 7: 'nặng · stop', 8: 'ngang' };
+Learn.board(document.getElementById('board'), {
+  build: parser => WORDS.map(w => {
+    const p = parser.parse(w);
+    if (!p || !p.qatt) return { label: w, rows: [] };
+    const base = p.qatt.split(',').slice(0, 3).join(',');
+    return {
+      label: w, sample: Learn.cell(w),
+      rows: ROWS.map(pair => pair.map(t => {
+        const g = Learn.syllable(base + ',' + t), r = QattText.reading(g, parser);
+        return { glyph: g, show: r, small: t + ' ' + NAMES[t], speak: r === '?' ? '' : r };
+      })),
+    };
+  }),
+});
+</script>
+</body>
+</html>

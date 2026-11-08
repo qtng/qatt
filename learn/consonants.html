@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consonants · Learn QATT</title>
+  <meta name="description" content="Lesson 1 of Learn QATT: the 22 base shapes of Quốc Âm Tân Tự as initial consonants, read aloud.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/learn.css">
+  <script src="/js/navigation.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <script src="/js/learn.js"></script>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="kicker mb-2" id="lessonNo"></div>
+    <h1 class="mb-3" data-vi="Phụ âm">Consonants</h1>
+    <p class="lead mx-auto mb-0" data-vi="Mỗi hình cơ bản đứng riêng là một phụ âm đầu.">Each base shape alone is an initial consonant.</p>
+  </div>
+</header>
+
+<main class="container py-4" id="content">
+  <div class="learn mx-auto">
+    <nav id="learnSteps" aria-label="Lessons"></nav>
+    <p class="intro">The 22 base shapes stand for the initial consonants of Vietnamese. Where Quốc Ngữ has several spellings for one sound (<b>c, k, q</b> or <b>g, gh</b>), QATT has one shape; the other spellings are shown small under the reading. The shape without strokes, <b>ʔ</b>, is the syllable without a consonant, as in <i>ăn</i> or <i>em</i>.</p>
+    <div id="board"></div>
+    <nav id="learnPager"></nav>
+  </div>
+</main>
+
+<script>
+Learn.page('consonants');
+Learn.board(document.getElementById('board'), {
+  decoding: false,
+  build: () => [{ label: 'Consonants', rows: pairsOf(Learn.SHAPES).map(pair => pair.map(s => ({ glyph: Learn.glyph(s, 0), ...Learn.consonant(s) }))) }],
+});
+function pairsOf(list) { const out = []; for (let i = 0; i < list.length; i += 2) out.push(list.slice(i, i + 2)); return out; }
+</script>
+</body>
+</html>
