@@ -55,12 +55,13 @@
 //   P.struct(op, role) [x1, y1, x2, y2, n] parts built with the operator op in that role, or null
 //   P.idsChar(key)    the code point of the character whose IDS (canonical parts, IdsParse.key) this is, or null (a part made of parts that is a character)
 //   P.variant(cp, sfx) the name of the GlyphWiki variant uXXXX-<sfx> if it exists (and P.glyph has it), or null
+//   P.dens(role, own, partner) [x1, y1, x2, y2, n] all parts of a role by their own layers and the partner's (buckets of 0.5), or null
 //   P.root(op, cp)    [x1, y1, x2, y2, n] the ink box of whole characters of the operator (cp: of that first part), or null
 // layout(tree, P, target, opt) -> KAGE data (plain strokes) of the composition, its ink in the box target [x1, y1, x2, y2] of the 200 frame.
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1, pairFine: 's', kFine: 5 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1, pairFine: 's', kFine: 5, useDens: 1, kDens: 5, densStruct: 0 };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -89,7 +90,7 @@
     l: function (node, P, lay) { return Math.min(7, Math.floor(lay * 2)); },
     s: function (node, P) { return first([3, 5, 7, 9, 11, 14, 18], strokes(node, P)); }
   };
-  function est(node, role, P, o, partner) {
+  function est(node, role, P, o, partner, sibs) {
     var g = P.op(role) || [0, 0, 1, 1, 0], k = keyOf(node, P), m = k != null ? P.role(k, role) : null;
     if (m && partner && o.usePair && P.pair) {   // the box of this part next to partners like this one
       var pf = feat(partner, P), lay = role[0] === '⿰' ? pf[0] : pf[1], pm = P.pair(k, role, bucket(lay));
@@ -97,8 +98,15 @@
       var fb = o.pairFine && FINE[o.pairFine] ? FINE[o.pairFine](partner, P, lay) : null, fm2 = fb != null ? P.pair(k, role, o.pairFine + fb) : null;
       if (fm2 && fm2[4] >= o.nPair) { var wf = fm2[4] / (fm2[4] + o.kFine); m = m.slice(); for (var q2 = 0; q2 < 4; q2++) m[q2] = m[q2] * (1 - wf) + fm2[q2] * wf; }
     }
-    var box = g.slice(0, 4), measured = m && m[4] >= o.nMin;
-    if (!measured && node.op && o.useStruct && P.struct) {   // a part of parts: the size of parts of its structure in this role
+    var box = g.slice(0, 4), measured = m && m[4] >= o.nMin, dn = null;
+    if (!measured && o.useDens && P.dens && sibs && (H_OPS[role[0]] || V_OPS[role[0]])) {   // no measurement: parts of this density next to such partners
+      var ax = H_OPS[role[0]] ? 0 : 1, own = feat(node, P)[ax], pl = 0, idx = +role.slice(1);
+      sibs.forEach(function (sb, j) { if (j !== idx) pl += feat(sb, P)[ax]; });
+      var db = function (x) { return Math.max(0, Math.min(9, Math.floor(x * 2))); };
+      dn = P.dens(role, db(own), db(pl));
+      if (dn && dn[4] >= o.kDens) { var wd = dn[4] / (dn[4] + o.kDens); box = box.map(function (v, i) { return v * (1 - wd) + dn[i] * wd; }); } else dn = null;
+    }
+    if (!measured && node.op && o.useStruct && P.struct && (!dn || o.densStruct)) {   // a part of parts: the size of parts of its structure in this role
       var st = P.struct(node.op, role);
       if (st && st[4] >= 3) { var ws = st[4] / (st[4] + o.k0s); box = box.map(function (v, i) { return v * (1 - ws) + st[i] * ws; }); }
     }
@@ -114,7 +122,7 @@
         box = box.map(function (v, i) { return v * (1 - o.wVar) + Math.max(0, Math.min(1, rel[i])) * o.wVar; });
       }
     }
-    if (o.useDensity && (!measured || o.mixDensity) && (!vg || o.densVar) && (H_OPS[op] || V_OPS[op])) {
+    if (o.useDensity && !dn && (!measured || o.mixDensity) && (!vg || o.densVar) && (H_OPS[op] || V_OPS[op])) {
       var fm = P.feat(role), f = feat(node, P), H = !!H_OPS[op], i = H ? 0 : 1;
       if (fm && fm[i] > 0) {
         var fac = Math.pow(Math.max(0.5, f[i]) / fm[i], o.alpha);
@@ -200,7 +208,7 @@
       draw(node.args[0], T, P, o, null, out); out.fx = ofx; out.fy = ofy; return;
     }
     if (op === '㇯') { draw(node.args[0], T, P, o, null, out); return; }   // subtraction: the first part (approximation)
-    var e = node.args.map(function (a, i) { return est(a, roles[i], P, o, (op === '⿰' || op === '⿱') ? node.args[1 - i] : null); });
+    var e = node.args.map(function (a, i) { return est(a, roles[i], P, o, (op === '⿰' || op === '⿱') ? node.args[1 - i] : null, node.args); });
     var boxes = e.map(function (x) { return x.box; });
     var gen = roles.map(function (r) { return P.op(r); });
     var conf = e.map(function (x) { return x.conf; });
@@ -297,6 +305,7 @@
         return i && i[key] != null ? i[key] : null;
       },
       variant: function (cp, sfx) { var r = rec(cp); return (r && r.vr && r.vr[sfx]) || null; },
+      dens: function (role, a, b) { return (M.dens && M.dens[role] && M.dens[role][a + '|' + b]) || null; },
       op: function (role) { return M.ops[role] || null; }, feat: function (role) { return M.feat[role] || null; }
     };
   }
