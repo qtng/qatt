@@ -33,7 +33,7 @@ const QattWriter = (() => {
     body.pa-site .qatt-bar .group > :not(#font) { visibility: visible; }   /* the Chunom writer: Convert and the PA button are always there, also with PA off */
     .pa-help { display: block; width: fit-content; margin-top: -.1rem; font-size: .72rem; line-height: 1.2; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }   /* under the switch Phonetic annotation */
     .pa-help[hidden] { display: none; }
-    .qatt-bar #pa-btn, html .qatt-bar #pa-btn, html[data-theme] .qatt-bar #pa-btn { font-family: var(--pafont, "PA"), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .45rem; min-width: 2.1rem; letter-spacing: 0; text-transform: none; }   /* the preview is a PA cell */
+    .qatt-bar #pa-btn, html .qatt-bar #pa-btn, html[data-theme] .qatt-bar #pa-btn { font-family: var(--pafont, "PA"), system-ui, sans-serif !important; font-size: 1.1rem; line-height: 1.2; padding: 0 .5rem; min-width: 2.4rem; min-height: 1.9rem; display: inline-flex; align-items: center; justify-content: center; letter-spacing: 0; text-transform: none; }   /* the preview is a PA cell, as high as the Convert button */
     .qatt-bar .group { display: flex; flex: 0 1 auto; align-items: center; gap: .4rem; white-space: nowrap; min-width: 0; }
     .qatt-bar select { flex: 0 1 auto; font-size: .78rem; padding-top: .1rem; padding-bottom: .1rem; min-width: 4.2rem; text-overflow: ellipsis; }
     .qatt-bar .btn { flex: none; font-size: .78rem; padding: .1rem .6rem; }
@@ -51,7 +51,7 @@ const QattWriter = (() => {
     .qatt-on li.qatt-only { display: list-item; }
     .pa-on .pa-only { display: block; }
     .bar-buttons, .opts { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; }
-    .opts { gap: .2rem 1.5rem; }
+    .opts { gap: .2rem 1.5rem; align-items: flex-start; }   /* the switches at one height (the PA switch has its link below) */
     .opts .form-check { margin: 0; }
     @media (max-width: 575.98px) {   /* on a phone the switches are a little tighter, and in one row from 360 px on */
       .opts { gap: .2rem .8rem; }
