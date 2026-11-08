@@ -87,7 +87,9 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
     "QATT Pen":        { weights: { 100: ["qatt-pen-thin", "qatt-pen-thin-letters"], 300: ["qatt-pen-light", "qatt-pen-light-letters"], 400: ["qatt-pen", "qatt-pen-letters"], 500: ["qatt-pen-medium", "qatt-pen-medium-letters"] } },
     "Migoi":           { weights: { 400: ["migoi", "migoi-letters"] } },
     "Celluloid":       { weights: { 400: ["celluloid", "celluloid-letters"] } },
-    "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } }
+    "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } },
+    "QATT Gothic":     { weights: { 400: ["gothic", "qatt-gothic-letters"] } },
+    "QATT Gothic Rounded": { weights: { 400: ["qatt-gothic-rounded", "qatt-gothic-rounded-letters"] } }
   };
   var DISPLAYS = ["auto", "block", "swap", "fallback", "optional"];
   var display = url.searchParams.get("display"); if (DISPLAYS.indexOf(display) < 0) display = "swap";
