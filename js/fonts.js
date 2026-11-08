@@ -36,8 +36,12 @@ var QATT_FONTS = [
 // PA, the phonetic script (pa/index.html; the font of PA is a file of its own, not in the list above): the families "PA" and "PA Phong Thao", used by the writer behind the QATT font
 var PA_FONTS = [
   { family: "PA",             file: "pa" },
+  { family: "PA Pen",         file: "pa-pen" },
+  { family: "PA Migoi",       file: "pa-migoi" },
   { family: "PA Phong Thao",  file: "pa-phongthao" },
 ];
+// the PA fonts that go behind a QATT font (the fonts of PA text in the Chunom writer and in Notes): the one of its stroke style, then the plain one
+var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : null; return own ? [own, "PA"] : ["PA"]; };
 // big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack
