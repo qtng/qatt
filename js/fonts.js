@@ -12,7 +12,7 @@ as soon as the parser has added them. Its globals are var: it may run twice (adm
 */
 var QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
-  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic", big: "gothic", cjk: true },   // letters here, CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
+  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic-letters", big: "gothic", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "gothic", cjk: true },   // its CJK: the same big font
   { family: "QATT Pen Thin",        label: "QATT Pen thin",                file: "qatt-pen-thin-letters", big: "qatt-pen-thin", cjk: true },
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters", big: "qatt-pen-light", cjk: true },
