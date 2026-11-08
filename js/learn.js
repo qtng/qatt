@@ -31,11 +31,11 @@ const Learn = (() => {
   const syllable = c => QattText.syllable(c);
   const cell = w => QattText.word(w, parser);
 
-  // a plain shape as an initial: its main spelling (parser.toQuocNgu of the bare consonant), the other spellings (QATT_ONSET_MAP), its name (bờ, cờ, …)
+  // a plain shape as an initial: its main spelling (parser.toQuocNgu of the bare consonant), the other spellings (QATT_ONSET_MAP), its name (bờ, cờ, …; ʔ is read ờ)
   const consonant = shape => {
     const main = parser.toQuocNgu({ onset: code(shape), rhyme: '', tone: 0 });
     const alt = Object.entries(VietnameseParser.QATT_ONSET_MAP).filter(([k, v]) => v === shape && k !== main && !/^[fjwz]$/.test(k)).map(([k]) => k);
-    return main ? { show: main, small: alt.join(', '), speak: main + 'ờ' } : { show: 'ʔ', small: 'no consonant', speak: '' };
+    return main ? { show: main, small: alt.join(', '), speak: main + 'ờ' } : { show: 'ʔ', small: 'no consonant', speak: 'ờ' };
   };
 
   // progress of this browser: { <lesson id>: true }
