@@ -26,7 +26,7 @@
 <main class="container py-4" id="content">
   <div class="learn mx-auto">
     <nav id="learnSteps" aria-label="Lessons"></nav>
-    <p class="intro">The tone mark comes after the syllable. A syllable without a mark is <b>ngang</b>; mark 8 writes ngang out. Marks 6 and 7 are the <b>entering tones</b>, sắc and nặng of a syllable that ends in p, t, c or ch: QATT writes its nasal twin (n for t, ng for c, m for p, nh for ch) and the mark makes it a stop, so <i>man</i> becomes <i>mát, mạt</i>.</p>
+    <p class="intro"><span data-vi="Dấu thanh đứng sau âm tiết. Âm tiết không có dấu là thanh ngang; dấu 8 viết rõ thanh ngang. Dấu 6 và 7 là thanh nhập, tức sắc và nặng của âm tiết tận cùng bằng p, t, c hay ch: QATT viết âm mũi tương ứng (n cho t, ng cho c, m cho p, nh cho ch) và dấu biến nó thành âm tắc, nên man thành mát, mạt.">The tone mark comes after the syllable. A syllable without a mark is ngang; mark 8 writes ngang out. Marks 6 and 7 are the entering tones, sắc and nặng of a syllable that ends in p, t, c or ch: QATT writes its nasal twin (n for t, ng for c, m for p, nh for ch) and the mark makes it a stop, so man becomes mát, mạt.</span></p>
     <div id="board"></div>
     <nav id="learnPager"></nav>
   </div>
@@ -37,6 +37,7 @@ Learn.page('tones');
 const WORDS = ['man', 'lang', 'tinh', 'cam'];
 const ROWS = [[8, 1], [2, 3], [4, 5], [6, 7]];
 const NAMES = { 1: 'sắc', 2: 'huyền', 3: 'hỏi', 4: 'ngã', 5: 'nặng', 6: 'sắc · stop', 7: 'nặng · stop', 8: 'ngang' };
+const NAMES_VI = { 6: 'sắc · nhập', 7: 'nặng · nhập' };
 Learn.board(document.getElementById('board'), {
   build: parser => WORDS.map(w => {
     const p = parser.parse(w);
@@ -46,7 +47,7 @@ Learn.board(document.getElementById('board'), {
       label: w, sample: Learn.cell(w),
       rows: ROWS.map(pair => pair.map(t => {
         const g = Learn.syllable(base + ',' + t), r = QattText.reading(g, parser);
-        return { glyph: g, show: r, small: t + ' ' + NAMES[t], speak: r === '?' ? '' : r };
+        return { glyph: g, show: r, small: t + ' ' + NAMES[t], smallVi: t + ' ' + (NAMES_VI[t] || NAMES[t]), speak: r === '?' ? '' : r };
       })),
     };
   }),
