@@ -123,7 +123,7 @@ window.Theme = window.Theme || (function() {
     const themed = !onChunom || /^\/chunom\//.test(location.pathname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
-    let chosen = onChunom ? (CHUNOM_THEMES ? "boho" : "classic") : "nocturne";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, nocturne on qatt.org
+    let chosen = onChunom && CHUNOM_THEMES ? "boho" : "classic";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, classic on qatt.org
     const DEFAULT_THEME = chosen;
     const valid = s => Object.prototype.hasOwnProperty.call(list, s);
     // a stored choice counts only for an admin (app_metadata.is_admin in the session of this browser): the theme is no longer chosen by the others, so the old choice of a visitor does not hold
@@ -152,7 +152,7 @@ window.Theme = window.Theme || (function() {
         else { const l = document.createElement("link"); l.rel = "stylesheet"; l.id = "theme-css"; l.href = href(); document.head.append(l); }
         apply();
     }
-    // show the theme chosen; the event tells the menu bar
+    // show the chosen theme; the event tells the menu bar
     const update = () => {
         current = chosen;
         apply();
@@ -168,10 +168,10 @@ window.Theme = window.Theme || (function() {
             try { localStorage.setItem(KEY, name); } catch (e) {}
             update();
         },
-        reset() {   // "Default": forget the stored choice, the default theme is shown
+        reset() {   // "Default": forget the stored choice, the default theme is shown again
             if (!choosable) return;
             chosen = DEFAULT_THEME;
-            try { localStorage.removeItem(KEY); } catch (e) {}
+            try { localStorage.removeItem(KEY); localStorage.removeItem("daynight1"); } catch (e) {}
             update();
         }
     };
@@ -256,10 +256,10 @@ window.Readings = window.Readings || (function() {
         site: onChunom ? QATT_SITE : "",
         links: [
             { name: "Qatt.org home", vi: "Trang chủ Qatt.org", bar: "Home", barOrder: 1, barVi: "Trang chủ", url: "/index.html", icon: "bi-house" },
-            { name: "Unicode", bar: "Unicode", barOrder: 2, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
+            { name: "Unicode", bar: "Unicode", barOrder: 5, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
-            { name: "Learn QATT", vi: "Học QATT", bar: "Learn", barOrder: 5, barVi: "Học", barPrefix: "/learn/", url: "/learn/", icon: "bi-easel" },
+            { name: "Learn QATT", vi: "Học QATT", bar: "Learn", barOrder: 2, barVi: "Học", barPrefix: "/learn/", url: "/learn/", icon: "bi-easel" },
             { name: "Symbols", vi: "Bảng chữ", tile: "Symbols", tileVi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "Decodings", vi: "Giải mã", tile: "Decodings", tileVi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Wiki", tile: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
