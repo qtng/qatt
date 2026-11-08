@@ -25,8 +25,9 @@
 .steps .done .num { background: color-mix(in srgb, var(--bs-success) 25%, transparent); color: var(--bs-success); }
 #content .steps .now a { background: var(--cinnabar); color: #fff; }
 .steps .now .num { background: rgba(255, 255, 255, .25); color: #fff; }
+#learnSteps .steps .t { display: none; }   /* only the numbers (the name is the title); the phone shows the name of the current lesson */
 .steps .home .num { font-size: .8rem; }
-@media (max-width: 576px) { .steps { flex-wrap: nowrap; gap: .2rem; } .steps li:not(.now) .t { display: none; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
+@media (max-width: 576px) { .steps { flex-wrap: nowrap; gap: .2rem; } .steps li:not(.now) .t { display: none; } #learnSteps .steps .now .t { display: inline; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
 
 /* the tabs: a row (or rows: .rows, tabRows of Learn.board) with a sliding pill behind the active one */
 .marks.rows { grid-auto-flow: row; }
