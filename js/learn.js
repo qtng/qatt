@@ -59,7 +59,7 @@ const Learn = (() => {
     if (steps) {
       const ol = el('ol', 'steps');
       const home = el('li', 'home'), back = el('a', 'step-nav'); back.href = BASE;   // the overview first: a grid icon
-      back.setAttribute('aria-label', 'Overview'); back.dataset.viAriaLabel = 'Tổng quan';
+      back.title = 'Overview'; back.dataset.viTitle = 'Tổng quan'; back.setAttribute('aria-label', 'Overview'); back.dataset.viAriaLabel = 'Tổng quan';
       const icon = el('span', 'num'); icon.append(el('i', 'bi bi-grid-3x3-gap-fill'));
       back.append(icon, tr('span', 't', 'Overview', 'Tổng quan'));
       home.append(back); ol.append(home);
@@ -67,6 +67,7 @@ const Learn = (() => {
         const li = el('li', (i === at ? 'now' : '') + (l.soon ? ' soon' : '')); li.dataset.lesson = l.id;
         const a = el('a', 'step-nav'); a.href = href(l);   // "nav" in the class: the themes leave the colour of such links alone
         if (i === at) a.setAttribute('aria-current', 'step');
+        a.title = l.en; a.dataset.viTitle = l.vi; a.setAttribute('aria-label', l.en); a.dataset.viAriaLabel = l.vi;   // only the number shows (the name on hover)
         a.append(el('span', 'num', i + 1), tr('span', 't', l.en, l.vi));
         li.append(a); ol.append(li);
       });
