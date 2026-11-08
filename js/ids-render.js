@@ -60,7 +60,7 @@
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1, remain: 0.75, kConf: 1 };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -110,13 +110,17 @@
         box[a] = c - half; box[a + 2] = c + half;
       }
     }
-    return { box: box, glyph: measured && o.useRoleGlyph ? m[5] : vg };
+    // how sure the size is: measured in that role (by the count), else 0 (a guess from the role, the structure, the density)
+    var conf = measured ? m[4] / (m[4] + o.kConf) : 0;
+    return { box: box, glyph: measured && o.useRoleGlyph ? m[5] : vg, conf: conf };
   }
 
   // places the children of a row (H) or a column of parts: their extents along the axis from the estimated boxes, in order, scaled to fill
   // the overlap (or gap) between neighbours: as estimated from the two boxes (end of one - start of the next), mixed by gapOp with the
   // overlap of all parts of these roles (gen): the two medians come from different partners, so their difference alone makes big gaps
-  function row(boxes, H, gen, o) {
+  // conf: how sure each extent is; with remain the parts that fill too much or too little are changed by how unsure they are
+  // (a part measured in its role keeps its median size, a part without measurements takes the rest), else all in proportion
+  function row(boxes, H, gen, o, conf) {
     var a = H ? 0 : 1, n = boxes.length, ext = boxes.map(function (b) { return Math.max(0.05, b[a + 2] - b[a]); });
     var ov = [], wg = o ? (H ? o.gapOp : o.gapOpV) : 0;
     for (var i = 0; i + 1 < n; i++) {
@@ -129,6 +133,11 @@
       ov.push(Math.min(0.5 * Math.min(ext[i], ext[i + 1]), v));
     }
     var total = ext.reduce(function (s, x) { return s + x; }, 0) - ov.reduce(function (s, x) { return s + x; }, 0);
+    if (o && o.remain && conf) {
+      var wt = ext.map(function (e, k) { return e * (1.02 - o.remain * conf[k]); }), sw = wt.reduce(function (s, x) { return s + x; }, 0), d = 1 - total;
+      ext = ext.map(function (e, k) { return Math.max(0.4 * e, e + d * wt[k] / sw); });
+      total = ext.reduce(function (s, x) { return s + x; }, 0) - ov.reduce(function (s, x) { return s + x; }, 0);
+    }
     var pos = 0, out = [];
     for (var j = 0; j < n; j++) {
       var b = boxes[j].slice(), s0 = pos / total, s1 = (pos + ext[j]) / total;
@@ -181,8 +190,9 @@
     var e = node.args.map(function (a, i) { return est(a, roles[i], P, o, (op === '⿰' || op === '⿱') ? node.args[1 - i] : null); });
     var boxes = e.map(function (x) { return x.box; });
     var gen = roles.map(function (r) { return P.op(r); });
-    if (H_OPS[op]) boxes = row(boxes, true, gen, o);
-    else if (V_OPS[op]) boxes = row(boxes, false, gen, o);
+    var conf = e.map(function (x) { return x.conf; });
+    if (H_OPS[op]) boxes = row(boxes, true, gen, o, conf);
+    else if (V_OPS[op]) boxes = row(boxes, false, gen, o, conf);
     else if (ENCL.indexOf(op) >= 0) {
       var ko = keyOf(node.args[0], P), inn = ko != null ? P.inner(ko, op) : null;
       if (inn && inn[4] >= o.nMin) { var w = inn[4] / (inn[4] + o.k0); boxes[1] = boxes[1].map(function (v, i) { return v * (1 - w) + inn[i] * w; }); }
