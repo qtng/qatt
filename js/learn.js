@@ -6,7 +6,7 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
         build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes, then onRebuild(parser))
-        item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading in the band; small: a line below it)
+        item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading, in the middle of the row; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
 Needs parser.js and qatt-text.js; css/learn.css.
 */
@@ -146,7 +146,6 @@ const Learn = (() => {
       <div class="progress-line" aria-hidden="true"><div data-k="progress"></div></div>
       <div class="card-box board mt-3" data-k="board">
         <div class="band" data-k="band" aria-live="polite">
-          <div class="say"><div class="pair" data-k="say"></div></div>
           <i class="bi bi-volume-up-fill speaking"></i>
           <div class="tick" data-k="tick"></div>
         </div>
@@ -175,16 +174,24 @@ const Learn = (() => {
         target.replaceChildren(el('span', 'part', a), el('span', 'plus', '+'), el('span', 'part', b));
       } else target.textContent = item.glyph;
     };
+    // the readings of a row stand in its middle, muted; the row being read shows them fully (the band only leads the eye, every row can be read)
+    const reading = item => {
+      const r = el('span', 'r'); r.lang = 'vi';
+      r.append(el('span', 'big', item.show ?? ''));
+      if (item.small) r.append(tr('span', 'small', item.small, item.smallVi));
+      return r;
+    };
     const drawRows = animate => {
       rowEls.forEach(r => r.div.remove());
       rowEls = tabs[tab].rows.map((pair, r) => {
         const div = el('div', 'row-pair'); div.style.setProperty('--i', r);
         const cells = pair.map(item => { const c = el('div', 'g'); drawGlyph(c, item); return c; });
-        div.append(cells[0], el('div'), cells[1]);
+        const mid = el('div', 'pair'); mid.append(reading(pair[0]), el('span', 'dot', '·'), reading(pair[1]));
+        div.append(cells[0], mid, cells[1]);
         div.addEventListener('click', () => { row = r; pick(); });
         $('board').append(div);
         if (animate) restart(div, 'in');
-        return { div };
+        return { div, mid };
       });
     };
     const setTab = (t, animate) => {
@@ -216,15 +223,8 @@ const Learn = (() => {
       row = Math.min(row, rows.length - 1);
       $('band').style.transform = `translateY(calc(${row} * var(--row)))`;
       rowEls.forEach((r, i) => { r.div.classList.toggle('now', i === row); r.div.classList.toggle('done', i < row); });
-      const reading = item => {
-        const r = el('span', 'r'); r.lang = 'vi';
-        r.append(el('span', 'big', item.show ?? ''));
-        if (item.small) r.append(tr('span', 'small', item.small, item.smallVi));
-        return r;
-      };
       const [a, b] = rows[row];
-      $('say').replaceChildren(reading(a), el('span', 'dot', '·'), reading(b));
-      restart($('say'), 'in');
+      restart(rowEls[row].mid, 'in');
       $('progress').style.width = ((row + 1) / rows.length * 100) + '%';
       const tick = $('tick'); tick.classList.remove('run'); void tick.offsetWidth;
       if (playing) { tick.classList.add('run'); rowEls[row].div.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
