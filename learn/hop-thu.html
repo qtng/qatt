@@ -34,20 +34,24 @@
 
 <script>
 Learn.page('hop-thu');
-const KINDS = [
-  ['ông', ['không', 'sông', 'công', 'đông', 'lông', 'trông', 'mông', 'phông']],
-  ['ong', ['trong', 'mong', 'xong', 'cong', 'long', 'song', 'nóng', 'đóng']],
-  ['ung', ['chung', 'cùng', 'trung', 'sung', 'dùng', 'khung', 'nhung', 'rung']],
-  ['uông', ['chuông', 'buông', 'muống', 'xuống', 'uống', 'luống', 'ruộng', 'cuống']],
-];
-Learn.board(document.getElementById('board'), {
-  build: parser => KINDS.map(([kind, words]) => {
-    const items = words.map(w => ({ w, cell: Learn.cell(w) })).filter(x => x.cell && QattText.reading(x.cell, parser) === x.w)
-      .map(x => ({ glyph: x.cell, show: x.w, speak: x.w }));
-    const rows = []; for (let i = 0; i + 1 < items.length; i += 2) rows.push([items[i], items[i + 1]]);
-    return { label: kind, sample: items[0] && items[0].glyph, rows };
-  }),
+const KINDS = ['ông', 'ong', 'ung', 'uông'];
+// as in the lesson Rhymes: a tab for each pair of shapes (the tab shows the first, unmarked; at the end the first pair once more, named after its second shape),
+// its rows the four rhymes on both shapes
+const tabOf = (a, b, by = a) => parser => ({
+  label: Learn.consonant(by).show, sample: Learn.glyph(by, 0),
+  rows: KINDS.map(kind => [a, b].map(s => {
+    const on = Learn.consonant(s).show, w = (on === 'ʔ' ? '' : on) + kind, cell = Learn.cell(w);   // the main spelling of the initial + the rhyme
+    return cell && QattText.reading(cell, parser) === w ? { glyph: cell, show: w, speak: w } : { glyph: '', show: '' };
+  })),
 });
+Learn.board(document.getElementById('board'), {
+  tabRows: 2,
+  build: parser => {
+    const pairs = pairsOf(Learn.SHAPES);
+    return [...pairs.map(([a, b]) => tabOf(a, b)(parser)), tabOf(pairs[0][0], pairs[0][1], pairs[0][1])(parser)];
+  },
+});
+function pairsOf(list) { const out = []; for (let i = 0; i < list.length; i += 2) out.push(list.slice(i, i + 2)); return out; }
 </script>
 </body>
 </html>

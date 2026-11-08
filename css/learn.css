@@ -47,6 +47,7 @@
 .row-pair .g { display: flex; align-items: center; justify-content: center; gap: .3rem; font-family: var(--qfont), sans-serif; font-size: 3.1rem; line-height: 1; transition: color .6s, transform .6s cubic-bezier(.34, 1.56, .64, 1), opacity .6s; opacity: .7; }
 .row-pair .g .part { font-size: 2.3rem; }
 .row-pair .g .plus { font-family: Georgia, serif; font-size: 1.1rem; opacity: .6; }
+.row-pair.apart::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 0; border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent); }   /* the first row of a tab with apart (the rhymes: stroke 1, always ông) */
 .row-pair.now .g { opacity: 1; color: var(--cinnabar); transform: scale(1.15); }
 .row-pair:hover .g { opacity: .9; }
 .row-pair.in .g { animation: glyphIn .55s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 35ms); }
