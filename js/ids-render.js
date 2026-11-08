@@ -60,7 +60,7 @@
 (function (root) {
   'use strict';
   var H_OPS = { '⿰': 1, '⿲': 1 }, V_OPS = { '⿱': 1, '⿳': 1 }, ENCL = '⿴⿵⿶⿷⿸⿹⿺⿼⿽';
-  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3 };
+  var DEF = { nMin: 1, k0: 0.25, alpha: 0.5, useRoleGlyph: true, useDensity: true, mixDensity: 0, dHV: Infinity, dIn: Infinity, dOut: Infinity, beta: 0, sMin: 0.6, useVariant: true, wVar: 0.5, densVar: false, usePair: true, nPair: 1, kPair: 1, recognise: true, recRoot: true, useStruct: true, k0s: 20, gamma: 0, vRef: 3, hRef: 3, gapOp: 0.75, gapOpV: 1 };
   var SUFFIX = { '⿰0': ['01'], '⿰1': ['02'], '⿱0': ['03'], '⿱1': ['04'], '⿳0': ['03'], '⿳2': ['04'], '⿲0': ['01'], '⿲2': ['02'] };
   '⿴⿵⿶⿷⿸⿹⿺⿼⿽'.split('').forEach(function (op) { SUFFIX[op + '0'] = ['05', '10']; });
 
@@ -114,11 +114,20 @@
   }
 
   // places the children of a row (H) or a column of parts: their extents along the axis from the estimated boxes, in order, scaled to fill
-  function row(boxes, H) {
+  // the overlap (or gap) between neighbours: as estimated from the two boxes (end of one - start of the next), mixed by gapOp with the
+  // overlap of all parts of these roles (gen): the two medians come from different partners, so their difference alone makes big gaps
+  function row(boxes, H, gen, o) {
     var a = H ? 0 : 1, n = boxes.length, ext = boxes.map(function (b) { return Math.max(0.05, b[a + 2] - b[a]); });
-    // the overlap between neighbours as estimated: end of one - start of the next
-    var ov = [];
-    for (var i = 0; i + 1 < n; i++) ov.push(Math.min(0.5 * Math.min(ext[i], ext[i + 1]), boxes[i][a + 2] - boxes[i + 1][a]));
+    var ov = [], wg = o ? (H ? o.gapOp : o.gapOpV) : 0;
+    for (var i = 0; i + 1 < n; i++) {
+      var v = boxes[i][a + 2] - boxes[i + 1][a];
+      if (wg && gen && gen[i] && gen[i + 1]) {   // the generic overlap, in units of the extents of the generic boxes, scaled to these parts
+        var ge0 = gen[i][a + 2] - gen[i][a], ge1 = gen[i + 1][a + 2] - gen[i + 1][a], gv = gen[i][a + 2] - gen[i + 1][a];
+        var g = gv / Math.max(0.05, (ge0 + ge1) / 2) * (ext[i] + ext[i + 1]) / 2;
+        v = v * (1 - wg) + g * wg;
+      }
+      ov.push(Math.min(0.5 * Math.min(ext[i], ext[i + 1]), v));
+    }
     var total = ext.reduce(function (s, x) { return s + x; }, 0) - ov.reduce(function (s, x) { return s + x; }, 0);
     var pos = 0, out = [];
     for (var j = 0; j < n; j++) {
@@ -171,8 +180,9 @@
     if (op === '㇯') { draw(node.args[0], T, P, o, null, out); return; }   // subtraction: the first part (approximation)
     var e = node.args.map(function (a, i) { return est(a, roles[i], P, o, (op === '⿰' || op === '⿱') ? node.args[1 - i] : null); });
     var boxes = e.map(function (x) { return x.box; });
-    if (H_OPS[op]) boxes = row(boxes, true);
-    else if (V_OPS[op]) boxes = row(boxes, false);
+    var gen = roles.map(function (r) { return P.op(r); });
+    if (H_OPS[op]) boxes = row(boxes, true, gen, o);
+    else if (V_OPS[op]) boxes = row(boxes, false, gen, o);
     else if (ENCL.indexOf(op) >= 0) {
       var ko = keyOf(node.args[0], P), inn = ko != null ? P.inner(ko, op) : null;
       if (inn && inn[4] >= o.nMin) { var w = inn[4] / (inn[4] + o.k0); boxes[1] = boxes[1].map(function (v, i) { return v * (1 - w) + inn[i] * w; }); }
