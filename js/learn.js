@@ -5,7 +5,7 @@ Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodin
 
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
   Learn.board(el, { build, step, decoding, lesson })
-        build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes)
+        build(parser) -> [{ label, vi, sample, rows: [[item, item], …] }]   (called again when the decoding changes, then onRebuild(parser))
         item = { glyph | parts: [a, b], show, small, speak }               (glyph: QATT text; show: the reading in the band; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
 Needs parser.js and qatt-text.js; css/learn.css.
@@ -17,7 +17,7 @@ const Learn = (() => {
     { id: 'pairs', en: 'Phiên thiết pairs', vi: 'Cặp phiên thiết', sample: 'con', about: 'An initial and a rhyme join into one syllable.', aboutVi: 'Phụ âm đầu và vần ghép thành một âm tiết.' },
     { id: 'tones', en: 'Tones', vi: 'Thanh điệu', sample: 'mán', about: 'Eight tone marks after the syllable.', aboutVi: 'Tám dấu thanh sau âm tiết.' },
     { id: 'hop-thu', en: 'Hợp Thư', vi: 'Hợp Thư', sample: 'không', about: 'ông, ong, ung and uông in their short forms.', aboutVi: 'ông, ong, ung và uông viết gọn.' },
-    { id: 'reading', en: 'Reading', vi: 'Đọc', sample: 'đọc', soon: true, about: 'Read words and short sentences.', aboutVi: 'Đọc từ và câu ngắn.' },
+    { id: 'reading', en: 'Reading', vi: 'Đọc', sample: 'đọc', about: 'Read words and short sentences.', aboutVi: 'Đọc từ và câu ngắn.' },
     { id: 'typing', en: 'Typing', vi: 'Gõ chữ', sample: 'gõ', soon: true, about: 'Type QATT with Telex in the writer and the Notes app.', aboutVi: 'Gõ QATT bằng Telex trong trình soạn thảo và ứng dụng Notes.' },
   ];
   const BASE = '/learn/';
@@ -123,9 +123,10 @@ const Learn = (() => {
   };
   let sound = true;
   try { sound = localStorage.getItem('qattLearnSound') !== '0'; } catch (e) {}
+  const speak = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };   // read aloud (unless the sound of the board is off)
 
   // the board
-  const board = (root, { build, step = 4000, decoding = true, lesson = current } = {}) => {
+  const board = (root, { build, step = 4000, decoding = true, lesson = current, onRebuild } = {}) => {
     root.style.setProperty('--step', step / 1000 + 's');
     const html = `
       <div class="d-flex justify-content-center align-items-center gap-2 tools mb-3">
@@ -199,7 +200,7 @@ const Learn = (() => {
     const say = text => {
       if (!sound || !text) return;
       $('band').classList.add('voice'); setTimeout(() => $('band').classList.remove('voice'), 1400);
-      withSpeaker(sp => sp.speak(text, 'auto', 0.8));
+      speak(text);
     };
     const show = speak => {
       const rows = tabs[tab].rows;
@@ -252,6 +253,7 @@ const Learn = (() => {
     const rebuild = animate => {
       tabs = build(parser).filter(t => t.rows.length);
       drawTabs(); setTab(Math.min(tab, tabs.length - 1), animate); show(false);
+      if (onRebuild) onRebuild(parser);                   // the rest of the page follows the decoding too
     };
 
     $('play').addEventListener('click', () => setPlaying(!playing));
@@ -287,5 +289,5 @@ const Learn = (() => {
     return { rebuild };
   };
 
-  return { LESSONS, page, overview, board, parser, SHAPES, code, glyph, syllable, cell, consonant, isDone, done };
+  return { LESSONS, page, overview, board, speak, parser, SHAPES, code, glyph, syllable, cell, consonant, isDone, done };
 })();

@@ -89,6 +89,36 @@
 .soon-box h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.6rem; margin: .6rem 0 .4rem; }
 .soon-box p { color: var(--bs-secondary-color); max-width: 28rem; margin: 0 auto 1.2rem; }
 
+/* lesson 6: sentences to uncover and the quiz */
+.learn h2.part-title { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.6rem; text-align: center; margin: 2.8rem 0 .4rem; color: var(--ink); }
+.learn .part-lead { text-align: center; color: var(--bs-secondary-color); margin-bottom: 1.2rem; }
+.sentences { display: grid; gap: .6rem; }
+.sentence { display: block; width: 100%; text-align: left; padding: .9rem 1.1rem; border: 0; color: var(--ink); cursor: pointer; transition: transform .2s; }
+.sentence:hover { transform: translateY(-1px); }
+.sentence .q { font-family: var(--qfont), sans-serif; font-size: 2.1rem; line-height: 1.25; overflow-wrap: anywhere; }
+.sentence .a { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .45s cubic-bezier(.2, .8, .2, 1), opacity .45s; font-family: Georgia, "Times New Roman", serif; font-size: 1.15rem; color: var(--cinnabar); }
+.sentence .a > span { overflow: hidden; }
+.sentence.open .a { grid-template-rows: 1fr; opacity: 1; }
+.sentence .hint-tap { font-size: .75rem; color: var(--bs-secondary-color); }
+.sentence.open .hint-tap { display: none; }
+
+.quiz { text-align: center; padding: 1.6rem 1.2rem 1.4rem; color: var(--ink); }
+.quiz .count { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--bs-secondary-color); }
+.quiz .dots { display: flex; justify-content: center; gap: .35rem; margin: .5rem 0 1rem; }
+.quiz .dots span { width: .55rem; height: .55rem; border-radius: 50%; background: color-mix(in srgb, currentColor 15%, transparent); transition: background-color .3s, transform .3s; }
+.quiz .dots .ok { background: var(--bs-success); }
+.quiz .dots .no { background: var(--bs-danger); }
+.quiz .dots .now { transform: scale(1.4); background: var(--cinnabar); }
+.quiz .ask { font-family: var(--qfont), sans-serif; font-size: 5rem; line-height: 1.1; color: var(--ink); animation: pop .4s cubic-bezier(.34, 1.56, .64, 1) both; }
+@keyframes pop { from { opacity: 0; transform: scale(.8); } }
+.quiz .options { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; max-width: 22rem; margin: 1.2rem auto 0; }
+.quiz .options .btn { font-family: Georgia, "Times New Roman", serif; font-size: 1.25rem; padding: .55rem .5rem; transition: background-color .25s, border-color .25s, color .25s, transform .15s; }
+.quiz .options .btn.right { --bs-btn-bg: var(--bs-success); --bs-btn-border-color: var(--bs-success); --bs-btn-color: #fff; --bs-btn-disabled-bg: var(--bs-success); --bs-btn-disabled-border-color: var(--bs-success); --bs-btn-disabled-color: #fff; --bs-btn-disabled-opacity: 1; }
+.quiz .options .btn.wrong { --bs-btn-bg: var(--bs-danger); --bs-btn-border-color: var(--bs-danger); --bs-btn-color: #fff; --bs-btn-disabled-bg: var(--bs-danger); --bs-btn-disabled-border-color: var(--bs-danger); --bs-btn-disabled-color: #fff; --bs-btn-disabled-opacity: 1; animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.quiz .result { font-family: Georgia, "Times New Roman", serif; font-size: 2.6rem; color: var(--cinnabar); }
+.quiz .result-text { color: var(--bs-secondary-color); margin: .3rem 0 1.2rem; }
+
 /* the overview */
 .lessons { display: grid; gap: .9rem; max-width: 46rem; }
 @media (min-width: 640px) { .lessons { grid-template-columns: 1fr 1fr; } }
