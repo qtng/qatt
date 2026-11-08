@@ -26,7 +26,7 @@
 <main class="container py-4" id="content">
   <div class="learn mx-auto">
     <nav id="learnSteps" aria-label="Lessons"></nav>
-    <p class="intro"><span data-vi="Một âm tiết gồm phụ âm đầu (một hình trơn) và vần (một hình có nét đánh dấu), ghép thành một ô vuông, giống như khi đánh vần: bờ – a – ba. Khi phụ âm đầu và vần có cùng một hình, riêng hình có nét đánh dấu là cả âm tiết (thẻ thứ hai).">A syllable is its initial (a plain shape) and its rhyme (a marked shape), joined into one square, the way a word is spelled out: bờ – a – ba. When the initial and the rhyme have the same shape, the marked shape alone is the whole syllable (second tab).</span></p>
+    <p class="intro"><span data-vi="Một âm tiết gồm phụ âm đầu (một hình trơn) và vần (một hình có nét đánh dấu), ghép thành một ô vuông, giống như khi đánh vần: bờ – a – ba. Khi phụ âm đầu và vần có cùng một hình, riêng hình có nét đánh dấu là cả âm tiết, như trong bài Vần.">A syllable is its initial (a plain shape) and its rhyme (a marked shape), joined into one square, the way a word is spelled out: bờ – a – ba. When the initial and the rhyme have the same shape, the marked shape alone is the whole syllable, as in the lesson Rhymes.</span></p>
     <div id="board"></div>
     <nav id="learnPager"></nav>
   </div>
@@ -34,10 +34,10 @@
 
 <script>
 Learn.page('pairs');
-const WORDS = ['ba', 'con', 'xe', 'đi', 'nghe', 'tôi', 'lên', 'viên', 'trăng', 'mưa', 'thương', 'quê', 'ăn', 'em', 'tay', 'khi', 'vui', 'xa', 'hoa', 'sinh', 'mô', 'ta', 'na', 'thu', 'lo'];
+const WORDS = ['ba', 'con', 'xe', 'đi', 'nghe', 'tôi', 'lên', 'viên', 'trăng', 'mưa', 'thương', 'quê', 'ăn', 'em', 'tay', 'khi', 'vui', 'xa', 'hoa', 'sinh'];
 Learn.board(document.getElementById('board'), {
   build: parser => {
-    const joined = [], same = [];
+    const joined = [];   // only words of two shapes: one of the same shape is a marked shape alone (the lesson Rhymes)
     for (const w of WORDS) {
       const p = parser.parse(w), cell = Learn.cell(w);
       if (!p || !p.qatt || !cell || QattText.reading(cell, parser) !== w) continue;
@@ -47,11 +47,10 @@ Learn.board(document.getElementById('board'), {
         { parts: [Learn.syllable(on + ',,,0'), Learn.syllable(rh + ',,,0')], show: name.show + ' + ' + rhyme, speak: [name.speak, rhyme].filter(Boolean).join(', ') },
         { glyph: cell, show: w, speak: w },
       ];
-      (Array.from(cell).length === 1 ? same : joined).push(row);
+      if (Array.from(cell).length > 1) joined.push(row);
     }
     return [
       { label: 'Joined', vi: 'Ghép', sample: Learn.cell('con'), rows: joined.slice(0, 8) },
-      { label: 'Same shape', vi: 'Cùng hình', sample: Learn.cell('mô'), rows: same.slice(0, 8) },
     ];
   },
 });
