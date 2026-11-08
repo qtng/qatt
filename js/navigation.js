@@ -277,7 +277,7 @@ window.Readings = window.Readings || (function() {
             { name: "Translate Chữ Nôm", vi: "Dịch chữ Nôm", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
             { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", url: "/chunom/dict/genibrel.html", icon: "bi-book" },
             { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", url: "/chunom/dict/bonet.html", icon: "bi-book" },
-            { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, url: "/chunom/shelf/", icon: "bi-book" },
+            { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, barPrefix: "/chunom/shelf/", url: "/chunom/shelf/", icon: "bi-book" },
             { name: "Phiên âm tự (PA)", vi: "Phiên âm tự (PA)", url: "/chunom/pa/", icon: "bi-type" },
         ]
     };
@@ -346,12 +346,23 @@ window.Readings = window.Readings || (function() {
               border-bottom: 1px solid var(--nav-line, color-mix(in srgb, var(--nav-bg) 72%, #fff));
             }
             /* desktop: the links of the own block in the bar, the other site in a dropdown; below 992px the offcanvas menu and the bottom bar do it */
-            .desk-links, .desk-other { display: none; }
-            @media (min-width: 992px) {
+            /* from 768px (tablet and desktop) the bar has the links, the phone has the side menu and the bottom bar. When the links do not fit in text, the bar is
+               "compact": the entries of the bottom bar (icon above a short label) and Menu, which opens the side menu (the rest, and the other site), as on the phone */
+            .desk-links, .desk-other, .desk-compact { display: none; }
+            @media (min-width: 768px) {
                 #navTogglerCustom { display: none; }
                 .desk-links { display: flex; align-items: stretch; gap: .15rem; align-self: stretch; margin: 0 auto 0 .5rem; padding: 0; list-style: none; }
                 .desk-other { display: block; position: relative; margin-right: 1rem; }
+                .nav-backdrop.compact .desk-links, .nav-backdrop.compact .desk-other { display: none; }
+                .nav-backdrop.compact .desk-compact { display: flex; align-items: stretch; align-self: stretch; margin: 0 auto 0 .5rem; padding: 0; list-style: none; }
             }
+            .desk-compact a, .desk-compact button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 3.6rem; height: 100%; padding: 0 .5rem; color: rgba(255, 255, 255, .65); background: none; border: 0; border-bottom: 3px solid transparent; font-size: .68rem; text-decoration: none; white-space: nowrap; }
+            .desk-compact i { font-size: 1.25rem; line-height: 1; }
+            .desk-compact a:hover, .desk-compact button:hover { color: #fff; }
+            .desk-compact a.active { color: #fff; border-bottom-color: var(--bar-accent); }
+            .desk-compact a.active i { color: var(--bar-accent); }
+            .desk-compact.icons-only span { display: none; }
+            .desk-compact.icons-only a, .desk-compact.icons-only button { min-width: 0; padding: 0 .6rem; }
             .desk-links a, .desk-other > button { display: flex; align-items: center; gap: .4rem; height: 100%; padding: 0 .6rem; color: rgba(255, 255, 255, .65); text-decoration: none; background: none; border: 0; border-bottom: 3px solid transparent; font-size: .92rem; white-space: nowrap; }
             .desk-links a:hover, .desk-other > button:hover { color: #fff; }
             .desk-links a.active { color: #fff; border-bottom-color: var(--bar-accent); }
@@ -361,9 +372,6 @@ window.Readings = window.Readings || (function() {
             .desk-other .desk-menu a { display: flex; align-items: center; gap: .6rem; padding: .45rem 1rem; color: rgba(255, 255, 255, .8); text-decoration: none; font-size: .92rem; }
             .desk-other .desk-menu a:hover { background: rgba(255, 255, 255, .08); color: #fff; }
             .desk-links i { display: none; }
-            .desk-links.icons-only i { display: inline; font-size: 1.15rem; }
-            .desk-links.icons-only .dl-text { display: none; }
-            .desk-links.icons-only a { padding: 0 .75rem; }
             .lang-switch { display: flex; align-items: center; gap: .35rem; margin-right: .5rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
             .lang-switch button { background: none; border: 0; padding: .25rem .15rem; color: rgba(255, 255, 255, .6); font-weight: 600; letter-spacing: .04em; cursor: pointer; }
             .lang-switch button:hover { color: #fff; }
@@ -519,6 +527,11 @@ window.Readings = window.Readings || (function() {
         const isActive = (sec, link) => !sec.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
         const deskLinks = ownSection.links.map(link =>
             `<li><a href="${ownSection.site || ''}${link.url}" title="${link.name}" class="${isActive(ownSection, link) ? 'active' : ''}"><i class="bi ${link.icon}"></i><span class="dl-text${link.vi ? '" data-vi="' + link.vi : ''}">${link.name}</span></a></li>`).join('');
+        // compact: the entries of the bottom bar, in its order, with its short labels; Menu opens the side menu
+        const barActive = link => currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '') || (link.barPrefix && currentPath.startsWith(link.barPrefix));
+        const compactLinks = ownSection.links.filter(l => l.bar).sort((a, b) => (a.barOrder ?? 0) - (b.barOrder ?? 0)).map(link =>
+            `<li><a href="${ownSection.site || ''}${link.barUrl || link.url}" title="${link.name}" class="${!ownSection.site && barActive(link) ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></a></li>`).join('')
+            + '<li><button type="button" class="desk-menu-btn" aria-label="Menu"><i class="bi bi-list"></i><span>Menu</span></button></li>';
         const otherLabel = onChunom ? 'QATT' : 'Chữ Nôm';
         const otherLinks = otherSection.links.map(link =>
             `<a href="${otherSection.site || ''}${link.url}"><i class="bi ${link.icon}"></i><span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span></a>`).join('');
@@ -538,6 +551,7 @@ window.Readings = window.Readings || (function() {
                     ${navConfig.brand(logo, brandTitle, false)}
                 </a>
                 <ul class="desk-links">${deskLinks}</ul>
+                <ul class="desk-compact">${compactLinks}</ul>
                 <div class="desk-other">
                     <button type="button" aria-haspopup="true" aria-expanded="false">${otherLabel} <i class="bi bi-chevron-down small"></i></button>
                     <div class="desk-menu">${otherLinks}</div>
@@ -678,14 +692,17 @@ window.Readings = window.Readings || (function() {
 
         document.body.style.paddingTop = "60px";
         document.body.prepend(header);
-        // the horizontal menu shows text only; when it no longer fits (the controls on the right wrap to a second row) it shows icons only
-        const deskUl = header.querySelector('.desk-links'), deskBrand = header.querySelector('.navbar-brand');
+        // the horizontal menu shows its links in text; when they do not fit (the controls on the right wrap to a second row) the bar is compact
+        // (the entries of the bottom bar and Menu), and when even that does not fit, those show only their icons
+        const deskUl = header.querySelector('.desk-links'), compactUl = header.querySelector('.desk-compact'), deskBrand = header.querySelector('.navbar-brand');
+        const wrapped = ul => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || ul.scrollWidth > ul.clientWidth;
         const fitDesk = () => {
-            deskUl.classList.remove('icons-only');
-            if (!deskUl.offsetParent) return;
-            const wrapped = () => [...deskBrand.parentElement.children].some(el => el.offsetParent && el.getBoundingClientRect().top > deskBrand.getBoundingClientRect().top + deskBrand.offsetHeight / 2) || deskUl.scrollWidth > deskUl.clientWidth;
-            if (wrapped()) deskUl.classList.add('icons-only');
+            header.classList.remove('compact'); compactUl.classList.remove('icons-only');
+            if (!deskUl.offsetParent || !wrapped(deskUl)) return;
+            header.classList.add('compact');
+            if (wrapped(compactUl)) compactUl.classList.add('icons-only');
         };
+        compactUl.querySelector('.desk-menu-btn').addEventListener('click', () => document.getElementById('navTogglerCustom').click());
         fitDesk();
         window.addEventListener('resize', fitDesk);
         document.addEventListener('langchange', fitDesk);
