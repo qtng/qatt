@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reading · Learn QATT</title>
-  <meta name="description" content="Lesson 6 of Learn QATT: reading words and short sentences in Quốc Âm Tân Tự (coming soon).">
+  <meta name="description" content="Lesson 6 of Learn QATT: read words and short sentences in Quốc Âm Tân Tự, read aloud, with a quiz.">
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/site.css">
@@ -26,21 +26,104 @@
 <main class="container py-4" id="content">
   <div class="learn mx-auto">
     <nav id="learnSteps" aria-label="Lessons"></nav>
-    <div class="card-box soon-box">
-      <i class="bi bi-hourglass-split"></i>
-      <h2 data-vi="Sắp ra mắt">Coming soon</h2>
-      <p><span data-vi="Bài này đang được soạn. Trong lúc chờ, hãy luyện đọc với Đánh vần!">This lesson is being written. Until then, practise reading with Spell it!</span></p>
-      <div class="d-flex justify-content-center gap-2 flex-wrap">
-        <a class="btn btn-cinnabar btn-pill" href="/spell.html"><span data-vi="Đánh vần!">Spell it!</span></a>
-        <a class="btn btn-quiet btn-pill" href="/symbols.html"><span data-vi="Bảng chữ">Symbol table</span></a>
-      </div>
-    </div>
+    <p class="intro">Now the parts come together: every square is one syllable, with its initial, its rhyme and its tone. Read each word yourself before the band reaches it, then listen. Below are a few short sentences to uncover, and a quiz at the end: answer five of six right to finish the lesson.</p>
+    <div id="board"></div>
+
+    <h2 class="part-title" data-vi="Câu">Sentences</h2>
+    <p class="part-lead"><span data-vi="Đọc thầm, rồi nhấn để xem và nghe.">Read it yourself, then tap to see and hear it.</span></p>
+    <div class="sentences" id="sentences"></div>
+
+    <h2 class="part-title" data-vi="Câu đố">Quiz</h2>
+    <p class="part-lead"><span data-vi="Từ này là gì?">Which word is this?</span></p>
+    <div class="card-box quiz" id="quiz"></div>
+
     <nav id="learnPager"></nav>
   </div>
 </main>
 
 <script>
+const GROUPS = [
+  ['Family', 'Gia đình', ['mẹ', 'cha', 'anh', 'chị', 'em', 'con', 'ông', 'bà', 'cô', 'chú']],
+  ['Every day', 'Hằng ngày', ['nhà', 'nước', 'cơm', 'ăn', 'uống', 'ngủ', 'đi', 'học', 'làm', 'chơi']],
+  ['Nature', 'Thiên nhiên', ['trời', 'mưa', 'đất', 'núi', 'sông', 'biển', 'cây', 'hoa', 'trăng', 'sao']],
+  ['Numbers', 'Số', ['một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín', 'mười']],
+];
+const SENTENCES = ['xin chào', 'cảm ơn bạn', 'mẹ đi chợ', 'hôm nay trời đẹp', 'em học tiếng việt', 'chúc mừng năm mới'];
+const QUESTIONS = 6, PASS = 5;
+let quiz = null;                                           // { parser, pool, items, at, marks }
+
+// the words of a group that this decoding writes and reads back unchanged
+const usable = (words, parser) => words.map(w => ({ w, cell: Learn.cell(w) })).filter(x => x.cell && QattText.reading(x.cell, parser) === x.w);
+
 Learn.page('reading');
+Learn.board(document.getElementById('board'), {
+  lesson: null,                                            // the quiz finishes this lesson, not the band
+  build: parser => GROUPS.map(([en, vi, words]) => {
+    const items = usable(words, parser).map(x => ({ glyph: x.cell, show: x.w, speak: x.w }));
+    const rows = []; for (let i = 0; i + 1 < items.length; i += 2) rows.push([items[i], items[i + 1]]);
+    return { label: en, vi, sample: items[0] && items[0].glyph, rows };
+  }),
+  onRebuild: parser => { drawSentences(parser); newQuiz(parser); },
+});
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function vi(e, text) { e.dataset.vi = text; return e; }
+
+function drawSentences(parser) {
+  const box = document.getElementById('sentences');
+  box.replaceChildren(...SENTENCES.map(s => {
+    const b = el('button', 'card-box sentence'); b.type = 'button';
+    const q = el('div', 'q', QattText.convert(s, parser));
+    const a = el('div', 'a'); const span = el('span', '', s); span.lang = 'vi'; a.append(span);
+    b.append(q, a, vi(el('div', 'hint-tap', 'Tap to see the reading'), 'Nhấn để xem cách đọc'));
+    b.addEventListener('click', () => { b.classList.add('open'); Learn.speak(s); });
+    return b;
+  }));
+}
+
+function newQuiz(parser) {
+  const pool = GROUPS.flatMap(([, , words]) => usable(words, parser));
+  const shuffle = list => list.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  quiz = { parser, pool, items: shuffle(pool).slice(0, QUESTIONS), at: 0, marks: [] };
+  ask();
+}
+function ask() {
+  const box = document.getElementById('quiz');
+  const { items, at, marks, pool } = quiz;
+  const dots = el('div', 'dots');
+  items.forEach((_, i) => dots.append(el('span', i === at ? 'now' : (marks[i] === true ? 'ok' : marks[i] === false ? 'no' : ''))));
+  if (at >= items.length) return finish(box, dots);
+  const item = items[at];
+  const others = pool.filter(x => x.w !== item.w).map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).slice(0, 3).map(x => x[1]);
+  const options = [item, ...others].map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const count = el('div', 'count'); count.append(vi(el('span', '', 'Question'), 'Câu hỏi'), document.createTextNode(` ${at + 1} / ${items.length}`));
+  const grid = el('div', 'options');
+  const buttons = options.map(x => {
+    const b = el('button', 'btn btn-quiet btn-pill', x.w); b.type = 'button'; b.lang = 'vi';
+    b.addEventListener('click', () => {
+      const right = x === item;
+      buttons.forEach(o => { o.disabled = true; if (o.textContent === item.w) o.classList.add('right'); });
+      if (!right) b.classList.add('wrong');
+      quiz.marks[at] = right;
+      Learn.speak(item.w);
+      setTimeout(() => { quiz.at++; ask(); }, right ? 1300 : 2200);
+    });
+    grid.append(b);
+    return b;
+  });
+  box.replaceChildren(count, dots, el('div', 'ask', item.cell), grid);
+}
+function finish(box, dots) {
+  const right = quiz.marks.filter(Boolean).length, passed = right >= PASS;
+  if (passed) Learn.done('reading');
+  const text = passed
+    ? vi(el('div', 'result-text', 'Well done: the lesson is finished.'), 'Giỏi lắm: bạn đã hoàn thành bài này.')
+    : vi(el('div', 'result-text', `Five right answers finish the lesson. Try again!`), 'Trả lời đúng năm câu để hoàn thành bài. Thử lại nhé!');
+  const again = el('button', 'btn btn-cinnabar btn-pill'); again.type = 'button';
+  again.append(el('i', 'bi bi-arrow-repeat'), document.createTextNode(' '), vi(el('span', '', 'Again'), 'Làm lại'));
+  again.addEventListener('click', () => newQuiz(quiz.parser));
+  box.replaceChildren(dots, el('div', 'result', `${right} / ${quiz.items.length}`), text, again);
+}
 </script>
 </body>
 </html>
