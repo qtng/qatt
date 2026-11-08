@@ -19,6 +19,9 @@
     .box { width: 10rem; height: 10rem; border: 1px solid var(--bs-border-color); border-radius: .5rem; display: flex; align-items: center; justify-content: center; background: var(--bs-body-bg); }
     .box svg { width: 100%; height: 100%; }
     .box.text { font-size: 1.1rem; word-break: break-all; padding: .5rem; }
+    .mix { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; max-width: 32rem; margin-top: .75rem; }
+    .mix input[type=range] { flex: 1 1 10rem; }
+    .mix output { min-width: 3.5rem; font-variant-numeric: tabular-nums; }
     .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .5rem; }
     .gallery button { border: 1px solid var(--bs-border-color); border-radius: .5rem; background: var(--bs-body-bg); padding: .3rem; color: inherit; }
     .gallery button:hover { border-color: var(--bs-body-color); }
@@ -32,13 +35,25 @@
 <main class="container py-4">
   <h1 class="h3"><span data-vi="Vẽ chuỗi IDS">IDS renderer</span></h1>
   <p class="note">Any IDS sequence (Ideographic Description Sequence) drawn by <code>js/ids-render.js</code>: the size of every part in its role is the median of
-    real characters (GlyphWiki), with the GlyphWiki variant of the part for its role. Left: the drawing of the Bookshelf until now (whole glyphs in fixed halves).</p>
+    real characters (GlyphWiki), with the GlyphWiki variant of the part for its role. Left: the drawing of the Bookshelf until now (whole glyphs in fixed halves).
+    A part that the data of cdn.qatt.org does not have (a character newer than the data) is read live from GlyphWiki and measured in the browser; it is then
+    sized by the density table only. Middle: every part read this way, none of our measurements (what the renderer does with GlyphWiki alone).</p>
   <div class="input-group" style="max-width: 32rem">
     <input id="ids" class="form-control form-control-lg" value="⿰氵⿱宀子" aria-label="IDS" spellcheck="false">
     <button id="go" class="btn btn-cinnabar"><span data-vi="Vẽ">Draw</span></button>
   </div>
+  <div class="mix">
+    <label for="mix"><span data-vi="Tỷ lệ bảng mật độ">Density table</span></label>
+    <input type="range" id="mix" min="0" max="100" step="5" value="0" aria-describedby="mixNote">
+    <output id="mixOut">Auto</output>
+    <button id="mixAuto" class="btn btn-sm btn-pill btn-quiet"><span data-vi="Tự động">Auto</span></button>
+  </div>
+  <p class="note" id="mixNote">How much the size of every part comes from the density table (its own layers against the partner's): 0 % = no table, the
+    measured medians and the old fallback (scaled in proportion to the density); 100 % = the table only. Auto (the default of the renderer): the table
+    only for parts without measurements. Changes "New" and the examples (a sequence that is a character of its own keeps its glyph).</p>
   <div class="cmp">
     <figure><div class="box" id="old"></div><figcaption><span data-vi="Trước đây">Before</span></figcaption></figure>
+    <figure><div class="box" id="gw"></div><figcaption><span data-vi="Chỉ GlyphWiki">Only GlyphWiki</span></figcaption></figure>
     <figure><div class="box" id="new"></div><figcaption><span data-vi="Mới">New</span></figcaption></figure>
   </div>
   <p class="note" id="msg"></p>
@@ -79,31 +94,51 @@
   })();
 
   const $ = (id) => document.getElementById(id);
+  let mix = null;   // null = Auto (the renderer's default), else 0–1: layout option densMix
+  const lay = () => (mix == null ? undefined : { densMix: mix });
   async function show() {
     const ids = $('ids').value.trim();
     history.replaceState(null, '', '?ids=' + encodeURIComponent(ids));
-    $('msg').textContent = ''; $('new').innerHTML = ''; $('old').innerHTML = '';
+    $('msg').textContent = ''; $('new').innerHTML = ''; $('old').innerHTML = ''; $('gw').innerHTML = '';
+    const notes = [];
     try {
-      const r = await IdsRender.draw(ids, { size: '100%' });
+      const r = await IdsRender.draw(ids, { size: '100%', layout: lay() });
       $('new').innerHTML = r.svg;
-      if (r.missing) $('msg').textContent = r.missing + ' part(s) without data.';
-    } catch (e) { $('msg').textContent = String(e.message || e); }
+      if (r.fromGlyphWiki) notes.push(r.fromGlyphWiki + ' part(s) not in our data: read from GlyphWiki and measured in the browser.');
+      if (r.missing) notes.push(r.missing + ' part(s) without data, not on GlyphWiki either.');
+    } catch (e) { notes.push(String(e.message || e)); }
+    $('msg').textContent = notes.join(' ');
+    IdsRender.draw(ids, { size: '100%', onlyGlyphWiki: true, layout: { recRoot: false } }).then((r) => { $('gw').innerHTML = r.svg || '—'; }).catch(() => { $('gw').textContent = '—'; });
     Old(ids).then((s) => { $('old').innerHTML = s; }).catch(() => { $('old').textContent = '—'; });
   }
   $('go').addEventListener('click', show);
+  function setMix(v) {
+    mix = v; $('mixOut').textContent = v == null ? 'Auto' : Math.round(v * 100) + ' %';
+    $('mixAuto').disabled = v == null;
+    show(); drawGallery();
+  }
+  $('mix').addEventListener('input', () => { $('mixOut').textContent = $('mix').value + ' %'; });
+  $('mix').addEventListener('change', () => setMix($('mix').value / 100));
+  $('mixAuto').addEventListener('click', () => setMix(null));
+  $('mixAuto').disabled = true;
   $('ids').addEventListener('keydown', (e) => { if (e.key === 'Enter') show(); });
   const q = new URLSearchParams(location.search).get('ids'); if (q) $('ids').value = q;
   show();
 
   const EXAMPLES = ['⿰氵⿱宀子', '⿱艹⿰亻尔', '⿵門⿱日一', '⿺辶⿱山水', '⿰⿱人上𡿨', '⿰⿱罒𪜀異', '⿰⿳䒑人朩老', '⿰ソ帛', '⿰個里', '⿱宀⿰女女',
     '⿴囗⿱十口', '⿸广⿰木木', '⿰口⿱艹⿰亻尔', '⿲亻言寸', '⿳亠口小', '⿰⿻丨二丶', '⿰㫗月', '⿱⿰丿丿⿰十十', '⿰金⿱山⿰石石', '⿹勹⿱十口', '⿰⿱宀竜下', '⿰口⿱免⺀', '⿰扌⿱白工', '⿱⿰牙攵正'];
+  const galleryNew = [];
+  function drawGallery() {
+    galleryNew.forEach(([ids, n]) => IdsRender.draw(ids, { size: '100%', layout: lay() }).then((r) => { n.innerHTML = r.svg; }).catch(() => {}));
+  }
   (async () => {
     for (const ids of EXAMPLES) {
       const b = document.createElement('button'), pair = document.createElement('span'), o = document.createElement('span'), n = document.createElement('span');
       pair.className = 'pair'; pair.append(o, n); b.append(pair); const s = document.createElement('small'); s.textContent = ids; b.append(s);
       b.addEventListener('click', () => { $('ids').value = ids; show(); scrollTo(0, 0); });
       $('gallery').append(b);
-      IdsRender.draw(ids, { size: '100%' }).then((r) => { n.innerHTML = r.svg; }).catch(() => {});
+      galleryNew.push([ids, n]);
+      IdsRender.draw(ids, { size: '100%', layout: lay() }).then((r) => { n.innerHTML = r.svg; }).catch(() => {});
       Old(ids).then((x) => { o.innerHTML = x; }).catch(() => {});
     }
   })();
