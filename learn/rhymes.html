@@ -37,14 +37,14 @@ Learn.page('rhymes');
 const MARKS = [1, 2, 3, 4, 5, 6];   // stroke 1: the rhyme is always ông
 // a tab for each pair of shapes (the second is the mirror of the first, so the tab shows only the first, unmarked); its rows: the strokes 1 to 6 on both.
 // At the end the first pair once more, the same rows, with the second shape (ʔ) on the tab: 12 tabs, two even rows.
-// syllables that do not occur in standard Vietnamese (a manual list): shown as a dash, not read
+// syllables that do not occur in standard Vietnamese (a manual list): the glyph is shown, the reading is a dash and is not spoken
 const ABSENT = new Set(['hoam', 'nhoăm', 'chêng', 'duêng', 'duêm', 'xơng', 'khuơng', 'khuyêng', 'sing', 'ruyng', 'ruym']);
 const tabOf = (a, b, by = a) => parser => ({   // by: the shape on the tab
   label: Learn.consonant(by).show, sample: Learn.glyph(by, 0),
   apart: 2,   // the heading row (the initials) and stroke 1 (always ông) stand apart and are skipped when a tab is entered
   rows: [[a, b].map(s => ({ glyph: Learn.glyph(s, 0), show: Learn.consonant(s).show.toUpperCase(), speak: '' }))].concat(MARKS.map(m => [a, b].map(s => {
     const g = Learn.glyph(s, m), r = QattText.reading(g, parser);
-    if (ABSENT.has(r)) return { glyph: '—', show: '—', speak: '' };
+    if (ABSENT.has(r)) return { glyph: g, show: '—', speak: '' };   // the glyph stays, only the reading is a dash and is not spoken
     return { glyph: g, show: r, speak: r === '?' ? '' : r };
   }))),
 });
