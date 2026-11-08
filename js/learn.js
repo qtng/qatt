@@ -31,11 +31,11 @@ const Learn = (() => {
   const syllable = c => QattText.syllable(c);
   const cell = w => QattText.word(w, parser);
 
-  // a plain shape as an initial: its main spelling (parser.toQuocNgu of the bare consonant), the other spellings (QATT_ONSET_MAP), its name (bờ, cờ, …)
+  // a plain shape as an initial: its main spelling (parser.toQuocNgu of the bare consonant), the other spellings (QATT_ONSET_MAP), its name (bờ, cờ, …; ʔ is read ờ)
   const consonant = shape => {
     const main = parser.toQuocNgu({ onset: code(shape), rhyme: '', tone: 0 });
     const alt = Object.entries(VietnameseParser.QATT_ONSET_MAP).filter(([k, v]) => v === shape && k !== main && !/^[fjwz]$/.test(k)).map(([k]) => k);
-    return main ? { show: main, small: alt.join(', '), speak: main + 'ờ' } : { show: 'ʔ', small: 'no consonant', speak: '' };
+    return main ? { show: main, small: alt.join(', '), speak: main + 'ờ' } : { show: 'ʔ', small: 'no consonant', speak: 'ờ' };
   };
 
   // progress of this browser: { <lesson id>: true }
@@ -150,7 +150,7 @@ const Learn = (() => {
       <p class="hint text-center mt-3 mb-0"><span data-vi="Nhấn vào một dòng để đến đó. Phím cách: phát / dừng, mũi tên: dòng và thẻ.">Click a row to go there. Space: play / pause, arrows: row and tab.</span></p>`;
     root.innerHTML = html;
     const $ = k => root.querySelector(`[data-k="${k}"]`);
-    let tabs = [], tabEls = [], rowEls = [], tab = 0, row = 0, playing = false, timer = null;
+    let tabs = [], tabEls = [], rowEls = [], tab = 0, row = 0, playing = false, timer = null, started = false;   // started: the first click on a row or a tab also starts playing
 
     const restart = (e, cls) => { e.classList.remove(cls); void e.offsetWidth; e.classList.add(cls); };
     const placePill = () => {
@@ -171,7 +171,7 @@ const Learn = (() => {
         const div = el('div', 'row-pair'); div.style.setProperty('--i', r);
         const cells = pair.map(item => { const c = el('div', 'g'); drawGlyph(c, item); return c; });
         div.append(cells[0], el('div'), cells[1]);
-        div.addEventListener('click', () => { row = r; go(); });
+        div.addEventListener('click', () => { row = r; pick(); });
         $('board').append(div);
         if (animate) restart(div, 'in');
         return { div };
@@ -188,7 +188,7 @@ const Learn = (() => {
       tabEls = tabs.map((t, i) => {
         const b = el('button'); b.type = 'button'; b.setAttribute('role', 'tab');
         b.append(el('span', 'g', t.sample || ''), tr('span', 'n', t.label, t.vi));
-        b.addEventListener('click', () => { setTab(i, true); row = 0; go(); });
+        b.addEventListener('click', () => { setTab(i, true); row = 0; pick(); });
         $('marks').append(b);
         return b;
       });
@@ -231,8 +231,9 @@ const Learn = (() => {
       }, step);
     };
     const go = () => { show(playing); schedule(); };
+    const pick = () => started ? go() : setPlaying(true);
     const setPlaying = on => {
-      playing = on;
+      playing = on; started = true;
       $('play').firstElementChild.className = 'bi ' + (on ? 'bi-pause-fill' : 'bi-play-fill');
       $('play').setAttribute('aria-label', on ? 'Pause' : 'Play');
       $('play').dataset.viAriaLabel = on ? 'Tạm dừng' : 'Phát';
