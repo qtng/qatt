@@ -12,7 +12,7 @@
   <script src="js/parser.js"></script>
   <script src="js/qatt-text.js"></script>
   <style>
-    :root { --qfont: "QATT Pen Medium"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --row: 4.6rem; --step: 2s; }
+    :root { --qfont: "QATT Pen Medium"; --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; --row: 4.6rem; --step: 4s; }
     .hero {
       background:
         radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
@@ -125,7 +125,7 @@
   const PAIRS = [];
   for (let i = 0; i < SHAPES.length; i += 2) PAIRS.push([SHAPES[i], SHAPES[i + 1]]);
   const CHUNOM_SITE = 'https://chunom.org/';
-  const STEP = 2000;                                            // ms per pair
+  const STEP = 4000;                                            // ms per pair
   const code = s => s === 'z' ? '_' : s;
   const glyph = (shape, mark) => QattText.syllable(code(shape) + (mark || '') + ',,,0');
   const BARE = { z: 'ʔ', d: 'đ', dz: 'd' };                       // the plain shape alone is its consonant
