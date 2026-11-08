@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hợp Thư · Learn QATT</title>
+  <meta name="description" content="Lesson 5 of Learn QATT: Hợp Thư, the short forms of the rhymes ông, ong, ung and uông in Quốc Âm Tân Tự, read aloud.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/learn.css">
+  <script src="/js/navigation.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <script src="/js/learn.js"></script>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="kicker mb-2" id="lessonNo"></div>
+    <h1 class="mb-3" data-vi="Hợp Thư">Hợp Thư</h1>
+    <p class="lead mx-auto mb-0" data-vi="ông, ong, ung và uông viết gọn.">ông, ong, ung and uông in their short forms.</p>
+  </div>
+</header>
+
+<main class="container py-4" id="content">
+  <div class="learn mx-auto">
+    <nav id="learnSteps" aria-label="Lessons"></nav>
+    <p class="intro">Four frequent rhymes are not in the rhyme table: they are written with the initial alone. The shape with <b>stroke 1</b> is the initial + <i>ông</i> (<i>không</i>). The shape with <b>stroke 2, 3 or 4</b> joined to the same plain shape is the initial + <i>ong</i>, <i>ung</i>, <i>uông</i> (<i>trong, chung, chuông</i>).</p>
+    <div id="board"></div>
+    <nav id="learnPager"></nav>
+  </div>
+</main>
+
+<script>
+Learn.page('hop-thu');
+const KINDS = [
+  ['ông', ['không', 'sông', 'công', 'đông', 'lông', 'trông', 'mông', 'phông']],
+  ['ong', ['trong', 'mong', 'xong', 'cong', 'long', 'song', 'nóng', 'đóng']],
+  ['ung', ['chung', 'cùng', 'trung', 'sung', 'dùng', 'khung', 'nhung', 'rung']],
+  ['uông', ['chuông', 'buông', 'muống', 'xuống', 'uống', 'luống', 'ruộng', 'cuống']],
+];
+Learn.board(document.getElementById('board'), {
+  build: parser => KINDS.map(([kind, words]) => {
+    const items = words.map(w => ({ w, cell: Learn.cell(w) })).filter(x => x.cell && QattText.reading(x.cell, parser) === x.w)
+      .map(x => ({ glyph: x.cell, show: x.w, speak: x.w }));
+    const rows = []; for (let i = 0; i + 1 < items.length; i += 2) rows.push([items[i], items[i + 1]]);
+    return { label: kind, sample: items[0] && items[0].glyph, rows };
+  }),
+});
+</script>
+</body>
+</html>

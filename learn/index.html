@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learn QATT</title>
+  <meta name="description" content="Learn Quốc Âm Tân Tự step by step: consonants, rhymes, phiên thiết pairs, tones and Hợp Thư, with animations read aloud.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/learn.css">
+  <script src="/js/navigation.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <script src="/js/learn.js"></script>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <h1 class="mb-3" data-vi="Học QATT">Learn QATT</h1>
+    <p class="lead mx-auto mb-0" data-vi="Từng bước: phụ âm, vần, cặp phiên thiết, thanh điệu và Hợp Thư.">Step by step: consonants, rhymes, phiên thiết pairs, tones and Hợp Thư.</p>
+  </div>
+</header>
+
+<main class="container py-4" id="content">
+  <div class="lessons mx-auto" id="lessons"></div>
+</main>
+
+<script>
+Learn.overview(document.getElementById('lessons'));
+</script>
+</body>
+</html>
