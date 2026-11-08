@@ -366,7 +366,7 @@ const NotesEditor = (() => {
       alternate,
       typeShape,
       shapes: DIRECT_ORDER.map(i => String.fromCodePoint(0xF0000 + 7 * i)),   // the plain letters of the 22 shapes in that order
-      setMode(m) { mode = m === 'direct' ? 'direct' : m === 'pa' && typeof PaText !== 'undefined' ? 'pa' : 'telex'; if (ime) { ime.update({ telex: mode === 'telex' }); ime.hide(); } last = null; },
+      setMode(m) { mode = m === 'direct' ? 'direct' : m === 'pa' && typeof PaText !== 'undefined' ? 'pa' : 'telex'; if (ime) { ime.update({ telex: mode !== 'direct' }); ime.hide(); } last = null; },
       nomReady,
       convert() { field.value = mode === 'pa' ? convertPa(field.value, parser) : convertText(field.value, parser); changed(); },
       setDecoding(name) {
