@@ -265,7 +265,7 @@ window.Theme = window.Theme || (function() {
             { name: "Unicode", bar: "Unicode", barOrder: 2, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 3, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 4, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
-            { name: "Learn QATT", vi: "Học QATT", url: "/learn/", icon: "bi-easel" },
+            { name: "Learn QATT", vi: "Học QATT", bar: "Learn", barOrder: 5, barVi: "Học", barPrefix: "/learn/", url: "/learn/", icon: "bi-easel" },
             { name: "Symbols", vi: "Bảng chữ", url: "/symbols.html", icon: "bi-book" },
             { name: "Decodings", vi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
@@ -598,7 +598,7 @@ window.Theme = window.Theme || (function() {
             const block = sections.find(sec => sec.links.some(l => l.bar));
             const own = sections.find(sec => sec.linkClass === navConfig.own) || block;
             const barLinks = own.links.filter(l => l.bar).sort((a, b) => (a.barOrder ?? 0) - (b.barOrder ?? 0)).map(link => {
-                const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '');
+                const isActive = currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '') || (link.barPrefix && currentPath.startsWith(link.barPrefix));   // barPrefix: every page of a folder (the lessons of /learn/)
                 return `<a href="${link.barUrl || link.url}"${link.barUrl ? ` data-href-en="${link.barUrl}" data-href-vi="${link.barUrlVi || link.barUrl}"` : ''} class="${isActive ? 'active' : ''}"><i class="bi ${link.icon}"></i><span${link.barVi ? ` data-vi="${link.barVi}"` : ''}>${link.bar}</span></a>`;
             }).join('');
             const bar = document.createElement('nav');
