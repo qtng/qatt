@@ -25,6 +25,7 @@
 .steps .done .num { background: color-mix(in srgb, var(--bs-success) 25%, transparent); color: var(--bs-success); }
 #content .steps .now a { background: var(--cinnabar); color: #fff; }
 .steps .now .num { background: rgba(255, 255, 255, .25); color: #fff; }
+.steps .home .num { font-size: .8rem; }
 @media (max-width: 576px) { .steps { flex-wrap: nowrap; gap: .2rem; } .steps li:not(.now) .t { display: none; } .steps a { padding-right: .3rem; } .steps .now a { padding-right: .7rem; } }
 
 /* the tabs: a row with a sliding pill behind the active one */
