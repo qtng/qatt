@@ -12,9 +12,9 @@ as soon as the parser has added them. Its globals are var: it may run twice (adm
 */
 var QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
-  { family: "QATT Gothic",           label: "Gothic",              file: "qatt-gothic-letters", big: "gothic", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
-  { family: "QATT Gothic Rounded",   label: "Gothic rounded",      file: "qatt-gothic-rounded-letters", big: "qatt-gothic-rounded", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
-  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "gothic", cjk: true },   // its CJK: the same big font
+  { family: "QATT Gothic ExtraLight", label: "Gothic extralight",   file: "qatt-gothic-extralight-letters", big: "qatt-gothic-extralight", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
+  { family: "QATT Gothic Rounded ExtraLight", label: "Gothic rounded extralight", file: "qatt-gothic-rounded-extralight-letters", big: "qatt-gothic-rounded-extralight", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
+  { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "qatt-gothic-extralight", cjk: true },   // its CJK: the same big font
   { family: "QATT Pen Thin",        label: "QATT Pen thin",                file: "qatt-pen-thin-letters", big: "qatt-pen-thin", cjk: true },
   { family: "QATT Pen Light",       label: "QATT Pen light",               file: "qatt-pen-light-letters", big: "qatt-pen-light", cjk: true },
   { family: "QATT Pen",             label: "QATT Pen",                     file: "qatt-pen-letters", big: "qatt-pen", cjk: true, default: true },   // the QATT letters are a small subset of the big font QATT Pen (the same strokes), CJK and Latin come from its big file
@@ -45,7 +45,9 @@ var PA_FONTS = [
   { family: "PA Phong Thao",  file: "pa-phongthao" },
 ];
 // the PA fonts that go behind a QATT font (the fonts of PA text in the Chunom writer and in Notes): the one of its stroke style, then the plain one
-var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : family === "QATT Gothic Rounded" ? "PA Gothic Rounded" : /^QATT Gothic/.test(family) ? "PA Gothic" : /^Celluloid/.test(family) ? "PA Celluloid" : null; return own ? [own, "PA"] : ["PA"]; };
+var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : /^QATT Gothic Rounded/.test(family) ? "PA Gothic Rounded" : /^QATT Gothic/.test(family) ? "PA Gothic" : /^Celluloid/.test(family) ? "PA Celluloid" : null; return own ? [own, "PA"] : ["PA"]; };
+// the old CSS names of renamed fonts -> the new ones (a note of Qatt.org Notes keeps the name of its font: notes.js looks it up here first)
+var QATT_FONT_RENAMED = { "QATT Gothic": "QATT Gothic ExtraLight", "QATT Gothic Rounded": "QATT Gothic Rounded ExtraLight" };
 // big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack

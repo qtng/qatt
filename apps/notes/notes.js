@@ -378,6 +378,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const formatOf = note => ({ ...FORMAT_DEFAULTS, ...(note && note.format && typeof note.format === 'object' ? note.format : {}) });
   const keepFormat = (key, value) => { const note = state.current; if (!note) return; note.format = { ...(note.format || {}), [key]: value }; schedule(); };
   const setFont = (family, user) => {
+    if (typeof QATT_FONT_RENAMED !== 'undefined' && QATT_FONT_RENAMED[family]) family = QATT_FONT_RENAMED[family];   // a font that was renamed (js/fonts.js)
     if (!FONTS.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
     document.documentElement.style.setProperty('--qfont', `"${family}"`);
     document.documentElement.style.setProperty('--pafont', paFontStack(family).map(f => `"${f}"`).join(', '));   // the PA font behind the font chosen (PA text: U+F00B0.., js/fonts.js PA_FONTS)
