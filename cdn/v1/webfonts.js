@@ -87,7 +87,9 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
     "QATT Pen":        { weights: { 100: ["qatt-pen-thin", "qatt-pen-thin-letters"], 300: ["qatt-pen-light", "qatt-pen-light-letters"], 400: ["qatt-pen", "qatt-pen-letters"], 500: ["qatt-pen-medium", "qatt-pen-medium-letters"] } },
     "Migoi":           { weights: { 400: ["migoi", "migoi-letters"] } },
     "Celluloid":       { weights: { 400: ["celluloid", "celluloid-letters"] } },
-    "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } }
+    "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } },
+    "QATT Gothic ExtraLight": { weights: { 200: ["qatt-gothic-extralight", "qatt-gothic-extralight-letters"] } },
+    "QATT Gothic Rounded ExtraLight": { weights: { 200: ["qatt-gothic-rounded-extralight", "qatt-gothic-rounded-extralight-letters"] } }
   };
   var DISPLAYS = ["auto", "block", "swap", "fallback", "optional"];
   var display = url.searchParams.get("display"); if (DISPLAYS.indexOf(display) < 0) display = "swap";
@@ -110,7 +112,7 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   url.searchParams.getAll("family").forEach(function (spec) {
     var i = spec.indexOf(":"), asked = (i < 0 ? spec : spec.slice(0, i)).replace(/\+/g, " ").trim(), name = Object.keys(FONTS).filter(function (k) { return k.toLowerCase() === asked.toLowerCase(); })[0], f = FONTS[name];   // upper and lower case do not matter
     if (!f) { console.warn("Chunom Fonts: unknown font '" + asked + "' (" + Object.keys(FONTS).join(", ") + ")"); return; }
-    var want = [400];
+    var ws = Object.keys(f.weights).map(Number), want = [ws.indexOf(400) >= 0 || ws.length > 1 ? 400 : ws[0]];   // no weight asked: Regular, or the one weight of the font (ExtraLight 200)
     if (i >= 0) {   // weight@300;400;500 (or wght@, as Google Fonts)
       var m = /(?:weight|wght)@([\d;]+)/.exec(spec.slice(i + 1));
       if (m) want = m[1].split(";").filter(Boolean).map(Number);
