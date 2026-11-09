@@ -48,7 +48,7 @@ window.Lang = window.Lang || (function() {
         st.shown = want;
         if (script.cls) el.classList.toggle(script.cls, current === "vi");
     };
-    // the script of the Vietnamese texts (Readings with "Translate UI": QATT or PA): a function from the Quốc Ngữ text and a class for its font; attributes stay Quốc Ngữ
+    // the script of the Vietnamese texts (Readings with "Transliterate UI": QATT or PA): a function from the Quốc Ngữ text and a class for its font; attributes stay Quốc Ngữ
     const script = { fn: t => t, cls: "" };
     const ATTRS = ["label", "title", "placeholder", "aria-label"];
     const attrStates = new WeakMap();   // per tag and attribute: the English value and the value shown last
@@ -196,7 +196,7 @@ window.Theme = window.Theme || (function() {
 })();
 
 // ---------- the readings of Chữ Nôm: Readings ----------
-// Which reading stands next to Chữ Nôm on the Chunom site: one of Quốc Ngữ, QATT and PA (Phiên âm tự); with ui ('Translate UI') the Vietnamese texts of the interface are written in it too.
+// Which reading stands next to Chữ Nôm on the Chunom site: one of Quốc Ngữ, QATT and PA (Phiên âm tự); with ui ('Transliterate UI') the Vietnamese texts of the interface are written in it too.
 // One setting for the whole site (localStorage.readings1 = { pa, qatt, qn, ui }, per origin),
 // switched next to EN | VI in the menu bar (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
 // Readings.state, .shown() (the kind on, as a list), .set(kind) (.toggle(kind) is the same), .setUi(on), the event "readingschange" on document (also when another tab changes it);
@@ -248,7 +248,7 @@ window.Readings = window.Readings || (function() {
         el.dataset.readings = shown.join(' ') || 'off';
         if ((state.pa || state.qatt) && !parser) { el.textContent = state.qn ? qn : ''; getReady().then(put, () => { el.textContent = qn; }); } else put();
     }
-    // "Translate UI": the Vietnamese texts of the interface (Lang) in QATT or PA
+    // "Transliterate UI": the Vietnamese texts of the interface (Lang) in QATT or PA
     const ui = () => {
         const k = state.ui && (state.qatt ? 'qatt' : state.pa ? 'pa' : null);
         if (!k) { Lang.setScript(null, ''); return; }
@@ -489,7 +489,7 @@ window.Readings = window.Readings || (function() {
             .rp-ui { margin-top: .4rem; padding-top: .7rem; border-top: 1px solid rgba(255, 255, 255, .12); border-radius: 0; }
             .rp-row.off { opacity: .4; cursor: default; }
             .rp-row.off:hover { background: none; }
-            /* "Translate UI": the Vietnamese texts of the interface in QATT or PA (Lang.setScript) */
+            /* "Transliterate UI": the Vietnamese texts of the interface in QATT or PA (Lang.setScript) */
             .ui-qatt { font-family: "QATT Pen", sans-serif !important; }
             .ui-pa { font-family: "PA Pen", "PA", sans-serif !important; }
             @media (max-width: 575.98px) {
@@ -606,7 +606,7 @@ window.Readings = window.Readings || (function() {
                             <label class="rp-row"><input type="radio" name="rp-kind" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn">abc</span></label>
                             <label class="rp-row"><input type="radio" name="rp-kind" data-k="qatt"><span class="rp-txt"><b>QATT</b><small>Quốc Âm Tân Tự</small></span><span class="rp-ex rd-qatt" data-ex="qatt"></span></label>
                             <label class="rp-row"><input type="radio" name="rp-kind" data-k="pa"><span class="rp-txt"><b>PA</b><small>Phiên âm tự</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
-                            <label class="rp-row rp-ui"><input type="checkbox" data-ui><span class="rp-txt"><b data-vi="Dịch giao diện">Translate UI</b><small data-vi="Chữ tiếng Việt của giao diện bằng chữ này">The Vietnamese texts of the interface in this script</small></span></label>
+                            <label class="rp-row rp-ui"><input type="checkbox" data-ui><span class="rp-txt"><b data-vi="Chuyển tự giao diện">Transliterate UI</b><small data-vi="Chữ tiếng Việt của giao diện bằng chữ này">The Vietnamese texts of the interface in this script</small></span></label>
                         </div>
                     </div>
                     <div class="lang-switch" role="group" aria-label="Language">
