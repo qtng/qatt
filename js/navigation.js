@@ -449,16 +449,35 @@ window.Readings = window.Readings || (function() {
             .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
             .to-top.show { opacity: 1; pointer-events: auto; }
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
-            /* the readings next to EN | VI (Chunom site): PA | QATT | Quốc Ngữ in the look of the language switch, any of them on; "QN" on narrow screens */
-            .readings-switch { display: flex; align-items: center; gap: .3rem; margin-right: .6rem; color: rgba(255, 255, 255, .35); font-size: .8rem; }
-            .readings-switch button { background: none; border: 0; padding: .25rem .1rem; color: rgba(255, 255, 255, .5); font-weight: 600; letter-spacing: .04em; white-space: nowrap; cursor: pointer; }
-            .readings-switch button:hover { color: #fff; }
-            .readings-switch button.active { color: var(--bar-accent); text-decoration: underline; text-underline-offset: .3em; }
-            .readings-switch .short { display: none; }
-            @media (max-width: 575.98px) { .readings-switch .long { display: none; } .readings-switch .short { display: inline; } .readings-switch { margin-right: .3rem; gap: .2rem; } }
+            /* the readings of Chữ Nôm (Chunom site): one button left of EN | VI that shows 國 with its readings as they are set, and a panel to choose them */
+            .readings-switch { position: relative; margin-right: .5rem; }
             .readings-switch[hidden] { display: none; }
-            @media (max-width: 389.98px) { .readings-switch > span { display: none; } .readings-switch { gap: .45rem; margin-right: .25rem; } .lang-switch { margin-right: .1rem; } .lang-switch button { padding: .12rem .4rem; } }
-            @media (max-width: 359.98px) { .nav-backdrop > .container-fluid { padding-left: .4rem; padding-right: .3rem; } .nav-backdrop .navbar-brand { margin-right: .3rem; } #navTogglerCustom { padding: .25rem .2rem; } .readings-switch { gap: .3rem; } }
+            .rp-btn { display: flex; align-items: center; gap: .35rem; height: 30px; padding: 0 .55rem; background: none; border: 1px solid rgba(255, 255, 255, .3); border-radius: 999px; color: rgba(255, 255, 255, .85); font-size: .8rem; white-space: nowrap; cursor: pointer; }
+            .rp-btn:hover, .readings-switch.open .rp-btn { color: #fff; border-color: rgba(255, 255, 255, .6); }
+            .rp-btn .bi { font-size: .65rem; opacity: .7; }
+            .rp-han { font-family: var(--font-cjk, "QATT Pen"), serif; font-size: 1.05rem; line-height: 1; }
+            .rp-btn .rp-now { max-width: 7rem; overflow: hidden; text-overflow: ellipsis; color: var(--bar-accent); }
+            .rp-now[data-readings="off"]::before { content: "—"; }
+            .rp-panel { display: none; position: absolute; right: 0; top: calc(100% + .6rem); z-index: 1080; width: 18rem; padding: .8rem; background: var(--nav-bg); border: 1px solid rgba(255, 255, 255, .15); border-radius: .6rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); color: rgba(255, 255, 255, .85); text-align: left; }
+            .readings-switch.open .rp-panel { display: block; }
+            .rp-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: rgba(255, 255, 255, .5); margin-bottom: .5rem; }
+            .rp-preview { display: flex; flex-direction: column; align-items: center; gap: .15rem; padding: .6rem; margin-bottom: .5rem; border-radius: .45rem; background: rgba(255, 255, 255, .06); }
+            .rp-preview .rp-han { font-size: 2.4rem; color: #fff; }
+            .rp-preview .rp-now { color: var(--bar-accent); font-size: 1rem; min-height: 1.4em; }
+            .rp-row { display: flex; align-items: center; gap: .6rem; padding: .45rem .4rem; border-radius: .4rem; cursor: pointer; }
+            .rp-row:hover { background: rgba(255, 255, 255, .07); }
+            .rp-row input { width: 1.05rem; height: 1.05rem; accent-color: var(--bar-accent); flex: none; margin: 0; }
+            .rp-txt { display: flex; flex-direction: column; line-height: 1.2; flex: 1; }
+            .rp-txt b { font-size: .9rem; color: #fff; font-weight: 600; }
+            .rp-txt small { font-size: .72rem; color: rgba(255, 255, 255, .5); }
+            .rp-ex { color: rgba(255, 255, 255, .7); font-size: .95rem; }
+            @media (max-width: 575.98px) {
+                .readings-switch { position: static; margin-right: .3rem; }
+                .rp-btn .rp-now { display: none; }
+                .rp-panel { position: fixed; left: .75rem; right: .75rem; top: calc(var(--nav-h, 60px) + .4rem); width: auto; }
+            }
+            @media (max-width: 389.98px) { .readings-switch { margin-right: .2rem; } .rp-btn { padding: 0 .4rem; } .lang-switch { margin-right: .1rem; } .lang-switch button { padding: .12rem .4rem; } }
+            @media (max-width: 359.98px) { .nav-backdrop > .container-fluid { padding-left: .4rem; padding-right: .3rem; } .nav-backdrop .navbar-brand { margin-right: .3rem; } #navTogglerCustom { padding: .25rem .2rem; } }
             /* the readings written by Readings.fill: in one line, PA and QATT in their fonts */
             .rd-pa { font-family: "PA Pen", "PA", sans-serif; font-size: 1.2em; }
             .rd-qatt { font-family: "QATT Pen", sans-serif; font-size: 1.2em; }
@@ -558,8 +577,15 @@ window.Readings = window.Readings || (function() {
                         <div class="theme-menu" role="menu" hidden></div>
                     </div>
                     <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
-                    <div class="readings-switch" role="group" aria-label="Readings" data-vi-aria-label="Cách đọc"${onChunom ? '' : ' hidden'}>
-                        <button type="button" data-k="pa" title="Phiên âm tự">PA</button><span aria-hidden="true">|</span><button type="button" data-k="qatt" title="Quốc Âm Tân Tự">QATT</button><span aria-hidden="true">|</span><button type="button" data-k="qn" title="Quốc Ngữ"><span class="long">Quốc Ngữ</span><span class="short">QN</span></button>
+                    <div class="readings-switch"${onChunom ? '' : ' hidden'}>
+                        <button type="button" class="rp-btn" aria-haspopup="dialog" aria-expanded="false" title="Readings of Chữ Nôm" data-vi-title="Cách đọc chữ Nôm"><span class="rp-han" aria-hidden="true">國</span><span class="rp-now"></span><i class="bi bi-chevron-down small"></i></button>
+                        <div class="rp-panel" role="dialog" aria-label="Readings of Chữ Nôm" data-vi-aria-label="Cách đọc chữ Nôm">
+                            <div class="rp-title" data-vi="Hiện cách đọc dưới chữ Nôm">Show readings under Chữ Nôm</div>
+                            <div class="rp-preview"><span class="rp-han">國</span><span class="rp-now"></span></div>
+                            <label class="rp-row"><input type="checkbox" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn"></span></label>
+                            <label class="rp-row"><input type="checkbox" data-k="qatt"><span class="rp-txt"><b>QATT</b><small>Quốc Âm Tân Tự</small></span><span class="rp-ex rd-qatt" data-ex="qatt"></span></label>
+                            <label class="rp-row"><input type="checkbox" data-k="pa"><span class="rp-txt"><b>PA</b><small data-vi="Phiên âm tự · thay cho hai cái kia">Phiên âm tự · replaces the others</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
+                        </div>
                     </div>
                     <div class="lang-switch" role="group" aria-label="Language">
                         <button type="button" data-lang="en">EN</button><span aria-hidden="true">|</span><button type="button" data-lang="vi">VI</button>
@@ -707,10 +733,18 @@ window.Readings = window.Readings || (function() {
         document.addEventListener('langchange', fitDesk);
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDesk);
         window.addEventListener('load', fitDesk);
-        // the readings (Readings): PA | QATT | Quốc Ngữ next to EN | VI, on the Chunom site
-        const rd = header.querySelector('.readings-switch');
-        const markReadings = () => rd.querySelectorAll('button').forEach(b => { const on = Readings.state[b.dataset.k]; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-        rd.addEventListener('click', e => { const b = e.target.closest('button'); if (b) Readings.toggle(b.dataset.k); });
+        // the readings (Readings), on the Chunom site: a button with 國 and its readings, a panel with the three kinds (each with the reading of 國 as an example)
+        const rd = header.querySelector('.readings-switch'), rdBtn = rd.querySelector('.rp-btn');
+        const markReadings = () => {
+            rd.querySelectorAll('input[data-k]').forEach(i => { i.checked = Readings.state[i.dataset.k]; });
+            rd.querySelectorAll('.rp-now').forEach(e => Readings.fill(e, 'quốc'));
+        };
+        const examples = () => Readings.ready().then(() => rd.querySelectorAll('[data-ex]').forEach(e => { e.textContent = Readings.text('quốc', e.dataset.ex); }));
+        const closeRd = () => { rd.classList.remove('open'); rdBtn.setAttribute('aria-expanded', 'false'); };
+        rdBtn.addEventListener('click', () => { const open = rd.classList.toggle('open'); rdBtn.setAttribute('aria-expanded', open); if (open) examples(); });
+        rd.addEventListener('change', e => { const i = e.target.closest('input[data-k]'); if (i && i.checked !== Readings.state[i.dataset.k]) Readings.toggle(i.dataset.k); });
+        document.addEventListener('click', e => { if (!rd.contains(e.target)) closeRd(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRd(); });
         document.addEventListener('readingschange', markReadings);
         markReadings();
         document.body.appendChild(offcanvas);
