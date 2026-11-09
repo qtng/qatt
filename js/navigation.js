@@ -43,10 +43,13 @@ window.Lang = window.Lang || (function() {
         let st = states.get(el);
         if (!st) states.set(el, st = { en: text, shown: text });
         else if (text !== st.shown) st.en = text;   // a new text from the page: the English one
-        const want = current === "vi" ? el.getAttribute("data-vi") : st.en;
+        const want = current === "vi" ? script.fn(el.getAttribute("data-vi")) : st.en;
         if (text !== want) el.textContent = want;
         st.shown = want;
+        if (script.cls) el.classList.toggle(script.cls, current === "vi");
     };
+    // the script of the Vietnamese texts (Readings with "Translate UI": QATT or PA): a function from the Quốc Ngữ text and a class for its font; attributes stay Quốc Ngữ
+    const script = { fn: t => t, cls: "" };
     const ATTRS = ["label", "title", "placeholder", "aria-label"];
     const attrStates = new WeakMap();   // per tag and attribute: the English value and the value shown last
     const applyAttr = (el, name) => {
@@ -94,7 +97,12 @@ window.Lang = window.Lang || (function() {
         document.dispatchEvent(new CustomEvent("langchange", { detail: l }));
     };
     if (current === "vi") document.documentElement.lang = "vi";
-    return { get current() { return current; }, set: setLang, t: (en, vi) => current === "vi" ? vi : en, valid };
+    const setScript = (fn, cls) => {
+        const old = script.cls;
+        script.fn = fn || (t => t); script.cls = cls || "";
+        document.querySelectorAll("[data-vi]").forEach(el => { if (old) el.classList.remove(old); apply(el); });
+    };
+    return { get current() { return current; }, set: setLang, t: (en, vi) => current === "vi" ? vi : en, valid, setScript };
 })();
 
 // ---------- the menu ----------
@@ -188,16 +196,16 @@ window.Theme = window.Theme || (function() {
 })();
 
 // ---------- the readings of Chữ Nôm: Readings ----------
-// Which readings stand next to Chữ Nôm on the Chunom site: PA (Phiên âm tự), QATT and Quốc Ngữ, any of them together, in this order; none = no reading.
-// One setting for the whole site (localStorage.readings1 = { pa, qatt, qn }, per origin),
+// Which reading stands next to Chữ Nôm on the Chunom site: one of Quốc Ngữ, QATT and PA (Phiên âm tự); with ui ('Translate UI') the Vietnamese texts of the interface are written in it too.
+// One setting for the whole site (localStorage.readings1 = { pa, qatt, qn, ui }, per origin),
 // switched next to EN | VI in the menu bar (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
-// Readings.state, .shown() (the kinds on, in order), .toggle(kind), the event "readingschange" on document (also when another tab changes it);
+// Readings.state, .shown() (the kind on, as a list), .set(kind) (.toggle(kind) is the same), .setUi(on), the event "readingschange" on document (also when another tab changes it);
 // Readings.ready() loads parser.js, pa-text.js and qatt-text.js of qatt.org when PA or QATT is first wanted; then Readings.text(qn, kind) writes a Quốc Ngữ text
 // in that script and Readings.fill(element, qn) puts the readings shown into an element (plain text for Quốc Ngữ alone, else a span .rd-<kind> each).
 window.Readings = window.Readings || (function() {
     const KEY = 'readings1', KINDS = ['pa', 'qatt', 'qn'];
     const BASE = new URL('.', document.currentScript ? document.currentScript.src : 'https://qatt.org/js/navigation.js').href;
-    const state = { pa: false, qatt: false, qn: true };
+    const state = { pa: false, qatt: false, qn: true, ui: false };
     const read = () => {
         try {
             let s = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -205,17 +213,17 @@ window.Readings = window.Readings || (function() {
                 const o = JSON.parse(localStorage.getItem('shelf1') || '{}');
                 s = { pa: !!o.pa || o.reading === 'pa', qatt: !!o.qatt, qn: o.reading ? o.reading === 'qn' : o.ruby === false ? false : o.qn !== false };
             }
-            KINDS.forEach(k => { state[k] = !!s[k]; });
+            const one = ['qn', 'qatt', 'pa'].find(k => s[k]) || 'qn';   // one kind (an older setting could have several)
+            KINDS.forEach(k => { state[k] = k === one; });
+            state.ui = !!s.ui;
         } catch (e) { /* storage may be blocked */ }
     };
     read();
     const changed = () => document.dispatchEvent(new CustomEvent('readingschange', { detail: { ...state } }));
     window.addEventListener('storage', e => { if (e.key === KEY) { read(); changed(); } });
-    function toggle(k) {
-        state[k] = !state[k];
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
-        changed();
-    }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ } changed(); };
+    function set(k) { if (!KINDS.includes(k)) return; KINDS.forEach(x => { state[x] = x === k; }); save(); }
+    function setUi(on) { state.ui = !!on; save(); }
     const loaded = {};
     const load = (name, exists) => loaded[name] || (loaded[name] = exists() ? Promise.resolve() : new Promise((ok, fail) => {   // once, and not when the page has it
         const sc = document.createElement('script'); sc.src = BASE + name; sc.onload = ok; sc.onerror = () => fail(new Error(name)); document.head.appendChild(sc);
@@ -240,7 +248,15 @@ window.Readings = window.Readings || (function() {
         el.dataset.readings = shown.join(' ') || 'off';
         if ((state.pa || state.qatt) && !parser) { el.textContent = state.qn ? qn : ''; getReady().then(put, () => { el.textContent = qn; }); } else put();
     }
-    return { state, KINDS, shown: () => KINDS.filter(k => state[k]), toggle, ready: getReady, text, fill };
+    // "Translate UI": the Vietnamese texts of the interface (Lang) in QATT or PA
+    const ui = () => {
+        const k = state.ui && (state.qatt ? 'qatt' : state.pa ? 'pa' : null);
+        if (!k) { Lang.setScript(null, ''); return; }
+        getReady().then(() => { if (state.ui && state[k]) Lang.setScript(t => text(t, k), 'ui-' + k); });
+    };
+    document.addEventListener('readingschange', ui);
+    if (state.ui && !state.qn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ui); else ui(); }   // after the scripts of the page (it may load parser.js itself)
+    return { state, KINDS, shown: () => KINDS.filter(k => state[k]), set, toggle: set, setUi, ready: getReady, text, fill };
 })();
 
 (function() {
@@ -470,6 +486,12 @@ window.Readings = window.Readings || (function() {
             .rp-txt b { font-size: .9rem; color: #fff; font-weight: 600; }
             .rp-txt small { font-size: .72rem; color: rgba(255, 255, 255, .5); }
             .rp-ex { color: rgba(255, 255, 255, .7); font-size: .95rem; }
+            .rp-ui { margin-top: .4rem; padding-top: .7rem; border-top: 1px solid rgba(255, 255, 255, .12); border-radius: 0; }
+            .rp-row.off { opacity: .4; cursor: default; }
+            .rp-row.off:hover { background: none; }
+            /* "Translate UI": the Vietnamese texts of the interface in QATT or PA (Lang.setScript) */
+            .ui-qatt { font-family: "QATT Pen", sans-serif !important; }
+            .ui-pa { font-family: "PA Pen", "PA", sans-serif !important; }
             @media (max-width: 575.98px) {
                 .readings-switch { position: static; margin-right: .3rem; }
                 .rp-btn .rp-label { display: none; }
@@ -581,9 +603,10 @@ window.Readings = window.Readings || (function() {
                         <div class="rp-panel" role="dialog" aria-label="Readings of Chữ Nôm" data-vi-aria-label="Cách đọc chữ Nôm">
                             <div class="rp-title" data-vi="Hiện cách đọc dưới chữ Nôm">Show readings under Chữ Nôm</div>
                             <div class="rp-preview"><span class="rp-han">國</span><span class="rp-now"></span></div>
-                            <label class="rp-row"><input type="checkbox" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn">abc</span></label>
-                            <label class="rp-row"><input type="checkbox" data-k="qatt"><span class="rp-txt"><b>QATT</b><small>Quốc Âm Tân Tự</small></span><span class="rp-ex rd-qatt" data-ex="qatt"></span></label>
-                            <label class="rp-row"><input type="checkbox" data-k="pa"><span class="rp-txt"><b>PA</b><small>Phiên âm tự</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
+                            <label class="rp-row"><input type="radio" name="rp-kind" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn">abc</span></label>
+                            <label class="rp-row"><input type="radio" name="rp-kind" data-k="qatt"><span class="rp-txt"><b>QATT</b><small>Quốc Âm Tân Tự</small></span><span class="rp-ex rd-qatt" data-ex="qatt"></span></label>
+                            <label class="rp-row"><input type="radio" name="rp-kind" data-k="pa"><span class="rp-txt"><b>PA</b><small>Phiên âm tự</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
+                            <label class="rp-row rp-ui"><input type="checkbox" data-ui><span class="rp-txt"><b data-vi="Dịch giao diện">Translate UI</b><small data-vi="Chữ tiếng Việt của giao diện bằng chữ này">The Vietnamese texts of the interface in this script</small></span></label>
                         </div>
                     </div>
                     <div class="lang-switch" role="group" aria-label="Language">
@@ -736,12 +759,18 @@ window.Readings = window.Readings || (function() {
         const rd = header.querySelector('.readings-switch'), rdBtn = rd.querySelector('.rp-btn');
         const markReadings = () => {
             rd.querySelectorAll('input[data-k]').forEach(i => { i.checked = Readings.state[i.dataset.k]; });
+            const uiBox = rd.querySelector('input[data-ui]'), en = Lang.current !== 'vi';
+            uiBox.checked = Readings.state.ui; uiBox.disabled = en; uiBox.closest('label').classList.toggle('off', en);   // English: no Vietnamese texts, greyed out
             rd.querySelectorAll('.rp-now').forEach(e => Readings.fill(e, 'quốc'));
         };
         const examples = () => Readings.ready().then(() => rd.querySelectorAll('[data-ex]').forEach(e => { e.textContent = e.dataset.ex === 'qn' ? 'abc' : Readings.text('quốc', e.dataset.ex); }));
         const closeRd = () => { rd.classList.remove('open'); rdBtn.setAttribute('aria-expanded', 'false'); };
         rdBtn.addEventListener('click', () => { const open = rd.classList.toggle('open'); rdBtn.setAttribute('aria-expanded', open); if (open) examples(); });
-        rd.addEventListener('change', e => { const i = e.target.closest('input[data-k]'); if (i && i.checked !== Readings.state[i.dataset.k]) Readings.toggle(i.dataset.k); });
+        rd.addEventListener('change', e => {
+            const i = e.target.closest('input[data-k]'); if (i && i.checked) Readings.set(i.dataset.k);
+            if (e.target.matches('input[data-ui]')) Readings.setUi(e.target.checked);
+        });
+        document.addEventListener('langchange', markReadings);
         document.addEventListener('click', e => { if (!rd.contains(e.target)) closeRd(); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRd(); });
         document.addEventListener('readingschange', markReadings);
