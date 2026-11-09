@@ -451,7 +451,7 @@ window.Readings = window.Readings || (function() {
             /* the readings of Chữ Nôm (Chunom site): one button "Readings" left of EN | VI (only the icon on a phone) and a panel to choose them, with a preview of 國 */
             .readings-switch { position: relative; margin-right: .5rem; }
             .readings-switch[hidden] { display: none; }
-            .rp-btn { display: flex; align-items: center; gap: .35rem; height: 30px; padding: 0 .55rem; background: none; border: 1px solid rgba(255, 255, 255, .3); border-radius: 999px; color: rgba(255, 255, 255, .85); font-size: .8rem; white-space: nowrap; cursor: pointer; }
+            .rp-btn { display: flex; align-items: center; gap: .35rem; height: calc(6px + .24rem + .975rem);   /* as high as .lang-switch (borders, padding, its buttons) */ box-sizing: border-box; padding: 0 .55rem; background: none; border: 1px solid rgba(255, 255, 255, .3); border-radius: 999px; color: rgba(255, 255, 255, .85); font-size: .8rem; white-space: nowrap; cursor: pointer; }
             .rp-btn:hover, .readings-switch.open .rp-btn { color: #fff; border-color: rgba(255, 255, 255, .6); }
             .rp-btn .bi-sliders { font-size: .9rem; }
             .rp-btn .bi-chevron-down { font-size: .65rem; opacity: .7; }
@@ -581,7 +581,7 @@ window.Readings = window.Readings || (function() {
                         <div class="rp-panel" role="dialog" aria-label="Readings of Chữ Nôm" data-vi-aria-label="Cách đọc chữ Nôm">
                             <div class="rp-title" data-vi="Hiện cách đọc dưới chữ Nôm">Show readings under Chữ Nôm</div>
                             <div class="rp-preview"><span class="rp-han">國</span><span class="rp-now"></span></div>
-                            <label class="rp-row"><input type="checkbox" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn"></span></label>
+                            <label class="rp-row"><input type="checkbox" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn">abc</span></label>
                             <label class="rp-row"><input type="checkbox" data-k="qatt"><span class="rp-txt"><b>QATT</b><small>Quốc Âm Tân Tự</small></span><span class="rp-ex rd-qatt" data-ex="qatt"></span></label>
                             <label class="rp-row"><input type="checkbox" data-k="pa"><span class="rp-txt"><b>PA</b><small>Phiên âm tự</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
                         </div>
@@ -738,7 +738,7 @@ window.Readings = window.Readings || (function() {
             rd.querySelectorAll('input[data-k]').forEach(i => { i.checked = Readings.state[i.dataset.k]; });
             rd.querySelectorAll('.rp-now').forEach(e => Readings.fill(e, 'quốc'));
         };
-        const examples = () => Readings.ready().then(() => rd.querySelectorAll('[data-ex]').forEach(e => { e.textContent = Readings.text('quốc', e.dataset.ex); }));
+        const examples = () => Readings.ready().then(() => rd.querySelectorAll('[data-ex]').forEach(e => { e.textContent = e.dataset.ex === 'qn' ? 'abc' : Readings.text('quốc', e.dataset.ex); }));
         const closeRd = () => { rd.classList.remove('open'); rdBtn.setAttribute('aria-expanded', 'false'); };
         rdBtn.addEventListener('click', () => { const open = rd.classList.toggle('open'); rdBtn.setAttribute('aria-expanded', open); if (open) examples(); });
         rd.addEventListener('change', e => { const i = e.target.closest('input[data-k]'); if (i && i.checked !== Readings.state[i.dataset.k]) Readings.toggle(i.dataset.k); });
