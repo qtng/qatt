@@ -189,7 +189,7 @@ window.Theme = window.Theme || (function() {
 
 // ---------- the readings of Chữ Nôm: Readings ----------
 // Which readings stand next to Chữ Nôm on the Chunom site: PA (Phiên âm tự), QATT and Quốc Ngữ, any of them together, in this order; none = no reading.
-// Turning PA on turns the other two off (they can be turned on again). One setting for the whole site (localStorage.readings1 = { pa, qatt, qn }, per origin),
+// One setting for the whole site (localStorage.readings1 = { pa, qatt, qn }, per origin),
 // switched next to EN | VI in the menu bar (navigation.js, the Chunom site), in the toolbar of the Bookshelf (js/shelf.js) and used by the dictionary entries of the detail popup (js/detail.js).
 // Readings.state, .shown() (the kinds on, in order), .toggle(kind), the event "readingschange" on document (also when another tab changes it);
 // Readings.ready() loads parser.js, pa-text.js and qatt-text.js of qatt.org when PA or QATT is first wanted; then Readings.text(qn, kind) writes a Quốc Ngữ text
@@ -213,7 +213,6 @@ window.Readings = window.Readings || (function() {
     window.addEventListener('storage', e => { if (e.key === KEY) { read(); changed(); } });
     function toggle(k) {
         state[k] = !state[k];
-        if (k === 'pa' && state.pa) state.qatt = state.qn = false;
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
         changed();
     }
@@ -449,14 +448,14 @@ window.Readings = window.Readings || (function() {
             .to-top { position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; width: 3rem; height: 3rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg); color: #fff; font-size: 1.5rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transition: opacity .2s; }
             .to-top.show { opacity: 1; pointer-events: auto; }
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .to-top { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
-            /* the readings of Chữ Nôm (Chunom site): one button left of EN | VI that shows 國 with its readings as they are set, and a panel to choose them */
+            /* the readings of Chữ Nôm (Chunom site): one button "Readings" left of EN | VI (only the icon on a phone) and a panel to choose them, with a preview of 國 */
             .readings-switch { position: relative; margin-right: .5rem; }
             .readings-switch[hidden] { display: none; }
             .rp-btn { display: flex; align-items: center; gap: .35rem; height: 30px; padding: 0 .55rem; background: none; border: 1px solid rgba(255, 255, 255, .3); border-radius: 999px; color: rgba(255, 255, 255, .85); font-size: .8rem; white-space: nowrap; cursor: pointer; }
             .rp-btn:hover, .readings-switch.open .rp-btn { color: #fff; border-color: rgba(255, 255, 255, .6); }
-            .rp-btn .bi { font-size: .65rem; opacity: .7; }
-            .rp-han { font-family: var(--font-cjk, "QATT Pen"), serif; font-size: 1.05rem; line-height: 1; }
-            .rp-btn .rp-now { max-width: 7rem; overflow: hidden; text-overflow: ellipsis; color: var(--bar-accent); }
+            .rp-btn .bi-sliders { font-size: .9rem; }
+            .rp-btn .bi-chevron-down { font-size: .65rem; opacity: .7; }
+            .rp-han { font-family: var(--font-cjk, "QATT Pen"), serif; line-height: 1; }
             .rp-now[data-readings="off"]::before { content: "—"; }
             .rp-panel { display: none; position: absolute; right: 0; top: calc(100% + .6rem); z-index: 1080; width: 18rem; padding: .8rem; background: var(--nav-bg); border: 1px solid rgba(255, 255, 255, .15); border-radius: .6rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); color: rgba(255, 255, 255, .85); text-align: left; }
             .readings-switch.open .rp-panel { display: block; }
@@ -473,7 +472,7 @@ window.Readings = window.Readings || (function() {
             .rp-ex { color: rgba(255, 255, 255, .7); font-size: .95rem; }
             @media (max-width: 575.98px) {
                 .readings-switch { position: static; margin-right: .3rem; }
-                .rp-btn .rp-now { display: none; }
+                .rp-btn .rp-label { display: none; }
                 .rp-panel { position: fixed; left: .75rem; right: .75rem; top: calc(var(--nav-h, 60px) + .4rem); width: auto; }
             }
             @media (max-width: 389.98px) { .readings-switch { margin-right: .2rem; } .rp-btn { padding: 0 .4rem; } .lang-switch { margin-right: .1rem; } .lang-switch button { padding: .12rem .4rem; } }
@@ -578,13 +577,13 @@ window.Readings = window.Readings || (function() {
                     </div>
                     <a class="admin-link" href="${QATT_SITE}/admin/"${isAdmin() ? '' : ' hidden'} title="Admin" data-vi-title="Quản trị" aria-label="Admin" data-vi-aria-label="Quản trị"><i class="bi bi-shield-lock"></i></a>
                     <div class="readings-switch"${onChunom ? '' : ' hidden'}>
-                        <button type="button" class="rp-btn" aria-haspopup="dialog" aria-expanded="false" title="Readings of Chữ Nôm" data-vi-title="Cách đọc chữ Nôm"><span class="rp-han" aria-hidden="true">國</span><span class="rp-now"></span><i class="bi bi-chevron-down small"></i></button>
+                        <button type="button" class="rp-btn" aria-haspopup="dialog" aria-expanded="false" title="Readings of Chữ Nôm" data-vi-title="Cách đọc chữ Nôm"><i class="bi bi-sliders" aria-hidden="true"></i><span class="rp-label" data-vi="Cách đọc">Readings</span><i class="bi bi-chevron-down small"></i></button>
                         <div class="rp-panel" role="dialog" aria-label="Readings of Chữ Nôm" data-vi-aria-label="Cách đọc chữ Nôm">
                             <div class="rp-title" data-vi="Hiện cách đọc dưới chữ Nôm">Show readings under Chữ Nôm</div>
                             <div class="rp-preview"><span class="rp-han">國</span><span class="rp-now"></span></div>
                             <label class="rp-row"><input type="checkbox" data-k="qn"><span class="rp-txt"><b>Quốc Ngữ</b><small data-vi="chữ Latinh">the Latin alphabet</small></span><span class="rp-ex" data-ex="qn"></span></label>
                             <label class="rp-row"><input type="checkbox" data-k="qatt"><span class="rp-txt"><b>QATT</b><small>Quốc Âm Tân Tự</small></span><span class="rp-ex rd-qatt" data-ex="qatt"></span></label>
-                            <label class="rp-row"><input type="checkbox" data-k="pa"><span class="rp-txt"><b>PA</b><small data-vi="Phiên âm tự · thay cho hai cái kia">Phiên âm tự · replaces the others</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
+                            <label class="rp-row"><input type="checkbox" data-k="pa"><span class="rp-txt"><b>PA</b><small>Phiên âm tự</small></span><span class="rp-ex rd-pa" data-ex="pa"></span></label>
                         </div>
                     </div>
                     <div class="lang-switch" role="group" aria-label="Language">
@@ -733,7 +732,7 @@ window.Readings = window.Readings || (function() {
         document.addEventListener('langchange', fitDesk);
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitDesk);
         window.addEventListener('load', fitDesk);
-        // the readings (Readings), on the Chunom site: a button with 國 and its readings, a panel with the three kinds (each with the reading of 國 as an example)
+        // the readings (Readings), on the Chunom site: a button "Readings" (a sliders icon), a panel with the three kinds (each with the reading of 國 as an example)
         const rd = header.querySelector('.readings-switch'), rdBtn = rd.querySelector('.rp-btn');
         const markReadings = () => {
             rd.querySelectorAll('input[data-k]').forEach(i => { i.checked = Readings.state[i.dataset.k]; });
