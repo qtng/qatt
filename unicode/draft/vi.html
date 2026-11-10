@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="vi" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Đề xuất Unicode cho QATT, Alpha 1</title><link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css"><link rel="stylesheet" href="/css/site.css"><script src="/js/navigation.js"></script><script>document.addEventListener("langchange", e => { const vi = /\/vi(\.html)?$/.test(location.pathname); if ((e.detail === "vi") !== vi) location.href = (e.detail === "vi" ? "vi.html" : "./") + location.hash; });</script><style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, code, figcaption) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) :is(code, pre) { font-family: ui-monospace, Menlo, Consolas, monospace; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body table { display: block; max-width: 100%; overflow-x: auto; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style><style>
-@font-face { font-family: "QATT Chart"; src: url(https://cdn.qatt.org/fonts/qatt-serif.woff2) format("woff2"); }
+<!DOCTYPE html><html lang="vi" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Đề xuất Unicode cho QATT, Alpha 1</title><link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css"><link rel="stylesheet" href="/css/site.css"><script src="/js/navigation.js"></script><script>document.addEventListener("langchange", e => { const vi = /\/vi(\.html)?$/.test(location.pathname); if ((e.detail === "vi") !== vi) location.href = (e.detail === "vi" ? "vi.html" : "./") + location.hash; });</script><style>html[data-theme] body { background: #fff !important; color: #111 !important; color-scheme: light; } html[data-theme] body > :not(nav, .to-top), html[data-theme] body > :not(nav, .to-top) :is(h1, h2, h3, p, li, td, code, figcaption) { color: #111 !important; } html[data-theme] body > :not(nav, .to-top) { font-family: Georgia, "Times New Roman", serif; } html[data-theme] body > :not(nav, .to-top) :is(code, pre) { font-family: ui-monospace, Menlo, Consolas, monospace; } html[data-theme] body > :not(nav, .to-top) a { color: #8a2a1f !important; } html[data-theme] body th { background: #eee !important; } html[data-theme] body table { display: block; max-width: 100%; overflow-x: auto; } html[data-theme] body > :not(nav, .to-top) { overflow-wrap: break-word; }</style><style>@font-face { font-family: "QATT Chart"; src: url(https://cdn.qatt.org/fonts/qatt-pen-letters.woff2) format("woff2"), url(https://cdn.qatt.org/fonts/qatt-pen-letters.ttf) format("truetype"); }
 body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; font: 17px/1.55 Georgia, "Times New Roman", serif; color: #111; background: #fff; }
 h1 { font-size: 1.9rem; } h2 { margin-top: 2.2rem; border-bottom: 1px solid #999; } h3 { margin-top: 1.6rem; }
 table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem; }
@@ -7,7 +6,7 @@ th, td { border: 1px solid #aaa; padding: .25rem .5rem; vertical-align: top; } t
 code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88rem; } pre { background: #f4f4f4; padding: .5rem .7rem; overflow-x: auto; }
 a { color: #8a2a1f; overflow-wrap: anywhere; }
 .chart td, .chart th { text-align: center; padding: .2rem .4rem; font-size: .8rem; }
-.chart .g { font-family: "QATT Chart"; font-size: 1.7rem; line-height: 1.1; } .chart .cp { font-size: .7rem; color: #666; }
+.chart .g { font-family: "QATT Chart"; font-size: 1.7rem; line-height: 1.1; } .chart .g.on { padding: .25em 0; } .chart .cp { font-size: .7rem; color: #666; }
 .chart td.name { text-align: left; white-space: nowrap; }
 .ids { display: inline-block; width: .72em; height: .72em; border: 1px solid #333; position: relative; vertical-align: -.04em; margin: 0 .06em; }
 .ids::after { content: ""; position: absolute; border: 0 solid #333; }
@@ -27,11 +26,11 @@ blockquote.epigraph .zh { font-style: normal; font-size: 1.25em; letter-spacing:
 blockquote.epigraph footer { font-style: normal; font-size: .8em; margin-top: .4rem; }
 blockquote.epigraph footer::before { content: "— "; }
 .qg { display: inline-block; font-family: "QATT Chart"; font-size: 1.3em; white-space: nowrap; }
-</style></head><body><p><a href="/unicode.html">← Unicode</a></p><h1 id="xu-t-unicode-cho-qatt-b-n-th-o-alpha-1">Đề xuất Unicode cho QATT – Bản thảo, Alpha 1</h1>
-<p>Oct 27, 2026 · Nguyễn Quốc Trung</p>
-<p><em>Bản dịch tiếng Việt (bản nháp). Bản tiếng Anh là bản gốc của đề xuất.</em></p>
+</style></head><body><p><a href="/unicode.html">← Unicode</a></p><!-- Vietnamese translation of proposal.md (draft, written with Claude). Keep the markers and links as in proposal.md; tools/make_simple.py builds vi.html from it. -->
+<h1 id="xu-t-s-b-m-ho-qu-c-m-t-n-t-qatt">Đề xuất sơ bộ mã hoá Quốc Âm Tân Tự (QATT)</h1>
+<p>Ngày 10 tháng 11 năm 2026 · Nguyễn Quốc Trung</p>
 <h2 id="1-t-m-t-t">1. Tóm tắt</h2>
-<p>Đề xuất này mã hoá Quốc Âm Tân Tự (QATT), một loại chữ viết cho tiếng Việt dùng trong các văn bản Hán Nôm, thành 164 ký tự trong Mặt phẳng Đa ngữ Bổ sung (SMP).</p>
+<p>Văn bản này đề nghị mã hoá Quốc Âm Tân Tự (QATT), một loại chữ ghi âm cho tiếng Việt, thành 164 ký tự trong một khối mới của Mặt phẳng Đa ngữ Bổ sung. Chữ này có nguồn gốc từ một văn bản thế kỷ XIX và ngày nay được một cộng đồng nhỏ sử dụng.</p>
 <table>
 <thead>
 <tr>
@@ -54,15 +53,19 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 <tr>
 <td>Ngày của bản thảo</td>
-<td>2026-10-27</td>
+<td>2026-11-10</td>
 </tr>
 <tr>
 <td>Ký tự</td>
-<td>164: 154 thành phần, 2 ký tự nối, 8 dấu thanh. Ký tự nối Tham Thư có thể quyết định riêng (5.1)</td>
+<td>164: 154 thành phần, 2 ký tự nối, 8 dấu thanh (4.1)</td>
 </tr>
 <tr>
 <td>Mô hình</td>
-<td>Các thành phần nguyên tử, trái trước phải, dưới trước trên, mọi tổ hợp được viết với một ký tự nối tường minh</td>
+<td>Các thành phần nguyên tử, trái trước phải và dưới trước trên, mọi tổ hợp được viết với một ký tự nối tường minh (5)</td>
+</tr>
+<tr>
+<td>Sử dụng hiện nay</td>
+<td>Một cộng đồng người học và người viết trên web, với phông chữ, trình soạn thảo, bộ chuyển đổi và một bộ gõ của nhiều nhà phát triển (3)</td>
 </tr>
 <tr>
 <td>Mặt phẳng</td>
@@ -73,124 +76,24 @@ blockquote.epigraph footer::before { content: "— "; }
 <td>Theo Hán Nôm (nguồn viết dọc)</td>
 </tr>
 <tr>
-<td>Nguồn chứng thực</td>
-<td>Hai bản chép tay của cùng một văn bản, Viện Nghiên cứu Hán Nôm, Hà Nội, AB.630. Không cổ hơn đời Thiệu Trị (1841–1847)</td>
+<td>Nguồn</td>
+<td>Hai bản chép tay của cùng một văn bản, Viện Nghiên cứu Hán Nôm, Hà Nội, AB.636. Không cổ hơn đời Thiệu Trị (1841–1847)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="2-gi-i-thi-u">2. Giới thiệu</h2>
-<p>Quốc Âm Tân Tự (國音新字, &quot;chữ mới ghi âm của tiếng nước nhà&quot;) là một loại chữ viết cho tiếng Việt, xây từ 22 cơ sở, mỗi cơ sở vẽ bằng ba nét. Một cơ sở có bảy dạng: một dạng không có nét đánh dấu và sáu dạng có một nét đánh dấu ngắn ở một trong sáu đầu nét. Mỗi dạng đều đứng riêng được. Mỗi cơ sở có sáu dạng kết hợp được với nhau theo nhóm hai hoặc ba, và mọi ký tự đều có thể mang một dấu thanh ở một trong các góc.</p>
+<h2 id="2-ch-vi-t">2. Chữ viết</h2>
+<p>Quốc Âm Tân Tự (國音新字, &quot;chữ mới ghi âm của tiếng nước nhà&quot;) là một loại chữ ghi âm cho tiếng Việt. Chữ được xây từ 22 cơ sở, mỗi cơ sở có bảy dạng; các dạng đứng riêng hoặc kết hợp thành nhóm hai hay ba, và mọi chữ đều có thể mang một dấu thanh ở một trong các góc.</p>
 <h3 id="sec-2-1">2.1 Bối cảnh</h3>
-<p>Chữ này được biết đến qua một văn bản duy nhất, lưu giữ trong hai bản chép tay tại Viện Nghiên cứu Hán Nôm ở Hà Nội (3.1). Văn bản gọi tên chữ ở đầu bài tựa, 國音新字序, &quot;tựa chữ mới ghi âm của tiếng nước nhà&quot; (tr. 1). Văn bản không ghi niên đại. Nó không cổ hơn đời vua Thiệu Trị (1841–1847), vì chữ 華 bị bớt nét cuối, một chữ kiêng huý của mẹ nhà vua, bà Hồ Thị Hoa (tr. 1). Chữ kiêng huý chỉ cho biết mốc sớm nhất. Tác giả ký tên ở cuối bài tựa là 南城居士阮子 (Nam Thành cư sĩ Nguyễn Tử), một nho sĩ tại gia (cư sĩ) họ Nguyễn ở Nam Thành (tr. 2). Ông nói rằng mình đặt ra chữ này để ghi chép riêng cho bản thân. Bài tựa giải thích ý tưởng đằng sau chữ:</p>
+<p>Chữ này được biết đến qua một văn bản duy nhất, lưu giữ trong hai bản chép tay tại Viện Nghiên cứu Hán Nôm ở Hà Nội (7.1). Văn bản gọi tên chữ ở đầu đề bài tựa, 國音新字序, &quot;tựa chữ mới ghi âm của tiếng nước nhà&quot; (tr. 1). Văn bản không ghi niên đại. Nó không cổ hơn đời vua Thiệu Trị (1841–1847), vì chữ 華 bị bớt nét cuối, một chữ kiêng huý tên mẹ nhà vua, bà Hồ Thị Hoa (tr. 1). Chữ kiêng huý chỉ cho biết mốc sớm nhất. Tác giả ký tên ở cuối bài tựa là 南城居士阮子 (Nam Thành cư sĩ Nguyễn Tử), một nho sĩ tại gia (cư sĩ) họ Nguyễn ở Nam Thành (tr. 2). Ông nói rằng mình đặt ra chữ này để ghi chép riêng cho bản thân. Bài tựa giải thích ý tưởng đằng sau chữ:</p>
 <blockquote class="epigraph">
 <p class="zh" lang="zh">窃想書契之造，必有一箇簡易之格，而人物聲音靡有遺者。</p>
 <p>Tôi trộm nghĩ rằng khi chữ viết mới được tạo ra, ắt phải có một phép đơn giản, dễ dùng, nhờ đó không sót âm thanh nào của người và vật.</p>
 <footer>Nam Thành cư sĩ Nguyễn Tử, bài tựa, trang 2 (bản dịch nháp)</footer>
 </blockquote>
-<p>Trong nguồn, chữ này xuất hiện giữa văn bản Hán Nôm và được đối xử hệt như chữ Hán Nôm. Nguồn không có đoạn văn liền mạch nào viết bằng chữ này: nó chỉ đưa ra từng chữ làm ví dụ và các công thức đánh vần theo lối phiên thiết (反切, tiếng Trung <em>fǎnqiè</em>: chú âm một âm tiết bằng hai chữ, một chữ cho phụ âm đầu và một chữ cho vần; 4.2). Chữ ba thành phần (Tham Thư) có hai ví dụ. Nguồn mô tả cách phát âm của chúng nhưng không cho cách đọc (4.3). Tám thanh được đánh dấu bằng vòng tròn và nửa vòng tròn ở các góc, theo phép âm dương của Trung Hoa.</p>
+<p>Trong nguồn, chữ này xuất hiện giữa văn bản Hán Nôm và được đối xử hệt như chữ Hán Nôm. Nguồn không có đoạn văn liền mạch nào viết bằng chữ này: nó chỉ đưa ra từng chữ làm ví dụ và các công thức đánh vần theo lối phiên thiết (反切, tiếng Trung <em>fǎnqiè</em>: chú âm một âm tiết bằng hai chữ, một chữ cho phụ âm đầu và một chữ cho vần; 7.4). Chữ ba thành phần (Tham Thư) có hai ví dụ. Nguồn mô tả cách phát âm của chúng nhưng không cho cách đọc (7.5). Tám thanh được đánh dấu bằng vòng tròn và nửa vòng tròn ở các góc, theo phép âm dương của Trung Hoa.</p>
 <p>Nguyễn Quang Hồng đã công bố một bản mô tả chữ này năm 1986 (Phụ lục C). Đề xuất này dựa trên chính nguồn.</p>
-<h3 id="sec-2-2">2.2 Lý do mã hoá</h3>
-<p>Chữ này được chứng thực trong một văn bản, hai bản chép tay (3.1). Hiện nay không thể trao đổi văn bản số bằng chữ này: Unicode chưa có ký tự nào của chữ, nên chỉ có thể viết bằng ký tự của chữ khác hoặc bằng hình ảnh. Người đề xuất đã xây dựng một phông chữ cho chữ này, một trình soạn thảo và một bộ chuyển đổi giữa chữ này và Quốc ngữ. Chúng dùng các điểm mã của Vùng Dùng riêng Bổ sung-A (U+F0000..U+F00AF), sắp xếp như đề xuất ở đây. Văn bản viết bằng chúng chỉ đọc được với phông chữ và công cụ này. Điểm mã dùng riêng không có thuộc tính được ấn định, nên việc tìm kiếm, sắp xếp, ngắt dòng và phân đoạn văn bản như vậy tuỳ thuộc từng ứng dụng, và văn bản dùng các cách gán dùng riêng khác nhau không thể kết hợp với nhau.</p>
-<p>Mã hoá chữ này cho phép phiên âm, trích dẫn và tìm kiếm văn bản của nguồn theo một dạng chuẩn, và cho phép dùng chữ này bên cạnh Hán Nôm và Quốc ngữ trong cùng một tài liệu, như trong nguồn (2.1). Mô hình của đề xuất (5) được xây dựng để mọi ký tự của nguồn đều viết được, kể cả Tham Thư được chứng thực trong nguồn (4.3).</p>
-<p>Chữ này hiện đang được dùng trên web (3.3). [TBD: nghiên cứu học thuật]</p>
-<h2 id="3-ngu-n-v-ch-ng-c">3. Nguồn và chứng cứ</h2>
-<p>Hai nguồn chứng thực chữ này. Cả hai là bản chép tay của cùng một văn bản Hán Nôm viết dọc, mô tả các phương pháp kết hợp. Mỗi bản có bốn tờ đôi, đánh số thành tám trang, cùng nội dung và cùng cách đánh số trang. Cả hai đóng chung một tập với số tờ liên tục, Nguồn 1 ở tờ 3–10 và Nguồn 2 ở tờ 11–18. Trong đề xuất này, chỉ dẫn trang cho biết trang trong từng bản chép, từ 1 đến 8. Chưa xác định được Nguồn 2 chép từ Nguồn 1 hay cả hai chép từ một bản gốc cũ hơn. Hai nguồn là một văn bản trong hai bản chép. Các chỉ dẫn trang trong đề xuất này, như (tr. 2), là chỉ dẫn đến Nguồn 1. Vì hai bản chép có cùng cách đánh số trang và cách chia cột, các chỉ dẫn đó cũng áp dụng cho Nguồn 2. Nguồn 2 chỉ được nêu tên khi nó khác hoặc khi cách đọc của nó quan trọng. Các hình là phần cắt từ Nguồn 1 (Hình 1).</p>
-<figure class="fig" id="fig-title" style="width: 160px"><div class="parts"><img src="images/E33-1.png" alt="Hình 1" loading="lazy" style="flex: 0 1 41px"></div><figcaption>Hình 1. Đầu đề của bài tựa, 國音新字序, có tên của chữ (tr. 1).</figcaption></figure>
-<h3 id="sec-3-1">3.1 Các nguồn được chứng thực</h3>
-<table>
-<thead>
-<tr>
-<th>Nguồn</th>
-<th>Niên đại</th>
-<th>Nơi lưu giữ</th>
-<th>Loại văn bản</th>
-<th>Hướng viết</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Nguồn 1</td>
-<td>Thiệu Trị (1841–1847) hoặc muộn hơn</td>
-<td>Viện Nghiên cứu Hán Nôm, Hà Nội, AB.630</td>
-<td>Bản chép tay, Hán Nôm, 4 tờ đôi</td>
-<td>Dọc</td>
-</tr>
-<tr>
-<td>Nguồn 2</td>
-<td>Thiệu Trị (1841–1847) hoặc muộn hơn</td>
-<td>Viện Nghiên cứu Hán Nôm, Hà Nội, AB.630</td>
-<td>Bản chép tay, Hán Nôm, 4 tờ đôi</td>
-<td>Dọc</td>
-</tr>
-</tbody>
-</table>
-<p>Cả hai bản chép cùng ký hiệu AB.630 (hoặc AB.636 [TBD]). Niên đại là của văn bản, suy ra từ chữ kiêng huý (2.1). Niên đại của hai bản chép chưa rõ.</p>
-<h3 id="sec-3-2">3.2 Chứng cứ theo đặc điểm</h3>
-<p>Phụ lục B liệt kê các đoạn theo trang. Các thuật ngữ Cán và Chi được giải thích ở 4.1.</p>
-<table>
-<thead>
-<tr>
-<th>Đặc điểm</th>
-<th>Chứng cứ</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Cán đánh dấu</td>
-<td>22 Cán đánh dấu được liệt kê cùng tên âm của chúng trong mục 幹音二十二字 (tr. 2)</td>
-</tr>
-<tr>
-<td>Cán trơn</td>
-<td>Không được liệt kê. Xuất hiện trong các chữ ghép của ví dụ và đứng riêng, chẳng hạn với tám thanh (tr. 5–7)</td>
-</tr>
-<tr>
-<td>Chi</td>
-<td>Lập bảng trong mục 枝字一百一十字, theo từng khối năm chữ cho mỗi cơ sở: 109 dạng được thể hiện so với 110 được nêu (tr. 3–4)</td>
-</tr>
-<tr>
-<td>Cặp phiên thiết</td>
-<td>Mô tả trong mục 反切諧音法, từ tr. 5. Thành phần thuộc các cơ sở khác nhau, Cán trơn đứng trước. Cán trơn cho phụ âm đầu, Chi cho vần. Các cặp trong phần lời giải thích (tr. 6)</td>
-</tr>
-<tr>
-<td>Hợp Thư</td>
-<td>Mô tả trong văn bản. Mọi ví dụ là cặp cùng cơ sở với Chi đứng trước. Công thức của ví dụ minh hoạ nêu Chi trước và cho vần bằng Cán. Con số 880 (110 × 8 thanh) chỉ gồm các cặp cùng cơ sở (tr. 8)</td>
-</tr>
-<tr>
-<td>Tham Thư</td>
-<td>Quy tắc được mô tả trong văn bản (參書下從合体上從枝体), phần dưới đọc như một Hợp Thư. Có hai ví dụ, đều trên một Hợp Thư. Công thức của một Tham Thư nêu thành phần dưới trước (tr. 7). Cách phát âm của từng ví dụ được mô tả, nhưng không cho cách đọc</td>
-</tr>
-<tr>
-<td>Thành phần đứng riêng và đứng cạnh nhau</td>
-<td>Khi văn bản giải thích cách các thành phần kết hợp, nó viết các thành phần riêng rẽ và cạnh nhau mà không ghép: một Cán trơn đứng riêng trước một Chi, và hai Cán trơn đứng riêng trước một cặp phiên thiết (tr. 6)</td>
-</tr>
-<tr>
-<td>Dấu thanh</td>
-<td>Tám thanh ở bốn góc, được giải thích bằng góc của từng loại thanh và minh hoạ trên một chữ (tr. 4–5). Thanh ngang đánh dấu bằng nửa vòng tròn ở góc dưới trái. Các chữ có và không có dấu thanh trong cùng một đoạn. Dạng tròn và dạng góc cạnh của cùng một dấu (tr. 6)</td>
-</tr>
-<tr>
-<td>Hướng viết</td>
-<td>Văn bản không nói đến. Cả hai bản chép đều là Hán Nôm viết dọc</td>
-</tr>
-</tbody>
-</table>
-<h3 id="sec-3-3">3.3 Sử dụng hiện nay</h3>
-<p>Chữ này hiện đang được dùng trên web: một trang web của người đề xuất (qatt.org), một trang trên Omniglot, một diễn đàn trên Reddit với các ví dụ viết tay, một nhóm Facebook mà các thành viên viết hướng dẫn và phát triển phông chữ, một video giới thiệu trên YouTube với hơn 12.000 lượt xem vào tháng 10 năm 2026, một bộ chuyển đổi trên web từ Quốc ngữ, cùng các bài đăng và thảo luận trên mạng xã hội (các nguồn web trong Phụ lục C và).</p>
-<h2 id="4-c-u-tr-c-c-a-ch">4. Cấu trúc của chữ</h2>
-<p>Quốc Âm Tân Tự xây từ 22 cơ sở, mỗi cơ sở có bảy dạng. Mỗi dạng đều đứng riêng được. Mỗi cơ sở có sáu dạng kết hợp được với nhau theo nhóm hai hoặc ba, và mọi ký tự đều có thể mang một dấu thanh ở một trong bốn góc.</p>
-<p>Bài tựa suy điều này từ Kinh Dịch, trong đó một vài ký hiệu nhờ kết hợp mà thành một số lượng lớn:</p>
-<blockquote class="epigraph">
-<p class="zh" lang="zh">嘗考之三易卦，始於兩，次於四，成於八，重之爲六十四，変之爲四千九十六。</p>
-<p>Tôi từng khảo các quẻ của ba kinh Dịch: bắt đầu từ hai, tiếp đến bốn, thành tám; chồng lên thì thành sáu mươi bốn, biến đổi thì thành bốn nghìn không trăm chín mươi sáu.</p>
-<footer>Nam Thành cư sĩ Nguyễn Tử, bài tựa, trang 1 (bản dịch nháp)</footer>
-</blockquote>
-<h3 id="sec-4-1">4.1 Các thành phần</h3>
-<figure class="fig" id="fig-listing" style="width: 160px"><div class="parts"><img src="images/E18-1.png" alt="Hình 2" loading="lazy" style="flex: 0 1 120px"></div><figcaption>Hình 2. Bảng liệt kê 22 Cán dưới đầu đề 幹音二十二字, mỗi Cán có chú âm Nôm (tr. 2).</figcaption></figure>
-<p>Chữ có 22 cơ sở (<em>Cán</em>, 幹, 'thân', mà nguồn viết với 音 trong đầu đề 幹音二十二字 của bảng liệt kê, tr. 2, và với 字 trong 二十二幹字為標, tr. 7), mỗi cơ sở vẽ bằng ba nét. Nguồn liệt kê 22 âm cơ sở (幹音二十二字, tr. 2). Mỗi âm được thể hiện bằng một ký tự QATT, có một nét đánh dấu ngắn ở vị trí xuất phát, góc trên bên trái hoặc giữa phía trên tuỳ cơ sở, và bằng một chú âm Nôm cho biết âm của nó. Dạng này là <em>Cán đánh dấu</em>. Nét đánh dấu luôn nằm ở đầu một nét, nên ba nét cho sáu vị trí để đặt nó, đếm ngược chiều kim đồng hồ từ vị trí xuất phát là 1 đến 6. Cán đánh dấu có nó ở vị trí 1, và năm dạng có nét đánh dấu ở vị trí 2 đến 6 là các <em>Chi</em> (枝, 'cành'), theo thứ tự. Hai thuật ngữ lấy hình ảnh một cái cây: 110 Chi rẽ nhánh từ 22 Cán. Dạng thứ bảy không có nét đánh dấu. Nguồn gọi cả dạng đánh dấu lẫn dạng không đánh dấu là Cán: trong mục đếm, 幹 chỉ Cán đứng riêng (單幹書) cũng như thành phần của một tổ hợp, vốn luôn là dạng không đánh dấu (幹体, tr. 8). Đề xuất này gọi dạng không có nét đánh dấu là <em>Cán trơn</em> để phân biệt hai dạng, và dùng <em>cơ sở</em> cho đơn vị gồm bảy dạng. Dạng trơn được chứng thực cho ONG, DONG, NGONG, TONG và PHONG (tr. 5–7). Việc cả 22 cơ sở đều có dạng này suy ra từ các con số đếm của nguồn (4.2), không phải từ một bảng liệt kê. Vì nét đánh dấu của mỗi Chi nằm ở vị trí khác với của Cán đánh dấu, không Chi nào trùng với Cán đánh dấu: mỗi cơ sở có sáu dạng đánh dấu khác nhau và một dạng trơn.</p>
-<p>Các Chi được lập bảng trong mục 枝字一百一十字, &quot;110 chữ Chi&quot;, theo từng khối năm chữ cho mỗi cơ sở (tr. 3–4). Bảng có 109 chữ, một chữ bị bỏ sót do sơ ý (KHONG-4). Nguồn chỉ cho cách đọc của các Chi qua chú âm Nôm cạnh từng dạng. Các chú âm này mơ hồ hoặc không có trong từ điển, nên cách đọc chưa được xác lập. Việc mã hoá không phụ thuộc vào chúng, vì các dạng khác nhau ở vị trí của nét đánh dấu. Các chú âm không được phiên ở đây.</p>
-<figure class="fig wide" id="fig-chi-table" style="width: 428px"><div class="parts"><img src="images/S1-p3.jpg" alt="Hình 3, part 1" loading="lazy" style="flex: 0 1 294px"><img src="images/S1-p4.jpg" alt="Hình 3, part 2" loading="lazy" style="flex: 0 1 126px"></div><figcaption>Hình 3. Bảng Chi, năm dạng mỗi Cán (tr. 3 và 4: bảng tiếp tục ở góc trên bên phải của tr. 4).</figcaption></figure>
-<p>Ba lớp có chức năng khác nhau. Trong một cặp phiên thiết, Cán trơn cho phụ âm đầu của cơ sở của nó và Chi cho vần. Cùng nhau, 110 Chi tạo thành bảng vần của chữ. Trong một Hợp Thư, công thức của nguồn chỉ ra điều ngược lại (4.2). Một Cán đánh dấu đại diện cho cả âm tiết của phụ âm đầu đó với vần ông và gọi tên cơ sở của nó. Nó dùng để đọc Cán trơn trong phép phiên thiết. Cán trơn và Chi còn dùng làm thành phần của Tham Thư (4.3). Các ví dụ minh hoạ của nguồn cho thấy các chức năng này. Mỗi ví dụ giải thích một chữ ghép bằng công thức theo dạng phiên thiết: chữ đó, 乃, hai chữ đánh vần và 反, trong đó chữ đánh vần thứ nhất cho phụ âm đầu và chữ thứ hai cho vần: cho một cặp phiên thiết ở tr. 7, cho một Hợp Thư ở tr. 6.</p>
-<figure class="fig" id="fig-components" style="width: 160px"><div class="parts"><img src="images/E04-1.png" alt="Hình 4" loading="lazy" style="flex: 0 1 83px"></div><figcaption>Hình 4. Các thành phần viết riêng rẽ và cạnh nhau, có dấu thanh (tr. 6).</figcaption></figure>
-<p>Không thể quyết định từ nguồn liệu một thành phần có được đứng riêng trong văn bản liền mạch hay không, vì nguồn không có văn bản liền mạch nào bằng chữ này (2.1). Trong các ví dụ này, Cán đánh dấu, Cán trơn và Chi đều xuất hiện riêng rẽ, cả khi có dấu thanh, và khi văn bản giải thích cách các thành phần kết hợp, nó cũng viết chúng cạnh nhau mà không ghép: một Cán trơn đứng riêng trước một Chi, và hai Cán trơn đứng riêng trước một cặp phiên thiết (tr. 6). Một Cán trơn đứng riêng có cùng cách đọc với Cán đánh dấu của cơ sở của nó: nguồn minh hoạ tám thanh trên Cán trơn đứng riêng của đông (tr. 5). Chỉ Cán trơn và Chi mới kết hợp. Cán đánh dấu không bao giờ kết hợp. Ngoài bảng liệt kê 22 Cán (tr. 2), Cán đánh dấu chỉ xuất hiện hai lần, cả hai lần là một ký tự riêng có cách đọc, trong các công thức giải thích một chữ ghép (tr. 6, tr. 7). Lần thứ hai có kèm dấu thanh.</p>
+<h3 id="sec-2-2">2.2 Cấu trúc và thuật ngữ</h3>
+<p>Chữ có 22 cơ sở, gọi là Cán (幹, 'thân'), mỗi cơ sở vẽ bằng ba nét. Một cơ sở có bảy dạng. Một dạng không có nét đánh dấu: Cán trơn. Sáu dạng có một nét đánh dấu ngắn ở một trong sáu đầu nét, đánh số từ 1 đến 6: dạng có nét ở vị trí 1 là Cán đánh dấu, năm dạng còn lại là Chi (枝, 'cành'). Bảng dưới cho thấy các dạng của cơ sở thứ nhất, ONG.</p>
 <table>
 <thead>
 <tr>
@@ -229,80 +132,151 @@ blockquote.epigraph footer::before { content: "— "; }
 </tr>
 </tbody>
 </table>
-<h3 id="sec-4-2">4.2 Chữ hai thành phần: phiên thiết và Hợp Thư</h3>
-<p>Một Cán trơn và một Chi kết hợp thành một chữ. Nguồn mô tả hai phương pháp.</p>
-<figure class="fig" id="fig-phien-thiet" style="width: 160px"><div class="parts"><img src="images/E39-1.png" alt="Hình 5" loading="lazy" style="flex: 0 1 106px"></div><figcaption>Hình 5. Ví dụ minh hoạ về một cặp phiên thiết, kèm danh sách năm chữ (tr. 7).</figcaption></figure>
+<p>Một Cán trơn và một Chi kết hợp thành một chữ theo hai cách. Trong cặp phiên thiết, Cán trơn đứng trước và Chi thuộc một cơ sở khác. Trong Hợp Thư, Chi đứng trước và Cán trơn thuộc cùng cơ sở (7.4). Một Hợp Thư có thể mang thành phần thứ ba, một Chi, ở phía trên: đó là Tham Thư (7.5). Mọi chữ đều có thể mang một trong tám dấu thanh ở một trong bốn góc (7.6).</p>
+<p>Bài tựa rút điều này từ Kinh Dịch, trong đó một số ít ký hiệu kết hợp với nhau mà thành vô số:</p>
+<blockquote class="epigraph">
+<p class="zh" lang="zh">嘗考之三易卦，始於兩，次於四，成於八，重之爲六十四，変之爲四千九十六。</p>
+<p>Tôi từng khảo các quẻ của ba bộ Dịch: bắt đầu từ hai, kế đến bốn, thành tám; chồng lên thì thành sáu mươi bốn, biến đổi thì thành bốn nghìn không trăm chín mươi sáu.</p>
+<footer>Nam Thành cư sĩ Nguyễn Tử, bài tựa, trang 1 (bản dịch nháp)</footer>
+</blockquote>
+<p><strong>Bố cục.</strong> Nguồn viết các thành phần của một chữ theo một cách sắp xếp cố định. Theo ký hiệu của các Ký tự Mô tả Chữ Hán (Ideographic Description Characters):</p>
 <ul>
-<li><strong>Phiên thiết.</strong> Cán trơn và Chi thuộc các cơ sở khác nhau, và Cán trơn đứng trước. Cán trơn cho phụ âm đầu và Chi cho vần, như trong phép phiên thiết (反切), ghi một âm tiết bằng phụ âm đầu của một chữ và vần của một chữ khác. Mục Phiên Thiết Hài Âm Pháp (反切諧音法) mô tả các cặp này. Mục đếm tính chúng là 合書 với Cán ở bên trái (xem dưới). Ngoài ra nguồn không đặt tên riêng cho chúng, và đề xuất này gọi chúng là cặp phiên thiết. Nguồn không đếm cặp phiên thiết nào cùng cơ sở (xem dưới), và ngữ pháp không tạo ra các cặp như vậy (5.3). Ví dụ minh hoạ ở tr. 7 giải thích cặp <code>[ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-5">󰀀󰂚󰁙</span>, đọc là yên (Hình 5).</li>
-<li><strong>Hợp Thư.</strong> Chi và Cán trơn thuộc cùng một cơ sở, và Chi đứng trước. Đầu đề của mục nêu cách sắp xếp: 合書左從枝体右從幹体, thể Chi ở bên trái, thể Cán ở bên phải (tr. 6). Ví dụ minh hoạ giải thích một Hợp Thư của ONG bằng công thức dạng phiên thiết, 螉乃喊翁反, nêu Chi (喊, ONG-2) trước và Cán đánh dấu của ONG (翁) sau. Trong dạng phiên thiết, chữ đánh vần thứ hai cho vần, và 螉 có vần của 翁. Do đó công thức phù hợp với cách đọc trong đó Cán trơn cho vần và Chi cho phụ âm đầu, ngược với cặp phiên thiết. Nó không chứng minh cách đọc đó: cách đọc của các Chi chưa được xác lập (4.1), nên phần của Chi không kiểm chứng được. Việc mã hoá không phụ thuộc vào điều này. Có 110 Hợp Thư của một Chi và một Cán trơn, mỗi Chi một chữ, chẳng hạn <code>[ONG-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG">󰀂󰂚󰀀</span>, và 22 Hợp Thư của hai Cán trơn cùng một cơ sở, mỗi cơ sở một chữ, chẳng hạn <code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span> (xem dưới).</li>
+<li><strong>Phiên thiết:</strong> <span class="ids ids-lr"></span>, Cán trơn bên trái và Chi bên phải, như <code>[ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-5">󰀀󰂚󰁙</span>.</li>
+<li><strong>Hợp Thư:</strong> <span class="ids ids-lr"></span>, Chi bên trái và Cán trơn bên phải, như <code>[ONG-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG">󰀂󰂚󰀀</span>.</li>
+<li><strong>Tham Thư:</strong> <span class="ids ids-ud"></span>, Hợp Thư ở dưới và Chi ở trên, như <code>[ONG-5 J ONG C KHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5">󰀅󰂚󰀀󰂛󰁮</span>. Hợp Thư giữ cách sắp xếp <span class="ids ids-lr"></span> của nó trong nửa dưới.</li>
 </ul>
-<figure class="fig" id="fig-hop-thu" style="width: 160px"><div class="parts"><img src="images/E07-1.png" alt="Hình 6" loading="lazy" style="flex: 0 1 132px"></div><figcaption>Hình 6. Mục về Hợp Thư: đầu đề, ví dụ minh hoạ và danh sách bốn chữ (tr. 6).</figcaption></figure>
-<p>Mục ở tr. 6 cho thấy năm Hợp Thư của ONG: chữ được công thức giải thích và bốn chữ nữa, có nét đánh dấu ở vị trí 3 đến 6 (ONG-3 đến ONG-6 J ONG). Trong cả hai nguồn, chữ đầu tiên trong số đó được viết mà nét đánh dấu không nằm trên thành phần nào, <code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span>, dù công thức đánh vần nó bằng Chi ONG-2 (喊) và Cán đánh dấu (翁). Có hai cách đọc. Nếu đó là một lỗi chép của bản gốc chung, thì chữ là ONG-2 J ONG, dãy chạy qua cả năm Chi của ONG, và ngữ pháp của 5.3 đứng vững. Nếu nó đúng như được viết, thì ONG J ONG là một loại Hợp Thư riêng, hai Cán trơn của một cơ sở. Nguồn không giải quyết câu hỏi này, và một bản chép phải giữ dạng mà nguồn viết (5.1). Vì vậy đề xuất này chấp nhận ONG J ONG trong ngữ pháp như một Hợp Thư (5.3), cho mọi cơ sở (22 chuỗi), như đối xứng của Hợp Thư gồm một Chi và một Cán trơn, dù dạng này có phải là lỗi chép hay không. Cả hai nguồn đều chứng thực dạng này, nên nó được vẽ như mọi cặp khác; một Tham Thư trên nó không được chứng thực và vẫn nằm trong số các chuỗi mà ngữ pháp không cấm. ONG J ONG viết được với ký tự nối và được phân đoạn như mọi cặp khác (6.2), nên không phải thêm hay đổi ký tự nào. Chỉ điều một trình kiểm tra chấp nhận là khác.</p>
-<p>Trong cả hai phương pháp, các thành phần được viết trái trước phải. Trong một cặp phiên thiết đây cũng là thứ tự phụ âm đầu và vần. Trong một Hợp Thư, công thức nêu các thành phần theo cùng thứ tự được viết.</p>
-<p>Mục 音数 (tr. 8) đếm các chữ của hệ thống, mỗi chữ với tám thanh: 176 Cán đơn (單幹書, 22 × 8), 880 chữ đơn (單書, 110 Chi × 8), 880 合書 với Chi bên trái và Cán bên phải (110 × 8) và 18.480 合書 với Cán bên trái và Chi bên phải (2.310 × 8). Cách sắp xếp Chi trước chỉ được đếm cho 110 cặp cùng cơ sở, và cách sắp xếp Cán trước chỉ cho 2.310 cặp khác cơ sở (22 × 105). Mọi cơ sở đều tham gia các cặp này, nên cả 22 cơ sở đều xuất hiện dưới dạng Cán trơn trong tổ hợp. Nguồn dùng tên 合書 cho cả hai cách sắp xếp trong mục này. Đề xuất này giữ Hợp Thư cho cách sắp xếp Chi trước, như trong đầu đề của mục ở tr. 6 (合書左從枝体右從幹体).</p>
-<h3 id="sec-4-3">4.3 Tham Thư (ba thành phần)</h3>
-<p>Một Hợp Thư có thể mang thành phần thứ ba, một Chi đơn, ở phía trên. Quy tắc của nguồn là 參書下從合体上從枝体, phần dưới theo thể 合 và phần trên theo thể Chi (tr. 7). Đề xuất này đọc 合体 là một Hợp Thư, nên một cặp phiên thiết hay một Chi đơn không phải là nền. Thành phần thứ ba ngoài ra không bị hạn chế. Như vậy có 110 nền và 110 × 110 = 12.100 Tham Thư. Hợp Thư của hai Cán trơn (xem trên) không phải là nền: không có Tham Thư nào được chứng thực trên nó, và nguồn chỉ chứng thực nó một lần, có thể là lỗi chép. Cả hai Tham Thư được chứng thực đều có một Hợp Thư làm nền.</p>
-<p>Một cách đọc rộng của Hợp Thư, trong đó thuật ngữ bao gồm mọi cặp Cán trơn + Chi và nền của Tham Thư có thể là bất kỳ cặp nào hoặc một Chi đơn (2.552 nền × 110 Chi = 280.720 Tham Thư), không được chấp nhận, nhưng nguồn không loại trừ nó. Trong mục đếm nguồn dùng 合書 cho cả hai cách sắp xếp (4.2), nên 合体 trong quy tắc có thể chỉ bất kỳ cặp nào. Cách đọc hẹp dựa trên ba điểm: cả hai Tham Thư được chứng thực đều đứng trên một cặp Chi trước cùng cơ sở, mục ở tr. 6 chỉ dùng 合書 trong đầu đề cho cách sắp xếp Chi trước, và các cặp phiên thiết được mô tả trong một mục riêng (反切諧音法). Mục đếm không cho con số nào cho Tham Thư (參書倣此, &quot;Tham Thư cũng vậy&quot;). Lựa chọn này không ảnh hưởng đến bộ ký tự: cách đọc rộng sẽ chấp nhận thêm nền trước ký tự kết hợp, với cùng ký tự và cùng cách phân đoạn, và chỉ đổi điều một trình kiểm tra chấp nhận (5.3).</p>
-<figure class="fig" id="fig-tham-thu-1" style="width: 160px"><div class="parts"><img src="images/E40-1.png" alt="Hình 7" loading="lazy" style="flex: 0 1 50px"></div><figcaption>Hình 7. Tham Thư thứ nhất: công thức 音乃嗡圈反合 và chữ mà nó giải thích (tr. 7).</figcaption></figure>
-<figure class="fig" id="fig-tham-thu-2" style="width: 160px"><div class="parts"><img src="images/E41-1.png" alt="Hình 8, part 1" loading="lazy" style="flex: 0 1 44px"><img src="images/E41-2.png" alt="Hình 8, part 2" loading="lazy" style="flex: 0 1 34px"></div><figcaption>Hình 8. Tham Thư thứ hai: cuối cột thứ hai và phần tiếp ở cột thứ nhất, kèm công thức (tr. 7).</figcaption></figure>
-<p>Thứ tự các thành phần do nguồn cho: công thức giải thích một chữ Tham Thư nêu thành phần dưới trước và thành phần trên sau (tr. 7). Công thức giải thích chữ <code>[ONG-5 J ONG C KHONG-5 TONE-SEMICIRCLE-LOWER-LEFT]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5 TONE-SEMICIRCLE-LOWER-LEFT">󰀅󰂚󰀀󰂛󰁮󰂜</span> (ký hiệu ở 5.3, Hình 7): một Hợp Thư của ONG với Chi KHONG-5 ở trên. Nó được viết 音乃嗡圈反合 theo sau là chữ Nôm <span class="ids ids-lr"></span>舌<span class="ids ids-in"></span><span class="ids ids-lr"></span>片爿一 (淵 với bộ 舌), chưa rõ cách đọc. Ví dụ thứ hai được giải thích bằng công thức cùng dạng (tr. 7, Hình 8): <code>[BONG-5 J BONG C HONG-2 TONE-SEMICIRCLE-LOWER-LEFT]</code>&nbsp;<span class="qg" role="img" aria-label="BONG-5 J BONG C HONG-2 TONE-SEMICIRCLE-LOWER-LEFT">󰂊󰂚󰂅󰂛󰀐󰂜</span>, viết 音乃𱓄花反法合吧字也. Tuy vậy, Tham Thư là phần kém chắc chắn nhất của chữ. Nguồn mô tả cấu trúc của nó và, với mỗi ví dụ, cách phát âm, nhưng không cho cách đọc: chữ thứ nhất &quot;đọc nhanh, lưỡi cuốn dưới hàm, hai hàm răng mở rộng, môi thu vào mọi phía&quot; (其音疾語…舌卷在頷下兩牙<span class="ids ids-lr"></span>广朮闊開上下唇縮八方成音也), chữ thứ hai đọc nhanh với đôi môi mím lại (tr. 7). Với chỉ hai ví dụ, không thể xác lập chức năng của ba thành phần trong một Tham Thư. Vì vậy đề xuất này chỉ coi Tham Thư là một cấu tạo về cấu trúc và không khẳng định gì về cách phát âm. Mã hoá theo thứ tự của công thức: Hợp Thư đứng trước như một đơn vị trọn vẹn, và ký tự kết hợp thêm thành phần thứ ba vào nó (5.3).</p>
-<h3 id="sec-4-4">4.4 Dấu thanh</h3>
-<figure class="fig" id="fig-tones" style="width: 160px"><div class="parts"><img src="images/E16-1.png" alt="Hình 9" loading="lazy" style="flex: 0 1 44px"></div><figcaption>Hình 9. Cán trơn của đông với tám dấu thanh, chú 東 董 凍 篤 同 洞 動 獨 (tr. 5).</figcaption></figure>
-<p>Dấu thanh là một vòng tròn hoặc nửa vòng tròn đặt ở một trong bốn góc của chữ, cho tám thanh của hệ âm dương (陰陽, tiếng Trung <em>yīnyáng</em>) Trung Hoa. Nguồn giải thích hệ thống này sau bảng Chi: &quot;dương dùng vòng tròn đầy, âm dùng nửa vòng tròn&quot; (陽用全圈，陰用半圈, tr. 4), và nêu góc cho từng loại thanh: chân trái (左足) cho bình, vai trái (左肩) cho thượng, vai phải (右肩) cho khứ và chân phải (右足) cho nhập (tr. 5). Nó minh hoạ tám dấu trên một chữ, Cán trơn của đông, chú 東 董 凍 篤 cho âm và 同 洞 動 獨 cho dương (tr. 5). Nguồn nêu rõ 同 洞 動 獨 là các thanh bình, thượng, khứ, nhập (平上去入, tr. 4), trong khi truyền thống vận thư xếp 動 vào thanh thượng và 洞 vào thanh khứ. 洞 có các âm đỗng và động (Tự điển chữ Nôm trích dẫn, tr. 403). Bằng cách xếp 洞 vào thanh thượng, nguồn đọc nó là đỗng, nên 同 洞 動 獨 (đồng, đỗng, động, độc) theo các thanh huyền, ngã, nặng của tiếng Việt và thanh nặng nhập. Góc cho biết loại thanh và hình dạng cho biết âm vực: nửa vòng tròn đánh dấu âm (陰), vòng tròn đánh dấu dương (陽).</p>
+<p>Các thành phần của một chữ chia đều ô chữ: mỗi nửa của chữ hai thành phần, và mỗi nửa của Tham Thư, được vẽ thu hẹp vào phần ô của nó. Trong mọi trường hợp, cách sắp xếp theo thứ tự lưu trữ: trong <span class="ids ids-lr"></span> thành phần thứ nhất ở bên trái, và trong Tham Thư, Hợp Thư được lưu trước và vẽ ở dưới.</p>
+<p><strong>Thuật ngữ.</strong></p>
 <table>
 <thead>
 <tr>
-<th>Góc</th>
-<th>Loại thanh</th>
-<th>Nửa vòng tròn (âm)</th>
-<th>Vòng tròn (dương)</th>
+<th>Thuật ngữ</th>
+<th>Nghĩa</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Dưới trái</td>
-<td>bình 平</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-LOWER-LEFT">󰀱󰂜</span> âm bình (ngang)</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-LOWER-LEFT">󰀱󰂝</span> dương bình (huyền)</td>
+<td>Cán</td>
+<td>Thuật ngữ của nguồn (幹, 'thân') chỉ một trong 22 cơ sở, mỗi cơ sở ba nét, liệt kê trong mục 幹音二十二字 (tr. 2). Mỗi Cán có dạng Cán đánh dấu và dạng Cán trơn</td>
 </tr>
 <tr>
-<td>Trên trái</td>
-<td>thượng 上</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-UPPER-LEFT">󰀱󰂞</span> âm thượng (hỏi)</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-UPPER-LEFT">󰀱󰂟</span> dương thượng (ngã)</td>
+<td>Cán đánh dấu</td>
+<td>Cán có nét đánh dấu ở vị trí đầu (tổng cộng 22). Chỉ đứng riêng, không bao giờ kết hợp. Tên ký tự kết thúc bằng -1</td>
 </tr>
 <tr>
-<td>Trên phải</td>
-<td>khứ 去</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-UPPER-RIGHT">󰀱󰂠</span> âm khứ (sắc)</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-UPPER-RIGHT">󰀱󰂡</span> dương khứ (nặng)</td>
+<td>Chi</td>
+<td>Thuật ngữ của nguồn (枝, 'cành') chỉ một trong năm dạng của mỗi cơ sở có nét đánh dấu ở vị trí 2 đến 6 (tổng cộng 110). Đứng riêng hoặc kết hợp</td>
 </tr>
 <tr>
-<td>Dưới phải</td>
-<td>nhập 入</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-LOWER-RIGHT">󰀱󰂢</span> âm nhập (sắc ở âm tiết tận cùng bằng -p, -t, -c)</td>
-<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-LOWER-RIGHT">󰀱󰂣</span> dương nhập (nặng ở âm tiết tận cùng bằng -p, -t, -c)</td>
+<td>Cán trơn</td>
+<td>Dạng của một cơ sở không có nét đánh dấu (tổng cộng 22). Kết hợp với một Chi. Khi đứng riêng, nó có cách đọc của Cán đánh dấu. Tên ký tự: chỉ tên của cơ sở</td>
+</tr>
+<tr>
+<td>Cặp phiên thiết</td>
+<td>(反切 <em>fǎnqiè</em>) Tổ hợp của một Cán trơn và một Chi thuộc hai cơ sở khác nhau, Cán trơn đứng trước, nối bằng ký tự nối thành phần. Được mô tả dưới mục Phiên Thiết Hài Âm Pháp (反切諧音法). Tổng cộng 2.310. Trong mục đếm số được tính là 合書 với Cán ở bên trái. Thuật ngữ mô tả của đề xuất này</td>
+</tr>
+<tr>
+<td>Hợp Thư</td>
+<td>Tổ hợp của một Chi và một Cán trơn cùng cơ sở, Chi đứng trước, nối bằng ký tự nối thành phần. Theo công thức của nguồn, Cán trơn cho vần. Tổng cộng 110, và 22 Hợp Thư của hai Cán trơn cùng một cơ sở (một chữ được chứng thực, có thể là viết nhầm)</td>
+</tr>
+<tr>
+<td>Tham Thư</td>
+<td>Hợp Thư có thành phần thứ ba, một Chi, ở phía trên (12.100 chữ có thể có, hai chữ được chứng thực). Công thức nêu thành phần dưới trước</td>
+</tr>
+<tr>
+<td>Ký tự nối thành phần</td>
+<td>Ký tự định dạng nối hai thành phần thành một chữ. Thứ tự của chúng cho biết cách sắp xếp</td>
+</tr>
+<tr>
+<td>Ký tự nối Tham Thư</td>
+<td>Ký tự định dạng đặt Chi theo sau lên trên một Hợp Thư</td>
 </tr>
 </tbody>
 </table>
-<p>Thanh ngang có dấu riêng, một nửa vòng tròn ở góc dưới trái (tr. 6). Một chữ mang nhiều nhất một dấu thanh, và nhiều chữ không mang dấu nào. Ở tr. 6, một đoạn đánh dấu thanh ngang cho mọi chữ Quốc Âm Tân Tự trừ hai chữ cuối, hai chữ này không mang dấu. Vì vậy một chữ không có dấu thanh để thanh không được xác định. Các thành phần đứng riêng cũng mang dấu thanh (tr. 6).</p>
-<p>Nguồn không quy định hướng của nửa vòng tròn. Mọi ví dụ đều cho thấy phía hở của nó quay về tâm chữ (tr. 5). Dạng tròn và dạng góc cạnh của nửa vòng tròn là biến thể chữ viết tay, không phải các dấu khác nhau: Nguồn 1 viết cùng một dấu khi thì tròn, khi thì gần như một cái móc, còn Nguồn 2 viết mọi dấu thanh của đoạn ở tr. 6 theo dạng góc cạnh.</p>
-<h3 id="sec-4-5">4.5 Bố cục</h3>
-<p>Nguồn viết các thành phần của một chữ theo một cách sắp xếp cố định. Theo ký hiệu của các Ký tự Mô tả Chữ Biểu ý (Ideographic Description Characters):</p>
+<h2 id="3-s-d-ng-hi-n-nay-n-nh-v-nhu-c-u-trao-i">3. Sử dụng hiện nay, độ ổn định và nhu cầu trao đổi</h2>
+<p>Unicode Consortium đòi hỏi ba điều ở một chữ viết mới: chữ được một cộng đồng độc lập với người tạo ra nó sử dụng, bộ ký tự ổn định, và văn bản thuần bằng chữ đó cần được trao đổi. Phần này lần lượt trả lời ba điều đó.</p>
+<h3 id="sec-3-1">3.1 Sử dụng hiện nay</h3>
+<p>Chữ này do một tác giả tạo ra vào thế kỷ XIX để ghi chép riêng (2.1). Việc sử dụng ngày nay độc lập với ông và không chỉ giới hạn ở người đề xuất:</p>
 <ul>
-<li><strong>Phiên thiết:</strong> <span class="ids ids-lr"></span>, Cán trơn bên trái và Chi bên phải, như trong <code>[ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-5">󰀀󰂚󰁙</span>.</li>
-<li><strong>Hợp Thư:</strong> <span class="ids ids-lr"></span>, Chi bên trái và Cán trơn bên phải, như trong <code>[ONG-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG">󰀂󰂚󰀀</span>.</li>
-<li><strong>Tham Thư:</strong> <span class="ids ids-ud"></span>, Hợp Thư ở dưới và Chi ở trên nó, như trong <code>[ONG-5 J ONG C KHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5">󰀅󰂚󰀀󰂛󰁮</span>. Hợp Thư giữ cách sắp xếp <span class="ids ids-lr"></span> của nó trong nửa dưới.</li>
+<li>một trang trên Omniglot,</li>
+<li>một diễn đàn trên Reddit, nơi người dùng đăng các ví dụ viết tay,</li>
+<li>một nhóm Facebook mà các thành viên viết bài hướng dẫn,</li>
+<li>một video giới thiệu trên YouTube với hơn 12.000 lượt xem vào tháng 10 năm 2026,</li>
+<li>một bộ chuyển đổi trên web từ Quốc Ngữ, mã nguồn mở, có hai phông chữ riêng,</li>
+<li>một bộ gõ cho Windows, do một nhà phát triển khác xây dựng dựa trên bộ chuyển đổi,</li>
+<li>các bài đăng và thảo luận trên mạng xã hội.</li>
 </ul>
-<p>Các thành phần của một chữ chia ô vuông thành các phần bằng nhau: mỗi nửa của chữ hai thành phần, và mỗi nửa của một Tham Thư, được vẽ nén vào phần của nó trong ô. Trong mọi trường hợp, cách sắp xếp theo thứ tự lưu trữ: trong <span class="ids ids-lr"></span> thành phần đầu ở bên trái, và trong Tham Thư thì Hợp Thư được lưu trước và vẽ ở dưới.</p>
-<h2 id="5-m-h-nh-m-ho">5. Mô hình mã hoá</h2>
-<p>Chữ được mã hoá thành 164 ký tự nguyên tử: 154 thành phần, hai ký tự nối và tám dấu thanh. Các thành phần được lưu trái trước phải và, trong một Tham Thư, dưới trước trên, như các công thức của nguồn nêu, và được vẽ theo thứ tự đó. Không thành phần nào bị đảo thứ tự. Mọi tổ hợp được viết với một ký tự nối tường minh, và các thành phần không có ký tự nối là các ký tự riêng. Chữ hai và ba thành phần là các chuỗi, nên mọi chữ đều sửa được và ranh giới của nó được xác định cục bộ.</p>
-<h3 id="sec-5-1">5.1 Bộ ký tự</h3>
+<p>Các nguồn trên web được liệt kê ở Phụ lục C. Các hình cho thấy ví dụ: chữ viết tay của một người dùng (Hình 1), một bài hướng dẫn (Hình 2), bộ chuyển đổi (Hình 3) và một bài đăng với văn bản trong các phông chữ của qatt.org (Hình 4).</p>
+<figure class="fig" id="fig-use-handwriting" style="width: 360px"><div class="parts"><img src="images/use-handwriting.png" alt="Hình 1" loading="lazy" style="flex: 0 1 360px"></div><figcaption>Hình 1. [TBD] Văn bản viết tay của một người dùng, đăng trên diễn đàn r/Qatt (nguồn, ngày).</figcaption></figure>
+<figure class="fig" id="fig-use-tutorial" style="width: 360px"><div class="parts"><img src="images/use-tutorial.png" alt="Hình 2" loading="lazy" style="flex: 0 1 360px"></div><figcaption>Hình 2. [TBD] Một bài hướng dẫn của một thành viên nhóm Facebook QATT (nguồn, ngày).</figcaption></figure>
+<figure class="fig" id="fig-use-converter" style="width: 1024px"><div class="parts"><img src="images/use-converter.png" alt="Hình 3" loading="lazy" style="flex: 0 1 1024px"></div><figcaption>Hình 3. Bộ chuyển đổi trên web của một nhà phát triển khác (3.1): Quốc Ngữ bên trái, kết quả chuyển đổi trong phông chữ của bộ chuyển đổi bên phải. quocamtantu.vercel.app, ngày 10 tháng 11 năm 2026.</figcaption></figure>
+<figure class="fig" id="fig-use-post" style="width: 360px"><div class="parts"><img src="images/use-post.png" alt="Hình 4" loading="lazy" style="flex: 0 1 360px"></div><figcaption>Hình 4. [TBD] Một bài đăng của người dùng với văn bản tạo bằng trình soạn thảo hoặc ứng dụng của qatt.org (nguồn, ngày).</figcaption></figure>
+<p><strong>Phần mềm của các nhà phát triển khác.</strong> Hai chương trình cho chữ này do những người khác ngoài người đề xuất viết, và cả hai đều được công bố dưới dạng mã nguồn mở (Phụ lục C). Bộ chuyển đổi là một ứng dụng web với hai phông chữ, một cho văn bản ngang và một cho văn bản dọc, cùng một bảng các âm tiết tiếng Việt. Tài liệu của nó nêu mục tiêu của dự án là một bảng mã chuẩn, một phông chữ Unicode hoàn chỉnh và việc đưa chữ này vào Unicode. Bộ gõ, của một nhà phát triển thứ hai, lấy bảng của bộ chuyển đổi và gõ chữ này vào bất kỳ ứng dụng nào trên Windows. Lần thay đổi gần nhất của nó là vào tháng 11 năm 2026. Cả hai chương trình lưu văn bản theo một cách mã hoá riêng, được mô tả ở 3.4.</p>
+<p><strong>Tài nguyên trên qatt.org.</strong> Trang web của người đề xuất, qatt.org, theo hiểu biết của ông là nguồn tài liệu đầy đủ nhất về chữ này hiện nay. Nó được nêu ở đây vì đó là thứ cộng đồng đang dùng, và nó được phát triển với sự tham khảo ý kiến của hai cộng đồng (3.5). Trang web cung cấp:</p>
+<ul>
+<li>phông chữ cho chữ này theo nhiều kiểu, tải về miễn phí,</li>
+<li>một trình soạn thảo, một bộ chuyển đổi giữa Quốc Ngữ và chữ này, và một ứng dụng ghi chú,</li>
+<li>một khoá học với bài hướng dẫn tương tác và một ứng dụng luyện tập,</li>
+<li>bản phiên âm đầy đủ của Nguồn 1, trong đó mọi chữ của chữ viết này được viết theo cách mã hoá đề xuất ở đây và mọi chữ Nôm chưa có điểm mã được viết bằng một Chuỗi Mô tả Chữ Hán (Ideographic Description Sequence),</li>
+<li>các chứng cứ của đề xuất này, cùng các trang của nguồn.</li>
+</ul>
+<p>Trang web ở dạng hiện nay đã hoạt động từ ngày 28 tháng 10 năm 2026. Từ đó đến ngày 9 tháng 11 năm 2026, trang có trung bình 46 người truy cập mỗi ngày, từ 17 đến 158. Trong 14 ngày đến ngày 9 tháng 11, trình soạn thảo được mở 558 lần, hơn một nửa số lần từ Việt Nam, bảng ký hiệu 212 lần, trang về các bản giải mã 124 lần và bản thảo đề xuất này 162 lần ở bản tiếng Anh và tiếng Việt. Người dùng đăng lên mạng xã hội các văn bản họ tạo bằng trình soạn thảo và ứng dụng trong các phông chữ này (Hình 4). [TBD: cập nhật số liệu trước khi nộp]</p>
+<p>Chữ này đã được Nguyễn Quang Hồng mô tả trong giới nghiên cứu năm 1986 (Phụ lục C); ông đã phải in các chữ của nó (Hình 5). [TBD: nghiên cứu học thuật]</p>
+<figure class="fig" id="fig-use-article" style="width: 360px"><div class="parts"><img src="images/use-article.png" alt="Hình 5" loading="lazy" style="flex: 0 1 360px"></div><figcaption>Hình 5. [TBD] Chữ này trên bản in: một trang của Nguyễn Quang Hồng (1986).</figcaption></figure>
+<h3 id="sec-3-2">3.2 Viết tiếng Việt ngày nay</h3>
+<p>Người dùng ngày nay viết một âm tiết như nguồn mô tả: một Cán trơn cho phụ âm đầu, một Chi cho vần và một dấu thanh (Hình 6). Một Chi ghi vần nào thì do một cách đọc bảng vần của nguồn quyết định, gọi là bản giải mã. Nguồn chỉ cho cách đọc của các Chi qua chú âm Nôm, và không phải tất cả đều xác định được (7.3). Hai bản giải mã đã được công bố và đang được dùng, một trên Omniglot và một trên qatt.org (Phụ lục C). Chúng thống nhất về cấu trúc của âm tiết và về các phụ âm đầu, và khác nhau ở vần của một số Chi, nên một văn bản được đọc theo bản giải mã của người viết.</p>
+<p>Việc mã hoá không phụ thuộc vào bản giải mã. Các ký tự được phân biệt và đặt tên theo hình dạng, tức là cơ sở và vị trí của nét đánh dấu, chứ không theo âm (4.3). Văn bản viết theo bản giải mã nào cũng được ghi bằng cùng các ký tự.</p>
+<p>Một cách viết ngày nay khác với nguồn. Một bộ chuyển đổi trên web mà nhiều người dùng làm theo viết phụ âm đầu bằng Cán đánh dấu, dạng có nét đánh dấu ở vị trí 1, ở chỗ nguồn viết Cán trơn (7.3). Văn bản như vậy có tồn tại, và việc mã hoá ghi lại nó đúng như được viết: Cán đánh dấu, ký tự nối và Chi.</p>
+<figure class="fig" id="fig-use-text" style="width: 360px"><div class="parts"><img src="images/use-text.png" alt="Hình 6" loading="lazy" style="flex: 0 1 360px"></div><figcaption>Hình 6. [TBD] Một câu viết ngày nay, kèm Quốc Ngữ và chuỗi đã mã hoá.</figcaption></figure>
+<p>Tham Thư ngày nay không được dùng để viết tiếng Việt. Người dùng đưa nó ra để giải thích và thảo luận cách chữ vận hành, và họ bàn xem nó có thể ghi những phụ âm mà chữ không có cơ sở, như p và w, hoặc phân biệt d với gi hay không. Các thảo luận này liên quan đến cách viết âm tiết bằng các thành phần đã có. Chúng không thêm ký tự nào.</p>
+<h3 id="sec-3-3">3.3 Độ ổn định</h3>
+<p>Bộ ký tự đã khép kín. Nguồn định nghĩa nó như một hệ thống, 22 cơ sở với bảy dạng và tám dấu thanh (2.2), và từ đó đến nay không có gì được thêm vào. Người dùng ngày nay viết bằng cùng các thành phần và dấu thanh và không thêm ký tự nào. Bộ chuyển đổi của một nhà phát triển khác (3.1) được xây dựng mà không biết đến đề xuất này, và có cùng bộ ký tự: 22 phụ âm đầu, 110 vần và tám thanh, tức là 22 cơ sở, 110 Chi của chúng và tám dấu thanh. Các công cụ chuyển đổi giữa Quốc Ngữ và chữ này gán các âm tiết tiếng Việt cho các chuỗi của những ký tự này. Đó là vấn đề chính tả và không thêm gì vào bộ ký tự. Dấu câu là dấu câu của Hán Nôm (6.3).</p>
+<h3 id="sec-3-4">3.4 Nhu cầu trao đổi</h3>
+<p>Unicode chưa có ký tự nào của chữ này, nên văn bản số bằng chữ này ngày nay được viết theo hai cách mã hoá không tương thích với nhau, hoặc bằng hình ảnh.</p>
+<p><strong>Cách mã hoá của bộ chuyển đổi.</strong> Bộ chuyển đổi và bộ gõ xây dựng dựa trên nó (3.1) lưu một điểm mã cho mỗi âm tiết: 21.780 âm tiết tổ hợp sẵn, mọi tổ hợp của 22 phụ âm đầu, 110 vần và một thanh, cùng 140 điểm mã cho riêng phụ âm đầu, vần và dấu thanh. Các phông chữ của chúng phủ 21.920 điểm mã từ U+10000 đến U+15613. Tài liệu của bộ chuyển đổi coi vùng này là vùng dùng riêng. Thực ra đây là phần đầu của Mặt phẳng Đa ngữ Bổ sung: 12.503 điểm mã trong số đó là các ký tự đã được gán trong Unicode 18.0, thuộc 104 khối, trong đó có Linear B, chữ hình nêm (Cuneiform) và chữ tượng hình Ai Cập, và các điểm mã còn lại chưa được gán. Bảng dưới cho ba ví dụ từ bảng âm tiết của bộ chuyển đổi.</p>
+<table>
+<thead>
+<tr>
+<th>Điểm mã</th>
+<th>Trong bộ chuyển đổi</th>
+<th>Trong Unicode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>U+10109</td>
+<td>âm tiết <em>oan</em></td>
+<td>AEGEAN NUMBER THREE</td>
+</tr>
+<tr>
+<td>U+12002</td>
+<td>âm tiết <em>nung</em></td>
+<td>CUNEIFORM SIGN A TIMES BAD</td>
+</tr>
+<tr>
+<td>U+13001</td>
+<td>âm tiết <em>chen</em></td>
+<td>EGYPTIAN HIEROGLYPH A002</td>
+</tr>
+</tbody>
+</table>
+<p>Hình 7 cho thấy một câu được chuyển bằng nó, trong phông chữ của nó và trong phông chữ của các chữ viết sở hữu những điểm mã này.</p>
+<figure class="fig" id="fig-converter-fallback" style="width: 765px"><div class="parts"><img src="images/converter-fallback.png" alt="Hình 7" loading="lazy" style="flex: 0 1 765px"></div><figcaption>Hình 7. Kết quả của bộ chuyển đổi cho câu “Quốc âm tân tự là chữ viết tiếng Việt”, sao chép bằng nút của nó, một lần trong phông chữ của bộ chuyển đổi và một lần trong các phông Noto của những chữ viết mà Unicode 18.0 gán cho các điểm mã này, như mọi chương trình không có phông chữ của bộ chuyển đổi hiển thị. Các ô vuông là điểm mã chưa được gán. Ngày 10 tháng 11 năm 2026.</figcaption></figure>
+<p>Vì vậy, văn bản sao chép từ bộ chuyển đổi hoặc gõ bằng bộ gõ, đối với mọi chương trình khác, là văn bản chữ hình nêm, chữ tượng hình Ai Cập và các chữ viết khác của vùng này. Không có phông chữ của bộ chuyển đổi, nó được hiển thị, tìm kiếm, sắp xếp và ngắt dòng như các chữ đó; còn với phông chữ ấy, văn bản thật của các chữ đó lại hiển thị thành Quốc Âm Tân Tự. Bộ chuyển đổi sao chép văn bản như vậy vào bộ nhớ tạm và bộ gõ gõ nó vào bất kỳ ứng dụng nào, nên lượng văn bản này tăng lên theo mỗi người dùng của hai chương trình.</p>
+<p><strong>Cách mã hoá của qatt.org.</strong> Phông chữ, trình soạn thảo và bộ chuyển đổi của người đề xuất dùng các điểm mã của Vùng Dùng riêng Bổ sung-A (U+F0000..U+F00AF), sắp xếp như đề xuất ở đây. Văn bản viết bằng chúng chỉ đọc được với các phông chữ này. Điểm mã dùng riêng không có thuộc tính được ấn định, nên việc tìm kiếm, sắp xếp, ngắt dòng và phân đoạn văn bản như vậy tuỳ thuộc từng ứng dụng.</p>
+<p>Văn bản theo một trong hai cách mã hoá không đọc được bằng công cụ của cách kia. Không cách nào có thể trở thành chuẩn: cách thứ nhất chiếm điểm mã của các chữ viết khác, cách thứ hai theo định nghĩa là dùng riêng. Chừng nào chữ này chưa có điểm mã riêng, mỗi công cụ mới phải chọn một trong hai hoặc thêm cách thứ ba. Việc mã hoá trong Unicode chấm dứt tình trạng này. Mỗi điểm mã của bộ chuyển đổi ứng với một phụ âm đầu, một vần và một thanh, nên văn bản hiện có có thể được chuyển một cách máy móc sang các ký tự đề xuất ở đây, và văn bản của qatt.org bằng cách dịch chuyển các điểm mã.</p>
+<p>Việc mã hoá chữ này cho phép phiên âm, trích dẫn và tìm kiếm văn bản của nguồn theo một dạng chuẩn, và cho phép dùng chữ này bên cạnh Hán Nôm và Quốc Ngữ trong cùng một tài liệu, như trong nguồn (2.1). Mô hình của đề xuất (5) được xây dựng để mọi chữ của nguồn đều viết được, kể cả Tham Thư được chứng thực trong nguồn (7.5).</p>
+<h3 id="sec-3-5">3.5 Triển khai và ý kiến của cộng đồng</h3>
+<p>Mô hình của đề xuất này đã được triển khai và kiểm tra trên nguồn. Toàn bộ Nguồn 1 đã được phiên âm theo mô hình này, và mọi chữ của chữ viết này trong nguồn, kể cả hai Tham Thư, đều được viết bằng 164 ký tự đề xuất ở đây (3.1). Phông tham chiếu, QATT Pen, ghép mọi chữ từ các thành phần của nó bằng các quy tắc thay thế và định vị, không dùng glyph tổ hợp sẵn (5.5). Trình soạn thảo của trang web và của ứng dụng lưu văn bản như đề xuất ở đây, theo bố cục của khối đề xuất trên các điểm mã dùng riêng bắt đầu từ U+F0000. Người đề xuất đã kiểm tra việc hiển thị trong Chrome trên Android và macOS, trong Firefox trên Android và trong Android WebView. Trình soạn thảo và ứng dụng ngày càng được dùng nhiều, và chưa có báo cáo lỗi hiển thị nào (Hình 8).</p>
+<figure class="fig" id="fig-use-editor" style="width: 880px"><div class="parts"><img src="images/use-editor.png" alt="Hình 8" loading="lazy" style="flex: 0 1 880px"></div><figcaption>Hình 8. Trình soạn thảo của qatt.org với câu “Quốc âm tân tự là chữ viết tiếng Việt”, chuyển từ Quốc Ngữ theo bản giải mã của qatt.org. Văn bản được lưu theo bố cục đề xuất từ U+F0000 và được QATT Pen ghép trong trình duyệt (Chromium). qatt.org/editor.html, ngày 10 tháng 11 năm 2026.</figcaption></figure>
+<p>Hai cộng đồng người dùng, diễn đàn r/Qatt (qua máy chủ Discord của nó) và nhóm Facebook QATT, đã được hỏi ý kiến về đề xuất này ngày 29 tháng 10 năm 2026. Cả hai đều đón nhận với sự quan tâm. Không ai phản đối mô hình hay tên ký tự, kể cả tên GIONG cho cơ sở của d và gi (4.3). Một thành viên đề nghị một thứ tự điểm mã khác (4.5).</p>
+<h2 id="4-c-c-k-t-xu-t">4. Các ký tự đề xuất</h2>
+<h3 id="sec-4-1">4.1 Bộ ký tự</h3>
 <table>
 <thead>
 <tr>
 <th>Nhóm</th>
-<th>Ký tự</th>
+<th>Số ký tự</th>
 </tr>
 </thead>
 <tbody>
@@ -323,7 +297,7 @@ blockquote.epigraph footer::before { content: "— "; }
 <td>1</td>
 </tr>
 <tr>
-<td>Ký tự kết hợp Tham Thư</td>
+<td>Ký tự nối Tham Thư</td>
 <td>1</td>
 </tr>
 <tr>
@@ -331,280 +305,54 @@ blockquote.epigraph footer::before { content: "— "; }
 <td>8</td>
 </tr>
 <tr>
-<td><strong>Tổng</strong></td>
+<td><strong>Tổng cộng</strong></td>
 <td><strong>164</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Cán đánh dấu và Cán trơn của một cơ sở không được hợp nhất, dù một Cán trơn đứng riêng có cách đọc của Cán đánh dấu (4.1). Ba sự việc giữ chúng tách biệt. Thứ nhất, chúng ứng xử khác nhau: Cán trơn kết hợp với một Chi còn Cán đánh dấu thì không bao giờ, nên phông chữ và trình kiểm tra phải biết văn bản chứa dạng nào. Thứ hai, Cán đánh dấu là một trong sáu dạng đánh dấu của cơ sở: nét đánh dấu ở vị trí 1 thuộc cùng một dãy với các vị trí 2 đến 6, các Chi, và hợp nhất nó với dạng trơn sẽ lấy một vị trí ra khỏi dãy đó và để nó thành một biến thể mặt chữ chọn theo ngữ cảnh. Thứ ba, nguồn viết cả hai dạng đứng riêng trong cùng một loại công thức: ở tr. 6 công thức của một cặp phiên thiết đánh vần bằng Cán trơn của ONG (cột thứ nhất), công thức của một Hợp Thư bằng Cán đánh dấu của ONG (cột thứ bảy), và công thức ở tr. 7 đánh vần một cặp phiên thiết bằng Cán đánh dấu. Người viết có ý phân biệt giữa các cách dùng này hay không thì không thể quyết định từ số lần xuất hiện ít như vậy. Một bản phiên âm phải giữ dạng mà nguồn viết, nên mỗi dạng có điểm mã riêng.</p>
-<p><strong>Ký tự kết hợp Tham Thư có thể quyết định riêng.</strong> Nó là ký tự duy nhất của bộ ký tự chỉ phục vụ Tham Thư, và Tham Thư là phần kém chắc chắn nhất của chữ: hai ví dụ, không có cách đọc được nêu (4.3). 163 ký tự còn lại tạo thành một mô hình đầy đủ cho mọi điều khác mà nguồn cho thấy, và không thuộc tính nào của chúng phụ thuộc vào ký tự kết hợp. Không có nó, hai Tham Thư được chứng thực không thể viết thành từng ký tự đơn trong văn bản thuần. Nếu UTC muốn hoãn nó, vị trí của nó (+9B) có thể được để dành và các điểm mã còn lại giữ nguyên độ lệch.</p>
-<h3 id="sec-5-2">5.2 Vì sao không tổ hợp sẵn</h3>
-<p>Một Cán trơn và một Chi cho 2.420 chữ hai thành phần (22 Cán trơn × 110 Chi): 2.310 cặp phiên thiết và 110 Hợp Thư. Nguồn đưa ra cùng các con số đó nhân với tám thanh (4.2). 22 Hợp Thư của hai Cán trơn (4.2) không có trong phép đếm của nguồn, nên có 2.442 chữ hai thành phần. Tham Thư cho 110 × 110 = 12.100. Tổ hợp sẵn sẽ cần 14.542 điểm mã, phần lớn dành cho các tổ hợp mà chỉ rất ít được chứng thực. Tổ hợp sẵn vừa không khả thi vừa không có cơ sở.</p>
-<h3 id="sec-5-3">5.3 Ngữ pháp chuỗi</h3>
-<pre><code>Character:= Cluster [ToneMark]
-Cluster:= MarkedCan | Chi | UnmarkedCan | PhanThiet | HopThu | ThamThu
-PhanThiet:= UnmarkedCan(X) Joiner Chi(Y)  X ≠ Y, unmarked Cán first
-HopThu:= (Chi(X) | UnmarkedCan(X)) Joiner UnmarkedCan(X)  same base X
-ThamThu:= HopThu Combiner Chi            third component added to a complete Hợp Thư
-</code></pre>
-<p>Trong văn bản và trong các bảng, một chuỗi được viết trong ngoặc vuông: mỗi thành phần được ghi bằng tên cơ sở của nó, theo sau là -n cho một dạng có nét đánh dấu (ONG, ONG-4). <code>J</code> là ký tự nối thành phần và <code>C</code> là ký tự kết hợp Tham Thư. Khi cần nói về lớp chứ không về cơ sở, CM là Cán đánh dấu, CH là Chi và CU là Cán trơn, kèm cơ sở trong ngoặc khi cần (CU(X), CH(Y)), và TONE là dấu thanh. Ví dụ, <code>[ONG-5 J ONG C KHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5">󰀅󰂚󰀀󰂛󰁮</span> là Hợp Thư của ONG với Chi KHONG-5 ở trên.</p>
-<p>Ký tự nối thành phần nối hai thành phần thành một chữ, và thứ tự của chúng cho biết cách sắp xếp. Các thành phần không có ký tự nối là các ký tự riêng. Một Cán trơn đứng riêng có cách đọc của Cán đánh dấu của cơ sở của nó (4.1). Các điều kiện cùng cơ sở không ảnh hưởng đến việc phân đoạn mà được kiểm tra bằng thẩm định (5.5).</p>
+<p>Cán đánh dấu và Cán trơn của một cơ sở không được hợp nhất, dù Cán trơn khi đứng riêng có cách đọc của Cán đánh dấu (7.3). Ba sự kiện giữ chúng tách biệt. Thứ nhất, chúng hành xử khác nhau: Cán trơn kết hợp với Chi còn Cán đánh dấu thì không bao giờ, nên phông chữ phải biết văn bản chứa dạng nào. Thứ hai, Cán đánh dấu là một trong sáu dạng có đánh dấu của cơ sở: nét đánh dấu ở vị trí 1 thuộc cùng dãy với các vị trí 2 đến 6, tức các Chi, và hợp nhất nó với dạng trơn sẽ lấy một vị trí ra khỏi dãy đó và biến nó thành một biến thể glyph chọn theo ngữ cảnh. Thứ ba, nguồn viết cả hai dạng đứng riêng trong cùng loại công thức: ở tr. 6, công thức của một cặp phiên thiết đánh vần bằng Cán trơn của ONG (cột thứ nhất), công thức của một Hợp Thư bằng Cán đánh dấu của ONG (cột thứ bảy), và công thức ở tr. 7 đánh vần một cặp phiên thiết bằng Cán đánh dấu. Với chừng ấy lần xuất hiện, không thể xác định người viết có muốn phân biệt các cách dùng này hay không. Một bản phiên âm phải giữ dạng mà nguồn viết, nên mỗi dạng có điểm mã riêng. Văn bản ngày nay thêm một sự kiện thứ tư: cả hai dạng đều xuất hiện làm thành phần thứ nhất của một cặp (3.2), và chỉ các ký tự riêng biệt mới ghi lại được người viết đã dùng dạng nào.</p>
+<p><strong>Những gì nguồn cho thấy về bộ ký tự.</strong></p>
 <table>
 <thead>
 <tr>
-<th>Chữ định viết</th>
-<th>Chuỗi</th>
-<th>Ví dụ</th>
+<th>Nhóm</th>
+<th>Được mã hoá</th>
+<th>Có trong nguồn</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Cán đánh dấu đứng riêng</td>
-<td>CM</td>
-<td><code>[ONG-1]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-1">󰀁</span></td>
+<td>Cán đánh dấu</td>
+<td>22</td>
+<td>22, trong bảng liệt kê (tr. 2)</td>
 </tr>
 <tr>
-<td>Chi đứng riêng</td>
-<td>CH</td>
-<td><code>[ONG-2]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2">󰀂</span></td>
+<td>Chi</td>
+<td>110</td>
+<td>109, trong bảng (tr. 3–4). Đầu đề và các con số của nguồn cho 110</td>
 </tr>
 <tr>
-<td>Cán trơn đứng riêng (cách đọc của Cán đánh dấu)</td>
-<td>CU</td>
-<td><code>[ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG">󰀀</span></td>
+<td>Cán trơn</td>
+<td>22</td>
+<td>ONG, NGONG, DONG, TONG, BONG và PHONG (7.3). Các con số của nguồn cần đủ 22 (7.4)</td>
 </tr>
 <tr>
-<td>Các thành phần cạnh nhau, không ghép</td>
-<td>CU(X) CH(Y)</td>
-<td><code>[ONG CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG CHONG-5">󰀀󰁙</span></td>
+<td>Dấu thanh</td>
+<td>8</td>
+<td>8, trên một chữ (tr. 5)</td>
 </tr>
 <tr>
-<td>Cặp phiên thiết</td>
-<td>CU(X) J CH(Y)</td>
-<td><code>[ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-5">󰀀󰂚󰁙</span></td>
-</tr>
-<tr>
-<td>Hợp Thư</td>
-<td>CH(X) J CU(X)</td>
-<td><code>[ONG-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG">󰀂󰂚󰀀</span></td>
-</tr>
-<tr>
-<td>Hợp Thư của hai Cán trơn (4.2)</td>
-<td>CU(X) J CU(X)</td>
-<td><code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span></td>
-</tr>
-<tr>
-<td>Tham Thư</td>
-<td>CH(X) J CU(X) C CH(Z)</td>
-<td><code>[ONG-5 J ONG C KHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5">󰀅󰂚󰀀󰂛󰁮</span></td>
-</tr>
-<tr>
-<td>Mọi chữ trên kèm dấu thanh</td>
-<td>chuỗi + TONE</td>
-<td><code>[ONG-2 J ONG TONE-CIRCLE-LOWER-LEFT]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG TONE-CIRCLE-LOWER-LEFT">󰀂󰂚󰀀󰂝</span></td>
+<td>Ký tự nối</td>
+<td>2</td>
+<td>Không phải ký tự của nguồn. Chúng ghi lại hai cách sắp xếp mà nguồn viết, cạnh nhau (7.4) và chồng lên trên (7.5)</td>
 </tr>
 </tbody>
 </table>
-<p>Các chuỗi ngoài những mẫu này không bị cấm. Chúng không được chứng thực, và đề xuất này không quy định cách hiển thị chúng.</p>
-<h3 id="sec-5-4">5.4 Thứ tự đọc và ký tự nối thành phần</h3>
-<p>Các thành phần được lưu theo thứ tự chúng được viết, trái trước phải, như trong một Chuỗi Mô tả Chữ Biểu ý. Trong một Hợp Thư, Chi được viết bên trái và được lưu trước, nên việc hiển thị không cần đảo thứ tự. Thứ tự lưu trữ không phụ thuộc vào chức năng của các thành phần. Công thức của nguồn, nêu Chi trước, phù hợp với điều đó (4.2).</p>
-<p>Ký tự nối mang thông tin mà bản thân các thành phần không có. Nguồn viết các thành phần cạnh nhau mà không ghép (4.1), nên <code>CU CH</code> có thể là hai thành phần riêng hoặc một cặp phiên thiết, và <code>CH CU</code> có thể là một Chi theo sau bởi một Cán trơn riêng hoặc một Hợp Thư. Ký tự nối quyết định. Vì vậy mọi chữ hai thành phần được chứng thực đều chứa nó.</p>
-<p><strong>Vì sao cần ký tự nối.</strong> Không có ký tự nối, việc nhóm các thành phần sẽ phụ thuộc vào cơ sở của chúng, và vẫn còn mơ hồ. Với Y ≠ X, chuỗi CH(X) CU(X) CH(Y) hợp lệ cả khi là [CH(X) CU(X)][CH(Y)], một Hợp Thư theo sau là một Chi, lẫn khi là [CH(X)][CU(X) CH(Y)], một Chi theo sau là một cặp phiên thiết. Một trình phân tích sẽ phải so sánh các cơ sở để nhóm văn bản và vẫn phải chọn một cách đọc, và một chỉnh sửa đổi một cơ sở có thể nhóm lại các thành phần lân cận. Với ký tự nối, <code>CH(X) J CU(X) CH(Y)</code> và <code>CH(X) CU(X) J CH(Y)</code> là hai cách đọc còn <code>CH(X) CU(X) CH(Y)</code> là ba thành phần riêng: mỗi cách đọc có một cách viết, việc phân đoạn không cần so sánh các cơ sở, và các chỉnh sửa vẫn cục bộ. Với X = ONG và Y = CHONG, ba chuỗi là <code>[ONG-2 J ONG CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG CHONG-5">󰀂󰂚󰀀󰁙</span>, <code>[ONG-2 ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 ONG J CHONG-5">󰀂󰀀󰂚󰁙</span> và <code>[ONG-2 ONG CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 ONG CHONG-5">󰀂󰀀󰁙</span>.</p>
-<h3 id="sec-5-5">5.5 Độ ổn định khi chỉnh sửa</h3>
-<p>Xoá hoặc chèn một ký tự chỉ làm thay đổi nhiều nhất là cụm tại điểm chỉnh sửa và các cụm lân cận trực tiếp. Một chỉnh sửa có thể tách một cụm, gộp hai cụm lân cận (chẳng hạn khi xoá thành phần trên cùng của một Tham Thư và Chi kế tiếp thế chỗ) hoặc gắn một dấu thanh vào cụm đứng trước. Không có gì ngoài các cụm lân cận bị đổi.</p>
-<p>Sự bảo đảm này cũng đúng với văn bản sai dạng, vì việc phân đoạn chỉ dùng các quy tắc theo cặp (6.2): ranh giới giữa hai ký tự có hay không chỉ phụ thuộc vào hai ký tự đó, và không bao giờ có ngắt trước hoặc sau một ký tự nối. Vì vậy một chuỗi sai dạng như <code>CH C CH C CH</code> tạo thành một cụm, mà trình kiểm tra báo là sai dạng. Việc phân đoạn không bao giờ ghép đôi các phần của một chuỗi như vậy, nên một chỉnh sửa bên trong nó không thể nhóm lại văn bản ngoài nó.</p>
-<h3 id="sec-5-6">5.6 Dấu thanh</h3>
-<p>Tám dấu thanh là các ký tự kết hợp theo sau cụm hoàn chỉnh. Mỗi góc và mỗi loại dấu đều có tính đối lập, nên một thanh là một ký tự chứ không phải một biến thể mặt chữ. Một cụm không có dấu thanh để thanh không được xác định. Nó không biểu thị thanh ngang, vốn có dấu riêng (4.4). Vì vậy cả tám dấu đều cần thiết. Hướng của nửa vòng tròn suy ra từ góc của nó và là một thuộc tính mặt chữ. Một cụm mang nhiều nhất một dấu thanh. Hai dấu kèm một bộ chọn cho góc cũng không phù hợp, vì góc có tính đối lập.</p>
-<p>Hai bộ ký tự hiện có đã được xem xét và không được chấp nhận. U+A700..U+A707 MODIFIER LETTER CHINESE TONE YIN PING đến YANG RU bao gồm cùng tám thanh theo cùng thứ tự, nhưng chúng là các chữ cái biến âm có độ rộng (General_Category Sk) viết bên cạnh một âm tiết, không phải dấu kết hợp đặt ở góc của một chữ. Là các cụm grapheme riêng, chúng sẽ phá vỡ cấu trúc cụm, và một phông chữ không thể đặt chúng trong ô. Dạng của chúng cũng khác: chúng phân biệt âm và dương bằng một gạch chân, còn Quốc Âm Tân Tự bằng nửa vòng tròn và vòng tròn.</p>
-<p>U+302A..U+302D IDEOGRAPHIC LEVEL, RISING, DEPARTING và ENTERING TONE MARK dùng cùng các góc cho cùng bốn loại thanh, nhưng không phân biệt âm và dương. Dùng chúng cho một âm vực và ký tự mới cho âm vực kia sẽ chia một bộ tám dấu đối lập ra hai khối, và các dấu hiện có sẽ mang một âm vực mà chúng không biểu thị.</p>
-<h3 id="sec-5-7">5.7 Các phương án đã xem xét</h3>
-<p>Các phương án sau cho mô hình ký tự nối đã được xem xét. Các phương án cho bộ ký tự và dấu thanh được bàn ở 4.3, 5.1, 5.2 và 5.6.</p>
-<ul>
-<li>Hoán đổi tự động: một Hợp Thư lưu dưới dạng Cán trơn, Chi, với phông chữ hoán đổi các thành phần khi cả hai cùng cơ sở. Không chấp nhận, vì nó lưu thành phần phải trước thành phần trái, trái với thứ tự viết và trái với công thức của nguồn, vốn nêu Chi trước, và dựa vào một quy tắc hiển thị so sánh các cơ sở. Nó cũng sẽ gán vĩnh viễn <code>CU(X) CH(X)</code> cho Hợp Thư.</li>
-<li>Phiên thiết ngầm định, trong đó một Cán trơn gắn với ký tự theo sau mà không cần ký tự nối và chỉ Hợp Thư dùng ký tự nối: không chấp nhận, vì nguồn cũng viết Cán trơn đứng riêng và các thành phần cạnh nhau (4.1). Một Cán trơn gắn về phía trước sẽ nối chúng sai, chẳng hạn với một chữ Hán theo sau.</li>
-<li>Ký tự nối hoán đổi các thành phần (<code>CU(X) J CH(X)</code>, vẽ hoán đổi): không chấp nhận, vì nó giữ thứ tự lưu trữ trái với thứ tự viết.</li>
-<li>Ký tự nối làm hậu tố (<code>CH(X) CU(X) J</code>): không chấp nhận, vì nó nhóm các ký tự đứng trước theo cách hồi tố, đòi hỏi ngữ cảnh bên phải trong việc phân đoạn. Các ký tự nối như U+200D ZERO WIDTH JOINER đứng giữa các phần mà chúng nối, và ký tự kết hợp Tham Thư cũng vậy.</li>
-<li>Một ký tự nối cho cả chữ hai lẫn ba thành phần (163 ký tự): không chấp nhận, vì cấu trúc sẽ suy ra từ vị trí chứ không từ ký tự nối, và ký tự kết hợp Tham Thư không còn được cân nhắc riêng.</li>
-<li>Bộ chọn biến thể: bị bác, vì hai thứ tự khác nhau về cách đọc, và một bộ chọn biến thể chỉ được chọn một biến thể mặt chữ của cùng một ký tự.</li>
-<li>Điểm mã riêng cho Cán trơn của một Hợp Thư: bị bác, 22 điểm mã thay vì một ký tự nối.</li>
-</ul>
-<h2 id="6-thu-c-t-nh-k-t">6. Thuộc tính ký tự</h2>
-<p>Các thuộc tính đề xuất suy ra từ mô hình mã hoá: các thành phần là chữ cái, hai ký tự nối là ký tự định dạng, và dấu thanh là dấu không chiếm chỗ. Các giá trị cho hai ký tự nối là đề xuất. Các chuyên gia phân đoạn văn bản của Unicode được đề nghị xem xét chúng (6.2).</p>
-<table>
-<thead>
-<tr>
-<th>Ký tự</th>
-<th>General_Category</th>
-<th>Lớp kết hợp</th>
-<th>Grapheme_Cluster_Break</th>
-<th>Line_Break</th>
-<th>Bidi_Class</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Cán đánh dấu, Cán trơn, Chi</td>
-<td>Lo</td>
-<td>0</td>
-<td>Other</td>
-<td>ID</td>
-<td>L</td>
-</tr>
-<tr>
-<td>Ký tự nối thành phần, ký tự kết hợp Tham Thư</td>
-<td>Cf</td>
-<td>0</td>
-<td>Extend</td>
-<td>GL</td>
-<td>BN</td>
-</tr>
-<tr>
-<td>Dấu thanh (8)</td>
-<td>Mn</td>
-<td>0</td>
-<td>Extend</td>
-<td>CM</td>
-<td>NSM</td>
-</tr>
-</tbody>
-</table>
-<p>Các tệp dữ liệu nháp liệt kê mọi giá trị, kể cả Indic_Conjunct_Break, East_Asian_Width và Vertical_Orientation. Các câu hỏi cần xem xét được tập hợp cùng chúng.</p>
-<h3 id="sec-6-1">6.1 Lớp kết hợp của dấu thanh</h3>
-<p>Góc là một phần của danh tính mỗi dấu thanh, nên không cần lớp kết hợp theo vị trí. Một cụm mang nhiều nhất một dấu thanh, nên không bao giờ xảy ra việc sắp xếp lại chính tắc giữa các dấu. Vì vậy cả tám dấu đều có lớp 0. Các dấu thanh biểu ý U+302A..U+302D, đánh dấu cùng các góc trên chữ Hán, lại có các lớp theo vị trí (218 dưới trái, 228 trên trái, 232 trên phải, 222 dưới phải). Các lớp đó cũng dùng được ở đây, vì một cụm không bao giờ mang hai dấu thanh. [TBD: xác nhận theo quy ước Unicode hiện hành nên dùng lớp nào]</p>
-<h3 id="sec-6-2">6.2 Cụm grapheme</h3>
-<p>Việc phân đoạn chỉ dùng các quy tắc theo cặp: không có ngắt ngay trước hay sau một trong hai ký tự nối và không có ngắt trước dấu thanh. Mọi ranh giới khác đều là ngắt. Dấu thanh khớp với Extend. Các thành phần không được nối, kể cả Cán trơn đứng riêng, tạo thành các cụm riêng, nên mọi thành phần ứng xử như nhau. Cụm có đúng dạng hay không được để cho thẩm định (5.5). Một cách diễn đạt điều này bằng các thuộc tính hiện có là Grapheme_Cluster_Break=Extend cho cả hai ký tự nối, ngăn ngắt trước chúng, cùng với cơ chế Indic_Conjunct_Break của quy tắc GB9c cho ngắt sau chúng: thành phần là Consonant, ký tự nối là Linker, dấu thanh là Extend. [TBD: liệu Indic_Conjunct_Break có thể dùng cho một chữ không phải Ấn Độ hay nên dùng một giá trị hoặc quy tắc mới. So sánh với các ký tự điều khiển định dạng chữ tượng hình Ai Cập]</p>
-<h3 id="sec-6-3">6.3 Ngắt dòng và hướng viết</h3>
-<p>Nguồn không nêu hướng viết. Cả hai bản chép đều chứa văn bản Hán Nôm viết dọc, và trong mọi trường hợp chữ này được đối xử hệt như Hán Nôm và chạy theo nó: dòng dọc, cột chạy từ phải sang trái, không có khoảng trắng giữa các từ. Không có cách dùng ngang nào được chứng thực. Vì vậy đề xuất giả định thói quen viết của Hán Nôm. Các ký tự ứng xử như chữ biểu ý, mỗi chữ chiếm một ô vuông. Đề xuất cho các thành phần: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Dấu thanh và các ký tự nối không bao giờ mở đầu một dòng, vì chúng thuộc về cụm đứng trước.</p>
-<h3 id="sec-6-4">6.4 Thứ tự điểm mã</h3>
-<p>Nguồn liệt kê 22 Cán trong mục 幹音二十二字, &quot;âm Cán, hai mươi hai chữ&quot;, mỗi Cán chú tên bằng chữ Nôm (tr. 2). Thứ tự này nhóm các phụ âm đầu theo vị trí cấu âm một cách đại khái. Nó không có ý nghĩa mã hoá, nên các điểm mã theo thứ tự của bảng liệt kê đó. Trong mỗi cơ sở, năm Chi theo thứ tự vị trí nét đánh dấu, ngược chiều kim đồng hồ từ vị trí của Cán đánh dấu (4.1). Bảy dạng của một cơ sở nối tiếp nhau: dạng trơn trước, rồi sáu dạng đánh dấu. Vì vậy các điểm mã được nhóm theo cơ sở. Do một cặp phiên thiết bắt đầu bằng Cán trơn và một Hợp Thư bằng Chi, so sánh nhị phân các chuỗi điểm mã, không cần đối chiếu nào, xếp mọi tổ hợp vào dải của cơ sở của thành phần đầu tiên của nó.</p>
-<p><strong>Thứ tự thay thế.</strong> Một thành viên của cộng đồng người dùng đề nghị sắp xếp các điểm mã theo dạng thay vì theo cơ sở: trước hết 22 Cán trơn, rồi 22 Cán đánh dấu, rồi 110 Chi. Khi đó mỗi lớp là một dải liên tục, nên một bộ kiểm tra có thể kiểm các mẫu của 5.3 bằng dải thay vì bằng phần dư của độ lệch khi chia cho 7, và nếu UTC hợp nhất Cán đánh dấu với Cán trơn thì một dải được giải phóng thay vì 22 vị trí rời rạc. Một biến thể đặt 22 Cán trơn trước, rồi sáu dạng đánh dấu của từng cơ sở. Cả hai thứ tự đều tách hai loại tổ hợp khi so sánh nhị phân: mọi cặp phiên thiết bắt đầu bằng một Cán trơn và sẽ đứng trước mọi Hợp Thư, vốn bắt đầu bằng một Chi, nên Hợp Thư của một cơ sở không còn đứng cạnh các cặp phiên thiết và các chữ khác của cùng cơ sở. Chỉ một quy tắc đối chiếu (collation) được điều chỉnh riêng mới có thể khôi phục thứ tự, như nó đặt ä sau a, và một chữ viết có cộng đồng người dùng nhỏ khó có được quy tắc như vậy: quy tắc đối chiếu mặc định (DUCET) của một chữ viết mới thường theo thứ tự điểm mã. Trong thứ tự theo cơ sở, mọi chữ có thành phần đầu thuộc cơ sở X đứng cùng nhau, và các thành phần của một cơ sở có chung phụ âm đầu của nó: Cán trơn và Cán đánh dấu, và theo các chú âm Nôm, cả các Chi. Bản thảo giữ thứ tự theo cơ sở, vì nguồn liệt kê các Cán và lập bảng các Chi theo từng khối năm chữ cho mỗi cơ sở, vì khi đó so sánh nhị phân giữ các chữ của một cơ sở cùng nhau, và vì cơ sở và dạng suy ra được từ độ lệch bằng phép chia cho 7. Mọi thành phần có cùng thuộc tính trong cả hai thứ tự (6.2), nên lựa chọn này không ảnh hưởng đến phân đoạn, ngắt dòng hay phông chữ. Các độ lệch ở 7.1 theo thứ tự theo cơ sở.</p>
-<p><strong>Đối chiếu mặc định.</strong> Vì khó có một quy tắc đối chiếu điều chỉnh riêng, các trọng số mặc định trong DUCET trên thực tế là thứ tự sắp xếp của chữ viết này. Bản thảo đề nghị: 154 thành phần nhận trọng số cấp một theo thứ tự điểm mã; tám dấu thanh nhận trọng số cấp hai theo thứ tự ở 7.1, nên các chữ chỉ khác nhau về thanh đứng cạnh nhau và thanh chỉ quyết định sau các thành phần; ký tự nối thành phần và ký tự kết hợp Tham Thư bị bỏ qua, nên một tổ hợp được xếp như các thành phần của nó theo thứ tự lưu trữ. Văn bản không có quy tắc đối chiếu, so sánh theo điểm mã, cho cùng thứ tự các thành phần.</p>
-<h3 id="sec-6-5">6.5 Các ký tự giống về hình thức</h3>
-<p>Một số dạng trơn trông giống các ký tự đã có, phần lớn là chữ Hán (CJK) được tạo từ cùng những nét thẳng. Việc so sánh dưới đây được làm bằng mắt trên bảng mã (7.2) và gồm các dạng trơn cùng các dạng có dấu giống ký tự đã có. Các dạng có dấu khác thêm một nét đánh dấu và gần với các ký tự của dạng trơn tương ứng. Danh sách này là tạm thời <code>[TBD: xác nhận bằng dữ liệu ký tự dễ nhầm của UTR #36]</code>.</p>
-<table>
-<thead>
-<tr>
-<th>Dạng</th>
-<th>QATT</th>
-<th>Ký tự đã có tương tự</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ONG (+00)</td>
-<td><span class="qg" role="img" aria-label="ONG">󰀀</span></td>
-<td>U+4E09 三, U+2630 ☰ TRIGRAM FOR HEAVEN</td>
-</tr>
-<tr>
-<td>NGONG (+07)</td>
-<td><span class="qg" role="img" aria-label="NGONG">󰀇</span></td>
-<td>U+4E0C 丌, U+5140 兀</td>
-</tr>
-<tr>
-<td>GONG (+15)</td>
-<td><span class="qg" role="img" aria-label="GONG">󰀕</span></td>
-<td>U+0045 E, U+3151 ㅑ HANGUL LETTER YA</td>
-</tr>
-<tr>
-<td>CONG (+1C)</td>
-<td><span class="qg" role="img" aria-label="CONG">󰀜</span></td>
-<td>U+3155 ㅕ HANGUL LETTER YEO, U+4E2C 丬</td>
-</tr>
-<tr>
-<td>LONG (+23)</td>
-<td><span class="qg" role="img" aria-label="LONG">󰀣</span></td>
-<td>U+5DDD 川</td>
-</tr>
-<tr>
-<td>TRONG (+2A)</td>
-<td><span class="qg" role="img" aria-label="TRONG">󰀪</span></td>
-<td>U+5E72 干, U+4E8E 于</td>
-</tr>
-<tr>
-<td>TRONG-1 (+2B)</td>
-<td><span class="qg" role="img" aria-label="TRONG-1">󰀫</span></td>
-<td>U+5348 午</td>
-</tr>
-<tr>
-<td>TRONG-4 (+2E)</td>
-<td><span class="qg" role="img" aria-label="TRONG-4">󰀮</span></td>
-<td>U+738B 王, U+58EC 壬</td>
-</tr>
-<tr>
-<td>DONG (+31)</td>
-<td><span class="qg" role="img" aria-label="DONG">󰀱</span></td>
-<td>U+571F 土, U+58EB 士</td>
-</tr>
-<tr>
-<td>DONG-1 (+32)</td>
-<td><span class="qg" role="img" aria-label="DONG-1">󰀲</span></td>
-<td>U+738B 王, U+58EC 壬</td>
-</tr>
-<tr>
-<td>THONG (+46)</td>
-<td><span class="qg" role="img" aria-label="THONG">󰁆</span></td>
-<td>U+5344 卄, U+5EFE 廾</td>
-</tr>
-<tr>
-<td>THONG-1 (+47)</td>
-<td><span class="qg" role="img" aria-label="THONG-1">󰁇</span></td>
-<td>U+5347 升</td>
-</tr>
-<tr>
-<td>NHONG-1 (+4E)</td>
-<td><span class="qg" role="img" aria-label="NHONG-1">󰁎</span></td>
-<td>U+5347 升</td>
-</tr>
-<tr>
-<td>CHONG (+54)</td>
-<td><span class="qg" role="img" aria-label="CHONG">󰁔</span></td>
-<td>U+30AD キ KATAKANA LETTER KI</td>
-</tr>
-<tr>
-<td>CHONG-2 (+56)</td>
-<td><span class="qg" role="img" aria-label="CHONG-2">󰁖</span></td>
-<td>U+725B 牛</td>
-</tr>
-<tr>
-<td>GIONG-2 (+5D)</td>
-<td><span class="qg" role="img" aria-label="GIONG-2">󰁝</span></td>
-<td>U+725B 牛</td>
-</tr>
-<tr>
-<td>XONG (+62)</td>
-<td><span class="qg" role="img" aria-label="XONG">󰁢</span></td>
-<td>U+005A Z, U+4E4B 之</td>
-</tr>
-<tr>
-<td>SONG (+70)</td>
-<td><span class="qg" role="img" aria-label="SONG">󰁰</span></td>
-<td>U+0418 И CYRILLIC CAPITAL LETTER I</td>
-</tr>
-<tr>
-<td>RONG (+77)</td>
-<td><span class="qg" role="img" aria-label="RONG">󰁷</span></td>
-<td>U+004E N</td>
-</tr>
-<tr>
-<td>MONG (+7E)</td>
-<td><span class="qg" role="img" aria-label="MONG">󰁾</span></td>
-<td>U+53C8 又, U+3121 ㄡ BOPOMOFO LETTER OU</td>
-</tr>
-<tr>
-<td>Tone mark circle upper right (+A1)</td>
-<td><span class="qg" role="img" aria-label="TONE-CIRCLE-UPPER-RIGHT">󰂡</span></td>
-<td>U+309A COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK</td>
-</tr>
-<tr>
-<td>Tone marks (+9C..+A3)</td>
-<td>(7.2)</td>
-<td>U+302A..U+302D ideographic tone marks (same corners, different shapes, 5.7)</td>
-</tr>
-</tbody>
-</table>
-<p>Mọi ký tự được đề xuất có giá trị Script riêng, nên việc phát hiện văn bản trộn chữ phân biệt chúng với các ký tự này. Các dạng khác nhau ở số và vị trí của các nét, và trong một ô, ngữ cảnh của chữ khiến sự nhầm lẫn trong văn bản liền mạch khó xảy ra.</p>
-<h2 id="7-b-ng-k-t-v-b-ng-m">7. Bảng ký tự và bảng mã</h2>
-<p>164 ký tự nằm vừa trong một khối 176 điểm mã (11 cột × 16), đề xuất đặt trong Mặt phẳng Đa ngữ Bổ sung. Vị trí khối do UTC ấn định. Các điểm mã theo thứ tự nguồn của 22 Cán, và bảy dạng của mỗi cơ sở liên tiếp nhau: dạng trơn, Cán đánh dấu và năm Chi. Vì vậy 22 dạng trơn không nằm trong một dải liền. Chúng là các dạng ở mỗi vị trí thứ bảy (+00, +07, … +93).</p>
+<p><strong>Một Chi được mã hoá dù bảng không có.</strong> Bảng Chi có 109 dạng trong cả hai nguồn. Dạng không được viết là KHONG-4, ở chỗ chuyển từ tr. 3 sang tr. 4. Nó được mã hoá vì chính nguồn tính với 110: đầu đề của bảng nêu 110 Chi (枝字一百一十字), và mục đếm số cho 880 Chi đứng riêng (110 × 8), 880 Hợp Thư (110 × 8) và 18.480 cặp phiên thiết (22 × 105 × 8, tr. 8, 7.4). Hình dạng của nó được hệ thống xác định: nét đánh dấu ở vị trí 4 của KHONG, giữa vị trí của KHONG-3 và KHONG-5, mà bảng có. Cán trơn của 16 cơ sở cũng dựa trên cùng các con số đó. Nếu UTC chỉ muốn mã hoá những gì được viết, vị trí của KHONG-4 (+6D) có thể được để dành, còn mô hình, tên và các độ lệch khác không đổi.</p>
+<p><strong>Ký tự nối Tham Thư có thể quyết định riêng.</strong> Đây là ký tự duy nhất của bộ ký tự chỉ phục vụ Tham Thư, và Tham Thư là phần kém chắc chắn nhất của chữ: hai ví dụ trong nguồn, không có cách đọc được nêu (7.5), và ngày nay không được dùng để viết tiếng Việt (3.2). 163 ký tự còn lại tạo thành một mô hình đầy đủ cho mọi thứ khác mà nguồn cho thấy, và không thuộc tính nào của chúng phụ thuộc vào ký tự nối này. Thiếu nó, hai Tham Thư được chứng thực không thể viết thành chữ đơn trong văn bản thuần. Nếu UTC muốn hoãn nó, vị trí của nó (+9B) có thể được để dành và các điểm mã còn lại giữ nguyên độ lệch.</p>
+<p><strong>Vì sao không tổ hợp sẵn.</strong> Một Cán trơn và một Chi cho 2.420 chữ hai thành phần (22 Cán trơn × 110 Chi): 2.310 cặp phiên thiết và 110 Hợp Thư. Nguồn đưa ra cùng các con số đó nhân với tám thanh (7.4). 22 Hợp Thư của hai Cán trơn (7.4) không nằm trong con số của nguồn, nên có 2.442 chữ hai thành phần. Tham Thư cho 110 × 110 = 12.100. Tổ hợp sẵn sẽ cần 14.542 điểm mã, phần lớn dành cho các tổ hợp mà chỉ rất ít được chứng thực. Tổ hợp sẵn vừa không khả thi vừa không có cơ sở.</p>
+<h3 id="sec-4-2">4.2 Điểm mã</h3>
+<p>164 ký tự nằm vừa trong một khối 176 điểm mã (11 cột 16), đề xuất cho Mặt phẳng Đa ngữ Bổ sung. Vị trí khối do UTC ấn định. Điểm mã theo thứ tự của 22 Cán trong nguồn, và bảy dạng của mỗi cơ sở liền nhau: dạng trơn, Cán đánh dấu và năm Chi. Vì vậy 22 dạng trơn không nằm thành một dãy liền. Chúng là các dạng ở mỗi vị trí thứ bảy (+00, +07, … +93).</p>
 <table>
 <thead>
 <tr>
@@ -615,7 +363,7 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 </thead>
 <tbody>
 <tr>
-<td>Bảy dạng mỗi cơ sở: dạng trơn, Cán đánh dấu và năm Chi</td>
+<td>Bảy dạng của mỗi cơ sở: dạng trơn, Cán đánh dấu và năm Chi</td>
 <td>+00 đến +99</td>
 <td>154 (22 cơ sở × 7)</td>
 </tr>
@@ -625,7 +373,7 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>1</td>
 </tr>
 <tr>
-<td>Ký tự kết hợp Tham Thư</td>
+<td>Ký tự nối Tham Thư</td>
 <td>+9B</td>
 <td>1</td>
 </tr>
@@ -635,13 +383,13 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 <td>8, theo thứ tự truyền thống của tám thanh (xem dưới)</td>
 </tr>
 <tr>
-<td>Dự trữ</td>
+<td>Để dành</td>
 <td>+A4 đến +AF</td>
 <td>12</td>
 </tr>
 </tbody>
 </table>
-<p>Các dấu thanh theo thứ tự truyền thống của tám thanh, cách đánh số 1 đến 8 dùng trong phương ngữ học Trung Hoa: âm bình, dương bình, âm thượng, dương thượng, âm khứ, dương khứ, âm nhập, dương nhập, tức là theo loại thanh và trong mỗi loại thì âm trước dương. Sáu thanh đầu ứng với thứ tự thanh điệu tiếng Việt ngang, huyền, hỏi, ngã, sắc, nặng dùng trong từ điển và trong đối chiếu tiếng Việt. Nguồn liệt kê các dấu theo thứ tự khác, trước hết bốn nửa vòng tròn rồi bốn vòng tròn, mỗi nhóm bắt đầu từ góc dưới trái và chạy theo chiều kim đồng hồ (tr. 5). Thứ tự đó trình bày các dấu theo hình dạng và không được chấp nhận cho các điểm mã.</p>
+<p>Dấu thanh theo thứ tự truyền thống của tám thanh, cách đánh số 1 đến 8 dùng trong phương ngữ học Trung Hoa: âm bình, dương bình, âm thượng, dương thượng, âm khứ, dương khứ, âm nhập, dương nhập, tức là theo loại thanh và trong mỗi loại âm trước dương. Sáu thanh đầu ứng với thứ tự thanh tiếng Việt ngang, huyền, hỏi, ngã, sắc, nặng dùng trong từ điển và trong việc sắp xếp tiếng Việt. Nguồn liệt kê các dấu theo thứ tự khác, trước là bốn nửa vòng tròn rồi đến bốn vòng tròn, mỗi loại bắt đầu ở góc dưới trái và đi theo chiều kim đồng hồ (tr. 5). Thứ tự đó trình bày các dấu theo hình dạng và không được dùng cho điểm mã.</p>
 <table>
 <thead>
 <tr>
@@ -693,8 +441,8 @@ ThamThu:= HopThu Combiner Chi            third component added to a complete H�
 </tr>
 </tbody>
 </table>
-<h3 id="sec-7-1">7.1 Tên ký tự</h3>
-<p>Tên dùng chữ hoa ASCII không dấu, như Unicode yêu cầu. Các mẫu:</p>
+<h3 id="sec-4-3">4.3 Tên ký tự</h3>
+<p>Tên dùng chữ in hoa ASCII không dấu, theo yêu cầu của Unicode. Các mẫu:</p>
 <pre><code>QUOC AM TAN TU LETTER &lt;NAME&gt;
 QUOC AM TAN TU LETTER &lt;NAME&gt;-&lt;N&gt;
 QUOC AM TAN TU THAM THU COMBINER
@@ -702,13 +450,13 @@ QUOC AM TAN TU COMPONENT JOINER
 QUOC AM TAN TU COMBINING TONE CIRCLE UPPER LEFT
 QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </code></pre>
-<p>Các dấu thanh dùng các góc UPPER LEFT, UPPER RIGHT, LOWER LEFT và LOWER RIGHT, mỗi góc cho vòng tròn và nửa vòng tròn. Tên mô tả dấu. Thanh mà nó biểu thị được cho dưới dạng chú thích, chẳng hạn QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). Danh sách tên có tham chiếu chéo đến các ký tự hiện có liên quan: mỗi dấu thanh dẫn đến chữ cái biến âm có độ rộng cho cùng thanh (U+A700..U+A707) và đến dấu thanh biểu ý cho cùng góc (U+302A..U+302D).</p>
-<p>154 thành phần là chữ cái nên tên của chúng có LETTER, còn các dấu thanh là ký tự kết hợp nên tên của chúng có COMBINING. Tên chỉ mô tả dạng và không nói gì về chức năng. Một dạng không có nét đánh dấu lấy tên trơn của cơ sở. Một dạng có nét đánh dấu lấy tên của cơ sở kèm một gạch nối và một số từ 1 đến 6, số là vị trí của nét đánh dấu trong sáu đầu nét, đếm ngược chiều kim đồng hồ từ vị trí xuất phát của Cán đánh dấu (4.1). Số 1 là Cán đánh dấu, 2 đến 6 là năm Chi, chẳng hạn QUOC AM TAN TU LETTER ONG-1 đến QUOC AM TAN TU LETTER ONG-6. Các vị trí là tương đối so với Cán đánh dấu và nằm ở những chỗ khác nhau với các cơ sở khác nhau, nên tên đánh số chúng thay vì mô tả chúng về hình học. Dạng ngắn này cũng tránh chữ WITH, vốn trong tên ký tự thường nối một chữ cơ sở với một dấu phụ được mã hóa riêng; nét đánh dấu không phải là một ký tự riêng và các dạng không có phân tách. Danh sách tên ghi lớp dưới dạng chú thích.</p>
-<p>Tên của 22 Cán là tên âm của chúng trong bảng liệt kê của nguồn (6.4), nơi mỗi Cán được chú bằng một chữ Nôm. Các chú âm không có ký tự được mã hoá thì được cho dưới dạng Chuỗi Mô tả Chữ Biểu ý. Mỗi tên là âm tiết của phụ âm đầu với vần ông. Mọi dạng của một cơ sở lấy tên Cán của nó. Dấu phụ được bỏ. Nguồn có một Cán cho các phụ âm d và gi, vì không Cán nào trong 22 là Cán của gi, và không có Cán nào cho đ ngoài đông, nên nét của đ có thể bỏ mà không xung đột: đông → DONG, và Cán của d và gi là GIONG.</p>
+<p>Dấu thanh dùng các góc UPPER LEFT, UPPER RIGHT, LOWER LEFT và LOWER RIGHT, mỗi góc cho vòng tròn và nửa vòng tròn. Tên mô tả dấu. Thanh mà dấu biểu thị được ghi thành chú thích, chẳng hạn QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER LEFT = âm bình (ngang). Danh sách tên có tham chiếu chéo đến các ký tự đã có liên quan: mỗi dấu thanh tham chiếu đến chữ cái biến âm có độ rộng cho cùng thanh (U+A700..U+A707) và đến dấu thanh chữ Hán cho cùng góc (U+302A..U+302D).</p>
+<p>154 thành phần là chữ cái, nên tên của chúng chứa LETTER, còn dấu thanh là ký tự kết hợp, nên tên chứa COMBINING. Tên chỉ mô tả hình dạng và không nói gì về chức năng. Dạng không có nét đánh dấu lấy tên trơn của cơ sở. Dạng có nét đánh dấu lấy tên của cơ sở với một gạch nối và một số từ 1 đến 6, số đó là vị trí của nét đánh dấu trong sáu đầu nét, đếm ngược chiều kim đồng hồ từ vị trí đầu của Cán đánh dấu (7.3). Số 1 là Cán đánh dấu, 2 đến 6 là năm Chi, chẳng hạn QUOC AM TAN TU LETTER ONG-1 đến QUOC AM TAN TU LETTER ONG-6. Các vị trí là tương đối so với Cán đánh dấu và nằm ở chỗ khác nhau với các cơ sở khác nhau, nên tên đánh số chúng thay vì mô tả hình học. Dạng ngắn này cũng tránh WITH, từ mà trong tên ký tự thường nối một chữ cơ sở với một dấu phụ được mã hoá riêng; nét đánh dấu không phải là ký tự riêng và các dạng không có phân rã. Danh sách tên ghi loại thành chú thích.</p>
+<p>Tên của 22 Cán là tên âm của chúng trong bảng liệt kê của nguồn (4.5), nơi mỗi Cán được chú bằng một chữ Nôm. Chú âm không có ký tự đã mã hoá được ghi bằng Chuỗi Mô tả Chữ Hán. Mỗi tên là âm tiết của phụ âm đầu với vần ông. Mọi dạng của một cơ sở lấy tên Cán của nó. Dấu phụ được bỏ. Nguồn có một Cán cho phụ âm đầu d và gi, vì không Cán nào trong 22 là Cán của gi, và không có Cán nào cho đ ngoài đông, nên nét ngang của đ có thể bỏ mà không trùng: đông → DONG, và Cán của d và gi là GIONG.</p>
 <table>
 <thead>
 <tr>
-<th>Số</th>
+<th>STT</th>
 <th>Chú âm Nôm</th>
 <th>Cách đọc</th>
 <th>Phụ âm đầu</th>
@@ -838,7 +586,7 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>14</td>
 <td><span class="ids ids-lr"></span>月容</td>
-<td>giông (cũng dông)</td>
+<td>giông (cũng là dông)</td>
 <td>D, Gi</td>
 <td>GIONG</td>
 <td>+5B</td>
@@ -918,69 +666,384 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </tr>
 </tbody>
 </table>
-<h3 id="sec-7-2">7.2 Bảng mã</h3>
-<p>Bảng mã của bản thảo là phụ lục E. Nó xếp 22 cơ sở thành các hàng với bảy dạng của mỗi cơ sở thành các cột (không nét đánh dấu, -1 đến -6), tiếp theo là hai ký tự nối và tám dấu thanh, mỗi dấu được hiển thị trên một vòng tròn chấm ở góc của nó. Các mặt chữ là của phông chữ tham chiếu (8). Các điểm mã là điểm mã tạm thời của bản thảo. Chỉ các độ lệch thuộc về đề xuất.</p>
-<h2 id="8-ghi-ch-thi-t-k-ph-ng-ch">8. Ghi chú thiết kế phông chữ</h2>
-<p>Một phông chữ tuân thủ vẽ mỗi cụm trong một ô vuông và tạo nó bằng các quy tắc thay thế và định vị, không dùng các mặt chữ tổ hợp sẵn.</p>
-<ul>
-<li><strong>Ô:</strong> Mỗi cụm lấp đầy một ô vuông với số đo của chữ biểu ý Hán Nôm, nên nó nằm trong các dòng dọc hoặc ngang mà không cần điều chỉnh.</li>
-<li><strong>Chữ hai thành phần:</strong> Hai mặt chữ thành phần chia ô thành các phần bằng nhau, cạnh nhau (4.5).</li>
-<li><strong>Không đảo thứ tự:</strong> Các thành phần được vẽ theo thứ tự lưu trữ. Ký tự nối thành phần báo cho phông chữ ghép hai thành phần trong một ô. Thứ tự của chúng cho biết cách sắp xếp, Cán trơn trước cho một cặp phiên thiết và Chi trước cho một Hợp Thư. Các thành phần không có ký tự nối được vẽ như các ký tự riêng.</li>
-<li><strong>Tham Thư:</strong> Sau ký tự kết hợp, Chi được vẽ phía trên Hợp Thư, mỗi phần trong nửa ô (4.5). Phông chữ tạo cụm bằng thay thế và định vị theo ngữ cảnh, vì 12.100 mặt chữ tổ hợp sẵn là không thực tế. Hai ví dụ được chứng thực dùng làm ca kiểm thử cho phông chữ tham chiếu.</li>
-<li><strong>Dấu thanh:</strong> Tám mặt chữ kết hợp nằm ở bốn góc của ô của toàn bộ cụm. Phía hở của nửa vòng tròn quay về tâm. Đường nét tròn hay góc cạnh là một lựa chọn thiết kế, vì nguồn coi sự khác biệt là biến thể chữ viết tay. Phông chữ tham chiếu dùng một dạng trung gian, với góc bo tròn.</li>
-<li><strong>Phông chữ tham chiếu:</strong> Có một phông chữ tham chiếu, do người đề xuất thiết kế. Nó thực hiện các quy tắc trên, kể cả cách tạo Tham Thư. Nó được phát hành theo Giấy phép Phông chữ Mở SIL 1.1.</li>
-</ul>
-<h2 id="9-ph-l-c">9. Phụ lục</h2>
-<h3 id="sec-A">A. Bảng thuật ngữ</h3>
+<h3 id="sec-4-4">4.4 Bảng mã</h3>
+<p>Bảng mã xếp 22 cơ sở theo hàng, bảy dạng của mỗi cơ sở theo cột (không nét đánh dấu, -1 đến -6), tiếp theo là hai ký tự nối và tám dấu thanh, được thể hiện trên Cán trơn của ONG. Các glyph là của phông tham chiếu (5.5). Điểm mã là điểm mã tạm thời của bản thảo. Chỉ các độ lệch thuộc về đề xuất.</p>
+
+
+<p>Điểm mã tạm thời U+F0000..U+F00AF; các độ lệch là của đề xuất. Trình bày bằng QATT Pen, phông tham chiếu.</p>
+<table class="chart"><tr><th>Cơ sở</th><th>không</th><th>-1</th><th>-2</th><th>-3</th><th>-4</th><th>-5</th><th>-6</th></tr>
+<tr><td class="name">01 ONG</td><td><div class="g">&#xF0000;</div><div class="cp">+00</div></td><td><div class="g">&#xF0001;</div><div class="cp">+01</div></td><td><div class="g">&#xF0002;</div><div class="cp">+02</div></td><td><div class="g">&#xF0003;</div><div class="cp">+03</div></td><td><div class="g">&#xF0004;</div><div class="cp">+04</div></td><td><div class="g">&#xF0005;</div><div class="cp">+05</div></td><td><div class="g">&#xF0006;</div><div class="cp">+06</div></td></tr>
+<tr><td class="name">02 NGONG</td><td><div class="g">&#xF0007;</div><div class="cp">+07</div></td><td><div class="g">&#xF0008;</div><div class="cp">+08</div></td><td><div class="g">&#xF0009;</div><div class="cp">+09</div></td><td><div class="g">&#xF000A;</div><div class="cp">+0A</div></td><td><div class="g">&#xF000B;</div><div class="cp">+0B</div></td><td><div class="g">&#xF000C;</div><div class="cp">+0C</div></td><td><div class="g">&#xF000D;</div><div class="cp">+0D</div></td></tr>
+<tr><td class="name">03 HONG</td><td><div class="g">&#xF000E;</div><div class="cp">+0E</div></td><td><div class="g">&#xF000F;</div><div class="cp">+0F</div></td><td><div class="g">&#xF0010;</div><div class="cp">+10</div></td><td><div class="g">&#xF0011;</div><div class="cp">+11</div></td><td><div class="g">&#xF0012;</div><div class="cp">+12</div></td><td><div class="g">&#xF0013;</div><div class="cp">+13</div></td><td><div class="g">&#xF0014;</div><div class="cp">+14</div></td></tr>
+<tr><td class="name">04 GONG</td><td><div class="g">&#xF0015;</div><div class="cp">+15</div></td><td><div class="g">&#xF0016;</div><div class="cp">+16</div></td><td><div class="g">&#xF0017;</div><div class="cp">+17</div></td><td><div class="g">&#xF0018;</div><div class="cp">+18</div></td><td><div class="g">&#xF0019;</div><div class="cp">+19</div></td><td><div class="g">&#xF001A;</div><div class="cp">+1A</div></td><td><div class="g">&#xF001B;</div><div class="cp">+1B</div></td></tr>
+<tr><td class="name">05 CONG</td><td><div class="g">&#xF001C;</div><div class="cp">+1C</div></td><td><div class="g">&#xF001D;</div><div class="cp">+1D</div></td><td><div class="g">&#xF001E;</div><div class="cp">+1E</div></td><td><div class="g">&#xF001F;</div><div class="cp">+1F</div></td><td><div class="g">&#xF0020;</div><div class="cp">+20</div></td><td><div class="g">&#xF0021;</div><div class="cp">+21</div></td><td><div class="g">&#xF0022;</div><div class="cp">+22</div></td></tr>
+<tr><td class="name">06 LONG</td><td><div class="g">&#xF0023;</div><div class="cp">+23</div></td><td><div class="g">&#xF0024;</div><div class="cp">+24</div></td><td><div class="g">&#xF0025;</div><div class="cp">+25</div></td><td><div class="g">&#xF0026;</div><div class="cp">+26</div></td><td><div class="g">&#xF0027;</div><div class="cp">+27</div></td><td><div class="g">&#xF0028;</div><div class="cp">+28</div></td><td><div class="g">&#xF0029;</div><div class="cp">+29</div></td></tr>
+<tr><td class="name">07 TRONG</td><td><div class="g">&#xF002A;</div><div class="cp">+2A</div></td><td><div class="g">&#xF002B;</div><div class="cp">+2B</div></td><td><div class="g">&#xF002C;</div><div class="cp">+2C</div></td><td><div class="g">&#xF002D;</div><div class="cp">+2D</div></td><td><div class="g">&#xF002E;</div><div class="cp">+2E</div></td><td><div class="g">&#xF002F;</div><div class="cp">+2F</div></td><td><div class="g">&#xF0030;</div><div class="cp">+30</div></td></tr>
+<tr><td class="name">08 DONG</td><td><div class="g">&#xF0031;</div><div class="cp">+31</div></td><td><div class="g">&#xF0032;</div><div class="cp">+32</div></td><td><div class="g">&#xF0033;</div><div class="cp">+33</div></td><td><div class="g">&#xF0034;</div><div class="cp">+34</div></td><td><div class="g">&#xF0035;</div><div class="cp">+35</div></td><td><div class="g">&#xF0036;</div><div class="cp">+36</div></td><td><div class="g">&#xF0037;</div><div class="cp">+37</div></td></tr>
+<tr><td class="name">09 NONG</td><td><div class="g">&#xF0038;</div><div class="cp">+38</div></td><td><div class="g">&#xF0039;</div><div class="cp">+39</div></td><td><div class="g">&#xF003A;</div><div class="cp">+3A</div></td><td><div class="g">&#xF003B;</div><div class="cp">+3B</div></td><td><div class="g">&#xF003C;</div><div class="cp">+3C</div></td><td><div class="g">&#xF003D;</div><div class="cp">+3D</div></td><td><div class="g">&#xF003E;</div><div class="cp">+3E</div></td></tr>
+<tr><td class="name">10 TONG</td><td><div class="g">&#xF003F;</div><div class="cp">+3F</div></td><td><div class="g">&#xF0040;</div><div class="cp">+40</div></td><td><div class="g">&#xF0041;</div><div class="cp">+41</div></td><td><div class="g">&#xF0042;</div><div class="cp">+42</div></td><td><div class="g">&#xF0043;</div><div class="cp">+43</div></td><td><div class="g">&#xF0044;</div><div class="cp">+44</div></td><td><div class="g">&#xF0045;</div><div class="cp">+45</div></td></tr>
+<tr><td class="name">11 THONG</td><td><div class="g">&#xF0046;</div><div class="cp">+46</div></td><td><div class="g">&#xF0047;</div><div class="cp">+47</div></td><td><div class="g">&#xF0048;</div><div class="cp">+48</div></td><td><div class="g">&#xF0049;</div><div class="cp">+49</div></td><td><div class="g">&#xF004A;</div><div class="cp">+4A</div></td><td><div class="g">&#xF004B;</div><div class="cp">+4B</div></td><td><div class="g">&#xF004C;</div><div class="cp">+4C</div></td></tr>
+<tr><td class="name">12 NHONG</td><td><div class="g">&#xF004D;</div><div class="cp">+4D</div></td><td><div class="g">&#xF004E;</div><div class="cp">+4E</div></td><td><div class="g">&#xF004F;</div><div class="cp">+4F</div></td><td><div class="g">&#xF0050;</div><div class="cp">+50</div></td><td><div class="g">&#xF0051;</div><div class="cp">+51</div></td><td><div class="g">&#xF0052;</div><div class="cp">+52</div></td><td><div class="g">&#xF0053;</div><div class="cp">+53</div></td></tr>
+<tr><td class="name">13 CHONG</td><td><div class="g">&#xF0054;</div><div class="cp">+54</div></td><td><div class="g">&#xF0055;</div><div class="cp">+55</div></td><td><div class="g">&#xF0056;</div><div class="cp">+56</div></td><td><div class="g">&#xF0057;</div><div class="cp">+57</div></td><td><div class="g">&#xF0058;</div><div class="cp">+58</div></td><td><div class="g">&#xF0059;</div><div class="cp">+59</div></td><td><div class="g">&#xF005A;</div><div class="cp">+5A</div></td></tr>
+<tr><td class="name">14 GIONG</td><td><div class="g">&#xF005B;</div><div class="cp">+5B</div></td><td><div class="g">&#xF005C;</div><div class="cp">+5C</div></td><td><div class="g">&#xF005D;</div><div class="cp">+5D</div></td><td><div class="g">&#xF005E;</div><div class="cp">+5E</div></td><td><div class="g">&#xF005F;</div><div class="cp">+5F</div></td><td><div class="g">&#xF0060;</div><div class="cp">+60</div></td><td><div class="g">&#xF0061;</div><div class="cp">+61</div></td></tr>
+<tr><td class="name">15 XONG</td><td><div class="g">&#xF0062;</div><div class="cp">+62</div></td><td><div class="g">&#xF0063;</div><div class="cp">+63</div></td><td><div class="g">&#xF0064;</div><div class="cp">+64</div></td><td><div class="g">&#xF0065;</div><div class="cp">+65</div></td><td><div class="g">&#xF0066;</div><div class="cp">+66</div></td><td><div class="g">&#xF0067;</div><div class="cp">+67</div></td><td><div class="g">&#xF0068;</div><div class="cp">+68</div></td></tr>
+<tr><td class="name">16 KHONG</td><td><div class="g">&#xF0069;</div><div class="cp">+69</div></td><td><div class="g">&#xF006A;</div><div class="cp">+6A</div></td><td><div class="g">&#xF006B;</div><div class="cp">+6B</div></td><td><div class="g">&#xF006C;</div><div class="cp">+6C</div></td><td><div class="g">&#xF006D;</div><div class="cp">+6D</div></td><td><div class="g">&#xF006E;</div><div class="cp">+6E</div></td><td><div class="g">&#xF006F;</div><div class="cp">+6F</div></td></tr>
+<tr><td class="name">17 SONG</td><td><div class="g">&#xF0070;</div><div class="cp">+70</div></td><td><div class="g">&#xF0071;</div><div class="cp">+71</div></td><td><div class="g">&#xF0072;</div><div class="cp">+72</div></td><td><div class="g">&#xF0073;</div><div class="cp">+73</div></td><td><div class="g">&#xF0074;</div><div class="cp">+74</div></td><td><div class="g">&#xF0075;</div><div class="cp">+75</div></td><td><div class="g">&#xF0076;</div><div class="cp">+76</div></td></tr>
+<tr><td class="name">18 RONG</td><td><div class="g">&#xF0077;</div><div class="cp">+77</div></td><td><div class="g">&#xF0078;</div><div class="cp">+78</div></td><td><div class="g">&#xF0079;</div><div class="cp">+79</div></td><td><div class="g">&#xF007A;</div><div class="cp">+7A</div></td><td><div class="g">&#xF007B;</div><div class="cp">+7B</div></td><td><div class="g">&#xF007C;</div><div class="cp">+7C</div></td><td><div class="g">&#xF007D;</div><div class="cp">+7D</div></td></tr>
+<tr><td class="name">19 MONG</td><td><div class="g">&#xF007E;</div><div class="cp">+7E</div></td><td><div class="g">&#xF007F;</div><div class="cp">+7F</div></td><td><div class="g">&#xF0080;</div><div class="cp">+80</div></td><td><div class="g">&#xF0081;</div><div class="cp">+81</div></td><td><div class="g">&#xF0082;</div><div class="cp">+82</div></td><td><div class="g">&#xF0083;</div><div class="cp">+83</div></td><td><div class="g">&#xF0084;</div><div class="cp">+84</div></td></tr>
+<tr><td class="name">20 BONG</td><td><div class="g">&#xF0085;</div><div class="cp">+85</div></td><td><div class="g">&#xF0086;</div><div class="cp">+86</div></td><td><div class="g">&#xF0087;</div><div class="cp">+87</div></td><td><div class="g">&#xF0088;</div><div class="cp">+88</div></td><td><div class="g">&#xF0089;</div><div class="cp">+89</div></td><td><div class="g">&#xF008A;</div><div class="cp">+8A</div></td><td><div class="g">&#xF008B;</div><div class="cp">+8B</div></td></tr>
+<tr><td class="name">21 VONG</td><td><div class="g">&#xF008C;</div><div class="cp">+8C</div></td><td><div class="g">&#xF008D;</div><div class="cp">+8D</div></td><td><div class="g">&#xF008E;</div><div class="cp">+8E</div></td><td><div class="g">&#xF008F;</div><div class="cp">+8F</div></td><td><div class="g">&#xF0090;</div><div class="cp">+90</div></td><td><div class="g">&#xF0091;</div><div class="cp">+91</div></td><td><div class="g">&#xF0092;</div><div class="cp">+92</div></td></tr>
+<tr><td class="name">22 PHONG</td><td><div class="g">&#xF0093;</div><div class="cp">+93</div></td><td><div class="g">&#xF0094;</div><div class="cp">+94</div></td><td><div class="g">&#xF0095;</div><div class="cp">+95</div></td><td><div class="g">&#xF0096;</div><div class="cp">+96</div></td><td><div class="g">&#xF0097;</div><div class="cp">+97</div></td><td><div class="g">&#xF0098;</div><div class="cp">+98</div></td><td><div class="g">&#xF0099;</div><div class="cp">+99</div></td></tr></table>
+<div style="break-inside: avoid"><h3>Ký tự nối và dấu thanh</h3>
+<table class="chart"><tr><th>COMPONENT JOINER</th><th>THAM THU COMBINER</th><th colspan=8>Dấu thanh, thể hiện trên Cán trơn của ONG</th></tr><tr><td><div class="g on">&#x25CC;&#xF009A;</div><div class="cp">+9A</div></td><td><div class="g on">&#x25CC;&#xF009B;</div><div class="cp">+9B</div></td><td><div class="g on">&#xF0000;&#xF009C;</div><div class="cp">+9C</div></td><td><div class="g on">&#xF0000;&#xF009D;</div><div class="cp">+9D</div></td><td><div class="g on">&#xF0000;&#xF009E;</div><div class="cp">+9E</div></td><td><div class="g on">&#xF0000;&#xF009F;</div><div class="cp">+9F</div></td><td><div class="g on">&#xF0000;&#xF00A0;</div><div class="cp">+A0</div></td><td><div class="g on">&#xF0000;&#xF00A1;</div><div class="cp">+A1</div></td><td><div class="g on">&#xF0000;&#xF00A2;</div><div class="cp">+A2</div></td><td><div class="g on">&#xF0000;&#xF00A3;</div><div class="cp">+A3</div></td></tr></table>
+</div>
+<h3 id="sec-4-5">4.5 Thứ tự điểm mã</h3>
+<p>Nguồn liệt kê 22 Cán trong mục 幹音二十二字, &quot;âm thân, hai mươi hai chữ&quot;, mỗi Cán được chú tên bằng chữ Nôm (tr. 2). Thứ tự này nhóm các phụ âm đầu đại khái theo vị trí cấu âm. Nó không có ý nghĩa mã hoá, nên điểm mã theo thứ tự của bảng liệt kê đó. Trong mỗi cơ sở, năm Chi theo thứ tự vị trí của nét đánh dấu, ngược chiều kim đồng hồ từ vị trí của Cán đánh dấu (7.3). Bảy dạng của một cơ sở nối tiếp nhau: dạng trơn trước, rồi đến sáu dạng có đánh dấu. Vì vậy điểm mã được nhóm theo cơ sở. Vì một cặp phiên thiết bắt đầu bằng một Cán trơn và một Hợp Thư bằng một Chi, việc so sánh nhị phân các chuỗi điểm mã, không cần quy tắc sắp xếp nào, xếp mọi tổ hợp vào khoảng của cơ sở của thành phần thứ nhất.</p>
+<p><strong>Thứ tự khác.</strong> Một thành viên của cộng đồng người dùng đề nghị xếp điểm mã theo dạng thay vì theo cơ sở: trước là 22 Cán trơn, rồi 22 Cán đánh dấu, rồi 110 Chi. Khi đó mỗi loại sẽ là một khoảng liền. Tuy nhiên, khi so sánh nhị phân, mọi Hợp Thư, vốn bắt đầu bằng một Chi, sẽ xếp sau mọi cặp phiên thiết, xa các chữ khác của cơ sở của nó, và chỉ một quy tắc sắp xếp riêng mới gom chúng lại được. Bản thảo giữ thứ tự theo cơ sở, thứ tự mà nguồn liệt kê các Cán và lập bảng các Chi. Mọi thành phần có cùng thuộc tính theo cả hai thứ tự, nên lựa chọn này không ảnh hưởng đến phân đoạn, ngắt dòng hay phông chữ.</p>
+<p><strong>Sắp xếp mặc định.</strong> Vì khó có một quy tắc sắp xếp riêng, trọng số mặc định trong DUCET thực tế là thứ tự sắp xếp của chữ này. Bản thảo đề xuất: 154 thành phần nhận trọng số chính theo thứ tự điểm mã; tám dấu thanh nhận trọng số phụ theo thứ tự của 4.2, để các chữ chỉ khác nhau về thanh xếp cạnh nhau và thanh chỉ quyết định sau các thành phần; ký tự nối thành phần và ký tự nối Tham Thư được bỏ qua, nên một tổ hợp được xếp như các thành phần của nó theo thứ tự lưu trữ. Văn bản không có quy tắc sắp xếp, so sánh theo điểm mã, cho cùng thứ tự của các thành phần.</p>
+<h2 id="5-m-h-nh-m-ho">5. Mô hình mã hoá</h2>
+<p>Chữ này được mã hoá thành 164 ký tự nguyên tử: 154 thành phần, hai ký tự nối và tám dấu thanh. Các thành phần được lưu trái trước phải và, trong Tham Thư, dưới trước trên, như các công thức của nguồn nêu chúng, và được vẽ theo thứ tự đó. Không thành phần nào bị đổi thứ tự. Mọi tổ hợp được viết với một ký tự nối tường minh, và các thành phần không có ký tự nối là các ký tự riêng. Chữ hai và ba thành phần là các chuỗi, nên mọi chữ đều chỉnh sửa được và ranh giới của nó được xác định cục bộ.</p>
+<h3 id="sec-5-1">5.1 Các chuỗi</h3>
+<pre><code>Character  := Cluster [ToneMark]
+Cluster    := MarkedCan | Chi | UnmarkedCan | PhienThiet | HopThu | ThamThu
+PhienThiet := UnmarkedCan(X) Joiner Chi(Y)  X ≠ Y, unmarked Cán first
+HopThu     := (Chi(X) | UnmarkedCan(X)) Joiner UnmarkedCan(X)  same base X
+ThamThu    := HopThu Combiner Chi            third component added to a complete Hợp Thư
+</code></pre>
+<p>Trong văn bản và trong các bảng, một chuỗi được viết trong ngoặc vuông: mỗi thành phần được ghi bằng tên cơ sở của nó, theo sau là -n với dạng có nét đánh dấu (ONG, ONG-4). <code>J</code> là ký tự nối thành phần và <code>C</code> là ký tự nối Tham Thư. Ở chỗ cần nói về loại thay vì cơ sở, CM là Cán đánh dấu, CH là Chi và CU là Cán trơn, với cơ sở trong ngoặc khi cần (CU(X), CH(Y)), và TONE là một dấu thanh. Chẳng hạn, <code>[ONG-5 J ONG C KHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5">󰀅󰂚󰀀󰂛󰁮</span> là Hợp Thư của ONG với Chi KHONG-5 ở trên.</p>
+<p>Ký tự nối thành phần nối hai thành phần thành một chữ, và thứ tự của chúng cho biết cách sắp xếp. Các thành phần không có ký tự nối là các ký tự riêng. Cán trơn đứng riêng có cách đọc của Cán đánh dấu của cơ sở đó (7.3). Các điều kiện về cơ sở mô tả các mẫu của nguồn. Chúng không đóng vai trò gì trong việc phân đoạn (6.2).</p>
 <table>
 <thead>
 <tr>
-<th>Thuật ngữ</th>
-<th>Nghĩa</th>
+<th>Chữ định viết</th>
+<th>Chuỗi</th>
+<th>Ví dụ</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Cán</td>
-<td>Thuật ngữ của nguồn (幹, 'thân') cho một trong 22 cơ sở, mỗi cơ sở ba nét, được liệt kê trong mục 幹音二十二字 (tr. 2). Mỗi cơ sở tồn tại dưới dạng Cán đánh dấu và Cán trơn</td>
+<td>Cán đánh dấu đứng riêng</td>
+<td>CM</td>
+<td><code>[ONG-1]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-1">󰀁</span></td>
 </tr>
 <tr>
-<td>Cán đánh dấu</td>
-<td>Cán có nét đánh dấu ở vị trí xuất phát (tổng cộng 22). Chỉ đứng riêng, không bao giờ ghép. Tên ký tự kết thúc bằng -1</td>
+<td>Chi đứng riêng</td>
+<td>CH</td>
+<td><code>[ONG-2]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2">󰀂</span></td>
 </tr>
 <tr>
-<td>Chi</td>
-<td>Thuật ngữ của nguồn (枝, 'cành') cho một trong năm dạng mỗi cơ sở có nét đánh dấu ở vị trí 2 đến 6 (tổng cộng 110). Đứng riêng hoặc ghép</td>
+<td>Cán trơn đứng riêng (cách đọc của Cán đánh dấu)</td>
+<td>CU</td>
+<td><code>[ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG">󰀀</span></td>
 </tr>
 <tr>
-<td>Cán trơn</td>
-<td>Dạng của một cơ sở không có nét đánh dấu (tổng cộng 22). Kết hợp với một Chi. Đứng riêng thì có cách đọc của Cán đánh dấu. Tên ký tự: chỉ tên của cơ sở</td>
+<td>Các thành phần cạnh nhau, không ghép</td>
+<td>CU(X) CH(Y)</td>
+<td><code>[ONG CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG CHONG-5">󰀀󰁙</span></td>
 </tr>
 <tr>
 <td>Cặp phiên thiết</td>
-<td>(反切 <em>fǎnqiè</em>) Tổ hợp của một Cán trơn và một Chi thuộc các cơ sở khác nhau, Cán trơn trước, nối bằng ký tự nối thành phần. Mô tả trong Phiên Thiết Hài Âm Pháp (反切諧音法). Tổng cộng 2.310. Trong mục đếm được tính là 合書 với Cán ở bên trái. Thuật ngữ mô tả của đề xuất này</td>
+<td>CU(X) J CH(Y)</td>
+<td><code>[ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-5">󰀀󰂚󰁙</span></td>
 </tr>
 <tr>
 <td>Hợp Thư</td>
-<td>Tổ hợp của một Chi và một Cán trơn cùng cơ sở, Chi trước, nối bằng ký tự nối thành phần. Theo công thức của nguồn, Cán trơn cho vần. Tổng cộng 110, thêm 22 Hợp Thư của hai Cán trơn cùng cơ sở (một chữ được chứng thực, có thể là lỗi chép)</td>
+<td>CH(X) J CU(X)</td>
+<td><code>[ONG-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG">󰀂󰂚󰀀</span></td>
+</tr>
+<tr>
+<td>Hợp Thư của hai Cán trơn (7.4)</td>
+<td>CU(X) J CU(X)</td>
+<td><code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span></td>
 </tr>
 <tr>
 <td>Tham Thư</td>
-<td>Hợp Thư có thành phần thứ ba, một Chi, ở phía trên (có thể có 12.100, được chứng thực hai). Công thức nêu thành phần dưới trước</td>
+<td>CH(X) J CU(X) C CH(Z)</td>
+<td><code>[ONG-5 J ONG C KHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5">󰀅󰂚󰀀󰂛󰁮</span></td>
 </tr>
 <tr>
-<td>Ký tự nối thành phần</td>
-<td>Ký tự định dạng nối hai thành phần thành một chữ. Thứ tự của chúng cho biết cách sắp xếp</td>
-</tr>
-<tr>
-<td>Ký tự kết hợp Tham Thư</td>
-<td>Ký tự định dạng đặt Chi theo sau lên trên một Hợp Thư</td>
+<td>Bất kỳ chữ nào ở trên kèm một thanh</td>
+<td>chuỗi + TONE</td>
+<td><code>[ONG-2 J ONG TONE-CIRCLE-LOWER-LEFT]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG TONE-CIRCLE-LOWER-LEFT">󰀂󰂚󰀀󰂝</span></td>
 </tr>
 </tbody>
 </table>
+<p>Các chuỗi ngoài những mẫu này không bị cấm. Chúng không được chứng thực trong nguồn, và đề xuất này không quy định cách hiển thị chúng. Một trong số đó xuất hiện trong văn bản ngày nay: Cán đánh dấu nối với một Chi, CM J CH (3.2). Phông tham chiếu vẽ nó thành một cặp.</p>
+<h3 id="sec-5-2">5.2 Ký tự nối thành phần</h3>
+<p>Các thành phần được lưu theo thứ tự viết, trái trước phải, như trong một Chuỗi Mô tả Chữ Hán. Trong Hợp Thư, Chi được viết bên trái và được lưu trước, nên việc hiển thị không cần đổi thứ tự. Thứ tự lưu trữ không phụ thuộc vào chức năng của các thành phần. Công thức của nguồn, vốn nêu Chi trước, phù hợp với điều đó (7.4).</p>
+<p>Ký tự nối mang thông tin mà riêng các thành phần không có. Nguồn viết các thành phần cạnh nhau mà không ghép (7.3), nên <code>CU CH</code> có thể là hai thành phần riêng hoặc một cặp phiên thiết, và <code>CH CU</code> có thể là một Chi theo sau bởi một Cán trơn riêng hoặc một Hợp Thư. Ký tự nối quyết định. Vì vậy mọi chữ hai thành phần được chứng thực đều chứa nó.</p>
+<p><strong>Vì sao cần ký tự nối.</strong> Không có ký tự nối, cách nhóm các thành phần sẽ phụ thuộc vào cơ sở của chúng, mà vẫn còn mơ hồ. Với Y ≠ X, chuỗi CH(X) CU(X) CH(Y) hợp lệ cả theo cách [CH(X) CU(X)][CH(Y)], một Hợp Thư theo sau bởi một Chi, lẫn theo cách [CH(X)][CU(X) CH(Y)], một Chi theo sau bởi một cặp phiên thiết. Một bộ phân tích sẽ phải so sánh cơ sở để nhóm văn bản mà vẫn phải chọn một cách đọc, và một chỉnh sửa thay đổi một cơ sở có thể nhóm lại các chữ bên cạnh. Có ký tự nối, <code>CH(X) J CU(X) CH(Y)</code> và <code>CH(X) CU(X) J CH(Y)</code> là hai cách đọc, còn <code>CH(X) CU(X) CH(Y)</code> là ba thành phần riêng: mỗi cách đọc có một cách viết, việc phân đoạn không cần so sánh cơ sở, và các chỉnh sửa giữ tính cục bộ. Với X = ONG và Y = CHONG, ba chuỗi đó là <code>[ONG-2 J ONG CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG CHONG-5">󰀂󰂚󰀀󰁙</span>, <code>[ONG-2 ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 ONG J CHONG-5">󰀂󰀀󰂚󰁙</span> và <code>[ONG-2 ONG CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 ONG CHONG-5">󰀂󰀀󰁙</span>.</p>
+<p><strong>Tiền lệ.</strong> Trong chuẩn đã có các ký tự đứng giữa hai ký tự và nối chúng thành một đơn vị. U+13430 EGYPTIAN HIEROGLYPH VERTICAL JOINER và U+13431 EGYPTIAN HIEROGLYPH HORIZONTAL JOINER là các ký tự định dạng (General_Category Cf) sắp xếp các ký hiệu quanh chúng chồng lên nhau hoặc cạnh nhau trong một ô vuông, như ký tự nối Tham Thư và ký tự nối thành phần làm trong một ô chữ. U+1107F BRAHMI NUMBER JOINER và U+2D7F TIFINAGH CONSONANT JOINER nối hai ký tự mà chúng đứng giữa, được mã hoá thành dấu không chiếm chỗ (Mn, lớp kết hợp 9). Chữ Khiết Đan nhỏ (Khitan Small Script) viết nhiều ký tự nguyên tử trong một ô vuông, do phông chữ ghép. Đề xuất theo mô hình Ai Cập, một ký tự định dạng. Việc có nên dùng dấu không chiếm chỗ hay không được đặt ra cho các chuyên gia (6.4). Các giá trị thuộc tính nêu ở đây là của Unicode 18.0.</p>
+<p><strong>Chỉnh sửa giữ tính cục bộ.</strong> Có ranh giới giữa hai ký tự hay không chỉ phụ thuộc vào chính hai ký tự đó (6.2). Vì vậy xoá hoặc chèn một ký tự chỉ thay đổi nhiều nhất là chữ ở chỗ đó và các chữ bên cạnh, kể cả trong văn bản không theo mẫu nào của 5.1.</p>
+<h3 id="sec-5-3">5.3 Dấu thanh</h3>
+<p>Tám dấu thanh là các ký tự kết hợp đi sau toàn bộ cụm. Mỗi góc và mỗi loại dấu đều có giá trị khu biệt, nên một thanh là một ký tự chứ không phải một biến thể glyph. Một cụm không có dấu thanh để thanh không xác định. Nó không biểu thị thanh trung tính, vốn có dấu riêng (7.6). Vì vậy cần cả tám dấu. Hướng của nửa vòng tròn suy ra từ góc của nó và là một thuộc tính glyph. Một cụm mang nhiều nhất một dấu thanh. Hai dấu với một bộ chọn cho góc cũng không được, vì góc có giá trị khu biệt.</p>
+<p>Hai bộ ký tự đã có được xem xét và không được dùng. U+A700..U+A707 MODIFIER LETTER CHINESE TONE YIN PING đến YANG RU bao gồm cùng tám thanh theo cùng thứ tự, nhưng chúng là các chữ cái biến âm có độ rộng (General_Category Sk) viết bên cạnh một âm tiết, không phải dấu kết hợp đặt ở góc của một chữ. Là các cụm grapheme riêng, chúng sẽ phá vỡ cấu trúc cụm, và phông chữ không thể đặt chúng trong ô. Hình dạng của chúng cũng khác: chúng phân biệt âm và dương bằng một gạch dưới, còn Quốc Âm Tân Tự bằng nửa vòng tròn và vòng tròn.</p>
+<p>U+302A..U+302D IDEOGRAPHIC LEVEL, RISING, DEPARTING và ENTERING TONE MARK dùng cùng các góc cho cùng bốn loại thanh, nhưng không phân biệt âm và dương. Dùng chúng cho một âm vực và ký tự mới cho âm vực kia sẽ chia một bộ tám dấu khu biệt ra hai khối, và các dấu đã có sẽ mang một âm vực mà chúng không biểu thị.</p>
+<h3 id="sec-5-4">5.4 Các phương án đã xem xét</h3>
+<p>Các phương án sau thay cho mô hình ký tự nối đã được xem xét. Các phương án cho bộ ký tự và dấu thanh được bàn ở 4.1, 5.3 và 7.5.</p>
+<ul>
+<li>Hợp Thư lưu thành Cán trơn, Chi, và được phông chữ hoặc ký tự nối đảo lại khi cả hai cùng cơ sở: không dùng, vì nó lưu thành phần bên phải trước thành phần bên trái, ngược với thứ tự viết và với công thức của nguồn, vốn nêu Chi trước, và dựa vào một quy tắc hiển thị so sánh cơ sở.</li>
+<li>Phiên thiết ngầm, trong đó Cán trơn tự gắn với chữ theo sau mà không cần ký tự nối, và chỉ Hợp Thư dùng ký tự nối: không dùng, vì nguồn cũng viết Cán trơn đứng riêng và các thành phần cạnh nhau (7.3). Một Cán trơn gắn về phía sau sẽ nối sai chúng, chẳng hạn với một chữ Hán theo sau.</li>
+<li>Một ký tự nối cho cả chữ hai và ba thành phần (163 ký tự): không dùng, vì cấu trúc sẽ suy ra từ vị trí thay vì từ ký tự nối, và ký tự nối Tham Thư không còn được cân nhắc riêng.</li>
+<li>Một điểm mã cho mỗi âm tiết tiếng Việt: không dùng. Đây là cách mã hoá của bộ chuyển đổi đang được dùng ngày nay (3.4), nên có thể quan sát hệ quả của nó. Nó cần 21.780 điểm mã cho các âm tiết, trong khi đề xuất này cần 164 ký tự cho tất cả. Một điểm mã đại diện cho một âm, một phụ âm đầu với một vần và một thanh, nên các điểm mã được định nghĩa theo một bản giải mã của bảng vần (3.2) và mang âm khác theo bản kia. Vị trí của một âm tiết suy ra từ thứ tự các vần trong một danh sách của chương trình, nên sửa danh sách đó thì các điểm mã dịch chuyển. Cách viết bị cố định trong các glyph: bộ chuyển đổi vẽ phụ âm đầu bằng Cán đánh dấu (3.2), và chương trình nào lấy bảng của nó thì lấy luôn cách viết này. Hợp Thư và Tham Thư của nguồn (7.4, 7.5) không có điểm mã.</li>
+<li>U+200D ZERO WIDTH JOINER thay cho một ký tự nối mới: không dùng. ZWJ yêu cầu một cách hiển thị liền hơn nếu phông chữ có, và hiển thị các phần không nối là một cách dự phòng hợp lệ. Ở đây các thành phần nối và không nối là văn bản khác nhau, cả hai đều được viết trong nguồn (7.3), nên một quá trình bỏ ký tự nối sẽ làm thay đổi văn bản. ZWJ cũng không thể phân biệt cách sắp xếp của Tham Thư với của một cặp, và nó chỉ giữ ký tự theo sau trong cụm grapheme của nó ở các chuỗi emoji (quy tắc GB11).</li>
+<li>Các Ký tự Mô tả Chữ Hán đặt trước các thành phần (U+2FF0 <span class="ids ids-lr"></span>, U+2FF1 <span class="ids ids-ud"></span>): không dùng, vì chúng là các ký hiệu hiển thị mô tả một chữ và không được hiển thị thành chữ đó. Chúng đứng trước các toán hạng và không tạo thành cụm với chúng.</li>
+</ul>
+<h3 id="sec-5-5">5.5 Hiển thị</h3>
+<p>Một phông chữ phù hợp vẽ mọi cụm trong một ô vuông và ghép nó bằng các quy tắc thay thế và định vị, không bằng glyph tổ hợp sẵn.</p>
+<ul>
+<li><strong>Ô chữ:</strong> Mỗi cụm chiếm một ô vuông với kích thước của chữ Hán Nôm, nên nó đứng được trong dòng dọc hoặc ngang mà không cần điều chỉnh.</li>
+<li><strong>Chữ hai thành phần:</strong> Hai glyph thành phần chia đều ô chữ, đặt cạnh nhau (2.2).</li>
+<li><strong>Không đổi thứ tự:</strong> Các thành phần được vẽ theo thứ tự lưu trữ. Ký tự nối thành phần báo cho phông chữ ghép hai thành phần trong một ô. Thứ tự của chúng cho biết cách sắp xếp, Cán trơn trước với cặp phiên thiết và Chi trước với Hợp Thư. Các thành phần không có ký tự nối được vẽ thành các chữ riêng.</li>
+<li><strong>Tham Thư:</strong> Sau ký tự nối Tham Thư, Chi được vẽ trên Hợp Thư, mỗi phần chiếm nửa ô (2.2). Phông chữ ghép cụm bằng thay thế và định vị theo ngữ cảnh, vì 12.100 glyph tổ hợp sẵn là không thực tế. Hai ví dụ được chứng thực là các trường hợp kiểm tra cho phông tham chiếu.</li>
+<li><strong>Dấu thanh:</strong> Tám glyph kết hợp nằm ở bốn góc của toàn bộ ô của cụm. Phía mở của nửa vòng tròn hướng vào tâm. Đường nét tròn hay góc cạnh là lựa chọn thiết kế, vì nguồn coi sự khác biệt đó là biến thể của nét viết tay. Phông tham chiếu lấy một dạng ở giữa, với góc bo tròn.</li>
+<li><strong>Phông tham chiếu:</strong> Phông tham chiếu là QATT Pen, do người đề xuất thiết kế và được dùng tự do theo giấy phép SIL Open Font License 1.1. Nó thực hiện các quy tắc trên, kể cả việc ghép Tham Thư, và dùng để trình bày bảng mã (4.4) và các chữ trong văn bản này. Nó cũng vẽ Cán đánh dấu nối với một Chi thành một chữ (3.2).</li>
+</ul>
+<h2 id="6-thu-c-t-nh-k-t">6. Thuộc tính ký tự</h2>
+<p>Các thuộc tính đề xuất suy ra từ mô hình mã hoá: các thành phần là chữ cái, hai ký tự nối là ký tự định dạng, và dấu thanh là dấu không chiếm chỗ. Giá trị cho hai ký tự nối là đề xuất. Các quyết định đề nghị nhóm công tác đưa ra được tập hợp ở 6.4.</p>
+<table>
+<thead>
+<tr>
+<th>Ký tự</th>
+<th>General_Category</th>
+<th>Lớp kết hợp</th>
+<th>Grapheme_Cluster_Break</th>
+<th>Line_Break</th>
+<th>Bidi_Class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cán đánh dấu, Cán trơn, Chi</td>
+<td>Lo</td>
+<td>0</td>
+<td>Other</td>
+<td>ID</td>
+<td>L</td>
+</tr>
+<tr>
+<td>Ký tự nối thành phần, ký tự nối Tham Thư</td>
+<td>Cf</td>
+<td>0</td>
+<td>Extend</td>
+<td>GL</td>
+<td>BN</td>
+</tr>
+<tr>
+<td>Dấu thanh (8)</td>
+<td>Mn</td>
+<td>0</td>
+<td>Extend</td>
+<td>CM</td>
+<td>NSM</td>
+</tr>
+</tbody>
+</table>
+<p>Các tệp dữ liệu nháp liệt kê mọi giá trị, kể cả Indic_Conjunct_Break, East_Asian_Width và Vertical_Orientation. Các câu hỏi cần xem xét được tập hợp cùng với chúng.</p>
+<h3 id="sec-6-1">6.1 Lớp kết hợp của dấu thanh</h3>
+<p>Góc là một phần bản sắc của mỗi dấu thanh, nên không cần lớp kết hợp theo vị trí. Một cụm mang nhiều nhất một dấu thanh, nên không bao giờ xảy ra sắp xếp lại chính tắc giữa các dấu. Vì vậy cả tám dấu đều nhận lớp 0. Các dấu thanh chữ Hán U+302A..U+302D, vốn đánh dấu cùng các góc trên chữ Hán, lại có lớp theo vị trí (218 dưới trái, 228 trên trái, 232 trên phải, 222 dưới phải). Các lớp đó cũng dùng được ở đây, vì một cụm không bao giờ mang hai dấu thanh. Việc lựa chọn được đặt ra cho nhóm công tác (6.4).</p>
+<h3 id="sec-6-2">6.2 Cụm grapheme</h3>
+<p>Việc phân đoạn chỉ dùng quy tắc theo cặp: không có ranh giới ngay trước hoặc ngay sau mỗi ký tự nối, và không có ranh giới trước dấu thanh. Mọi chỗ khác đều là ranh giới. Dấu thanh khớp với Extend. Các thành phần không được nối, kể cả Cán trơn đứng riêng, tạo thành cụm riêng, nên mọi thành phần hành xử như nhau. Một chữ có theo mẫu nào của 5.1 hay không không đóng vai trò gì trong việc phân đoạn.</p>
+<p>Đề xuất không phụ thuộc vào việc thay đổi thuật toán phân đoạn của UAX #29. Có hai mức:</p>
+<ul>
+<li><strong>Chỉ với các quy tắc hiện có:</strong> Grapheme_Cluster_Break=Extend cho cả hai ký tự nối và các dấu thanh. Khi đó quy tắc GB9 ngăn ranh giới trước ký tự nối và trước dấu thanh. Vẫn còn ranh giới sau ký tự nối, nên một chữ ghép là hai hoặc ba cụm grapheme mặc định, và phông chữ vẫn vẽ chúng trong một ô. Chuẩn đã có tình trạng này với các ký tự nối khác: U+1107F BRAHMI NUMBER JOINER và U+2D7F TIFINAGH CONSONANT JOINER có Grapheme_Cluster_Break=Extend và không phải Linker, nên sau chúng có ranh giới, còn các ký tự nối của chữ tượng hình Ai Cập, U+13430 và U+13431, có Grapheme_Cluster_Break=Control và tách cả hai bên, nên một ô vuông là nhiều cụm mặc định (Unicode 18.0). Một triển khai muốn mỗi chữ là một cụm có thể điều chỉnh ranh giới sau ký tự nối, như UAX #29 cho phép.</li>
+<li><strong>Ưu tiên:</strong> cũng không có ranh giới sau ký tự nối, để mặc định mỗi chữ là một cụm grapheme mở rộng. Một cách biểu đạt điều này bằng các thuộc tính hiện có là cơ chế Indic_Conjunct_Break của quy tắc GB9c: thành phần là Consonant, ký tự nối là Linker, dấu thanh là Extend. Unicode 18.0 suy ra các giá trị này cho khoảng hai mươi chữ viết, từ Indic_Syllabic_Category=Virama và một danh sách chữ viết (UAX #44), nên chữ này cần được thêm vào cách suy ra đó. Việc điều này có chấp nhận được với một chữ viết không thuộc hệ Ấn Độ hay không được đặt ra cho nhóm công tác (6.4).</li>
+</ul>
+<h3 id="sec-6-3">6.3 Ngắt dòng, hướng viết và dấu câu</h3>
+<p>Nguồn không nêu hướng viết. Cả hai bản chép đều là văn bản Hán Nôm viết dọc, và trong mọi trường hợp chữ này được đối xử hệt như Hán Nôm và chảy cùng với nó: dòng dọc, cột từ phải sang trái, không có dấu cách giữa các từ. Không có chứng thực về cách viết ngang. Vì vậy đề xuất giả định thói quen viết của Hán Nôm. Các chữ hành xử như chữ Hán, mỗi chữ chiếm một ô vuông. Đề xuất cho các thành phần: Bidi_Class L, Line_Break ID, East_Asian_Width W, Vertical_Orientation U. Dấu thanh và ký tự nối không bao giờ bắt đầu một dòng, vì chúng thuộc về cụm đứng trước. Các từ không được tách bằng dấu cách. Mỗi chữ là một âm tiết, và có thể ngắt dòng giữa hai chữ bất kỳ.</p>
+<p>Chữ này không có dấu câu và chữ số riêng, và đề xuất không đưa ra ký tự nào như vậy. Trong các bản chép tay, ký hiệu duy nhất là các vòng tròn và nét son bên cạnh văn bản Hán Nôm. Người dùng ngày nay chấm câu như trong Hán Nôm, với các ký tự của khối CJK Symbols and Punctuation, như U+3002 IDEOGRAPHIC FULL STOP và U+3001 IDEOGRAPHIC COMMA.</p>
+<h3 id="sec-6-4">6.4 Các quyết định đề nghị nhóm công tác</h3>
+<p>Đề xuất đề nghị nhóm công tác đưa ra năm quyết định. Mỗi quyết định đã có một giá trị trong bản thảo, nên đề xuất đầy đủ mà không cần chúng. Các tệp dữ liệu nháp liệt kê mọi giá trị thuộc tính và một số câu hỏi chi tiết khác.</p>
+<table>
+<thead>
+<tr>
+<th>Quyết định</th>
+<th>Bản thảo</th>
+<th>Phương án khác</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ký tự nối Tham Thư (4.1)</td>
+<td>Mã hoá ngay</td>
+<td>Hoãn, vị trí của nó (+9B) được để dành</td>
+</tr>
+<tr>
+<td>General_Category của hai ký tự nối (5.2)</td>
+<td>Cf, như các ký tự nối của chữ tượng hình Ai Cập</td>
+<td>Mn với lớp kết hợp 9, như U+1107F BRAHMI NUMBER JOINER</td>
+</tr>
+<tr>
+<td>Cụm grapheme (6.2)</td>
+<td>Chữ này được thêm vào cách suy ra Indic_Conjunct_Break, để mỗi chữ là một cụm</td>
+<td>Chỉ Grapheme_Cluster_Break=Extend, và ranh giới sau ký tự nối để cho việc điều chỉnh</td>
+</tr>
+<tr>
+<td>Dấu thanh (5.3, 6.1)</td>
+<td>Tám dấu kết hợp mới với lớp kết hợp 0</td>
+<td>Các lớp theo vị trí của U+302A..U+302D, hoặc hợp nhất với U+302A..U+302D cho một âm vực</td>
+</tr>
+<tr>
+<td>Cán đánh dấu và Cán trơn (4.1)</td>
+<td>Mã hoá riêng, mỗi loại 22 ký tự</td>
+<td>Hợp nhất, dạng được chọn theo ngữ cảnh</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7-ch-ng-c-t-ngu-n">7. Chứng cứ từ nguồn</h2>
+<p>Hai nguồn chứng thực chữ này. Cả hai là bản chép tay của cùng một văn bản Hán Nôm viết dọc, mô tả các phương pháp kết hợp. Mỗi bản có bốn tờ đôi, đánh số thành tám trang, cùng nội dung và cùng cách đánh số trang. Cả hai đóng chung một tập với số tờ liên tục, Nguồn 1 ở tờ 3–10 và Nguồn 2 ở tờ 11–18. Chỉ dẫn trang trong đề xuất này cho biết trang trong từng bản chép, từ 1 đến 8. Hai văn bản khác nhau ở một chữ: ở cuối cột thứ nhất của tr. 2, Nguồn 1 viết 無 còn Nguồn 2 viết 者. Ở ba chỗ khác, người chép Nguồn 2 đã viết lại hoặc đảo chữ, và cách đọc đã sửa phù hợp với Nguồn 1. Nguyễn Quang Hồng (1986, Phụ lục C) viết rằng bản chép thứ nhất có vẻ là bản sao của bản thứ hai, nhưng không nêu lý do. Không có gì trong các bản chép cho thấy bản nào cổ hơn, nên không thể xác định một bản được chép từ bản kia hay cả hai từ một bản gốc cũ hơn. Hai nguồn là một văn bản trong hai bản chép. Các chỉ dẫn trang trong đề xuất này, như (tr. 2), là chỉ dẫn đến Nguồn 1. Vì hai bản chép có cùng cách đánh số trang và cách chia cột, chúng cũng áp dụng cho Nguồn 2. Nguồn 2 chỉ được nêu tên khi nó khác hoặc khi cách đọc của nó quan trọng. Các hình là phần cắt từ Nguồn 1 (Hình 9).</p>
+<figure class="fig" id="fig-title" style="width: 160px"><div class="parts"><img src="images/E33-1.png" alt="Hình 9" loading="lazy" style="flex: 0 1 41px"></div><figcaption>Hình 9. Đầu đề của bài tựa, 國音新字序, có tên của chữ (tr. 1).</figcaption></figure>
+<h3 id="sec-7-1">7.1 Các nguồn được chứng thực</h3>
+<table>
+<thead>
+<tr>
+<th>Nguồn</th>
+<th>Niên đại</th>
+<th>Nơi lưu giữ</th>
+<th>Loại văn bản</th>
+<th>Hướng viết</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nguồn 1</td>
+<td>Thiệu Trị (1841–1847) hoặc muộn hơn</td>
+<td>Viện Nghiên cứu Hán Nôm, Hà Nội, AB.636</td>
+<td>Bản chép tay, Hán Nôm, 4 tờ đôi</td>
+<td>Dọc</td>
+</tr>
+<tr>
+<td>Nguồn 2</td>
+<td>Thiệu Trị (1841–1847) hoặc muộn hơn</td>
+<td>Viện Nghiên cứu Hán Nôm, Hà Nội, AB.636</td>
+<td>Bản chép tay, Hán Nôm, 4 tờ đôi</td>
+<td>Dọc</td>
+</tr>
+</tbody>
+</table>
+<p>Cả hai bản chép tay được đóng chung một tập với ký hiệu AB.636 [TBD: đối chiếu với bản in của tạp chí hoặc thư mục của Viện], theo Nguyễn Quang Hồng (1986, Phụ lục C). Niên đại là của văn bản, suy từ chữ kiêng huý (2.1). Niên đại của hai bản chép không rõ.</p>
+<h3 id="sec-7-2">7.2 Chứng cứ theo đặc điểm</h3>
+<p>Phụ lục B liệt kê các đoạn theo trang. Các thuật ngữ được giải thích ở 2.2.</p>
+<table>
+<thead>
+<tr>
+<th>Đặc điểm</th>
+<th>Chứng cứ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cán đánh dấu</td>
+<td>22 Cán đánh dấu được liệt kê cùng tên âm của chúng trong mục 幹音二十二字 (tr. 2)</td>
+</tr>
+<tr>
+<td>Cán trơn</td>
+<td>Không được liệt kê. Xuất hiện trong các chữ ghép của ví dụ và đứng riêng, chẳng hạn với tám thanh (tr. 5–7)</td>
+</tr>
+<tr>
+<td>Chi</td>
+<td>Lập bảng trong mục 枝字一百一十字 theo khối năm dạng cho mỗi cơ sở: 109 dạng được viết so với 110 được nêu (tr. 3–4)</td>
+</tr>
+<tr>
+<td>Cặp phiên thiết</td>
+<td>Được mô tả trong mục 反切諧音法, từ tr. 5. Thành phần thuộc các cơ sở khác nhau, Cán trơn đứng trước. Cán trơn cho phụ âm đầu, Chi cho vần. Có các cặp trong phần giải thích (tr. 6)</td>
+</tr>
+<tr>
+<td>Hợp Thư</td>
+<td>Được mô tả trong văn bản. Mọi ví dụ đều là cặp cùng cơ sở với Chi đứng trước. Công thức của ví dụ minh hoạ nêu Chi trước và cho vần bằng Cán. Con số 880 (110 × 8 thanh) chỉ tính các cặp cùng cơ sở (tr. 8)</td>
+</tr>
+<tr>
+<td>Tham Thư</td>
+<td>Quy tắc được mô tả trong văn bản (參書下從合体上從枝体), phần dưới được hiểu là một Hợp Thư. Hai ví dụ được chứng thực, cả hai trên một Hợp Thư. Công thức của Tham Thư nêu thành phần dưới trước (tr. 7). Cách phát âm của từng ví dụ được mô tả, nhưng không có cách đọc</td>
+</tr>
+<tr>
+<td>Thành phần đứng riêng và cạnh nhau</td>
+<td>Khi giải thích cách các thành phần kết hợp, văn bản viết các thành phần đứng riêng và cạnh nhau mà không ghép: một Cán trơn đứng riêng trước một Chi, và hai Cán trơn đứng riêng trước một cặp phiên thiết (tr. 6)</td>
+</tr>
+<tr>
+<td>Dấu thanh</td>
+<td>Tám thanh ở bốn góc, được giải thích với góc của mỗi loại thanh và minh hoạ trên một chữ (tr. 4–5). Thanh ngang đánh dấu bằng nửa vòng tròn ở dưới trái. Chữ có và không có dấu thanh trong cùng một đoạn. Dạng tròn và góc cạnh của cùng một dấu (tr. 6)</td>
+</tr>
+<tr>
+<td>Hướng viết</td>
+<td>Văn bản không nói. Cả hai bản chép đều là Hán Nôm viết dọc</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-7-3">7.3 Các thành phần</h3>
+<figure class="fig" id="fig-listing" style="width: 160px"><div class="parts"><img src="images/E18-1.png" alt="Hình 10" loading="lazy" style="flex: 0 1 120px"></div><figcaption>Hình 10. Bảng liệt kê 22 Cán dưới đầu đề 幹音二十二字, mỗi Cán có chú âm Nôm (tr. 2).</figcaption></figure>
+<p>Chữ có 22 cơ sở (<em>Cán</em>, 幹, 'thân', mà nguồn viết với 音 trong đầu đề 幹音二十二字 của bảng liệt kê, tr. 2, và với 字 trong 二十二幹字為標, tr. 7), mỗi cơ sở vẽ bằng ba nét. Nguồn liệt kê 22 âm cơ sở (幹音二十二字, tr. 2). Mỗi âm được thể hiện bằng một chữ QATT mang một nét đánh dấu ngắn ở vị trí đầu, trên trái hoặc trên giữa tuỳ cơ sở, và bằng một chú âm Nôm cho biết âm của nó. Dạng này là <em>Cán đánh dấu</em>. Nét đánh dấu luôn nằm ở đầu một nét, nên ba nét cho sáu vị trí, đếm ngược chiều kim đồng hồ từ vị trí đầu là 1 đến 6. Cán đánh dấu có nét ở vị trí 1, và năm dạng có nét đánh dấu ở vị trí 2 đến 6 lần lượt là các <em>Chi</em> (枝, 'cành'). Hai thuật ngữ lấy hình ảnh một cái cây: 110 Chi tách ra từ 22 Cán. Dạng thứ bảy không có nét đánh dấu. Nguồn gọi cả dạng có đánh dấu lẫn dạng trơn là Cán: trong mục đếm số, 幹 chỉ Cán đứng riêng (單幹書) cũng như thành phần của một tổ hợp, vốn luôn là dạng trơn (幹体, tr. 8). Đề xuất này gọi dạng không có nét đánh dấu là <em>Cán trơn</em> để phân biệt hai dạng, và dùng <em>cơ sở</em> cho đơn vị bảy dạng. Dạng trơn được chứng thực với ONG, DONG, NGONG, TONG và PHONG (tr. 5–7), và với BONG trong Tham Thư thứ hai (7.5). Việc cả 22 cơ sở đều có dạng này suy ra từ các con số của nguồn (7.4), không từ một bảng liệt kê. Vì nét đánh dấu của mỗi Chi nằm ở vị trí khác với của Cán đánh dấu, không Chi nào trùng với Cán đánh dấu: mỗi cơ sở có sáu dạng đánh dấu khác nhau và một dạng trơn.</p>
+<p>Các Chi được lập bảng trong mục 枝字一百一十字, &quot;110 chữ Chi&quot;, theo khối năm dạng cho mỗi cơ sở (tr. 3–4). Bảng có 109 dạng, một dạng bị bỏ sót (KHONG-4). Nguồn chỉ cho cách đọc của các Chi qua chú âm Nôm bên cạnh mỗi dạng. Các chú âm này mơ hồ hoặc không có trong từ điển, nên cách đọc chưa được xác định. Việc mã hoá không phụ thuộc vào chúng, vì các dạng khác nhau ở vị trí của nét đánh dấu. Các chú âm không được phiên ở đây.</p>
+<figure class="fig wide" id="fig-chi-table" style="width: 428px"><div class="parts"><img src="images/S1-p3.jpg" alt="Hình 11, part 1" loading="lazy" style="flex: 0 1 294px"><img src="images/S1-p4.jpg" alt="Hình 11, part 2" loading="lazy" style="flex: 0 1 126px"></div><figcaption>Hình 11. Bảng Chi, năm dạng cho mỗi Cán (tr. 3 và 4: bảng tiếp tục ở phía trên bên phải của tr. 4).</figcaption></figure>
+<p>Ba loại có chức năng khác nhau. Trong cặp phiên thiết, Cán trơn cho phụ âm đầu của cơ sở và Chi cho vần. 110 Chi hợp lại thành bảng vần của chữ. Trong Hợp Thư, công thức của nguồn chỉ về chiều ngược lại (7.4). Cán đánh dấu đại diện cho cả âm tiết gồm phụ âm đầu của nó với vần ông và là tên của cơ sở. Nó dùng để đọc Cán trơn theo phép phiên thiết. Cán trơn và Chi cũng là thành phần của Tham Thư (7.5). Các ví dụ minh hoạ của nguồn cho thấy các chức năng này. Mỗi ví dụ giải thích một chữ ghép bằng một công thức theo lối phiên thiết, gồm chữ đó, 乃, hai chữ đánh vần và 反, trong đó chữ đánh vần thứ nhất cho phụ âm đầu và chữ thứ hai cho vần: cho một cặp phiên thiết ở tr. 7, cho một Hợp Thư ở tr. 6.</p>
+<figure class="fig" id="fig-components" style="width: 160px"><div class="parts"><img src="images/E04-1.png" alt="Hình 12" loading="lazy" style="flex: 0 1 83px"></div><figcaption>Hình 12. Các thành phần viết đứng riêng và cạnh nhau, có dấu thanh (tr. 6).</figcaption></figure>
+<p>Không thể xác định từ nguồn liệu một thành phần có thể đứng riêng trong văn bản liền mạch hay không, vì nguồn không có đoạn văn liền mạch nào bằng chữ này (2.1). Trong các ví dụ này, Cán đánh dấu, Cán trơn và Chi đều xuất hiện đứng riêng, cả khi có dấu thanh, và ở chỗ văn bản giải thích cách các thành phần kết hợp, nó cũng viết chúng cạnh nhau mà không ghép: một Cán trơn đứng riêng trước một Chi, và hai Cán trơn đứng riêng trước một cặp phiên thiết (tr. 6). Cán trơn đứng riêng có cùng cách đọc với Cán đánh dấu của cơ sở đó: nguồn minh hoạ tám thanh trên Cán trơn đứng riêng của đông (tr. 5). Chỉ Cán trơn và Chi kết hợp. Cán đánh dấu thì không bao giờ. Ngoài bảng liệt kê 22 Cán (tr. 2), Cán đánh dấu chỉ xuất hiện hai lần, cả hai lần là chữ riêng có cách đọc, trong các công thức giải thích một chữ ghép (tr. 6, tr. 7). Lần thứ hai có dấu thanh.</p>
+<h3 id="sec-7-4">7.4 Chữ hai thành phần: phiên thiết và Hợp Thư</h3>
+<p>Một Cán trơn và một Chi kết hợp thành một chữ. Nguồn mô tả hai phương pháp.</p>
+<figure class="fig" id="fig-phien-thiet" style="width: 160px"><div class="parts"><img src="images/E39-1.png" alt="Hình 13" loading="lazy" style="flex: 0 1 106px"></div><figcaption>Hình 13. Ví dụ minh hoạ một cặp phiên thiết, với danh sách năm chữ (tr. 7).</figcaption></figure>
+<ul>
+<li><strong>Phiên thiết.</strong> Cán trơn và Chi thuộc hai cơ sở khác nhau, và Cán trơn đứng trước. Cán trơn cho phụ âm đầu và Chi cho vần, như trong phép phiên thiết (反切) đánh vần một âm tiết bằng phụ âm đầu của một chữ và vần của một chữ khác. Mục Phiên Thiết Hài Âm Pháp (反切諧音法) mô tả các cặp này. Mục đếm số tính chúng là 合書 với Cán ở bên trái (xem dưới). Ngoài ra nguồn không đặt tên riêng cho chúng, và đề xuất này gọi chúng là cặp phiên thiết. Nguồn không tính cặp phiên thiết nào cùng cơ sở (xem dưới), và ngữ pháp không tạo các cặp như vậy (5.1). Ví dụ minh hoạ ở tr. 7 giải thích cặp <code>[ONG J CHONG-5]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J CHONG-5">󰀀󰂚󰁙</span>, đọc là yên (Hình 13).</li>
+<li><strong>Hợp Thư.</strong> Chi và Cán trơn thuộc cùng một cơ sở, và Chi đứng trước. Đầu đề của mục nêu cách sắp xếp: 合書左從枝体右從幹体, thân Chi bên trái và thân Cán bên phải (tr. 6). Ví dụ minh hoạ giải thích một Hợp Thư của ONG bằng một công thức theo lối phiên thiết, 螉乃喊翁反, nêu Chi (喊, ONG-2) trước và Cán đánh dấu của ONG (翁) sau. Theo lối phiên thiết, chữ đánh vần thứ hai cho vần, và 螉 có vần của 翁. Vì vậy công thức phù hợp với cách đọc trong đó Cán trơn cho vần và Chi cho phụ âm đầu, ngược với cặp phiên thiết. Nó không chứng minh cách đọc đó: cách đọc của các Chi chưa được xác định (7.3), nên không kiểm tra được vai trò của Chi. Việc mã hoá không phụ thuộc vào điều này. Có 110 Hợp Thư của một Chi và một Cán trơn, mỗi Chi một chữ, chẳng hạn <code>[ONG-2 J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-2 J ONG">󰀂󰂚󰀀</span>, và 22 Hợp Thư của hai Cán trơn cùng một cơ sở, mỗi cơ sở một chữ, chẳng hạn <code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span> (xem dưới).</li>
+</ul>
+<figure class="fig" id="fig-hop-thu" style="width: 160px"><div class="parts"><img src="images/E07-1.png" alt="Hình 14" loading="lazy" style="flex: 0 1 132px"></div><figcaption>Hình 14. Mục về Hợp Thư: đầu đề, ví dụ minh hoạ và danh sách bốn chữ (tr. 6).</figcaption></figure>
+<p>Mục ở tr. 6 cho thấy năm Hợp Thư của ONG: chữ được công thức giải thích và bốn chữ nữa, mang nét đánh dấu ở vị trí 3 đến 6 (ONG-3 đến ONG-6 J ONG). Trong cả hai nguồn, chữ đầu tiên trong số đó được viết mà không thành phần nào có nét đánh dấu, <code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span>, dù công thức đánh vần nó bằng Chi ONG-2. Đề xuất giữ dạng như nguồn viết và liệt kê nó trong các mẫu của 5.1 (Phụ lục A). Độc lập với điều đó, tổ hợp ONG-2 J ONG được chứng thực ở tr. 5, cột 8.</p>
+<p>Trong cả hai phương pháp, các thành phần được viết trái trước phải. Trong cặp phiên thiết đây cũng là thứ tự của phụ âm đầu và vần. Trong Hợp Thư, công thức nêu các thành phần theo cùng thứ tự như chúng được viết.</p>
+<p>Mục 音数 (tr. 8) đếm các chữ của chữ viết này, mỗi chữ với tám thanh: 176 Cán đơn (單幹書, 22 × 8), 880 chữ đơn (單書, 110 Chi × 8), 880 合書 với Chi bên trái và Cán bên phải (110 × 8) và 18.480 合書 với Cán bên trái và Chi bên phải (2.310 × 8). Cách sắp xếp Chi trước chỉ được tính cho 110 cặp cùng cơ sở, và cách sắp xếp Cán trước chỉ cho 2.310 cặp khác cơ sở (22 × 105). Mọi cơ sở đều tham gia các cặp này, nên cả 22 cơ sở đều xuất hiện dưới dạng Cán trơn trong tổ hợp. Nguồn dùng tên 合書 cho cả hai cách sắp xếp trong mục này. Đề xuất này giữ tên Hợp Thư cho cách sắp xếp Chi trước, như trong đầu đề của mục ở tr. 6 (合書左從枝体右從幹体).</p>
+<h3 id="sec-7-5">7.5 Tham Thư (ba thành phần)</h3>
+<p>Một Hợp Thư có thể mang thành phần thứ ba, một Chi đơn, ở phía trên. Quy tắc của nguồn là 參書下從合体上從枝体, phần dưới theo thân 合 và phần trên theo thân Chi (tr. 7). Đề xuất này hiểu 合体 là một Hợp Thư, nên một cặp phiên thiết hay một Chi đơn không làm phần dưới được. Thành phần thứ ba thì không bị hạn chế. Điều này cho 110 phần dưới và 110 × 110 = 12.100 Tham Thư. Hợp Thư của hai Cán trơn (ở trên) không làm phần dưới: không có Tham Thư nào được chứng thực trên nó, và nguồn chỉ chứng thực nó một lần, có thể là viết nhầm. Cả hai Tham Thư được chứng thực đều có phần dưới là một Hợp Thư.</p>
+<p>Cách hiểu rộng hơn về 合体, theo đó cặp nào cũng có thể mang thành phần thứ ba, không được dùng. Nó không làm thay đổi bộ ký tự (Phụ lục A).</p>
+<figure class="fig" id="fig-tham-thu-1" style="width: 160px"><div class="parts"><img src="images/E40-1.png" alt="Hình 15" loading="lazy" style="flex: 0 1 50px"></div><figcaption>Hình 15. Tham Thư thứ nhất: công thức 音乃嗡圈反合 và chữ mà nó giải thích (tr. 7).</figcaption></figure>
+<figure class="fig" id="fig-tham-thu-2" style="width: 160px"><div class="parts"><img src="images/E41-1.png" alt="Hình 16, part 1" loading="lazy" style="flex: 0 1 44px"><img src="images/E41-2.png" alt="Hình 16, part 2" loading="lazy" style="flex: 0 1 34px"></div><figcaption>Hình 16. Tham Thư thứ hai: cuối cột thứ hai và phần tiếp theo ở cột thứ nhất, với công thức của nó (tr. 7).</figcaption></figure>
+<p>Thứ tự của các thành phần do nguồn cho biết: công thức giải thích một chữ Tham Thư nêu thành phần dưới trước và thành phần trên sau (tr. 7). Công thức giải thích chữ <code>[ONG-5 J ONG C KHONG-5 TONE-SEMICIRCLE-LOWER-LEFT]</code>&nbsp;<span class="qg" role="img" aria-label="ONG-5 J ONG C KHONG-5 TONE-SEMICIRCLE-LOWER-LEFT">󰀅󰂚󰀀󰂛󰁮󰂜</span> (ký hiệu ở 5.1, Hình 15): một Hợp Thư của ONG với Chi KHONG-5 ở trên. Nó được viết 音乃嗡圈反合, theo sau là chữ Nôm <span class="ids ids-lr"></span>舌<span class="ids ids-in"></span><span class="ids ids-lr"></span>片爿一 (淵 với bộ 舌), chưa rõ cách đọc. Hai chữ đánh vần là các chú âm có ở chỗ khác trong nguồn: 嗡 đứng cạnh Hợp Thư ONG-5 J ONG trong danh sách ở tr. 6, và 圈 cạnh Chi KHONG-5 trong bảng Chi (tr. 4). Như vậy công thức nêu đúng hai phần mà hình dạng của chữ cho thấy. Ví dụ thứ hai được giải thích bằng một công thức cùng dạng (tr. 7, Hình 16): <code>[BONG-5 J BONG C HONG-2 TONE-SEMICIRCLE-LOWER-LEFT]</code>&nbsp;<span class="qg" role="img" aria-label="BONG-5 J BONG C HONG-2 TONE-SEMICIRCLE-LOWER-LEFT">󰂊󰂚󰂅󰂛󰀐󰂜</span>, viết 音乃𱓄花反法合吧字也. Ở đây 花 là chú âm của Chi HONG-2 trong bảng Chi (tr. 3). Nguồn mô tả cấu trúc của Tham Thư và, với mỗi ví dụ, cách phát âm, nhưng không cho cách đọc: ví dụ thứ nhất 'nói nhanh, lưỡi cuộn dưới hàm, hai hàm răng mở rộng, môi trên dưới thu lại tám phía' (其音疾語…舌卷在頷下兩牙<span class="ids ids-lr"></span>广朮闊開上下唇縮八方成音也), ví dụ thứ hai nói nhanh với hai môi mím lại (tr. 7). Chỉ với hai ví dụ, không thể xác định chức năng của ba thành phần trong một Tham Thư. Vì vậy đề xuất này chỉ coi Tham Thư là một cấu tạo hình thức và không khẳng định gì về cách phát âm. Việc mã hoá theo thứ tự của công thức: Hợp Thư đứng trước như một đơn vị hoàn chỉnh, và ký tự nối Tham Thư thêm thành phần thứ ba vào nó (5.1).</p>
+<h3 id="sec-7-6">7.6 Dấu thanh</h3>
+<figure class="fig" id="fig-tones" style="width: 160px"><div class="parts"><img src="images/E16-1.png" alt="Hình 17" loading="lazy" style="flex: 0 1 44px"></div><figcaption>Hình 17. Cán trơn của đông với tám dấu thanh, chú âm 東 董 凍 篤 同 洞 動 獨 (tr. 5).</figcaption></figure>
+<p>Dấu thanh là một vòng tròn hoặc nửa vòng tròn đặt ở một trong bốn góc của chữ, cho tám thanh theo hệ âm dương (陰陽) của Trung Hoa. Nguồn giải thích hệ thống này sau bảng Chi: &quot;dương dùng vòng tròn đầy, âm dùng nửa vòng tròn&quot; (陽用全圈，陰用半圈, tr. 4), và nêu góc cho mỗi loại thanh: chân trái (左足) cho bình, vai trái (左肩) cho thượng, vai phải (右肩) cho khứ và chân phải (右足) cho nhập (tr. 5). Nguồn minh hoạ tám dấu trên một chữ, Cán trơn của đông, chú âm 東 董 凍 篤 cho âm và 同 洞 動 獨 cho dương (tr. 5). Thứ tự của 洞 và 動 trong dãy này được bàn ở Phụ lục A. Góc cho biết loại thanh và hình dạng cho biết âm vực: nửa vòng tròn đánh dấu âm (陰), vòng tròn đánh dấu dương (陽).</p>
+<table>
+<thead>
+<tr>
+<th>Góc</th>
+<th>Loại thanh</th>
+<th>Nửa vòng tròn (âm)</th>
+<th>Vòng tròn (dương)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dưới trái</td>
+<td>bình 平</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-LOWER-LEFT">󰀱󰂜</span> âm bình (ngang)</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-LOWER-LEFT">󰀱󰂝</span> dương bình (huyền)</td>
+</tr>
+<tr>
+<td>Trên trái</td>
+<td>thượng 上</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-UPPER-LEFT">󰀱󰂞</span> âm thượng (hỏi)</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-UPPER-LEFT">󰀱󰂟</span> dương thượng (ngã)</td>
+</tr>
+<tr>
+<td>Trên phải</td>
+<td>khứ 去</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-UPPER-RIGHT">󰀱󰂠</span> âm khứ (sắc)</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-UPPER-RIGHT">󰀱󰂡</span> dương khứ (nặng)</td>
+</tr>
+<tr>
+<td>Dưới phải</td>
+<td>nhập 入</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-SEMICIRCLE-LOWER-RIGHT">󰀱󰂢</span> âm nhập (sắc trong âm tiết tận cùng bằng -p, -t, -c)</td>
+<td><span class="qg" role="img" aria-label="DONG TONE-CIRCLE-LOWER-RIGHT">󰀱󰂣</span> dương nhập (nặng trong âm tiết tận cùng bằng -p, -t, -c)</td>
+</tr>
+</tbody>
+</table>
+<p>Thanh ngang có dấu riêng, một nửa vòng tròn ở góc dưới trái (tr. 6). Một chữ mang nhiều nhất một dấu thanh, và nhiều chữ không mang dấu nào. Ở tr. 6, một đoạn đánh dấu thanh ngang cho mọi chữ Quốc Âm Tân Tự trừ hai chữ cuối, vốn không có dấu. Vì vậy một chữ không có dấu thanh để thanh không xác định. Các thành phần đứng riêng cũng mang dấu thanh (tr. 6).</p>
+<p>Nguồn không quy định hướng của nửa vòng tròn. Mọi ví dụ đều cho thấy phía mở của nó hướng vào tâm của chữ (tr. 5). Dạng tròn và góc cạnh của nửa vòng tròn là biến thể viết tay, không phải các dấu khác nhau: Nguồn 1 viết cùng một dấu khi tròn, khi gần như một cái móc, còn Nguồn 2 viết mọi dấu thanh của đoạn ở tr. 6 theo dạng góc cạnh.</p>
+<h2 id="8-ph-l-c">8. Phụ lục</h2>
+<h3 id="sec-A">A. Ghi chú về nguồn</h3>
+<p>Ba điểm của nguồn không ảnh hưởng đến việc mã hoá.</p>
+<p><strong>Hợp Thư đầu tiên của tr. 6.</strong> Mục ở tr. 6 cho thấy năm Hợp Thư của ONG: chữ được công thức giải thích và bốn chữ nữa, mang nét đánh dấu ở vị trí 3 đến 6 (ONG-3 đến ONG-6 J ONG). Trong cả hai nguồn, chữ đầu tiên trong số đó được viết mà không thành phần nào có nét đánh dấu, <code>[ONG J ONG]</code>&nbsp;<span class="qg" role="img" aria-label="ONG J ONG">󰀀󰂚󰀀</span>, dù công thức đánh vần nó bằng Chi ONG-2 (喊) và Cán đánh dấu (翁). Có hai cách hiểu. Nếu đó là chỗ viết nhầm của bản gốc chung, thì chữ đó là ONG-2 J ONG, dãy đi qua cả năm Chi của ONG, và ngữ pháp của 5.1 đứng vững. Nếu nó được viết có chủ ý, thì ONG J ONG là một loại Hợp Thư riêng, gồm hai Cán trơn cùng một cơ sở. Nguồn không giải quyết câu hỏi này, và một bản phiên âm phải giữ dạng mà nguồn viết (4.1). Vì vậy đề xuất này chấp nhận ONG J ONG trong ngữ pháp như một Hợp Thư (5.1), cho mọi cơ sở (22 chuỗi), như đối ứng của Hợp Thư gồm một Chi và một Cán trơn, dù dạng đó có phải là viết nhầm hay không. Cả hai nguồn đều chứng thực dạng này, nên nó được vẽ như mọi cặp khác; Tham Thư trên nó không được chứng thực và nằm trong số các chuỗi mà ngữ pháp không cấm. ONG J ONG được viết với ký tự nối và được phân đoạn như mọi cặp khác (6.2), nên không có ký tự nào được thêm hay thay đổi. Chỉ danh sách các mẫu là khác. Độc lập với cách hiểu, tổ hợp ONG-2 J ONG được chứng thực ở tr. 5, cột 8.</p>
+<p><strong>Cách hiểu 合体 trong quy tắc của Tham Thư.</strong> Cách hiểu rộng về Hợp Thư, theo đó thuật ngữ này bao gồm mọi cặp Cán trơn + Chi và phần dưới của Tham Thư có thể là bất kỳ cặp nào hoặc một Chi đơn (2.552 phần dưới × 110 Chi = 280.720 Tham Thư), không được dùng, nhưng nguồn không loại trừ nó. Trong mục đếm số, nguồn dùng 合書 cho cả hai cách sắp xếp (7.4), nên 合体 trong quy tắc có thể chỉ bất kỳ cặp nào. Cách hiểu hẹp dựa trên ba điểm: cả hai Tham Thư được chứng thực đều đứng trên một cặp Chi trước cùng cơ sở, mục ở tr. 6 dùng 合書 trong đầu đề chỉ cho cách sắp xếp Chi trước, và các cặp phiên thiết được mô tả trong một mục riêng (反切諧音法). Mục đếm số không cho con số của Tham Thư (參書倣此, 'Tham Thư cũng vậy'). Lựa chọn này không ảnh hưởng đến bộ ký tự: cách hiểu rộng sẽ chấp nhận nhiều phần dưới hơn trước ký tự nối Tham Thư, với cùng các ký tự và cùng cách phân đoạn, và chỉ thay đổi danh sách các mẫu (5.1).</p>
+<p><strong>洞 và 動 trong dãy tám thanh.</strong> Nguồn nêu rõ 同 洞 動 獨 là các thanh bình, thượng, khứ, nhập (平上去入, tr. 4), trong khi truyền thống vận thư xếp 動 vào thanh thượng và 洞 vào thanh khứ. 洞 có các cách đọc đỗng và động (Tự điển chữ Nôm trích dẫn, tr. 403). Bằng cách đặt 洞 vào thanh thượng, nguồn đọc nó là đỗng, để 同 洞 動 獨 (đồng, đỗng, động, độc) theo các thanh tiếng Việt huyền, ngã, nặng và nặng nhập.</p>
 <h3 id="sec-B">B. Các đoạn được chứng thực</h3>
-<!-- appendix-b:start -->
-<p>Các đoạn được xác định trong nguồn, theo trang của Nguồn 1 (mục 3). Một ký tự QATT được viết {x}, x là chú âm Nôm bên cạnh nó trong nguồn; một chuỗi thành phần trong ngoặc vuông được viết theo ký hiệu của 5.3.</p>
+<p>Các đoạn định vị trong nguồn, theo trang của Nguồn 1 (phần 7). Một chữ QATT được viết là {x}, với x là chú âm Nôm bên cạnh nó trong nguồn; một chuỗi thành phần trong ngoặc vuông được viết theo ký hiệu của 5.1.</p>
 <table>
 <thead>
 <tr>
@@ -993,27 +1056,27 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>1</td>
 <td>我國附於中華日前只</td>
-<td>Niên đại: chữ 華 bị bớt nét cuối, một chữ kiêng huý của Hồ Thị Hoa, mẹ vua Thiệu Trị (1841–1847), nên văn bản không cổ hơn đời vua này</td>
+<td>Niên đại: chữ 華 bị bớt nét cuối, kiêng huý tên Hồ Thị Hoa, mẹ vua Thiệu Trị (1841–1847), nên văn bản không cổ hơn đời vua này</td>
 </tr>
 <tr>
 <td>1</td>
 <td>國音新字序</td>
-<td>Tên của chữ: 國音新字 (Quốc Âm Tân Tự), trong đầu đề của bài tựa 國音新字序</td>
+<td>Tên của chữ: 國音新字 (Quốc Âm Tân Tự), trong đầu đề bài tựa 國音新字序</td>
 </tr>
 <tr>
 <td>1</td>
 <td>嘗考之三易卦。始於兩次於四成於八。重之爲六十四。変之爲四千九十六。</td>
-<td>Kết hợp từ ít ký hiệu: bài tựa lấy sự phát triển của các quẻ trong Kinh Dịch làm mô hình</td>
+<td>Kết hợp từ ít ký hiệu: bài tựa lấy sự phát triển của các quẻ trong Kinh Dịch làm mẫu</td>
 </tr>
 <tr>
 <td>2</td>
 <td>幹音二十二字</td>
-<td>Bảng liệt kê dưới đầu đề 幹音二十二字 cho thấy 22 dạng, Cán đánh dấu, mỗi dạng ba nét và một nét đánh dấu ngắn; Thuật ngữ Cán (幹): bảng 22 Cán có đầu đề 幹音二十二字, 'âm Cán, hai mươi hai chữ'</td>
+<td>Bảng liệt kê dưới đầu đề 幹音二十二字 có 22 dạng, các Cán đánh dấu, mỗi dạng ba nét và một nét đánh dấu ngắn; thuật ngữ Cán (幹): bảng liệt kê 22 Cán có đầu đề 幹音二十二字, 'âm thân, hai mươi hai chữ'</td>
 </tr>
 <tr>
 <td>2</td>
-<td>幹音二十二字 · Nôm annotations in order (IDS where no encoded character is used): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 giông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
-<td>Bảng liệt kê 22 âm cơ sở (幹音二十二字) theo thứ tự của nguồn, mỗi âm có ký tự QATT và chú tên âm bằng chữ Nôm</td>
+<td>幹音二十二字 · Chú âm Nôm theo thứ tự (IDS khi không dùng ký tự đã mã hoá): 翁 ông · <span class="ids ids-lr"></span>木禺 ngông · 胸 hông · <span class="ids ids-lr"></span>木功 gông · 工 công · 𱻢 lông · <span class="ids ids-lr"></span>竜里 trông · 東 đông · 農 nông · 宗 tông · 通 thông · <span class="ids ids-lr"></span>亻戍 nhông · 柊 chông · <span class="ids ids-lr"></span>月容 giông · 衝 xông · 空 không · 滝 sông · <span class="ids ids-ud"></span>山庸 rông · 蒙 mông · 𱽐 bông · 𱣩 vông · <span class="ids ids-lr"></span>口風 phông</td>
+<td>Bảng liệt kê 22 âm cơ sở (幹音二十二字) theo thứ tự của nguồn, mỗi âm có chữ QATT và chú tên âm bằng chữ Nôm</td>
 </tr>
 <tr>
 <td>2</td>
@@ -1028,62 +1091,62 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>2</td>
 <td>窃想書契之造。必有一箇簡易之格。而人物聲音靡有遺者。只以秦而泯耳。</td>
-<td>Ý tưởng của chữ: chữ viết ban đầu được tạo ra với một phép đơn giản không sót âm nào</td>
+<td>Ý tưởng của chữ: chữ viết ban đầu được tạo ra theo một phép đơn giản không sót âm nào</td>
 </tr>
 <tr>
 <td>3</td>
 <td>枝字一百一十字</td>
-<td>Năm Chi mỗi Cán: nét đánh dấu chỉ nằm ở đầu nét (sáu vị trí); Cán đánh dấu có nó ở vị trí xuất phát (góc trên trái hoặc giữa phía trên), và dời nó ngược chiều kim đồng hồ cho các Chi theo thứ tự</td>
+<td>Năm Chi cho mỗi Cán: nét đánh dấu chỉ nằm ở đầu nét (sáu vị trí); Cán đánh dấu có nét ở vị trí đầu (trên trái hoặc trên giữa), và dời nó ngược chiều kim đồng hồ cho các Chi theo thứ tự</td>
 </tr>
 <tr>
 <td>3</td>
-<td>枝字一百一十字 · 109 Chi, each annotated with a Nôm character</td>
-<td>Bảng Chi dưới đầu đề 枝字一百一十字, '110 chữ Chi'; bảng có 109, một chữ bị bỏ sót do sơ ý</td>
+<td>枝字一百一十字 · 109 Chi, mỗi Chi có một chữ Nôm chú âm</td>
+<td>Bảng Chi dưới đầu đề 枝字一百一十字, '110 chữ Chi'; bảng có 109, một dạng bị bỏ sót</td>
 </tr>
 <tr>
 <td>4</td>
 <td>本字八音識別法。於本字上依陰陽四象識別，每一字各成八字。如同東合一字，惟同音其聲在上為陽，東音其聲在下為陰。以陰陽分配，則東董凍篤四音是陰之平上去入，同洞動獨四音是陽之平上去入。以四象識別，則陽用全圈，陰用半圈。  其同字全識於其字之左足，洞字全識於其字之左肩，動字全識於其字之右肩，獨字全識於其字之右足；東字半識於其字之左足，董字半識於其字之左肩，凍字半識於其字之右肩，篤字半識於其字之右足。如下。他倣此。  {東}{董}{凍}{篤}{同}{洞}{動}{獨}</td>
-<td>Dấu thanh: vòng tròn và nửa vòng tròn ở bốn góc, tám thanh; Tám thanh theo phép dương âm</td>
+<td>Dấu thanh: vòng tròn và nửa vòng tròn ở bốn góc, tám thanh; tám thanh theo phép âm dương của Trung Hoa</td>
 </tr>
 <tr>
 <td>5</td>
 <td>反切諧音法</td>
-<td>Phép phiên thiết được mô tả trong mục Phiên Thiết Hài Âm Pháp (反切諧音法); thành phần thuộc các cơ sở khác nhau, Cán trơn trước</td>
+<td>Phép phiên thiết được mô tả trong mục Phiên Thiết Hài Âm Pháp (反切諧音法); thành phần thuộc các cơ sở khác nhau, Cán trơn đứng trước</td>
 </tr>
 <tr>
 <td>5</td>
 <td>{東}{董}{凍}{篤}{同}{洞}{動}{獨}</td>
-<td>Dấu thanh ở cả bốn góc, cả hai hình: Cán trơn của đông viết với cả tám dấu thanh, chú 東 董 凍 篤 同 洞 動 獨; Hướng nửa vòng tròn: phía hở quay về tâm trong mọi ví dụ; Cán đánh dấu và Cán trơn đều xuất hiện đứng riêng, cùng cách đọc, cả khi có dấu thanh; chỉ Cán trơn kết hợp, không bao giờ Cán đánh dấu</td>
+<td>Dấu thanh ở cả bốn góc, cả hai hình dạng: Cán trơn của đông viết với cả tám dấu thanh, chú âm 東 董 凍 篤 同 洞 動 獨; hướng của nửa vòng tròn: phía mở hướng vào tâm trong mọi ví dụ; Cán đánh dấu và Cán trơn đều xuất hiện đứng riêng, cùng cách đọc, cả khi có dấu thanh; chỉ Cán trơn kết hợp, Cán đánh dấu thì không bao giờ</td>
 </tr>
 <tr>
 <td>5</td>
 <td>其同字全識於其字之左足，洞字全識於其字之左肩，動字全識於其字之右肩，獨字全識於其字之右足；東字半識於其字之左足，董字半識於其字之左肩，凍字半識於其字之右肩，篤字半識於其字之右足。如下。他倣此。</td>
-<td>Nguồn liệt kê các thanh trước hết với bốn nửa vòng tròn, rồi bốn vòng tròn đầy, mỗi nhóm bắt đầu từ góc dưới trái và chạy theo chiều kim đồng hồ</td>
+<td>Nguồn liệt kê các thanh trước với bốn nửa vòng tròn, rồi bốn vòng tròn đầy, mỗi loại bắt đầu ở dưới trái và đi theo chiều kim đồng hồ</td>
 </tr>
 <tr>
 <td>6</td>
 <td>如{翁}{宜}{反}反云{翁}{翁}{焉}{衣}是合取{衣}{字}也</td>
-<td>Các thành phần viết riêng rẽ và cạnh nhau khi văn bản giải thích sự kết hợp, kể cả một Cán trơn đứng riêng và hai Cán trơn liền nhau; Dấu thanh là tuỳ chọn: có chữ có và có chữ không có dấu thanh trong cùng một đoạn; Thanh ngang (ngang, âm bình) có dấu riêng, một nửa vòng tròn ở góc dưới trái; chữ không có dấu thanh không có nghĩa là thanh ngang; Dấu thanh trên các thành phần đứng riêng (Cán trơn và Chi); Dạng tròn và dạng góc cạnh của cùng một dấu thanh là biến thể chữ viết tay: Nguồn 1 viết dấu khi thì tròn, khi thì gần như cái móc; Nguồn 2 viết mọi dấu thanh của đoạn theo dạng góc cạnh</td>
+<td>Thành phần viết đứng riêng và cạnh nhau khi văn bản giải thích việc kết hợp, kể cả một Cán trơn đứng riêng và hai Cán trơn cạnh nhau; dấu thanh không bắt buộc: chữ có và không có dấu thanh trong cùng một đoạn; thanh ngang (âm bình) có dấu riêng, một nửa vòng tròn ở góc dưới trái; chữ không có dấu thanh không có nghĩa là thanh ngang; dấu thanh trên các thành phần đứng riêng (Cán trơn và Chi); dạng tròn và góc cạnh của cùng một dấu thanh là biến thể viết tay: Nguồn 1 viết dấu khi tròn, khi gần như một cái móc; Nguồn 2 viết mọi dấu thanh của đoạn theo dạng góc cạnh</td>
 </tr>
 <tr>
 <td>6</td>
 <td>合書左從枝体右從幹体畧法  {螉}乃{喊}{翁}{反}法合螉字也他倣此切法亦如之  {雍} {螉} {嗡} {噰}</td>
-<td>Hợp Thư: chỉ các cặp cùng cơ sở, Chi trước; Chức năng trong một Hợp Thư: công thức nêu Chi trước và cho vần bằng Cán; phần của Chi chưa được xác lập</td>
+<td>Hợp Thư: chỉ có cặp cùng cơ sở, Chi đứng trước; chức năng trong Hợp Thư: công thức nêu Chi trước và cho vần bằng Cán; vai trò của Chi chưa được xác định</td>
 </tr>
 <tr>
 <td>7</td>
 <td>參書下從合体上從枝体畧</td>
-<td>Quy tắc Tham Thư: phần dưới theo thể 合, đọc như một Hợp Thư</td>
+<td>Quy tắc Tham Thư: phần dưới theo thân 合, được hiểu là một Hợp Thư</td>
 </tr>
 <tr>
 <td>7</td>
 <td>故二十二幹字為標足以</td>
-<td>Thuật ngữ Cán (幹) cũng xuất hiện với 字 trong 二十二幹字為標, '22 chữ Cán làm dấu'; với 幹音二十二字 nguồn dùng 幹 với 音 và với 字</td>
+<td>Thuật ngữ Cán (幹) cũng xuất hiện với 字 trong 二十二幹字為標, 'lấy 22 chữ Cán làm dấu'; cùng với 幹音二十二字, nguồn dùng 幹 với 音 và với 字</td>
 </tr>
 <tr>
 <td>7</td>
 <td>{嚥}乃{翁}{<span class="ids ids-lr"></span>口𠸜}{反}法合嚥字也他倣此切法亦然  {<span class="ids ids-lr"></span>口淵} {焉} {淵} {卬} {喧}</td>
-<td>Ví dụ minh hoạ về một cặp phiên thiết, Cán trơn của ONG và Chi CHONG-5, đọc là yên, và một danh sách năm chữ</td>
+<td>Ví dụ minh hoạ một cặp phiên thiết, Cán trơn của ONG và Chi CHONG-5, đọc là yên, và một danh sách năm chữ</td>
 </tr>
 <tr>
 <td>7</td>
@@ -1093,33 +1156,33 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 <tr>
 <td>7</td>
 <td>[BONG-5 J BONG C HONG-2 TONE-SEMICIRCLE-LOWER-LEFT] 音乃𱓄花反法合吧字也</td>
-<td>Tham Thư được chứng thực thứ hai: một Hợp Thư của BONG với Chi HONG-2 ở trên, được giải thích bằng một công thức</td>
+<td>Tham Thư thứ hai được chứng thực: một Hợp Thư của BONG với Chi HONG-2 ở trên, được giải thích bằng một công thức</td>
 </tr>
 <tr>
 <td>8</td>
 <td>音数  單幹書協契象（即識別也）成一百七十六字。單書協契象成八百八十字（內有喊字等四十六字其八聲稀微疊語）。合書左從枝体右從幹体協契象成八百八十字。合書左從幹体右從枝体協契象成一萬八千四百八十字（內有一千九百三十二字其八声稀微疊語）。參書倣此。</td>
-<td>Các con số đếm trong mục 音数: 176 Cán đơn, 880 chữ đơn, 880 合書 với Chi bên trái và Cán bên phải, 18.480 合書 với Cán bên trái và Chi bên phải, mỗi loại gồm cả dấu thanh; tám lần 22, 110, 110 và 2.310</td>
+<td>Số lượng chữ trong mục 音数: 176 Cán đơn, 880 chữ đơn, 880 合書 với Chi bên trái và Cán bên phải, 18.480 合書 với Cán bên trái và Chi bên phải, mỗi con số đã tính dấu thanh; tám lần 22, 110, 110 và 2.310</td>
 </tr>
 </tbody>
 </table>
-<!-- appendix-b:end -->
 <h3 id="sec-C">C. Tài liệu tham khảo</h3>
 <ul>
 <li>
-<p>Nguyễn Hữu Vinh, Đặng Thế Kiệt, Nguyễn Doãn Vượng, Lê Văn Đặng, Nguyễn Văn Sâm, Nguyễn Ngọc Bích, Trần Uyên Thi. <em>Tự điển chữ Nôm trích dẫn</em> (字典𡨸喃摘引) / <em>Dictionary of Nôm Characters with Excerpts</em>. USA: Viện Việt-Học (Institute of Vietnamese Studies), 2009. Tr. 403, mục 洞 đỗng (động, đùng), U+6D1E, có tham chiếu chéo đến 洞 động.</p>
+<p>Nguyễn Hữu Vinh, Đặng Thế Kiệt, Nguyễn Doãn Vượng, Lê Văn Đặng, Nguyễn Văn Sâm, Nguyễn Ngọc Bích, Trần Uyên Thi. <em>Tự điển chữ Nôm trích dẫn</em> (字典𡨸喃摘引) / <em>Dictionary of Nôm Characters with Excerpts</em>. Hoa Kỳ: Viện Việt-Học, 2009. Tr. 403, mục 洞 đỗng (động, đùng), U+6D1E, có tham chiếu chéo đến 洞 động.</p>
 </li>
 <li>
-<p>Nguyễn Quang Hồng. Quốc âm tân tự – một phương án chữ Việt ghi âm thế kỷ 19. <em>Tạp chí Hán Nôm</em>, số 1, 1986. Trực tuyến trong kho lưu trữ của tạp chí: <a href="https://hannom.vass.gov.vn/web/tchn/data/8602v.htm">https://hannom.vass.gov.vn/web/tchn/data/8602v.htm</a> (trang web ghi đầu đề 1/1989, nhưng chứa số 1 năm 1986, như Trần Nghĩa trích dẫn trong <em>Tạp chí Hán Nôm</em>, số 2, 1987).</p>
+<p>Nguyễn Quang Hồng. Quốc âm tân tự – một phương án chữ Việt ghi âm thế kỷ 19. <em>Tạp chí Hán Nôm</em>, số 1, 1986. Trực tuyến trong kho lưu trữ của tạp chí: <a href="https://hannom.vass.gov.vn/web/tchn/data/8602v.htm">https://hannom.vass.gov.vn/web/tchn/data/8602v.htm</a> (trang web ghi số 1/1989, nhưng chứa số 1 năm 1986, như Trần Nghĩa trích dẫn trong <em>Tạp chí Hán Nôm</em>, số 2, 1987).</p>
 </li>
 </ul>
-<p><strong>Nguồn web</strong>, truy cập ngày 25 tháng 10 năm 2026:</p>
+<p><strong>Nguồn trên web</strong>, truy cập ngày 25 tháng 10 năm 2026:</p>
 <ul>
 <li>Ager, Simon. <em>Quốc âm tân tự (國音新字)</em>. Omniglot. <a href="https://www.omniglot.com/writing/quocamtantu.htm">https://www.omniglot.com/writing/quocamtantu.htm</a></li>
 <li>Maruhi Academy (丸秘学園). <em>Maruhi Academy: Quốc Âm Tân Tự Script</em>. Video YouTube. <a href="https://youtu.be/1XPtftoxcjE">https://youtu.be/1XPtftoxcjE</a></li>
 <li><em>Qatt</em>. Diễn đàn Reddit với các ví dụ viết tay. <a href="https://www.reddit.com/r/Qatt/">https://www.reddit.com/r/Qatt/</a></li>
 <li><em>QATT Facebook Group</em>. <a href="https://www.facebook.com/groups/1842030006367450/">https://www.facebook.com/groups/1842030006367450/</a></li>
-<li><em>Quốc Âm Tân Tự Converter (QATT)</em>. Bộ chuyển đổi trên web từ Quốc ngữ, không rõ tác giả. <a href="https://quocamtantu.vercel.app/">https://quocamtantu.vercel.app/</a></li>
-<li><em>Qatt.org – Quốc Âm Tân Tự</em>. Trang web của người đề xuất, có tài liệu học và công cụ viết. <a href="https://qatt.org">https://qatt.org</a></li>
+<li>hungtq1016. <em>Quốc Âm Tân Tự Converter (QATT)</em>. Bộ chuyển đổi trên web từ Quốc Ngữ. <a href="https://quocamtantu.vercel.app/">https://quocamtantu.vercel.app/</a>. Mã nguồn, phông chữ và bảng âm tiết theo giấy phép MIT: <a href="https://github.com/hungtq1016/quocamtantu">https://github.com/hungtq1016/quocamtantu</a>, thay đổi gần nhất ngày 1 tháng 3 năm 2026 (truy cập ngày 10 tháng 11 năm 2026).</li>
+<li>yurixahri. <em>quocamtantu_keyboard</em>. Bộ gõ cho Windows, xây dựng dựa trên bảng âm tiết của bộ chuyển đổi. <a href="https://github.com/yurixahri/quocamtantu_keyboard">https://github.com/yurixahri/quocamtantu_keyboard</a>, thay đổi gần nhất ngày 2 tháng 11 năm 2026 (truy cập ngày 10 tháng 11 năm 2026).</li>
+<li><em>Qatt.org – Quốc Âm Tân Tự</em>. Trang web của người đề xuất, với tài liệu học tập và công cụ viết. <a href="https://qatt.org">https://qatt.org</a></li>
 <li>ASEAN urbanist. Bài đăng về Quốc Âm Tân Tự. Facebook. <a href="https://www.facebook.com/urbanistasean/posts/-qu%E1%BB%91c-%C3%A2m-t%C3%A2n-t%E1%BB%B1-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/">https://www.facebook.com/urbanistasean/posts/-quốc-âm-tân-tự-is-a-purely-vietnamese-alphabet-designed-by-the-vietnamese-in-th/1226154922874964/</a></li>
 </ul>
 <h3 id="sec-D">D. Proposal Summary Form</h3>
@@ -1151,7 +1214,7 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>Đề xuất hoàn chỉnh</td>
-<td>Không. Đề xuất sơ bộ; xem mục 5.1 (ký tự nối Tham Thư) và các điểm <code>[TBD]</code></td>
+<td>Không. Đề xuất sơ bộ; xem mục 4.1 (ký tự nối Tham Thư) và các điểm <code>[TBD]</code></td>
 </tr>
 </tbody>
 </table>
@@ -1170,35 +1233,35 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>Số ký tự</td>
-<td>164 (mục 5.1)</td>
+<td>164 (mục 4.1)</td>
 </tr>
 <tr>
 <td>Loại được đề xuất</td>
-<td>E – Minor extinct: một chữ lịch sử, được chứng thực trong hai bản chép tay của một văn bản thập niên 1840 (mục 3.1), với một cộng đồng người dùng nhỏ ngày nay (mục 3.3) <code>[TBD: đối chiếu với mục 2.2 của WG2 Principles and Procedures]</code></td>
+<td>B.1 – Chuyên biệt (bộ nhỏ): một bộ ký tự nhỏ với một cộng đồng người dùng hạn chế, những người tạo tài liệu mới bằng chúng, không dùng hằng ngày cho giao tiếp thông thường (mục 3.1). Bản thân chữ là chữ lịch sử, được chứng thực trong hai bản chép tay của một văn bản không cổ hơn đời Thiệu Trị (1841–1847; mục 7.1)</td>
 </tr>
 <tr>
 <td>Bộ ký tự với tên và hình dạng</td>
-<td>Có: tên ở mục 7.1, bảng mã ở mục 7.2 và trong phông tham chiếu. Tên chỉ dùng A–Z, chữ số, dấu cách và gạch nối, không từ nào bắt đầu bằng chữ số (ONG-1 như trong U+1069 MYANMAR SIGN WESTERN PWO KAREN TONE-1), và không tên nào trùng với tên đã có hay tên đề xuất khác theo cách so khớp lỏng của UAX #44 (kiểm tra với Unicode 15.1)</td>
+<td>Có: tên ở mục 4.3, bảng mã ở mục 4.4 và trong phông tham chiếu. Tên chỉ dùng A–Z, chữ số, dấu cách và gạch nối, không từ nào bắt đầu bằng chữ số (ONG-1 như trong U+1069 MYANMAR SIGN WESTERN PWO KAREN TONE-1), và không tên nào trùng với tên đã có hoặc tên đề xuất khác theo cách so khớp lỏng của UAX #44 (đã kiểm tra với Unicode 18.0)</td>
 </tr>
 <tr>
-<td>Người cung cấp phông</td>
+<td>Người cung cấp phông chữ</td>
 <td>Người đề xuất (Nguyễn Quốc Trung)</td>
 </tr>
 <tr>
-<td>Giấy phép phông</td>
-<td>SIL Open Font License 1.1 (mục 8) <code>[TBD: xác nhận cho phép biên tập viên sử dụng]</code></td>
+<td>Giấy phép phông chữ</td>
+<td>SIL Open Font License 1.1 (mục 5.5) <code>[TBD: xác nhận việc cấp quyền cho các biên tập viên sử dụng]</code></td>
 </tr>
 <tr>
 <td>Tài liệu tham khảo và ví dụ đã công bố</td>
-<td>Có: phụ lục C; các trang của nguồn nằm trong <code>evidence/</code> và trong phụ lục B</td>
+<td>Có: Phụ lục C; các trang của nguồn ở <code>evidence/</code> và ở Phụ lục B</td>
 </tr>
 <tr>
-<td>Vấn đề mã hóa đặc biệt</td>
-<td>Nhập các chuỗi có ký tự nối; trình bày dọc và ngang (4.5, 5.3, 5.4)</td>
+<td>Vấn đề mã hoá đặc biệt</td>
+<td>Nhập các chuỗi có ký tự nối; bố cục dọc và ngang (2.2, 5.1, 5.2)</td>
 </tr>
 <tr>
 <td>Thuộc tính của chữ</td>
-<td>Lớp kết hợp của dấu thanh (6.1), cụm grapheme (6.2), ngắt dòng và hướng viết (6.3). Không có chữ hoa/thường, không có giá trị số hay tiền tệ</td>
+<td>Lớp kết hợp của dấu thanh (6.1), cụm grapheme (6.2), ngắt dòng, hướng viết và dấu câu (6.3). Không có chữ hoa/thường, không có giá trị số hay tiền tệ</td>
 </tr>
 </tbody>
 </table>
@@ -1217,43 +1280,43 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </tr>
 <tr>
 <td>Liên hệ với cộng đồng người dùng</td>
-<td>Có: diễn đàn r/Qatt (qua máy chủ Discord của diễn đàn) và nhóm Facebook QATT (bằng một bài đăng trong nhóm) đã được hỏi ý kiến ngày 29 tháng 10 năm 2026 (mục 3.3). Một đề nghị về thứ tự các điểm mã được bàn ở mục 6.4</td>
+<td>Có: diễn đàn r/Qatt (qua máy chủ Discord của nó) và nhóm Facebook QATT (một bài đăng trong nhóm) đã được hỏi ý kiến ngày 29 tháng 10 năm 2026 (mục 3.5). Một đề nghị về thứ tự điểm mã được bàn ở mục 4.5</td>
 </tr>
 <tr>
 <td>Thông tin về cộng đồng người dùng</td>
-<td>Mục 3.3</td>
+<td>Mục 3.1</td>
 </tr>
 <tr>
-<td>Bối cảnh sử dụng</td>
-<td>Bản chép tay lịch sử (mục 3.1) và một cộng đồng nhỏ ngày nay viết và chia sẻ văn bản trên mạng (mục 3.3). Hiếm</td>
+<td>Ngữ cảnh sử dụng</td>
+<td>Một cộng đồng nhỏ hiện nay viết và chia sẻ văn bản trên mạng (mục 3.1), và bản chép tay lịch sử (mục 7.1). Hiếm</td>
 </tr>
 <tr>
 <td>Ký tự đang được dùng</td>
-<td>Có: trong bản chép tay và trên web (mục 3.1, 3.3, phụ lục C)</td>
+<td>Có: trong bản chép tay và trên web (mục 7.1, 3.1, Phụ lục C)</td>
 </tr>
 <tr>
 <td>Phải nằm trong BMP</td>
 <td>Không. Đề xuất dành cho SMP</td>
 </tr>
 <tr>
-<td>Dải liên tục</td>
-<td>Có: 176 điểm mã trong 11 cột 16 ô (mục 7)</td>
+<td>Khoảng liền</td>
+<td>Có: 176 điểm mã trong 11 cột 16 (mục 4.2)</td>
 </tr>
 <tr>
 <td>Dạng trình bày của một ký tự đã có</td>
-<td>Không. Các dấu thanh không phải là chữ bổ trợ U+A700..U+A707 (5.7)</td>
+<td>Không. Dấu thanh không phải là các chữ cái biến âm U+A700..U+A707 (5.3)</td>
 </tr>
 <tr>
-<td>Có thể mã hóa bằng chuỗi ký tự đã có</td>
-<td>Không. Các thành phần là ký tự mới; chữ hai và ba thành phần là chuỗi các ký tự mới (5.2)</td>
+<td>Có thể mã hoá bằng chuỗi các ký tự đã có</td>
+<td>Không. Các thành phần là ký tự mới; chữ hai và ba thành phần là chuỗi các ký tự mới (4.1)</td>
 </tr>
 <tr>
 <td>Dễ nhầm với một ký tự đã có</td>
-<td>Có, một số dạng giống chữ Hán và chữ Hangul; danh sách ở mục 6.5</td>
+<td>Có, một số dạng giống chữ Hán và chữ Hangul; danh sách ở Phụ lục F</td>
 </tr>
 <tr>
 <td>Ký tự kết hợp hoặc chuỗi tổ hợp</td>
-<td>Có: tám dấu thanh kết hợp, ký tự nối thành phần và ký tự nối Tham Thư (4.2, 4.3, 5.3). Các mẫu chuỗi tổ hợp, mỗi mẫu kèm hình glyph, được liệt kê ở mục 5.3; số chuỗi có thể có ở mục 5.2</td>
+<td>Có: tám dấu thanh kết hợp, ký tự nối thành phần và ký tự nối Tham Thư (7.4, 7.5, 5.1). Các mẫu chuỗi tổ hợp, mỗi mẫu kèm hình glyph, được liệt kê ở mục 5.1; số chuỗi có thể có ở mục 4.1</td>
 </tr>
 <tr>
 <td>Thuộc tính đặc biệt</td>
@@ -1265,33 +1328,136 @@ QUOC AM TAN TU COMBINING TONE SEMICIRCLE LOWER RIGHT
 </tr>
 </tbody>
 </table>
-<h3 id="app-e">E. Code chart</h3>
-
-
-<p>Provisional code points U+F0000..U+F00AF; the offsets are those of the proposal. Set in QATT Serif, a placeholder until the reference font exists.</p>
-<table class="chart"><tr><th>Base</th><th>none</th><th>-1</th><th>-2</th><th>-3</th><th>-4</th><th>-5</th><th>-6</th></tr>
-<tr><td class="name">01 ONG</td><td><div class="g">&#xF0000;</div><div class="cp">+00</div></td><td><div class="g">&#xF0001;</div><div class="cp">+01</div></td><td><div class="g">&#xF0002;</div><div class="cp">+02</div></td><td><div class="g">&#xF0003;</div><div class="cp">+03</div></td><td><div class="g">&#xF0004;</div><div class="cp">+04</div></td><td><div class="g">&#xF0005;</div><div class="cp">+05</div></td><td><div class="g">&#xF0006;</div><div class="cp">+06</div></td></tr>
-<tr><td class="name">02 NGONG</td><td><div class="g">&#xF0007;</div><div class="cp">+07</div></td><td><div class="g">&#xF0008;</div><div class="cp">+08</div></td><td><div class="g">&#xF0009;</div><div class="cp">+09</div></td><td><div class="g">&#xF000A;</div><div class="cp">+0A</div></td><td><div class="g">&#xF000B;</div><div class="cp">+0B</div></td><td><div class="g">&#xF000C;</div><div class="cp">+0C</div></td><td><div class="g">&#xF000D;</div><div class="cp">+0D</div></td></tr>
-<tr><td class="name">03 HONG</td><td><div class="g">&#xF000E;</div><div class="cp">+0E</div></td><td><div class="g">&#xF000F;</div><div class="cp">+0F</div></td><td><div class="g">&#xF0010;</div><div class="cp">+10</div></td><td><div class="g">&#xF0011;</div><div class="cp">+11</div></td><td><div class="g">&#xF0012;</div><div class="cp">+12</div></td><td><div class="g">&#xF0013;</div><div class="cp">+13</div></td><td><div class="g">&#xF0014;</div><div class="cp">+14</div></td></tr>
-<tr><td class="name">04 GONG</td><td><div class="g">&#xF0015;</div><div class="cp">+15</div></td><td><div class="g">&#xF0016;</div><div class="cp">+16</div></td><td><div class="g">&#xF0017;</div><div class="cp">+17</div></td><td><div class="g">&#xF0018;</div><div class="cp">+18</div></td><td><div class="g">&#xF0019;</div><div class="cp">+19</div></td><td><div class="g">&#xF001A;</div><div class="cp">+1A</div></td><td><div class="g">&#xF001B;</div><div class="cp">+1B</div></td></tr>
-<tr><td class="name">05 CONG</td><td><div class="g">&#xF001C;</div><div class="cp">+1C</div></td><td><div class="g">&#xF001D;</div><div class="cp">+1D</div></td><td><div class="g">&#xF001E;</div><div class="cp">+1E</div></td><td><div class="g">&#xF001F;</div><div class="cp">+1F</div></td><td><div class="g">&#xF0020;</div><div class="cp">+20</div></td><td><div class="g">&#xF0021;</div><div class="cp">+21</div></td><td><div class="g">&#xF0022;</div><div class="cp">+22</div></td></tr>
-<tr><td class="name">06 LONG</td><td><div class="g">&#xF0023;</div><div class="cp">+23</div></td><td><div class="g">&#xF0024;</div><div class="cp">+24</div></td><td><div class="g">&#xF0025;</div><div class="cp">+25</div></td><td><div class="g">&#xF0026;</div><div class="cp">+26</div></td><td><div class="g">&#xF0027;</div><div class="cp">+27</div></td><td><div class="g">&#xF0028;</div><div class="cp">+28</div></td><td><div class="g">&#xF0029;</div><div class="cp">+29</div></td></tr>
-<tr><td class="name">07 TRONG</td><td><div class="g">&#xF002A;</div><div class="cp">+2A</div></td><td><div class="g">&#xF002B;</div><div class="cp">+2B</div></td><td><div class="g">&#xF002C;</div><div class="cp">+2C</div></td><td><div class="g">&#xF002D;</div><div class="cp">+2D</div></td><td><div class="g">&#xF002E;</div><div class="cp">+2E</div></td><td><div class="g">&#xF002F;</div><div class="cp">+2F</div></td><td><div class="g">&#xF0030;</div><div class="cp">+30</div></td></tr>
-<tr><td class="name">08 DONG</td><td><div class="g">&#xF0031;</div><div class="cp">+31</div></td><td><div class="g">&#xF0032;</div><div class="cp">+32</div></td><td><div class="g">&#xF0033;</div><div class="cp">+33</div></td><td><div class="g">&#xF0034;</div><div class="cp">+34</div></td><td><div class="g">&#xF0035;</div><div class="cp">+35</div></td><td><div class="g">&#xF0036;</div><div class="cp">+36</div></td><td><div class="g">&#xF0037;</div><div class="cp">+37</div></td></tr>
-<tr><td class="name">09 NONG</td><td><div class="g">&#xF0038;</div><div class="cp">+38</div></td><td><div class="g">&#xF0039;</div><div class="cp">+39</div></td><td><div class="g">&#xF003A;</div><div class="cp">+3A</div></td><td><div class="g">&#xF003B;</div><div class="cp">+3B</div></td><td><div class="g">&#xF003C;</div><div class="cp">+3C</div></td><td><div class="g">&#xF003D;</div><div class="cp">+3D</div></td><td><div class="g">&#xF003E;</div><div class="cp">+3E</div></td></tr>
-<tr><td class="name">10 TONG</td><td><div class="g">&#xF003F;</div><div class="cp">+3F</div></td><td><div class="g">&#xF0040;</div><div class="cp">+40</div></td><td><div class="g">&#xF0041;</div><div class="cp">+41</div></td><td><div class="g">&#xF0042;</div><div class="cp">+42</div></td><td><div class="g">&#xF0043;</div><div class="cp">+43</div></td><td><div class="g">&#xF0044;</div><div class="cp">+44</div></td><td><div class="g">&#xF0045;</div><div class="cp">+45</div></td></tr>
-<tr><td class="name">11 THONG</td><td><div class="g">&#xF0046;</div><div class="cp">+46</div></td><td><div class="g">&#xF0047;</div><div class="cp">+47</div></td><td><div class="g">&#xF0048;</div><div class="cp">+48</div></td><td><div class="g">&#xF0049;</div><div class="cp">+49</div></td><td><div class="g">&#xF004A;</div><div class="cp">+4A</div></td><td><div class="g">&#xF004B;</div><div class="cp">+4B</div></td><td><div class="g">&#xF004C;</div><div class="cp">+4C</div></td></tr>
-<tr><td class="name">12 NHONG</td><td><div class="g">&#xF004D;</div><div class="cp">+4D</div></td><td><div class="g">&#xF004E;</div><div class="cp">+4E</div></td><td><div class="g">&#xF004F;</div><div class="cp">+4F</div></td><td><div class="g">&#xF0050;</div><div class="cp">+50</div></td><td><div class="g">&#xF0051;</div><div class="cp">+51</div></td><td><div class="g">&#xF0052;</div><div class="cp">+52</div></td><td><div class="g">&#xF0053;</div><div class="cp">+53</div></td></tr>
-<tr><td class="name">13 CHONG</td><td><div class="g">&#xF0054;</div><div class="cp">+54</div></td><td><div class="g">&#xF0055;</div><div class="cp">+55</div></td><td><div class="g">&#xF0056;</div><div class="cp">+56</div></td><td><div class="g">&#xF0057;</div><div class="cp">+57</div></td><td><div class="g">&#xF0058;</div><div class="cp">+58</div></td><td><div class="g">&#xF0059;</div><div class="cp">+59</div></td><td><div class="g">&#xF005A;</div><div class="cp">+5A</div></td></tr>
-<tr><td class="name">14 GIONG</td><td><div class="g">&#xF005B;</div><div class="cp">+5B</div></td><td><div class="g">&#xF005C;</div><div class="cp">+5C</div></td><td><div class="g">&#xF005D;</div><div class="cp">+5D</div></td><td><div class="g">&#xF005E;</div><div class="cp">+5E</div></td><td><div class="g">&#xF005F;</div><div class="cp">+5F</div></td><td><div class="g">&#xF0060;</div><div class="cp">+60</div></td><td><div class="g">&#xF0061;</div><div class="cp">+61</div></td></tr>
-<tr><td class="name">15 XONG</td><td><div class="g">&#xF0062;</div><div class="cp">+62</div></td><td><div class="g">&#xF0063;</div><div class="cp">+63</div></td><td><div class="g">&#xF0064;</div><div class="cp">+64</div></td><td><div class="g">&#xF0065;</div><div class="cp">+65</div></td><td><div class="g">&#xF0066;</div><div class="cp">+66</div></td><td><div class="g">&#xF0067;</div><div class="cp">+67</div></td><td><div class="g">&#xF0068;</div><div class="cp">+68</div></td></tr>
-<tr><td class="name">16 KHONG</td><td><div class="g">&#xF0069;</div><div class="cp">+69</div></td><td><div class="g">&#xF006A;</div><div class="cp">+6A</div></td><td><div class="g">&#xF006B;</div><div class="cp">+6B</div></td><td><div class="g">&#xF006C;</div><div class="cp">+6C</div></td><td><div class="g">&#xF006D;</div><div class="cp">+6D</div></td><td><div class="g">&#xF006E;</div><div class="cp">+6E</div></td><td><div class="g">&#xF006F;</div><div class="cp">+6F</div></td></tr>
-<tr><td class="name">17 SONG</td><td><div class="g">&#xF0070;</div><div class="cp">+70</div></td><td><div class="g">&#xF0071;</div><div class="cp">+71</div></td><td><div class="g">&#xF0072;</div><div class="cp">+72</div></td><td><div class="g">&#xF0073;</div><div class="cp">+73</div></td><td><div class="g">&#xF0074;</div><div class="cp">+74</div></td><td><div class="g">&#xF0075;</div><div class="cp">+75</div></td><td><div class="g">&#xF0076;</div><div class="cp">+76</div></td></tr>
-<tr><td class="name">18 RONG</td><td><div class="g">&#xF0077;</div><div class="cp">+77</div></td><td><div class="g">&#xF0078;</div><div class="cp">+78</div></td><td><div class="g">&#xF0079;</div><div class="cp">+79</div></td><td><div class="g">&#xF007A;</div><div class="cp">+7A</div></td><td><div class="g">&#xF007B;</div><div class="cp">+7B</div></td><td><div class="g">&#xF007C;</div><div class="cp">+7C</div></td><td><div class="g">&#xF007D;</div><div class="cp">+7D</div></td></tr>
-<tr><td class="name">19 MONG</td><td><div class="g">&#xF007E;</div><div class="cp">+7E</div></td><td><div class="g">&#xF007F;</div><div class="cp">+7F</div></td><td><div class="g">&#xF0080;</div><div class="cp">+80</div></td><td><div class="g">&#xF0081;</div><div class="cp">+81</div></td><td><div class="g">&#xF0082;</div><div class="cp">+82</div></td><td><div class="g">&#xF0083;</div><div class="cp">+83</div></td><td><div class="g">&#xF0084;</div><div class="cp">+84</div></td></tr>
-<tr><td class="name">20 BONG</td><td><div class="g">&#xF0085;</div><div class="cp">+85</div></td><td><div class="g">&#xF0086;</div><div class="cp">+86</div></td><td><div class="g">&#xF0087;</div><div class="cp">+87</div></td><td><div class="g">&#xF0088;</div><div class="cp">+88</div></td><td><div class="g">&#xF0089;</div><div class="cp">+89</div></td><td><div class="g">&#xF008A;</div><div class="cp">+8A</div></td><td><div class="g">&#xF008B;</div><div class="cp">+8B</div></td></tr>
-<tr><td class="name">21 VONG</td><td><div class="g">&#xF008C;</div><div class="cp">+8C</div></td><td><div class="g">&#xF008D;</div><div class="cp">+8D</div></td><td><div class="g">&#xF008E;</div><div class="cp">+8E</div></td><td><div class="g">&#xF008F;</div><div class="cp">+8F</div></td><td><div class="g">&#xF0090;</div><div class="cp">+90</div></td><td><div class="g">&#xF0091;</div><div class="cp">+91</div></td><td><div class="g">&#xF0092;</div><div class="cp">+92</div></td></tr>
-<tr><td class="name">22 PHONG</td><td><div class="g">&#xF0093;</div><div class="cp">+93</div></td><td><div class="g">&#xF0094;</div><div class="cp">+94</div></td><td><div class="g">&#xF0095;</div><div class="cp">+95</div></td><td><div class="g">&#xF0096;</div><div class="cp">+96</div></td><td><div class="g">&#xF0097;</div><div class="cp">+97</div></td><td><div class="g">&#xF0098;</div><div class="cp">+98</div></td><td><div class="g">&#xF0099;</div><div class="cp">+99</div></td></tr></table>
-<div style="break-inside: avoid"><h3>Joiners and tone marks</h3>
-<table class="chart"><tr><th>COMPONENT JOINER</th><th>THAM THU COMBINER</th><th colspan=8>Tone marks, shown on a dotted circle</th></tr><tr><td><div class="g">&#x25CC;&#xF009A;</div><div class="cp">+9A</div></td><td><div class="g">&#x25CC;&#xF009B;</div><div class="cp">+9B</div></td><td><div class="g">&#x25CC;&#xF009C;</div><div class="cp">+9C</div></td><td><div class="g">&#x25CC;&#xF009D;</div><div class="cp">+9D</div></td><td><div class="g">&#x25CC;&#xF009E;</div><div class="cp">+9E</div></td><td><div class="g">&#x25CC;&#xF009F;</div><div class="cp">+9F</div></td><td><div class="g">&#x25CC;&#xF00A0;</div><div class="cp">+A0</div></td><td><div class="g">&#x25CC;&#xF00A1;</div><div class="cp">+A1</div></td><td><div class="g">&#x25CC;&#xF00A2;</div><div class="cp">+A2</div></td><td><div class="g">&#x25CC;&#xF00A3;</div><div class="cp">+A3</div></td></tr></table>
-</div></body></html>
+<h3 id="e-ngh-v-n-b-n-cho-core-specification">E. Đề nghị văn bản cho Core Specification</h3>
+<p><strong>Quốc Âm Tân Tự: U+xxxx0–U+xxxAF</strong></p>
+<p>Quốc Âm Tân Tự (國音新字, &quot;chữ mới ghi âm của tiếng nước nhà&quot;) là một loại chữ ghi âm cho tiếng Việt. Chữ được biết qua một văn bản thế kỷ XIX, không cổ hơn đời Thiệu Trị (1841–1847), lưu giữ trong hai bản chép tay tại Viện Nghiên cứu Hán Nôm ở Hà Nội. Trong văn bản đó chữ đứng giữa Hán Nôm và được đối xử như chữ Hán Nôm. Ngày nay một cộng đồng nhỏ sử dụng chữ này.</p>
+<p><em>Cấu trúc.</em> Chữ có 22 cơ sở, mỗi cơ sở vẽ bằng ba nét. Một cơ sở có bảy dạng: một dạng không có nét đánh dấu, Cán trơn, và sáu dạng có một nét đánh dấu ngắn ở một trong sáu đầu nét. Dạng có nét đánh dấu ở vị trí đầu là Cán đánh dấu, năm dạng còn lại là Chi. Mọi dạng đều đứng riêng được. Một Cán trơn và một Chi kết hợp thành một chữ chiếm một ô vuông, và một thành phần thứ ba, một Chi, có thể đứng trên một cặp như vậy. Mọi chữ đều có thể mang một dấu thanh ở một trong bốn góc.</p>
+<p><em>Mã hoá.</em> 154 dạng được mã hoá thành chữ cái nguyên tử, nhóm theo cơ sở. Chữ ghép là các chuỗi: U+xxx9A QUOC AM TAN TU COMPONENT JOINER đứng giữa hai thành phần được viết cạnh nhau trong một ô, và U+xxx9B QUOC AM TAN TU THAM THU COMBINER đứng trước một thành phần được viết trên cặp đứng trước. Các thành phần được lưu theo thứ tự viết, trái trước phải và dưới trước trên, và không bị đổi thứ tự. Các thành phần không có ký tự nối là các ký tự riêng.</p>
+<p><em>Dấu thanh.</em> Tám dấu kết hợp đi sau toàn bộ chuỗi. Một nửa vòng tròn hoặc vòng tròn ở một trong bốn góc cho biết loại thanh qua góc và âm vực qua hình dạng. Một chữ mang nhiều nhất một dấu thanh, và chữ không có dấu thanh để thanh không xác định.</p>
+<p><em>Hiển thị.</em> Phông chữ vẽ mỗi chuỗi trong một ô vuông với kích thước của chữ Hán. Các thành phần chia đều ô, và dấu thanh nằm ở một góc của cả ô.</p>
+<p><em>Bố cục và dấu câu.</em> Chữ theo quy ước của Hán Nôm. Nguồn viết theo dòng dọc từ phải sang trái, không có dấu cách giữa các từ. Văn bản số cũng được trình bày theo dòng ngang. Chữ không có dấu câu riêng và dùng dấu câu của khối CJK Symbols and Punctuation.</p>
+<h3 id="f-c-c-k-t-gi-ng-v-h-nh-th-c">F. Các ký tự giống về hình thức</h3>
+<p>Một số dạng trơn trông giống các ký tự đã có, phần lớn là chữ Hán cấu tạo từ cùng các nét thẳng. Việc so sánh dưới đây được làm bằng mắt trên bảng mã (4.4) và bao gồm các dạng trơn và các dạng có đánh dấu trông giống ký tự đã có. Các dạng có đánh dấu khác thêm một nét đánh dấu và gần với các ký tự của dạng trơn tương ứng. Danh sách còn sơ bộ <code>[TBD: xác nhận với dữ liệu confusables của UTR #36]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Dạng</th>
+<th>QATT</th>
+<th>Ký tự đã có tương tự</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ONG (+00)</td>
+<td><span class="qg" role="img" aria-label="ONG">󰀀</span></td>
+<td>U+4E09 三, U+2630 ☰ TRIGRAM FOR HEAVEN</td>
+</tr>
+<tr>
+<td>NGONG (+07)</td>
+<td><span class="qg" role="img" aria-label="NGONG">󰀇</span></td>
+<td>U+4E0C 丌, U+5140 兀</td>
+</tr>
+<tr>
+<td>GONG (+15)</td>
+<td><span class="qg" role="img" aria-label="GONG">󰀕</span></td>
+<td>U+0045 E, U+3151 ㅑ HANGUL LETTER YA</td>
+</tr>
+<tr>
+<td>CONG (+1C)</td>
+<td><span class="qg" role="img" aria-label="CONG">󰀜</span></td>
+<td>U+3155 ㅕ HANGUL LETTER YEO, U+4E2C 丬</td>
+</tr>
+<tr>
+<td>LONG (+23)</td>
+<td><span class="qg" role="img" aria-label="LONG">󰀣</span></td>
+<td>U+5DDD 川</td>
+</tr>
+<tr>
+<td>TRONG (+2A)</td>
+<td><span class="qg" role="img" aria-label="TRONG">󰀪</span></td>
+<td>U+5E72 干, U+4E8E 于</td>
+</tr>
+<tr>
+<td>TRONG-1 (+2B)</td>
+<td><span class="qg" role="img" aria-label="TRONG-1">󰀫</span></td>
+<td>U+5348 午</td>
+</tr>
+<tr>
+<td>TRONG-4 (+2E)</td>
+<td><span class="qg" role="img" aria-label="TRONG-4">󰀮</span></td>
+<td>U+738B 王, U+58EC 壬</td>
+</tr>
+<tr>
+<td>DONG (+31)</td>
+<td><span class="qg" role="img" aria-label="DONG">󰀱</span></td>
+<td>U+571F 土, U+58EB 士</td>
+</tr>
+<tr>
+<td>DONG-1 (+32)</td>
+<td><span class="qg" role="img" aria-label="DONG-1">󰀲</span></td>
+<td>U+738B 王, U+58EC 壬</td>
+</tr>
+<tr>
+<td>THONG (+46)</td>
+<td><span class="qg" role="img" aria-label="THONG">󰁆</span></td>
+<td>U+5344 卄, U+5EFE 廾</td>
+</tr>
+<tr>
+<td>THONG-1 (+47)</td>
+<td><span class="qg" role="img" aria-label="THONG-1">󰁇</span></td>
+<td>U+5347 升</td>
+</tr>
+<tr>
+<td>NHONG-1 (+4E)</td>
+<td><span class="qg" role="img" aria-label="NHONG-1">󰁎</span></td>
+<td>U+5347 升</td>
+</tr>
+<tr>
+<td>CHONG (+54)</td>
+<td><span class="qg" role="img" aria-label="CHONG">󰁔</span></td>
+<td>U+30AD キ KATAKANA LETTER KI</td>
+</tr>
+<tr>
+<td>CHONG-2 (+56)</td>
+<td><span class="qg" role="img" aria-label="CHONG-2">󰁖</span></td>
+<td>U+725B 牛</td>
+</tr>
+<tr>
+<td>GIONG-2 (+5D)</td>
+<td><span class="qg" role="img" aria-label="GIONG-2">󰁝</span></td>
+<td>U+725B 牛</td>
+</tr>
+<tr>
+<td>XONG (+62)</td>
+<td><span class="qg" role="img" aria-label="XONG">󰁢</span></td>
+<td>U+005A Z, U+4E4B 之</td>
+</tr>
+<tr>
+<td>SONG (+70)</td>
+<td><span class="qg" role="img" aria-label="SONG">󰁰</span></td>
+<td>U+0418 И CYRILLIC CAPITAL LETTER I</td>
+</tr>
+<tr>
+<td>RONG (+77)</td>
+<td><span class="qg" role="img" aria-label="RONG">󰁷</span></td>
+<td>U+004E N</td>
+</tr>
+<tr>
+<td>MONG (+7E)</td>
+<td><span class="qg" role="img" aria-label="MONG">󰁾</span></td>
+<td>U+53C8 又, U+3121 ㄡ BOPOMOFO LETTER OU</td>
+</tr>
+<tr>
+<td>Dấu thanh vòng tròn trên phải (+A1)</td>
+<td><span class="qg" role="img" aria-label="TONE-CIRCLE-UPPER-RIGHT">󰂡</span></td>
+<td>U+309A COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK</td>
+</tr>
+<tr>
+<td>Dấu thanh (+9C..+A3)</td>
+<td>(4.4)</td>
+<td>U+302A..U+302D dấu thanh chữ Hán (cùng góc, khác hình dạng, 5.3)</td>
+</tr>
+</tbody>
+</table>
+<p>Mọi ký tự đề xuất đều có giá trị Script riêng, nên việc phát hiện văn bản trộn nhiều chữ viết tách chúng khỏi các ký tự này. Các dạng được phân biệt bằng số lượng và vị trí của các nét, và trong một ô, ngữ cảnh của chữ khiến việc nhầm lẫn trong văn bản liền mạch khó xảy ra.</p>
+</body></html>
