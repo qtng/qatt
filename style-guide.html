@@ -58,7 +58,7 @@
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3" data-vi="Sổ tay chính tả">Style guide</h1>
     <p class="lead mx-auto mb-4">How qatt.org writes Vietnamese in Quốc Âm Tân Tự: the writing standard of the editor, the course, Spell it! and the Notes app.</p>
-    <a class="btn btn-outline-secondary btn-pill" href="/decodings.html" data-vi="So sánh các bảng vần">Compare rhyme tables</a>
+    <a class="btn btn-outline-secondary btn-pill" href="/decodings.html" data-vi="Giải mã qatt.org và omniglot.com">Decodings of qatt.org and omniglot.com</a>
     <a class="btn btn-outline-secondary btn-pill" href="/editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
   </div>
 </header>
@@ -66,16 +66,16 @@
 <main class="container py-4">
   <div class="guide mx-auto">
     <h2 data-vi="Sổ tay chính tả là gì">What the style guide is</h2>
-    <p>The source of Quốc Âm Tân Tự gives the rhymes of its 110 Chi only through Nôm annotations, and not all of them can be read with certainty. A <a href="/decodings.html">decoding</a> is an attempt to read that rhyme table. The decoding of qatt.org is one of them.</p>
-    <p>The style guide is not a decoding. It is a definition: the spelling that qatt.org uses to write Vietnamese today, as a newspaper has a style guide of its own. It starts from the decoding qatt.org and changes it where the decoding leaves a rhyme of Vietnamese without a place or puts it far from its vowel. Its aim is a table that can be learnt: every row holds the rhymes of one vowel.</p>
+    <p>The source of Quốc Âm Tân Tự gives the rhymes of its 110 Chi only through Nôm annotations, and not all of them can be read with certainty. A decoding is an attempt to read that rhyme table. Two are in use, the decoding qatt.org and the decoding omniglot.com; the page <a href="/decodings.html">Decodings</a> shows and compares them.</p>
+    <p>The style guide is not a decoding. It is a definition: the spelling that qatt.org uses to write Vietnamese today, as a newspaper has a style guide of its own. It starts from the <a href="/decodings.html">decoding qatt.org</a> and changes it where the decoding leaves a rhyme of Vietnamese without a place or puts it far from its vowel. Its aim is a table that can be learnt: every row holds the rhymes of one vowel.</p>
 
     <h2 data-vi="Các quy tắc">The rules</h2>
     <ol>
-      <li><strong>The basis is the decoding qatt.org.</strong> Every rhyme that is not named below keeps its place, including the exchange of the rows CHONG and XONG, GIONG and KHONG.</li>
-      <li><strong>The unmarked Cán writes the rhymes with the coda u or o.</strong> In a pair, an unmarked Cán on the right is the rhyme of the row of its vowel: ao on NGONG, eo on GONG, âu on NONG, iu on SONG and so on. The position decides: on the left an unmarked Cán is the initial, on the right the rhyme. Example: <span class="q" id="ex-cao"></span> cao.</li>
-      <li><strong>ôm, um, om and uôm</strong> stand on MONG-6, BONG-6, VONG-6 and PHONG-6, in the rows of ô, u, o and ua.</li>
-      <li><strong>ư and ươ</strong> stand on TRONG-2 and DONG-2, the first Chi of their rows.</li>
-      <li><strong>uêu</strong>, which has no place in the decoding, is the unmarked Cán of GIONG.</li>
+      <li><strong>The basis is the <a href="/decodings.html">decoding qatt.org</a>.</strong> Every rhyme that is not named below keeps its place, including the exchange of the rows CHÔNG and XÔNG, GIÔNG and KHÔNG.</li>
+      <li><strong>The unmarked Cán writes the rhymes with the coda u or o.</strong> In a pair, an unmarked Cán on the right is the rhyme of the row of its vowel: ao on NGÔNG, eo on GÔNG, âu on NÔNG, iu on SÔNG and so on. The position decides: on the left an unmarked Cán is the initial, on the right the rhyme. Example: <span class="q" id="ex-cao"></span> cao.</li>
+      <li><strong>ôm, um, om and uôm</strong> stand on MÔNG-6, BÔNG-6, VÔNG-6 and PHÔNG-6, in the rows of ô, u, o and ua.</li>
+      <li><strong>ư and ươ</strong> stand on TRÔNG-2 and ĐÔNG-2, the first Chi of their rows.</li>
+      <li><strong>uêu</strong>, which has no place in the decoding, is the unmarked Cán of GIÔNG.</li>
       <li><strong>The places that are freed stay empty.</strong> They are obsolete for Vietnamese, not given to other rhymes, so that a text after the decoding is never read wrongly as a different word.</li>
     </ol>
 
@@ -106,7 +106,8 @@
 <script>
 (() => {
   const SHAPES = VietnameseParser.SHAPES;
-  const NAMES = "LONG ONG NGONG HONG GONG CONG TRONG DONG NONG TONG THONG NHONG CHONG GIONG XONG KHONG SONG RONG MONG BONG VONG PHONG".split(" ");
+  // the names of the 22 Cán as a learner reads them: lông, ông, ngông … đông (the row order of the tables)
+  const NAMES = "LÔNG ÔNG NGÔNG HÔNG GÔNG CÔNG TRÔNG ĐÔNG NÔNG TÔNG THÔNG NHÔNG CHÔNG GIÔNG XÔNG KHÔNG SÔNG RÔNG MÔNG BÔNG VÔNG PHÔNG".split(" ");
   const guide = VietnameseParser.DECODINGS.qatt, decoding = VietnameseParser.DECODINGS.qode;
   const code = s => s === "z" ? "_" : s;
   const glyph = (shape, mark) => QattText.syllable(code(shape) + (mark || "") + ",,,0");

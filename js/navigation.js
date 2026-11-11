@@ -260,7 +260,6 @@ window.Readings = window.Readings || (function() {
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 4, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Unicode", bar: "Unicode", barOrder: 5, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
             { name: "Style guide", vi: "Sổ tay chính tả", tile: "Style", tileVi: "Chính tả", url: "/style-guide.html", icon: "bi-journal-check" },
-            { name: "Decodings", vi: "Giải mã", tile: "Decodings", tileVi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
             { name: "Wiki", tile: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
     };
