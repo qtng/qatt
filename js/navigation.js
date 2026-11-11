@@ -259,7 +259,7 @@ window.Readings = window.Readings || (function() {
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 3, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 4, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Unicode", bar: "Unicode", barOrder: 5, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
-            { name: "Decodings", vi: "Giải mã", tile: "Decodings", tileVi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
+            { name: "Style guide", vi: "Sổ tay chính tả", tile: "Style", tileVi: "Chính tả", url: "/style-guide.html", icon: "bi-journal-check" },
             { name: "Wiki", tile: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
     };
