@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QATTKey – Vietnamese keyboard for Android | Qatt.org</title>
+  <meta name="description" content="QATTKey is an Android keyboard for Vietnamese: type with Telex and send Chữ Nôm, QATT or PA to any chat as an image that everyone can read, without a font. Free APK download.">
+  <link rel="canonical" href="https://qatt.org/apps/keyboard.html">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Qatt.org">
+  <meta property="og:title" content="QATTKey – the Vietnamese keyboard with QATT and Chữ Nôm">
+  <meta property="og:description" content="Type Vietnamese with Telex and send it as text or as an image in QATT, PA or Chữ Nôm to any app.">
+  <meta property="og:url" content="https://qatt.org/apps/keyboard.html">
+  <meta property="og:image" content="https://qatt.org/apps/keyboard/keyboard-chat.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <script src="/js/navigation.js"></script>
+  <style>
+    :root { --ink: #2b2118; --cinnabar: #a8362a; --paper: #f7efdc; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, rgba(168, 54, 42, .10), transparent 70%),
+        linear-gradient(180deg, var(--paper) 0%, #fffdf8 100%);
+      border-bottom: 0 !important;
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.6rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 36rem; color: var(--bs-secondary-color); }
+    .shot { display: block; width: 100%; height: auto; border-radius: 1rem; box-shadow: 0 .8rem 2.2rem rgba(0, 0, 0, .28); background: #111; }
+    .hero .shot { max-width: 19rem; margin: 0 auto; }
+    figure { margin: 0; }
+    figcaption { margin-top: .7rem; font-size: .93rem; color: var(--bs-secondary-color); text-align: center; }
+    .rule { display: flex; align-items: center; gap: 1rem; max-width: 46rem; margin: 0 auto 1.4rem; color: var(--bs-tertiary-color); font-size: .8rem; letter-spacing: .25em; text-transform: uppercase; }
+    .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid #dccfb2; }
+    section.block { padding-block: 2.5rem; }
+    section.block h2 { border-bottom: 0 !important; padding-bottom: 0 !important; }
+    .feature .bi { font-size: 1.6rem; color: var(--cinnabar); line-height: 1; }
+    .feature h3 { font-size: 1.05rem; margin: .7rem 0 .4rem; }
+    .feature p { margin: 0; font-size: .93rem; color: var(--bs-secondary-color); }
+    .num { width: 2rem; height: 2rem; border-radius: 50%; background: var(--cinnabar); color: #fff; display: grid; place-items: center; font-weight: 600; }
+    .steps { max-width: 40rem; margin: 0 auto; padding-left: 1.2rem; }
+    .steps li { margin-bottom: .45rem; }
+    .small-note { max-width: 40rem; margin: 1.2rem auto 0; font-size: .88rem; color: var(--bs-secondary-color); text-align: center; }
+    #how, #styles, #features, #install { padding-inline: .75rem; }   /* the hard shadow of a theme must not touch the edge of the screen */
+  </style>
+</head>
+<body>
+
+<header class="hero pt-5 pb-5">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-md-7 text-center text-md-start">
+        <div class="han mb-2" data-nosnippet>國音新字</div>
+        <h1 class="mb-3">QATTKey</h1>
+        <p class="lead mb-4" data-vi="Bàn phím tiếng Việt cho Android: viết chữ Nôm, QATT hay PA trong mọi cuộc trò chuyện. Gửi đi như hình ảnh, ai cũng đọc được mà không cần phông chữ.">The Vietnamese keyboard for Android: write Chữ Nôm, QATT or PA in any chat. It is sent as an image, so everyone can read it without a font.</p>
+        <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2 mb-2">
+          <a class="btn btn-cinnabar btn-pill" href="https://cdn.qatt.org/qattkey/QATTKey-latest.apk" download><i class="bi bi-download"></i> <span data-vi="Tải APK (Android)">Download the APK (Android)</span></a>
+          <a class="btn btn-ink btn-pill" href="#install" data-vi="Cài đặt">Install</a>
+        </div>
+        <p class="mb-0 small text-body-secondary" data-vi="Miễn phí · khoảng 50 MB · phiên bản thử nghiệm (beta)">Free · about 50 MB · beta version</p>
+      </div>
+      <div class="col-md-5">
+        <figure>
+          <img class="shot" src="/apps/keyboard/keyboard-chat.jpg" width="600" height="887" alt="A chat in Messenger: a message in Chữ Nôm sent as an image in a colour gradient; below it QATTKey with the composition field, the next word being typed and its Chữ Nôm candidates">
+          <figcaption data-vi="Chữ Nôm trong Messenger: người nhận không cần phông chữ nào.">Chữ Nôm in Messenger: the receiver needs no font at all.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+
+  <section class="block" id="how">
+    <div class="rule" aria-hidden="true" data-vi="Cách dùng">How it works</div>
+    <h2 class="h3 text-center mb-4" data-vi="Viết như thường, gửi bằng chữ viết bạn muốn.">Type as usual, send in the script you like.</h2>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="card h-100 feature"><div class="card-body">
+        <div class="num">1</div>
+        <h3 data-vi="Mở khung soạn thảo">Open the field</h3>
+        <p data-vi="Trong bất kỳ ứng dụng nào, chạm biểu tượng 喃 trên thanh gợi ý. Một khung soạn thảo mở ra phía trên bàn phím.">In any app, tap the 喃 icon in the suggestion bar. A field of its own opens above the keyboard.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100 feature"><div class="card-body">
+        <div class="num">2</div>
+        <h3 data-vi="Gõ Telex, chọn chữ">Type Telex, pick a character</h3>
+        <p data-vi="Gõ tiếng Việt bằng Telex. Dưới khung hiện các gợi ý PA, QATT và chữ Nôm; một chạm là chọn, phím cách tự chuyển từ vừa gõ.">Type Vietnamese with Telex. Below the field come the candidates in PA, QATT and Chữ Nôm; a tap picks one, the space bar converts the word by itself.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100 feature"><div class="card-body">
+        <div class="num">3</div>
+        <h3 data-vi="Gửi như hình ảnh">Send it as an image</h3>
+        <p data-vi="Nút gửi màu cam chèn văn bản thành hình ảnh với kiểu nền đã chọn. Người nhận thấy đúng như bạn thấy, không cần phông chữ.">The orange send button puts the text in as an image in the style you chose. The receiver sees exactly what you see, without any font.</p>
+      </div></div></div>
+    </div>
+  </section>
+
+  <section class="block" id="styles">
+    <div class="rule" aria-hidden="true" data-vi="Kiểu nền">Styles</div>
+    <div class="row g-4 align-items-center">
+      <div class="col-md-5 text-center text-md-start">
+        <h2 class="h3 mb-3" data-vi="Chọn kiểu cho hình ảnh của bạn.">Choose the look of your image.</h2>
+        <p class="text-body-secondary" data-vi="White, Dark, Gold leaf, Cinnabar, Lotus, Sunset, Ocean và Classic (giấy dó). Chọn kiểu trong menu cạnh nút gửi; khung soạn thảo cho xem ngay hình ảnh sẽ gửi đi, với cùng cách xuống dòng.">White, Dark, Gold leaf, Cinnabar, Lotus, Sunset, Ocean and Classic (rice paper). Pick one in the menu next to the send button; the field shows the image that will be sent at once, with the same line breaks.</p>
+        <p class="text-body-secondary mb-0" data-vi="Mỗi ứng dụng nhớ kiểu của riêng nó.">Every app keeps its own choice.</p>
+      </div>
+      <div class="col-md-7">
+        <img class="shot" src="/apps/keyboard/keyboard-styles.jpg" width="700" height="718" loading="lazy" alt="The menu of the send formats: Image: Dark, Gold leaf, Cinnabar, Lotus, Sunset, Ocean (chosen), Classic and Text, each in its colours; below it the composition field in the Ocean style">
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="features">
+    <div class="rule" aria-hidden="true" data-vi="Tính năng">Features</div>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-fonts" aria-hidden="true"></i>
+        <h3 data-vi="Hoặc như văn bản">Or as text</h3>
+        <p data-vi="Gửi chữ Nôm như văn bản Unicode khi muốn; ở ứng dụng không nhận hình ảnh, bàn phím tự gửi văn bản.">Send Chữ Nôm as Unicode text when you like; in an app that takes no images the keyboard sends text by itself.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-check2-square" aria-hidden="true"></i>
+        <h3 data-vi="Chữ viết của bạn">Your scripts</h3>
+        <p data-vi="Bật hoặc tắt PA, QATT và chữ Nôm, và chọn phím cách chuyển sang chữ viết nào.">Switch PA, QATT and Chữ Nôm on or off, and choose what the space bar converts to.</p>
+      </div></div></div>
+      <div class="col-md-4"><div class="card h-100 feature"><div class="card-body">
+        <i class="bi bi-globe2" aria-hidden="true"></i>
+        <h3 data-vi="Bàn phím hằng ngày">An everyday keyboard</h3>
+        <p data-vi="Ngoài khung soạn thảo là một bàn phím đầy đủ: tiếng Việt, tiếng Đức, tiếng Anh và nhiều ngôn ngữ khác, có gợi ý từ.">Outside the field it is a full keyboard: Vietnamese, German, English and many more languages, with word suggestions.</p>
+      </div></div></div>
+    </div>
+  </section>
+
+  <section class="block" id="install">
+    <div class="rule" aria-hidden="true" data-vi="Cài đặt">Install</div>
+    <h2 class="h3 text-center mb-3" data-vi="Cài đặt trong ba bước.">Installed in three steps.</h2>
+    <ol class="steps">
+      <li data-vi="Tải tệp APK và mở nó; Android sẽ hỏi có cho phép cài đặt từ trình duyệt này không — hãy cho phép.">Download the APK and open it; Android asks whether this browser may install apps — allow it.</li>
+      <li data-vi="Mở QATTKey, bật bàn phím trong Cài đặt → Hệ thống → Bàn phím rồi chọn nó làm bàn phím đang dùng.">Open QATTKey, switch the keyboard on (Settings → System → Keyboard) and choose it as the active keyboard.</li>
+      <li data-vi="Lần đầu mở khung soạn thảo, bạn chọn chữ viết muốn dùng.">The first time you open the field you choose the scripts you want.</li>
+    </ol>
+    <p class="text-center mt-4 mb-0"><a class="btn btn-cinnabar btn-pill" href="https://cdn.qatt.org/qattkey/QATTKey-latest.apk" download><i class="bi bi-download"></i> <span data-vi="Tải APK (Android)">Download the APK (Android)</span></a></p>
+    <p class="small-note" data-vi="Đây là phiên bản thử nghiệm, chỉ phát hành dưới dạng APK (chưa có trên Google Play), và cần Android 5 trở lên.">This is a beta that is published only as an APK (not on Google Play), for Android 5 and newer.</p>
+    <p class="small-note"><span data-vi="QATTKey là bản phái sinh của">QATTKey is a fork of</span> <a href="https://github.com/Helium314/HeliBoard">HeliBoard</a> (GPL-3.0). <span data-vi="Mã nguồn:">Source code:</span> <a href="https://github.com/qtng/qatt-chunom-apk">qtng/qatt-chunom-apk</a>.</p>
+  </section>
+
+</main>
+<div class="pb-4"></div>
+</body>
+</html>
