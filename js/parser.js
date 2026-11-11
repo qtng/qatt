@@ -40,8 +40,9 @@ class VietnameseParser {
 
             // Rhyme tables of the known decodings: DECODINGS[name][row][column] = rhyme written with the shape of the row and the marking stroke
             // column + 2 (a sixth column is the shape without marking stroke).
+            // qode: the decoding of qatt.org (a reading of the source); qatt: the qatt.org style guide, the writing standard of the site, the default.
             static DECODINGS = {
-                    qatt: [
+                    qode: [
                         ["ơ", "ơnh", "ơn", "ơi", "ơm"],
                         ["uơ", "uơnh", "uơn", "uơi", "ôm"],
                         ["a", "ang", "an", "ai", "am"],
@@ -65,34 +66,10 @@ class VietnameseParser {
                         ["o", "on", "oi", "iêu", "êu"],
                         ["ua", "uôn", "uôi", "iu", "uyu"]
                     ],
-                    qoex: [
-                        ["", "anh", "ơn", "ơi", "ơm", "ơ"],
-                        ["", "oanh", "uơn", "uơi", "", "uơ"],
-                        ["", "ang", "an", "ai", "am", "a"],
-                        ["", "oang", "oan", "oai", "oam", "oa"],
-                        ["", "eng", "en", "", "em", "e"],
-                        ["", "oeng", "oen", "", "", "oe"],
-                        ["ưu", "ưng", "ưi", "ưn", "ưm", "ư"],
-                        ["ươu", "ương", "ươi", "ươn", "ươm", "ươ"],
-                        ["âu", "âng", "ây", "ân", "âm", "â"],
-                        ["uâu", "uâng", "uây", "uân", "", "uâ"],
-                        ["au", "ăng", "ay", "ăn", "ăm", "ă"],
-                        ["oau", "oăng", "oay", "oăn", "oăm", "oă"],
-                        ["", "iêng", "", "iên", "iêm", "iê"],
-                        ["", "", "", "uyên", "", "uyê"],
-                        ["", "ênh", "ê", "ên", "êm", "ê"],
-                        ["", "uênh", "uê", "uên", "uêm", "uê"],
-                        ["", "inh", "i", "in", "im", "i"],
-                        ["", "uynh", "uy", "uyn", "uym", "uy"],
-                        ["", "ôn", "ôi", "ao", "oao", "ô"],
-                        ["", "un", "ui", "eo", "oeo", "u"],
-                        ["", "on", "oi", "iêu", "êu", "o"],
-                        ["", "uôn", "uôi", "iu", "uyu", "uô"]
-                    ],
                     // qatt.org style guide: a writing standard built on the decoding qatt.org (rows CHONG/XONG and GIONG/KHONG as there), not a decoding.
                     // Rhymes ending in u/o take the plain shape of the row of their vowel; ôm, um, om, uôm are MONG-6, BONG-6, VONG-6, PHONG-6;
                     // ư, ươ are TRONG-2, DONG-2. The places that become free and the rhymes Vietnamese lacks are left empty (obsolete).
-                    qosg: [
+                    qatt: [
                         ["ơ", "anh", "ơn", "ơi", "ơm", ""],
                         ["uơ", "oanh", "uơn", "uơi", "", ""],
                         ["a", "ang", "an", "ai", "am", "ao"],
