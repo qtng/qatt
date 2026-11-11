@@ -1,12 +1,12 @@
 /*
 The lessons of learn/ (the course "Learn QATT"): the list of the lessons, the steps above and the pager below a lesson, the progress of the browser,
 and the board: rows of two items, a band that moves down row by row every few seconds and reads the row aloud, tabs above it that change the rows.
-Every glyph and reading comes from js/parser.js and js/qatt-text.js (the decodings of the site), nothing is kept here.
+Every glyph and reading comes from js/parser.js and js/qatt-text.js (the style guide of the site, the default table of the parser), nothing is kept here.
 
   Learn.page('rhymes')                    the steps and the pager of that lesson (#learnSteps, #learnPager); a lesson with soon: true is a page that only says "coming soon"
-  Learn.board(el, { build, step, decoding, lesson })
+  Learn.board(el, { build, step, lesson })
         build(parser) -> [{ label, vi, sample, apart, rows: [[item, item], …] }]   (apart: that many first rows stand apart, a line below the last of them, and are skipped when a tab is entered; true = 1)
-          (called again when the decoding changes, then onRebuild(parser)); tabRows: the tabs in that many rows
+          (then onRebuild(parser)); tabRows: the tabs in that many rows
         item = { glyph | parts: [a, b], show, small, smallVi, speak }      (glyph: QATT text; show: the reading, in the middle of the row; small: a line below it)
   Learn.parser, Learn.glyph(shape, mark), Learn.code(shape), Learn.consonant(shape), Learn.cell(word), Learn.syllable(code)
 Needs parser.js and qatt-text.js; css/learn.css.
@@ -137,11 +137,10 @@ const Learn = (() => {
   const speak = text => { if (sound && text) withSpeaker(sp => sp.speak(text, 'auto', 0.8)); };   // read aloud (unless the sound of the board is off)
 
   // the board
-  const board = (root, { build, step = 2500, decoding = true, lesson = current, onRebuild, tabRows = 1 } = {}) => {
+  const board = (root, { build, step = 2500, lesson = current, onRebuild, tabRows = 1 } = {}) => {
     root.style.setProperty('--step', step / 1000 + 's');
     const html = `
       <div class="d-flex justify-content-center align-items-center gap-2 tools mb-3">
-        ${decoding ? `<select class="form-select form-select-sm w-auto" data-k="decoding" aria-label="Decoding" data-vi-aria-label="Cách giải mã"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select>` : ''}
         <select data-qatt-fonts data-qatt-default="QATT Pen" class="form-select form-select-sm w-auto" aria-label="Font"></select>
       </div>
       <div class="marks" role="tablist" data-k="marks"><div class="pill" data-k="pill"></div></div>
@@ -273,7 +272,7 @@ const Learn = (() => {
     const rebuild = animate => {
       tabs = build(parser).filter(t => t.rows.length);
       drawTabs(); setTab(Math.min(tab, tabs.length - 1), animate); if (!started) row = first(); show(false, false);
-      if (onRebuild) onRebuild(parser);                   // the rest of the page follows the decoding too
+      if (onRebuild) onRebuild(parser);
     };
 
     $('play').addEventListener('click', () => setPlaying(!playing));
@@ -283,20 +282,6 @@ const Learn = (() => {
       sound = !sound; showSound();
       try { localStorage.setItem('qattLearnSound', sound ? '1' : '0'); } catch (e) {}
     });
-    if (decoding) {
-      const sel = $('decoding');
-      // the choice is kept for the lessons only (this tab, until it is closed); ?decoding= wins; the rest of the site never reads it
-      let kept = null; try { kept = sessionStorage.getItem('qattLearnDecoding'); } catch (e) {}
-      const want = new URLSearchParams(location.search).get('decoding') || kept;
-      if (want && [...sel.options].some(o => o.value === want)) sel.value = want;
-      parser.setDecoding(sel.value);
-      sel.addEventListener('change', () => {
-        parser.setDecoding(sel.value);
-        try { sessionStorage.setItem('qattLearnDecoding', sel.value); } catch (e) {}
-        const u = new URL(location.href); u.searchParams.set('decoding', sel.value); history.replaceState(null, '', u);
-        rebuild(true);
-      });
-    }
     document.addEventListener('keydown', e => {
       if (e.target.closest('select, input, textarea, a, button')) return;   // a focused button gets Space itself
       if (e.key === ' ') { e.preventDefault(); setPlaying(!playing); }

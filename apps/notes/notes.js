@@ -5,8 +5,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 */
 (() => {
   const $ = id => document.getElementById(id);
-  const extraDecodings = {};   // the tables of decodings.json by name, filled at the start (loadDecodings)
-  const parser = new VietnameseParser('qatt', extraDecodings);
+  const parser = new VietnameseParser('qatt');   // the style guide (the notes are written after it; older ones are rewritten at the start and at an import, NotesCore.toStyleGuide)
   const field = $('note-field');
   const state = { store: null, notes: [], current: null, inStore: false, dirty: false };
   const app = window.notesApp = { store: null, ready: false, parser, flush: () => save() };
@@ -219,7 +218,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   const go = hash => { history.pushState({ fromList: true }, '', hash); return route(); };
   // a new note (empty, or with the text of the clipboard); the first note ever is Neon night, later ones get a random style
   function openNewNote(text = '') {
-    const now = Date.now(), note = { id: newId(), text, created: now, updated: now, format: { size: 150 }, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };
+    const now = Date.now(), note = { id: newId(), text, created: now, updated: now, sg: 1, format: { size: 150 }, style: NotesStyles.encode(NotesStyles.css(state.notes.length === 0 ? styleById('neon-glow') : NotesStyles.random())) };
     history.pushState({ fromList: true }, '', '#/n/' + encodeURIComponent(note.id));
     $('view-list').hidden = true;
     showEditor(note, true);
@@ -358,7 +357,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (!file) return;
     const parsed = NotesCore.parseImport(await file.text());
     if (!parsed.ok) { snack(parsed.error, ERRORS_VI[parsed.error] || parsed.error); return; }
-    const merged = NotesCore.merge(state.notes, parsed.notes);
+    const merged = NotesCore.merge(state.notes, parsed.notes.map(NotesCore.toStyleGuide));
     try { await state.store.putMany(merged.notes); } catch (e) { warnUnsaved(); return; }
     state.notes = merged.notes;
     renderList();
@@ -371,10 +370,10 @@ window.notesApp = { store, ready, flush() } is for the tests.
   document.addEventListener('langchange', () => { langLabel(); renderList(); });
   langLabel();
 
-  // ----- font, style, size, alignment, decoding -----
-  // the format (font, size, alignment, decoding, bold, italic) belongs to the note: note.format holds what differs from the defaults; user = chosen in the menu (stored in the note), else only shown
+  // ----- font, style, size, alignment -----
+  // the format (font, size, alignment, bold, italic) belongs to the note: note.format holds what differs from the defaults; user = chosen in the menu (stored in the note), else only shown
   const FONTS = qattFontsShown();   // js/fonts.js decides which fonts this visitor has, and its default is the default here (QATT Pen: the QATT letters of Pen Medium, CJK and Chữ Nôm characters from the big file of the Chunom site, loaded only when one is shown)
-  const FORMAT_DEFAULTS = { font: (FONTS.find(f => f.default) || FONTS[0]).family, size: 100, align: 'left', decoding: 'qatt', bold: false, italic: false };
+  const FORMAT_DEFAULTS = { font: (FONTS.find(f => f.default) || FONTS[0]).family, size: 100, align: 'left', bold: false, italic: false };
   const formatOf = note => ({ ...FORMAT_DEFAULTS, ...(note && note.format && typeof note.format === 'object' ? note.format : {}) });
   const keepFormat = (key, value) => { const note = state.current; if (!note) return; note.format = { ...(note.format || {}), [key]: value }; schedule(); };
   const setFont = (family, user) => {
@@ -387,7 +386,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
   };
   const pickFont = family => { setFont(family, true); closeMenu(); };
-  const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles, written with the decoding chosen
+  const sampleText = () => ['quốc', 'âm', 'tân', 'tự'].map(w => QattText.word(w, parser) || '').join('');   // the sample of fonts and styles
   const refreshSamples = () => { const text = sampleText(); document.querySelectorAll('.qsample, .style-sample').forEach(e => { e.textContent = text; }); };
   for (const f of FONTS) {
     const b = document.createElement('button');
@@ -460,42 +459,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     const f = formatOf(note);
     setFont(f.font); setSize(f.size); setAlign(f.align);
     emphasis.bold(f.bold === true); emphasis.italic(f.italic === true);
-    useDecoding(f.decoding);
   }
-
-  // qatt and omniglot are in parser.js; decodings.json holds additional ones (an entry with the name of a built-in one replaces it in the app) and is loaded at every start
-  const validDecoding = d => d && typeof d.name === 'string' && /^[a-z][a-z0-9_-]*$/.test(d.name) && Array.isArray(d.table)
-    && d.table.length === VietnameseParser.SHAPES.length && d.table.every(row => Array.isArray(row) && row.every(r => typeof r === 'string'));
-  async function loadDecodings() {
-    const list = new Map([['qatt', 'qatt.org'], ['omniglot', 'omniglot']]);
-    try {
-      const r = await fetch('/decodings.json', { cache: 'no-store' });
-      const data = r.ok ? await r.json() : [];
-      for (const d of Array.isArray(data) ? data : []) {
-        if (!validDecoding(d)) continue;   // an invalid entry is skipped, the others stay
-        extraDecodings[d.name] = d.table;
-        list.set(d.name, typeof d.label === 'string' && d.label ? d.label : d.name);
-      }
-    } catch (e) { /* offline without a stored copy: the built-in tables only */ }
-    const select = $('set-decoding');
-    select.textContent = '';
-    for (const [name, label] of list) select.append(new Option(label, name));
-    useDecoding(formatOf(state.current).decoding);
-  }
-  function useDecoding(name) {   // the reading of the note: only the tables change, the text stays as it is
-    const select = $('set-decoding');
-    if (!Array.from(select.options).some(o => o.value === name)) name = 'qatt';
-    select.value = name;
-    parser.setDecoding(name);
-    refreshSamples();
-  }
-  $('set-decoding').addEventListener('change', () => {
-    const name = $('set-decoding').value;
-    keepFormat('decoding', name);
-    editor.setDecoding(name);
-    refreshSamples();
-    closeMenu();
-  });
 
   // ----- delete and undo -----
   // ----- the seal (note.seal = { text, x, y }): red characters in a red frame over the text (inside transparent), its size after its characters, with the characters asked for ("tân tự" at first) in the default QATT font, in columns of two
@@ -528,7 +492,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     }));
     placeSeal();
   }
-  // a word of the text typed: Quốc Ngữ becomes QATT with the decoding of the note, QATT stays
+  // a word of the text typed: Quốc Ngữ becomes QATT after the style guide, QATT stays
   const toSealText = text => sealCells(text).map(w => /[\u{F0000}-\u{F00A3}]/u.test(w) ? w : NotesEditor.convertText(w, parser).replace(/[\s‌]+/g, '')).join(' ');
   const sealReading = text => sealCells(text).map(w => /[\u{F0000}-\u{F00A3}]/u.test(w) ? NotesEditor.convertText(w, parser).replace(/[\s‌]+/g, ' ').trim() : w).join(' ');
   $('menu-seal').addEventListener('click', () => {
@@ -764,9 +728,13 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // ----- start -----
   (async () => {
-    await loadDecodings();
-    try { state.store = await NotesDB.open(); state.notes = await state.store.all(); }
+    try {
+      state.store = await NotesDB.open(); state.notes = await state.store.all();
+      const old = state.notes.filter(n => n.sg !== 1);   // written after a decoding, before the style guide: rewritten once
+      if (old.length) { state.notes = state.notes.map(NotesCore.toStyleGuide); await state.store.putMany(state.notes.filter(n => old.some(o => o.id === n.id))); }
+    }
     catch (e) { state.store = NotesDB.memory(); warnUnsaved(); }
+    refreshSamples();
     app.store = state.store;
     await route();
     if (state.notes.length === 0 && !state.current) $('new-note').click();   // nothing written yet: straight to the editor

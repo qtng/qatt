@@ -190,7 +190,6 @@
 </dialog>
 <div class="game mx-auto">
   <div class="d-flex justify-content-center align-items-center gap-2 tools">
-    <select id="decoding" class="form-select form-select-sm w-auto tool" aria-label="Reading of the rhyme table"><optgroup label="Choose decoding" data-vi-label="Lựa chọn cách giải mã"><option value="qatt" selected>qatt.org</option><option value="omniglot">omniglot.com</option></optgroup></select>
     <select id="font" data-qatt-fonts data-qatt-default="QATT Pen" class="form-select form-select-sm w-auto tool" aria-label="Font"></select>
     <button type="button" class="btn btn-sm tool-btn" id="reload" data-vi="Bỏ qua" disabled>Skip</button>
   </div>
@@ -495,11 +494,7 @@
         if (typeof saved.badge === 'number') me.badge = saved.badge;
       }
     } catch (e) {}
-    const dec = () => $('decoding').value || 'qatt';
-    {   // ?decoding=qatt|omniglot preselects that reading of the rhyme table (an unknown name is ignored)
-      const want = new URLSearchParams(location.search).get('decoding');
-      if (want && [...$('decoding').options].some(o => o.value === want)) { $('decoding').value = want; parser.setDecoding(want); }
-    }
+    const dec = () => 'qatt';   // the game is played after the style guide (the table qatt of parser.js); the record and the server keep the name of the table
     const mine = () => { const d = dec(); me.decoding = d; const set = me.stats[d] = me.stats[d] || blank(); for (const k of KINDS) set[k] = { f: set[k].v, m: 0, ...set[k] }; return set; };
     const saveMe = () => { try { localStorage.setItem('qattSpell', JSON.stringify({ ...me, sum: sumOf(JSON.parse(JSON.stringify(me))) })); } catch (e) {} };
     let lap, word_ = { wrong: false, hinted: false, quick: true, t0: 0, points: 0 }, hiddenDuring = false;
@@ -1052,10 +1047,6 @@
     $('lateNext').addEventListener('click', another);   // after the minute: the word is left without a take-back (the points of its clicks stay), no Skip rule
     $('reload').addEventListener('click', skipWord);
     showSkip();
-    $('decoding').addEventListener('change', e => {
-      parser.setDecoding(e.target.value); showLevels(); showStats(); if (started) start(answer, nomOf);
-      try { const u = new URL(location.href); u.searchParams.set('decoding', e.target.value); history.replaceState(history.state, '', u); } catch (err) {}   // the address follows the choice: a link or a reload keeps it
-    });   // the same word after the other decoding
 
     const wanted = new URLSearchParams(location.search).get('word');
     // the game starts with a click on Start (the word, its speech and the clocks wait for it)

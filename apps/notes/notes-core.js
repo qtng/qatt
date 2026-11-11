@@ -9,6 +9,9 @@ A note is { id, text, created, updated } (milliseconds) and may have format: { f
   NotesCore.matches(text, query, cellReading) whether the folded query is in the text or in its readings (an empty query matches)
   NotesCore.exportJSON(notes)                 the file { version: 1, notes }
   NotesCore.parseImport(json)                 { ok: true, notes } or { ok: false, error }; nothing partial: one bad note refuses the file
+  NotesCore.toStyleGuide(note)                the note written after the style guide (sg: 1): a note without sg was written after a decoding (format.decoding: omniglot, else
+                                              the decoding qatt.org, now qode); its QATT cells (text and seal) are read after it and written again after the style guide, format.decoding goes.
+                                              The note itself if it has sg already. Needs VietnameseParser (parser.js)
   NotesCore.merge(existing, incoming)         by id, the larger `updated` wins (equal: the existing one stays), sorted by `updated` descending: { notes, added, updated }
 */
 const NotesCore = (() => {
@@ -52,6 +55,18 @@ const NotesCore = (() => {
     return !q || fold(text).includes(q) || fold(readingText(text, cellReading)).includes(q);
   };
 
+  let parsers = null;
+  const toStyleGuide = note => {
+    if (note.sg === 1) return note;
+    const { decoding, ...format } = note.format || {};
+    parsers = parsers || { qode: new VietnameseParser("qode"), omniglot: new VietnameseParser("omniglot"), qatt: new VietnameseParser("qatt") };
+    const from = decoding === "omniglot" ? parsers.omniglot : parsers.qode, recode = text => QattText.recode(text, from, parsers.qatt);
+    const out = { ...note, text: recode(note.text), sg: 1 };
+    if (Object.keys(format).length) out.format = format; else delete out.format;
+    if (note.seal) out.seal = { ...note.seal, text: recode(note.seal.text) };
+    return out;
+  };
+
   const exportJSON = notes => JSON.stringify({ version: 1, notes });
 
   const validNote = n => n && typeof n === "object" && typeof n.id === "string" && n.id !== "" && typeof n.text === "string"
@@ -61,7 +76,7 @@ const NotesCore = (() => {
     try { data = JSON.parse(json); } catch (e) { return { ok: false, error: "Not a notes file" }; }
     if (!data || data.version !== 1 || !Array.isArray(data.notes)) return { ok: false, error: "Not a notes file" };
     if (!data.notes.every(validNote)) return { ok: false, error: "The file has an invalid note" };
-    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(typeof n.title === "string" && /\S/.test(n.title) ? { title: cut(n.title.trim(), 80) } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}), ...(cleanSeal(n.seal) ? { seal: cleanSeal(n.seal) } : {}) })) };
+    return { ok: true, notes: data.notes.map(n => ({ id: n.id, text: n.text, created: n.created, updated: n.updated, ...(typeof n.style === "string" && n.style.length <= 50000 ? { style: n.style } : {}), ...(typeof n.title === "string" && /\S/.test(n.title) ? { title: cut(n.title.trim(), 80) } : {}), ...(cleanFormat(n.format) ? { format: cleanFormat(n.format) } : {}), ...(cleanSeal(n.seal) ? { seal: cleanSeal(n.seal) } : {}), ...(n.sg === 1 ? { sg: 1 } : {}) })) };
   };
 
   const merge = (existing, incoming) => {
@@ -78,6 +93,6 @@ const NotesCore = (() => {
 
   // a zero width non-joiner (U+200C) belongs behind a space (Convert puts the pair between two readings): any other one is removed when a note is saved
   const cleanText = text => text.replace(/(?<! )\u200C/g, '');
-  return { cleanText, title, preview, fold, readingText, matches, exportJSON, parseImport, merge };
+  return { cleanText, title, preview, fold, readingText, matches, exportJSON, parseImport, merge, toStyleGuide };
 })();
 if (typeof module !== "undefined") module.exports = NotesCore;
