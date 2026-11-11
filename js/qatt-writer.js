@@ -73,6 +73,7 @@ const QattWriter = (() => {
       <div class="group">
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
         <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Rhyme table" data-vi-aria-label="Bảng vần" title="Rhyme table" data-vi-title="Bảng vần"></select>
+        <a class="btn btn-quiet" id="style-link" href="https://qatt.org/style-guide.html" target="_blank" rel="noopener" aria-label="What is the style guide?" data-vi-aria-label="Sổ tay chính tả là gì?" title="What is the style guide?" data-vi-title="Sổ tay chính tả là gì?"><i class="bi bi-info-circle"></i></a>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
         <button type="button" class="btn btn-quiet" id="pa-btn" hidden disabled>·</button>
         <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
