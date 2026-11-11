@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QATT style guide</title>
-  <meta name="description" content="The qatt.org style guide: how qatt.org writes Vietnamese in Quốc Âm Tân Tự, the rhyme of every Chi and of every unmarked Cán, and how it differs from the decoding qatt.org.">
+  <meta name="description" content="How qatt.org spells Vietnamese in Quốc Âm Tân Tự, shown with examples: try a word, see how a syllable is built and which shape writes which rhyme.">
   <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/site.css">
   <script src="/js/navigation.js"></script>
   <script src="/js/parser.js"></script>
   <script src="/js/qatt-text.js"></script>
   <style>
-    :root { --qfont: "QATT Pen Medium"; }
+    /* layout only; colours come from the variables of site.css and the theme */
+    :root { --qfont: "QATT Pen Medium"; --soft: color-mix(in srgb, currentColor 14%, transparent); --tint: color-mix(in srgb, var(--cinnabar) 7%, transparent); }
     .hero {
       background:
         radial-gradient(60rem 22rem at 50% -6rem, color-mix(in srgb, var(--cinnabar) 10%, transparent), transparent 70%),
@@ -21,35 +22,75 @@
     }
     .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.4rem); letter-spacing: .01em; }
     .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
-    .hero .lead { max-width: 38rem; color: var(--bs-secondary-color); }
-    .guide { max-width: 50rem; }
-    .guide h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.6rem; margin: 2.4rem 0 .8rem; }
-    .guide ol li, .guide ul li { margin-bottom: .45rem; }
-    .q { font-family: var(--qfont), sans-serif; font-size: 1.5em; line-height: 1; vertical-align: -.15em; }
+    .hero .lead { max-width: 34rem; color: var(--bs-secondary-color); }
+    .guide { max-width: 46rem; }
+    .guide h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.6rem; margin: 0 0 .5rem; }
+    .guide section { margin-top: 3rem; }
+    .guide p { margin-bottom: .7rem; }
+    .q { font-family: var(--qfont), sans-serif; line-height: 1; }
+    .step { display: inline-flex; align-items: center; justify-content: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: var(--cinnabar); color: #fff; font: 600 1rem/1 var(--bs-body-font-family); margin-right: .6rem; vertical-align: .15rem; }
 
-    .table-wrap { overflow-x: auto; width: fit-content; max-width: 100%; margin-inline: auto; }
-    table.sg { border-collapse: collapse; margin: 0 auto; font-size: .92rem; }
-    table.sg th, table.sg td { border: 1px solid color-mix(in srgb, currentColor 18%, transparent); padding: .3rem .45rem; text-align: center; vertical-align: middle; }
-    table.sg thead th { font-weight: 600; font-size: .8rem; color: var(--bs-secondary-color); white-space: nowrap; }
-    table.sg th.row { text-align: left; white-space: nowrap; font-weight: 600; position: sticky; left: 0; z-index: 1; background: var(--bs-body-bg); }
-    table.sg th.row .q { margin-right: .35rem; }
-    table.sg td { min-width: 4.2rem; }
-    table.sg td .q { display: block; font-size: 1.9rem; margin: .1rem 0 .2rem; }
+    /* try a word */
+    .try { padding: 1.2rem; border: 1px solid var(--soft); border-radius: .75rem; }
+    .try input { max-width: 22rem; font-size: 1.15rem; text-align: center; }
+    .try .hint { font-size: .85rem; color: var(--bs-secondary-color); }
+
+    /* a syllable taken apart: onset + rhyme (+ tone) = cell */
+    .words { display: flex; flex-wrap: wrap; justify-content: center; gap: .9rem; margin-top: 1rem; }
+    .word { display: flex; align-items: flex-start; justify-content: center; gap: .45rem; padding: .8rem .9rem .6rem; border: 1px solid var(--soft); border-radius: .75rem; }
+    .part { display: flex; flex-direction: column; align-items: center; min-width: 2.6rem; }
+    .part .q { font-size: 2.3rem; height: 3.2rem; display: flex; align-items: center; }
+    .part .t { font-size: .95rem; margin-top: .3rem; white-space: nowrap; }
+    .part .k { font-size: .68rem; letter-spacing: .03em; text-transform: uppercase; color: var(--bs-secondary-color); white-space: nowrap; }
+    .part.result { padding: 0 .6rem .2rem; border-radius: .5rem; background: var(--tint); }
+    .part.result .q { font-size: 2.9rem; color: var(--cinnabar); }
+    .part.result .t { font-weight: 600; }
+    .part.tone .q { font: 600 .8rem/1 var(--bs-body-font-family); }
+    .part.tone .q span { padding: .3rem .55rem; border: 1px solid var(--soft); border-radius: 1rem; white-space: nowrap; }
+    .op { height: 3.2rem; display: flex; align-items: center; color: var(--bs-secondary-color); font-size: 1.1rem; }
+    .word .note { flex-basis: 100%; }
+    .wordbox { display: flex; flex-direction: column; align-items: center; }
+    .wordbox .note { font-size: .8rem; color: var(--bs-secondary-color); margin-top: .3rem; max-width: 16rem; text-align: center; }
+    .unknown { color: var(--bs-secondary-color); align-self: center; }
+
+    /* one shape, one vowel */
+    .vowels { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; margin: 1rem 0; }
+    .vowels button { display: flex; flex-direction: column; align-items: center; min-width: 3rem; padding: .3rem .35rem .25rem; border: 1px solid var(--soft); border-radius: .5rem; background: transparent; color: inherit; }
+    .vowels button .q { font-size: 1.5rem; }
+    .vowels button .t { font-size: .85rem; margin-top: .15rem; }
+    .vowels button[aria-pressed="true"] { border-color: var(--cinnabar); background: var(--tint); }
+    .vowels button[aria-pressed="true"] .t { color: var(--cinnabar); font-weight: 600; }
+    .family { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .4rem; max-width: 34rem; margin: 0 auto; }
+    .family .tile { display: flex; flex-direction: column; align-items: center; padding: .6rem .2rem .45rem; border: 1px solid var(--soft); border-radius: .6rem; }
+    .family .tile .q { font-size: 2.3rem; }
+    .family .tile .t { margin-top: .3rem; font-weight: 600; }
+    .family .tile .k { font-size: .66rem; color: var(--bs-secondary-color); white-space: nowrap; }
+    .family .tile.plain { background: var(--tint); }
+    .family .tile.empty { opacity: .4; }
+    .family-name { text-align: center; font-size: .85rem; color: var(--bs-secondary-color); margin-top: .6rem; }
+    @media (max-width: 575.98px) { .family { grid-template-columns: repeat(3, minmax(0, 1fr)); } .hero .han { letter-spacing: .3em; } }
+
+    /* the whole table */
+    .table-wrap { overflow-x: auto; width: fit-content; max-width: 100%; margin: 1rem auto 0; }
+    table.sg { border-collapse: collapse; font-size: .9rem; }
+    table.sg th, table.sg td { border: 1px solid var(--soft); padding: .25rem .4rem; text-align: center; vertical-align: middle; }
+    table.sg thead th { font-weight: 600; font-size: .75rem; color: var(--bs-secondary-color); white-space: nowrap; }
+    table.sg th.vowel { white-space: nowrap; position: sticky; left: 0; z-index: 1; background: var(--bs-body-bg); }
+    table.sg th.vowel b { display: block; font-size: 1.05rem; }
+    table.sg th.vowel small { font-weight: 400; font-size: .62rem; color: var(--bs-secondary-color); }
+    table.sg td { min-width: 3.6rem; }
+    table.sg td .q { display: block; font-size: 1.7rem; margin: .1rem 0 .15rem; }
     table.sg td .r { display: block; white-space: nowrap; }
-    table.sg td.plain { background: color-mix(in srgb, var(--cinnabar) 5%, transparent); }
-    table.sg td.empty { color: var(--bs-secondary-color); opacity: .45; }
-    table.sg td.moved .r { color: var(--cinnabar); font-weight: 600; }
-    table.sg td.moved { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cinnabar) 45%, transparent); }
-    .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.2rem; font-size: .85rem; color: var(--bs-secondary-color); margin: .8rem 0 0; }
-    .legend span::before { content: ""; display: inline-block; width: .9rem; height: .9rem; margin-right: .35rem; vertical-align: -.1rem; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
-    .legend .l-plain::before { background: color-mix(in srgb, var(--cinnabar) 8%, transparent); }
-    .legend .l-moved::before { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cinnabar) 45%, transparent); }
-    .legend .l-empty::before { opacity: .45; }
+    table.sg td.plain { background: var(--tint); }
+    table.sg td.empty { opacity: .35; }
 
-    table.moves { margin: 0 auto; font-size: .92rem; }
-    table.moves td, table.moves th { padding: .2rem .7rem; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
+    details.more { margin-top: 3rem; border: 1px solid var(--soft); border-radius: .75rem; padding: .8rem 1.1rem; }
+    details.more summary { cursor: pointer; font-family: Georgia, "Times New Roman", serif; font-size: 1.25rem; }
+    details.more[open] summary { margin-bottom: .8rem; }
+    table.moves { margin: .6rem auto; font-size: .9rem; }
+    table.moves td, table.moves th { padding: .2rem .7rem; border-bottom: 1px solid var(--soft); }
     table.moves td:first-child { font-weight: 600; }
-    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } table.sg td { min-width: 3.4rem; } table.sg td .q { font-size: 1.6rem; } }
+    .next { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin: 3rem 0 1rem; }
   </style>
 </head>
 <body>
@@ -57,111 +98,179 @@
   <div class="container text-center">
     <div class="han mb-2">國音新字</div>
     <h1 class="mb-3" data-vi="Sổ tay chính tả">Style guide</h1>
-    <p class="lead mx-auto mb-4">How qatt.org writes Vietnamese in Quốc Âm Tân Tự: the writing standard of the editor, the course, Spell it! and the Notes app.</p>
-    <a class="btn btn-outline-secondary btn-pill" href="/decodings.html" data-vi="Giải mã qatt.org và omniglot.com">Decodings of qatt.org and omniglot.com</a>
-    <a class="btn btn-outline-secondary btn-pill" href="/editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
+    <p class="lead mx-auto mb-0" data-vi="Qatt.org viết tiếng Việt bằng Quốc Âm Tân Tự như thế nào: bốn ý, có ví dụ để thử.">How qatt.org spells Vietnamese in Quốc Âm Tân Tự: four ideas, with examples to try.</p>
   </div>
 </header>
 
 <main class="container py-4">
   <div class="guide mx-auto">
-    <h2 data-vi="Sổ tay chính tả là gì">What the style guide is</h2>
-    <p>The source of Quốc Âm Tân Tự gives the rhymes of its 110 Chi only through Nôm annotations, and not all of them can be read with certainty. A decoding is an attempt to read that rhyme table. Two are in use, the decoding qatt.org and the decoding omniglot.com; the page <a href="/decodings.html">Decodings</a> shows and compares them.</p>
-    <p>The style guide is not a decoding. It is a definition: the spelling that qatt.org uses to write Vietnamese today, as a newspaper has a style guide of its own. It starts from the <a href="/decodings.html">decoding qatt.org</a> and changes it where the decoding leaves a rhyme of Vietnamese without a place or puts it far from its vowel. Its aim is a table that can be learnt: every row holds the rhymes of one vowel.</p>
 
-    <h2 data-vi="Các quy tắc">The rules</h2>
-    <ol>
-      <li><strong>The basis is the <a href="/decodings.html">decoding qatt.org</a>.</strong> Every rhyme that is not named below keeps its place, including the exchange of the rows CHÔNG and XÔNG, GIÔNG and KHÔNG.</li>
-      <li><strong>The unmarked Cán writes the rhymes with the coda u or o.</strong> In a pair, an unmarked Cán on the right is the rhyme of the row of its vowel: ao on NGÔNG, eo on GÔNG, âu on NÔNG, iu on SÔNG and so on. The position decides: on the left an unmarked Cán is the initial, on the right the rhyme. Example: <span class="q" id="ex-cao"></span> cao.</li>
-      <li><strong>ôm, um, om and uôm</strong> stand on MÔNG-6, BÔNG-6, VÔNG-6 and PHÔNG-6, in the rows of ô, u, o and ua.</li>
-      <li><strong>ư and ươ</strong> stand on TRÔNG-2 and ĐÔNG-2, the first Chi of their rows.</li>
-      <li><strong>uêu</strong>, which has no place in the decoding, is the unmarked Cán of GIÔNG.</li>
-      <li><strong>The places that are freed stay empty.</strong> They are obsolete for Vietnamese, not given to other rhymes, so that a text after the decoding is never read wrongly as a different word.</li>
-    </ol>
+    <section class="try text-center mt-2">
+      <h2 data-vi="Thử một từ">Try a word</h2>
+      <p class="hint mb-2" data-vi="Gõ tiếng Việt và xem từng âm tiết được ghép như thế nào.">Type Vietnamese and see how every syllable is put together.</p>
+      <input id="try-input" class="form-control mx-auto" type="text" value="Việt Nam" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Vietnamese word" data-vi-aria-label="Từ tiếng Việt">
+      <div class="words" id="try-out" aria-live="polite"></div>
+    </section>
 
-    <h2 data-vi="Bảng vần">The rhyme table</h2>
-    <p>Each row is one Cán. The columns are its unmarked form and its five Chi, with the marking stroke at positions 2 to 6. A shaded cell is the unmarked Cán, a framed cell differs from the decoding qatt.org.</p>
+    <section>
+      <h2><span class="step">1</span><span data-vi="Bên trái là phụ âm, bên phải là vần">The consonant on the left, the rhyme on the right</span></h2>
+      <p data-vi="Mỗi âm tiết là một ô vuông. Nửa trái cho phụ âm đầu, nửa phải cho vần. Dấu thanh nằm ở một góc.">Every syllable is one square. The left half gives the first consonant, the right half the rhyme. The tone sits in a corner.</p>
+      <div class="words" data-words="bạn lên đi"></div>
+    </section>
+
+    <section>
+      <h2><span class="step">2</span><span data-vi="Mỗi hình một nguyên âm">One shape, one vowel</span></h2>
+      <p data-vi="Có 22 hình. Ở bên phải, mỗi hình thuộc về một nguyên âm. Một nét nhỏ ở một trong năm vị trí cho biết vần kết thúc thế nào.">There are 22 shapes. On the right, each shape belongs to one vowel. A small stroke in one of five places tells how the rhyme ends.</p>
+      <p data-vi="Chọn một nguyên âm:">Pick a vowel:</p>
+      <div class="vowels" id="vowels" role="group" aria-label="Vowel" data-vi-aria-label="Nguyên âm"></div>
+      <div class="family" id="family"></div>
+      <div class="family-name" id="family-name"></div>
+    </section>
+
+    <section>
+      <h2><span class="step">3</span><span data-vi="Hình trơn ở bên phải kết thúc bằng u hoặc o">The plain shape on the right ends in u or o</span></h2>
+      <p data-vi="Hình không có nét nhỏ cũng là một vần: nguyên âm của nó cộng với u hoặc o. Vị trí quyết định: bên trái là phụ âm, bên phải là vần.">The shape without a small stroke is a rhyme too: its vowel plus u or o. The place decides: on the left it is a consonant, on the right a rhyme.</p>
+      <div class="words" data-words="cao mèo lâu chiều"></div>
+    </section>
+
+    <section>
+      <h2><span class="step">4</span><span data-vi="Hai lần cùng một hình thì chỉ viết một lần">The same shape twice is written once</span></h2>
+      <p data-vi="Khi phụ âm và vần dùng cùng một hình, chỉ viết hình có nét nhỏ. Nó đứng một mình cho cả âm tiết.">When the consonant and the rhyme use the same shape, only the shape with the small stroke is written. It stands alone for the whole syllable.</p>
+      <div class="words" data-words="mô nga"></div>
+    </section>
+
+    <section>
+      <h2 data-vi="Toàn bộ bảng vần">The whole table</h2>
+      <p data-vi="Mỗi hàng là một nguyên âm với hình của nó: hình trơn và năm hình có nét nhỏ.">Each row is one vowel with its shape: the plain shape and the five with a small stroke.</p>
+    </section>
   </div>
 
   <div class="table-wrap">
     <table class="sg" id="sg-table"></table>
   </div>
-  <div class="legend">
-    <span class="l-plain" data-vi="Cán trơn">Unmarked Cán</span>
-    <span class="l-moved" data-vi="Khác với giải mã qatt.org">Different from the decoding qatt.org</span>
-    <span class="l-empty" data-vi="Không dùng">Not used</span>
-  </div>
 
   <div class="guide mx-auto">
-    <h2 data-vi="Khác với giải mã qatt.org">Differences from the decoding qatt.org</h2>
-    <p>Every rhyme of Vietnamese that the style guide writes in another place than the decoding qatt.org.</p>
-    <table class="moves" id="moves"></table>
-    <p class="mt-3" id="unused"></p>
+    <details class="more">
+      <summary data-vi="Sổ tay chính tả từ đâu ra?">Where does the style guide come from?</summary>
+      <p>The old manuscript of Quốc Âm Tân Tự explains its rhymes only with Nôm characters beside each shape, and not all of them can be read with certainty. A <em>decoding</em> is an attempt to read that table. Two are in use: the decoding qatt.org and the decoding omniglot.com. The page <a href="/decodings.html">Decodings</a> shows and compares them.</p>
+      <p>The style guide is not a decoding. It is the spelling that qatt.org has chosen for writing Vietnamese today, as a newspaper has a style guide of its own. It is built on the <a href="/decodings.html">decoding qatt.org</a> and tidies it up so that it can be learnt: every rhyme sits in the row of its vowel.</p>
+      <p data-vi="Các vần mà sổ tay chính tả viết ở chỗ khác với giải mã qatt.org:">The rhymes that the style guide writes in another place than the decoding qatt.org:</p>
+      <table class="moves" id="moves"></table>
+      <p id="unused"></p>
+      <p>The places that became free stay empty, so a text written after the decoding is never read as a different word. The editor, the wiki and the Notes app also offer the two decodings in their menu.</p>
+    </details>
 
-    <h2 data-vi="Chọn bảng vần">Choosing a rhyme table</h2>
-    <p>The editor, the wiki and the Notes app write after the style guide unless another table is chosen in their menu; a decoding can be chosen there as well. Spell it! and the course use the style guide only. Text that was written after a decoding is converted when its table is changed.</p>
+    <div class="next">
+      <a class="btn btn-cinnabar btn-pill" href="/learn/" data-vi="Học từng bước">Learn step by step</a>
+      <a class="btn btn-outline-secondary btn-pill" href="/spell.html" data-vi="Luyện tập: Đánh vần!">Practice: Spell it!</a>
+      <a class="btn btn-outline-secondary btn-pill" href="/editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
+    </div>
   </div>
 </main>
 
 <script>
 (() => {
-  const SHAPES = VietnameseParser.SHAPES;
-  // the names of the 22 Cán as a learner reads them: lông, ông, ngông … đông (the row order of the tables)
+  const SHAPES = VietnameseParser.SHAPES;                       // the row order of the rhyme tables
+  // the 22 shapes as a learner reads them, and the vowel of every row
   const NAMES = "LÔNG ÔNG NGÔNG HÔNG GÔNG CÔNG TRÔNG ĐÔNG NÔNG TÔNG THÔNG NHÔNG CHÔNG GIÔNG XÔNG KHÔNG SÔNG RÔNG MÔNG BÔNG VÔNG PHÔNG".split(" ");
+  const VOWELS = "ơ uơ a oa e oe ư ươ â uâ ă oă ê uê iê uyê i uy ô u o ua".split(" ");
+  const TONES = [null, ["sắc", "sắc"], ["huyền", "huyền"], ["hỏi", "hỏi"], ["ngã", "ngã"], ["nặng", "nặng"], ["sắc", "sắc"], ["nặng", "nặng"]];
+  const parser = new VietnameseParser("qatt");
   const guide = VietnameseParser.DECODINGS.qatt, decoding = VietnameseParser.DECODINGS.qode;
   const code = s => s === "z" ? "_" : s;
   const glyph = (shape, mark) => QattText.syllable(code(shape) + (mark || "") + ",,,0");
-  // the place of a rhyme in a table: "NAME" (unmarked Cán) or "NAME-n" (Chi, n = 2..6)
-  const places = table => {
-    const m = {};
-    table.forEach((row, i) => row.forEach((r, j) => { if (r) m[r] = NAMES[i] + (j === 5 ? "" : "-" + (j + 2)); }));
-    return m;
-  };
-  const inGuide = places(guide), inDecoding = places(decoding);
-  // anh and oanh are written in the places of ơnh and uơnh where a table has no place of their own (RHYME_SUBSTITUTES)
-  Object.entries(VietnameseParser.RHYME_SUBSTITUTES).forEach(([r, sub]) => { if (!inDecoding[r]) inDecoding[r] = inDecoding[sub]; delete inDecoding[sub]; });
-  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const el = (tag, cls, text, vi) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; if (vi) e.dataset.vi = vi; return e; };
+  const part = (cls, q, t, k, kVi) => { const p = el("div", "part " + cls); p.append(el("span", "q", q), el("span", "t", t), el("span", "k", k, kVi)); return p; };
+  const op = s => el("span", "op", s);
+  const plainTone = s => s.normalize("NFD").replace(/[̣̀́̃̉]/g, "").normalize("NFC");
 
-  // the table: rows = Cán, columns = unmarked, -2 … -6
+  // one syllable taken apart: consonant + rhyme (+ tone) = the cell
+  const wordBox = w => {
+    const box = el("div", "wordbox"), row = el("div", "word");
+    box.append(row);
+    const cell = QattText.word(w.toLowerCase(), parser), d = cell && QattText.decode(cell);
+    if (!d) { row.append(el("span", "unknown", "“" + w + "”: no Vietnamese syllable", "“" + w + "”: không phải âm tiết tiếng Việt")); return box; }
+    // the labels are the letters of the word as it is spelt: onset, and glide + vowel + coda without the tone
+    const spelt = parser.parse(w.toLowerCase());
+    const onsetText = spelt.onset || "–";
+    const result = part("result", cell, w.toLowerCase(), "syllable", "âm tiết");
+    if (d.hop) {                                                  // ông, ong, ung, uông: the short forms
+      row.append(result);
+      box.append(el("div", "note", "A short form for " + d.hop + ". The course explains these.", "Dạng viết gọn của " + d.hop + ". Khoá học giải thích các dạng này."));
+      return box;
+    }
+    if (!d.rhyme) { row.append(result); return box; }
+    const m = /^(\D+)(\d?)$/.exec(d.rhyme);
+    const rhymeText = plainTone(spelt.glide + spelt.vowel + spelt.coda);
+    const same = m[1] === d.onset && m[2];
+    row.append(part("", glyph(d.onset === "_" ? "z" : d.onset, ""), onsetText, d.onset === "_" ? "no consonant" : "consonant", d.onset === "_" ? "không phụ âm" : "phụ âm"), op("+"),
+               part("", glyph(m[1] === "_" ? "z" : m[1], m[2]), rhymeText, "rhyme", "vần"));
+    if (d.tone) { const t = part("tone", "", "", "tone", "thanh"); t.firstChild.append(el("span", "", TONES[d.tone][0], TONES[d.tone][1])); row.append(op("+"), t); }
+    row.append(op("="), result);
+    if (same) box.append(el("div", "note", "Same shape twice: written once.", "Hai lần cùng một hình: chỉ viết một lần."));
+    return box;
+  };
+  const fill = (target, text) => {
+    const words = text.split(/[^\p{L}\p{M}]+/u).filter(Boolean).slice(0, 8);
+    target.replaceChildren(...words.map(wordBox));
+  };
+  document.querySelectorAll("[data-words]").forEach(e => fill(e, e.dataset.words));
+  const input = document.getElementById("try-input"), out = document.getElementById("try-out");
+  const run = () => fill(out, input.value);
+  input.addEventListener("input", run);
+  run();
+
+  // one shape, one vowel: the family of a row
+  const KIND = [["stroke 2", "nét 2"], ["stroke 3", "nét 3"], ["stroke 4", "nét 4"], ["stroke 5", "nét 5"], ["stroke 6", "nét 6"], ["plain", "trơn"]];
+  const vowels = document.getElementById("vowels"), family = document.getElementById("family"), familyName = document.getElementById("family-name");
+  const show = i => {
+    [...vowels.children].forEach((b, j) => b.setAttribute("aria-pressed", j === i));
+    family.replaceChildren(...[5, 0, 1, 2, 3, 4].map(j => {
+      const rhyme = guide[i][j], tile = el("div", "tile" + (j === 5 ? " plain" : "") + (rhyme ? "" : " empty"));
+      tile.append(el("span", "q", glyph(SHAPES[i], j === 5 ? "" : String(j + 2))), el("span", "t", rhyme || "–"), el("span", "k", KIND[j][0], KIND[j][1]));
+      return tile;
+    }));
+    familyName.replaceChildren(el("span", "", "This shape is called " + NAMES[i] + ". On the left it writes the consonant.", "Hình này tên là " + NAMES[i] + ". Ở bên trái nó ghi phụ âm."));
+  };
+  SHAPES.forEach((shape, i) => {
+    const b = el("button"); b.type = "button";
+    b.append(el("span", "q", glyph(shape, "")), el("span", "t", VOWELS[i]));
+    b.addEventListener("click", () => show(i));
+    vowels.append(b);
+  });
+  show(2);
+
+  // the whole table: rows = vowels, columns = plain, strokes 2 … 6
   const table = document.getElementById("sg-table");
   const head = table.createTHead().insertRow();
-  head.append(el("th", "", "Cán"));
-  const plainHead = el("th", "", "Unmarked"); plainHead.dataset.vi = "Trơn"; head.append(plainHead);
-  for (let n = 2; n <= 6; n++) head.append(el("th", "", "-" + n));
+  head.append(el("th", "", "Vowel", "Nguyên âm"), el("th", "", "Plain", "Trơn"));
+  for (let n = 2; n <= 6; n++) head.append(el("th", "", "Stroke " + n, "Nét " + n));
   const body = table.createTBody();
   SHAPES.forEach((shape, i) => {
-    const tr = body.insertRow();
-    const th = el("th", "row");
-    th.append(el("span", "q", glyph(shape, "1")), document.createTextNode(NAMES[i]));
+    const tr = body.insertRow(), th = el("th", "vowel");
+    th.append(el("b", "", VOWELS[i]), el("small", "", NAMES[i]));
     tr.append(th);
     [5, 0, 1, 2, 3, 4].forEach(j => {
-      const rhyme = guide[i][j], td = el("td");
-      if (j === 5) td.classList.add("plain");
-      td.append(el("span", "q", glyph(shape, j === 5 ? "" : String(j + 2))));
-      if (rhyme) {
-        td.append(el("span", "r", rhyme));
-        if (inDecoding[rhyme] !== inGuide[rhyme]) td.classList.add("moved");
-      } else {
-        td.classList.add("empty");
-        td.append(el("span", "r", "–"));
-      }
+      const rhyme = guide[i][j], td = el("td", (j === 5 ? "plain" : "") + (rhyme ? "" : " empty"));
+      td.append(el("span", "q", glyph(shape, j === 5 ? "" : String(j + 2))), el("span", "r", rhyme || "–"));
       tr.append(td);
     });
   });
 
-  // the list of differences
-  const moves = document.getElementById("moves");
-  const mh = moves.createTHead().insertRow();
-  [["Rhyme", "Vần"], ["Decoding qatt.org", "Giải mã qatt.org"], ["Style guide", "Sổ tay chính tả"]].forEach(([en, vi]) => { const t = el("th", "", en); t.dataset.vi = vi; mh.append(t); });
+  // where the style guide differs from the decoding qatt.org (computed from the two tables)
+  const places = t => { const m = {}; t.forEach((row, i) => row.forEach((r, j) => { if (r) m[r] = NAMES[i] + (j === 5 ? "" : "-" + (j + 2)); })); return m; };
+  const inGuide = places(guide), inDecoding = places(decoding);
+  // anh and oanh are written in the places of ơnh and uơnh where a table has no place of their own (RHYME_SUBSTITUTES)
+  Object.entries(VietnameseParser.RHYME_SUBSTITUTES).forEach(([r, sub]) => { if (!inDecoding[r]) inDecoding[r] = inDecoding[sub]; delete inDecoding[sub]; });
+  const moves = document.getElementById("moves"), mh = moves.createTHead().insertRow();
+  mh.append(el("th", "", "Rhyme", "Vần"), el("th", "", "Decoding qatt.org", "Giải mã qatt.org"), el("th", "", "Style guide", "Sổ tay chính tả"));
   const mb = moves.createTBody();
-  const label = p => p ? (p.includes("-") ? p : p + " (unmarked)") : "–";
+  const label = p => p ? (p.includes("-") ? p.replace("-", ", stroke ") : p + ", plain") : "–";
   Object.keys(inGuide).filter(r => inGuide[r] !== inDecoding[r])
     .sort((a, b) => NAMES.indexOf(inGuide[a].split("-")[0]) - NAMES.indexOf(inGuide[b].split("-")[0]))
     .forEach(r => { const tr = mb.insertRow(); [r, label(inDecoding[r]), label(inGuide[r])].forEach(t => tr.append(el("td", "", t))); });
   const gone = Object.keys(inDecoding).filter(r => !inGuide[r]);
-  document.getElementById("unused").textContent = "Not used by the style guide, as they are no rhymes of Vietnamese: " + gone.join(", ") + ".";
-
-  document.getElementById("ex-cao").textContent = QattText.word("cao", new VietnameseParser("qatt"));
+  document.getElementById("unused").textContent = "Rhymes of the decoding that Vietnamese does not have are left out: " + gone.join(", ") + ".";
 })();
 </script>
 </body>
