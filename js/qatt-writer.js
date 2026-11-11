@@ -72,6 +72,7 @@ const QattWriter = (() => {
   const BAR = `
       <div class="group">
         <select id="font" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Font"></select>
+        <select id="decoding" autocomplete="off" class="form-select form-select-sm w-auto" aria-label="Rhyme table" data-vi-aria-label="Bảng vần" title="Rhyme table" data-vi-title="Bảng vần"></select>
         <button type="button" class="btn btn-quiet" id="convert-btn" title="If the field has QATT characters, convert them to Quốc Ngữ; else convert every Quốc Ngữ word to QATT"><i class="bi bi-arrow-repeat"></i> <span class="lbl" data-vi="Chuyển QATT">Convert QATT</span></button>
         <button type="button" class="btn btn-quiet" id="pa-btn" hidden disabled>·</button>
         <span class="variants" id="variants" role="group" aria-label="Variants of the characters before the cursor" data-vi-aria-label="Biến thể của các ký tự trước con trỏ"><button type="button" class="btn btn-quiet" disabled>·</button><button type="button" class="btn btn-quiet" disabled>·</button></span>
@@ -300,9 +301,11 @@ const QattWriter = (() => {
     const admin = () => typeof isAdmin === 'function' && isAdmin();
     const FONTS = typeof QATT_FONTS !== 'undefined' ? QATT_FONTS.filter(f => (!f.admin || admin()) && (mode === 'nom' || f.cjk)).map(f => [f.family, f.label]) : [];
     const DEFAULT_FONT = 'QATT Pen';
-    const font = $('font'), size = $('size');
+    const decoding = $('decoding'), font = $('font'), size = $('size');
+    for (const [name, label, vi] of VietnameseParser.TABLES) { const o = new Option(label, name, name === 'qatt', name === 'qatt'); o.setAttribute('data-vi', vi); decoding.append(o); }
     for (const [family, label] of FONTS) font.append(new Option(label, family, family === DEFAULT_FONT, family === DEFAULT_FONT));
     const heading = (select, label, vi) => { const value = select.value, g = document.createElement('optgroup'); g.label = label; g.setAttribute('data-vi-label', vi); g.append(...select.options); select.append(g); select.value = value; };
+    heading(decoding, 'Choose rhyme table', 'Lựa chọn bảng vần');
     heading(font, 'Choose QATT font', 'Lựa chọn phông chữ');
 
 
@@ -314,6 +317,13 @@ const QattWriter = (() => {
       typer.style.fontSize = Math.round(size.value * 0.363) + 'px';   // 100% is 36 pixels
       $('size-label').textContent = size.value + '%';
     }
+    // another table: every QATT cell is read with the old table and written with the new one, other text stays as it is
+    decoding.addEventListener('change', () => {
+      typer.value = QattText.recode(typer.value, parser, new VietnameseParser(decoding.value));
+      parser.setDecoding(decoding.value);
+      if (ime) ime.hide();
+      refresh();
+    });
     font.addEventListener('change', applyFont);   // the font is not stored: every visit starts with Pen
     size.addEventListener('input', () => { store.set('size', size.value); applyFont(); });
     $('vertical-select').addEventListener('change', () => { typer.classList.toggle('vertical', $('vertical-select').checked); typer.focus(); });
@@ -324,6 +334,7 @@ const QattWriter = (() => {
       document.body.classList.toggle('pa-on', pa);
       document.body.classList.toggle('pa-site', paSite);
       paBtn.hidden = $('pa-help').hidden = !paSite;
+      $('decoding').hidden = !qatt;
       $('variants').hidden = !qatt;
       status.innerHTML = paSite ? (pa ? '<b>Space</b> converts PA, <b>Enter</b> picks first Hán Nôm' : '<b>Space</b> and <b>Enter</b> pick first Hán Nôm')
         : qatt && nom ? '<b>Space</b> converts QATT, <b>Enter</b> picks first Hán Nôm'
@@ -445,7 +456,7 @@ const QattWriter = (() => {
     // every Quốc Ngữ word becomes QATT; an IDS stack character right behind and before QATT characters becomes the combiner
     const toQatt = text => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => QattText.word(w, parser) ?? w)
       .replace(/(?<=[\u{F0000}-\u{F00A3}])\u2FF1(?=[\u{F0000}-\u{F0099}])/gu, COMBINER_CHAR);
-    // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both after the style guide (the default table of the parser)
+    // Convert: with QATT characters that have a reading in the field they become Quốc Ngữ, else every Quốc Ngữ word becomes QATT; both after the table chosen (the style guide at the start)
     // (the parts of a stack are cells of their own; a cell without a reading, such as a pair with a letter of stroke 1, does not count: it stays as it is, and the field can still be converted back)
     const readable = text => paSite ? havePa && new RegExp(PaText.SYL.source, 'u').test(text)
       : text.split(COMBINER_CHAR).some(piece => QattText.cells(piece).some(c => QattText.reading(c.cell, parser) !== '?'));

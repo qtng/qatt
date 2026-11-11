@@ -90,6 +90,13 @@
                 </div>
             </div>
             <div class="options d-flex flex-wrap justify-content-center align-items-center gap-3">
+                <select id="decoding" class="form-select w-auto" aria-label="Rhyme table" data-vi-aria-label="Bảng vần" title="Rhyme table" data-vi-title="Bảng vần">
+                    <optgroup label="Choose rhyme table" data-vi-label="Lựa chọn bảng vần">
+                        <option value="qatt" selected data-vi="Sổ tay chính tả qatt.org">qatt.org style guide</option>
+                        <option value="qode" data-vi="Giải mã qatt.org">qatt.org decoding</option>
+                        <option value="omniglot" data-vi="Giải mã omniglot.com">omniglot.com decoding</option>
+                    </optgroup>
+                </select>
                 <select id="font" data-qatt-fonts class="form-select w-auto" aria-label="Font" data-vi-aria-label="Phông chữ"></select>
             </div>
         </div>
@@ -271,6 +278,7 @@
 
         qattToggle.addEventListener('change', renderWiki);
         readingToggle.addEventListener('change', updateReading);
+        $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); if (currentWikiHtml) renderWiki(); });
 
         contentArea.addEventListener('click', e => {
             const link = e.target.closest('a');

@@ -38,6 +38,13 @@ class VietnameseParser {
             // The 22 base shapes in the order of the rhyme tables (row i of a table = shape SHAPES[i]; z is the shape without strokes, written "_" in codes)
             static SHAPES = "l z ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
 
+            // The tables a page offers to choose, in this order, with their names (English, Vietnamese): the style guide first, then the decodings
+            static TABLES = [
+                ["qatt", "qatt.org style guide", "Sổ tay chính tả qatt.org"],
+                ["qode", "qatt.org decoding", "Giải mã qatt.org"],
+                ["omniglot", "omniglot.com decoding", "Giải mã omniglot.com"]
+            ];
+
             // Rhyme tables of the known decodings: DECODINGS[name][row][column] = rhyme written with the shape of the row and the marking stroke
             // column + 2 (a sixth column is the shape without marking stroke).
             // qode: the decoding of qatt.org (a reading of the source); qatt: the qatt.org style guide, the writing standard of the site, the default.
