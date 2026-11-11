@@ -35,7 +35,6 @@
 <script>
 Learn.page('consonants');
 Learn.board(document.getElementById('board'), {
-  decoding: false,
   build: () => [{ label: 'Consonants', rows: pairsOf(Learn.SHAPES).map(pair => pair.map(s => ({ glyph: Learn.glyph(s, 0), ...Learn.consonant(s) }))) }],
 });
 function pairsOf(list) { const out = []; for (let i = 0; i < list.length; i += 2) out.push(list.slice(i, i + 2)); return out; }

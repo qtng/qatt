@@ -3,10 +3,9 @@ Service worker of QATT notes (apps/notes/): the app works offline.
 Raise CACHE when a file of PRECACHE changes (a new name = a new cache; the old ones are deleted when the new worker takes over, the open page keeps what it has and the next start uses the new files).
 Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
-  - decodings.json: from the network first (a changed table arrives without an app update), the stored copy offline
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v87';
+const CACHE = 'qatt-notes-v88';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.qatt.org/fonts/';   // the font files (js/fonts.js, QATT_CDN): the R2 bucket
@@ -26,7 +25,6 @@ const PRECACHE = [
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/js/pa-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
   ...['qatt-pen-letters.woff2', 'qatt-pen-medium-letters.woff2', 'celluloid-letters.woff2', 'migoi-letters.woff2', 'qatt-serif.woff2', 'qatt-gothic.woff2', 'qatt-gothic-wide.woff2', 'qatt-hat-gao.woff2', 'qatt-snip.woff2', 'qatt-manh.woff2', 'qatt-metro.woff2', 'qatt-n7k.woff2', 'phongthao-letters.woff2'].map(n => CDN + n),
-  '/decodings.json',
 ];
 
 // the caches of earlier versions of this app
@@ -84,14 +82,6 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
     const req = event.request;
     if (req.method !== 'GET') return;
     const url = new URL(req.url);
-    if (url.origin === location.origin && url.pathname === '/decodings.json') {
-      event.respondWith((async () => {
-        const cache = await caches.open(CACHE);
-        try { const res = await fetch(req); if (res.ok) cache.put(url.pathname, res.clone()); return res; }
-        catch (e) { return (await cache.match(url.pathname)) || Response.error(); }
-      })());
-      return;
-    }
     if (NOM_FONTS.includes(req.url)) {   // cache first, for ever: no check for a new version, no download again
       event.respondWith((async () => {
         const forever = await caches.open(FOREVER);

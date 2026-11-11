@@ -219,10 +219,8 @@
         <div class="controls">
             <label for="table-select" data-vi="Giải mã">Decoding</label>
             <select id="table-select" class="form-select w-auto">
-                <option value="omniglot">omniglot.com</option>
-                <option value="qatt" selected>qatt.org</option>
-                <option value="qosg">qatt.org style guide</option>
-                <!--<option value="qoex">qatt.org standard</option>-->
+                <option value="omniglot" data-vi="Giải mã omniglot.com">omniglot.com decoding</option>
+                <option value="qode" selected data-vi="Giải mã qatt.org">qatt.org decoding</option>
             </select>
 
             <div class="d-flex align-items-center gap-2">
@@ -403,7 +401,7 @@
         const sizeSlider = document.getElementById('size-slider');
         const legendContainer = document.getElementById('legend-container');
 
-        const startTable = "qatt";
+        const startTable = "qode";
         let currentData = tables[startTable];
 
         function setNucleusColor(rhyme, el) {
@@ -510,6 +508,7 @@
         // Update labels without rebuilding the DOM
         function updateTable(tableName) {
             currentData = tables[tableName];
+            parser.setDecoding(tableName);
             names.forEach((name, index) => {
                 const rhymes = currentData[index] || ["none", "none", "none", "none", "none"];
                 for (let i = 0; i < 6; i++) {

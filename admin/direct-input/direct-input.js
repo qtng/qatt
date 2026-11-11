@@ -37,7 +37,7 @@
     const text = render(cell), read = text && QattText.reading(text, parser);
     live.innerHTML = '';
     const g = document.createElement('span'); g.className = 'q'; g.style.fontSize = '2rem'; g.textContent = text || '';
-    live.append(g, document.createTextNode(read && read !== '?' ? '  →  ' + read : '  →  ?  (no reading in this decoding)'));
+    live.append(g, document.createTextNode(read && read !== '?' ? '  →  ' + read : '  →  ?  (no reading in the style guide)'));
   };
   const fresh = () => ({ start: field.selectionEnd, end: field.selectionEnd, on: '', rh: '', tone: 0 });
 
@@ -121,11 +121,6 @@
   kb.append(mrow);
   addEventListener('keydown', e => { const k = kb.querySelector(`[data-code="${e.code}"]`); if (k) { k.classList.add('hit'); setTimeout(() => k.classList.remove('hit'), 120); } });
 
-  $('decoding').addEventListener('change', e => {
-    field.value = QattText.recode(field.value, parser, new VietnameseParser(e.target.value));
-    parser.setDecoding(e.target.value);
-    cell = null; status();
-  });
   $('ascii').addEventListener('click', async () => {
     const art = $('art');
     art.textContent = await QattAscii.convert(field.value, { cols: +$('asciiSize').value, font: document.documentElement.style.getPropertyValue('--qfont').replace(/"/g, '') || 'QATT Pen Medium' });
