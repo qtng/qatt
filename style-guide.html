@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QATT style guide</title>
+  <meta name="description" content="The qatt.org style guide: how qatt.org writes Vietnamese in Quốc Âm Tân Tự, the rhyme of every Chi and of every unmarked Cán, and how it differs from the decoding qatt.org.">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/site.css">
+  <script src="/js/navigation.js"></script>
+  <script src="/js/parser.js"></script>
+  <script src="/js/qatt-text.js"></script>
+  <style>
+    :root { --qfont: "QATT Pen Medium"; }
+    .hero {
+      background:
+        radial-gradient(60rem 22rem at 50% -6rem, color-mix(in srgb, var(--cinnabar) 10%, transparent), transparent 70%),
+        linear-gradient(180deg, var(--paper, #f7efdc) 0%, var(--bs-body-bg) 100%);
+      border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+      color: var(--ink);
+    }
+    .hero h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(2.2rem, 7vw, 3.4rem); letter-spacing: .01em; }
+    .hero .han { color: var(--cinnabar); font-size: 1.25rem; letter-spacing: .5em; padding-left: .5em; }
+    .hero .lead { max-width: 38rem; color: var(--bs-secondary-color); }
+    .guide { max-width: 50rem; }
+    .guide h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 1.6rem; margin: 2.4rem 0 .8rem; }
+    .guide ol li, .guide ul li { margin-bottom: .45rem; }
+    .q { font-family: var(--qfont), sans-serif; font-size: 1.5em; line-height: 1; vertical-align: -.15em; }
+
+    .table-wrap { overflow-x: auto; width: fit-content; max-width: 100%; margin-inline: auto; }
+    table.sg { border-collapse: collapse; margin: 0 auto; font-size: .92rem; }
+    table.sg th, table.sg td { border: 1px solid color-mix(in srgb, currentColor 18%, transparent); padding: .3rem .45rem; text-align: center; vertical-align: middle; }
+    table.sg thead th { font-weight: 600; font-size: .8rem; color: var(--bs-secondary-color); white-space: nowrap; }
+    table.sg th.row { text-align: left; white-space: nowrap; font-weight: 600; position: sticky; left: 0; z-index: 1; background: var(--bs-body-bg); }
+    table.sg th.row .q { margin-right: .35rem; }
+    table.sg td { min-width: 4.2rem; }
+    table.sg td .q { display: block; font-size: 1.9rem; margin: .1rem 0 .2rem; }
+    table.sg td .r { display: block; white-space: nowrap; }
+    table.sg td.plain { background: color-mix(in srgb, var(--cinnabar) 5%, transparent); }
+    table.sg td.empty { color: var(--bs-secondary-color); opacity: .45; }
+    table.sg td.moved .r { color: var(--cinnabar); font-weight: 600; }
+    table.sg td.moved { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cinnabar) 45%, transparent); }
+    .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem 1.2rem; font-size: .85rem; color: var(--bs-secondary-color); margin: .8rem 0 0; }
+    .legend span::before { content: ""; display: inline-block; width: .9rem; height: .9rem; margin-right: .35rem; vertical-align: -.1rem; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); }
+    .legend .l-plain::before { background: color-mix(in srgb, var(--cinnabar) 8%, transparent); }
+    .legend .l-moved::before { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cinnabar) 45%, transparent); }
+    .legend .l-empty::before { opacity: .45; }
+
+    table.moves { margin: 0 auto; font-size: .92rem; }
+    table.moves td, table.moves th { padding: .2rem .7rem; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
+    table.moves td:first-child { font-weight: 600; }
+    @media (max-width: 575.98px) { .hero .han { letter-spacing: .3em; } table.sg td { min-width: 3.4rem; } table.sg td .q { font-size: 1.6rem; } }
+  </style>
+</head>
+<body>
+<header class="hero pt-5 pb-4">
+  <div class="container text-center">
+    <div class="han mb-2">國音新字</div>
+    <h1 class="mb-3" data-vi="Sổ tay chính tả">Style guide</h1>
+    <p class="lead mx-auto mb-4">How qatt.org writes Vietnamese in Quốc Âm Tân Tự: the writing standard of the editor, the course, Spell it! and the Notes app.</p>
+    <a class="btn btn-outline-secondary btn-pill" href="/decodings.html" data-vi="So sánh các bảng vần">Compare rhyme tables</a>
+    <a class="btn btn-outline-secondary btn-pill" href="/editor.html" data-vi="Gõ chữ QATT">Type QATT</a>
+  </div>
+</header>
+
+<main class="container py-4">
+  <div class="guide mx-auto">
+    <h2 data-vi="Sổ tay chính tả là gì">What the style guide is</h2>
+    <p>The source of Quốc Âm Tân Tự gives the rhymes of its 110 Chi only through Nôm annotations, and not all of them can be read with certainty. A <a href="/decodings.html">decoding</a> is an attempt to read that rhyme table. The decoding of qatt.org is one of them.</p>
+    <p>The style guide is not a decoding. It is a definition: the spelling that qatt.org uses to write Vietnamese today, as a newspaper has a style guide of its own. It starts from the decoding qatt.org and changes it where the decoding leaves a rhyme of Vietnamese without a place or puts it far from its vowel. Its aim is a table that can be learnt: every row holds the rhymes of one vowel.</p>
+
+    <h2 data-vi="Các quy tắc">The rules</h2>
+    <ol>
+      <li><strong>The basis is the decoding qatt.org.</strong> Every rhyme that is not named below keeps its place, including the exchange of the rows CHONG and XONG, GIONG and KHONG.</li>
+      <li><strong>The unmarked Cán writes the rhymes with the coda u or o.</strong> In a pair, an unmarked Cán on the right is the rhyme of the row of its vowel: ao on NGONG, eo on GONG, âu on NONG, iu on SONG and so on. The position decides: on the left an unmarked Cán is the initial, on the right the rhyme. Example: <span class="q" id="ex-cao"></span> cao.</li>
+      <li><strong>ôm, um, om and uôm</strong> stand on MONG-6, BONG-6, VONG-6 and PHONG-6, in the rows of ô, u, o and ua.</li>
+      <li><strong>ư and ươ</strong> stand on TRONG-2 and DONG-2, the first Chi of their rows.</li>
+      <li><strong>uêu</strong>, which has no place in the decoding, is the unmarked Cán of GIONG.</li>
+      <li><strong>The places that are freed stay empty.</strong> They are obsolete for Vietnamese, not given to other rhymes, so that a text after the decoding is never read wrongly as a different word.</li>
+    </ol>
+
+    <h2 data-vi="Bảng vần">The rhyme table</h2>
+    <p>Each row is one Cán. The columns are its unmarked form and its five Chi, with the marking stroke at positions 2 to 6. A shaded cell is the unmarked Cán, a framed cell differs from the decoding qatt.org.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="sg" id="sg-table"></table>
+  </div>
+  <div class="legend">
+    <span class="l-plain" data-vi="Cán trơn">Unmarked Cán</span>
+    <span class="l-moved" data-vi="Khác với giải mã qatt.org">Different from the decoding qatt.org</span>
+    <span class="l-empty" data-vi="Không dùng">Not used</span>
+  </div>
+
+  <div class="guide mx-auto">
+    <h2 data-vi="Khác với giải mã qatt.org">Differences from the decoding qatt.org</h2>
+    <p>Every rhyme of Vietnamese that the style guide writes in another place than the decoding qatt.org.</p>
+    <table class="moves" id="moves"></table>
+    <p class="mt-3" id="unused"></p>
+
+    <h2 data-vi="Chọn bảng vần">Choosing a rhyme table</h2>
+    <p>The editor, the wiki and the Notes app write after the style guide unless another table is chosen in their menu; a decoding can be chosen there as well. Spell it! and the course use the style guide only. Text that was written after a decoding is converted when its table is changed.</p>
+  </div>
+</main>
+
+<script>
+(() => {
+  const SHAPES = VietnameseParser.SHAPES;
+  const NAMES = "LONG ONG NGONG HONG GONG CONG TRONG DONG NONG TONG THONG NHONG CHONG GIONG XONG KHONG SONG RONG MONG BONG VONG PHONG".split(" ");
+  const guide = VietnameseParser.DECODINGS.qatt, decoding = VietnameseParser.DECODINGS.qode;
+  const code = s => s === "z" ? "_" : s;
+  const glyph = (shape, mark) => QattText.syllable(code(shape) + (mark || "") + ",,,0");
+  // the place of a rhyme in a table: "NAME" (unmarked Cán) or "NAME-n" (Chi, n = 2..6)
+  const places = table => {
+    const m = {};
+    table.forEach((row, i) => row.forEach((r, j) => { if (r) m[r] = NAMES[i] + (j === 5 ? "" : "-" + (j + 2)); }));
+    return m;
+  };
+  const inGuide = places(guide), inDecoding = places(decoding);
+  // anh and oanh are written in the places of ơnh and uơnh where a table has no place of their own (RHYME_SUBSTITUTES)
+  Object.entries(VietnameseParser.RHYME_SUBSTITUTES).forEach(([r, sub]) => { if (!inDecoding[r]) inDecoding[r] = inDecoding[sub]; delete inDecoding[sub]; });
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  // the table: rows = Cán, columns = unmarked, -2 … -6
+  const table = document.getElementById("sg-table");
+  const head = table.createTHead().insertRow();
+  head.append(el("th", "", "Cán"));
+  const plainHead = el("th", "", "Unmarked"); plainHead.dataset.vi = "Trơn"; head.append(plainHead);
+  for (let n = 2; n <= 6; n++) head.append(el("th", "", "-" + n));
+  const body = table.createTBody();
+  SHAPES.forEach((shape, i) => {
+    const tr = body.insertRow();
+    const th = el("th", "row");
+    th.append(el("span", "q", glyph(shape, "1")), document.createTextNode(NAMES[i]));
+    tr.append(th);
+    [5, 0, 1, 2, 3, 4].forEach(j => {
+      const rhyme = guide[i][j], td = el("td");
+      if (j === 5) td.classList.add("plain");
+      td.append(el("span", "q", glyph(shape, j === 5 ? "" : String(j + 2))));
+      if (rhyme) {
+        td.append(el("span", "r", rhyme));
+        if (inDecoding[rhyme] !== inGuide[rhyme]) td.classList.add("moved");
+      } else {
+        td.classList.add("empty");
+        td.append(el("span", "r", "–"));
+      }
+      tr.append(td);
+    });
+  });
+
+  // the list of differences
+  const moves = document.getElementById("moves");
+  const mh = moves.createTHead().insertRow();
+  [["Rhyme", "Vần"], ["Decoding qatt.org", "Giải mã qatt.org"], ["Style guide", "Sổ tay chính tả"]].forEach(([en, vi]) => { const t = el("th", "", en); t.dataset.vi = vi; mh.append(t); });
+  const mb = moves.createTBody();
+  const label = p => p ? (p.includes("-") ? p : p + " (unmarked)") : "–";
+  Object.keys(inGuide).filter(r => inGuide[r] !== inDecoding[r])
+    .sort((a, b) => NAMES.indexOf(inGuide[a].split("-")[0]) - NAMES.indexOf(inGuide[b].split("-")[0]))
+    .forEach(r => { const tr = mb.insertRow(); [r, label(inDecoding[r]), label(inGuide[r])].forEach(t => tr.append(el("td", "", t))); });
+  const gone = Object.keys(inDecoding).filter(r => !inGuide[r]);
+  document.getElementById("unused").textContent = "Not used by the style guide, as they are no rhymes of Vietnamese: " + gone.join(", ") + ".";
+
+  document.getElementById("ex-cao").textContent = QattText.word("cao", new VietnameseParser("qatt"));
+})();
+</script>
+</body>
+</html>
