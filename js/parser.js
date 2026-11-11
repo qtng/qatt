@@ -89,7 +89,10 @@ class VietnameseParser {
                         ["", "on", "oi", "iêu", "êu", "o"],
                         ["", "uôn", "uôi", "iu", "uyu", "uô"]
                     ],
-                    qoex2: [
+                    // qatt.org style guide: a writing standard built on the decoding qatt.org (rows CHONG/XONG and GIONG/KHONG as there), not a decoding.
+                    // Rhymes ending in u/o take the plain shape of the row of their vowel; ôm, um, om, uôm are MONG-6, BONG-6, VONG-6, PHONG-6;
+                    // ư, ươ are TRONG-2, DONG-2. The places that become free and the rhymes Vietnamese lacks are left empty (obsolete).
+                    qosg: [
                         ["ơ", "anh", "ơn", "ơi", "ơm", ""],
                         ["uơ", "oanh", "uơn", "uơi", "", ""],
                         ["a", "ang", "an", "ai", "am", "ao"],
@@ -102,16 +105,16 @@ class VietnameseParser {
                         ["", "uâng", "uây", "uân", "", "uâu"],
                         ["", "ăng", "ay", "ăn", "ăm", "au"],
                         ["", "oăng", "oay", "oăn", "oăm", "oau"],
-                        ["", "iêng", "iê", "iên", "iêm", "iêu"],
-                        ["", "", "uyê", "uyên", "", ""],
                         ["", "ênh", "ê", "ên", "êm", "êu"],
                         ["", "uênh", "uê", "uên", "uêm", "uêu"],
+                        ["", "iêng", "iê", "iên", "iêm", "iêu"],
+                        ["", "", "uyê", "uyên", "", ""],
                         ["", "inh", "i", "in", "im", "iu"],
                         ["", "uynh", "uy", "uyn", "uym", "uyu"],
-                        ["ô", "ôn", "ôi", "", "", "ôm"],
-                        ["u", "un", "ui", "", "", "um"],
-                        ["o", "on", "oi", "", "", "om"],
-                        ["ua", "uôn", "uôi", "", "", "uôm"]
+                        ["ô", "ôn", "ôi", "", "ôm", ""],
+                        ["u", "un", "ui", "", "um", ""],
+                        ["o", "on", "oi", "", "om", ""],
+                        ["ua", "uôn", "uôi", "", "uôm", ""]
                     ],
                     omniglot: [
                         ["ê", "ênh", "ơn", "uơ", "um"],
