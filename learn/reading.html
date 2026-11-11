@@ -52,7 +52,7 @@ const SENTENCES = ['xin chào', 'cảm ơn bạn', 'mẹ đi chợ', 'hôm nay t
 const QUESTIONS = 6, PASS = 5;
 let quiz = null;                                           // { parser, pool, items, at, marks }
 
-// the words of a group that this decoding writes and reads back unchanged
+// the words of a group that the style guide writes and reads back unchanged
 const usable = (words, parser) => words.map(w => ({ w, cell: Learn.cell(w) })).filter(x => x.cell && QattText.reading(x.cell, parser) === x.w);
 
 Learn.page('reading');

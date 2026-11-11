@@ -39,7 +39,7 @@ td.g { font-family: "QATT Chart"; font-size: 1.7rem; line-height: 1.2; text-alig
 <script src="/js/qatt-text.js"></script>
 <script>
 (() => {
-  const parser = new VietnameseParser("qatt");
+  const parser = new VietnameseParser("qode");   // the decoding qatt.org (the readings of the proposal)
   const chr = o => String.fromCodePoint(0xF0000 + o), JOINER = chr(154);
   const items = [];
   const add = cell => { const reading = QattText.reading(cell, parser); if (reading !== "?") items.push({ reading, cell }); };
