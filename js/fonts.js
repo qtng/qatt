@@ -34,7 +34,7 @@ var QATT_FONTS = [
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
 ];
-// PA, the phonetic script (pa/index.html; the font of PA is a file of its own, not in the list above): the families "PA" and "PA Phong Thao", used by the writer behind the QATT font
+// PA, the phonetic annotation (pa/index.html). The big fonts (cjk: true) have PA in them (merge_pa.py of the private repository, the slice web/<big>-pa.woff2); these files are for the fonts without CJK (legacy): the families "PA" and "PA Phong Thao", used by the writer behind the QATT font
 var PA_FONTS = [
   { family: "PA",             file: "pa" },
   { family: "PA Pen",         file: "pa-pen" },
@@ -110,6 +110,7 @@ var QATT_CJK_SLICES = [
 ];
 /* slices: end */
 var QATT_RANGE = "U+F0000-F00A3";
+var PA_RANGE = "U+F00B0-F00B2, U+F00D0-F010E";   // the annotation controls (over, under, end) and PA
 // the Latin of a font with a big font (<big>-latin.woff2, about 21 KB: ASCII, Latin-1, Quốc Ngữ, punctuation) is a family of its own, "<family> Latin": only a page that
 // names it shows Latin in that font (the text field of Qatt.org Notes: qattFieldFont); everywhere else Latin stays in the fonts after it
 var qattFieldFont = family => { const f = QATT_FONTS.find(x => x.family === family); return f && f.big ? `"${family} Latin", "${family}"` : `"${family}"`; };
@@ -144,7 +145,7 @@ var qattFontVer = (() => {
     return v;
   } catch (e) { return {}; }
 })();
-var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin)$/, "$1");
+var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin|-pa)$/, "$1");
 var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
   return QATT_CDN.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
@@ -179,9 +180,11 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
   const face = (family, file, range = "") => `@font-face { font-family: "${family}"; src: ${qattFontSrc(file + ".woff2")};${range ? ` unicode-range: ${range};` : ""} }`;
   style.textContent = FONTS.map(f => f.cjk
     ? face(f.family, f.file, QATT_RANGE) + QATT_CJK_SLICES.map((range, i) => `\n@font-face { font-family: "${f.family}"; src: ${qattFontSrc(`web/${f.big}-${String(i).padStart(2, "0")}.woff2`)}; font-display: swap; unicode-range: ${range}; }`).join("")
+      // PA and the annotation controls (ruby: CJK + U+F00B0 over / U+F00B1 under + a PA syllable) are part of the big font; its PA part is a slice of its own
+      + `\n@font-face { font-family: "${f.family}"; src: ${qattFontSrc(`web/${f.big}-pa.woff2`)}; font-display: swap; unicode-range: ${PA_RANGE}; }`
     : face(f.family, f.file)).concat(FONTS.filter(f => f.big).map(f => `@font-face { font-family: "${f.family} Latin"; src: ${qattFontSrc(`web/${f.big}-latin.woff2`)}; }`))
     // PA (pa/index.html): its own font files, not in the lists of the QATT fonts; U+F00D0..U+F010E and the annotation controls U+F00B0..F00B2 next to the QATT block; the style of the QATT font chosen in the writer picks the one
-    .concat(PA_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: ${qattFontSrc(f.file + ".woff2")}; unicode-range: U+F00B0-F00B2, U+F00D0-F010E; font-display: swap; }`))
+    .concat(PA_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: ${qattFontSrc(f.file + ".woff2")}; unicode-range: ${PA_RANGE}; font-display: swap; }`))
     // "pa": the characters of the Chunom site in the private use area (U+E000.., not in Unicode yet; the decks, the practice: var(--font-cjk), 'pa')
     .concat(`@font-face { font-family: "pa"; src: local("HanaMinA"), url(https://chunom.org/chunom-assets/fonts/pa-Regular.woff2) format("woff2"); }`)
     .join("\n");
