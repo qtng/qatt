@@ -131,6 +131,11 @@ const NotesEditor = (() => {
       if (pair) { e.preventDefault(); typer.setRangeText('', back ? pos - 2 : pos, back ? pos : pos + 2, 'end'); typer.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: e.inputType })); return; }
       const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
       if (!cell || (typer.value.codePointAt(cell.start) < 0xF0000 && !RUBY_START.test(typer.value.slice(cell.start, cell.end)))) return;   // other text: as usual
+      if (e.inputType === 'deleteContentBackward' && cell.end === pos && RUBY_START.test(typer.value.slice(cell.start, cell.end))) {   // Backspace behind an annotation: first only the ruby control goes, the syllable is normal text
+        e.preventDefault();
+        dissolve(cell, pos);
+        return;
+      }
       e.preventDefault();
       // the joiners and combiners around the cell go with it (also when they stand next to it alone)
       const text = typer.value;
@@ -143,7 +148,15 @@ const NotesEditor = (() => {
       o.refresh();
     });
 
-    // Escape right behind an annotated character dissolves the annotation: the syllable becomes normal text (the ruby control goes)
+    // an annotation becomes normal text: the ruby control behind the CJK character goes (the cursor stays behind the syllable); Escape and Backspace do it
+    const dissolve = (cell, pos) => {
+      const control = cell.start + Array.from(typer.value.slice(cell.start, cell.end))[0].length;
+      typer.setRangeText('', control, control + 2, 'end');   // the control is one character outside the BMP: two units
+      typer.setSelectionRange(pos - 2, pos - 2);
+      lastPos = pos - 2;
+      o.refresh();
+    };
+    // Escape right behind an annotated character dissolves the annotation
     typer.addEventListener('keydown', e => {
       if (e.key !== 'Escape' || e.isComposing || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || !o.on()) return;
       const pos = typer.selectionStart;
@@ -151,11 +164,7 @@ const NotesEditor = (() => {
       const cell = cellAt(typer.value, pos, 'before');
       if (!cell || cell.end !== pos || !RUBY_START.test(typer.value.slice(cell.start, cell.end))) return;
       e.preventDefault();
-      const control = cell.start + Array.from(typer.value.slice(cell.start, cell.end))[0].length;
-      typer.setRangeText('', control, control + 2, 'end');   // the control is one character outside the BMP: two units
-      typer.setSelectionRange(pos - 2, pos - 2);
-      lastPos = pos - 2;
-      o.refresh();
+      dissolve(cell, pos);
     });
 
     // the cursor (and the ends of a selection) never sit inside a cell: it jumps to the end of the cell when it moved forward, else to its start
