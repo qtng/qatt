@@ -136,7 +136,7 @@ var QATT_CDN = ["https://cdn.qatt.org/fonts/"];
 // the date goes behind its files (?v=<date>), so a changed font has a new address and the next page load takes it (the page that is open keeps what it has).
 var QATT_FONT_CHECK = 5 * 60 * 1000;
 // QATT_FONT_EPOCH: raise it when every browser must load the fonts anew (an older copy sits in a cache under the plain address): a browser that has a list of an other epoch takes no base, so every font gets its date (?v=) at once
-var QATT_FONT_EPOCH = 1;
+var QATT_FONT_EPOCH = 2;
 var qattFontVer = (() => {
   try {
     const v = JSON.parse(localStorage.qattFontVer) || {};
