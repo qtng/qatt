@@ -20,11 +20,11 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
 const NotesEditor = (() => {
   const NOT_LETTER = /[^\p{Script=Latin}\p{M}]/u, WORD_END = /[\p{Script=Latin}\p{M}]+$/u;   // Han characters are letters too, but no Quốc Ngữ
   const LETTER = c => c >= 0xF0000 && c <= 0xF0099, JOINER = 0xF009A, COMBINER = 0xF009B, NEUTRAL = 0xF009C;   // a cell is what the font draws as one square: a letter of the block, a joiner or combiner with another letter, and the tone marks after it
-  const PA_J = 0xF00B0, PA_K = 0xF00B1, PA_ONSET = c => c >= 0xF00B2 && c <= 0xF00C8, PA_NUC = c => c >= 0xF00C9 && c <= 0xF00DE, PA_END = c => c >= 0xF00DF && c <= 0xF00EE;   // the code points of PA (js/pa-text.js)
-  const IS_LINK = s => /^[\u{F009A}\u{F009B}\u{F00B0}\u{F00B1}]$/u.test(s);   // a joiner or combiner (QATT or PA)
+  const PA_J = 0xF00D0, PA_K = 0xF00D1, PA_ONSET = c => c >= 0xF00D2 && c <= 0xF00E8, PA_NUC = c => c >= 0xF00E9 && c <= 0xF00FE, PA_END = c => c >= 0xF00FF && c <= 0xF010E;   // the code points of PA (js/pa-text.js)
+  const IS_LINK = s => /^[\u{F009A}\u{F009B}\u{F00D0}\u{F00D1}]$/u.test(s);   // a joiner or combiner (QATT or PA)
   const WINDOW = 64;
   // the cells of all scripts: QATT, and PA when js/pa-text.js is loaded
-  const cellAny = () => typeof PaText === 'undefined' ? QattText.CELL_ANY : new RegExp(QattText.CELL.source + '|' + PaText.CELL.source + '|[\\u{F009A}-\\u{F00A3}]+|[\\u{F00B0}\\u{F00B1}]|[^]', 'gu');
+  const cellAny = () => typeof PaText === 'undefined' ? QattText.CELL_ANY : new RegExp(QattText.CELL.source + '|' + PaText.CELL.source + '|[\\u{F009A}-\\u{F00A3}]+|[\\u{F00D0}\\u{F00D1}]|[^]', 'gu');
   // direct input: the shapes in the order of VietnameseParser.SHAPES (l first) as the index of the shape in the block (U+F0000 + 7 * index; the order of js/qatt-text.js:
   // _ ng h g c l tr d n t th nh ch dz x kh s r m b v ph); the marked forms a button goes through; tone 1..8 -> offset of the tone mark (as TONES of js/qatt-text.js)
   const DIRECT_ORDER = [5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
