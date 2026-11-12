@@ -5,7 +5,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v88';
+const CACHE = 'qatt-notes-v89';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.qatt.org/fonts/';   // the font files (js/fonts.js, QATT_CDN): the R2 bucket
