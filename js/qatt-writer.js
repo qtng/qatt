@@ -118,7 +118,10 @@ const QattWriter = (() => {
   const IS_LINK = s => /^[\u{F009A}\u{F009B}\u{F00D0}\u{F00D1}]$/u.test(s);   // a joiner or combiner (QATT or PA)
   const WINDOW = 64;
   // the cells of all scripts (QATT, and PA when js/pa-text.js is there)
-  const cellAny = () => typeof PaText === 'undefined' ? QattText.CELL_ANY : new RegExp(QattText.CELL.source + '|' + PaText.CELL.source + '|[\\u{F009A}-\\u{F00A3}]+|[\\u{F00D0}\\u{F00D1}]|[^]', 'gu');
+  // a CJK character that is annotated (the ruby control behind it and one syllable: a PA stem with its coda, or a QATT cell) is one unit like a cell
+  const RUBY_BASE_RE = '[\\u{2E80}-\\u{D7FF}\\u{F900}-\\u{FAFF}\\u{20000}-\\u{3FFFF}]', RUBY_START = new RegExp('^' + RUBY_BASE_RE + '[\\u{F00B0}\\u{F00B1}]', 'u');
+  const rubyUnit = () => RUBY_BASE_RE + '[\\u{F00B0}\\u{F00B1}](?:' + (typeof PaText === 'undefined' ? '' : PaText.CELL.source + '(?:[\\u{F00FF}-\\u{F0108}][\\u{F0109}-\\u{F010E}]?)?|') + QattText.CELL.source + ')';
+  const cellAny = () => new RegExp(rubyUnit() + '|' + QattText.CELL.source + '|' + (typeof PaText === 'undefined' ? '' : PaText.CELL.source + '|') + '[\\u{F009A}-\\u{F00A3}]+|[\\u{F00D0}\\u{F00D1}]|[^]', 'gu');
 
 
   // The behaviour of QATT in a text field (the editor and every field of `attach`): the word before the cursor becomes QATT characters, the cells stay whole (the cursor does not
@@ -133,14 +136,21 @@ const QattWriter = (() => {
   function wire(typer, o) {
     const { parser } = o;
     const keys = () => o.keys ? o.keys() : { space: o.convertOn === 'enter' ? 'none' : 'qatt', enter: 'qatt' };
+    // whether the PA syllable `text`, which comes at `start`, is an annotation: one syllable right behind a CJK character
+    const annotates = (start, text) => {
+      if (typeof PaText === 'undefined' || !new RegExp('^(?:' + PaText.SYL.source + ')$', 'u').test(text)) return false;
+      const before = Array.from(typer.value.slice(Math.max(0, start - 2), start)).pop();
+      return !!before && RUBY_BASE(before.codePointAt(0));
+    };
     // the word that ends right before `end` becomes the characters of a script (if there are any)
     const convertBefore = (end, script = 'qatt') => {
       const m = WORD_END.exec(typer.value.slice(0, end));
       const text = m && (script === 'pa' ? (typeof PaText !== 'undefined' && PaText.word(m[0], parser, o.paOptions ? o.paOptions() : {})) : QattText.word(m[0], parser));
       if (!text) return false;
       const start = end - m[0].length, caret = typer.selectionStart;
-      typer.setRangeText(text, start, end, 'end');
-      const at = caret + text.length - m[0].length;
+      const lead = script === 'pa' && annotates(start, text) ? String.fromCodePoint(RUBY_OVER) : '';   // PA behind a CJK character: at once an annotation (Escape behind it makes it normal text again)
+      typer.setRangeText(lead + text, start, end, 'end');
+      const at = caret + lead.length + text.length - m[0].length;
       typer.setSelectionRange(at, at);
       return true;
     };
@@ -179,11 +189,23 @@ const QattWriter = (() => {
       typer.setSelectionRange(caret - dropBeforeStart, end - dropBeforeEnd);
     };
 
+    // a deletion that cut a cell (QATT, PA, an annotated character) in two becomes the deletion of the whole cell: { value, caret } or null (as QattText.repairDeletion, for the cells of all scripts)
+    const repairCut = (was, now, caret) => {
+      const length = was.length - now.length;
+      if (length <= 0 || caret < 0 || caret + length > was.length || was.slice(0, caret) + was.slice(caret + length) !== now) return null;
+      let start = caret, end = caret + length;
+      for (const m of was.matchAll(cellAny())) {
+        const a = m.index, z = a + m[0].length;
+        if (a < caret && caret < z) start = a;
+        if (a < caret + length && caret + length < z) end = z;
+      }
+      return start === caret && end === caret + length ? null : { value: was.slice(0, start) + was.slice(end), caret: start };
+    };
     // the text as it was before the last edit, to repair a deletion that cut a cell in two (keyboards that bypass the Backspace handler below)
     let before = '';
     typer.addEventListener('beforeinput', () => { before = typer.value; });
     const repairDeletion = () => {
-      const fixed = QattText.repairDeletion(before, typer.value, typer.selectionStart);
+      const fixed = repairCut(before, typer.value, typer.selectionStart);
       if (!fixed) return;
       typer.value = fixed.value;
       typer.setSelectionRange(fixed.caret, fixed.caret);
@@ -195,7 +217,7 @@ const QattWriter = (() => {
       const pos = typer.selectionStart;
       if (pos !== typer.selectionEnd) return;
       const cell = cellAt(typer.value, pos, e.inputType === 'deleteContentBackward' ? 'before' : 'after');
-      if (!cell || typer.value.codePointAt(cell.start) < 0xF0000) return;   // other text: as usual
+      if (!cell || (typer.value.codePointAt(cell.start) < 0xF0000 && !RUBY_START.test(typer.value.slice(cell.start, cell.end)))) return;   // other text: as usual
       e.preventDefault();
       // the joiners and combiners around the cell go with it (also when they stand next to it alone)
       const text = typer.value;
@@ -205,6 +227,21 @@ const QattWriter = (() => {
       typer.setRangeText('', from, to, 'end');
       typer.setSelectionRange(from, from);
       tidy();
+      o.refresh();
+    });
+
+    // Escape right behind an annotated character dissolves the annotation: the syllable becomes normal text (the ruby control goes)
+    typer.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || e.isComposing || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || !o.on()) return;
+      const pos = typer.selectionStart;
+      if (pos !== typer.selectionEnd) return;
+      const cell = cellAt(typer.value, pos, 'before');
+      if (!cell || cell.end !== pos || !RUBY_START.test(typer.value.slice(cell.start, cell.end))) return;
+      e.preventDefault();
+      const control = cell.start + Array.from(typer.value.slice(cell.start, cell.end))[0].length;
+      typer.setRangeText('', control, control + 2, 'end');   // the control is one character outside the BMP: two units
+      typer.setSelectionRange(pos - 2, pos - 2);
+      lastPos = pos - 2;
       o.refresh();
     });
 
@@ -501,10 +538,10 @@ const QattWriter = (() => {
     if (paSite && asked !== null) modeBox.checked = !['0', 'off', 'false', 'no'].includes(asked.toLowerCase());
     setState();
     // js/pa-text.js next to this file, when the page has not loaded it: PA is there from the moment it has arrived
-    if (paSite && !havePa && BASE && parser) {
+    if (!havePa && BASE && parser) {   // also in the editor of qatt.org: the cells of PA stay whole there too
       const tag = document.createElement('script');
       tag.src = new URL('pa-text.js', BASE).href;
-      tag.onload = () => { havePa = typeof PaText !== 'undefined'; if (havePa) { modeBox.closest('.form-check').hidden = false; setState(); } };
+      tag.onload = () => { havePa = typeof PaText !== 'undefined'; if (havePa && paSite) { modeBox.closest('.form-check').hidden = false; setState(); } };
       document.head.append(tag);
     }
     return { field: typer };
