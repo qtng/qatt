@@ -33,6 +33,8 @@ var QATT_FONTS = [
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
+  { family: "QATT PA Ruby Over",    label: "PA ruby over (test)",  file: "pa-ruby-test-over", admin: true },    // test: PA (no CJK) with U+F009B + PA syllable = the syllable small over the CJK character before it (private repository: features/fonts/docs/pa.md); put it before the CJK font in a stack
+  { family: "QATT PA Ruby Under",   label: "PA ruby under (test)", file: "pa-ruby-test-under", admin: true },
 ];
 // PA, the phonetic script (pa/index.html; the font of PA is a file of its own, not in the list above): the families "PA" and "PA Phong Thao", used by the writer behind the QATT font
 var PA_FONTS = [
