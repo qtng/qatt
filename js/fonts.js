@@ -33,8 +33,6 @@ var QATT_FONTS = [
   { family: "QATT Khai v2",          label: "Khai v2 (draft)",     file: "v2-qatt-khai", admin: true },
   { family: "QATT Prototype Light",  label: "Prototype light",     file: "qatt-prototype-light", admin: true },
   { family: "QATT Brush",            label: "Brush-like",          file: "qatt-brush", admin: true },
-  { family: "QATT PA Ruby Over",    label: "PA ruby over (test)",  file: "pa-ruby-test-over", admin: true },    // test: PA (no CJK) with U+F009B + PA syllable = the syllable small over the CJK character before it (private repository: features/fonts/docs/pa.md); put it before the CJK font in a stack
-  { family: "QATT PA Ruby Under",   label: "PA ruby under (test)", file: "pa-ruby-test-under", admin: true },
 ];
 // PA, the phonetic script (pa/index.html; the font of PA is a file of its own, not in the list above): the families "PA" and "PA Phong Thao", used by the writer behind the QATT font
 var PA_FONTS = [
@@ -182,8 +180,8 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
   style.textContent = FONTS.map(f => f.cjk
     ? face(f.family, f.file, QATT_RANGE) + QATT_CJK_SLICES.map((range, i) => `\n@font-face { font-family: "${f.family}"; src: ${qattFontSrc(`web/${f.big}-${String(i).padStart(2, "0")}.woff2`)}; font-display: swap; unicode-range: ${range}; }`).join("")
     : face(f.family, f.file)).concat(FONTS.filter(f => f.big).map(f => `@font-face { font-family: "${f.family} Latin"; src: ${qattFontSrc(`web/${f.big}-latin.woff2`)}; }`))
-    // PA (pa/index.html): its own font files, not in the lists of the QATT fonts; U+F00B0..U+F00EE next to the QATT block; the style of the QATT font chosen in the writer picks the one
-    .concat(PA_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: ${qattFontSrc(f.file + ".woff2")}; unicode-range: U+F00B0-F00EE; font-display: swap; }`))
+    // PA (pa/index.html): its own font files, not in the lists of the QATT fonts; U+F00D0..U+F010E and the annotation controls U+F00B0..F00B2 next to the QATT block; the style of the QATT font chosen in the writer picks the one
+    .concat(PA_FONTS.map(f => `@font-face { font-family: "${f.family}"; src: ${qattFontSrc(f.file + ".woff2")}; unicode-range: U+F00B0-F00B2, U+F00D0-F010E; font-display: swap; }`))
     // "pa": the characters of the Chunom site in the private use area (U+E000.., not in Unicode yet; the decks, the practice: var(--font-cjk), 'pa')
     .concat(`@font-face { font-family: "pa"; src: local("HanaMinA"), url(https://chunom.org/chunom-assets/fonts/pa-Regular.woff2) format("woff2"); }`)
     .join("\n");

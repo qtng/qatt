@@ -380,7 +380,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     if (typeof QATT_FONT_RENAMED !== 'undefined' && QATT_FONT_RENAMED[family]) family = QATT_FONT_RENAMED[family];   // a font that was renamed (js/fonts.js)
     if (!FONTS.some(f => f.family === family)) family = FORMAT_DEFAULTS.font;
     document.documentElement.style.setProperty('--qfont', `"${family}"`);
-    document.documentElement.style.setProperty('--pafont', paFontStack(family).map(f => `"${f}"`).join(', '));   // the PA font behind the font chosen (PA text: U+F00B0.., js/fonts.js PA_FONTS)
+    document.documentElement.style.setProperty('--pafont', paFontStack(family).map(f => `"${f}"`).join(', '));   // the PA font behind the font chosen (PA text: U+F00D0.., js/fonts.js PA_FONTS)
     document.documentElement.style.setProperty('--qfont-field', qattFieldFont(family));   // the text field only: also the Latin of the font where it has a big font (js/fonts.js, big)
     if (user) keepFormat('font', family);
     document.querySelectorAll('#set-font button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.font === family)));
