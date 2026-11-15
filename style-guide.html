@@ -128,15 +128,15 @@
     </section>
 
     <section>
-      <h2><span class="step">3</span><span data-vi="Hình trơn ở bên phải kết thúc bằng u hoặc o">The plain shape on the right ends in u or o</span></h2>
-      <p data-vi="Hình không có nét nhỏ cũng là một vần: nguyên âm của nó cộng với u hoặc o. Vị trí quyết định: bên trái là phụ âm, bên phải là vần.">The shape without a small stroke is a rhyme too: its vowel plus u or o. The place decides: on the left it is a consonant, on the right a rhyme.</p>
-      <div class="words" data-words="cao mèo lâu chiều"></div>
+      <h2><span class="step">3</span><span data-vi="Hình trơn ở bên phải là nguyên âm đứng riêng">The plain shape on the right is the vowel alone</span></h2>
+      <p data-vi="Hình không có nét nhỏ cũng là một vần: chỉ nguyên âm của nó, không có âm cuối. Nét 2 thêm u hoặc o vào nguyên âm. Vị trí quyết định: bên trái là phụ âm, bên phải là vần.">The shape without a small stroke is a rhyme too: its vowel alone, with no final sound. Stroke 2 adds u or o to the vowel. The place decides: on the left it is a consonant, on the right a rhyme.</p>
+      <div class="words" data-words="xa mẹ đi cao mèo chiều"></div>
     </section>
 
     <section>
       <h2><span class="step">4</span><span data-vi="Hai lần cùng một hình thì chỉ viết một lần">The same shape twice is written once</span></h2>
-      <p data-vi="Khi phụ âm và vần dùng cùng một hình, chỉ viết hình có nét nhỏ. Nó đứng một mình cho cả âm tiết.">When the consonant and the rhyme use the same shape, only the shape with the small stroke is written. It stands alone for the whole syllable.</p>
-      <div class="words" data-words="mô nga"></div>
+      <p data-vi="Khi phụ âm và vần dùng cùng một hình, chỉ viết hình có nét nhỏ. Nó đứng một mình cho cả âm tiết. Nếu vần là hình trơn thì viết cả hai.">When the consonant and the rhyme use the same shape, only the shape with the small stroke is written. It stands alone for the whole syllable. If the rhyme is the plain shape, both are written.</p>
+      <div class="words" data-words="ngang sinh mô"></div>
     </section>
 
     <section>
@@ -153,8 +153,8 @@
     <details class="more">
       <summary data-vi="Sổ tay chính tả từ đâu ra?">Where does the style guide come from?</summary>
       <p>The old manuscript of Quốc Âm Tân Tự explains its rhymes only with Nôm characters beside each shape, and not all of them can be read with certainty. A <em>decoding</em> is an attempt to read that table. Two are in use: the decoding qatt.org and the decoding omniglot.com. The page <a href="/decodings.html">Decodings</a> shows and compares them.</p>
-      <p>The style guide is not a decoding. It is the spelling that qatt.org has chosen for writing Vietnamese today, as a newspaper has a style guide of its own. It is built on the <a href="/decodings.html">decoding qatt.org</a> and tidies it up so that it can be learnt: every rhyme sits in the row of its vowel.</p>
-      <p data-vi="Các vần mà sổ tay chính tả viết ở chỗ khác với giải mã qatt.org:">The rhymes that the style guide writes in another place than the decoding qatt.org:</p>
+      <p>The style guide is not a decoding. It is the spelling that qatt.org has chosen for writing Vietnamese today, as a newspaper has a style guide of its own. It is built on the <a href="/decodings.html">decoding qatt.org</a> and tidies it up so that it can be learnt: every rhyme sits in the row of its vowel, the vowel alone is the plain shape, the vowel with u or o has stroke 2.</p>
+      <p data-vi="Các chữ mà sổ tay chính tả đọc khác với giải mã qatt.org:">The characters that the style guide reads differently from the decoding qatt.org:</p>
       <table class="moves" id="moves"></table>
       <p id="unused"></p>
       <p>The places that became free stay empty, so a text written after the decoding is never read as a different word. The editor, the wiki and the Notes app also offer the two decodings in their menu.</p>
@@ -257,20 +257,21 @@
     });
   });
 
-  // where the style guide differs from the decoding qatt.org (computed from the two tables)
-  const places = t => { const m = {}; t.forEach((row, i) => row.forEach((r, j) => { if (r) m[r] = NAMES[i] + (j === 5 ? "" : "-" + (j + 2)); })); return m; };
-  const inGuide = places(guide), inDecoding = places(decoding);
-  // anh and oanh are written in the places of ơnh and uơnh where a table has no place of their own (RHYME_SUBSTITUTES)
-  Object.entries(VietnameseParser.RHYME_SUBSTITUTES).forEach(([r, sub]) => { if (!inDecoding[r]) inDecoding[r] = inDecoding[sub]; delete inDecoding[sub]; });
+  // where the style guide differs from the decoding qatt.org (computed from the two tables): the characters that both read, but differently,
+  // in the order of the place (stroke 2 … 6, then the shapes); the plain shape is left out (the decoding has no rhymes there)
+  const sub = r => Object.keys(VietnameseParser.RHYME_SUBSTITUTES).find(k => VietnameseParser.RHYME_SUBSTITUTES[k] === r) || r;   // ơnh, uơnh of the decoding are anh, oanh
   const moves = document.getElementById("moves"), mh = moves.createTHead().insertRow();
-  mh.append(el("th", "", "Rhyme", "Vần"), el("th", "", "Decoding qatt.org", "Giải mã qatt.org"), el("th", "", "Style guide", "Sổ tay chính tả"));
-  const mb = moves.createTBody();
-  const label = p => p ? (p.includes("-") ? p.replace("-", ", stroke ") : p + ", plain") : "–";
-  Object.keys(inGuide).filter(r => inGuide[r] !== inDecoding[r])
-    .sort((a, b) => NAMES.indexOf(inGuide[a].split("-")[0]) - NAMES.indexOf(inGuide[b].split("-")[0]))
-    .forEach(r => { const tr = mb.insertRow(); [r, label(inDecoding[r]), label(inGuide[r])].forEach(t => tr.append(el("td", "", t))); });
-  const gone = Object.keys(inDecoding).filter(r => !inGuide[r]);
-  document.getElementById("unused").textContent = "Rhymes of the decoding that Vietnamese does not have are left out: " + gone.join(", ") + ".";
+  mh.append(el("th", "", "Character", "Chữ"), el("th", "", "Decoding qatt.org", "Giải mã qatt.org"), el("th", "", "Style guide", "Sổ tay chính tả"));
+  const mb = moves.createTBody(), freed = [];
+  for (let j = 0; j < 5; j++) SHAPES.forEach((shape, i) => {
+    const old = sub(decoding[i][j]), now = guide[i][j];
+    if (!old || old === now) return;
+    if (!now) { freed.push(old); return; }
+    const tr = mb.insertRow(), td = el("td");
+    td.append(el("span", "q", glyph(shape, String(j + 2))), " " + NAMES[i] + ", stroke " + (j + 2));
+    tr.append(td, el("td", "", old), el("td", "", now));
+  });
+  document.getElementById("unused").textContent = "The decoding reads more characters that the style guide leaves empty: " + freed.join(", ") + ".";
 })();
 </script>
 </body>
