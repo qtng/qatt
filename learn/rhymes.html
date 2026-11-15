@@ -26,7 +26,7 @@
 <main class="container py-4" id="content">
   <div class="learn mx-auto">
     <nav id="learnSteps" aria-label="Lessons"></nav>
-    <p class="intro"><span data-vi="Nét đánh dấu biến một hình cơ bản thành vần. Các hình đi thành 11 cặp, hình thứ hai là ảnh soi gương của hình thứ nhất: mỗi thẻ là một cặp, các dòng là các nét từ 1 đến 6 trên cả hai hình (thẻ cuối là cặp đầu tiên một lần nữa, mang tên hình thứ hai). Nét 1 luôn cho vần ông; với các nét từ 2 đến 6, mỗi hình trong 22 hình cho năm vần: tất cả là 110 vần. Một hình có nét đánh dấu đứng riêng được đọc với chính hình đó làm phụ âm đầu, nên các dòng đọc là lông, lơ, … Thêm về ông và các vần gần nó: xem bài Hợp Thư.">A marking stroke turns a base shape into a rhyme. The shapes come in 11 pairs, the second the mirror image of the first: every tab is one pair, its rows are the strokes 1 to 6 on both (the last tab is the first pair once more, named after its second shape). Stroke 1 always gives the rhyme ông; with the strokes 2 to 6, each of the 22 shapes gives five rhymes, 110 in all. A marked shape that stands alone is read with its own shape as the initial, so the rows read lông, lơ, … More about ông and the rhymes near it: see the lesson Hợp Thư.</span></p>
+    <p class="intro"><span data-vi="Nét đánh dấu biến một hình cơ bản thành vần. Các hình đi thành 11 cặp, hình thứ hai là ảnh soi gương của hình thứ nhất: mỗi thẻ là một cặp, các dòng là nét 1, hình trơn và các nét từ 2 đến 6 trên cả hai hình (thẻ cuối là cặp đầu tiên một lần nữa, mang tên hình thứ hai). Nét 1 luôn cho vần ông; hình trơn là nguyên âm đứng riêng, nét 2 thêm u hoặc o, các nét từ 3 đến 6 cho các vần khác. Mỗi dòng được đọc với chính hình đó làm phụ âm đầu, nên các dòng đọc là lông, lơ, … Thêm về ông và các vần gần nó: xem bài Hợp Thư.">A marking stroke turns a base shape into a rhyme. The shapes come in 11 pairs, the second the mirror image of the first: every tab is one pair, its rows are stroke 1, the plain shape and the strokes 2 to 6 on both (the last tab is the first pair once more, named after its second shape). Stroke 1 always gives the rhyme ông; the plain shape is the vowel alone, stroke 2 adds u or o, the strokes 3 to 6 give the other rhymes. Every row is read with its own shape as the initial, so the rows read lông, lơ, … More about ông and the rhymes near it: see the lesson Hợp Thư.</span></p>
     <div id="board"></div>
     <p class="text-center mt-3"><a href="/style-guide.html" data-vi="Cả bảng vần trong Sổ tay chính tả">The whole table in the style guide</a></p>
     <nav id="learnPager"></nav>
@@ -35,19 +35,20 @@
 
 <script>
 Learn.page('rhymes');
-const MARKS = [1, 2, 3, 4, 5, 6];   // stroke 1: the rhyme is always ông
-// a tab for each pair of shapes (the second is the mirror of the first, so the tab shows only the first, unmarked); its rows: the strokes 1 to 6 on both.
+const MARKS = [1, 0, 2, 3, 4, 5, 6];   // stroke 1: the rhyme is always ông; 0: the plain shape (the vowel alone)
+// a tab for each pair of shapes (the second is the mirror of the first, so the tab shows only the first, unmarked); its rows: stroke 1, the plain shape and the strokes 2 to 6 on both.
 // At the end the first pair once more, the same rows, with the second shape (ʔ) on the tab: 12 tabs, two even rows.
 // syllables that do not occur in standard Vietnamese (a manual list): the glyph is shown, the reading is a dash and is not spoken
 const ABSENT = new Set(['hoam', 'nhoăm', 'chêng', 'duêng', 'duêm', 'xơng', 'khuơng', 'khuyêng', 'sing', 'ruyng', 'ruym']);
 const tabOf = (a, b, by = a) => parser => ({   // by: the shape on the tab
   label: Learn.consonant(by).show, sample: Learn.glyph(by, 0),
-  apart: 2,   // the heading row (the initials) and stroke 1 (always ông) stand apart and are skipped when a tab is entered
-  rows: [[a, b].map(s => ({ glyph: Learn.glyph(s, 0), show: Learn.consonant(s).show.toUpperCase(), speak: '' }))].concat(MARKS.map(m => [a, b].map(s => {
-    const g = Learn.glyph(s, m), r = QattText.reading(g, parser);
+  apart: 1,   // stroke 1 (always ông) stands apart and is skipped when a tab is entered
+  rows: MARKS.map(m => [a, b].map(s => {
+    // the shape read with its own shape as the initial; the plain shape alone would be the bare consonant, so its reading is the one of the pair (lơ = l + l)
+    const g = Learn.glyph(s, m), c = Learn.code(s), r = m ? QattText.reading(g, parser) : (parser.toQuocNgu({ onset: c, rhyme: c, tone: 0 }) || '?');
     if (ABSENT.has(r)) return { glyph: g, show: '—', speak: '' };   // the glyph stays, only the reading is a dash and is not spoken
     return { glyph: g, show: r, speak: r === '?' ? '' : r };
-  }))),
+  })),
 });
 Learn.board(document.getElementById('board'), {
   tabRows: 2,
