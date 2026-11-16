@@ -38,10 +38,18 @@ class VietnameseParser {
             // The 22 base shapes in the order of the rhyme tables (row i of a table = shape SHAPES[i]; z is the shape without strokes, written "_" in codes)
             static SHAPES = "l z ng h g c tr d n t th nh ch dz x kh s r m b v ph".split(" ");
 
+            // The tables a page offers to choose, in this order, with their names (English, Vietnamese): the style guide first, then the decodings
+            static TABLES = [
+                ["qatt", "qatt.org style guide", "Sổ tay chính tả qatt.org"],
+                ["qode", "qatt.org decoding", "Giải mã qatt.org"],
+                ["omniglot", "omniglot.com decoding", "Giải mã omniglot.com"]
+            ];
+
             // Rhyme tables of the known decodings: DECODINGS[name][row][column] = rhyme written with the shape of the row and the marking stroke
             // column + 2 (a sixth column is the shape without marking stroke).
+            // qode: the decoding of qatt.org (a reading of the source); qatt: the qatt.org style guide, the writing standard of the site, the default.
             static DECODINGS = {
-                    qatt: [
+                    qode: [
                         ["ơ", "ơnh", "ơn", "ơi", "ơm"],
                         ["uơ", "uơnh", "uơn", "uơi", "ôm"],
                         ["a", "ang", "an", "ai", "am"],
@@ -65,53 +73,32 @@ class VietnameseParser {
                         ["o", "on", "oi", "iêu", "êu"],
                         ["ua", "uôn", "uôi", "iu", "uyu"]
                     ],
-                    qoex: [
+                    // qatt.org style guide: a writing standard built on the decoding qatt.org (rows CHONG/XONG and GIONG/KHONG as there), not a decoding.
+                    // Rhymes without a coda take the plain shape of the row of their vowel, rhymes ending in u/o the marking stroke 2; ôm, um, om, uôm
+                    // are MONG-6, BONG-6, VONG-6, PHONG-6. The places that become free and the rhymes Vietnamese lacks are left empty (obsolete).
+                    qatt: [
                         ["", "anh", "ơn", "ơi", "ơm", "ơ"],
                         ["", "oanh", "uơn", "uơi", "", "uơ"],
-                        ["", "ang", "an", "ai", "am", "a"],
-                        ["", "oang", "oan", "oai", "oam", "oa"],
-                        ["", "eng", "en", "", "em", "e"],
-                        ["", "oeng", "oen", "", "", "oe"],
+                        ["ao", "ang", "an", "ai", "am", "a"],
+                        ["oao", "oang", "oan", "oai", "oam", "oa"],
+                        ["eo", "eng", "en", "", "em", "e"],
+                        ["oeo", "oeng", "oen", "", "", "oe"],
                         ["ưu", "ưng", "ưi", "ưn", "ưm", "ư"],
                         ["ươu", "ương", "ươi", "ươn", "ươm", "ươ"],
-                        ["âu", "âng", "ây", "ân", "âm", "â"],
-                        ["uâu", "uâng", "uây", "uân", "", "uâ"],
-                        ["au", "ăng", "ay", "ăn", "ăm", "ă"],
-                        ["oau", "oăng", "oay", "oăn", "oăm", "oă"],
-                        ["", "iêng", "", "iên", "iêm", "iê"],
+                        ["âu", "âng", "ây", "ân", "âm", ""],
+                        ["uâu", "uâng", "uây", "uân", "", ""],
+                        ["au", "ăng", "ay", "ăn", "ăm", ""],
+                        ["oau", "oăng", "oay", "oăn", "oăm", ""],
+                        ["êu", "ênh", "", "ên", "êm", "ê"],
+                        ["uêu", "uênh", "", "uên", "uêm", "uê"],
+                        ["iêu", "iêng", "", "iên", "iêm", "iê"],
                         ["", "", "", "uyên", "", "uyê"],
-                        ["", "ênh", "ê", "ên", "êm", "ê"],
-                        ["", "uênh", "uê", "uên", "uêm", "uê"],
-                        ["", "inh", "i", "in", "im", "i"],
-                        ["", "uynh", "uy", "uyn", "uym", "uy"],
-                        ["", "ôn", "ôi", "ao", "oao", "ô"],
-                        ["", "un", "ui", "eo", "oeo", "u"],
-                        ["", "on", "oi", "iêu", "êu", "o"],
-                        ["", "uôn", "uôi", "iu", "uyu", "uô"]
-                    ],
-                    qoex2: [
-                        ["ơ", "anh", "ơn", "ơi", "ơm", ""],
-                        ["uơ", "oanh", "uơn", "uơi", "", ""],
-                        ["a", "ang", "an", "ai", "am", "ao"],
-                        ["oa", "oang", "oan", "oai", "oam", "oao"],
-                        ["e", "eng", "en", "", "em", "eo"],
-                        ["oe", "oeng", "oen", "", "", "oeo"],
-                        ["ư", "ưng", "ưi", "ưn", "ưm", "ưu"],
-                        ["ươ", "ương", "ươi", "ươn", "ươm", "ươu"],
-                        ["", "âng", "ây", "ân", "âm", "âu"],
-                        ["", "uâng", "uây", "uân", "", "uâu"],
-                        ["", "ăng", "ay", "ăn", "ăm", "au"],
-                        ["", "oăng", "oay", "oăn", "oăm", "oau"],
-                        ["", "iêng", "iê", "iên", "iêm", "iêu"],
-                        ["", "", "uyê", "uyên", "", ""],
-                        ["", "ênh", "ê", "ên", "êm", "êu"],
-                        ["", "uênh", "uê", "uên", "uêm", "uêu"],
-                        ["", "inh", "i", "in", "im", "iu"],
-                        ["", "uynh", "uy", "uyn", "uym", "uyu"],
-                        ["ô", "ôn", "ôi", "", "", "ôm"],
-                        ["u", "un", "ui", "", "", "um"],
-                        ["o", "on", "oi", "", "", "om"],
-                        ["ua", "uôn", "uôi", "", "", "uôm"]
+                        ["iu", "inh", "", "in", "im", "i"],
+                        ["uyu", "uynh", "", "uyn", "uym", "uy"],
+                        ["", "ôn", "ôi", "", "ôm", "ô"],
+                        ["", "un", "ui", "", "um", "u"],
+                        ["", "on", "oi", "", "om", "o"],
+                        ["", "uôn", "uôi", "", "uôm", "ua"]
                     ],
                     omniglot: [
                         ["ê", "ênh", "ơn", "uơ", "um"],

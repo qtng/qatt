@@ -67,6 +67,11 @@
     .notes-banner { position: relative; display: block; max-width: 52rem; margin: 0 auto; -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
     .notes-banner img { display: block; width: 100%; height: auto; border-radius: .9rem; }
     @media (max-width: 575.98px) { .notes-banner { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); } }
+    /* QATTKey: a screenshot of a chat with the keyboard, linked to its page (apps/keyboard.html) */
+    .keyboard-shot { display: block; max-width: 17rem; margin: 0 auto; }
+    .keyboard-shot img { display: block; width: 100%; height: auto; border-radius: .9rem; }
+    /* the text sections: as narrow as the texts of the other sections, away from the edge of the screen */
+    #script { max-width: 46rem; margin-inline: auto; padding-inline: .75rem; }
   </style>
 </head>
 <body>
@@ -151,6 +156,7 @@
         <img src="/apps/apps-1800.jpg" srcset="/apps/apps-900.jpg 900w, /apps/apps-1800.jpg 1800w" sizes="(min-width: 900px) 52rem, 100vw" width="1800" height="600" alt="">
       </picture>
     </a>
+    </div></div>
   </section>
 
   <section class="block" id="why">
@@ -174,7 +180,7 @@
         <div class="han h2 mb-2" aria-hidden="true" data-nosnippet>國音新字</div>
         <h3 class="h5" data-vi="Học chữ viết">Learn the script</h3>
         <p data-vi="Theo khóa học ngắn: phụ âm, vần, thanh điệu và cách đọc QATT, từng bước một.">Take the short course: the consonants, the rhymes, the tones and how to read QATT, step by step.</p>
-        <p class="mt-auto mb-0"><a class="btn btn-cinnabar btn-pill" href="/learn/" data-vi="Bắt đầu học">Start learning</a></p>
+        <p class="mt-auto mb-0 d-flex flex-wrap gap-2"><a class="btn btn-cinnabar btn-pill" href="/learn/" data-vi="Bắt đầu học">Start learning</a><a class="btn btn-ink btn-pill" href="style-guide.html" data-vi="Sổ tay chính tả">Style guide</a></p>
       </div></div></div>
       <div class="col-md-6"><div class="card h-100"><div class="card-body d-flex flex-column">
         <div class="h2 mb-2" aria-hidden="true" data-nosnippet style="font-family: Georgia, 'Times New Roman', serif">Aa → QATT</div>
@@ -183,6 +189,14 @@
         <p class="mt-auto mb-0 d-flex flex-wrap gap-2"><a class="btn btn-cinnabar btn-pill" href="editor.html" data-vi="Gõ chữ">Type it</a><a class="btn btn-ink btn-pill" href="spell.html" data-vi="Luyện tập">Practice</a></p>
       </div></div></div>
     </div>
+  </section>
+
+  <section class="block" id="keyboard">
+    <div class="rule" aria-hidden="true">QATTKey</div>
+    <h2 class="h3 text-center" data-vi="Chữ Nôm và QATT trong mọi cuộc trò chuyện.">Chữ Nôm and QATT in every chat.</h2>
+    <p class="text-center mx-auto mb-3" style="max-width:38rem" data-vi="QATTKey là bàn phím tiếng Việt cho Android. Gõ Telex, chọn chữ Nôm, QATT hay PA, và gửi đi như hình ảnh mà ai cũng đọc được, không cần phông chữ.">QATTKey is a Vietnamese keyboard for Android. Type with Telex, pick Chữ Nôm, QATT or PA, and send it as an image that everyone can read, without any font.</p>
+    <p class="text-center mb-4"><a class="btn btn-cinnabar btn-pill" href="/apps/keyboard.html" data-vi="Tải bàn phím">Get the keyboard</a></p>
+    <a class="keyboard-shot" href="/apps/keyboard.html" aria-label="QATTKey"><img src="/apps/keyboard/keyboard-chat.jpg" width="600" height="887" loading="lazy" alt=""></a>
   </section>
 
   <section class="block" id="script">

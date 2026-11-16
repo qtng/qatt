@@ -275,7 +275,7 @@ window.Readings = window.Readings || (function() {
             { name: "Practice", vi: "Luyện tập", bar: "Practice", barOrder: 3, barVi: "Luyện tập", url: "/spell.html", icon: "bi-mortarboard" },
             { name: "QATT writer", vi: "Gõ chữ QATT", bar: "Write", barOrder: 4, barVi: "Gõ chữ", url: "/editor.html", icon: "bi-pencil-square" },
             { name: "Unicode", bar: "Unicode", barOrder: 5, barVi: "Unicode", url: "/unicode.html", icon: "bi-fonts" },
-            { name: "Decodings", vi: "Giải mã", tile: "Decodings", tileVi: "Giải mã", url: "/decodings.html", icon: "bi-puzzle" },
+            { name: "Style guide", vi: "Sổ tay chính tả", tile: "Style", tileVi: "Chính tả", url: "/style-guide.html", icon: "bi-journal-check" },
             { name: "Wiki", tile: "Wiki", url: "/wiki.html", icon: "bi-wikipedia" },
         ]
     };
@@ -289,8 +289,7 @@ window.Readings = window.Readings || (function() {
             { name: "Practice / decks", vi: "Luyện tập / Bộ thẻ", bar: "Practice", barVi: "Luyện tập", barOrder: 4, url: "/chunom/decks/index.html", icon: "bi-mortarboard" },
             { name: "Write Chữ Nôm", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
             { name: "Translate Chữ Nôm", vi: "Dịch chữ Nôm", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
-            { name: "Dictionary: Génibrel 1898", vi: "Từ điển: Génibrel 1898", tile: "Génibrel", url: "/chunom/dict/genibrel.html", icon: "bi-journal-text" },
-            { name: "Dictionary: Bonet 1899", vi: "Từ điển: Bonet 1899", tile: "Bonet", url: "/chunom/dict/bonet.html", icon: "bi-journal-bookmark" },
+            { name: "Dictionaries", vi: "Từ điển", tile: "Dictionaries", tileVi: "Từ điển", barPrefix: "/chunom/dict/", url: "/chunom/dict/", icon: "bi-journal-bookmark" },   // the overview, the viewers of Génibrel and Bonet below it
             { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, barPrefix: "/chunom/shelf/", url: "/chunom/shelf/", icon: "bi-bookshelf" },
             { name: "Phiên âm tự (PA)", vi: "Phiên âm tự (PA)", tile: "PA", url: "/chunom/pa/", icon: "bi-type" },
         ]
@@ -564,7 +563,7 @@ window.Readings = window.Readings || (function() {
         // desktop bar: the links of the own block, the other site in a dropdown
         const ownSection = sections.find(sec => sec.linkClass === navConfig.own) || sections[0];
         const otherSection = sections.find(sec => sec !== ownSection);
-        const isActive = (sec, link) => !sec.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
+        const isActive = (sec, link) => !sec.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '') || (link.barPrefix && currentPath.startsWith(link.barPrefix)));
         // the bar (from 768px) shows the links as tiles (icon above a short label: bar, else tile, else name): first the entries of the bottom bar in its order, then the others;
         // when they do not all fit, it is compact: only the entries of the bottom bar and Menu, which opens the side menu (the rest and the other site), as on the phone
         const barActive = link => currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '') || (link.barPrefix && currentPath.startsWith(link.barPrefix));
@@ -630,7 +629,7 @@ window.Readings = window.Readings || (function() {
 
         const sectionsHtml = sections.map(section => {
             const linksHtml = section.links.map(link => {
-                const isActive = !section.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, ''));
+                const isActive = !section.site && (currentPath === link.url || currentPath === link.url.replace(/index\.html$/, '') || (link.barPrefix && currentPath.startsWith(link.barPrefix)));
                 return `<a href="${section.site || ''}${link.url}" class="offcanvas-nav-link ${section.linkClass} ${isActive ? 'active' : ''}">
                             <i class="bi ${link.icon}"></i> <span${link.vi ? ` data-vi="${link.vi}"` : ''}>${link.name}</span>
                         </a>`;

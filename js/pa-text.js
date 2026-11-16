@@ -7,10 +7,10 @@ PA text <-> Quốc Ngữ (see the specification in index.html). The syllable is 
   PaText.CELL, PaText.CELL_ANY                                      // the cells (what the font draws as one square) for the cursor and Backspace
   PaText.restack(text, parser, opts)                                // the same text with every syllable stacked or not
 
-Needs js/parser.js (VietnameseParser). The code points are those of the specification (U+F00B0 joiner, U+F00B1 combiner, onsets from U+F00B2, ...).
+Needs js/parser.js (VietnameseParser). The code points are those of the specification (U+F00D0 joiner, U+F00D1 combiner, onsets from U+F00D2, ...).
 */
 const PaText = (() => {
-  const J = 0xF00B0, K = 0xF00B1, A0 = 0xF00B2, N0 = 0xF00C9, C0 = 0xF00DF, T0 = 0xF00E9;
+  const J = 0xF00D0, K = 0xF00D1, A0 = 0xF00D2, N0 = 0xF00E9, C0 = 0xF00FF, T0 = 0xF0109;
   const ONSETS = 'Z B C CH DD D PH G GI H KH L M N NG NH R S T TH TR V X'.split(' ');
   const NUCLEI = 'A OW AW AA EE E I IEE OO O U UOO UW UWOW OA UOW OAW UAA UEE OE UY UYEE'.split(' ');
   const CODAS = 'U I M N NG NH P T C CH'.split(' ');
@@ -52,7 +52,7 @@ const PaText = (() => {
   };
 
   // a syllable of PA text: the stem, then a coda (with or without the combiner), a tone alone, or the combiner and a tone alone
-  const SYL = /([\u{F00B2}-\u{F00C8}])\u{F00B0}([\u{F00C9}-\u{F00DE}])(?:\u{F00B1}?([\u{F00DF}-\u{F00E8}])([\u{F00E9}-\u{F00EE}])?|\u{F00B1}?([\u{F00E9}-\u{F00EE}]))?/gu;
+  const SYL = /([\u{F00D2}-\u{F00E8}])\u{F00D0}([\u{F00E9}-\u{F00FE}])(?:\u{F00D1}?([\u{F00FF}-\u{F0108}])([\u{F0109}-\u{F010E}])?|\u{F00D1}?([\u{F0109}-\u{F010E}]))?/gu;
   const readMatch = (m, parser) => {
     const on = ONSETS[m[1].codePointAt(0) - A0], nu = NUCLEI[m[2].codePointAt(0) - N0];
     const co = m[3] ? CODAS[m[3].codePointAt(0) - C0] : null;
@@ -84,12 +84,12 @@ const PaText = (() => {
       return out;
     });
   };
-  const convert = (text, parser, opt) => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => word(w, parser, opt) ?? w).replace(/([\u{F00B2}-\u{F00EE}]) (?=[\u{F00B2}-\u{F00EE}])/gu, '$1');
+  const convert = (text, parser, opt) => text.replace(/[\p{Script=Latin}\p{M}]+/gu, w => word(w, parser, opt) ?? w).replace(/([\u{F00D2}-\u{F010E}]) (?=[\u{F00D2}-\u{F010E}])/gu, '$1');
   const restack = (text, parser, opt) => convert(read(text, parser), parser, opt);
 
   // the cells: a stem alone, with a tone mark, or stacked with a coda (and a tone); a nucleus, a coda with its tone, a tone: each alone
-  const CELL = /[\u{F00B2}-\u{F00C8}](?:\u{F00B0}[\u{F00C9}-\u{F00DE}](?:\u{F00B1}(?:[\u{F00DF}-\u{F00E8}][\u{F00E9}-\u{F00EE}]?|[\u{F00E9}-\u{F00EE}])|[\u{F00E9}-\u{F00EE}])?)?|[\u{F00C9}-\u{F00DE}]|[\u{F00DF}-\u{F00E8}][\u{F00E9}-\u{F00EE}]?|[\u{F00E9}-\u{F00EE}]/gu;
-  const CELL_ANY = new RegExp(CELL.source + '|[\\u{F00B0}\\u{F00B1}]|[^]', 'gu');
+  const CELL = /[\u{F00D2}-\u{F00E8}](?:\u{F00D0}[\u{F00E9}-\u{F00FE}](?:\u{F00D1}(?:[\u{F00FF}-\u{F0108}][\u{F0109}-\u{F010E}]?|[\u{F0109}-\u{F010E}])|[\u{F0109}-\u{F010E}])?)?|[\u{F00E9}-\u{F00FE}]|[\u{F00FF}-\u{F0108}][\u{F0109}-\u{F010E}]?|[\u{F0109}-\u{F010E}]/gu;
+  const CELL_ANY = new RegExp(CELL.source + '|[\\u{F00D0}\\u{F00D1}]|[^]', 'gu');
   return { word, read, convert, restack, CELL, CELL_ANY, SYL, J, K, A0 };
 })();
 if (typeof module !== 'undefined') module.exports = PaText;
