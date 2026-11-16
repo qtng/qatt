@@ -225,7 +225,10 @@ window.Readings = window.Readings || (function() {
     function set(k) { if (!KINDS.includes(k)) return; KINDS.forEach(x => { state[x] = x === k; }); save(); }
     function setUi(on) { state.ui = !!on; save(); }
     const loaded = {};
-    const load = (name, exists) => loaded[name] || (loaded[name] = exists() ? Promise.resolve() : new Promise((ok, fail) => {   // once, and not when the page has it
+    const load = (name, exists) => loaded[name] || (loaded[name] = exists() ? Promise.resolve() : new Promise((ok, fail) => {   // once, and not when the page has it (or is just loading it: then wait for it, a second copy would declare its classes again)
+        if ([...document.scripts].some(t => t.src && t.src.endsWith('/' + name))) {
+            let n = 0; const wait = () => exists() ? ok() : ++n > 100 ? fail(new Error(name)) : setTimeout(wait, 50); wait(); return;
+        }
         const sc = document.createElement('script'); sc.src = BASE + name; sc.onload = ok; sc.onerror = () => fail(new Error(name)); document.head.appendChild(sc);
     }));
     let ready = null, parser = null;
@@ -491,6 +494,7 @@ window.Readings = window.Readings || (function() {
             /* "Transliterate UI": the Vietnamese texts of the interface in QATT or PA (Lang.setScript) */
             .ui-qatt { font-family: "QATT Pen", sans-serif !important; }
             .ui-pa { font-family: "PA Pen", "PA", sans-serif !important; }
+            .ui-qatt, .ui-pa, .rd-qatt, .rd-pa { font-style: normal !important; }   /* a theme sets italics on headings, lead texts and buttons: these scripts have no italic (the browser would slant them) */
             @media (max-width: 575.98px) {
                 .readings-switch { position: static; margin-right: .3rem; }
                 .rp-btn .rp-label { display: none; }

@@ -548,10 +548,14 @@ const QattWriter = (() => {
     setState();
     // js/pa-text.js next to this file, when the page has not loaded it: PA is there from the moment it has arrived
     if (!havePa && BASE && parser) {   // also in the editor of qatt.org: the cells of PA stay whole there too
-      const tag = document.createElement('script');
-      tag.src = new URL('pa-text.js', BASE).href;
-      tag.onload = () => { havePa = typeof PaText !== 'undefined'; if (havePa && paSite) { modeBox.closest('.form-check').hidden = false; setState(); } };
-      document.head.append(tag);
+      const arrived = () => { havePa = typeof PaText !== 'undefined'; if (havePa && paSite) { modeBox.closest('.form-check').hidden = false; setState(); } };
+      if (window.Readings && Readings.ready) Readings.ready().then(arrived, () => {});   // navigation.js loads it once (it may be loading it for the readings at this moment: a second copy would declare PaText again)
+      else {
+        const tag = document.createElement('script');
+        tag.src = new URL('pa-text.js', BASE).href;
+        tag.onload = arrived;
+        document.head.append(tag);
+      }
     }
     return { field: typer };
   }
