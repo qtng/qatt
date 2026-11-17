@@ -28,7 +28,7 @@
     .chi-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; border-radius: 1rem; min-width: 0; }
     .chi-cell.on { background: color-mix(in srgb, currentColor 5%, transparent); }
     .chi-cell .g { font-family: var(--qfont), sans-serif; font-size: clamp(2.2rem, 11vw, 3.6rem); line-height: 1; }
-    .chi-cell.soft .g { opacity: .5; }                                  /* the marks 1 and 2 */
+    .chi-cell.soft .g { opacity: 0; }                                   /* the marks 1 and 2, and the syllables without a reading */
     .chi-cell.mid { background: color-mix(in srgb, var(--cinnabar) 10%, transparent); border: 1px solid color-mix(in srgb, var(--cinnabar) 35%, transparent); }
     .chi-cell.mid .g { font-size: clamp(3rem, 15vw, 5rem); color: var(--cinnabar); }
     .chi-cell .r { font-family: Georgia, "Times New Roman", serif; font-size: clamp(.85rem, 3.4vw, 1.15rem); line-height: 1.1; }
@@ -52,7 +52,7 @@
     <div id="pick1" class="chi-pick" role="tablist"></div>
     <div id="pick2" class="chi-pick" role="tablist"></div>
     <div class="card-box mt-3"><div id="grid" class="chi-grid" aria-live="polite"></div></div>
-    <p class="hint text-center mt-3 mb-0"><span data-vi="Các nét 1 và 2 được làm mờ; các nét khác ghi cách đọc: phụ âm đầu là hình đã chọn, vần là hình có nét đánh dấu.">Strokes 1 and 2 are dimmed; the others show their reading: the initial is the chosen shape, the rhyme the shape with the marking stroke.</span></p>
+    <p class="hint text-center mt-3 mb-0"><span data-vi="Các nét 1 và 2 và âm tiết không có cách đọc được ẩn; các nét khác ghi cách đọc: phụ âm đầu là hình đã chọn, vần là hình có nét đánh dấu.">Strokes 1 and 2 and syllables without a reading are hidden; the others show their reading: the initial is the chosen shape, the rhyme the shape with the marking stroke.</span></p>
   </div>
 </main>
 
@@ -64,7 +64,7 @@ const GROUPS = [
   { cells: [0, 1, 2, 6, 7, 8], shapes: { l: '216345', g: '165234', c: '165234', tr: '126345', d: '216435', ch: '216345', dz: '216345', s: '165234', r: '165245', v: '165234', ph: '165234' } },
   { cells: [0, 3, 6, 2, 5, 8], shapes: { ng: '123654', h: '123654', n: '132654', t: '123645', th: '123654', nh: '123b654', x: '123654', kh: '123654', m: '123654', b: '123654', z: '123654' } },
 ];
-// syllables that do not occur in standard Vietnamese (as in rhymes.html): the glyph stays, the reading is a dash
+// syllables that do not occur in standard Vietnamese (as in rhymes.html): the glyph is hidden (opacity 0)
 const ABSENT = new Set(['hoam', 'nhoăm', 'chêng', 'duêng', 'duêm', 'xơng', 'khuơng', 'khuyêng', 'sing', 'ruyng', 'ruym']);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const parser = Learn.parser;
@@ -84,7 +84,8 @@ function draw() {
     c.append(el('span', 'g', Learn.glyph(current, mk.n)));
     if (mk.n <= 2) { c.classList.add('soft'); return; }
     const r = QattText.reading(Learn.glyph(current, mk.n), parser);
-    c.append(el('span', 'r', ABSENT.has(r) || r === '?' ? '—' : r));
+    if (ABSENT.has(r) || r === '?') { c.classList.add('soft'); return; }
+    c.append(el('span', 'r', r));
   });
   grid.replaceChildren(...cells);
   document.querySelectorAll('.chi-pick button').forEach(b => { const on = b.dataset.shape === current; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
