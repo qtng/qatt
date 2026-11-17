@@ -760,6 +760,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
     snack('Updated to the latest version', 'Đã cập nhật lên phiên bản mới nhất');
   }
 
+  // the title leads to qatt.org: in the installed app in a new window (the browser), on the website in the same window
+  if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone) { $('app-home').target = '_blank'; $('app-home').rel = 'noopener'; }
+
   // ----- start -----
   (async () => {
     try {
