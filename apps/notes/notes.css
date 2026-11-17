@@ -154,3 +154,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .menu-toggles { display: flex; }
 .menu-toggles button { flex: 1 1 0; }
 .menu-toggles button[aria-pressed="true"] { color: var(--accent); }
+
+/* "Check clipboard": bottom left of the list, opposite the plus button */
+.fab-clip { position: fixed; left: calc(1rem + env(safe-area-inset-left)); bottom: calc(1rem + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: .4rem; height: 44px; padding: 0 .9rem; border: 1px solid var(--line); border-radius: 14px; background: var(--menu); color: var(--ink); box-shadow: 0 4px 14px rgba(0, 0, 0, .55); }
+/* the card: a small Save at the bottom left, Close at the bottom right */
+.clip-actions { justify-content: space-between; align-items: center; }
+.clip-actions button.small { flex: none; min-height: 36px; padding: 0 .75rem; font-size: .85rem; }
+.clip-actions #clip-close { flex: none; min-width: 7rem; }
+/* the hint in the lower half of the screen (4 seconds) */
+.cliphint { position: fixed; z-index: 20; left: 50%; top: 68%; transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; max-width: calc(100% - 2rem); padding: .6rem 1rem; border-radius: 10px; background: #51473a; color: var(--ink); box-shadow: 0 4px 14px rgba(0, 0, 0, .6); }
+.cliphint button { min-height: 40px; padding: 0 .5rem; border: 0; background: transparent; color: var(--accent); font-weight: 600; text-transform: uppercase; }
