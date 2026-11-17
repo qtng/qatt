@@ -43,7 +43,7 @@
     <ul id="notes" class="notes"></ul>
     <p id="empty" class="empty" hidden data-vi="Chưa có ghi chú">No notes yet</p>
     <p id="no-results" class="empty" hidden data-vi="Không có ghi chú phù hợp">No matching notes</p>
-    <button id="clip-check" class="fab-clip" type="button"><i class="bi bi-clipboard"></i> <span data-vi="Kiểm tra bộ nhớ tạm">Check clipboard</span></button>
+    <button id="clip-check" class="fab fab-clip" type="button" aria-label="Check clipboard" data-vi-aria-label="Kiểm tra bộ nhớ tạm" title="Check clipboard" data-vi-title="Kiểm tra bộ nhớ tạm"><i class="bi bi-eye"></i></button>
     <button id="new-note" class="fab" type="button" aria-label="New note" data-vi-aria-label="Ghi chú mới"><i class="bi bi-plus-lg"></i></button>
   </main>
   <section id="view-editor" class="view" hidden>
@@ -106,10 +106,10 @@
   </section>
   <div id="clip" class="clip" hidden>
     <div class="clip-sheet" role="dialog" aria-modal="true" aria-labelledby="clip-title">
-      <div id="clip-title" class="clip-title" data-vi="Văn bản từ bộ nhớ tạm">Text from the clipboard</div>
+      <div class="clip-title"><span id="clip-title" data-vi="Văn bản từ bộ nhớ tạm">Text from the clipboard</span><select id="clip-font" autocomplete="off" aria-label="Font" data-vi-aria-label="Phông chữ"></select></div>
       <div class="clip-body"><div id="clip-text" class="clip-text qfont"></div></div>
       <div class="clip-actions">
-        <button id="clip-save" class="small" type="button"><i class="bi bi-plus-lg"></i> <span data-vi="Lưu thành ghi chú mới">Save as new note</span></button>
+        <button id="clip-save" class="small btn-link" type="button"><i class="bi bi-plus-lg"></i> <span data-vi="Lưu thành ghi chú mới">Save as new note</span></button>
         <button id="clip-close" type="button"><i class="bi bi-x-lg"></i> <span data-vi="Đóng">Close</span></button>
       </div>
     </div>
