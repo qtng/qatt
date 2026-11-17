@@ -591,6 +591,11 @@ window.notesApp = { store, ready, flush() } is for the tests.
     $('clip-text').parentNode.scrollTop = 0;
     clip.hidden = false;
   }
+  // the text of the last hint is remembered (length and hash): the same text gets no second hint
+  const HINT_KEY = 'qattNotesHint';
+  const hintKey = text => { let h = 5381; for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0; return text.length + ':' + h; };
+  const seenHint = text => { try { return localStorage.getItem(HINT_KEY) === hintKey(text); } catch (e) { return false; } };
+  const rememberHint = text => { try { localStorage.setItem(HINT_KEY, hintKey(text)); } catch (e) { /* no storage: it may show again */ } };
   function hideHint() { clearTimeout(hintTimer); hint.hidden = true; }
   $('cliphint-close').addEventListener('click', () => hideHint());
   function showHint(en, vi, text) {
@@ -616,8 +621,9 @@ window.notesApp = { store, ready, flush() } is for the tests.
       if (!text || !text.trim()) { if (manual) snack('The clipboard is empty', 'Bộ nhớ tạm trống'); return; }   // clipRead stays false: the automatic check keeps trying
       clipRead = true;
       if (manual) return showClip(text);
-      if (CJKV_CHARS.test(text)) { lastHint = Date.now(); showHint('The clipboard contains CJKV', 'Bộ nhớ tạm có chữ CJKV', text); }
-      else if (PUA_CHARS.test(text)) { lastHint = Date.now(); showHint('The clipboard contains QATT or PA', 'Bộ nhớ tạm có chữ QATT hoặc PA', text); }
+      if (seenHint(text)) return;
+      if (CJKV_CHARS.test(text)) { lastHint = Date.now(); rememberHint(text); showHint('The clipboard contains CJKV', 'Bộ nhớ tạm có chữ CJKV', text); }
+      else if (PUA_CHARS.test(text)) { lastHint = Date.now(); rememberHint(text); showHint('The clipboard contains QATT or PA', 'Bộ nhớ tạm có chữ QATT hoặc PA', text); }
     } catch (e) {   // no permission yet, or the page has no focus: the automatic check tries again later, the manual one says it
       if (manual) snack('The clipboard cannot be read: allow it in the browser', 'Không đọc được bộ nhớ tạm: hãy cho phép trong trình duyệt');
     } finally { clipChecking = false; }
