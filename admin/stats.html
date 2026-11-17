@@ -76,10 +76,10 @@
     </div>
 
     <h2>Pages</h2>
-    <p class="note">Page views of the last 14 days (the first use of a page counts one; bots and admins not), the pages with most views first. Path only, no parameters (tools/db/page_views.sql).</p>
+    <p class="note">Page views of the last 14 days (the first use of a page counts one; bots and admins not), the pages with most views first. Path only, no parameters (tools/db/page_views.sql). Time: the active seconds of a page that was used (visible and in use), sent when the page is left; a page closed too fast may be missing there (tools/db/page_time.sql).</p>
     <div class="table-responsive">
       <table class="table table-sm mb-0">
-        <thead><tr><th>Site</th><th>Page</th><th>Views</th><th>Vietnamese</th><th>Phone</th><th>Vietnam</th></tr></thead>
+        <thead><tr><th>Site</th><th>Page</th><th>Views</th><th>Vietnamese</th><th>Phone</th><th>Vietnam</th><th>Mean time</th><th>Over 1 min</th></tr></thead>
         <tbody id="pages"></tbody>
       </table>
     </div>
@@ -262,6 +262,9 @@
           const tr = document.createElement('tr'); [c, g.n, all ? Math.round(100 * g.n / all) + ' %' : '', top(g.z, 4)].forEach(v => cell(tr, v)); return tr;
         }));
       }
+      const tm = await sp.client.rpc('admin_time', { p_days: 14 });
+      const timeOf = new Map();   // site + page -> { n, sec, long }
+      for (const r of tm.data || []) { const k = r.site + ' ' + r.page, t = timeOf.get(k) || { n: 0, sec: 0, long: 0 }; t.n += r.views; t.sec += Number(r.seconds); if (['m1_3', 'm3_10', 'm10_plus'].includes(r.band)) t.long += r.views; timeOf.set(k, t); }
       const pv = await sp.client.rpc('admin_views', { p_days: 14 });   // page views: needs tools/db/page_views.sql in Supabase
       if (pv.data) {
         const pages = new Map(), by = { lang: {}, device: {}, region: {} };
@@ -275,7 +278,8 @@
         const pct = (n, m) => m ? Math.round(100 * n / m) + ' %' : '';
         $('pages').replaceChildren(...[...pages.values()].sort((a, b) => b.views - a.views).slice(0, 40).map(e => {
           const tr = document.createElement('tr');
-          [e.site, e.page, e.views, pct(e.vi, e.views), pct(e.phone, e.views), pct(e.vietnam, e.views)].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+          const t = timeOf.get(e.site + ' ' + e.page), mean = t && t.n ? (t.sec / t.n >= 90 ? (t.sec / t.n / 60).toFixed(1) + ' min' : Math.round(t.sec / t.n) + ' s') : '';
+          [e.site, e.page, e.views, pct(e.vi, e.views), pct(e.phone, e.views), pct(e.vietnam, e.views), mean, t && t.n ? pct(t.long, t.n) : ''].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
           return tr;
         }));
         const list = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(([k, n]) => k + ' ' + pct(n, total)).join(', ') || 'none';

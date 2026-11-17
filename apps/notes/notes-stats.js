@@ -27,10 +27,24 @@ device by the width, a rough region by the time zone. It counts once the app is 
       return { p_site: 'qatt.org', p_page: '/apps/notes/', p_lang: lang, p_device: device, p_region: region };
     };
     const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } };
-    const send = (fn, body) => fetch(SUPABASE + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
+    const send = (fn, body) => fetch(SUPABASE + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {});
     // events of the app (tools/db/events.sql): QattStats.event('decoding_switch', name); the installation of the app counts as app_install / notes
     window.QattStats = { event: (name, detail) => { try { if (kind() === 'admin' || localStorage.getItem('qv_off')) return; } catch (e) { return; } send('count_event', { p_site: 'qatt.org', p_event: name, p_detail: detail || '', p_tz: tz() }); } };
     addEventListener('appinstalled', () => window.QattStats.event('app_install', 'notes'));
+    // the active time of the app (tools/db/page_time.sql), as in js/navigation.js: visible and used in the last minute, sent once when the page is left or hidden
+    const startTime = v => {
+      let active = 0, last = Date.now(), sent = false;
+      const touch = () => { last = Date.now(); };
+      EVENTS.forEach(ev => addEventListener(ev, touch, { passive: true }));
+      const timer = setInterval(() => { if (document.visibilityState === 'visible' && Date.now() - last < 60000) active++; }, 1000);
+      const out = () => {
+        if (sent || active < 1) return;
+        sent = true; clearInterval(timer);
+        send('count_time', { p_site: v.p_site, p_page: v.p_page, p_lang: v.p_lang, p_device: v.p_device, p_seconds: Math.min(active, 1800) });
+      };
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') out(); });
+      addEventListener('pagehide', out);
+    };
     const count = e => {
       if (e && e.isTrusted === false) return;
       EVENTS.forEach(ev => removeEventListener(ev, count));
@@ -40,7 +54,9 @@ device by the width, a rough region by the time zone. It counts once the app is 
       const k = kind();
       if (k === 'admin') return;
       const call = (fn, body) => fetch(SUPABASE + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
-      call('count_view', view());
+      const v = view();
+      call('count_view', v);
+      startTime(v);
       if (newVisit) { call('count_visit', { p_site: 'qatt.org', p_kind: k, p_new_visitor: newVisitor }); call('count_geo', { p_site: 'qatt.org', p_tz: tz() }); }
     };
     if (kind() === 'admin' || localStorage.getItem('qv_off')) return;
