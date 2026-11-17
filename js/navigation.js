@@ -825,7 +825,7 @@ window.Readings = window.Readings || (function() {
 // Counts the visits in Supabase (tools/db/visits.sql): only numbers, no cookie, no id, no address of the page. It counts only on qatt.org and chunom.org,
 // only when somebody uses the page (tap, key, mouse wheel or button; so most bots do not count) and not for browsers that name themselves as bots.
 // localStorage "qv" = { d: the UTC day of the last count, t: the time of the last activity }: once per browser and day = a visitor, a pause of more
-// than 30 minutes = a new visit. Every page that is used also counts one page view (path, language, device, rough region; tools/db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
+// than 30 minutes = a new visit (with the country from the request and the time zone, count_geo). Every page that is used also counts one page view (path, language, device, rough region; tools/db/page_views.sql). kind: "account" if the session of the browser is a signed-in user, else "anonymous".
 // Admins (app_metadata.is_admin in the session of the browser) are not counted; localStorage.qv_off = "1" (set by an admin session on every page of a site, and by admin/admin.js) switches it off in a browser that is not signed in.
 (function() {
     try {
@@ -844,6 +844,19 @@ window.Readings = window.Readings || (function() {
             }
             catch (e) { return "anonymous"; }
         };
+        const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
+        const call = (fn, body) => fetch(SUPABASE + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body), keepalive: true }).catch(() => {});
+        // events (tools/db/events.sql): QattStats.event("font_download", "qatt-pen"), also by a click on a tag with data-stat="event:detail" (the country comes from the request, the time zone from here)
+        const seen = new Set();   // downloads count once per open page (the same file again on this page does not count; a new page load does)
+        window.QattStats = { event: (name, detail) => {
+            try { if (kind() === "admin" || localStorage.getItem("qv_off")) return; } catch (e) { return; }
+            if (/_download$/.test(name)) { const k = name + ":" + (detail || ""); if (seen.has(k)) return; seen.add(k); }
+            call("count_event", { p_site: SITE, p_event: name, p_detail: detail || "", p_tz: tz() });
+        } };
+        document.addEventListener("click", e => {
+            const a = e.target && e.target.closest && e.target.closest("[data-stat]");
+            if (a && e.isTrusted !== false) { const [name, detail] = a.dataset.stat.split(":"); window.QattStats.event(name, detail); }
+        }, true);
         // what a page view says (tools/db/page_views.sql): the path only (no parameters, no #; the file index.html is its folder), the language of the page,
         // the kind of device by the width of the window, a rough region by the time zone; nothing that identifies a browser
         const view = () => {
@@ -855,6 +868,21 @@ window.Readings = window.Readings || (function() {
                 : /^Africa\//.test(zone) ? "africa" : /^(Australia|Pacific)\//.test(zone) ? "oceania" : "other";
             return { p_site: SITE, p_page: page, p_lang: lang, p_device: device, p_region: region };
         };
+        // the active time of a page that was used (tools/db/page_time.sql): the seconds in which the page is visible and something was done in the last minute;
+        // sent once when the page is left or hidden (fetch with keepalive, like a beacon but with the headers that Supabase needs)
+        const startTime = v => {
+            let active = 0, last = Date.now(), sent = false;
+            const touch = () => { last = Date.now(); };
+            EVENTS.forEach(ev => addEventListener(ev, touch, { passive: true }));
+            const timer = setInterval(() => { if (document.visibilityState === "visible" && Date.now() - last < 60000) active++; }, 1000);
+            const send = () => {
+                if (sent || active < 1) return;
+                sent = true; clearInterval(timer);
+                call("count_time", { p_site: v.p_site, p_page: v.p_page, p_lang: v.p_lang, p_device: v.p_device, p_seconds: Math.min(active, 1800) });
+            };
+            document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") send(); });
+            addEventListener("pagehide", send);
+        };
         const count = e => {
             if (e && e.isTrusted === false) return;   // events made by a script
             EVENTS.forEach(ev => removeEventListener(ev, count));
@@ -863,9 +891,10 @@ window.Readings = window.Readings || (function() {
             write({ d: today, t: now });
             const k = kind();
             if (k === "admin") return;
-            const call = (fn, body) => fetch(SUPABASE + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => {});
-            call("count_view", view());   // every page that is used counts once (tools/db/page_views.sql)
-            if (newVisit) call("count_visit", { p_site: SITE, p_kind: k, p_new_visitor: newVisitor });
+            const v = view();
+            call("count_view", v);
+            startTime(v);   // every page that is used counts once (tools/db/page_views.sql)
+            if (newVisit) { call("count_visit", { p_site: SITE, p_kind: k, p_new_visitor: newVisitor }); call("count_geo", { p_site: SITE, p_tz: tz() }); }   // country and time zone of the visit (tools/db/events.sql)
         };
         if (kind() === "admin" || localStorage.getItem("qv_off")) return;   // an admin session sets qv_off at once, on this site too (the flag is per origin)
         EVENTS.forEach(e => addEventListener(e, count, { passive: true }));

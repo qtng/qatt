@@ -279,7 +279,7 @@
 
         qattToggle.addEventListener('change', renderWiki);
         readingToggle.addEventListener('change', updateReading);
-        $('decoding').addEventListener('change', () => { parser.setDecoding($('decoding').value); if (currentWikiHtml) renderWiki(); });
+        $('decoding').addEventListener('change', () => { if (window.QattStats) QattStats.event('decoding_switch', $('decoding').value); parser.setDecoding($('decoding').value); if (currentWikiHtml) renderWiki(); });
 
         contentArea.addEventListener('click', e => {
             const link = e.target.closest('a');
