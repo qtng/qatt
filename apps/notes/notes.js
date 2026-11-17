@@ -474,6 +474,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
   $('set-decoding').addEventListener('change', () => {
     const name = $('set-decoding').value;
     keepFormat('decoding', name);
+    if (window.QattStats) QattStats.event('decoding_switch', name);
     editor.setDecoding(name);   // every cell read with the old table and written with the new one
     refreshSamples();
     closeMenu();

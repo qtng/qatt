@@ -26,6 +26,11 @@ device by the width, a rough region by the time zone. It counts once the app is 
         : /^Africa\//.test(zone) ? 'africa' : /^(Australia|Pacific)\//.test(zone) ? 'oceania' : 'other';
       return { p_site: 'qatt.org', p_page: '/apps/notes/', p_lang: lang, p_device: device, p_region: region };
     };
+    const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } };
+    const send = (fn, body) => fetch(SUPABASE + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
+    // events of the app (tools/db/events.sql): QattStats.event('decoding_switch', name); the installation of the app counts as app_install / notes
+    window.QattStats = { event: (name, detail) => { try { if (kind() === 'admin' || localStorage.getItem('qv_off')) return; } catch (e) { return; } send('count_event', { p_site: 'qatt.org', p_event: name, p_detail: detail || '', p_tz: tz() }); } };
+    addEventListener('appinstalled', () => window.QattStats.event('app_install', 'notes'));
     const count = e => {
       if (e && e.isTrusted === false) return;
       EVENTS.forEach(ev => removeEventListener(ev, count));
@@ -36,7 +41,7 @@ device by the width, a rough region by the time zone. It counts once the app is 
       if (k === 'admin') return;
       const call = (fn, body) => fetch(SUPABASE + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
       call('count_view', view());
-      if (newVisit) call('count_visit', { p_site: 'qatt.org', p_kind: k, p_new_visitor: newVisitor });
+      if (newVisit) { call('count_visit', { p_site: 'qatt.org', p_kind: k, p_new_visitor: newVisitor }); call('count_geo', { p_site: 'qatt.org', p_tz: tz() }); }
     };
     if (kind() === 'admin' || localStorage.getItem('qv_off')) return;
     EVENTS.forEach(e => addEventListener(e, count, { passive: true }));
