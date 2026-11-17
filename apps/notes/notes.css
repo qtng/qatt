@@ -109,7 +109,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .fontinfo-note { margin-top: .5rem; font-size: .75rem; color: var(--muted); }
 .clip-actions { display: flex; gap: .5rem; padding: .5rem; border-top: 1px solid var(--line); }
 .clip-actions button { flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 48px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
-#clip-save { color: var(--accent); border-color: var(--accent); }
 .clip-actions button:active { background: rgba(255, 255, 255, .12); }
 
 /* direct input: the 22 shapes in two rows of 11, in the order of the column (top, bottom, next column) */
@@ -154,3 +153,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .menu-toggles { display: flex; }
 .menu-toggles button { flex: 1 1 0; }
 .menu-toggles button[aria-pressed="true"] { color: var(--accent); }
+
+/* "Check clipboard": an eye, as large and as orange as the plus button, left of it with a gap */
+.fab { right: calc(1.75rem + env(safe-area-inset-right)); bottom: calc(1.75rem + env(safe-area-inset-bottom)); }
+.fab-clip { right: calc(1.75rem + 56px + .9rem + env(safe-area-inset-right)); }
+.clip-text { font-family: var(--clip-font, var(--qfont, "QATT Pen Medium")), var(--pafont, "PA"), system-ui, sans-serif, var(--nom); }
+/* the card: a small Save (a link) at the bottom left, a small orange Close at the bottom right */
+.clip-actions { justify-content: space-between; align-items: center; }
+.clip-actions button.small, .clip-actions #clip-close { flex: none; min-height: 36px; padding: 0 .75rem; font-size: .85rem; }
+#clip-close { border-color: var(--accent); background: var(--accent); color: #fff; }
+.clip-actions button.btn-link { border-color: transparent; background: transparent; color: var(--muted, inherit); text-decoration: underline; }
+.clip-title:has(#clip-font) { display: flex; align-items: center; gap: .5rem; padding-top: .4rem; padding-bottom: .4rem; }
+.clip-title #clip-title { flex: 1; min-width: 0; }
+#clip-font { flex: none; min-width: 0; max-width: 9.5rem; height: 34px; font-size: .8rem; }   /* the normal system look */
+/* the hint in the lower half of the screen (4 seconds) */
+.cliphint { position: fixed; z-index: 20; left: 50%; top: 68%; transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; max-width: calc(100% - 2rem); padding: .6rem 1rem; border-radius: 10px; background: #51473a; color: var(--ink); box-shadow: 0 4px 14px rgba(0, 0, 0, .6); }
+.cliphint button { min-height: 40px; padding: 0 .5rem; border: 0; background: transparent; color: var(--accent); font-weight: 600; text-transform: uppercase; }

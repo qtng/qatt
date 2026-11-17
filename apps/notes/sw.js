@@ -5,7 +5,7 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v92';
+const CACHE = 'qatt-notes-v97';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.qatt.org/fonts/';   // the font files (js/fonts.js, QATT_CDN): the R2 bucket
@@ -24,7 +24,7 @@ const PRECACHE = [
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/js/pa-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  ...['qatt-pen-letters.woff2', 'qatt-pen-medium-letters.woff2', 'celluloid-letters.woff2', 'migoi-letters.woff2', 'qatt-serif.woff2', 'qatt-gothic.woff2', 'qatt-gothic-wide.woff2', 'qatt-hat-gao.woff2', 'qatt-snip.woff2', 'qatt-manh.woff2', 'qatt-metro.woff2', 'qatt-n7k.woff2', 'phongthao-letters.woff2'].map(n => CDN + n),
+  ...['qatt-pen-letters.woff2', 'qatt-pen-medium-letters.woff2', 'celluloid-letters.woff2', 'migoi-letters.woff2', 'qatt-serif.woff2', 'qatt-gothic-extralight-letters.woff2', 'qatt-gothic-wide.woff2', 'qatt-hat-gao.woff2', 'qatt-snip.woff2', 'qatt-manh.woff2', 'qatt-metro.woff2', 'qatt-n7k.woff2', 'phongthao-letters.woff2'].map(n => CDN + n),
 ];
 
 // the caches of earlier versions of this app
@@ -48,7 +48,7 @@ if (typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWo
     const cache = await caches.open(CACHE);
     await Promise.all(PRECACHE.map(async url => {
       let res = await fetch(new Request(url, { cache: 'reload' })).catch(() => null);
-      if (!res || !res.ok) throw new Error(url + ' ' + (res && res.status));
+      if (!res || !res.ok) { if (url.startsWith(CDN)) return; throw new Error(url + ' ' + (res && res.status)); }   // a font of the bucket that is gone must not stop the install (it is cached when a page loads it)
       await cache.put(url, res);
     }));
     await Promise.all(CHUNOM.map(async url => {
