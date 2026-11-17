@@ -368,6 +368,7 @@ const QattWriter = (() => {
     }
     // another table: every QATT cell is read with the old table and written with the new one, other text stays as it is
     decoding.addEventListener('change', () => {
+      if (window.QattStats) QattStats.event('decoding_switch', decoding.value);
       typer.value = QattText.recode(typer.value, parser, new VietnameseParser(decoding.value));
       parser.setDecoding(decoding.value);
       if (ime) ime.hide();
