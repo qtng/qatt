@@ -126,9 +126,11 @@ window.Theme = window.Theme || (function() {
         glass: ["Glassmorphism", "Kính mờ"], clay: ["Clay", "Đất sét"], boho: ["Bohemian", "Bohemian"], pixel: ["Pixel art", "Pixel art"], vector: ["Vector art", "Vector art"], future: ["Futuristic", "Tương lai"],
         neobrutal: ["Neobrutalism", "Tân thô mộc"], vietnam: ["Modern Vietnam", "Việt Nam hiện đại"], nocturne: ["Nocturne", "Đêm khuya"] };
     const DARK_THEMES = ["future", "nocturne"];   // themes with a dark background: Bootstrap gets data-bs-theme="dark" too
-    const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
+    // the Chunom site: every host but qatt.org (chunom.org, cdn.qatt.org, a local file, …), and the folders of the Chunom site on qatt.org (forwarded there)
+    const onChunom = !/^(www\.)?qatt\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     const CHUNOM_THEMES = true;
-    const themed = !onChunom || /^\/chunom\//.test(location.pathname);
+    // themed: qatt.org, the pages under /chunom/, and a page of the Chunom site on another host (not the landing pages and assets of chunom.org)
+    const themed = !onChunom || /^\/chunom\//.test(location.pathname) || !/(^|\.)chunom\.org$/.test(location.hostname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
     let chosen = onChunom && CHUNOM_THEMES ? "boho" : "classic";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, classic on qatt.org
@@ -265,8 +267,9 @@ window.Readings = window.Readings || (function() {
 (function() {
     const CHUNOM_SITE = "https://chunom.org";
     const QATT_SITE = "https://qatt.org";
-    // the site of this page: the Chunom site (chunom.org, the folders /chunom/, /pages/, /chunom-assets/) or qatt.org
-    const onChunom = /(^|\.)chunom\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
+    // the site of this page: qatt.org is the QATT site; every other host (chunom.org, cdn.qatt.org, a local file, …) and the folders /chunom/, /pages/,
+    // /chunom-assets/ are the Chunom site
+    const onChunom = !/^(www\.)?qatt\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     const qattBlock = {
         header: "Quốc Âm Tân Tự (QATT)",
         themeClass: "text-info",
