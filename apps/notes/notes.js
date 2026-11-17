@@ -592,6 +592,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
     clip.hidden = false;
   }
   function hideHint() { clearTimeout(hintTimer); hint.hidden = true; }
+  $('cliphint-close').addEventListener('click', () => hideHint());
   function showHint(en, vi, text) {
     clearTimeout(hintTimer);
     $('cliphint-text').textContent = Lang.t(en, vi);
