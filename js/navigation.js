@@ -847,8 +847,10 @@ window.Readings = window.Readings || (function() {
         const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
         const call = (fn, body) => fetch(SUPABASE + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => {});
         // events (tools/db/events.sql): QattStats.event("font_download", "qatt-pen"), also by a click on a tag with data-stat="event:detail" (the country comes from the request, the time zone from here)
+        const seen = new Set();   // downloads count once per open page (the same file again on this page does not count; a new page load does)
         window.QattStats = { event: (name, detail) => {
             try { if (kind() === "admin" || localStorage.getItem("qv_off")) return; } catch (e) { return; }
+            if (/_download$/.test(name)) { const k = name + ":" + (detail || ""); if (seen.has(k)) return; seen.add(k); }
             call("count_event", { p_site: SITE, p_event: name, p_detail: detail || "", p_tz: tz() });
         } };
         document.addEventListener("click", e => {
