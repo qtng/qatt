@@ -88,6 +88,7 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
     "Migoi":           { weights: { 400: ["migoi", "migoi-letters"] } },
     "Celluloid":       { weights: { 400: ["celluloid", "celluloid-letters"] } },
     "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } },
+    "Hai Minh":        { weights: { 400: ["hai-minh"] } },
     "QATT Gothic ExtraLight": { weights: { 200: ["qatt-gothic-extralight", "qatt-gothic-extralight-letters"] } },
     "QATT Gothic Rounded ExtraLight": { weights: { 200: ["qatt-gothic-rounded-extralight", "qatt-gothic-rounded-extralight-letters"] } }
   };
