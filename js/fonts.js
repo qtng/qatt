@@ -12,6 +12,7 @@ as soon as the parser has added them. Its globals are var: it may run twice (adm
 */
 var QATT_FONTS = [
   { family: "QATT Serif",          label: "Serif",          file: "qatt-serif" },
+  { family: "QATT Serif Mincho",   label: "Serif mincho (draft)", file: "qatt-serif-mincho-letters", big: "qatt-serif-mincho", cjk: true, admin: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/qatt-serif.json of the private repository): letters here, CJK, Latin and PA from the big font; admins only while it is a draft
   { family: "QATT Gothic ExtraLight", label: "Gothic extralight",   file: "qatt-gothic-extralight-letters", big: "qatt-gothic-extralight", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
   { family: "QATT Gothic Rounded ExtraLight", label: "Gothic rounded extralight", file: "qatt-gothic-rounded-extralight-letters", big: "qatt-gothic-rounded-extralight", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "qatt-gothic-extralight", cjk: true },   // its CJK: the same big font
