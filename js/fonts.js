@@ -131,7 +131,7 @@ var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 // where the font files are (the Cloudflare R2 bucket qatt-fonts at cdn.qatt.org, filled by r2_publish.py of the private repository; no Git history, a changed file is overwritten);
 // a list, so that another address could be put behind the first (the browser takes the next address of src when one fails). qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
 var QATT_CDN = ["https://cdn.qatt.org/fonts/"];
-// versions: fonts/version.json of the bucket (written by r2_publish.py) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "qatt-serif"; the slices and the Latin
+// versions: fonts/version.json of the bucket (written by r2_publish.py) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "hai-minh"; the slices and the Latin
 // of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, epoch, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
 // with the time as a cache buster. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice for a visitor when nothing changed); when its date is later than the base,
 // the date goes behind its files (?v=<date>), so a changed font has a new address and the next page load takes it (the page that is open keeps what it has).
@@ -146,7 +146,7 @@ var qattFontVer = (() => {
   } catch (e) { return {}; }
 })();
 var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin|-pa)$/, "$1");
-var qattFontSrc = path => {   // path: "qatt-serif.woff2", "web/qatt-pen-00.woff2"
+var qattFontSrc = path => {   // path: "hai-minh-letters.woff2", "web/qatt-pen-00.woff2"
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
   return QATT_CDN.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
 };
