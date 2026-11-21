@@ -187,8 +187,9 @@
         const QATT_SPACE = 'qatt';
         const SPACES_KEY = 'kage.spaces'; // die angelegten Spaces außer 'qatt' (Liste der Namen)
         const SPACE_ID = /^[A-Za-z0-9]+$/; // Name eines Space: nur Buchstaben und Ziffern (sein "Dateiname")
-        // Nur der Space 'qatt' kennt die Regeln der QATT-Glyphen: die Vorgaben, die Kombinationen, die Marks, die Box im Namen
-        // der Großbuchstaben und den Export nach Codepunkten. Die anderen Spaces speichern Glyphen unter ihrem Namen, wie sie sind.
+        // Nur der Space 'qatt' kennt die Regeln der QATT-Glyphen: die Kombinationen, die Marks und den Export nach Codepunkten.
+        // Die Box im Namen der Großbuchstaben (Breite und Ecken, die grünen Anfasser) gilt in jedem Space; die anderen Spaces
+        // exportieren die Glyphen unter ihrem Namen.
         let qattMode = true;
         const storeGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
         const storeSet = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
@@ -211,7 +212,7 @@
             },
         };
         const LINE_CAPS = ['butt', 'square', 'round'];
-        const PRESET_CODES = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'NH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
+        const QATT_ORDER = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'NH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
 
         // Glyphen aus Großbuchstaben tragen Breite und die Box der anderen Komponente im Namen:
         // "TR-120-10-180-190-20" (BASIS-Breite-X-Y-X2-Y2).
@@ -266,13 +267,13 @@
         };
 
         // Sortierung der Glyphen-Liste: Großbuchstaben, dann Kleinbuchstaben, dann gemischt;
-        // innerhalb der Gruppe in der Reihenfolge von PRESET_CODES, alle anderen danach alphabetisch.
+        // innerhalb der Gruppe in der Reihenfolge von QATT_ORDER, alle anderen danach alphabetisch.
         // Gemischte Codes zuerst nach dem großen Anfang, dann nach dem kleinen Rest (TRnh: TR, dann nh).
         function glyphOrder(a, b) {
             const group = c => c === c.toUpperCase() ? 0 : c === c.toLowerCase() ? 1 : 2;
             const rank = c => {
-                const i = PRESET_CODES.indexOf(splitName(c).base.toUpperCase());
-                return i === -1 ? PRESET_CODES.length : i;
+                const i = QATT_ORDER.indexOf(splitName(c).base.toUpperCase());
+                return i === -1 ? QATT_ORDER.length : i;
             };
             const cmp = (x, y) => rank(x) - rank(y) || x.localeCompare(y);
             const split = c => c.match(/^([^a-z]*)(.*)$/).slice(1);
@@ -404,7 +405,7 @@
         const cpName = (i, m = 0) => 'u' + (0xF0000 + 7 * i + m).toString(16);
         const FULL_REF = (name) => `99,0,0,0,0,200,0,0,200,200,200,${name}`;
         function glyphsToFile(saved) {
-            const codes = Object.keys(saved).filter(c => saved[c].length); // leere Glyphen (die Vorgaben des Editors) nicht
+            const codes = Object.keys(saved).filter(c => saved[c].length); // leere Glyphen nicht
             // der Großbuchstabe eines Symbols: gibt es mehrere mit derselben Basis (eine ältere Fassung unter anderem Namen), der, den die Kombinationen
             // nehmen (syncCombos: der letzte); die anderen werden nicht exportiert (stale)
             const uppersOf = i => codes.filter(c => !COMBO_NAME.test(c) && isUpperName(splitName(c).base) && splitName(c).base === CP_KEYS[i].toUpperCase());
@@ -548,14 +549,9 @@
                 qattMode = id === QATT_SPACE;
                 storeSet('kage.space', id);
                 this.savedGlyphs = this.loadStored(this.storageKey()) ?? {};
-                if (qattMode) {
-                    // Fehlende Zeichen als leere Glyphen anlegen (vorhandene bleiben unverändert, auch mit Breite)
-                    const bases = new Set(Object.keys(this.savedGlyphs).map(k => splitName(k).base));
-                    [...PRESET_CODES, ...PRESET_CODES.map(c => c.toLowerCase())].forEach(c => {
-                        if (!bases.has(c)) this.savedGlyphs[c] = [];
-                    });
-                    this.syncCombos();
-                }
+                // leere Glyphen (die früheren Vorgaben des Editors) fallen weg; gespeichert wird keine leere Glyphe
+                Object.keys(this.savedGlyphs).forEach(k => { if (!this.savedGlyphs[k]?.length) delete this.savedGlyphs[k]; });
+                this.syncCombos();
                 this.persist();
 
                 this.strokes = withLayers(strokes); // in einem anderen Space gibt es keine Marks: alle Striche auf die Ebene Glyph
@@ -877,7 +873,7 @@
 
             // Anfasser für Breite und Versatz nur für Namen aus Großbuchstaben
             showsWidth() {
-                return qattMode && isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
+                return isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
             }
 
             // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | 'corner' | null
@@ -1212,17 +1208,16 @@
                     return;
                 }
 
-                // Name mit Breite (nur Großbuchstaben im Space 'qatt'); eine im Feld getippte Breite zählt nicht, der Anfasser gilt.
-                // In einem anderen Space ist der Name der Code, wie er im Feld steht.
-                const { base } = qattMode ? splitName(input) : { base: input };
-                const code = qattMode ? joinName(base, this.glyphWidth, this.offset, this.corner) : input;
+                // Name mit Breite und Box (nur Großbuchstaben, in jedem Space); eine im Feld getippte Breite zählt nicht, der Anfasser gilt
+                const { base } = splitName(input);
+                const code = joinName(base, this.glyphWidth, this.offset, this.corner);
 
                 // Deep Copy (überschreibt, wenn der Code existiert)
                 this.savedGlyphs[code] = withoutLayers(this.strokes);
 
                 // Nur die Breite geändert: alte Glyphe umbenennen und Verweise in anderen Glyphen nachziehen
                 const old = this.loadedCode;
-                if (qattMode && old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
+                if (old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
                     delete this.savedGlyphs[old];
                     this.renameReferences(old, code);
                 }
@@ -1380,8 +1375,7 @@
                 this.selectedPointIdx = null;
                 this.resetToAddOrEdit();
                 // Im Feld steht der Name ohne Breite; die Breite steht am grünen Anfasser
-                const { base, width, offset, corner } = qattMode ? splitName(code)
-                    : { base: code, width: GRID, offset: { ...NEUTRAL_OFFSET }, corner: { ...NEUTRAL_CORNER } };
+                const { base, width, offset, corner } = splitName(code);
                 document.getElementById('saveCodeInput').value = base;
                 this.glyphWidth = width;
                 this.offset = offset;
@@ -1790,7 +1784,7 @@
             // bearbeitete Glyphe kommt live von der Malfläche (Striche und Breite).
             renderPreview() {
                 const box = document.getElementById('comboPreview');
-                const name = qattMode ? document.getElementById('saveCodeInput').value.trim() : ''; // nur im Space 'qatt'
+                const name = document.getElementById('saveCodeInput').value.trim();
                 const keys = Object.keys(this.savedGlyphs).sort(this.sortFn());
                 const upperKeys = keys.filter(k => isUpperName(splitName(k).base));
                 const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k));
