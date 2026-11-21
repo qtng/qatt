@@ -11,10 +11,10 @@ which has no navigation.js). It defines the @font-face rules of every font, also
 as soon as the parser has added them. Its globals are var: it may run twice (admin/view.html). The font files are in the R2 bucket at cdn.qatt.org (QATT_CDN).
 */
 var QATT_FONTS = [
-  { family: "Hai Minh ExtraLight",  label: "Hài Minh extralight", file: "hai-minh-extralight-letters", big: "hai-minh-extralight", cjk: true },
-  { family: "Hai Minh Light",       label: "Hài Minh light",   file: "hai-minh-light-letters", big: "hai-minh-light", cjk: true },
-  { family: "Hai Minh",             label: "Hài Minh",         file: "hai-minh-letters", big: "hai-minh", cjk: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/hai-minh*.json of the private repository): letters here (a subset of the big font), CJK, Latin and PA from the big font; ExtraLight, Light and Bold the same
-  { family: "Hai Minh Bold",        label: "Hài Minh bold",    file: "hai-minh-bold-letters", big: "hai-minh-bold", cjk: true },
+  { family: "HaiMinh ExtraLight",   label: "Hài Minh extralight", file: "haiminh-extralight-letters", big: "haiminh-extralight", cjk: true },
+  { family: "HaiMinh Light",        label: "Hài Minh light",   file: "haiminh-light-letters", big: "haiminh-light", cjk: true },
+  { family: "HaiMinh",              label: "Hài Minh",         file: "haiminh-letters", big: "haiminh", cjk: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/haiminh*.json of the private repository), its QATT letters the glyphs of Migoi with the Pen stroke and PA in Pen; letters here (a subset of the big font), CJK, Latin and PA from the big font; ExtraLight, Light and Bold the same
+  { family: "HaiMinh Bold",         label: "Hài Minh bold",    file: "haiminh-bold-letters", big: "haiminh-bold", cjk: true },
   { family: "QATT Gothic ExtraLight", label: "Gothic extralight",   file: "qatt-gothic-extralight-letters", big: "qatt-gothic-extralight", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
   { family: "QATT Gothic Rounded ExtraLight", label: "Gothic rounded extralight", file: "qatt-gothic-rounded-extralight-letters", big: "qatt-gothic-rounded-extralight", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "qatt-gothic-extralight", cjk: true },   // its CJK: the same big font
@@ -50,7 +50,7 @@ var PA_FONTS = [
 // the PA fonts that go behind a QATT font (the fonts of PA text in the Chunom writer and in Notes): the one of its stroke style, then the plain one
 var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : /^QATT Gothic Rounded/.test(family) ? "PA Gothic Rounded" : /^QATT Gothic/.test(family) ? "PA Gothic" : /^Celluloid/.test(family) ? "PA Celluloid" : null; return own ? [own, "PA"] : ["PA"]; };
 // the old CSS names of renamed fonts -> the new ones (a note of Qatt.org Notes keeps the name of its font: notes.js looks it up here first)
-var QATT_FONT_RENAMED = { "QATT Gothic": "QATT Gothic ExtraLight", "QATT Gothic Rounded": "QATT Gothic Rounded ExtraLight" };
+var QATT_FONT_RENAMED = { "QATT Gothic": "QATT Gothic ExtraLight", "QATT Gothic Rounded": "QATT Gothic Rounded ExtraLight", "Hai Minh": "HaiMinh", "Hai Minh ExtraLight": "HaiMinh ExtraLight", "Hai Minh Light": "HaiMinh Light", "Hai Minh Bold": "HaiMinh Bold", "Hai Minh Medium": "HaiMinh Bold" };
 // big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack
@@ -134,7 +134,7 @@ var qattFontsShown = () => QATT_FONTS.filter(f => !f.admin || isAdmin());
 // where the font files are (the Cloudflare R2 bucket qatt-fonts at cdn.qatt.org, filled by r2_publish.py of the private repository; no Git history, a changed file is overwritten);
 // a list, so that another address could be put behind the first (the browser takes the next address of src when one fails). qatt.org itself serves no font file (only fonts/LICENSE.txt, whose address is in every font)
 var QATT_CDN = ["https://cdn.qatt.org/fonts/"];
-// versions: fonts/version.json of the bucket (written by r2_publish.py) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "hai-minh"; the slices and the Latin
+// versions: fonts/version.json of the bucket (written by r2_publish.py) lists the date of the last change of every font, by the name of its TTF ("migoi", "qatt-pen-letters", "haiminh"; the slices and the Latin
 // of a big font belong to the big font). The browser keeps the list (localStorage.qattFontVer: { at, build, epoch, base, fonts }) and asks for it at most every 5 minutes (when a page starts and when it comes to the front),
 // with the time as a cache buster. The first list seen is the base: a font with its base date keeps its plain address (no file is loaded twice for a visitor when nothing changed); when its date is later than the base,
 // the date goes behind its files (?v=<date>), so a changed font has a new address and the next page load takes it (the page that is open keeps what it has).
@@ -149,7 +149,7 @@ var qattFontVer = (() => {
   } catch (e) { return {}; }
 })();
 var qattFontKey = path => path.replace(/\.woff2$/, "").replace(/^web\/(.*?)(-\d\d|-latin|-pa)$/, "$1");
-var qattFontSrc = path => {   // path: "hai-minh-letters.woff2", "web/qatt-pen-00.woff2"
+var qattFontSrc = path => {   // path: "haiminh-letters.woff2", "web/qatt-pen-00.woff2"
   const k = qattFontKey(path), v = (qattFontVer.fonts || {})[k], q = v && v !== (qattFontVer.base || {})[k] ? "?v=" + encodeURIComponent(v) : "";
   return QATT_CDN.map(base => `url(${base}${path}${q}) format("woff2")`).join(", ");
 };
