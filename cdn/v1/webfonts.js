@@ -5,7 +5,7 @@
 
 The query of the script says which fonts:
   family=QATT+Pen                      one font (400); more fonts: family=...&family=...
-  family=QATT+Pen:weight@300;400;500   the weights (QATT Pen: 100 Thin, 300 Light, 400 Regular, 500 Medium; Hai Minh: 300, 400, 500; the others have 400 only); wght@ is the same
+  family=QATT+Pen:weight@300;400;500   the weights (QATT Pen: 100 Thin, 300 Light, 400 Regular, 500 Medium; Hai Minh: 200, 300, 400, 500; the others have 400 only); wght@ is the same
   display=swap                         font-display (swap, block, fallback, optional, auto; default swap)
 The script writes the @font-face rules into the page; the font files are loaded only when the page shows a character of them (the CJK part in slices with
 a unicode-range, the QATT letters U+F0000..F00A3 in one file). The fonts give Chữ Nôm, Han characters (with their punctuation and the radicals) and the QATT letters; the Latin
@@ -85,7 +85,7 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   // name -> { weights: { weight: [the name of the big font (slices), the file of the QATT letters] } }
   var FONTS = {
     "QATT Pen":        { weights: { 100: ["qatt-pen-thin", "qatt-pen-thin-letters"], 300: ["qatt-pen-light", "qatt-pen-light-letters"], 400: ["qatt-pen", "qatt-pen-letters"], 500: ["qatt-pen-medium", "qatt-pen-medium-letters"] } },
-    "Hai Minh":        { weights: { 300: ["hai-minh-light", "hai-minh-light-letters"], 400: ["hai-minh", "hai-minh-letters"], 500: ["hai-minh-medium", "hai-minh-medium-letters"] } },
+    "Hai Minh":        { weights: { 200: ["hai-minh-extralight", "hai-minh-extralight-letters"], 300: ["hai-minh-light", "hai-minh-light-letters"], 400: ["hai-minh", "hai-minh-letters"], 500: ["hai-minh-medium", "hai-minh-medium-letters"] } },
     "Migoi":           { weights: { 400: ["migoi", "migoi-letters"] } },
     "Celluloid":       { weights: { 400: ["celluloid", "celluloid-letters"] } },
     "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } },
