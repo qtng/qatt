@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QATT Glyphs Creator</title>
     <script src="../js/navigation.js"></script>
+    <script src="/js/kage-engine.min.js"></script>
     <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/site.css" rel="stylesheet">
     <style>
@@ -33,7 +34,14 @@
     </div>
 
     <div class="container-xl py-3" style="max-width: 1200px;">
-        <h1 class="h5 fw-bold mb-3">KAGE Editor</h1>
+        <!-- Titel; rechts der Space (jeder Space hat seine eigenen Glyphen), + legt einen neuen an -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <h1 class="h5 fw-bold mb-0 me-auto">KAGE Editor</h1>
+            <label for="spaceSelect" class="small text-body-secondary">Space</label>
+            <select id="spaceSelect" class="form-select form-select-sm w-auto font-monospace"></select>
+            <button id="addSpaceBtn" class="btn btn-sm btn-outline-primary" title="Neuen Space anlegen" aria-label="Neuen Space anlegen">+</button>
+            <button id="deleteSpaceBtn" class="btn btn-sm btn-outline-danger" title="Diesen Space löschen" aria-label="Diesen Space löschen">&times;</button>
+        </div>
 
         <div class="row g-3">
 
@@ -51,7 +59,7 @@
                     <div id="editTools" class="card-footer d-flex flex-column-reverse flex-lg-row align-items-center gap-2 py-2">
                         <div class="d-flex flex-column gap-2 align-self-stretch justify-content-center flex-grow-1">
                             <!-- Ebene: nur ihre Striche sind bearbeitbar, die der anderen gedämpft (Einrasten an allen) -->
-                            <div class="d-flex align-items-center gap-2">
+                            <div id="layerRow" class="d-flex align-items-center gap-2">
                                 <div id="layerTools" class="btn-group btn-group-sm" role="group" aria-label="Ebene">
                                     <button type="button" class="layer-btn btn btn-primary" data-layer="glyph" aria-pressed="true">Glyph</button>
                                     <button type="button" class="layer-btn btn btn-outline-primary" data-layer="marks" aria-pressed="false" title="Die 6 Markierungen der markierten Formen">Marks <span id="marksCount" class="font-monospace">0/6</span></button>
@@ -64,12 +72,18 @@
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="2">+ Kurve</button>
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="99">+ Komponente</button>
                                 </div>
-                                <button id="clearBtn" class="btn btn-sm btn-outline-danger ms-auto" title="Alle Striche der aktuellen Ebene entfernen">Leeren</button>
                             </div>
                             <div class="d-flex align-items-center gap-2" style="min-height: 31px;">
                                 <span id="editInfo" class="small text-body-secondary me-auto">Nichts ausgewählt</span>
                                 <button id="resolveBtn" class="d-none btn btn-sm btn-warning">Auflösen</button>
                                 <button id="deleteStrokeBtn" class="d-none btn btn-sm btn-outline-danger" title="Ausgewählte Form entfernen (Entf)">Entfernen</button>
+                            </div>
+                            <!-- Anfangs- und Endtyp (KAGE) der ausgewählten Linie oder Kurve; ohne Wahl 0 -->
+                            <div id="strokeEnds" class="d-none d-flex flex-wrap align-items-center gap-2">
+                                <label for="startTypeSel" class="small text-body-secondary">Anfang</label>
+                                <select id="startTypeSel" class="form-select form-select-sm w-auto"></select>
+                                <label for="endTypeSel" class="small text-body-secondary">Ende</label>
+                                <select id="endTypeSel" class="form-select form-select-sm w-auto"></select>
                             </div>
                         </div>
                         <div class="d-grid gap-1" style="grid-template-columns: repeat(3, 2.25rem);" role="group" aria-label="Auswahl verschieben">
@@ -106,11 +120,27 @@
                             <input type="range" id="lineCapSlider" min="0" max="2" step="1" value="1" class="form-range flex-grow-1">
                             <span id="lineCapVal" class="font-monospace text-body-secondary flex-shrink-0" style="width: 4em;">square</span>
                         </label>
+                        <div class="d-flex align-items-center gap-2 small px-1">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="kageRender">
+                                <label class="form-check-label" for="kageRender" title="Die Striche mit der KAGE-Engine zeichnen (mit Anfangs- und Endtypen)">Mit KAGE rendern</label>
+                            </div>
+                            <select id="kageStyle" class="form-select form-select-sm w-auto" aria-label="KAGE-Stil">
+                                <option value="mincho">Mincho</option>
+                                <option value="gothic">Gothic</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div id="savedGlyphsCard" class="card shadow-sm">
-                    <div class="card-header py-2 small fw-bold">Gespeicherte Glyphen</div>
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center gap-2">
+                        <span class="small fw-bold">Gespeicherte Glyphen</span>
+                        <select id="sortSelect" class="form-select form-select-sm w-auto" aria-label="Sortierung">
+                            <option value="qatt">Sortierung QATT</option>
+                            <option value="alpha">Alphabetisch</option>
+                        </select>
+                    </div>
                     <div id="savedGlyphsContainer" class="card-body p-2 d-flex flex-wrap gap-2 align-items-start">
                         <p class="small text-body-secondary fst-italic mb-0" id="emptyGlyphsMsg">Noch keine Glyphen gespeichert.</p>
                     </div>
@@ -153,7 +183,33 @@
     <script>
         const GRID = 200; // KAGE intern ist IMMER 200x200
         const MARGIN = 12; // Hilfsrahmen vom Rand
-        const STORAGE_KEY = 'kage.savedGlyphs';
+        const STORAGE_KEY = 'kage.savedGlyphs'; // die Glyphen des Space 'qatt'; jeder andere Space unter 'kage.space.<id>'
+        const QATT_SPACE = 'qatt';
+        const SPACES_KEY = 'kage.spaces'; // die angelegten Spaces außer 'qatt' (Liste der Namen)
+        const SPACE_ID = /^[A-Za-z0-9]+$/; // Name eines Space: nur Buchstaben und Ziffern (sein "Dateiname")
+        // Nur der Space 'qatt' kennt die Regeln der QATT-Glyphen: die Vorgaben, die Kombinationen, die Marks, die Box im Namen
+        // der Großbuchstaben und den Export nach Codepunkten. Die anderen Spaces speichern Glyphen unter ihrem Namen, wie sie sind.
+        let qattMode = true;
+        const storeGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+        const storeSet = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
+        // Sortierungen der Glyphen-Liste: QATT (glyphOrder) oder streng lexikalisch nach Codeeinheiten (Ziffern, dann Groß-, dann Kleinbuchstaben)
+        const SORTS = {
+            qatt: (a, b) => glyphOrder(a, b),
+            alpha: (a, b) => a < b ? -1 : a > b ? 1 : 0,
+        };
+        // Anfangs- und Endtypen (KAGE) für Linie (1) und Kurve (2); 0 ist der Standard
+        const STROKE_ENDS = {
+            1: {
+                start: [[0, 'frei'], [2, 'Anschluss'], [32, 'Anschluss senkrecht'], [12, 'Ecke oben links'], [22, 'Ecke oben rechts']],
+                end: [[0, 'frei'], [2, 'Anschluss'], [32, 'Anschluss senkrecht'], [13, 'Ecke unten links'], [23, 'Ecke unten rechts'],
+                      [4, 'Haken nach links'], [24, 'Ecke unten rechts (H/T)'], [313, 'Ecke unten links (alt)'], [413, 'Ecke unten links (neu)']],
+            },
+            2: {
+                start: [[0, 'frei'], [2, 'Anschluss'], [32, 'Anschluss senkrecht'], [12, 'Ecke oben links'], [22, 'Ecke oben rechts'],
+                        [7, 'dünner Anfang'], [27, 'dünner Anfang mit Dach']],
+                end: [[0, 'frei'], [7, 'Schwung nach links'], [8, 'Halt'], [5, 'Haken'], [2, 'Anschluss'], [32, 'Anschluss senkrecht']],
+            },
+        };
         const LINE_CAPS = ['butt', 'square', 'round'];
         const PRESET_CODES = ['L', 'Z', 'NG', 'H', 'G', 'C', 'TR', 'DD', 'N', 'T', 'TH', 'NH', 'CH', 'DZ', 'X', 'KH', 'S', 'R', 'M', 'B', 'V', 'PH'];
 
@@ -236,7 +292,7 @@
         // sie nicht (nur die Reihenfolge).
         const MARK_COUNT = 6;
         const MARKS_MIN_PARTS = 9;
-        const hasMarks = (strokes) => strokes.length >= MARKS_MIN_PARTS;
+        const hasMarks = (strokes) => qattMode && strokes.length >= MARKS_MIN_PARTS; // nur im Space 'qatt'
         const glyphPart = (strokes) => hasMarks(strokes) ? strokes.slice(0, -MARK_COUNT) : strokes;
         const marksPart = (strokes) => hasMarks(strokes) ? strokes.slice(-MARK_COUNT) : [];
         // Gespeicherte Striche -> Editor-Striche mit Ebene (Kopie)
@@ -259,11 +315,13 @@
         const FINE_STEPS = Array.from({ length: RASTER * SUBDIV + 1 }, (_, k) => Math.round(MARGIN + k * (GRID - 2 * MARGIN) / (RASTER * SUBDIV)));
         const SNAP_LINES = [...new Set([0, ...FINE_STEPS, ...CENTER_GUIDES, GRID])];
 
+        // Anfangs- und Endtyp eines Strichs (fehlt einer, gilt 0)
+        const endsOf = (stroke) => `${stroke.start || 0},${stroke.end || 0}`;
         // Ein Strich als KAGE-Zeile
         function strokeToKage(stroke) {
             const p = stroke.points;
-            if (stroke.type === 1) return `1,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
-            if (stroke.type === 2) return `2,0,0,${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
+            if (stroke.type === 1) return `1,${endsOf(stroke)},${p[0].x},${p[0].y},${p[1].x},${p[1].y}`;
+            if (stroke.type === 2) return `2,${endsOf(stroke)},${p[0].x},${p[0].y},${p[1].x},${p[1].y},${p[2].x},${p[2].y}`;
             const x1 = p[0].x, y1 = p[0].y, x2 = p[1].x, y2 = p[1].y;
             return `99,0,0,${x1},${y1},${x2},${y1},${x1},${y2},${x2},${y2},${stroke.refName}`;
         }
@@ -280,7 +338,12 @@
                 const type = parseInt(parts[0]);
 
                 if (type === 99) {
-                    if (parts.length >= 12) {
+                    // KAGE wie bei GlyphWiki: 99:0:0:x1:y1:x2:y2:NAME[:0:0:0]
+                    if (parts.length >= 8 && !/^\s*-?\d+\s*$/.test(parts[7])) {
+                        const n = parts.slice(3, 7).map(v => parseInt(v));
+                        if (n.some(isNaN)) return;
+                        newStrokes.push({ type: 99, points: [{ x: n[0], y: n[1] }, { x: n[2], y: n[3] }], refName: parts[7].trim() });
+                    } else if (parts.length >= 12) {
                         const x1 = parseInt(parts[3]);
                         const y1 = parseInt(parts[4]);
                         const x2 = parseInt(parts[9]);
@@ -299,18 +362,27 @@
 
                 // Alle anderen KAGE-Typen nach Anzahl der Koordinaten in Linie oder Kurve umwandeln
                 const coords = parts.slice(3).map(p => parseInt(p)).filter(n => !isNaN(n));
+                // Linie und Kurve behalten ihren Anfangs- und Endtyp (die umgewandelten Typen nicht: dort bedeuten die Zahlen anderes)
+                const typed = (stroke) => {
+                    if (stroke.type === type) {
+                        const start = parseInt(parts[1]) || 0, end = parseInt(parts[2]) || 0;
+                        if (start) stroke.start = start;
+                        if (end) stroke.end = end;
+                    }
+                    newStrokes.push(stroke);
+                };
 
                 if (coords.length >= 8) {
                     // 4 Punkte -> 3-Punkt-Kurve (Start, Kontrollpunkt 1, Ende)
-                    newStrokes.push({ type: 2, points: [
+                    typed({ type: 2, points: [
                         { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[6], y: coords[7] }
                     ], refName: "" });
                 } else if (coords.length >= 6) {
-                    newStrokes.push({ type: 2, points: [
+                    typed({ type: 2, points: [
                         { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }, { x: coords[4], y: coords[5] }
                     ], refName: "" });
                 } else if (coords.length >= 4) {
-                    newStrokes.push({ type: 1, points: [
+                    typed({ type: 1, points: [
                         { x: coords[0], y: coords[1] }, { x: coords[2], y: coords[3] }
                     ], refName: "" });
                 }
@@ -367,6 +439,18 @@
             glyphsToFile.stale = [...stale];
             return out.join('\n') + '\n';
         }
+        // Ein anderer Space: jede Glyphe unter ihrem Namen, in der gewählten Sortierung (leere nicht)
+        function glyphsToPlainFile(saved, order) {
+            const out = [];
+            Object.keys(saved).filter(c => saved[c].length).sort(order)
+                .forEach(c => out.push(`${c}: |-`, ...saved[c].map(s => `  ${strokeToKage(s)}`)));
+            return out.join('\n') + '\n';
+        }
+        // Ein Strich (Linie oder Kurve) als KAGE-Zeile für die Engine (ganze Zahlen, Trenner ':')
+        function strokeToEngine(stroke) {
+            return [stroke.type, stroke.start || 0, stroke.end || 0, ...stroke.points.flatMap(p => [Math.round(p.x), Math.round(p.y)])].join(':');
+        }
+
         // Die Datei zurück in die Glyphen des Editors (die Kombinationen nicht: sie entstehen im Editor aus den Großbuchstaben).
         // Eine ältere Datei mit den Namen des Editors (ohne uf0000) wird so übernommen, wie sie ist.
         function fileToGlyphs(text) {
@@ -432,20 +516,116 @@
 
                 try { localStorage.removeItem('kage.glyphMeta'); } catch {} // früher: Kommentare der Datei (Export und Import kennen keine mehr)
 
-                // Gespeicherte Glyphen aus dem localStorage, sonst leer (die Kombinationen entstehen automatisch)
-                this.savedGlyphs = this.loadStored() ?? {};
+                // Einstellungen: Sortierung der Liste, Rendern mit der KAGE-Engine und ihr Stil
+                this.sort = SORTS[storeGet('kage.sort')] ? storeGet('kage.sort') : 'qatt';
+                this.useKage = storeGet('kage.render') === 'kage';
+                this.kageStyle = storeGet('kage.kageStyle') === 'gothic' ? 'gothic' : 'mincho';
+                document.getElementById('sortSelect').value = this.sort;
+                document.getElementById('kageRender').checked = this.useKage;
+                document.getElementById('kageStyle').value = this.kageStyle;
+                this.updateRenderControls();
 
-                // Fehlende Zeichen als leere Glyphen anlegen (vorhandene bleiben unverändert, auch mit Breite)
-                const bases = new Set(Object.keys(this.savedGlyphs).map(k => splitName(k).base));
-                [...PRESET_CODES, ...PRESET_CODES.map(c => c.toLowerCase())].forEach(c => {
-                    if (!bases.has(c)) this.savedGlyphs[c] = [];
-                });
-                this.syncCombos();
+                // Spaces: 'qatt' und die angelegten; geöffnet wird der zuletzt gewählte
+                let spaces = [];
+                try { spaces = JSON.parse(storeGet(SPACES_KEY)) || []; } catch {}
+                this.spaces = spaces.filter(id => typeof id === 'string' && SPACE_ID.test(id) && id !== QATT_SPACE);
+                const last = storeGet('kage.space');
+                this.strokes = [];
+                this.initEvents();
+                this.openSpace(this.spaces.includes(last) ? last : QATT_SPACE);
+            }
+
+            // Wo die Glyphen des Space liegen ('qatt' unter dem alten Schlüssel)
+            storageKey(id = this.space) {
+                return id === QATT_SPACE ? STORAGE_KEY : `kage.space.${id}`;
+            }
+
+            // Einen Space öffnen: seine Glyphen laden. Die Striche auf der Malfläche und der Name bleiben (so lässt sich eine Glyphe
+            // in einen anderen Space kopieren: laden, Space wechseln, speichern); sie gelten dort als neu.
+            openSpace(id) {
+                const strokes = withoutLayers(this.strokes);
+                this.space = id;
+                qattMode = id === QATT_SPACE;
+                storeSet('kage.space', id);
+                this.savedGlyphs = this.loadStored(this.storageKey()) ?? {};
+                if (qattMode) {
+                    // Fehlende Zeichen als leere Glyphen anlegen (vorhandene bleiben unverändert, auch mit Breite)
+                    const bases = new Set(Object.keys(this.savedGlyphs).map(k => splitName(k).base));
+                    [...PRESET_CODES, ...PRESET_CODES.map(c => c.toLowerCase())].forEach(c => {
+                        if (!bases.has(c)) this.savedGlyphs[c] = [];
+                    });
+                    this.syncCombos();
+                }
                 this.persist();
 
-                this.initEvents();
+                this.strokes = withLayers(strokes); // in einem anderen Space gibt es keine Marks: alle Striche auf die Ebene Glyph
+                this.layer = 'glyph';
+                this.loadedCode = null;
+                this.glyphWidth = GRID;
+                this.offset = { ...NEUTRAL_OFFSET };
+                this.corner = { ...NEUTRAL_CORNER };
+                this.selectedStrokeIdx = null;
+                this.selectedPointIdx = null;
+                this.resetToAddOrEdit();
+                this.comboRank = document.getElementById('comboShuffle').checked ? new Map() : null;
+
+                document.getElementById('layerRow').classList.toggle('d-none', !qattMode);
+                this.renderSpaceSelect();
+                this.updateOutput();
+                this.updateEditInfo();
                 this.renderSavedGlyphPreviews();
                 this.render();
+            }
+
+            renderSpaceSelect() {
+                const select = document.getElementById('spaceSelect');
+                select.innerHTML = '';
+                [QATT_SPACE, ...this.spaces].forEach(id => select.add(new Option(id, id)));
+                select.value = this.space;
+                document.getElementById('deleteSpaceBtn').classList.toggle('d-none', this.space === QATT_SPACE);
+            }
+
+            // Neuer Space: nach dem Namen fragen (nur Buchstaben und Ziffern), anlegen und öffnen
+            addSpace() {
+                const answer = prompt('Name des neuen Space (nur Buchstaben und Ziffern):', '');
+                if (answer === null) return;
+                const id = answer.trim();
+                if (!SPACE_ID.test(id)) {
+                    this.showToast('Ungültiger Name: nur Buchstaben (a–z, A–Z) und Ziffern, ohne Leerzeichen.');
+                    return;
+                }
+                if (id === QATT_SPACE || this.spaces.includes(id)) {
+                    this.showToast(`Den Space '${id}' gibt es schon.`);
+                    return;
+                }
+                this.spaces.push(id);
+                storeSet(SPACES_KEY, JSON.stringify(this.spaces));
+                this.openSpace(id);
+                this.showToast(`Space '${id}' angelegt.`);
+            }
+
+            // Den geöffneten Space mit allen seinen Glyphen löschen ('qatt' nicht)
+            deleteSpace() {
+                const id = this.space;
+                if (id === QATT_SPACE) return;
+                const count = Object.keys(this.savedGlyphs).length;
+                if (!confirm(`Space '${id}' mit ${count} Glyphe(n) löschen? Das lässt sich nicht rückgängig machen (vorher exportieren).`)) return;
+                try { localStorage.removeItem(this.storageKey(id)); } catch {}
+                this.spaces = this.spaces.filter(s => s !== id);
+                storeSet(SPACES_KEY, JSON.stringify(this.spaces));
+                this.openSpace(QATT_SPACE);
+                this.showToast(`Space '${id}' gelöscht.`);
+            }
+
+            sortFn() {
+                return SORTS[this.sort];
+            }
+
+            // Der Regler Linienende gilt nicht für die KAGE-Engine, der Stil nur für sie
+            updateRenderControls() {
+                document.getElementById('lineCapSlider').disabled = this.useKage;
+                document.getElementById('kageStyle').disabled = !this.useKage;
+                if (this.useKage && !window.Kage) this.showToast('Die KAGE-Engine ist nicht geladen; es wird wie bisher gezeichnet.');
             }
 
             loadStored(key = STORAGE_KEY) {
@@ -458,7 +638,7 @@
 
             persist() {
                 try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.savedGlyphs));
+                    localStorage.setItem(this.storageKey(), JSON.stringify(this.savedGlyphs));
                 } catch {
                     this.showToast('Speichern im Browser nicht möglich!');
                 }
@@ -474,6 +654,43 @@
             }
 
             initEvents() {
+                document.getElementById('spaceSelect').addEventListener('change', (e) => this.openSpace(e.target.value));
+                document.getElementById('addSpaceBtn').addEventListener('click', () => this.addSpace());
+                document.getElementById('deleteSpaceBtn').addEventListener('click', () => this.deleteSpace());
+
+                document.getElementById('sortSelect').addEventListener('change', (e) => {
+                    this.sort = SORTS[e.target.value] ? e.target.value : 'qatt';
+                    storeSet('kage.sort', this.sort);
+                    this.renderSavedGlyphPreviews();
+                    this.render();
+                });
+
+                document.getElementById('kageRender').addEventListener('change', (e) => {
+                    this.useKage = e.target.checked;
+                    storeSet('kage.render', this.useKage ? 'kage' : '');
+                    this.updateRenderControls();
+                    this.render();
+                    this.renderSavedGlyphPreviews();
+                });
+                document.getElementById('kageStyle').addEventListener('change', (e) => {
+                    this.kageStyle = e.target.value === 'gothic' ? 'gothic' : 'mincho';
+                    storeSet('kage.kageStyle', this.kageStyle);
+                    this.render();
+                    this.renderSavedGlyphPreviews();
+                });
+
+                // Anfangs- und Endtyp der ausgewählten Linie oder Kurve (0 wird nicht gespeichert)
+                [['startTypeSel', 'start'], ['endTypeSel', 'end']].forEach(([id, key]) => {
+                    document.getElementById(id).addEventListener('change', (e) => {
+                        const stroke = this.strokes[this.selectedStrokeIdx];
+                        if (!stroke || (stroke.type !== 1 && stroke.type !== 2)) return;
+                        const v = parseInt(e.target.value) || 0;
+                        if (v) stroke[key] = v; else delete stroke[key];
+                        this.updateOutput();
+                        this.render();
+                    });
+                });
+
                 document.querySelectorAll('.layer-btn').forEach(btn => {
                     btn.addEventListener('click', () => this.setLayer(btn.dataset.layer));
                 });
@@ -553,17 +770,6 @@
                     this.handleCanvasClick(x, y);
                 });
                 this.canvas.addEventListener('pointercancel', () => { this.drag = null; });
-
-                document.getElementById('clearBtn').addEventListener('click', () => {
-                    this.strokes = this.strokes.filter(s => s.layer !== this.layer);
-                    this.currentPoints = [];
-                    this.selectedStrokeIdx = null;
-                    this.selectedPointIdx = null;
-                    this.handleSelected = null;
-                    this.updateOutput();
-                    this.updateEditInfo();
-                    this.render();
-                });
 
                 // Import/Export: alle Glyphen als eine Textdatei
                 const importFile = document.getElementById('kageImportFile');
@@ -671,7 +877,7 @@
 
             // Anfasser für Breite und Versatz nur für Namen aus Großbuchstaben
             showsWidth() {
-                return isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
+                return qattMode && isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
             }
 
             // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | 'corner' | null
@@ -884,6 +1090,7 @@
                 const info = document.getElementById('editInfo');
                 const resolveBtn = document.getElementById('resolveBtn');
                 const deleteBtn = document.getElementById('deleteStrokeBtn');
+                this.updateStrokeEnds();
 
                 if (this.handleSelected) {
                     info.textContent = HANDLES[this.handleSelected].label;
@@ -910,6 +1117,24 @@
                     const typeNames = {1: 'Linie', 2: 'Kurve', 99: `Komponente ${stroke.refName}`};
                     info.textContent = typeNames[stroke.type];
                 }
+            }
+
+            // Auswahl Anfangs- und Endtyp: nur bei einer ausgewählten Linie oder Kurve (auch bei einem ihrer Punkte)
+            updateStrokeEnds() {
+                const row = document.getElementById('strokeEnds');
+                const stroke = !this.handleSelected && this.selectedStrokeIdx !== null ? this.strokes[this.selectedStrokeIdx] : null;
+                const types = stroke && STROKE_ENDS[stroke.type];
+                row.classList.toggle('d-none', !types);
+                if (!types) return;
+                [['startTypeSel', 'start'], ['endTypeSel', 'end']].forEach(([id, key]) => {
+                    const select = document.getElementById(id);
+                    const value = stroke[key] || 0;
+                    const options = [...types[key]];
+                    if (!options.some(([v]) => v === value)) options.push([value, 'andere']); // ein Wert aus importierten Daten
+                    select.innerHTML = '';
+                    options.forEach(([v, label]) => select.add(new Option(`${v} ${label}`, v)));
+                    select.value = value;
+                });
             }
 
             deleteSelectedStroke() {
@@ -979,7 +1204,7 @@
                     problem = `Die Ebene Marks hat ${marks.length} Striche, sie braucht genau ${MARK_COUNT}.`;
                 } else if (marks.length && glyphCount + MARK_COUNT < MARKS_MIN_PARTS) {
                     problem = `Mit Marks braucht die Ebene Glyph mindestens ${MARKS_MIN_PARTS - MARK_COUNT} Teile (sie hat ${glyphCount}).`;
-                } else if (!marks.length && glyphCount >= MARKS_MIN_PARTS) {
+                } else if (qattMode && !marks.length && glyphCount >= MARKS_MIN_PARTS) {
                     problem = `Ohne Marks darf die Glyphe höchstens ${MARKS_MIN_PARTS - 1} Teile haben (sie hat ${glyphCount}), sonst gelten die letzten ${MARK_COUNT} als Marks.`;
                 }
                 if (problem) {
@@ -987,16 +1212,17 @@
                     return;
                 }
 
-                // Name mit Breite (nur Großbuchstaben); eine im Feld getippte Breite zählt nicht, der Anfasser gilt
-                const { base } = splitName(input);
-                const code = joinName(base, this.glyphWidth, this.offset, this.corner);
+                // Name mit Breite (nur Großbuchstaben im Space 'qatt'); eine im Feld getippte Breite zählt nicht, der Anfasser gilt.
+                // In einem anderen Space ist der Name der Code, wie er im Feld steht.
+                const { base } = qattMode ? splitName(input) : { base: input };
+                const code = qattMode ? joinName(base, this.glyphWidth, this.offset, this.corner) : input;
 
                 // Deep Copy (überschreibt, wenn der Code existiert)
                 this.savedGlyphs[code] = withoutLayers(this.strokes);
 
                 // Nur die Breite geändert: alte Glyphe umbenennen und Verweise in anderen Glyphen nachziehen
                 const old = this.loadedCode;
-                if (old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
+                if (qattMode && old && old !== code && splitName(old).base === base && this.savedGlyphs[old]) {
                     delete this.savedGlyphs[old];
                     this.renameReferences(old, code);
                 }
@@ -1026,6 +1252,7 @@
             // Glyphen, sie folgen also jeder Änderung. Gleichnamige Glyphen werden überschrieben, Kombinationen,
             // deren Teile nicht mehr (oder nur leer) existieren, entfallen. Leere Glyphen ergeben keine Kombination.
             syncCombos() {
+                if (!qattMode) return; // nur im Space 'qatt'
                 const keys = Object.keys(this.savedGlyphs);
                 const upperKeys = keys.filter(k => isUpperName(splitName(k).base) && this.savedGlyphs[k].length);
                 const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k) && this.savedGlyphs[k].length);
@@ -1120,11 +1347,12 @@
             // Alle Glyphen als Datei (data/kage-glyphs.yaml des Schriftbaus); Format siehe glyphsToFile
             exportAll() {
                 const a = document.createElement('a');
-                a.href = URL.createObjectURL(new Blob([glyphsToFile(this.savedGlyphs)], { type: 'text/plain' }));
-                a.download = 'kage-glyphen.yaml';
+                const text = qattMode ? glyphsToFile(this.savedGlyphs) : glyphsToPlainFile(this.savedGlyphs, this.sortFn());
+                a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+                a.download = qattMode ? 'kage-glyphen.yaml' : `kage-${this.space}.yaml`;
                 a.click();
                 URL.revokeObjectURL(a.href);
-                if (glyphsToFile.stale.length) this.showToast(`Nicht exportiert (ältere Fassung eines Großbuchstaben, die Kombinationen nehmen die neuere): ${glyphsToFile.stale.join(', ')}`);
+                if (qattMode && glyphsToFile.stale.length) this.showToast(`Nicht exportiert (ältere Fassung eines Großbuchstaben, die Kombinationen nehmen die neuere): ${glyphsToFile.stale.join(', ')}`);
             }
 
             // Datei aus exportAll einlesen (auch eine ältere mit den Namen des Editors, siehe fileToGlyphs).
@@ -1141,7 +1369,7 @@
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.render();
-                this.showToast(`${codes.filter(c => !COMBO_NAME.test(c)).length} Glyphen importiert.`);
+                this.showToast(`${codes.filter(c => !(qattMode && COMBO_NAME.test(c))).length} Glyphen in den Space '${this.space}' importiert.`);
             }
 
             loadGlyph(code) {
@@ -1152,7 +1380,8 @@
                 this.selectedPointIdx = null;
                 this.resetToAddOrEdit();
                 // Im Feld steht der Name ohne Breite; die Breite steht am grünen Anfasser
-                const { base, width, offset, corner } = splitName(code);
+                const { base, width, offset, corner } = qattMode ? splitName(code)
+                    : { base: code, width: GRID, offset: { ...NEUTRAL_OFFSET }, corner: { ...NEUTRAL_CORNER } };
                 document.getElementById('saveCodeInput').value = base;
                 this.glyphWidth = width;
                 this.offset = offset;
@@ -1176,19 +1405,19 @@
                 this.previewTransform(ctx, size);
                 ctx.lineCap = this.lineCap;
                 ctx.lineJoin = 'round';
-                glyphPart(this.savedGlyphs[code]).forEach(stroke => {
+                // ein Verweis zeigt die Glyphe selbst in ihrer Box (ohne Rahmen und Beschriftung)
+                const strokes = glyphPart(this.savedGlyphs[code]).flatMap(stroke => {
                     const ref = stroke.type === 99 ? this.savedGlyphs[stroke.refName] : null;
-                    if (ref) { // ein Verweis zeigt die Glyphe selbst in ihrer Box (ohne Rahmen und Beschriftung)
+                    if (ref && mark && /^[a-z]+$/.test(stroke.refName)) { // der Kleinbuchstabe mit seiner Markierung
                         const [a, b] = stroke.points;
-                        const parts = [...glyphPart(ref)];
-                        if (mark && /^[a-z]+$/.test(stroke.refName)) parts.push(...marksPart(ref).slice(mark - 1, mark)); // der Kleinbuchstabe mit seiner Markierung
-                        this.drawInBox(ctx, parts, Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), false, 0, false);
-                    } else this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
+                        const parts = [...glyphPart(ref), ...marksPart(ref).slice(mark - 1, mark)];
+                        return this.flatten(parts, Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), 1);
+                    }
+                    return this.flatten([stroke]);
                 });
+                this.paint(ctx, strokes);
                 ctx.globalAlpha = 0.3; // Marks gedämpft
-                marksPart(this.savedGlyphs[code]).forEach(stroke => {
-                    this.drawShape(ctx, stroke.type, stroke.points, stroke.refName, false);
-                });
+                this.paint(ctx, this.flatten(marksPart(this.savedGlyphs[code])));
                 ctx.globalAlpha = 1;
             }
 
@@ -1218,8 +1447,8 @@
 
             renderSavedGlyphPreviews() {
                 const container = document.getElementById('savedGlyphsContainer');
-                const all = Object.keys(this.savedGlyphs).sort(glyphOrder);
-                const isCombo = k => COMBO_NAME.test(k);
+                const all = Object.keys(this.savedGlyphs).sort(this.sortFn());
+                const isCombo = k => qattMode && COMBO_NAME.test(k);
                 this.renderCombos(all.filter(isCombo));
                 const keys = all.filter(k => !isCombo(k));
 
@@ -1307,6 +1536,21 @@
                 this.ctx.lineCap = this.lineCap;
                 this.ctx.lineJoin = 'round';
 
+                // Mit der KAGE-Engine: die Umrisse jeder Ebene in einem Durchgang (die andere gedämpft); darüber die Rahmen der
+                // Komponenten und das Skelett des ausgewählten Strichs
+                if (this.kageOn()) {
+                    const ink = this.strokes.filter(s => s.layer === this.layer);
+                    this.ctx.globalAlpha = 0.2;
+                    this.kageFill(this.ctx, this.flatten(this.strokes.filter(s => s.layer !== this.layer)));
+                    this.ctx.globalAlpha = 1;
+                    this.kageFill(this.ctx, this.flatten(ink));
+                    this.strokes.forEach((stroke, idx) => {
+                        if (stroke.layer !== this.layer) return;
+                        const isSelected = this.appMode === 'edit' && this.selectedStrokeIdx === idx;
+                        if (stroke.type === 99) this.drawFrame(this.ctx, stroke.points, stroke.refName, isSelected);
+                        else if (isSelected) this.drawSkeleton(this.ctx, stroke);
+                    });
+                } else {
                 // Erst die andere Ebene gedämpft, darüber die aktuelle
                 this.strokes.forEach((stroke, idx) => {
                     if (stroke.layer === this.layer) return;
@@ -1319,6 +1563,7 @@
                     const isSelected = (this.appMode === 'edit' && this.selectedStrokeIdx === idx);
                     this.drawShape(this.ctx, stroke.type, stroke.points, stroke.refName, isSelected);
                 });
+                }
                 // Ebene Marks: Nummer jeder Markierung (Reihenfolge = markierte Form 1–6) an ihrer Mitte
                 if (this.layer === 'marks') {
                     this.strokes.filter(s => s.layer === 'marks').forEach((s, n) => {
@@ -1432,24 +1677,103 @@
                     const w = Math.abs(p2.x - p1.x);
                     const h = Math.abs(p2.y - p1.y);
 
-                    if (frame) {
-                        ctx.save();
-                        ctx.strokeStyle = isSelected ? '#2563eb' : '#94a3b8';
-                        ctx.fillStyle = isSelected ? 'rgba(37, 99, 235, 0.1)' : 'transparent';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([4, 4]);
-                        ctx.fillRect(x, y, w, h);
-                        ctx.strokeRect(x, y, w, h);
-                        ctx.setLineDash([]);
-                        ctx.fillStyle = isSelected ? '#1e40af' : '#64748b';
-                        ctx.font = '10px monospace';
-                        ctx.fillText(refName, x + 4, y + 12);
-                        ctx.restore();
-                    }
+                    if (frame) this.drawFrame(ctx, points, refName, isSelected);
 
                     // Referenzierte Glyphe in die Box einpassen
                     this.drawInBox(ctx, glyphPart(this.savedGlyphs[refName] || []), x, y, w, h, isSelected, depth + 1, frame);
                 }
+            }
+
+            // Gestrichelter Rahmen einer Komponente mit ihrem Namen
+            drawFrame(ctx, points, refName, isSelected = false) {
+                const [p1, p2] = points;
+                const x = Math.min(p1.x, p2.x), y = Math.min(p1.y, p2.y), w = Math.abs(p2.x - p1.x), h = Math.abs(p2.y - p1.y);
+                ctx.save();
+                ctx.strokeStyle = isSelected ? '#2563eb' : '#94a3b8';
+                ctx.fillStyle = isSelected ? 'rgba(37, 99, 235, 0.1)' : 'transparent';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeRect(x, y, w, h);
+                ctx.setLineDash([]);
+                ctx.fillStyle = isSelected ? '#1e40af' : '#64748b';
+                ctx.font = '10px monospace';
+                ctx.fillText(refName, x + 4, y + 12);
+                ctx.restore();
+            }
+
+            // Das Skelett eines Strichs als dünne blaue Linie (über den Umrissen der KAGE-Engine)
+            drawSkeleton(ctx, stroke) {
+                const p = stroke.points;
+                ctx.save();
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 1.5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(p[0].x, p[0].y);
+                if (stroke.type === 1) ctx.lineTo(p[1].x, p[1].y);
+                else ctx.quadraticCurveTo(p[1].x, p[1].y, p[2].x, p[2].y);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            kageOn() {
+                return this.useKage && !!window.Kage;
+            }
+
+            // Striche mit aufgelösten Verweisen (99): nur Linien und Kurven, in die Box x, y, w, h (200er Raster) gesetzt; die Marks
+            // einer verwiesenen Glyphe fallen weg (wie bei drawShape)
+            flatten(strokes, x = 0, y = 0, w = GRID, h = GRID, depth = 0) {
+                if (depth > 10) return []; // zirkuläre Verweise
+                return strokes.flatMap(s => {
+                    const points = s.points.map(p => ({ x: x + p.x * w / GRID, y: y + p.y * h / GRID }));
+                    if (s.type !== 99) return [{ type: s.type, start: s.start, end: s.end, points }];
+                    const ref = this.savedGlyphs[s.refName];
+                    if (!ref) return [];
+                    const [a, b] = points;
+                    return this.flatten(glyphPart(ref), Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), depth + 1);
+                });
+            }
+
+            // Aufgelöste Striche zeichnen: mit der KAGE-Engine oder wie bisher als Linien
+            paint(ctx, strokes) {
+                if (this.kageOn()) this.kageFill(ctx, strokes);
+                else strokes.forEach(s => this.drawShape(ctx, s.type, s.points, '', false));
+            }
+
+            // Die KAGE-Engine (Mincho oder Gothic); die Strichbreite des Reglers ist die Breite der senkrechten Striche
+            kageEngine() {
+                if (!this.kage) this.kage = new Kage();
+                const k = this.kage;
+                k.kShotai = this.kageStyle === 'gothic' ? k.kGothic : k.kMincho;
+                k.kFont.kWidth = this.strokeWidth / 2;     // Gothic: halbe Strichbreite
+                k.kFont.kMinWidthT = this.strokeWidth / 2; // Mincho: halbe Breite der senkrechten Striche
+                return k;
+            }
+
+            // Aufgelöste Linien und Kurven als Umrisse der KAGE-Engine füllen (alle in einem Durchgang, so passt sie die Enden aneinander an)
+            kageFill(ctx, strokes, color = '#0f172a') {
+                const data = strokes.filter(s => STROKE_ENDS[s.type]).map(strokeToEngine).join('$');
+                if (!data) return;
+                const polygons = new Kage.Polygons();
+                try {
+                    this.kageEngine().makeGlyph2(polygons, data);
+                } catch (e) {
+                    console.warn('[KAGE]', e);
+                    return;
+                }
+                ctx.save();
+                ctx.fillStyle = color;
+                polygons.array.forEach(polygon => {
+                    const pts = polygon.array;
+                    if (!pts.length) return;
+                    ctx.beginPath();
+                    ctx.moveTo(pts[0].x, pts[0].y);
+                    pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+                    ctx.closePath();
+                    ctx.fill();
+                });
+                ctx.restore();
             }
 
             // Striche einer Glyphe (200er Raster) in eine Box einpassen
@@ -1466,8 +1790,8 @@
             // bearbeitete Glyphe kommt live von der Malfläche (Striche und Breite).
             renderPreview() {
                 const box = document.getElementById('comboPreview');
-                const name = document.getElementById('saveCodeInput').value.trim();
-                const keys = Object.keys(this.savedGlyphs).sort(glyphOrder);
+                const name = qattMode ? document.getElementById('saveCodeInput').value.trim() : ''; // nur im Space 'qatt'
+                const keys = Object.keys(this.savedGlyphs).sort(this.sortFn());
                 const upperKeys = keys.filter(k => isUpperName(splitName(k).base));
                 const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k));
 
@@ -1514,11 +1838,12 @@
                     const canvasGlyph = this.strokes.filter(s => s.layer !== 'marks');
                     const upperStrokes = c.upper ? glyphPart(this.savedGlyphs[c.upper]) : canvasGlyph;
                     const lowerStrokes = c.lower ? glyphPart(this.savedGlyphs[c.lower]) : canvasGlyph;
-                    this.drawInBox(ctx, upperStrokes, 0, 0, width, GRID, false, 0, false);
+                    const strokes = this.flatten(upperStrokes, 0, 0, width, GRID);
                     // Die andere Komponente ist eine 200x200-Glyphe in der Box zwischen den zwei Ecken: unten links (X/Y) und
                     // oben rechts. Ist die Box leer, wird nichts gezeichnet (keine Spiegelung).
                     const box = cornerBox(offset, corner);
-                    if (box) this.drawInBox(ctx, lowerStrokes, box[0], box[1], box[2] - box[0], box[3] - box[1], false, 0, false);
+                    if (box) strokes.push(...this.flatten(lowerStrokes, box[0], box[1], box[2] - box[0], box[3] - box[1]));
+                    this.paint(ctx, strokes);
                 });
             }
 
