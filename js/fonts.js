@@ -13,8 +13,8 @@ as soon as the parser has added them. Its globals are var: it may run twice (adm
 var QATT_FONTS = [
   { family: "Hai Minh ExtraLight",  label: "Hài Minh extralight", file: "hai-minh-extralight-letters", big: "hai-minh-extralight", cjk: true },
   { family: "Hai Minh Light",       label: "Hài Minh light",   file: "hai-minh-light-letters", big: "hai-minh-light", cjk: true },
-  { family: "Hai Minh",             label: "Hài Minh",         file: "hai-minh-letters", big: "hai-minh", cjk: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/hai-minh*.json of the private repository): letters here (a subset of the big font), CJK, Latin and PA from the big font; ExtraLight, Light and Medium the same
-  { family: "Hai Minh Medium",      label: "Hài Minh medium",  file: "hai-minh-medium-letters", big: "hai-minh-medium", cjk: true },
+  { family: "Hai Minh",             label: "Hài Minh",         file: "hai-minh-letters", big: "hai-minh", cjk: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/hai-minh*.json of the private repository): letters here (a subset of the big font), CJK, Latin and PA from the big font; ExtraLight, Light and Bold the same
+  { family: "Hai Minh Bold",        label: "Hài Minh bold",    file: "hai-minh-bold-letters", big: "hai-minh-bold", cjk: true },
   { family: "QATT Gothic ExtraLight", label: "Gothic extralight",   file: "qatt-gothic-extralight-letters", big: "qatt-gothic-extralight", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
   { family: "QATT Gothic Rounded ExtraLight", label: "Gothic rounded extralight", file: "qatt-gothic-rounded-extralight-letters", big: "qatt-gothic-rounded-extralight", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
   { family: "QATT Gothic Wide",      label: "Gothic wide",         file: "qatt-gothic-wide", big: "qatt-gothic-extralight", cjk: true },   // its CJK: the same big font
