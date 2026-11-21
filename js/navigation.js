@@ -129,8 +129,9 @@ window.Theme = window.Theme || (function() {
     // the Chunom site: every host but qatt.org (chunom.org, cdn.qatt.org, a local file, …), and the folders of the Chunom site on qatt.org (forwarded there)
     const onChunom = !/^(www\.)?qatt\.org$/.test(location.hostname) || /^\/(chunom|pages|chunom-assets)\//.test(location.pathname);
     const CHUNOM_THEMES = true;
-    // themed: qatt.org, the pages under /chunom/, and a page of the Chunom site on another host (not the landing pages and assets of chunom.org)
-    const themed = !onChunom || /^\/chunom\//.test(location.pathname) || !/(^|\.)chunom\.org$/.test(location.hostname);
+    // themed: qatt.org, the pages under /chunom/ and the seal generator /apps/seals/, and a page of the Chunom site on another host (not the landing pages
+    // and assets of chunom.org, nor the landing page /apps/ of Nôm Notes, which has a look of its own)
+    const themed = !onChunom || /^\/(chunom|apps\/seals)\//.test(location.pathname) || !/(^|\.)chunom\.org$/.test(location.hostname);
     const choosable = themed && (!onChunom || CHUNOM_THEMES);
     const base = onChunom ? "https://qatt.org" : "";
     let chosen = onChunom && CHUNOM_THEMES ? "boho" : "classic";   // the theme of a visitor who has not chosen one: bohemian on the Chunom site, classic on qatt.org
