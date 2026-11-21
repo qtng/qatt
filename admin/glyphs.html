@@ -187,9 +187,9 @@
         const QATT_SPACE = 'qatt';
         const SPACES_KEY = 'kage.spaces'; // die angelegten Spaces außer 'qatt' (Liste der Namen)
         const SPACE_ID = /^[A-Za-z0-9]+$/; // Name eines Space: nur Buchstaben und Ziffern (sein "Dateiname")
-        // Nur der Space 'qatt' kennt die Regeln der QATT-Glyphen: die Kombinationen, die Marks und den Export nach Codepunkten.
-        // Die Box im Namen der Großbuchstaben (Breite und Ecken, die grünen Anfasser) gilt in jedem Space; die anderen Spaces
-        // exportieren die Glyphen unter ihrem Namen.
+        // Nur der Space 'qatt' kennt die Marks und den Export nach Codepunkten. Die Box im Namen der Großbuchstaben (Breite und
+        // Ecken, die grünen Anfasser) und die Kombinationen (Großbuchstabe + Kleinbuchstabe) gibt es in jedem Space; die anderen
+        // Spaces exportieren die Glyphen unter ihrem Namen (die Kombinationen mit).
         let qattMode = true;
         const storeGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
         const storeSet = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
@@ -1247,7 +1247,6 @@
             // Glyphen, sie folgen also jeder Änderung. Gleichnamige Glyphen werden überschrieben, Kombinationen,
             // deren Teile nicht mehr (oder nur leer) existieren, entfallen. Leere Glyphen ergeben keine Kombination.
             syncCombos() {
-                if (!qattMode) return; // nur im Space 'qatt'
                 const keys = Object.keys(this.savedGlyphs);
                 const upperKeys = keys.filter(k => isUpperName(splitName(k).base) && this.savedGlyphs[k].length);
                 const lowerKeys = keys.filter(k => /^[a-z]+$/.test(k) && this.savedGlyphs[k].length);
@@ -1364,7 +1363,7 @@
                 this.persist();
                 this.renderSavedGlyphPreviews();
                 this.render();
-                this.showToast(`${codes.filter(c => !(qattMode && COMBO_NAME.test(c))).length} Glyphen in den Space '${this.space}' importiert.`);
+                this.showToast(`${codes.filter(c => !COMBO_NAME.test(c)).length} Glyphen in den Space '${this.space}' importiert.`);
             }
 
             loadGlyph(code) {
@@ -1442,7 +1441,7 @@
             renderSavedGlyphPreviews() {
                 const container = document.getElementById('savedGlyphsContainer');
                 const all = Object.keys(this.savedGlyphs).sort(this.sortFn());
-                const isCombo = k => qattMode && COMBO_NAME.test(k);
+                const isCombo = k => COMBO_NAME.test(k);
                 this.renderCombos(all.filter(isCombo));
                 const keys = all.filter(k => !isCombo(k));
 
