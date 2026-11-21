@@ -5,7 +5,7 @@
 
 The query of the script says which fonts:
   family=QATT+Pen                      one font (400); more fonts: family=...&family=...
-  family=QATT+Pen:weight@300;400;500   the weights (QATT Pen: 100 Thin, 300 Light, 400 Regular, 500 Medium; Hai Minh: 200, 300, 400, 500 Bold (600 and 700 ask for it too); the others have 400 only); wght@ is the same
+  family=QATT+Pen:weight@300;400;500   the weights (QATT Pen: 100 Thin, 300 Light, 400 Regular, 500 Medium; HaiMinh: 200, 300, 400, 500 Bold (600 and 700 ask for it too); the others have 400 only); wght@ is the same
   display=swap                         font-display (swap, block, fallback, optional, auto; default swap)
 The script writes the @font-face rules into the page; the font files are loaded only when the page shows a character of them (the CJK part in slices with
 a unicode-range, the QATT letters U+F0000..F00A3 in one file). The fonts give Chữ Nôm, Han characters (with their punctuation and the radicals) and the QATT letters; the Latin
@@ -85,7 +85,8 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   // name -> { weights: { weight: [the name of the big font (slices), the file of the QATT letters] } }
   var FONTS = {
     "QATT Pen":        { weights: { 100: ["qatt-pen-thin", "qatt-pen-thin-letters"], 300: ["qatt-pen-light", "qatt-pen-light-letters"], 400: ["qatt-pen", "qatt-pen-letters"], 500: ["qatt-pen-medium", "qatt-pen-medium-letters"] } },
-    "Hai Minh":        { weights: { 200: ["hai-minh-extralight", "hai-minh-extralight-letters"], 300: ["hai-minh-light", "hai-minh-light-letters"], 400: ["hai-minh", "hai-minh-letters"], 500: ["hai-minh-bold", "hai-minh-bold-letters"] }, alias: { 600: 500, 700: 500 } },
+    "HaiMinh":         { weights: { 200: ["haiminh-extralight", "haiminh-extralight-letters"], 300: ["haiminh-light", "haiminh-light-letters"], 400: ["haiminh", "haiminh-letters"], 500: ["haiminh-bold", "haiminh-bold-letters"] }, alias: { 600: 500, 700: 500 } },
+    "Hai Minh":        { same: "HaiMinh" },   // the old name (2026-11-21), the same files
     "Migoi":           { weights: { 400: ["migoi", "migoi-letters"] } },
     "Celluloid":       { weights: { 400: ["celluloid", "celluloid-letters"] } },
     "PhongThao":       { weights: { 400: ["phongthao", "phongthao-letters"] } },
@@ -112,6 +113,7 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   };
   url.searchParams.getAll("family").forEach(function (spec) {
     var i = spec.indexOf(":"), asked = (i < 0 ? spec : spec.slice(0, i)).replace(/\+/g, " ").trim(), name = Object.keys(FONTS).filter(function (k) { return k.toLowerCase() === asked.toLowerCase(); })[0], f = FONTS[name];   // upper and lower case do not matter
+    if (f && f.same) f = FONTS[f.same];   // an old name: the files of the new one, the CSS family as asked
     if (!f) { console.warn("Chunom Fonts: unknown font '" + asked + "' (" + Object.keys(FONTS).join(", ") + ")"); return; }
     var ws = Object.keys(f.weights).map(Number), want = [ws.indexOf(400) >= 0 || ws.length > 1 ? 400 : ws[0]];   // no weight asked: Regular, or the one weight of the font (ExtraLight 200)
     if (i >= 0) {   // weight@300;400;500 (or wght@, as Google Fonts)
