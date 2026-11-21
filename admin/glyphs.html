@@ -72,7 +72,6 @@
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="2">+ Kurve</button>
                                     <button class="btn btn-outline-primary tool-add-btn" data-tool="99">+ Komponente</button>
                                 </div>
-                                <button id="clearBtn" class="btn btn-sm btn-outline-danger ms-auto" title="Alle Striche der aktuellen Ebene entfernen">Leeren</button>
                             </div>
                             <div class="d-flex align-items-center gap-2" style="min-height: 31px;">
                                 <span id="editInfo" class="small text-body-secondary me-auto">Nichts ausgewählt</span>
@@ -771,17 +770,6 @@
                     this.handleCanvasClick(x, y);
                 });
                 this.canvas.addEventListener('pointercancel', () => { this.drag = null; });
-
-                document.getElementById('clearBtn').addEventListener('click', () => {
-                    this.strokes = this.strokes.filter(s => s.layer !== this.layer);
-                    this.currentPoints = [];
-                    this.selectedStrokeIdx = null;
-                    this.selectedPointIdx = null;
-                    this.handleSelected = null;
-                    this.updateOutput();
-                    this.updateEditInfo();
-                    this.render();
-                });
 
                 // Import/Export: alle Glyphen als eine Textdatei
                 const importFile = document.getElementById('kageImportFile');
