@@ -734,7 +734,9 @@
 
                 // Canvas: Maus wählt beim Drücken aus und zieht. Touch/Stift wählen nur per Tippen aus,
                 // Wischen bleibt Scrollen (der Browser schickt dann pointercancel statt pointerup).
+                this.lastPointer = 'mouse';
                 this.canvas.addEventListener('pointerdown', (e) => {
+                    this.lastPointer = e.pointerType;
                     if (e.pointerType !== 'mouse' || e.button !== 0) return;
                     const { x, y } = this.toGrid(e);
                     this.handleCanvasClick(x, y);
@@ -750,6 +752,7 @@
                     this.canvas.setPointerCapture(e.pointerId);
                 });
                 this.canvas.addEventListener('pointermove', (e) => {
+                    this.lastPointer = e.pointerType;
                     if (e.pointerType !== 'mouse') return;
                     const { x, y } = this.toGrid(e);
                     if (!this.drag) {
@@ -884,13 +887,19 @@
                 return isUpperName(splitName(document.getElementById('saveCodeInput').value.trim()).base);
             }
 
-            // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | 'corner' | null
+            // Welcher Anfasser liegt unter (x, y)? 'width' | 'offset' | 'corner' | null; der nächste im Fangradius.
+            // Der Fangradius ist in Bildschirmpixeln fest (Maus 26 px, Finger 34 px), also auf kleinem Canvas nicht kleiner.
             handleHit(x, y) {
                 if (!this.showsWidth()) return null;
-                return Object.keys(HANDLES).find(k => {
+                const px = this.lastPointer === 'mouse' ? 26 : 34;
+                const radius = Math.max(12, px * GRID / this.canvas.getBoundingClientRect().width);
+                let best = null, bestDist = radius;
+                Object.keys(HANDLES).forEach(k => {
                     const p = HANDLES[k].get(this);
-                    return Math.hypot(x - p.x, y - p.y) <= 8;
-                }) ?? null;
+                    const d = Math.hypot(x - p.x, y - p.y);
+                    if (d <= bestDist) { best = k; bestDist = d; }
+                });
+                return best;
             }
 
             // Gespeicherte Glyphe als KAGE-99-Referenz über die ganze Fläche einfügen und auswählen
@@ -1586,7 +1595,7 @@
                             this.ctx.beginPath(); this.ctx.moveTo(p.x, 0); this.ctx.lineTo(p.x, GRID); this.ctx.stroke();
                         }
                         this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, selected ? 6 : 5, 0, Math.PI * 2);
+                        this.ctx.arc(p.x, p.y, selected ? 9 : 7, 0, Math.PI * 2); // groß genug zum Treffen
                         this.ctx.fillStyle = '#16a34a';
                         this.ctx.fill();
                         this.ctx.strokeStyle = '#fff';
