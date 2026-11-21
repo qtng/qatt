@@ -11,9 +11,9 @@ which has no navigation.js). It defines the @font-face rules of every font, also
 as soon as the parser has added them. Its globals are var: it may run twice (admin/view.html). The font files are in the R2 bucket at cdn.qatt.org (QATT_CDN).
 */
 var QATT_FONTS = [
-  { family: "HaiMinh ExtraLight",   label: "Hài Minh extralight", file: "haiminh-extralight-letters", big: "haiminh-extralight", cjk: true },
   { family: "HaiMinh Light",        label: "Hài Minh light",   file: "haiminh-light-letters", big: "haiminh-light", cjk: true },
-  { family: "HaiMinh",              label: "Hài Minh",         file: "haiminh-letters", big: "haiminh", cjk: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/haiminh*.json of the private repository), its QATT letters the glyphs of Migoi with the Pen stroke and PA in Pen; letters here (a subset of the big font), CJK, Latin and PA from the big font; ExtraLight, Light and Bold the same
+  { family: "HaiMinh",              label: "Hài Minh",         file: "haiminh-letters", big: "haiminh", cjk: true },   // the KAGE Mincho of GlyphWiki with the radical forms of QATT Pen (profiles/haiminh*.json of the private repository), its QATT letters the glyphs of Migoi with the Pen stroke, PA and Latin in Pen; letters here (a subset of the big font), CJK, Latin and PA from the big font; Light, Medium and Bold the same
+  { family: "HaiMinh Medium",       label: "Hài Minh medium",  file: "haiminh-medium-letters", big: "haiminh-medium", cjk: true },
   { family: "HaiMinh Bold",         label: "Hài Minh bold",    file: "haiminh-bold-letters", big: "haiminh-bold", cjk: true },
   { family: "QATT Gothic ExtraLight", label: "Gothic extralight",   file: "qatt-gothic-extralight-letters", big: "qatt-gothic-extralight", cjk: true },   // as QATT Pen: letters here (the same strokes as its big font), CJK from the big font Gothic (the KAGE Gothic of GlyphWiki with the radical forms of QATT Pen)
   { family: "QATT Gothic Rounded ExtraLight", label: "Gothic rounded extralight", file: "qatt-gothic-rounded-extralight-letters", big: "qatt-gothic-rounded-extralight", cjk: true },   // QATT Gothic with round stroke ends and corners (its big font rounded: round_font.py of the private repository)
@@ -50,7 +50,7 @@ var PA_FONTS = [
 // the PA fonts that go behind a QATT font (the fonts of PA text in the Chunom writer and in Notes): the one of its stroke style, then the plain one
 var paFontStack = family => { const own = family === "PhongThao" ? "PA Phong Thao" : family === "Migoi" ? "PA Migoi" : /^QATT Pen/.test(family) ? "PA Pen" : /^QATT Gothic Rounded/.test(family) ? "PA Gothic Rounded" : /^QATT Gothic/.test(family) ? "PA Gothic" : /^Celluloid/.test(family) ? "PA Celluloid" : null; return own ? [own, "PA"] : ["PA"]; };
 // the old CSS names of renamed fonts -> the new ones (a note of Qatt.org Notes keeps the name of its font: notes.js looks it up here first)
-var QATT_FONT_RENAMED = { "QATT Gothic": "QATT Gothic ExtraLight", "QATT Gothic Rounded": "QATT Gothic Rounded ExtraLight", "Hai Minh": "HaiMinh", "Hai Minh ExtraLight": "HaiMinh ExtraLight", "Hai Minh Light": "HaiMinh Light", "Hai Minh Bold": "HaiMinh Bold", "Hai Minh Medium": "HaiMinh Bold" };
+var QATT_FONT_RENAMED = { "QATT Gothic": "QATT Gothic ExtraLight", "QATT Gothic Rounded": "QATT Gothic Rounded ExtraLight", "Hai Minh": "HaiMinh", "Hai Minh ExtraLight": "HaiMinh Light", "Hai Minh Light": "HaiMinh", "Hai Minh Bold": "HaiMinh Bold", "Hai Minh Medium": "HaiMinh Medium", "HaiMinh ExtraLight": "HaiMinh Light" };
 // big: the name of the big font of this font (chunom-assets/fonts/<big>.ttf, for the desktop), whose web files are in fonts/web/ of QATT_CDN (hannom_web_slices.py):
 // cjk: true: its CJK slices (<big>-NN.woff2) for CJK ideographs, radicals, fullwidth forms and CJK punctuation
 // from the Chunom site, cut into small slices (chunom-assets/fonts/web/<name>-NN.woff2, a few hundred KB each; the whole font took seconds to load and unpack
