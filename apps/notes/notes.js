@@ -372,7 +372,7 @@ window.notesApp = { store, ready, flush() } is for the tests.
 
   // ----- font, style, size, alignment, table -----
   // the format (font, size, alignment, table (decoding), bold, italic) belongs to the note: note.format holds what differs from the defaults; user = chosen in the menu (stored in the note), else only shown
-  const FONTS = qattFontsShown();   // js/fonts.js decides which fonts this visitor has, and its default is the default here (QATT Pen: the QATT letters of Pen Medium, CJK and Chữ Nôm characters from the big file of the Chunom site, loaded only when one is shown)
+  const FONTS = qattFontsShown();   // js/fonts.js decides which fonts this visitor has, and its default is the default here (Pen: the QATT letters of Pen Medium, CJK and Chữ Nôm characters from the big file of the Chunom site, loaded only when one is shown)
   const FORMAT_DEFAULTS = { font: (FONTS.find(f => f.default) || FONTS[0]).family, size: 100, align: 'left', decoding: 'qatt', bold: false, italic: false };
   const formatOf = note => ({ ...FORMAT_DEFAULTS, ...(note && note.format && typeof note.format === 'object' ? note.format : {}) });
   const keepFormat = (key, value) => { const note = state.current; if (!note) return; note.format = { ...(note.format || {}), [key]: value }; schedule(); };

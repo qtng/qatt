@@ -1,11 +1,11 @@
 /* Chunom Fonts: the fonts of qatt.org and chunom.org for any web page, in the way of Google Fonts.
 
-  <script src="https://qatt.org/cdn/v1/webfonts.js?family=QATT+Pen:weight@300;400;500"></script>
-  body { font-family: "QATT Pen", serif; }
+  <script src="https://qatt.org/cdn/v1/webfonts.js?family=Pen:weight@300;400;500"></script>
+  body { font-family: "Pen", serif; }
 
 The query of the script says which fonts:
-  family=QATT+Pen                      one font (400); more fonts: family=...&family=...
-  family=QATT+Pen:weight@300;400;500   the weights (QATT Pen: 100 Thin, 300 Light, 400 Regular, 500 Medium; HaiMinh: 300 Light, 400 Regular, 500 Medium, 700 Bold; the others have 400 only); wght@ is the same
+  family=Pen                           one font (400); more fonts: family=...&family=...
+  family=Pen:weight@300;400;500        the weights (Pen: 100 Thin, 300 Light, 400 Regular, 500 Medium; HaiMinh: 300 Light, 400 Regular, 500 Medium, 700 Bold; the others have 400 only); wght@ is the same
   display=swap                         font-display (swap, block, fallback, optional, auto; default swap)
 The script writes the @font-face rules into the page; the font files are loaded only when the page shows a character of them (the CJK part in slices with
 a unicode-range, the QATT letters U+F0000..F00A3 in one file). The fonts give Chữ Nôm, Han characters (with their punctuation and the radicals) and the QATT letters; the Latin
@@ -84,7 +84,8 @@ succession of the domain are there too (docs). Licence: https://qatt.org/fonts/L
   var LETTERS = "U+F0000-F00A3";
   // name -> { weights: { weight: [the name of the big font (slices), the file of the QATT letters] } }
   var FONTS = {
-    "QATT Pen":        { weights: { 100: ["qatt-pen-thin", "qatt-pen-thin-letters"], 300: ["qatt-pen-light", "qatt-pen-light-letters"], 400: ["qatt-pen", "qatt-pen-letters"], 500: ["qatt-pen-medium", "qatt-pen-medium-letters"] } },
+    "Pen":             { weights: { 100: ["pen-thin", "pen-thin-letters"], 300: ["pen-light", "pen-light-letters"], 400: ["pen", "pen-letters"], 500: ["pen-medium", "pen-medium-letters"] } },
+    "QATT Pen":        { same: "Pen" },   // the old name (until 2026-11-22), the same files
     "HaiMinh":         { weights: { 300: ["haiminh-light", "haiminh-light-letters"], 400: ["haiminh", "haiminh-letters"], 500: ["haiminh-medium", "haiminh-medium-letters"], 700: ["haiminh-bold", "haiminh-bold-letters"] } },
     "Hai Minh":        { same: "HaiMinh" },   // the old name (2026-11-21), the same files
     "Migoi":           { weights: { 400: ["migoi", "migoi-letters"] } },

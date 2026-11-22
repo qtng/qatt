@@ -1,5 +1,5 @@
 /* The lessons of learn/ (js/learn.js): hero, the steps of the course, the board with the band, the pager. Colours from the variables of site.css and the theme. */
-:root { --qfont: "QATT Pen Medium"; --row: 4.6rem; --step: 4s; --mid: 10rem; }
+:root { --qfont: "Pen Medium"; --row: 4.6rem; --step: 4s; --mid: 10rem; }
 
 .hero {
   background:

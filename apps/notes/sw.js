@@ -5,15 +5,15 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v112';
+const CACHE = 'qatt-notes-v113';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.qatt.org/fonts/';   // the font files (js/fonts.js, QATT_CDN): the R2 bucket
-const LATIN = ['qatt-pen', 'qatt-pen-thin', 'qatt-pen-light', 'qatt-pen-medium', 'migoi', 'celluloid', 'phongthao', 'qatt-gothic-extralight', 'qatt-gothic-rounded-extralight'].map(n => `${CDN}web/${n}-latin.woff2`);
+const LATIN = ['pen', 'pen-thin', 'pen-light', 'pen-medium', 'migoi', 'celluloid', 'phongthao', 'qatt-gothic-extralight', 'qatt-gothic-rounded-extralight'].map(n => `${CDN}web/${n}-latin.woff2`);
 const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json', ...LATIN];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB (?v=2: the first file had wrong vertical metrics; a copy kept for ever needs a new address): cached when a character needs it, not at install
 // the Nôm fonts never change: cached for ever, the two small ones at install, the big one when first needed
-// the CJK of QATT Pen, Migoi, Celluloid, Phong Thảo: small slices (js/fonts.js), each cached in CACHE when the page first needs it, like the other fonts of the bucket
+// the CJK of Pen, Migoi, Celluloid, Phong Thảo: small slices (js/fonts.js), each cached in CACHE when the page first needs it, like the other fonts of the bucket
 const CJK_SLICES = /^https:\/\/cdn\.qatt\.org\/fonts\/(?:web\/)?[\w.-]+\.woff2(?:\?v=[\w%.-]+)?$/;   // every font file of the bucket, with the version of js/fonts.js (?v=<date of the font>) or without
 const OLD_FOREVER = ['https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=2', 'https://chunom.org/chunom-assets/fonts/qatt-pen.woff2?v=3'];   // the whole font before the slices: removed from the permanent cache
 const NOM_FONTS = ['https://chunom.org/chunom-assets/fonts/hannom-gothic-supplement.woff2', 'https://chunom.org/chunom-assets/fonts/nomkhai-supplement.woff2', NOM_NA_TONG];
@@ -24,7 +24,7 @@ const PRECACHE = [
   '/apps/notes/manifest.webmanifest', '/apps/notes/icons/icon-192.png', '/apps/notes/icons/icon-512.png', '/apps/notes/icons/maskable-512.png',
   '/js/parser.js', '/js/fonts.js', '/js/qatt-text.js', '/js/pa-text.js', '/apps/notes/notes-editor.js',
   '/vendor/bootstrap-icons/bootstrap-icons.min.css', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2', '/vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  ...['qatt-pen-letters.woff2', 'qatt-pen-medium-letters.woff2', 'celluloid-letters.woff2', 'migoi-letters.woff2', 'haiminh-letters.woff2', 'qatt-gothic-extralight-letters.woff2', 'qatt-gothic-wide.woff2', 'qatt-hat-gao.woff2', 'qatt-snip.woff2', 'qatt-manh.woff2', 'qatt-metro.woff2', 'qatt-n7k.woff2', 'phongthao-letters.woff2'].map(n => CDN + n),
+  ...['pen-letters.woff2', 'pen-medium-letters.woff2', 'celluloid-letters.woff2', 'migoi-letters.woff2', 'haiminh-letters.woff2', 'qatt-gothic-extralight-letters.woff2', 'qatt-gothic-wide.woff2', 'qatt-hat-gao.woff2', 'qatt-snip.woff2', 'qatt-manh.woff2', 'qatt-metro.woff2', 'qatt-n7k.woff2', 'phongthao-letters.woff2'].map(n => CDN + n),
 ];
 
 // the caches of earlier versions of this app

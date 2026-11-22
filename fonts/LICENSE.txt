@@ -3,7 +3,7 @@ Copyright (c) 2026 qatt.org. All rights reserved.
 
 This licence covers
   - the QATT fonts of qatt.org (the files in this folder, .ttf and .woff2);
-  - the CJK fonts of chunom.org: QATT Pen (Thin, Light, Regular, Medium),
+  - the CJK fonts of chunom.org: Pen (Thin, Light, Regular, Medium),
     Migoi, Celluloid and Phong Thao (the .ttf files offered for download and
     the web files cut from them);
 and the glyph data and tools they are built from. They are not free software

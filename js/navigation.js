@@ -189,7 +189,7 @@ window.Theme = window.Theme || (function() {
 })();
 
 // ---------- the QATT fonts: js/fonts.js on every page of both sites ----------
-// js/fonts.js (next to this file) defines every font of the lists (QATT_FONTS) with its @font-face rules, also "QATT Pen", the CJK font of --font-cjk (css/site.css);
+// js/fonts.js (next to this file) defines every font of the lists (QATT_FONTS) with its @font-face rules, also "Pen", the CJK font of --font-cjk (css/site.css);
 // written into the <head> right after this script while the page is parsed (as the theme), so it runs before the scripts of the page. A page does not load it itself.
 // It may run twice (admin/view.html writes a private page with its own navigation.js into the same window): its globals are var, it adds its rules again.
 (function() {
@@ -477,7 +477,7 @@ window.Readings = window.Readings || (function() {
             .rp-btn:hover, .readings-switch.open .rp-btn { color: #fff; border-color: rgba(255, 255, 255, .6); }
             .rp-btn .bi-sliders { font-size: .9rem; }
             .rp-btn .bi-chevron-down { font-size: .65rem; opacity: .7; }
-            .rp-han { font-family: var(--font-cjk, "QATT Pen"), serif; line-height: 1; }
+            .rp-han { font-family: var(--font-cjk, "Pen"), serif; line-height: 1; }
             .rp-now[data-readings="off"]::before { content: "—"; }
             .rp-panel { display: none; position: absolute; right: 0; top: calc(100% + .6rem); z-index: 1080; width: 18rem; padding: .8rem; background: var(--nav-bg); border: 1px solid rgba(255, 255, 255, .15); border-radius: .6rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); color: rgba(255, 255, 255, .85); text-align: left; }
             .readings-switch.open .rp-panel { display: block; }
@@ -496,7 +496,7 @@ window.Readings = window.Readings || (function() {
             .rp-row.off { opacity: .4; cursor: default; }
             .rp-row.off:hover { background: none; }
             /* "Transliterate UI": the Vietnamese texts of the interface in QATT or PA (Lang.setScript) */
-            .ui-qatt { font-family: "QATT Pen", sans-serif !important; }
+            .ui-qatt { font-family: "Pen", sans-serif !important; }
             .ui-pa { font-family: "PA Pen", "PA", sans-serif !important; }
             .ui-qatt, .ui-pa, .rd-qatt, .rd-pa { font-style: normal !important; }   /* a theme sets italics on headings, lead texts and buttons: these scripts have no italic (the browser would slant them) */
             @media (max-width: 575.98px) {
@@ -508,7 +508,7 @@ window.Readings = window.Readings || (function() {
             @media (max-width: 359.98px) { .nav-backdrop > .container-fluid { padding-left: .4rem; padding-right: .3rem; } .nav-backdrop .navbar-brand { margin-right: .3rem; } #navTogglerCustom { padding: .25rem .2rem; } }
             /* the readings written by Readings.fill: in one line, PA and QATT in their fonts */
             .rd-pa { font-family: "PA Pen", "PA", sans-serif; font-size: 1.2em; }
-            .rd-qatt { font-family: "QATT Pen", sans-serif; font-size: 1.2em; }
+            .rd-qatt { font-family: "Pen", sans-serif; font-size: 1.2em; }
             .rd-pa + span, .rd-qatt + span { margin-left: .3em; }
             #siteOffcanvas { width: 280px; transition: transform 0.3s ease-in-out; }
             .powered-by { text-align: center; font-size: .7rem; padding: 1.5rem 1rem 1rem; }
@@ -850,7 +850,7 @@ window.Readings = window.Readings || (function() {
         };
         const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
         const call = (fn, body) => fetch(SUPABASE + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify(body), keepalive: true }).catch(() => {});
-        // events (tools/db/events.sql): QattStats.event("font_download", "qatt-pen"), also by a click on a tag with data-stat="event:detail" (the country comes from the request, the time zone from here)
+        // events (tools/db/events.sql): QattStats.event("font_download", "pen"), also by a click on a tag with data-stat="event:detail" (the country comes from the request, the time zone from here)
         const seen = new Set();   // downloads count once per open page (the same file again on this page does not count; a new page load does)
         window.QattStats = { event: (name, detail) => {
             try { if (kind() === "admin" || localStorage.getItem("qv_off")) return; } catch (e) { return; }
