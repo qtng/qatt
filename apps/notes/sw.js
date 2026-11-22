@@ -5,12 +5,12 @@ Keep PRECACHE equal to what index.html loads (a test compares them).
   - the files of PRECACHE: from the cache, renewed in the background
   - ime.js of chunom.org (Telex), its dictionaries (the Chữ Nôm candidates) are cached the first time they load, and at install if the network allows
 */
-const CACHE = 'qatt-notes-v114';
+const CACHE = 'qatt-notes-v115';
 const IME = 'https://chunom.org/chunom/js/ime.js';
 // the Latin of the fonts that have a big font (js/fonts.js, big): the text field shows Latin in them (qattFieldFont), also offline
 const CDN = 'https://cdn.qatt.org/fonts/';   // the font files (js/fonts.js, QATT_CDN): the R2 bucket
 const LATIN = ['pen', 'pen-thin', 'pen-light', 'pen-medium', 'migoi', 'celluloid', 'phongthao', 'qatt-gothic-extralight', 'qatt-gothic-rounded-extralight'].map(n => `${CDN}web/${n}-latin.woff2`);
-const CHUNOM = [IME, 'https://chunom.org/chunom/js/generated_chars.json', 'https://chunom.org/chunom/js/base_chars.json', ...LATIN];
+const CHUNOM = [IME, 'https://chunom.org/chunom/js/ime_dict.json', ...LATIN];
 const NOM_NA_TONG = 'https://chunom.org/chunom-assets/fonts/nomnatong-supplement.woff2?v=2'; // 8 MB (?v=2: the first file had wrong vertical metrics; a copy kept for ever needs a new address): cached when a character needs it, not at install
 // the Nôm fonts never change: cached for ever, the two small ones at install, the big one when first needed
 // the CJK of Pen, Migoi, Celluloid, Phong Thảo: small slices (js/fonts.js), each cached in CACHE when the page first needs it, like the other fonts of the bucket
