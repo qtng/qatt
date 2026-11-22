@@ -123,7 +123,7 @@
 
   $('ascii').addEventListener('click', async () => {
     const art = $('art');
-    art.textContent = await QattAscii.convert(field.value, { cols: +$('asciiSize').value, font: document.documentElement.style.getPropertyValue('--qfont').replace(/"/g, '') || 'QATT Pen Medium' });
+    art.textContent = await QattAscii.convert(field.value, { cols: +$('asciiSize').value, font: document.documentElement.style.getPropertyValue('--qfont').replace(/"/g, '') || 'Pen Medium' });
     art.hidden = false;
   });
   $('asciiSize').addEventListener('change', () => $('ascii').click());

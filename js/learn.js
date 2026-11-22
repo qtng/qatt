@@ -141,7 +141,7 @@ const Learn = (() => {
     root.style.setProperty('--step', step / 1000 + 's');
     const html = `
       <div class="d-flex justify-content-center align-items-center gap-2 tools mb-3">
-        <select data-qatt-fonts data-qatt-default="QATT Pen" class="form-select form-select-sm w-auto" aria-label="Font"></select>
+        <select data-qatt-fonts data-qatt-default="Pen" class="form-select form-select-sm w-auto" aria-label="Font"></select>
       </div>
       <div class="marks" role="tablist" data-k="marks"><div class="pill" data-k="pill"></div></div>
       <div class="progress-line" aria-hidden="true"><div data-k="progress"></div></div>

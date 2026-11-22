@@ -349,7 +349,7 @@ const QattWriter = (() => {
     // the fonts of the list of qatt.org (js/fonts.js defines their @font-face rules; admins also get the fonts marked admin; the Chunom writer shows only the fonts marked cjk, those that also have Chữ Nôm)
     const admin = () => typeof isAdmin === 'function' && isAdmin();
     const FONTS = typeof QATT_FONTS !== 'undefined' ? QATT_FONTS.filter(f => (!f.admin || admin()) && (mode === 'nom' || f.cjk)).map(f => [f.family, f.label]) : [];
-    const DEFAULT_FONT = 'QATT Pen';
+    const DEFAULT_FONT = 'Pen';
     const decoding = $('decoding'), font = $('font'), size = $('size');
     for (const [name, label, vi] of VietnameseParser.TABLES) { const o = new Option(label, name, name === 'qatt', name === 'qatt'); o.setAttribute('data-vi', vi); decoding.append(o); }
     for (const [family, label] of FONTS) font.append(new Option(label, family, family === DEFAULT_FONT, family === DEFAULT_FONT));
@@ -567,7 +567,7 @@ const QattWriter = (() => {
     if (!field || typeof VietnameseParser === 'undefined' || typeof QattText === 'undefined') return null;
     const parser = new VietnameseParser();
     const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
-    field.style.fontFamily = 'system-ui, "QATT Pen Medium", sans-serif';   // the QATT font after the text font (before a generic family, or it is never used)
+    field.style.fontFamily = 'system-ui, "Pen Medium", sans-serif';   // the QATT font after the text font (before a generic family, or it is never used)
     const core = wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: options.convertOn || 'enter' });
     // a one-line field has no line break to convert on, and Enter would send the form: Enter converts the word before the cursor, and only without one it goes on as usual
     if (field.tagName === 'INPUT') field.addEventListener('keydown', e => {
