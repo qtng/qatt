@@ -7,7 +7,8 @@ Needs the global VietnameseParser (js/parser.js), QattText (js/qatt-text.js) and
     inside one, Backspace and Delete remove a whole cell, joiners that join nothing go).
     onChange        called after a change the field did not report itself (a variant, Convert, a new decoding)
     ed.variants()   the three slots [neutral, tham, plain]: { id, view, en, vi, run() } or undefined (not possible at the cursor now)
-    ed.candidates() the Chữ Nôm candidates of the Quốc Ngữ word before the cursor (dictionaries of ime.js): [{ glyph, reading, definition, run() }], [] without a word
+    ed.candidates() the Chữ Nôm candidates of the Quốc Ngữ word before the cursor (those of the VietIme of the field, in its order): [{ glyph, reading, definition, run() }],
+                    [] without a word; run() chooses through the VietIme, so the choice is counted and syllables chosen one after the other find the word of several syllables
     ed.nomReady     a promise, resolved when the dictionaries are loaded
     ed.setMode(m)   'telex' (the default: Telex, a word becomes QATT at a space), 'direct' (no Telex, no conversion; the letters come from ed.typeShape, digits 1–8 are tones)
                     or 'pa' (Telex, a word becomes PA, the phonetic script, at a space; js/pa-text.js; Convert reads and writes PA)
@@ -310,7 +311,8 @@ const NotesEditor = (() => {
   //   convert()      Convert as the button of the editor; setDecoding(name) writes every cell again after the decoding `name`
   function editor(field, opts) {
     const { parser } = opts, changed = () => opts.onChange && opts.onChange();
-    const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, returnSelect: false, spaceSelect: false }) : null;
+    // its own list stays closed (candidates: false); with renderItem it still finds the candidates (ime.shown after ime.refresh()) for the key bar of the app
+    const ime = typeof VietIme !== 'undefined' ? new VietIme(field, { telex: true, candidates: false, renderItem: () => {}, returnSelect: false, spaceSelect: false }) : null;
     let mode = 'telex';
     wire(field, { parser, on: () => true, refresh: () => {}, converted: () => ime && ime.hide(), convertOn: () => (mode === 'direct' ? 'none' : 'any'), script: () => (mode === 'pa' ? 'pa' : 'qatt'), enterScript: () => (mode === 'pa' ? 'qatt' : 'pa') });
     const slots = makeVariants(field, { on: () => mode !== 'pa', refresh: changed });   // the variants are those of QATT
@@ -324,16 +326,17 @@ const NotesEditor = (() => {
       if (!ime || at !== field.selectionEnd || (next && !NOT_LETTER.test(next))) return [];   // not in the middle of a word
       const m = WORD_END.exec(field.value.slice(0, at));
       if (!m) return [];
-      const start = at - m[0].length, word = composing ? VietIme.telex(m[0]) : m[0];
-      return VietIme.lookup(word).map(c => ({ ...c, run: () => {   // the glyph takes the place of the word, as typed text (events, the app's undo)
-        field.focus({ preventScroll: true });
-        field.setSelectionRange(start, at);
-        if (!document.execCommand('insertText', false, c.glyph)) {
-          field.setRangeText(c.glyph, start, at, 'end');
-          field.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText', data: c.glyph }));
-        }
-      } }));
+      ime.refresh();   // the VietIme finds the word itself (while a phone keyboard composes, as Telex)
+      return ime.shown.map(({ item }) => ({ glyph: item.glyph, reading: readingOf(item.key), definition: (item.definition || '').trim(), run: () => choose(item) }));
     };
+    // the glyph takes the place of the word through the VietIme (as typed text: events, the app's undo); it counts the choice and remembers it for the next syllable
+    const choose = item => {
+      field.focus({ preventScroll: true });
+      let i = ime.shown.findIndex(s => s.item === item);
+      if (i < 0) { ime.refresh(); i = ime.shown.findIndex(s => s.item.glyph === item.glyph); }
+      if (i >= 0) ime.select(i);
+    };
+    const readingOf = key => key.replace(/(\p{Lu})/gu, ' $1').trim().toLowerCase();   // "chữNôm" → "chữ nôm" (as VietIme.lookup)
     // ----- the other script -----
     // the word before the cursor in the script that does not stand in the text: with QATT Telex PA, with PA Telex QATT (the first slot of the key bar; Enter takes it): { glyph, script, run() } or null
     const alternate = () => {
