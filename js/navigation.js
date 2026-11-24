@@ -832,9 +832,16 @@ window.Readings = window.Readings || (function() {
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 4.6rem + env(safe-area-inset-bottom)); } }
             .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid var(--accent, #a8362a); border-radius: 50%; background: var(--bs-body-bg, #fff); color: var(--accent, #a8362a); font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
             .help-badge:hover { filter: brightness(.95); }
-            /* grows and shrinks once when the popup has closed, so that the eye finds the badge */
-            .help-badge.pop { animation: help-zoom .8s ease-in-out; }
-            @keyframes help-zoom { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.6); } }
+            /* grows with a spring and settles back with two small bounces (the shape stays round, only the size changes), once when the popup has closed, so that the eye finds the badge */
+            .help-badge.pop { animation: help-zoom 1s linear; }
+            @keyframes help-zoom {
+                0% { transform: scale(1); animation-timing-function: cubic-bezier(.3, 1.5, .5, 1); }
+                32% { transform: scale(1.7); animation-timing-function: ease-in-out; }
+                62% { transform: scale(.88); animation-timing-function: ease-in-out; }
+                80% { transform: scale(1.08); animation-timing-function: ease-in-out; }
+                92% { transform: scale(.98); animation-timing-function: ease-in-out; }
+                100% { transform: scale(1); }
+            }
             @media (prefers-reduced-motion: reduce) { .help-badge.pop { animation: none; } }
             .help-card { width: min(19rem, calc(100vw - 2rem)); padding: .85rem 1rem .8rem; border: 1px solid var(--bs-border-color, #ccc); border-left: 4px solid var(--accent, #a8362a); border-radius: .75rem; background: var(--bs-body-bg, #fff); color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 .5rem 1.4rem rgba(0, 0, 0, .28); font-size: .95rem; }
             .help-card p { margin: 0 0 .7rem; }
