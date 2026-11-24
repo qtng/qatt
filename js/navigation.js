@@ -832,6 +832,7 @@ window.Readings = window.Readings || (function() {
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 4.6rem + env(safe-area-inset-bottom)); } }
             .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid var(--accent, #a8362a); border-radius: 50%; background: var(--bs-body-bg, #fff); color: var(--accent, #a8362a); font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
             .help-badge:hover { filter: brightness(.95); }
+            .help-badge.away { display: none; }
             /* grows with a spring and settles back with two small bounces (the shape stays round, only the size changes), once when the popup has closed, so that the eye finds the badge */
             .help-badge.pop { animation: help-zoom 1s linear; }
             @keyframes help-zoom {
@@ -861,7 +862,12 @@ window.Readings = window.Readings || (function() {
             sc.src = '/chunom/js/review.js'; sc.onload = () => ok(); sc.onerror = () => { loading = null; fail(); };
             document.head.appendChild(sc);
         }));
-        const openPopup = () => load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => {});
+        // while the popup is open the badge is away; it comes back (with its bounce) when the popup closes, or at once if the popup cannot be loaded
+        const openPopup = () => {
+            if (card) { card.remove(); card = null; }
+            if (badge) badge.classList.add('away');
+            load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => showBadge());
+        };
         // below the menu bar, whatever its height is (the bar changes between phone and desktop)
         function place() {
             const bar = document.querySelector('.navbar.fixed-top');
@@ -874,10 +880,10 @@ window.Readings = window.Readings || (function() {
         }
         window.addEventListener('resize', place);
         // the popup of ChunomReview is closed (a close event does not bubble: listen while it goes down): the badge grows once and shrinks again, to say where to go on
-        document.addEventListener('close', e => { if (e.target.matches && e.target.matches('dialog.crv')) setTimeout(pop, 150); }, true);
+        document.addEventListener('close', e => { if (e.target.matches && e.target.matches('dialog.crv')) setTimeout(() => { showBadge(); pop(); }, 150); }, true);
         function showBadge() {
             if (card) { card.remove(); card = null; }
-            if (badge) return;
+            if (badge) { badge.classList.remove('away'); place(); return; }
             badge = document.createElement('button');
             badge.type = 'button'; badge.className = 'help-badge';
             badge.title = 'Help check the dictionaries'; badge.setAttribute('data-vi-title', 'Giúp kiểm tra các từ điển');
@@ -892,7 +898,7 @@ window.Readings = window.Readings || (function() {
             card.className = 'help-card'; card.setAttribute('role', 'region');
             card.innerHTML = '<p><i class="bi bi-patch-check"></i><span data-vi="Giúp chúng tôi kiểm tra các từ điển. Chỉ mất một phút.">Help us check the dictionaries. It takes a minute.</span></p>'
                 + '<div class="help-row"><button type="button" class="help-go" data-vi="Giúp">Help</button><button type="button" class="help-later" data-vi="Để sau">Not now</button></div>';
-            card.querySelector('.help-go').addEventListener('click', () => { showBadge(); openPopup(); });
+            card.querySelector('.help-go').addEventListener('click', openPopup);
             card.querySelector('.help-later').addEventListener('click', () => { showBadge(); setTimeout(pop, 150); });   // the card goes, the badge shows where to come back
             document.body.appendChild(card);
         }
