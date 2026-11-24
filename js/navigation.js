@@ -813,16 +813,77 @@ window.Readings = window.Readings || (function() {
         document.body.appendChild(button);
     }
 
+    // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for the time being only for
+    // admins (HELP_ADMINS_ONLY; false = every signed-in user). Once a day (localStorage.helpInvite = the local day it was shown) a card at the bottom left;
+    // otherwise, and after "Not now" or "Help", a small round badge that opens the popup again. Not on the review page itself, not in a frame.
+    function injectHelp() {
+        const HELP_ADMINS_ONLY = true;
+        if (location.hostname !== "chunom.org" || window.top !== window || /^\/chunom\/review\//.test(location.pathname)) return;
+        let user = null;
+        try { user = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user || null; } catch (e) {}
+        if (!user || (HELP_ADMINS_ONLY && !(user.app_metadata && user.app_metadata.is_admin === true))) return;
+        const style = document.createElement('style');
+        style.textContent = `
+            .help-badge, .help-card { position: fixed; left: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; }
+            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-badge, body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
+            .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg, #333); color: #ffe600; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); }
+            .help-badge:hover { filter: brightness(1.2); }
+            .help-card { max-width: min(20rem, calc(100vw - 2rem)); padding: .9rem 1rem; border: 1px solid var(--bs-border-color, #ccc); border-radius: .75rem; background: var(--bs-body-bg, #fff); color: var(--bs-body-color, #222); box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .3); font-size: .95rem; }
+            .help-card p { margin: 0 0 .7rem; }
+            .help-card .help-row { display: flex; gap: .5rem; align-items: center; }
+            .help-card button { border: 0; border-radius: 2rem; padding: .3rem .9rem; font-size: .9rem; white-space: nowrap; }
+            .help-card .help-go { background: var(--nav-bg, #333); color: #fff; }
+            .help-card .help-later { background: transparent; color: inherit; opacity: .75; }
+        `;
+        document.head.appendChild(style);
+        let card = null, badge = null, loading = null;
+        const day = new Date().toLocaleDateString('sv');
+        const load = () => loading || (loading = new Promise((ok, fail) => {
+            if (window.ChunomReview) return ok();
+            const sc = document.createElement('script');
+            sc.src = '/chunom/js/review.js'; sc.onload = () => ok(); sc.onerror = () => { loading = null; fail(); };
+            document.head.appendChild(sc);
+        }));
+        const openPopup = () => load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => {});
+        function showBadge() {
+            if (card) { card.remove(); card = null; }
+            if (badge) return;
+            badge = document.createElement('button');
+            badge.type = 'button'; badge.className = 'help-badge';
+            badge.title = 'Help check the dictionaries'; badge.setAttribute('data-vi-title', 'Giúp kiểm tra các từ điển');
+            badge.setAttribute('aria-label', 'Help check the dictionaries'); badge.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
+            badge.innerHTML = '<i class="bi bi-patch-check"></i>';
+            badge.addEventListener('click', openPopup);
+            document.body.appendChild(badge);
+        }
+        function showCard() {
+            card = document.createElement('div');
+            card.className = 'help-card'; card.setAttribute('role', 'region');
+            card.innerHTML = '<p data-vi="Giúp chúng tôi kiểm tra các từ điển. Chỉ mất một phút.">Help us check the dictionaries. It takes a minute.</p>'
+                + '<div class="help-row"><button type="button" class="help-go" data-vi="Giúp">Help</button><button type="button" class="help-later" data-vi="Để sau">Not now</button></div>';
+            card.querySelector('.help-go').addEventListener('click', () => { showBadge(); openPopup(); });
+            card.querySelector('.help-later').addEventListener('click', showBadge);
+            document.body.appendChild(card);
+        }
+        let last = null;
+        try { last = (JSON.parse(localStorage.getItem('helpInvite')) || {}).d; } catch (e) {}
+        if (last === day) { showBadge(); return; }
+        try { localStorage.setItem('helpInvite', JSON.stringify({ d: day })); } catch (e) {}
+        setTimeout(showCard, 3000);
+    }
+
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", () => {
             injectDependencies();
             injectNav();
             injectToTop();
+            injectHelp();
         });
     } else {
         injectDependencies();
         injectNav();
         injectToTop();
+        injectHelp();
     }
 })();
 
