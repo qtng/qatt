@@ -814,23 +814,22 @@ window.Readings = window.Readings || (function() {
     }
 
     // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for everybody (signed in or
-    // not: the popup asks for the sign-in). At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a card at the bottom right;
-    // otherwise, and after "Not now" or when the popup closes, a small round badge at the top right that opens the popup again. Not on the review page itself, not in a frame.
+    // not: the popup asks for the sign-in); not on the review page itself, not in a frame. A small round badge at the top right below the menu bar opens the
+    // popup. At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with one example question,
+    // one button and a small ×: when the popup of a character (#detailModal of detail.js) has been closed, or else 3 s into the second page view of the visit
+    // (sessionStorage.helpViews). × sends it back into the badge, which then bounces (also when the review popup closes). Details: docs/sites/navigation.md (private).
     function injectHelp() {
-        const HELP_EVERY = 60 * 60 * 1000;   // ms between two cards: one hour
+        const HELP_EVERY = 60 * 60 * 1000;   // ms between two bubbles: one hour
         if (location.hostname !== "chunom.org" || window.top !== window || /^\/chunom\/review\//.test(location.pathname)) return;
+        const A = 'var(--accent, #a8362a)', EDGE = 'color-mix(in srgb, var(--accent, #a8362a) 45%, transparent)', BG = 'var(--bs-body-bg, #fff)';
         const style = document.createElement('style');
         style.textContent = `
-            /* the card at the bottom right above the button to the top; the badge at the top right below the menu bar (top is set in place()), so the two never meet the button */
-            .help-badge, .help-card { position: fixed; right: 1rem; z-index: 1020; }
-            .help-badge { top: 4.5rem; }
-            .help-card { bottom: calc(4.6rem + env(safe-area-inset-bottom)); }
-            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 4.6rem + env(safe-area-inset-bottom)); } }
-            .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid var(--accent, #a8362a); border-radius: 50%; background: var(--bs-body-bg, #fff); color: var(--accent, #a8362a); font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
+            /* the badge at the top right below the menu bar (top is set in place()), away from the button to the top */
+            .help-badge { position: fixed; right: 1rem; top: 4.5rem; z-index: 1020; width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid ${A}; border-radius: 50%; background: ${BG}; color: ${A}; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
             .help-badge:hover { filter: brightness(.95); }
             .help-badge.away { display: none; }
-            .help-badge .help-ring { position: absolute; inset: -1.5px; border-radius: 50%; border: 2px solid var(--accent, #a8362a); opacity: 0; pointer-events: none; }
-            /* grows a little with a spring and settles back with a small bounce (the shape stays round, only the size changes), once when the popup has closed, so that the eye finds the badge */
+            .help-badge .help-ring { position: absolute; inset: -1.5px; border-radius: 50%; border: 2px solid ${A}; opacity: 0; pointer-events: none; }
+            /* grows a little with a spring and settles back with a small bounce, with a thin ring that spreads out twice: when the bubble or the popup has closed */
             .help-badge.pop { animation: help-zoom .7s linear; }
             @keyframes help-zoom {
                 0% { transform: scale(1); animation-timing-function: cubic-bezier(.3, 1.4, .5, 1); }
@@ -839,75 +838,94 @@ window.Readings = window.Readings || (function() {
                 85% { transform: scale(1.03); animation-timing-function: ease-in-out; }
                 100% { transform: scale(1); }
             }
-            /* with it a thin ring spreads out of the badge and fades, two times */
             .help-badge.pop .help-ring { animation: help-ring 1s cubic-bezier(.2, .6, .3, 1) .12s 2; }
             @keyframes help-ring { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(2.3); opacity: 0; border-width: .5px; } }
-            @media (prefers-reduced-motion: reduce) { .help-badge.pop, .help-badge.pop .help-ring { animation: none; } }
-            .help-card { width: min(19rem, calc(100vw - 2rem)); padding: .85rem 1rem .8rem; border: 1px solid var(--bs-border-color, #ccc); border-left: 4px solid var(--accent, #a8362a); border-radius: .75rem; background: var(--bs-body-bg, #fff); color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 .5rem 1.4rem rgba(0, 0, 0, .28); font-size: .95rem; }
-            .help-card { text-align: center; }
-            .help-card p { margin: 0 0 .7rem; }
-            .help-card p i { color: var(--accent, #a8362a); margin-right: .35rem; }
-            .help-card .help-row { display: flex; gap: .5rem; align-items: center; justify-content: center; }
-            .help-card button { border-radius: 2rem; padding: .3rem .95rem; font-size: .9rem; white-space: nowrap; }
-            .help-card .help-go { border: 1.5px solid var(--accent, #a8362a); background: var(--accent, #a8362a); color: #fff; font-weight: 600; }
-            .help-card .help-go:hover { background: color-mix(in srgb, var(--accent, #a8362a) 85%, #000); border-color: color-mix(in srgb, var(--accent, #a8362a) 85%, #000); }
-            .help-card .help-later { border: 0; background: transparent; color: inherit; opacity: .65; }
-            .help-card .help-later:hover { opacity: 1; }
+            /* the speech bubble below the badge, its arrow pointing up to it; it grows out of the badge and shrinks back into it */
+            .help-bubble { position: fixed; right: .6rem; z-index: 1020; width: min(18rem, calc(100vw - 1.2rem)); padding: .85rem .9rem .75rem; border-radius: 1rem; background: ${BG}; color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 0 0 1.5px ${EDGE}, 0 .8rem 2rem rgba(0, 0, 0, .25); transform-origin: calc(100% - 1.775rem) -.7rem; font-size: .9rem; line-height: 1.35; animation: help-in .45s cubic-bezier(.3, 1.45, .5, 1) both; }
+            .help-bubble::before { content: ""; position: absolute; top: -.5rem; right: 1.3rem; width: .95rem; height: .95rem; background: ${BG}; transform: rotate(45deg); box-shadow: -1.5px -1.5px 0 ${EDGE}; border-radius: 3px 0 0 0; }
+            .help-bubble.out { animation: help-out .3s cubic-bezier(.5, 0, .75, .3) both; }
+            @keyframes help-in { 0% { opacity: 0; transform: scale(.2); } 40% { opacity: 1; } 100% { opacity: 1; transform: scale(1); } }
+            @keyframes help-out { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.15); } }
+            .help-bubble .help-ask { display: flex; gap: .75rem; align-items: center; padding-right: 1rem; }
+            .help-bubble .help-glyph { flex: none; width: 3.6rem; height: 3.6rem; border-radius: .75rem; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, ${A} 9%, ${BG}); box-shadow: inset 0 0 0 1px color-mix(in srgb, ${A} 30%, transparent); font-family: var(--font-cjk, "Pen"), serif; font-size: 2.3rem; line-height: 1; }
+            .help-bubble .help-q { min-width: 0; opacity: .8; font-size: .85rem; }
+            .help-bubble .help-q b { display: block; opacity: 1; font-size: .98rem; font-weight: 600; margin-bottom: .1rem; }
+            .help-bubble .help-q em { font-style: normal; color: ${A}; }
+            .help-bubble .help-foot { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .75rem; }
+            .help-bubble .help-foot small { opacity: .65; font-size: .78rem; }
+            .help-bubble .help-go { border: 0; border-radius: 2rem; padding: .4rem 1.05rem; background: ${A}; color: #fff; font-weight: 600; font-size: .88rem; white-space: nowrap; }
+            .help-bubble .help-go:hover { background: color-mix(in srgb, ${A} 85%, #000); }
+            .help-bubble .help-x { position: absolute; top: .35rem; right: .35rem; width: 1.7rem; height: 1.7rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; opacity: .6; font-size: 1.2rem; line-height: 1; }
+            .help-bubble .help-x:hover { opacity: 1; background: color-mix(in srgb, currentColor 8%, transparent); }
+            @media (prefers-reduced-motion: reduce) { .help-badge.pop, .help-badge.pop .help-ring, .help-bubble, .help-bubble.out { animation: none; } }
         `;
         document.head.appendChild(style);
-        let card = null, badge = null, loading = null;
+        let badge = null, bubble = null, loading = null, shown = false;
         const load = () => loading || (loading = new Promise((ok, fail) => {
             if (window.ChunomReview) return ok();
             const sc = document.createElement('script');
             sc.src = '/chunom/js/review.js'; sc.onload = () => ok(); sc.onerror = () => { loading = null; fail(); };
             document.head.appendChild(sc);
         }));
-        // while the popup is open the badge is away; it comes back (with its bounce) when the popup closes, or at once if the popup cannot be loaded
-        const openPopup = () => {
-            if (card) { card.remove(); card = null; }
-            if (badge) badge.classList.add('away');
-            load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => showBadge());
-        };
-        // below the menu bar, whatever its height is (the bar changes between phone and desktop)
+        // below the menu bar, whatever its height is (the bar changes between phone and desktop); the bubble below the badge
         function place() {
             const bar = document.querySelector('.navbar.fixed-top');
-            if (badge) badge.style.top = ((bar ? bar.getBoundingClientRect().bottom : 56) + 10) + 'px';
+            const top = (bar ? bar.getBoundingClientRect().bottom : 56) + 10;
+            badge.style.top = top + 'px';
+            if (bubble) bubble.style.top = (top + badge.offsetHeight + 12) + 'px';
         }
         function pop() {
-            if (!badge) return;
             badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop');
-            const ring = badge.querySelector('.help-ring');   // the ring runs longest: the class goes when it has ended
-            ring.addEventListener('animationend', () => badge.classList.remove('pop'), { once: true });
+            badge.querySelector('.help-ring').addEventListener('animationend', () => badge.classList.remove('pop'), { once: true });   // the ring runs longest
         }
-        window.addEventListener('resize', place);
-        // the popup of ChunomReview is closed (a close event does not bubble: listen while it goes down): the badge grows once and shrinks again, to say where to go on
-        document.addEventListener('close', e => { if (e.target.matches && e.target.matches('dialog.crv')) setTimeout(() => { showBadge(); pop(); }, 150); }, true);
-        function showBadge() {
-            if (card) { card.remove(); card = null; }
-            if (badge) { badge.classList.remove('away'); place(); return; }
-            badge = document.createElement('button');
-            badge.type = 'button'; badge.className = 'help-badge';
-            badge.title = 'Help check the dictionaries'; badge.setAttribute('data-vi-title', 'Giúp kiểm tra các từ điển');
-            badge.setAttribute('aria-label', 'Help check the dictionaries'); badge.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
-            badge.innerHTML = '<span class="help-ring"></span><i class="bi bi-patch-check"></i>';
-            badge.addEventListener('click', openPopup);
-            document.body.appendChild(badge);
+        // while the review popup is open the badge is away; it comes back with its bounce when the popup closes (at once if the popup cannot be loaded)
+        function openPopup() {
+            if (bubble) { bubble.remove(); bubble = null; }
+            badge.classList.add('away');
+            load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => badge.classList.remove('away'));
+        }
+        document.addEventListener('close', e => {   // a close event does not bubble: listen while it goes down
+            if (e.target.matches && e.target.matches('dialog.crv')) setTimeout(() => { badge.classList.remove('away'); place(); pop(); }, 150);
+        }, true);
+        function closeBubble() {
+            if (!bubble) return;
+            const b = bubble; bubble = null;
+            b.classList.add('out');
+            const done = () => { b.remove(); pop(); };
+            if (matchMedia('(prefers-reduced-motion: reduce)').matches) done(); else b.addEventListener('animationend', done, { once: true });
+        }
+        function showBubble() {
+            if (shown || badge.classList.contains('away')) return;   // once per page, and not over the review popup
+            shown = true;
+            try { localStorage.setItem('helpInvite', JSON.stringify({ t: Date.now() })); } catch (e) {}
+            bubble = document.createElement('div');
+            bubble.className = 'help-bubble'; bubble.setAttribute('role', 'dialog'); bubble.setAttribute('aria-label', 'Help check the dictionaries'); bubble.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
+            // an example of what is checked (a fixed one for now)
+            bubble.innerHTML = '<button type="button" class="help-x" aria-label="Close" data-vi-aria-label="Đóng">×</button>'
+                + '<div class="help-ask"><span class="help-glyph" aria-hidden="true">喃</span><div class="help-q"><b><span data-vi="Chữ này đọc là">Is this read</span> <em>nôm</em>?</b>'
+                + '<span data-vi="Máy tính đã đọc các từ điển cổ. Hãy kiểm tra từng chỗ chỉ với một chạm.">A computer read the old dictionaries. Check one place with a tap.</span></div></div>'
+                + '<div class="help-foot"><small data-vi="Khoảng một phút">About a minute</small><button type="button" class="help-go" data-vi="Xem thử">Take a look</button></div>';
+            bubble.querySelector('.help-x').addEventListener('click', closeBubble);
+            bubble.querySelector('.help-go').addEventListener('click', openPopup);
+            document.body.appendChild(bubble);
             place();
         }
-        function showCard() {
-            card = document.createElement('div');
-            card.className = 'help-card'; card.setAttribute('role', 'region');
-            card.innerHTML = '<p><i class="bi bi-patch-check"></i><span data-vi="Giúp chúng tôi kiểm tra các từ điển. Chỉ mất một phút.">Help us check the dictionaries. It takes a minute.</span></p>'
-                + '<div class="help-row"><button type="button" class="help-later" data-vi="Để sau">Not now</button><button type="button" class="help-go" data-vi="Giúp">Help</button></div>';
-            card.querySelector('.help-go').addEventListener('click', openPopup);
-            card.querySelector('.help-later').addEventListener('click', () => { showBadge(); setTimeout(pop, 150); });   // the card goes, the badge shows where to come back
-            document.body.appendChild(card);
-        }
-        let last = 0;
+        badge = document.createElement('button');
+        badge.type = 'button'; badge.className = 'help-badge';
+        badge.title = 'Help check the dictionaries'; badge.setAttribute('data-vi-title', 'Giúp kiểm tra các từ điển');
+        badge.setAttribute('aria-label', 'Help check the dictionaries'); badge.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
+        badge.innerHTML = '<span class="help-ring"></span><i class="bi bi-patch-check"></i>';
+        badge.addEventListener('click', openPopup);
+        document.body.appendChild(badge);
+        place();
+        window.addEventListener('resize', place);
+        let last = 0, views = 0;
         try { last = Number((JSON.parse(localStorage.getItem('helpInvite')) || {}).t) || 0; } catch (e) {}
-        if (Date.now() - last < HELP_EVERY) { showBadge(); return; }
-        try { localStorage.setItem('helpInvite', JSON.stringify({ t: Date.now() })); } catch (e) {}
-        setTimeout(showCard, 3000);
+        try { views = Number(sessionStorage.getItem('helpViews')) + 1; sessionStorage.setItem('helpViews', String(views)); } catch (e) {}
+        if (Date.now() - last < HELP_EVERY) return;
+        // the moment: a character popup was closed (Bootstrap's hidden.bs.modal bubbles), or the second page view of the visit
+        document.addEventListener('hidden.bs.modal', e => { if (e.target.id === 'detailModal') setTimeout(showBubble, 400); });
+        if (views >= 2) setTimeout(showBubble, 3000);
     }
 
     if (document.readyState === "loading") {
