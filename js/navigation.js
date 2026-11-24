@@ -297,6 +297,7 @@ window.Readings = window.Readings || (function() {
             { name: "Write Chữ Nôm", vi: "Gõ chữ Nôm", bar: "Write", barVi: "Gõ chữ", barOrder: 3, url: "/chunom/writer.html", icon: "bi-pencil-square" },
             { name: "Translate Chữ Nôm", vi: "Dịch chữ Nôm", bar: "Translate", barVi: "Dịch", barOrder: 2, url: "/chunom/translate.html", icon: "bi-translate" },
             { name: "Dictionaries", vi: "Từ điển", tile: "Dictionaries", tileVi: "Từ điển", barPrefix: "/chunom/dict/", url: "/chunom/dict/", icon: "bi-journal-bookmark" },   // the overview, the viewers of Génibrel and Bonet below it
+            { name: "Help check", vi: "Giúp kiểm tra", tile: "Review", tileVi: "Kiểm tra", url: "/chunom/review/", icon: "bi-patch-check" },
             { name: "Bookshelf", vi: "Tủ sách", bar: "Bookshelf", barVi: "Tủ sách", barOrder: 5, barPrefix: "/chunom/shelf/", url: "/chunom/shelf/", icon: "bi-bookshelf" },
             { name: "Phiên âm tự (PA)", vi: "Phiên âm tự (PA)", tile: "PA", url: "/chunom/pa/", icon: "bi-type" },
         ]
