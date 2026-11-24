@@ -833,14 +833,13 @@ window.Readings = window.Readings || (function() {
             .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid var(--accent, #a8362a); border-radius: 50%; background: var(--bs-body-bg, #fff); color: var(--accent, #a8362a); font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
             .help-badge:hover { filter: brightness(.95); }
             .help-badge.away { display: none; }
-            /* grows with a spring and settles back with two small bounces (the shape stays round, only the size changes), once when the popup has closed, so that the eye finds the badge */
-            .help-badge.pop { animation: help-zoom 1s linear; }
+            /* grows a little with a spring and settles back with a small bounce (the shape stays round, only the size changes), once when the popup has closed, so that the eye finds the badge */
+            .help-badge.pop { animation: help-zoom .7s linear; }
             @keyframes help-zoom {
-                0% { transform: scale(1); animation-timing-function: cubic-bezier(.3, 1.5, .5, 1); }
-                32% { transform: scale(1.7); animation-timing-function: ease-in-out; }
-                62% { transform: scale(.88); animation-timing-function: ease-in-out; }
-                80% { transform: scale(1.08); animation-timing-function: ease-in-out; }
-                92% { transform: scale(.98); animation-timing-function: ease-in-out; }
+                0% { transform: scale(1); animation-timing-function: cubic-bezier(.3, 1.4, .5, 1); }
+                35% { transform: scale(1.22); animation-timing-function: ease-in-out; }
+                65% { transform: scale(.96); animation-timing-function: ease-in-out; }
+                85% { transform: scale(1.03); animation-timing-function: ease-in-out; }
                 100% { transform: scale(1); }
             }
             @media (prefers-reduced-motion: reduce) { .help-badge.pop { animation: none; } }
