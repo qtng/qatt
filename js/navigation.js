@@ -829,12 +829,12 @@ window.Readings = window.Readings || (function() {
             @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-badge, body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
             .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg, #333); color: #ffe600; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); }
             .help-badge:hover { filter: brightness(1.2); }
-            .help-card { max-width: min(20rem, calc(100vw - 2rem)); padding: .9rem 1rem; border: 1px solid var(--bs-border-color, #ccc); border-radius: .75rem; background: var(--bs-body-bg, #fff); color: var(--bs-body-color, #222); box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .3); font-size: .95rem; }
+            .help-card { max-width: min(20rem, calc(100vw - 2rem)); padding: .9rem 1rem; border: 2px solid var(--bs-warning, #ffc107); border-radius: .75rem; background: var(--nav-bg, #333); color: #fff; box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .45); font-size: .95rem; }
             .help-card p { margin: 0 0 .7rem; }
             .help-card .help-row { display: flex; gap: .5rem; align-items: center; }
             .help-card button { border: 0; border-radius: 2rem; padding: .3rem .9rem; font-size: .9rem; white-space: nowrap; }
-            .help-card .help-go { background: var(--nav-bg, #333); color: #fff; }
-            .help-card .help-later { background: transparent; color: inherit; opacity: .75; }
+            .help-card .help-go { background: var(--bs-warning, #ffc107); color: #222; font-weight: 600; }
+            .help-card .help-later { background: transparent; color: #fff; opacity: .8; }
         `;
         document.head.appendChild(style);
         let card = null, badge = null, loading = null;
