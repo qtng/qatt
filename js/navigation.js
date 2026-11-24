@@ -814,10 +814,11 @@ window.Readings = window.Readings || (function() {
     }
 
     // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for the time being only for
-    // admins (HELP_ADMINS_ONLY; false = every signed-in user). Once a day (localStorage.helpInvite = the local day it was shown) a card at the bottom left;
+    // admins (HELP_ADMINS_ONLY; false = every signed-in user). Once per HELP_EVERY (localStorage.helpInvite = the time it was shown; one minute while the owner tests, then one day) a card at the bottom left;
     // otherwise, and after "Not now" or "Help", a small round badge that opens the popup again. Not on the review page itself, not in a frame.
     function injectHelp() {
         const HELP_ADMINS_ONLY = true;
+        const HELP_EVERY = 60 * 1000;   // ms between two cards: one minute for the test, later 24 * 60 * 60 * 1000
         if (location.hostname !== "chunom.org" || window.top !== window || /^\/chunom\/review\//.test(location.pathname)) return;
         let user = null;
         try { user = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user || null; } catch (e) {}
@@ -837,7 +838,6 @@ window.Readings = window.Readings || (function() {
         `;
         document.head.appendChild(style);
         let card = null, badge = null, loading = null;
-        const day = new Date().toLocaleDateString('sv');
         const load = () => loading || (loading = new Promise((ok, fail) => {
             if (window.ChunomReview) return ok();
             const sc = document.createElement('script');
@@ -865,10 +865,10 @@ window.Readings = window.Readings || (function() {
             card.querySelector('.help-later').addEventListener('click', showBadge);
             document.body.appendChild(card);
         }
-        let last = null;
-        try { last = (JSON.parse(localStorage.getItem('helpInvite')) || {}).d; } catch (e) {}
-        if (last === day) { showBadge(); return; }
-        try { localStorage.setItem('helpInvite', JSON.stringify({ d: day })); } catch (e) {}
+        let last = 0;
+        try { last = Number((JSON.parse(localStorage.getItem('helpInvite')) || {}).t) || 0; } catch (e) {}
+        if (Date.now() - last < HELP_EVERY) { showBadge(); return; }
+        try { localStorage.setItem('helpInvite', JSON.stringify({ t: Date.now() })); } catch (e) {}
         setTimeout(showCard, 3000);
     }
 
