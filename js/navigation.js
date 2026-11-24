@@ -825,16 +825,23 @@ window.Readings = window.Readings || (function() {
         if (!user || (HELP_ADMINS_ONLY && !(user.app_metadata && user.app_metadata.is_admin === true))) return;
         const style = document.createElement('style');
         style.textContent = `
-            .help-badge, .help-card { position: fixed; left: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 1020; }
-            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-badge, body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 1rem + env(safe-area-inset-bottom)); } }
-            .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 50%; background: var(--nav-bg, #333); color: #ffe600; font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .35); }
-            .help-badge:hover { filter: brightness(1.2); }
-            .help-card { max-width: min(20rem, calc(100vw - 2rem)); padding: .9rem 1rem; border: 2px solid var(--bs-warning, #ffc107); border-radius: .75rem; background: var(--nav-bg, #333); color: #fff; box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .45); font-size: .95rem; }
+            /* bottom right; the card above the corner, the badge in the corner and the button to the top moves to its left, but only while the badge is there */
+            .help-badge, .help-card { position: fixed; right: 1rem; z-index: 1020; }
+            .help-badge { bottom: calc(1.125rem + env(safe-area-inset-bottom)); }
+            .help-card { bottom: calc(4.6rem + env(safe-area-inset-bottom)); }
+            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-badge { bottom: calc(60px + 1.125rem + env(safe-area-inset-bottom)); } body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 4.6rem + env(safe-area-inset-bottom)); } }
+            body.has-help-badge .to-top { right: calc(1rem + 2.75rem + .6rem); }
+            .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid var(--accent, #a8362a); border-radius: 50%; background: var(--bs-body-bg, #fff); color: var(--accent, #a8362a); font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
+            .help-badge:hover { filter: brightness(.95); }
+            .help-card { width: min(19rem, calc(100vw - 2rem)); padding: .85rem 1rem .8rem; border: 1px solid var(--bs-border-color, #ccc); border-left: 4px solid var(--accent, #a8362a); border-radius: .75rem; background: var(--bs-body-bg, #fff); color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 .5rem 1.4rem rgba(0, 0, 0, .28); font-size: .95rem; }
             .help-card p { margin: 0 0 .7rem; }
+            .help-card p i { color: var(--accent, #a8362a); margin-right: .35rem; }
             .help-card .help-row { display: flex; gap: .5rem; align-items: center; }
-            .help-card button { border: 0; border-radius: 2rem; padding: .3rem .9rem; font-size: .9rem; white-space: nowrap; }
-            .help-card .help-go { background: var(--bs-warning, #ffc107); color: #222; font-weight: 600; }
-            .help-card .help-later { background: transparent; color: #fff; opacity: .8; }
+            .help-card button { border-radius: 2rem; padding: .3rem .95rem; font-size: .9rem; white-space: nowrap; }
+            .help-card .help-go { border: 1.5px solid var(--accent, #a8362a); background: transparent; color: var(--accent, #a8362a); font-weight: 600; }
+            .help-card .help-go:hover { background: var(--accent, #a8362a); color: #fff; }
+            .help-card .help-later { border: 0; background: transparent; color: inherit; opacity: .65; }
+            .help-card .help-later:hover { opacity: 1; }
         `;
         document.head.appendChild(style);
         let card = null, badge = null, loading = null;
@@ -847,6 +854,7 @@ window.Readings = window.Readings || (function() {
         const openPopup = () => load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => {});
         function showBadge() {
             if (card) { card.remove(); card = null; }
+            document.body.classList.add('has-help-badge');
             if (badge) return;
             badge = document.createElement('button');
             badge.type = 'button'; badge.className = 'help-badge';
@@ -859,7 +867,7 @@ window.Readings = window.Readings || (function() {
         function showCard() {
             card = document.createElement('div');
             card.className = 'help-card'; card.setAttribute('role', 'region');
-            card.innerHTML = '<p data-vi="Giúp chúng tôi kiểm tra các từ điển. Chỉ mất một phút.">Help us check the dictionaries. It takes a minute.</p>'
+            card.innerHTML = '<p><i class="bi bi-patch-check"></i><span data-vi="Giúp chúng tôi kiểm tra các từ điển. Chỉ mất một phút.">Help us check the dictionaries. It takes a minute.</span></p>'
                 + '<div class="help-row"><button type="button" class="help-go" data-vi="Giúp">Help</button><button type="button" class="help-later" data-vi="Để sau">Not now</button></div>';
             card.querySelector('.help-go').addEventListener('click', () => { showBadge(); openPopup(); });
             card.querySelector('.help-later').addEventListener('click', showBadge);
