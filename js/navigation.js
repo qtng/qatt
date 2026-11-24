@@ -825,14 +825,25 @@ window.Readings = window.Readings || (function() {
         if (!user || (HELP_ADMINS_ONLY && !(user.app_metadata && user.app_metadata.is_admin === true))) return;
         const style = document.createElement('style');
         style.textContent = `
-            /* bottom right; the card above the corner, the badge in the corner and the button to the top moves to its left, but only while the badge is there */
+            /* the card at the bottom right above the button to the top; the badge at the top right below the menu bar (top is set in place()), so the two never meet the button */
             .help-badge, .help-card { position: fixed; right: 1rem; z-index: 1020; }
-            .help-badge { bottom: calc(1.125rem + env(safe-area-inset-bottom)); }
+            .help-badge { top: 4.5rem; }
             .help-card { bottom: calc(4.6rem + env(safe-area-inset-bottom)); }
-            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-badge { bottom: calc(60px + 1.125rem + env(safe-area-inset-bottom)); } body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 4.6rem + env(safe-area-inset-bottom)); } }
-            body.has-help-badge .to-top { right: calc(1rem + 2.75rem + .6rem); }
+            @media (max-width: 991.98px) { body.has-bottom-bar:not(.bar-typing) .help-card { bottom: calc(60px + 4.6rem + env(safe-area-inset-bottom)); } }
             .help-badge { width: 2.75rem; height: 2.75rem; padding: 0; border: 1.5px solid var(--accent, #a8362a); border-radius: 50%; background: var(--bs-body-bg, #fff); color: var(--accent, #a8362a); font-size: 1.3rem; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 .2rem .7rem rgba(0, 0, 0, .25); }
             .help-badge:hover { filter: brightness(.95); }
+            /* a blobby, bouncy zoom: squashes and stretches like jelly, so that the eye finds the badge when the popup has closed */
+            .help-badge.pop { animation: help-blob 1s cubic-bezier(.3, .6, .4, 1) both; }
+            @keyframes help-blob {
+                0% { transform: scale(1); border-radius: 50%; }
+                12% { transform: scale(1.55, .7); border-radius: 42% 58% 50% 50% / 60% 60% 40% 40%; }
+                28% { transform: scale(.7, 1.45); border-radius: 58% 42% 50% 50% / 40% 40% 60% 60%; }
+                44% { transform: scale(1.3, .85); border-radius: 46% 54% 52% 48% / 54% 46% 54% 46%; }
+                60% { transform: scale(.9, 1.15); border-radius: 52% 48% 48% 52% / 48% 52% 48% 52%; }
+                78% { transform: scale(1.08, .96); border-radius: 50%; }
+                100% { transform: scale(1); border-radius: 50%; }
+            }
+            @media (prefers-reduced-motion: reduce) { .help-badge.pop { animation: none; } }
             .help-card { width: min(19rem, calc(100vw - 2rem)); padding: .85rem 1rem .8rem; border: 1px solid var(--bs-border-color, #ccc); border-left: 4px solid var(--accent, #a8362a); border-radius: .75rem; background: var(--bs-body-bg, #fff); color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 .5rem 1.4rem rgba(0, 0, 0, .28); font-size: .95rem; }
             .help-card p { margin: 0 0 .7rem; }
             .help-card p i { color: var(--accent, #a8362a); margin-right: .35rem; }
@@ -852,9 +863,21 @@ window.Readings = window.Readings || (function() {
             document.head.appendChild(sc);
         }));
         const openPopup = () => load().then(() => window.ChunomReview.open({ batch: 10 })).catch(() => {});
+        // below the menu bar, whatever its height is (the bar changes between phone and desktop)
+        function place() {
+            const bar = document.querySelector('.navbar.fixed-top');
+            if (badge) badge.style.top = ((bar ? bar.getBoundingClientRect().bottom : 56) + 10) + 'px';
+        }
+        function pop() {
+            if (!badge) return;
+            badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop');
+            badge.addEventListener('animationend', () => badge.classList.remove('pop'), { once: true });
+        }
+        window.addEventListener('resize', place);
+        // the popup of ChunomReview is closed (a close event does not bubble: listen while it goes down): the badge says where to go on
+        document.addEventListener('close', e => { if (e.target.matches && e.target.matches('dialog.crv')) setTimeout(pop, 150); }, true);
         function showBadge() {
             if (card) { card.remove(); card = null; }
-            document.body.classList.add('has-help-badge');
             if (badge) return;
             badge = document.createElement('button');
             badge.type = 'button'; badge.className = 'help-badge';
@@ -863,6 +886,7 @@ window.Readings = window.Readings || (function() {
             badge.innerHTML = '<i class="bi bi-patch-check"></i>';
             badge.addEventListener('click', openPopup);
             document.body.appendChild(badge);
+            place(); pop();
         }
         function showCard() {
             card = document.createElement('div');
