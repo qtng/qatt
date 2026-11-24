@@ -814,7 +814,7 @@ window.Readings = window.Readings || (function() {
     }
 
     // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for the time being only for
-    // admins (HELP_ADMINS_ONLY; false = every signed-in user). Once per HELP_EVERY (localStorage.helpInvite = the time it was shown; one minute while the owner tests, then one day) a card at the bottom left;
+    // admins (HELP_ADMINS_ONLY; false = everybody, also those who are not signed in). Once per HELP_EVERY (localStorage.helpInvite = the time it was shown; one minute while the owner tests, then one day) a card at the bottom left;
     // otherwise, and after "Not now" or "Help", a small round badge that opens the popup again. Not on the review page itself, not in a frame.
     function injectHelp() {
         const HELP_ADMINS_ONLY = true;
@@ -822,7 +822,7 @@ window.Readings = window.Readings || (function() {
         if (location.hostname !== "chunom.org" || window.top !== window || /^\/chunom\/review\//.test(location.pathname)) return;
         let user = null;
         try { user = (JSON.parse(localStorage.getItem("sb-kfgqhhmdzboszpwsqkxt-auth-token")) || {}).user || null; } catch (e) {}
-        if (!user || (HELP_ADMINS_ONLY && !(user.app_metadata && user.app_metadata.is_admin === true))) return;
+        if (HELP_ADMINS_ONLY && !(user && user.app_metadata && user.app_metadata.is_admin === true)) return;   // signed in or not: the popup asks the others to sign in
         const style = document.createElement('style');
         style.textContent = `
             /* the card at the bottom right above the button to the top; the badge at the top right below the menu bar (top is set in place()), so the two never meet the button */
