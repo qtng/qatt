@@ -815,7 +815,7 @@ window.Readings = window.Readings || (function() {
 
     // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for everybody (signed in or
     // not: the popup asks for the sign-in); not on the review page itself, not in a frame. A small round badge at the top right below the menu bar opens the
-    // popup. At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with a request to check a reading (a glyph as an example),
+    // popup. At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with a request to check a reading (a static picture of a scan on the left),
     // one button and a small ×: when the popup of a character (#detailModal of detail.js) has been closed, or else 3 s into the second page view of the visit
     // (sessionStorage.helpViews). × sends it back into the badge, which then bounces (also when the review popup closes). Details: docs/sites/navigation.md (private).
     function injectHelp() {
@@ -841,21 +841,21 @@ window.Readings = window.Readings || (function() {
             .help-badge.pop .help-ring { animation: help-ring 1s cubic-bezier(.2, .6, .3, 1) .12s 2; }
             @keyframes help-ring { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(2.3); opacity: 0; border-width: .5px; } }
             /* the speech bubble below the badge, its arrow pointing up to it; it grows out of the badge and shrinks back into it */
-            .help-bubble { position: fixed; right: .6rem; z-index: 1020; width: min(18rem, calc(100vw - 1.2rem)); padding: .85rem .9rem .75rem; border-radius: 1rem; background: ${BG}; color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 0 0 1.5px ${EDGE}, 0 .8rem 2rem rgba(0, 0, 0, .25); transform-origin: calc(100% - 1.775rem) -.7rem; font-size: .9rem; line-height: 1.35; animation: help-in .45s cubic-bezier(.3, 1.45, .5, 1) both; }
+            .help-bubble { position: fixed; right: .6rem; z-index: 1020; width: min(21rem, calc(100vw - 1.2rem)); display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); border-radius: 1rem; background: ${BG}; color: var(--ink, var(--bs-body-color, #222)); box-shadow: 0 0 0 1.5px ${EDGE}, 0 .8rem 2rem rgba(0, 0, 0, .25); transform-origin: calc(100% - 1.775rem) -.7rem; font-size: .9rem; line-height: 1.35; animation: help-in .45s cubic-bezier(.3, 1.45, .5, 1) both; }
             .help-bubble::before { content: ""; position: absolute; top: -.5rem; right: 1.3rem; width: .95rem; height: .95rem; background: ${BG}; transform: rotate(45deg); box-shadow: -1.5px -1.5px 0 ${EDGE}; border-radius: 3px 0 0 0; }
             .help-bubble.out { animation: help-out .3s cubic-bezier(.5, 0, .75, .3) both; }
             @keyframes help-in { 0% { opacity: 0; transform: scale(.2); } 40% { opacity: 1; } 100% { opacity: 1; transform: scale(1); } }
             @keyframes help-out { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.15); } }
-            .help-bubble .help-ask { display: flex; gap: .75rem; align-items: center; padding-right: 1rem; }
-            .help-bubble .help-glyph { flex: none; width: 3.6rem; height: 3.6rem; border-radius: .75rem; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, ${A} 9%, ${BG}); box-shadow: inset 0 0 0 1px color-mix(in srgb, ${A} 30%, transparent); font-family: var(--font-cjk, "Pen"), serif; font-size: 2.3rem; line-height: 1; }
-            .help-bubble .help-q { min-width: 0; opacity: .8; font-size: .85rem; }
-            .help-bubble .help-q b { display: block; opacity: 1; font-size: .98rem; font-weight: 600; margin-bottom: .1rem; }
-            .help-bubble .help-q em { font-style: normal; color: ${A}; }
+            /* on the left a picture of a scan (static: the entry chanh of Bonet, framed), filling the whole height as in a scan viewer */
+            .help-bubble .help-scan { background: #fff url(/chunom-assets/review/help-chanh.webp) 46% 45% / cover no-repeat; border-radius: 1rem 0 0 1rem; box-shadow: inset -1px 0 0 ${EDGE}; }
+            .help-bubble .help-main { min-width: 0; padding: .85rem .9rem .75rem; }
+            .help-bubble .help-q { opacity: .8; font-size: .85rem; padding-right: 1rem; }
+            .help-bubble .help-q b { display: block; opacity: 1; font-size: .98rem; font-weight: 600; margin-bottom: .15rem; }
             .help-bubble .help-foot { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .75rem; }
             .help-bubble .help-foot small { opacity: .65; font-size: .78rem; }
             .help-bubble .help-go { border: 0; border-radius: 2rem; padding: .4rem 1.05rem; background: ${A}; color: #fff; font-weight: 600; font-size: .88rem; white-space: nowrap; }
             .help-bubble .help-go:hover { background: color-mix(in srgb, ${A} 85%, #000); }
-            .help-bubble .help-x { position: absolute; top: .35rem; right: .35rem; width: 1.7rem; height: 1.7rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; opacity: .6; font-size: 1.2rem; line-height: 1; }
+            .help-bubble .help-x { position: absolute; z-index: 1; top: .35rem; right: .35rem; width: 1.7rem; height: 1.7rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; opacity: .6; font-size: 1.2rem; line-height: 1; }
             .help-bubble .help-x:hover { opacity: 1; background: color-mix(in srgb, currentColor 8%, transparent); }
             @media (prefers-reduced-motion: reduce) { .help-badge.pop, .help-badge.pop .help-ring, .help-bubble, .help-bubble.out { animation: none; } }
         `;
@@ -900,11 +900,12 @@ window.Readings = window.Readings || (function() {
             try { localStorage.setItem('helpInvite', JSON.stringify({ t: Date.now() })); } catch (e) {}
             bubble = document.createElement('div');
             bubble.className = 'help-bubble'; bubble.setAttribute('role', 'dialog'); bubble.setAttribute('aria-label', 'Help check the dictionaries'); bubble.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
-            // an example of what is checked (a fixed one for now)
-            bubble.innerHTML = '<button type="button" class="help-x" aria-label="Close" data-vi-aria-label="Đóng">×</button>'
-                + '<div class="help-ask"><span class="help-glyph" aria-hidden="true">喃</span><div class="help-q"><b data-vi="Bạn kiểm tra giúp cách đọc này nhé?">Can you check this reading?</b>'
-                + '<span data-vi="Một số cách đọc trong các từ điển cổ bị sai. Mỗi câu trả lời của bạn giúp sửa lại cho mọi người.">Some readings in our old dictionaries are wrong. Every answer you give corrects them for everyone.</span></div></div>'
-                + '<div class="help-foot"><small data-vi="Mỗi chỗ một chạm">One tap per place</small><button type="button" class="help-go" data-vi="Kiểm tra">Check it</button></div>';
+            // a picture of what is checked (static) and the request
+            bubble.innerHTML = '<span class="help-scan" aria-hidden="true"></span><div class="help-main">'
+                + '<button type="button" class="help-x" aria-label="Close" data-vi-aria-label="Đóng">×</button>'
+                + '<div class="help-q"><b data-vi="Bạn kiểm tra giúp cách đọc này nhé?">Can you check this reading?</b>'
+                + '<span data-vi="Một số cách đọc trong các từ điển cổ bị sai. Mỗi câu trả lời của bạn giúp sửa lại cho mọi người.">Some readings in our old dictionaries are wrong. Every answer you give corrects them for everyone.</span></div>'
+                + '<div class="help-foot"><small data-vi="Mỗi chỗ một chạm">One tap per place</small><button type="button" class="help-go" data-vi="Kiểm tra">Check it</button></div></div>';
             bubble.querySelector('.help-x').addEventListener('click', closeBubble);
             bubble.querySelector('.help-go').addEventListener('click', openPopup);
             document.body.appendChild(bubble);
