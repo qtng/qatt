@@ -851,8 +851,7 @@ window.Readings = window.Readings || (function() {
             .help-bubble .help-main { min-width: 0; padding: .85rem .9rem .75rem; }
             .help-bubble .help-q { opacity: .8; font-size: .85rem; padding-right: 1rem; }
             .help-bubble .help-q b { display: block; opacity: 1; font-size: .98rem; font-weight: 600; margin-bottom: .15rem; }
-            .help-bubble .help-foot { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .75rem; }
-            .help-bubble .help-foot small { opacity: .65; font-size: .78rem; }
+            .help-bubble .help-foot { display: flex; align-items: center; justify-content: flex-end; gap: .6rem; margin-top: .75rem; }
             .help-bubble .help-go { border: 0; border-radius: 2rem; padding: .4rem 1.05rem; background: ${A}; color: #fff; font-weight: 600; font-size: .88rem; white-space: nowrap; }
             .help-bubble .help-go:hover { background: color-mix(in srgb, ${A} 85%, #000); }
             .help-bubble .help-x { position: absolute; z-index: 1; top: .35rem; right: .35rem; width: 1.7rem; height: 1.7rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; opacity: .6; font-size: 1.2rem; line-height: 1; }
@@ -905,7 +904,7 @@ window.Readings = window.Readings || (function() {
                 + '<button type="button" class="help-x" aria-label="Close" data-vi-aria-label="Đóng">×</button>'
                 + '<div class="help-q"><b data-vi="Bạn kiểm tra giúp cách đọc này nhé?">Can you check this reading?</b>'
                 + '<span data-vi="Một số cách đọc trong các từ điển cổ bị sai. Mỗi câu trả lời của bạn giúp sửa lại cho mọi người.">Some readings in our old dictionaries are wrong. Every answer you give corrects them for everyone.</span></div>'
-                + '<div class="help-foot"><small data-vi="Mỗi chỗ một chạm">One tap per place</small><button type="button" class="help-go" data-vi="Kiểm tra">Check it</button></div></div>';
+                + '<div class="help-foot"><button type="button" class="help-go" data-vi="Kiểm tra">Check it</button></div></div>';
             bubble.querySelector('.help-x').addEventListener('click', closeBubble);
             bubble.querySelector('.help-go').addEventListener('click', openPopup);
             document.body.appendChild(bubble);
