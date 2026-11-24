@@ -919,6 +919,11 @@ window.Readings = window.Readings || (function() {
         document.body.appendChild(badge);
         place();
         window.addEventListener('resize', place);
+        // back from the sign-in that the review popup asked for (the page was reloaded; review.js keeps its options in sessionStorage.chunomReviewResume):
+        // load review.js at once, so that it opens the popup again; no bubble on this page
+        let resuming = false;
+        try { resuming = !!sessionStorage.getItem('chunomReviewResume'); } catch (e) {}
+        if (resuming) { shown = true; load().catch(() => {}); }
         let last = 0, views = 0;
         try { last = Number((JSON.parse(localStorage.getItem('helpInvite')) || {}).t) || 0; } catch (e) {}
         try { views = Number(sessionStorage.getItem('helpViews')) + 1; sessionStorage.setItem('helpViews', String(views)); } catch (e) {}
