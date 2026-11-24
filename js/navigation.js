@@ -815,7 +815,7 @@ window.Readings = window.Readings || (function() {
 
     // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for everybody (signed in or
     // not: the popup asks for the sign-in); not on the review page itself, not in a frame. A small round badge at the top right below the menu bar opens the
-    // popup. At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with one example question,
+    // popup. At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with a request to check a reading (a glyph as an example),
     // one button and a small ×: when the popup of a character (#detailModal of detail.js) has been closed, or else 3 s into the second page view of the visit
     // (sessionStorage.helpViews). × sends it back into the badge, which then bounces (also when the review popup closes). Details: docs/sites/navigation.md (private).
     function injectHelp() {
@@ -902,9 +902,9 @@ window.Readings = window.Readings || (function() {
             bubble.className = 'help-bubble'; bubble.setAttribute('role', 'dialog'); bubble.setAttribute('aria-label', 'Help check the dictionaries'); bubble.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
             // an example of what is checked (a fixed one for now)
             bubble.innerHTML = '<button type="button" class="help-x" aria-label="Close" data-vi-aria-label="Đóng">×</button>'
-                + '<div class="help-ask"><span class="help-glyph" aria-hidden="true">喃</span><div class="help-q"><b><span data-vi="Chữ này đọc là">Is this read</span> <em>nôm</em>?</b>'
-                + '<span data-vi="Máy tính đã đọc các từ điển cổ. Hãy kiểm tra từng chỗ chỉ với một chạm.">A computer read the old dictionaries. Check one place with a tap.</span></div></div>'
-                + '<div class="help-foot"><small data-vi="Khoảng một phút">About a minute</small><button type="button" class="help-go" data-vi="Xem thử">Take a look</button></div>';
+                + '<div class="help-ask"><span class="help-glyph" aria-hidden="true">喃</span><div class="help-q"><b data-vi="Bạn kiểm tra giúp cách đọc này nhé?">Can you check this reading?</b>'
+                + '<span data-vi="Một số cách đọc trong các từ điển cổ bị sai. Mỗi câu trả lời của bạn giúp sửa lại cho mọi người.">Some readings in our old dictionaries are wrong. Every answer you give corrects them for everyone.</span></div></div>'
+                + '<div class="help-foot"><small data-vi="Mỗi chỗ một chạm">One tap per place</small><button type="button" class="help-go" data-vi="Kiểm tra">Check it</button></div>';
             bubble.querySelector('.help-x').addEventListener('click', closeBubble);
             bubble.querySelector('.help-go').addEventListener('click', openPopup);
             document.body.appendChild(bubble);
