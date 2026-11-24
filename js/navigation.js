@@ -893,7 +893,7 @@ window.Readings = window.Readings || (function() {
             card.innerHTML = '<p><i class="bi bi-patch-check"></i><span data-vi="Giúp chúng tôi kiểm tra các từ điển. Chỉ mất một phút.">Help us check the dictionaries. It takes a minute.</span></p>'
                 + '<div class="help-row"><button type="button" class="help-go" data-vi="Giúp">Help</button><button type="button" class="help-later" data-vi="Để sau">Not now</button></div>';
             card.querySelector('.help-go').addEventListener('click', () => { showBadge(); openPopup(); });
-            card.querySelector('.help-later').addEventListener('click', showBadge);
+            card.querySelector('.help-later').addEventListener('click', () => { showBadge(); setTimeout(pop, 150); });   // the card goes, the badge shows where to come back
             document.body.appendChild(card);
         }
         let last = 0;
