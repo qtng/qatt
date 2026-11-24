@@ -814,8 +814,8 @@ window.Readings = window.Readings || (function() {
     }
 
     // Invitation to help check the dictionaries (popup ChunomReview of /chunom/js/review.js): only on chunom.org (not qatt.org), for everybody (signed in or
-    // not: the popup asks for the sign-in); not on the review page itself, not in a frame. A small round badge at the top right below the menu bar opens the
-    // popup. At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with a request to check a reading (a static picture of a scan on the left),
+    // not: the popup asks for the sign-in); not on the review page itself, not in a frame. A small round badge at the top right below the menu bar shows the
+    // bubble (a second click closes it). At most once per HELP_EVERY (localStorage.helpInvite = the time it was shown) a speech bubble comes out of the badge with a request to check a reading (a static picture of a scan on the left),
     // one button and a small ×: when the popup of a character (#detailModal of detail.js) has been closed, or else 3 s into the second page view of the visit
     // (sessionStorage.helpViews). × sends it back into the badge, which then bounces (also when the review popup closes). Details: docs/sites/navigation.md (private).
     function injectHelp() {
@@ -886,17 +886,21 @@ window.Readings = window.Readings || (function() {
         document.addEventListener('close', e => {   // a close event does not bubble: listen while it goes down
             if (e.target.matches && e.target.matches('dialog.crv')) setTimeout(() => { badge.classList.remove('away'); place(); pop(); }, 150);
         }, true);
-        function closeBubble() {
+        function closeBubble(bounce = true) {   // × : back into the badge, which bounces; a click on the badge closes it without the bounce
             if (!bubble) return;
             const b = bubble; bubble = null;
             b.classList.add('out');
-            const done = () => { b.remove(); pop(); };
+            const done = () => { b.remove(); if (bounce) pop(); };
             if (matchMedia('(prefers-reduced-motion: reduce)').matches) done(); else b.addEventListener('animationend', done, { once: true });
         }
-        function showBubble() {
-            if (shown || badge.classList.contains('away')) return;   // once per page, and not over the review popup
-            shown = true;
-            try { localStorage.setItem('helpInvite', JSON.stringify({ t: Date.now() })); } catch (e) {}
+        // by itself (manual false): once per page and per HELP_EVERY; from the badge (manual true): always, and it does not count for HELP_EVERY
+        function showBubble(manual = false) {
+            if (bubble || badge.classList.contains('away')) return;   // not twice, and not over the review popup
+            if (!manual) {
+                if (shown) return;
+                shown = true;
+                try { localStorage.setItem('helpInvite', JSON.stringify({ t: Date.now() })); } catch (e) {}
+            }
             bubble = document.createElement('div');
             bubble.className = 'help-bubble'; bubble.setAttribute('role', 'dialog'); bubble.setAttribute('aria-label', 'Help check the dictionaries'); bubble.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
             // a picture of what is checked (static) and the request
@@ -905,7 +909,7 @@ window.Readings = window.Readings || (function() {
                 + '<div class="help-q"><b data-vi="Bạn kiểm tra giúp cách đọc này nhé?">Can you check this reading?</b>'
                 + '<span data-vi="Một số cách đọc trong các từ điển cổ bị sai. Mỗi câu trả lời của bạn giúp sửa lại cho mọi người.">Some readings in our old dictionaries are wrong. Every answer you give corrects them for everyone.</span></div>'
                 + '<div class="help-foot"><button type="button" class="help-go" data-vi="Kiểm tra">Check it</button></div></div>';
-            bubble.querySelector('.help-x').addEventListener('click', closeBubble);
+            bubble.querySelector('.help-x').addEventListener('click', () => closeBubble(true));
             bubble.querySelector('.help-go').addEventListener('click', openPopup);
             document.body.appendChild(bubble);
             place();
@@ -915,7 +919,7 @@ window.Readings = window.Readings || (function() {
         badge.title = 'Help check the dictionaries'; badge.setAttribute('data-vi-title', 'Giúp kiểm tra các từ điển');
         badge.setAttribute('aria-label', 'Help check the dictionaries'); badge.setAttribute('data-vi-aria-label', 'Giúp kiểm tra các từ điển');
         badge.innerHTML = '<span class="help-ring"></span><i class="bi bi-patch-check"></i>';
-        badge.addEventListener('click', openPopup);
+        badge.addEventListener('click', () => bubble ? closeBubble(false) : showBubble(true));   // the badge shows the request first; Check it opens the popup
         document.body.appendChild(badge);
         place();
         window.addEventListener('resize', place);
